@@ -1,0 +1,497 @@
+{
+  "Retatrutide": [
+    {
+      "strength": "10 mg",
+      "unit_price": 99.0,
+      "kit_price": 638.0
+    },
+    {
+      "strength": "20 mg",
+      "unit_price": 143.0,
+      "kit_price": 935.0
+    }
+  ],
+  "Tirzepatide": [
+    {
+      "strength": "5 mg",
+      "unit_price": 44.0,
+      "kit_price": 308.0
+    },
+    {
+      "strength": "10 mg",
+      "unit_price": 66.0,
+      "kit_price": 429.0
+    },
+    {
+      "strength": "15 mg",
+      "unit_price": 99.0,
+      "kit_price": 550.0
+    },
+    {
+      "strength": "30 mg",
+      "unit_price": 154.0,
+      "kit_price": 935.0
+    },
+    {
+      "strength": "60 mg",
+      "unit_price": 297.0,
+      "kit_price": 1705.0
+    }
+  ],
+  "Semaglutide": [
+    {
+      "strength": "2 mg",
+      "unit_price": 27.5,
+      "kit_price": 165.0
+    },
+    {
+      "strength": "5 mg",
+      "unit_price": 41.8,
+      "kit_price": 308.0
+    },
+    {
+      "strength": "10 mg",
+      "unit_price": 77.0,
+      "kit_price": 440.0
+    }
+  ],
+  "AOD-9604": [
+    {
+      "strength": "2 mg",
+      "unit_price": 33.0,
+      "kit_price": 165.0
+    },
+    {
+      "strength": "5 mg",
+      "unit_price": 66.0,
+      "kit_price": 330.0
+    }
+  ],
+  "ARA-290": [
+    {
+      "strength": "10 mg",
+      "unit_price": 66.0,
+      "kit_price": 330.0
+    }
+  ],
+  "BPC-157": [
+    {
+      "strength": "2 mg",
+      "unit_price": 16.5,
+      "kit_price": 99.0
+    },
+    {
+      "strength": "5 mg",
+      "unit_price": 27.5,
+      "kit_price": 165.0
+    },
+    {
+      "strength": "10 mg",
+      "unit_price": 44.0,
+      "kit_price": 275.0
+    },
+    {
+      "strength": "20 mg",
+      "unit_price": 66.0,
+      "kit_price": 385.0
+    }
+  ],
+  "CJC-1295 with DAC": [
+    {
+      "strength": "2 mg",
+      "unit_price": 33.0,
+      "kit_price": 165.0
+    }
+  ],
+  "CJC-1295 without DAC": [
+    {
+      "strength": "2 mg",
+      "unit_price": 22.0,
+      "kit_price": 110.0
+    },
+    {
+      "strength": "5 mg",
+      "unit_price": 33.0,
+      "kit_price": 176.0
+    },
+    {
+      "strength": "10 mg",
+      "unit_price": 55.0,
+      "kit_price": 297.0
+    }
+  ],
+  "5-AMINO 1 MQ": [
+    {
+      "strength": "10 mg",
+      "unit_price": 33.0,
+      "kit_price": 165.0
+    }
+  ],
+  "Cartalax": [
+    {
+      "strength": "25 mg",
+      "unit_price": 77.0,
+      "kit_price": 418.0
+    }
+  ],
+  "Cardiogen": [
+    {
+      "strength": "25 mg",
+      "unit_price": 77.0,
+      "kit_price": 418.0
+    }
+  ],
+  "Thymogen": [
+    {
+      "strength": "25 mg",
+      "unit_price": 77.0,
+      "kit_price": 418.0
+    }
+  ],
+  "Prostamax": [
+    {
+      "strength": "25 mg",
+      "unit_price": 77.0,
+      "kit_price": 418.0
+    }
+  ],
+  "Testagen": [
+    {
+      "strength": "25 mg",
+      "unit_price": 77.0,
+      "kit_price": 418.0
+    }
+  ],
+  "Cagrilintide": [
+    {
+      "strength": "5 mg",
+      "unit_price": 44.0,
+      "kit_price": 275.0
+    },
+    {
+      "strength": "10 mg",
+      "unit_price": 88.0,
+      "kit_price": 495.0
+    }
+  ],
+  "DSIP": [
+    {
+      "strength": "5 mg",
+      "unit_price": 44.0,
+      "kit_price": 198.0
+    }
+  ],
+  "Epithalon": [
+    {
+      "strength": "10 mg",
+      "unit_price": 33.0,
+      "kit_price": 165.0
+    }
+  ],
+  "FST-344": [
+    {
+      "strength": "1 mg",
+      "unit_price": 99.0,
+      "kit_price": 528.0
+    }
+  ],
+  "GHK-Cu (Copper Peptide)": [
+    {
+      "strength": "50 mg",
+      "unit_price": 27.5,
+      "kit_price": 143.0
+    },
+    {
+      "strength": "100 mg",
+      "unit_price": 44.0,
+      "kit_price": 198.0
+    }
+  ],
+  "GHRP-2": [
+    {
+      "strength": "5 mg",
+      "unit_price": 19.8,
+      "kit_price": 143.0
+    }
+  ],
+  "GLOW (BPC-157/TB-500/GHK-Cu)": [
+    {
+      "strength": "10 mg",
+      "unit_price": 132.0,
+      "kit_price": 825.0
+    }
+  ],
+  "KLOW (BPC-157/TB-500/GHK-Cu/KPV)": [
+    {
+      "strength": "10 mg",
+      "unit_price": 154.0,
+      "kit_price": 935.0
+    }
+  ],
+  "HCG": [
+    {
+      "strength": "5000iu",
+      "unit_price": 44.0,
+      "kit_price": 275.0
+    }
+  ],
+  "Hexarelin": [
+    {
+      "strength": "2 mg",
+      "unit_price": 22.0,
+      "kit_price": 110.0
+    },
+    {
+      "strength": "5 mg",
+      "unit_price": 44.0,
+      "kit_price": 198.0
+    }
+  ],
+  "HGH": [
+    {
+      "strength": "10iu",
+      "unit_price": 33.0,
+      "kit_price": 165.0
+    }
+  ],
+  "HMG": [
+    {
+      "strength": "75iu",
+      "unit_price": 33.0,
+      "kit_price": 132.0
+    }
+  ],
+  "IGF-LR3": [
+    {
+      "strength": "0.1 mg",
+      "unit_price": 33.0,
+      "kit_price": 198.0
+    }
+  ],
+  "Ipamorelin": [
+    {
+      "strength": "10 mg",
+      "unit_price": 38.5,
+      "kit_price": 286.0
+    }
+  ],
+  "Kisspeptin-10": [
+    {
+      "strength": "5 mg",
+      "unit_price": 44.0,
+      "kit_price": 275.0
+    }
+  ],
+  "KPV": [
+    {
+      "strength": "10 mg",
+      "unit_price": 33.0,
+      "kit_price": 198.0
+    }
+  ],
+  "MK-677": [
+    {
+      "strength": "12 mg",
+      "unit_price": 132.0,
+      "kit_price": 132.0
+    }
+  ],
+  "GW-501516": [
+    {
+      "strength": "10 mg",
+      "unit_price": 88.0,
+      "kit_price": 88.0
+    }
+  ],
+  "SLU PP-332": [
+    {
+      "strength": "250mcg",
+      "unit_price": 88.0,
+      "kit_price": 88.0
+    }
+  ],
+  "MOTS-C": [
+    {
+      "strength": "10 mg",
+      "unit_price": 77.0,
+      "kit_price": 418.0
+    }
+  ],
+  "MT2": [
+    {
+      "strength": "10 mg",
+      "unit_price": 27.5,
+      "kit_price": 165.0
+    }
+  ],
+  "NAD+": [
+    {
+      "strength": "500 mg",
+      "unit_price": 33.0,
+      "kit_price": 198.0
+    },
+    {
+      "strength": "1000 mg",
+      "unit_price": 55.0,
+      "kit_price": 308.0
+    }
+  ],
+  "NMN": [
+    {
+      "strength": "50 mg",
+      "unit_price": 66.0,
+      "kit_price": 66.0
+    }
+  ],
+  "Oxytocin Acetate": [
+    {
+      "strength": "2 mg",
+      "unit_price": 33.0,
+      "kit_price": 198.0
+    }
+  ],
+  "Pinealon": [
+    {
+      "strength": "16 mg",
+      "unit_price": 44.0,
+      "kit_price": 330.0
+    }
+  ],
+  "PE-22 28": [
+    {
+      "strength": "10 mg",
+      "unit_price": 33.0,
+      "kit_price": 220.0
+    }
+  ],
+  "PNC-27": [
+    {
+      "strength": "10 mg",
+      "unit_price": 66.0,
+      "kit_price": 418.0
+    }
+  ],
+  "PEG MGF": [
+    {
+      "strength": "5 mg",
+      "unit_price": 33.0,
+      "kit_price": 220.0
+    }
+  ],
+  "PT-141": [
+    {
+      "strength": "5 mg",
+      "unit_price": 27.5,
+      "kit_price": 198.0
+    },
+    {
+      "strength": "10 mg",
+      "unit_price": 49.5,
+      "kit_price": 385.0
+    }
+  ],
+  "Selank": [
+    {
+      "strength": "5 mg",
+      "unit_price": 27.5,
+      "kit_price": 198.0
+    }
+  ],
+  "Semax": [
+    {
+      "strength": "10 mg",
+      "unit_price": 44.0,
+      "kit_price": 220.0
+    }
+  ],
+  "Sermorelin": [
+    {
+      "strength": "5 mg",
+      "unit_price": 55.0,
+      "kit_price": 297.0
+    },
+    {
+      "strength": "10 mg",
+      "unit_price": 99.0,
+      "kit_price": 528.0
+    }
+  ],
+  "Snap-8": [
+    {
+      "strength": "10 mg",
+      "unit_price": 33.0,
+      "kit_price": 165.0
+    }
+  ],
+  "SS-31": [
+    {
+      "strength": "10 mg",
+      "unit_price": 77.0,
+      "kit_price": 418.0
+    }
+  ],
+  "Thymulin": [
+    {
+      "strength": "10 mg",
+      "unit_price": 44.0,
+      "kit_price": 308.0
+    }
+  ],
+  "Tesamorelin": [
+    {
+      "strength": "10 mg",
+      "unit_price": 88.0,
+      "kit_price": 638.0
+    }
+  ],
+  "Thymosin Alpha 1": [
+    {
+      "strength": "10 mg",
+      "unit_price": 88.0,
+      "kit_price": 418.0
+    }
+  ],
+  "Thymosin B4 (TB-500)": [
+    {
+      "strength": "2 mg",
+      "unit_price": 27.5,
+      "kit_price": 110.0
+    },
+    {
+      "strength": "5 mg",
+      "unit_price": 38.5,
+      "kit_price": 220.0
+    },
+    {
+      "strength": "10 mg",
+      "unit_price": 66.0,
+      "kit_price": 385.0
+    }
+  ],
+  "Insulin Syringes 1/": [
+    {
+      "strength": "2ml",
+      "unit_price": 16.5,
+      "kit_price": 16.5
+    }
+  ],
+  "Bacteriostatic Water": [
+    {
+      "strength": "30ml",
+      "unit_price": 22.0,
+      "kit_price": 22.0
+    },
+    {
+      "strength": "3ml",
+      "unit_price": 5.5,
+      "kit_price": 33.0
+    }
+  ],
+  "Syringe & Bac Water Bundle 100 Syringes +": [
+    {
+      "strength": "30ml",
+      "unit_price": 33.0,
+      "kit_price": 33.0
+    }
+  ]
+}

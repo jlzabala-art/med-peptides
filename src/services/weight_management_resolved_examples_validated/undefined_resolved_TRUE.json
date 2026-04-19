@@ -1,0 +1,354 @@
+{
+  "patient_context": {
+    "sex": "male",
+    "age_group": "36-50",
+    "duration_weeks": 12,
+    "tempo": "standard"
+  },
+  "resolved_phases": [
+    {
+      "phase_key": "metabolic_induction",
+      "phase_title": "Metabolic Induction",
+      "duration_weeks": 4,
+      "start_week": 1,
+      "compounds": [
+        {
+          "product_title": "Tirzepatide",
+          "dosage": 2.5,
+          "frequency": "weekly"
+        },
+        {
+          "product_title": "MOTS-C",
+          "dosage": "N/A",
+          "frequency": "2x_week"
+        }
+      ]
+    },
+    {
+      "phase_key": "metabolic_acceleration",
+      "phase_title": "Metabolic Acceleration",
+      "duration_weeks": 8,
+      "start_week": 5,
+      "compounds": [
+        {
+          "product_title": "Tirzepatide",
+          "dosage": 5,
+          "frequency": "weekly"
+        },
+        {
+          "product_title": "AOD-9604",
+          "dosage": "N/A",
+          "frequency": "daily"
+        },
+        {
+          "product_title": "MOTS-C",
+          "dosage": "N/A",
+          "frequency": "3x_week"
+        }
+      ]
+    }
+  ],
+  "resolved_timeline": [
+    {
+      "week": 1,
+      "events": [
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "Tirzepatide (2.5)",
+          "dose": 2.5,
+          "frequency": "weekly"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "MOTS-C (N/A)",
+          "dose": "N/A",
+          "frequency": "2x_week"
+        },
+        {
+          "day": 1,
+          "type": "clinical_event",
+          "title": "Baseline tolerance and metabolic induction review"
+        }
+      ]
+    },
+    {
+      "week": 2,
+      "events": [
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "Tirzepatide (2.5)",
+          "dose": 2.5,
+          "frequency": "weekly"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "MOTS-C (N/A)",
+          "dose": "N/A",
+          "frequency": "2x_week"
+        }
+      ]
+    },
+    {
+      "week": 3,
+      "events": [
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "Tirzepatide (2.5)",
+          "dose": 2.5,
+          "frequency": "weekly"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "MOTS-C (N/A)",
+          "dose": "N/A",
+          "frequency": "2x_week"
+        }
+      ]
+    },
+    {
+      "week": 4,
+      "events": [
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "Tirzepatide (2.5)",
+          "dose": 2.5,
+          "frequency": "weekly"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "MOTS-C (N/A)",
+          "dose": "N/A",
+          "frequency": "2x_week"
+        }
+      ]
+    },
+    {
+      "week": 5,
+      "events": [
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "Tirzepatide (5)",
+          "dose": 5,
+          "frequency": "weekly"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "AOD-9604 (N/A)",
+          "dose": "N/A",
+          "frequency": "daily"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "MOTS-C (N/A)",
+          "dose": "N/A",
+          "frequency": "3x_week"
+        }
+      ]
+    },
+    {
+      "week": 6,
+      "events": [
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "Tirzepatide (5)",
+          "dose": 5,
+          "frequency": "weekly"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "AOD-9604 (N/A)",
+          "dose": "N/A",
+          "frequency": "daily"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "MOTS-C (N/A)",
+          "dose": "N/A",
+          "frequency": "3x_week"
+        }
+      ]
+    },
+    {
+      "week": 7,
+      "events": [
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "Tirzepatide (5)",
+          "dose": 5,
+          "frequency": "weekly"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "AOD-9604 (N/A)",
+          "dose": "N/A",
+          "frequency": "daily"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "MOTS-C (N/A)",
+          "dose": "N/A",
+          "frequency": "3x_week"
+        }
+      ]
+    },
+    {
+      "week": 8,
+      "events": [
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "Tirzepatide (5)",
+          "dose": 5,
+          "frequency": "weekly"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "AOD-9604 (N/A)",
+          "dose": "N/A",
+          "frequency": "daily"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "MOTS-C (N/A)",
+          "dose": "N/A",
+          "frequency": "3x_week"
+        },
+        {
+          "day": 1,
+          "type": "clinical_event",
+          "title": "Progress and adherence audit"
+        }
+      ]
+    },
+    {
+      "week": 9,
+      "events": [
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "Tirzepatide (5)",
+          "dose": 5,
+          "frequency": "weekly"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "AOD-9604 (N/A)",
+          "dose": "N/A",
+          "frequency": "daily"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "MOTS-C (N/A)",
+          "dose": "N/A",
+          "frequency": "3x_week"
+        }
+      ]
+    },
+    {
+      "week": 10,
+      "events": [
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "Tirzepatide (5)",
+          "dose": 5,
+          "frequency": "weekly"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "AOD-9604 (N/A)",
+          "dose": "N/A",
+          "frequency": "daily"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "MOTS-C (N/A)",
+          "dose": "N/A",
+          "frequency": "3x_week"
+        }
+      ]
+    },
+    {
+      "week": 11,
+      "events": [
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "Tirzepatide (5)",
+          "dose": 5,
+          "frequency": "weekly"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "AOD-9604 (N/A)",
+          "dose": "N/A",
+          "frequency": "daily"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "MOTS-C (N/A)",
+          "dose": "N/A",
+          "frequency": "3x_week"
+        }
+      ]
+    },
+    {
+      "week": 12,
+      "events": [
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "Tirzepatide (5)",
+          "dose": 5,
+          "frequency": "weekly"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "AOD-9604 (N/A)",
+          "dose": "N/A",
+          "frequency": "daily"
+        },
+        {
+          "day": 1,
+          "type": "medication",
+          "title": "MOTS-C (N/A)",
+          "dose": "N/A",
+          "frequency": "3x_week"
+        },
+        {
+          "day": 1,
+          "type": "clinical_event",
+          "title": "Final continuation or maintenance decision"
+        }
+      ]
+    }
+  ],
+  "generated_at": "2026-04-02T07:21:05.929Z",
+  "validation_integrity": "HIGH"
+}

@@ -1,0 +1,87 @@
+{
+  "project": "med-peptides protocol builder v4",
+  "version": "4.0-validation-phase",
+  "objective": "Add a second-phase Protocol Validation Layer that opens after clicking 'Generate Protocol', validates the generated proposal, highlights conflicts, confirms applied constraints, and lets the doctor approve or revise before export or Start Request.",
+  "entryTrigger": {
+    "button": "Generate Protocol",
+    "nextRoute": "/protocol-builder/validation",
+    "description": "After protocol generation, users land on a validation screen before final export or submission."
+  },
+  "coreSections": [
+    "validation_summary",
+    "constraint_check_panel",
+    "clinical_sanity_checks",
+    "format_conflict_panel",
+    "complexity_check_panel",
+    "cost_and_duration_check",
+    "final_protocol_preview",
+    "actions_row"
+  ],
+  "validationRules": {
+    "hardConflicts": [
+      "injectable protocol selected when user chose oral only",
+      "blend product included when user chose avoid blends",
+      "advanced protocol selected when simple protocol required"
+    ],
+    "softConflicts": [
+      "high total cost when budget-sensitive selected",
+      "too many products when high adherence required",
+      "sleep-sensitive case with potentially conflicting protocol tags"
+    ],
+    "checks": [
+      {
+        "id": "format_compatibility",
+        "label": "Format Compatibility",
+        "passCriteria": "All included products compatible with selected format tolerance"
+      },
+      {
+        "id": "contraindication_alignment",
+        "label": "Contraindications Applied",
+        "passCriteria": "No selected contraindication is violated by chosen protocol"
+      },
+      {
+        "id": "complexity_alignment",
+        "label": "Complexity Alignment",
+        "passCriteria": "Protocol burden matches selected complexity preference"
+      },
+      {
+        "id": "duration_alignment",
+        "label": "Duration Alignment",
+        "passCriteria": "Protocol duration is consistent with selected duration or clearly flagged"
+      },
+      {
+        "id": "cost_alignment",
+        "label": "Cost Alignment",
+        "passCriteria": "Estimated cost is shown and flagged if misaligned with budget sensitivity"
+      }
+    ]
+  },
+  "outputFields": [
+    "validationStatus",
+    "hardConflictCount",
+    "softConflictCount",
+    "appliedContraindications",
+    "ignoredContraindications",
+    "warnings",
+    "recommendedFixes",
+    "finalRecommendation"
+  ],
+  "statusModel": {
+    "pass": "Protocol is suitable to proceed",
+    "warning": "Protocol may proceed with clinician review",
+    "blocked": "Protocol should be revised before proceeding"
+  },
+  "actions": [
+    "Approve Protocol",
+    "Revise Protocol",
+    "Export PDF",
+    "Send to Start Request"
+  ],
+  "uiBehavior": {
+    "desktopLayout": "two-column validation workspace",
+    "mobileLayout": "stacked review flow",
+    "showStatusBadge": true,
+    "showWarningBanner": true,
+    "showFixSuggestions": true
+  }
+}

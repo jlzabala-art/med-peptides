@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "med-peptides-app"
+  },
+  "targets": {
+    "med-peptides-app": {
+      "hosting": {
+        "production": [
+          "med-peptides-app-27a3a"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

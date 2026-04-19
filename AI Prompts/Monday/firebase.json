@@ -1,0 +1,2057 @@
+{
+  "project": "med-peptides scientific modal faq and mechanism patch",
+  "version": "v1-additive-family-level",
+  "strategy": {
+    "mode": "additive_patch_only",
+    "preserveExistingFields": [
+      "tags",
+      "semanticKeywords",
+      "faqTags",
+      "relatedGoals",
+      "relatedProtocolSlugs",
+      "description",
+      "scientificResources",
+      "productFaq",
+      "pubmed",
+      "quality",
+      "stability",
+      "slug",
+      "name"
+    ],
+    "notes": [
+      "Do not overwrite existing FAQ objects if already richer; merge additively.",
+      "Append semantic additions instead of replacing semanticKeywords.",
+      "Attach family-level content to family documents or to each variant using family inheritance logic."
+    ]
+  },
+  "families": [
+    {
+      "familySlug": "retatrutide",
+      "displayName": "Retatrutide",
+      "mechanismOfAction": {
+        "summary": "Triple incretin-pathway peptide acting across GLP-1, GIP, and glucagon signaling in metabolic research models.",
+        "researchFocus": [
+          "metabolic regulation",
+          "energy expenditure",
+          "body composition"
+        ],
+        "semanticAdditions": [
+          "triple agonist",
+          "GLP-1",
+          "GIP",
+          "glucagon receptor",
+          "metabolic research",
+          "incretin pathway"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "What is the primary research interest for Retatrutide?",
+          "a": "Retatrutide is typically explored in metabolic and body-composition research because it engages multiple incretin-related pathways at once."
+        },
+        {
+          "q": "How should strengths be presented in the catalog?",
+          "a": "Retatrutide should be shown as one family with selectable strengths so researchers can compare available presentations without duplicating the product family row."
+        },
+        {
+          "q": "Should Retatrutide be surfaced in metabolic protocol searches?",
+          "a": "Yes. It should rank for metabolic, body-composition, incretin, appetite, and energy-expenditure related searches."
+        },
+        {
+          "q": "What should clinicians see first in the FAQ modal?",
+          "a": "A short mechanism summary, available strengths, storage or handling notes if present, and links to scientific literature are the most useful first items."
+        },
+        {
+          "q": "How should Retatrutide connect to product detail pages?",
+          "a": "The family row should link to the PDP, where strength selection, scientific literature, and protocol relevance can be handled in more detail."
+        }
+      ]
+    },
+    {
+      "familySlug": "tirzepatide",
+      "displayName": "Tirzepatide",
+      "mechanismOfAction": {
+        "summary": "Dual incretin-pathway peptide acting on GIP and GLP-1 signaling in metabolic research contexts.",
+        "researchFocus": [
+          "metabolism",
+          "glucose-regulation research",
+          "body composition"
+        ],
+        "semanticAdditions": [
+          "dual agonist",
+          "GLP-1",
+          "GIP",
+          "incretin",
+          "metabolic peptide",
+          "weight-management research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "Why is Tirzepatide often shown in multiple strengths?",
+          "a": "Because the family is commonly represented in several vial strengths, the UI should treat it as one peptide family with variant selection."
+        },
+        {
+          "q": "What search themes should trigger Tirzepatide?",
+          "a": "Metabolic health, incretin signaling, body composition, appetite-related research, and insulin-response related terms."
+        },
+        {
+          "q": "Should Tirzepatide appear in protocol-related results?",
+          "a": "Yes, especially when the protocol context is weight-management, metabolic support, or incretin-pathway exploration."
+        },
+        {
+          "q": "What is the best FAQ modal structure for Tirzepatide?",
+          "a": "Use concise answers covering mechanism, strengths, protocol relevance, and literature access rather than commercial copy."
+        },
+        {
+          "q": "Should price be emphasized in scientific list views?",
+          "a": "No. Scientific list views should emphasize evidence, mechanism, and strengths first, leaving pricing to the PDP if needed."
+        }
+      ]
+    },
+    {
+      "familySlug": "semaglutide",
+      "displayName": "Semaglutide",
+      "mechanismOfAction": {
+        "summary": "GLP-1 pathway peptide studied for metabolic regulation and appetite-related signaling in research settings.",
+        "researchFocus": [
+          "GLP-1 signaling",
+          "metabolic regulation",
+          "body composition"
+        ],
+        "semanticAdditions": [
+          "GLP-1 agonist",
+          "appetite research",
+          "metabolic peptide",
+          "body composition",
+          "incretin research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "What is the main scientific theme for Semaglutide?",
+          "a": "Semaglutide is usually surfaced around GLP-1, metabolic regulation, appetite signaling, and body-composition research themes."
+        },
+        {
+          "q": "How should Semaglutide be organized in the catalog?",
+          "a": "As one family with multiple selectable strengths, not as repeated product rows."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, variant strengths, protocol relevance, and evidence links rather than quick-buy controls."
+        },
+        {
+          "q": "Should Semaglutide be visible in protocol builder cross-links?",
+          "a": "Yes, especially for metabolic and weight-management protocol contexts."
+        },
+        {
+          "q": "How should scientific literature be accessed?",
+          "a": "Through a modal or side panel with concise article previews and a path to the full product detail page for deeper review."
+        }
+      ]
+    },
+    {
+      "familySlug": "aod-9604",
+      "displayName": "AOD-9604",
+      "mechanismOfAction": {
+        "summary": "Growth-hormone-fragment research peptide commonly surfaced in lipolysis and body-composition related exploration.",
+        "researchFocus": [
+          "lipolysis research",
+          "body-composition studies",
+          "metabolic support"
+        ],
+        "semanticAdditions": [
+          "growth hormone fragment",
+          "lipolysis",
+          "fat metabolism",
+          "body composition peptide"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "What is AOD-9604 generally associated with in research catalogs?",
+          "a": "It is often grouped with body-composition and lipolysis-related research themes."
+        },
+        {
+          "q": "Should AOD-9604 appear in metabolic discovery lists?",
+          "a": "Yes, especially where body-composition or fat-metabolism terms are part of the discovery logic."
+        },
+        {
+          "q": "Why use a modal FAQ for AOD-9604?",
+          "a": "Because a modal keeps the list view scientific and clean while still allowing access to important explanatory notes."
+        },
+        {
+          "q": "How should multiple strengths be shown?",
+          "a": "As selectable strengths within one family row."
+        },
+        {
+          "q": "What should be indexed semantically?",
+          "a": "Lipolysis, body composition, growth hormone fragment, metabolic support, and related protocol cues."
+        }
+      ]
+    },
+    {
+      "familySlug": "ara-290",
+      "displayName": "ARA-290",
+      "mechanismOfAction": {
+        "summary": "Innate repair and tissue-response research peptide often associated with nerve and inflammation-related exploration.",
+        "researchFocus": [
+          "tissue response",
+          "nerve-support research",
+          "inflammation-related studies"
+        ],
+        "semanticAdditions": [
+          "tissue support",
+          "nerve research",
+          "repair peptide",
+          "inflammation pathway"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "What type of searches should surface ARA-290?",
+          "a": "Recovery, repair, tissue-support, nerve-related, and inflammation-context research searches."
+        },
+        {
+          "q": "What should the product row show?",
+          "a": "One family entry, strengths if multiple exist, and links to product detail, FAQ, and evidence."
+        },
+        {
+          "q": "Should ARA-290 emphasize scientific positioning over sales?",
+          "a": "Yes. This catalog mode should present it primarily as a research reference item."
+        },
+        {
+          "q": "What should the FAQ modal contain?",
+          "a": "A concise mechanism note, protocol relevance, evidence access, and handling-related notes where available."
+        },
+        {
+          "q": "How should this connect to protocol builder outputs?",
+          "a": "Through related-goal tags such as recovery, repair, tissue support, and nerve-context matching."
+        }
+      ]
+    },
+    {
+      "familySlug": "bpc-157",
+      "displayName": "BPC-157",
+      "mechanismOfAction": {
+        "summary": "Repair-oriented research peptide commonly surfaced in tissue-response, recovery, and integrity-related contexts.",
+        "researchFocus": [
+          "recovery",
+          "tissue support",
+          "repair-related research"
+        ],
+        "semanticAdditions": [
+          "repair peptide",
+          "recovery",
+          "tissue support",
+          "healing research",
+          "integrity support"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "What is the main research positioning for BPC-157?",
+          "a": "BPC-157 is commonly positioned around repair, recovery, and tissue-support themes in research catalogs."
+        },
+        {
+          "q": "Why should BPC-157 variants be grouped?",
+          "a": "Because multiple strengths exist and the family should be browsed as one peptide with selectable presentations."
+        },
+        {
+          "q": "What should BPC-157 match semantically?",
+          "a": "Recovery, tissue support, repair, tendon-related, and integrity-focused searches."
+        },
+        {
+          "q": "Should BPC-157 be highlighted in protocol contexts?",
+          "a": "Yes, especially in repair and recovery-oriented protocol suggestions."
+        },
+        {
+          "q": "What should be visible in the FAQ modal?",
+          "a": "Mechanism summary, strengths, recovery-oriented protocol cues, and evidence access."
+        }
+      ]
+    },
+    {
+      "familySlug": "cjc-1295-with-dac",
+      "displayName": "CJC-1295 with DAC",
+      "mechanismOfAction": {
+        "summary": "Longer-acting growth-hormone-axis research peptide typically associated with GH-secretory signaling exploration.",
+        "researchFocus": [
+          "growth hormone axis",
+          "secretagogue research",
+          "performance-related studies"
+        ],
+        "semanticAdditions": [
+          "GH axis",
+          "GHRH analog",
+          "secretagogue",
+          "DAC peptide",
+          "growth hormone research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should CJC-1295 with DAC be categorized semantically?",
+          "a": "Around growth-hormone-axis research, secretagogue exploration, and performance or body-composition related contexts."
+        },
+        {
+          "q": "Why distinguish DAC and non-DAC versions?",
+          "a": "Because they are different product families in practice and should not be merged in semantic or FAQ handling."
+        },
+        {
+          "q": "What should the FAQ modal clarify?",
+          "a": "That this is the DAC version and should be differentiated clearly from the non-DAC family."
+        },
+        {
+          "q": "Should it link to scientific literature from the list?",
+          "a": "Yes, preferably through a modal to keep the list uncluttered."
+        },
+        {
+          "q": "Should PDP remain the main place for ordering?",
+          "a": "Yes. The list view should stay scientific-first and route to PDP for deeper actions."
+        }
+      ]
+    },
+    {
+      "familySlug": "cjc-1295-without-dac",
+      "displayName": "CJC-1295 without DAC",
+      "mechanismOfAction": {
+        "summary": "Shorter-acting growth-hormone-axis research peptide usually grouped with secretagogue and pulsatile signaling contexts.",
+        "researchFocus": [
+          "GH-axis signaling",
+          "secretagogue research",
+          "performance/body-composition"
+        ],
+        "semanticAdditions": [
+          "GHRH analog",
+          "non-DAC peptide",
+          "secretagogue",
+          "growth hormone pathway",
+          "pulsatile signaling"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "Why should the non-DAC version have its own family row?",
+          "a": "Because the non-DAC family is distinct from the DAC version and should keep its own semantic and FAQ identity."
+        },
+        {
+          "q": "Which searches should surface this product?",
+          "a": "Growth-hormone-axis, GHRH analog, secretagogue, and performance-oriented research terms."
+        },
+        {
+          "q": "How should strengths be shown?",
+          "a": "As variants under a single family entry rather than duplicated rows."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Version distinction, mechanism summary, strengths, and research-context guidance."
+        },
+        {
+          "q": "Should there be inline purchasing in the scientific list view?",
+          "a": "No. Keep discovery and scientific reference separate from purchase flow."
+        }
+      ]
+    },
+    {
+      "familySlug": "5-amino-1mq",
+      "displayName": "5-AMINO 1 MQ",
+      "mechanismOfAction": {
+        "summary": "Metabolic-pathway research compound commonly associated with NNMT-related exploration in body-composition contexts.",
+        "researchFocus": [
+          "NNMT-related research",
+          "metabolic support",
+          "body-composition studies"
+        ],
+        "semanticAdditions": [
+          "NNMT",
+          "metabolic research",
+          "body composition",
+          "energy regulation"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "What research theme best describes 5-AMINO 1 MQ?",
+          "a": "It is commonly associated with NNMT-related metabolic and body-composition research themes."
+        },
+        {
+          "q": "Should this appear in metabolic protocol discovery?",
+          "a": "Yes, especially where metabolic optimization or body-composition research themes are active."
+        },
+        {
+          "q": "What should the FAQ modal contain?",
+          "a": "NNMT-related mechanism summary, research-use context, and semantic links to protocol or literature views."
+        },
+        {
+          "q": "Should price be visible in scientific category views?",
+          "a": "No. Use PDP for that and keep this list focused on research discovery."
+        },
+        {
+          "q": "How should this product connect to search?",
+          "a": "Index it for NNMT, metabolic support, energy regulation, and body-composition language."
+        }
+      ]
+    },
+    {
+      "familySlug": "cartalax",
+      "displayName": "Cartalax",
+      "mechanismOfAction": {
+        "summary": "Peptide bioregulator family entry typically positioned in structural and connective-tissue research contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "bioregulator",
+          "connective tissue",
+          "cartilage research",
+          "structural support"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Cartalax be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "cardiogen",
+      "displayName": "Cardiogen",
+      "mechanismOfAction": {
+        "summary": "Peptide bioregulator entry generally associated with cardiovascular-focused research themes.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "cardiovascular peptide",
+          "bioregulator",
+          "heart research",
+          "cardio support"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Cardiogen be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "thymogen",
+      "displayName": "Thymogen",
+      "mechanismOfAction": {
+        "summary": "Bioregulator peptide commonly surfaced in immune-oriented and regulatory research contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "immune peptide",
+          "bioregulator",
+          "thymic research",
+          "regulatory support"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Thymogen be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "prostamax",
+      "displayName": "Prostamax",
+      "mechanismOfAction": {
+        "summary": "Bioregulator family entry generally aligned with prostate-focused and glandular research contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "prostate peptide",
+          "glandular support",
+          "bioregulator",
+          "prostate research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Prostamax be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "testagen",
+      "displayName": "Testagen",
+      "mechanismOfAction": {
+        "summary": "Bioregulator peptide often associated with testicular and glandular research themes.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "testicular peptide",
+          "glandular support",
+          "bioregulator",
+          "endocrine-context research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Testagen be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "cagrilintide",
+      "displayName": "Cagrilintide",
+      "mechanismOfAction": {
+        "summary": "Amylin-pathway research peptide generally surfaced in appetite and metabolic regulation contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "amylin analog",
+          "appetite research",
+          "metabolic support",
+          "weight-management research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Cagrilintide be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "dsip",
+      "displayName": "DSIP",
+      "mechanismOfAction": {
+        "summary": "Sleep-related research peptide commonly surfaced around circadian and restorative-support contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "sleep peptide",
+          "circadian",
+          "restorative support",
+          "neuroregulation research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should DSIP be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "epithalon",
+      "displayName": "Epithalon",
+      "mechanismOfAction": {
+        "summary": "Peptide often surfaced in longevity and circadian-related research conversations.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "longevity peptide",
+          "circadian research",
+          "aging support",
+          "cellular longevity"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Epithalon be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "fst-344",
+      "displayName": "FST-344",
+      "mechanismOfAction": {
+        "summary": "Myostatin-axis research peptide often associated with muscle-regulation and growth signaling exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "myostatin",
+          "muscle growth research",
+          "performance peptide",
+          "muscle regulation"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should FST-344 be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "ghk-cu",
+      "displayName": "GHK-Cu (Copper Peptide)",
+      "mechanismOfAction": {
+        "summary": "Copper-binding peptide commonly surfaced in skin, repair, and regenerative-support research contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "copper peptide",
+          "skin support",
+          "regeneration research",
+          "repair peptide",
+          "aesthetic research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should GHK-Cu (Copper Peptide) be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "ghrp-2",
+      "displayName": "GHRP-2",
+      "mechanismOfAction": {
+        "summary": "Growth-hormone secretagogue research peptide associated with GH-axis signaling and performance-oriented exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "secretagogue",
+          "growth hormone peptide",
+          "GH axis",
+          "performance research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should GHRP-2 be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "glow",
+      "displayName": "GLOW (BPC-157/TB-500/GHK-Cu)",
+      "mechanismOfAction": {
+        "summary": "Combination research formula grouped around repair, recovery, and regenerative-support contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "blend",
+          "recovery formula",
+          "repair combination",
+          "regenerative support"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should GLOW (BPC-157/TB-500/GHK-Cu) be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "klow",
+      "displayName": "KLOW (BPC-157/TB-500/GHK-Cu/KPV)",
+      "mechanismOfAction": {
+        "summary": "Combination research formula centered on recovery, regeneration, and broader blend-based support contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "blend",
+          "repair formula",
+          "recovery combination",
+          "regenerative support",
+          "KPV blend"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should KLOW (BPC-157/TB-500/GHK-Cu/KPV) be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "hcg",
+      "displayName": "HCG",
+      "mechanismOfAction": {
+        "summary": "Hormonal-axis research compound usually surfaced in endocrine and fertility-related contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "hormonal support",
+          "fertility research",
+          "endocrine peptide",
+          "gonadotropic research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should HCG be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "hexarelin",
+      "displayName": "Hexarelin",
+      "mechanismOfAction": {
+        "summary": "Growth-hormone secretagogue research peptide commonly explored in GH-axis and performance contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "secretagogue",
+          "GH axis",
+          "growth hormone peptide",
+          "performance research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Hexarelin be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "hgh",
+      "displayName": "HGH 10iu",
+      "mechanismOfAction": {
+        "summary": "Growth-hormone pathway research compound used in endocrine and performance-related exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "growth hormone",
+          "GH research",
+          "endocrine support",
+          "performance"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should HGH 10iu be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "hmg",
+      "displayName": "HMG",
+      "mechanismOfAction": {
+        "summary": "Hormonal-axis research compound often associated with endocrine and fertility-context exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "endocrine peptide",
+          "fertility research",
+          "gonadotropic research",
+          "hormonal support"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should HMG be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "igf-lr3",
+      "displayName": "IGF-LR3",
+      "mechanismOfAction": {
+        "summary": "IGF-pathway research peptide commonly grouped with growth-signaling and performance-oriented exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "IGF",
+          "growth factor research",
+          "performance peptide",
+          "recovery support"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should IGF-LR3 be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "ipamorelin",
+      "displayName": "Ipamorelin",
+      "mechanismOfAction": {
+        "summary": "GH-axis secretagogue research peptide generally associated with growth-hormone signaling exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "secretagogue",
+          "GH pathway",
+          "growth hormone research",
+          "body composition"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Ipamorelin be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "kisspeptin-10",
+      "displayName": "Kisspeptin-10",
+      "mechanismOfAction": {
+        "summary": "Neuroendocrine-pathway research peptide often explored in hormonal and fertility-context signaling studies.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "kisspeptin",
+          "neuroendocrine",
+          "fertility research",
+          "hormonal support"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Kisspeptin-10 be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "kpv",
+      "displayName": "KPV",
+      "mechanismOfAction": {
+        "summary": "Short peptide research entry often surfaced in inflammation-context and barrier-support exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "inflammation peptide",
+          "barrier support",
+          "regulatory peptide",
+          "immune-context research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should KPV be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "mk-677",
+      "displayName": "MK-677",
+      "mechanismOfAction": {
+        "summary": "Oral research compound associated with growth-hormone-axis and appetite-related exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "oral compound",
+          "GH axis",
+          "secretagogue research",
+          "appetite-related",
+          "body composition"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should MK-677 be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "gw-501516",
+      "displayName": "GW-501516",
+      "mechanismOfAction": {
+        "summary": "PPAR\u03b4-related research compound generally surfaced in endurance and fatty-acid-oxidation contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "PPAR delta",
+          "endurance research",
+          "fatty acid oxidation",
+          "metabolic adaptation"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should GW-501516 be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "slu-pp-332",
+      "displayName": "SLU PP-332",
+      "mechanismOfAction": {
+        "summary": "Metabolic adaptation research compound typically explored in endurance-like and energy-regulation contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "metabolic adaptation",
+          "endurance research",
+          "energy regulation",
+          "ERR-related research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should SLU PP-332 be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "mots-c",
+      "displayName": "MOTS-C",
+      "mechanismOfAction": {
+        "summary": "Mitochondrial-context research peptide commonly surfaced in energy, metabolic, and longevity-related exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "mitochondrial peptide",
+          "energy support",
+          "longevity research",
+          "metabolic adaptation"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should MOTS-C be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "mt2",
+      "displayName": "MT2",
+      "mechanismOfAction": {
+        "summary": "Melanocortin-related research peptide commonly surfaced in pigmentation and signaling-context exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "melanocortin",
+          "pigmentation research",
+          "signaling peptide"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should MT2 be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "nad-plus",
+      "displayName": "NAD+",
+      "mechanismOfAction": {
+        "summary": "Cellular-energy research compound commonly associated with redox, mitochondrial, and longevity-related exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "NAD+",
+          "redox support",
+          "mitochondrial research",
+          "cellular energy",
+          "longevity"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should NAD+ be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "nmn",
+      "displayName": "NMN",
+      "mechanismOfAction": {
+        "summary": "Cellular-energy and NAD-pathway research compound often surfaced in metabolic and longevity-related exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "NMN",
+          "NAD pathway",
+          "cellular energy",
+          "longevity research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should NMN be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "oxytocin-acetate",
+      "displayName": "Oxytocin Acetate",
+      "mechanismOfAction": {
+        "summary": "Neuropeptide research compound generally surfaced in social, neuroendocrine, and signaling-context exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "oxytocin",
+          "neuropeptide",
+          "neuroendocrine",
+          "signaling research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Oxytocin Acetate be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "pinealon",
+      "displayName": "Pinealon",
+      "mechanismOfAction": {
+        "summary": "Neuroregulatory peptide commonly surfaced in cognitive and neuro-support research contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "neuro peptide",
+          "cognitive support",
+          "neuroregulation",
+          "brain research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Pinealon be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "pe-22-28",
+      "displayName": "PE-22 28",
+      "mechanismOfAction": {
+        "summary": "Neuroactive research peptide often grouped with mood and neuro-support exploration contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "neuroactive peptide",
+          "mood research",
+          "neuro support",
+          "brain-context studies"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should PE-22 28 be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "pnc-27",
+      "displayName": "PNC-27",
+      "mechanismOfAction": {
+        "summary": "Oncology-related research peptide family often surfaced in cell-targeting and tumor-biology exploration contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "oncology peptide",
+          "cell targeting",
+          "tumor biology",
+          "research peptide"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should PNC-27 be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "peg-mgf",
+      "displayName": "PEG MGF",
+      "mechanismOfAction": {
+        "summary": "Growth-factor-related research peptide usually surfaced in muscle and recovery-related exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "growth factor",
+          "muscle recovery",
+          "performance support",
+          "repair research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should PEG MGF be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "pt-141",
+      "displayName": "PT-141",
+      "mechanismOfAction": {
+        "summary": "Melanocortin-related research peptide often surfaced in neuroendocrine and behavioral signaling contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "PT-141",
+          "melanocortin",
+          "neuroendocrine",
+          "behavioral signaling"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should PT-141 be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "selank",
+      "displayName": "Selank",
+      "mechanismOfAction": {
+        "summary": "Neuroactive research peptide generally associated with anxiolytic and cognitive-support exploration contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "Selank",
+          "neuroactive peptide",
+          "stress research",
+          "cognitive support"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Selank be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "semax",
+      "displayName": "Semax",
+      "mechanismOfAction": {
+        "summary": "Neuroactive peptide typically surfaced in cognitive and neuro-support research contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "Semax",
+          "cognitive support",
+          "neuro peptide",
+          "brain research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Semax be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "sermorelin",
+      "displayName": "Sermorelin",
+      "mechanismOfAction": {
+        "summary": "Growth-hormone-axis research peptide generally surfaced in GHRH-pathway and performance-related exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "Sermorelin",
+          "GHRH",
+          "GH axis",
+          "growth hormone research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Sermorelin be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "snap-8",
+      "displayName": "Snap-8",
+      "mechanismOfAction": {
+        "summary": "Cosmetic-science peptide generally associated with expression-line and topical-formulation related research contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "cosmetic peptide",
+          "expression line research",
+          "topical science",
+          "aesthetic support"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Snap-8 be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "ss-31",
+      "displayName": "SS-31",
+      "mechanismOfAction": {
+        "summary": "Mitochondrial-targeted research peptide generally surfaced in energy, membrane, and resilience-related exploration contexts.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "mitochondrial peptide",
+          "energy support",
+          "SS-31",
+          "cellular resilience"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should SS-31 be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "thymulin",
+      "displayName": "Thymulin",
+      "mechanismOfAction": {
+        "summary": "Immune-context research peptide often associated with thymic and regulatory signaling exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "thymic peptide",
+          "immune support",
+          "regulatory peptide",
+          "thymulin"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Thymulin be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "tesamorelin",
+      "displayName": "Tesamorelin",
+      "mechanismOfAction": {
+        "summary": "GHRH-pathway research peptide generally positioned in GH-axis and body-composition related exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "Tesamorelin",
+          "GHRH",
+          "GH axis",
+          "body composition research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Tesamorelin be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "thymosin-alpha-1",
+      "displayName": "Thymosin Alpha 1",
+      "mechanismOfAction": {
+        "summary": "Immune-context research peptide generally surfaced around regulatory and thymic signaling studies.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "immune peptide",
+          "thymosin alpha 1",
+          "regulatory support",
+          "thymic research"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Thymosin Alpha 1 be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "tb-500",
+      "displayName": "Thymosin B4 (TB-500)",
+      "mechanismOfAction": {
+        "summary": "Recovery-oriented research peptide family commonly surfaced in repair, tissue-response, and performance-support exploration.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "TB-500",
+          "repair peptide",
+          "recovery support",
+          "tissue support",
+          "performance recovery"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Thymosin B4 (TB-500) be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "insulin-syringes",
+      "displayName": "Insulin Syringes",
+      "mechanismOfAction": {
+        "summary": "Ancillary consumable used to support handling and administration workflows where relevant.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "ancillary",
+          "syringe",
+          "administration support",
+          "research supply"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Insulin Syringes be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "bacteriostatic-water",
+      "displayName": "Bacteriostatic Water",
+      "mechanismOfAction": {
+        "summary": "Ancillary support item used in preparation and handling workflows where applicable.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "bacteriostatic water",
+          "ancillary",
+          "reconstitution support",
+          "research supply"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Bacteriostatic Water be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    },
+    {
+      "familySlug": "syringe-bac-water-bundle",
+      "displayName": "Syringe & Bac Water Bundle",
+      "mechanismOfAction": {
+        "summary": "Ancillary preparation bundle intended to support handling workflows where relevant.",
+        "researchFocus": [],
+        "semanticAdditions": [
+          "bundle",
+          "ancillary bundle",
+          "preparation support",
+          "research supply bundle"
+        ]
+      },
+      "faqModalItems": [
+        {
+          "q": "How should Syringe & Bac Water Bundle be positioned in scientific discovery?",
+          "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+        },
+        {
+          "q": "What should the FAQ modal emphasize?",
+          "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+        },
+        {
+          "q": "Should inline price and purchase buttons be visible in the scientific list?",
+          "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+        },
+        {
+          "q": "How should semantic search use this family?",
+          "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+        },
+        {
+          "q": "How should users continue if this family is relevant?",
+          "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+        }
+      ]
+    }
+  ]
+}

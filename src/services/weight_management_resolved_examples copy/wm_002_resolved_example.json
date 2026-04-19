@@ -1,0 +1,221 @@
+{
+  "generated_protocol_id": "wm_002_resolved_4337",
+  "protocol_id": "wm_002",
+  "protocol_slug": "wm_002",
+  "protocol_title": "WM_002",
+  "protocol_version": "v6.0",
+  "patient_context": {
+    "sex": "female",
+    "age_group": "36-50",
+    "primary_goal": "weight_management",
+    "duration_weeks": 12,
+    "start_date": "2026-04-02"
+  },
+  "applied_variants": {
+    "age_variant": "36-50_standard",
+    "sex_variant": "default",
+    "duration_variant": "12_weeks",
+    "tempo_variant": "standard"
+  },
+  "resolved_phases": [
+    {
+      "phase_key": "main_phase",
+      "phase_title": "Active Treatment",
+      "duration_weeks": 12,
+      "drugs": [
+        {
+          "product_title": "Semaglutide",
+          "frequency": "weekly"
+        }
+      ]
+    }
+  ],
+  "resolved_timeline": [
+    {
+      "week": 1,
+      "events": [
+        {
+          "type": "medication",
+          "notes": "Weekly dosing review"
+        },
+        {
+          "type": "monitoring",
+          "notes": "Weight & tolerance check"
+        }
+      ]
+    },
+    {
+      "week": 2,
+      "events": [
+        {
+          "type": "medication",
+          "notes": "Weekly dosing review"
+        },
+        {
+          "type": "monitoring",
+          "notes": "Weight & tolerance check"
+        }
+      ]
+    },
+    {
+      "week": 3,
+      "events": [
+        {
+          "type": "medication",
+          "notes": "Weekly dosing review"
+        },
+        {
+          "type": "monitoring",
+          "notes": "Weight & tolerance check"
+        }
+      ]
+    },
+    {
+      "week": 4,
+      "events": [
+        {
+          "type": "medication",
+          "notes": "Weekly dosing review"
+        },
+        {
+          "type": "monitoring",
+          "notes": "Weight & tolerance check"
+        }
+      ]
+    },
+    {
+      "week": 5,
+      "events": [
+        {
+          "type": "medication",
+          "notes": "Weekly dosing review"
+        },
+        {
+          "type": "monitoring",
+          "notes": "Weight & tolerance check"
+        }
+      ]
+    },
+    {
+      "week": 6,
+      "events": [
+        {
+          "type": "medication",
+          "notes": "Weekly dosing review"
+        },
+        {
+          "type": "monitoring",
+          "notes": "Weight & tolerance check"
+        }
+      ]
+    },
+    {
+      "week": 7,
+      "events": [
+        {
+          "type": "medication",
+          "notes": "Weekly dosing review"
+        },
+        {
+          "type": "monitoring",
+          "notes": "Weight & tolerance check"
+        }
+      ]
+    },
+    {
+      "week": 8,
+      "events": [
+        {
+          "type": "medication",
+          "notes": "Weekly dosing review"
+        },
+        {
+          "type": "monitoring",
+          "notes": "Weight & tolerance check"
+        }
+      ]
+    },
+    {
+      "week": 9,
+      "events": [
+        {
+          "type": "medication",
+          "notes": "Weekly dosing review"
+        },
+        {
+          "type": "monitoring",
+          "notes": "Weight & tolerance check"
+        }
+      ]
+    },
+    {
+      "week": 10,
+      "events": [
+        {
+          "type": "medication",
+          "notes": "Weekly dosing review"
+        },
+        {
+          "type": "monitoring",
+          "notes": "Weight & tolerance check"
+        }
+      ]
+    },
+    {
+      "week": 11,
+      "events": [
+        {
+          "type": "medication",
+          "notes": "Weekly dosing review"
+        },
+        {
+          "type": "monitoring",
+          "notes": "Weight & tolerance check"
+        }
+      ]
+    },
+    {
+      "week": 12,
+      "events": [
+        {
+          "type": "medication",
+          "notes": "Weekly dosing review"
+        },
+        {
+          "type": "monitoring",
+          "notes": "Weight & tolerance check"
+        }
+      ]
+    }
+  ],
+  "resolved_monitoring": {
+    "baseline_required": [
+      "CMP",
+      "Body composition"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "week": 4
+      },
+      {
+        "week": 8
+      },
+      {
+        "week": 12
+      }
+    ]
+  },
+  "resolved_costs": {
+    "estimated_weekly_cost": 150,
+    "estimated_total_cost": 1800,
+    "currency": "USD"
+  },
+  "validation": {
+    "state": "READY_FOR_TIMELINE",
+    "physician_validation": {
+      "status": true,
+      "validated_by": "Dr Test",
+      "timestamp": "2026-04-02T07:16:12.986665"
+    }
+  }
+}

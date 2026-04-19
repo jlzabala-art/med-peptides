@@ -1,0 +1,195 @@
+Design a Firebase product data architecture that serves both:
+
+1. the application frontend and protocol engine
+2. a future synchronization with Zoho Books Items and Price Lists
+
+We are starting with products only.
+
+Do not model Firebase as a copy of Zoho Books.
+Instead, create a product-centered architecture with a clean separation between:
+
+- product identity
+- app-facing content
+- inventory / operational fields
+- Zoho integration metadata
+- pricing layer
+
+==================================================
+PRIMARY OBJECTIVE
+==================================================
+
+Create a scalable Firebase product structure that:
+
+- works well for the app today
+- supports future Zoho Books synchronization
+- avoids fragile text-based relationships
+- keeps pricing flexible
+- is easy to query in Firestore
+
+==================================================
+ANALYZE THE PROVIDED CSV STRUCTURES
+==================================================
+
+Use the uploaded CSV files as reference inputs:
+
+1. Item.csv
+2. Price_lists.csv
+
+Extract the important concepts from those files and use them to inform the Firebase design.
+
+The solution must take into account that:
+
+- Items include SKU, descriptions, product type, inventory flags, tax fields, purchase/sales fields, status, usage unit, vendor, and custom fields
+- Price Lists include both fixed_percentage and per_item logic
+- Some price lists use unit pricing
+- Some price lists use volume pricing
+- A product may belong to multiple price lists
+
+==================================================
+FIREBASE DATA MODEL TO DESIGN
+==================================================
+
+Create the following core collections:
+
+1. products
+2. categories
+3. subcategories
+4. price_lists
+
+Optional if useful:
+5. vendors
+6. locations
+
+==================================================
+PRODUCT DOCUMENT REQUIREMENTS
+==================================================
+
+Each product document must support:
+
+A. Stable identity
+- internal product id
+- slug
+- canonical name
+- aliases
+- status
+- visibility
+
+B. App-facing content
+- display name
+- short description
+- long description
+- category id
+- subcategory id
+- brand
+- tags
+- presentation (strength, form, pack size)
+- media
+- linked FAQ ids
+- linked protocol ids
+
+C. Inventory / operational fields
+- sellable
+- purchasable
+- track_inventory
+- stock_on_hand
+- reorder_point
+- location ids
+- unit of measure
+
+D. Zoho integration metadata
+- zoho item_id
+- zoho sku
+- zoho status
+- tax name
+- tax percentage
+- tax type
+- reference_id
+- last_sync_time
+- account codes if needed
+
+E. Pricing references
+- base rate snapshot if useful
+- currency code
+- price_list_ids
+
+==================================================
+PRICE LIST DOCUMENT REQUIREMENTS
+==================================================
+
+Design price_lists to support:
+
+1. fixed_percentage lists
+2. per_item lists
+3. volume pricing
+
+Each price list document must support:
+
+- internal id
+- zoho price list id
+- name
+- currency code
+- type
+- status
+- is default
+- percentage if applicable
+- is increase flag
+- rounding type
+- decimal place
+- rules array
+
+Each rule must support:
+
+- product_id
+- sku
+- pricing_scheme
+- start_quantity
+- end_quantity
+- rate
+- discount if present
+
+==================================================
+RELATIONSHIP RULES
+==================================================
+
+Do not use product names as primary relational keys.
+
+Use:
+
+- internal product ids
+- zoho item ids
+- sku where useful
+
+Relationships must be based on IDs, not display strings.
+
+==================================================
+OUTPUT REQUIRED
+==================================================
+
+Provide:
+
+1. recommended Firebase schema
+2. example document for products
+3. example document for price_lists
+4. example category and subcategory documents
+5. field-level mapping from Firebase to Zoho Item.csv
+6. field-level mapping from Firebase to Zoho Price_lists.csv
+7. recommendations on which fields should live in Firebase and which should remain Zoho-only
+8. recommendations for future sync workflow
+
+==================================================
+DESIGN PRINCIPLES
+==================================================
+
+The structure must be:
+
+- normalized enough for clean sync
+- simple enough for Firestore reads
+- scalable
+- app-friendly
+- future-proof for Zoho Books integration
+
+==================================================
+FINAL OBJECTIVE
+==================================================
+
+Create a product architecture in Firebase that is optimized for the app today and properly prepared for a future integration with Zoho Books Items and Price Lists.

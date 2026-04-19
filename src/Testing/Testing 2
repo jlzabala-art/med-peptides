@@ -1,0 +1,458 @@
+
+
+MASTER PROMPT — Automated Clinical Protocol Selection Test Suite (Protocol Builder 2.0)
+
+Project: ReGen PEPT — Protocol Builder 2.0
+Location: /protocol builder 2.0
+Module: Protocol Selection Engine
+Target: All Clinical Protocols in Model 2.0
+Priority: HIGH — Protocol Routing Validation
+
+⸻
+
+Implement an automated test framework that validates that each protocol defined in the Protocol Builder 2.0 library is correctly selected when appropriate patient input data is provided.
+
+The objective of this system is to simulate real patient profiles and verify that the correct protocol is selected according to clinical logic, priority rules, and protocol routing hierarchy.
+
+The system must automatically test every protocol defined in the normalized protocol library and confirm that:
+
+Each protocol can be triggered.
+Each protocol appears when correct clinical conditions are entered.
+Each protocol is not incorrectly skipped.
+Each protocol contains valid compounds.
+Each protocol produces valid timelines.
+
+⸻
+
+Load all protocol definitions from:
+
+protocol_library_2_0
+
+Store all protocol identifiers.
+
+For example:
+
+WM-001
+WM-002
+WM-003
+WM-004
+
+And also:
+
+cog_001
+cog_002
+energy_001
+energy_002
+horm_001
+horm_002
+immune_001
+immune_002
+lon_001
+lon_002
+met_001
+
+The system must dynamically read the library rather than relying on hardcoded protocol names.
+
+⸻
+
+Create a simulation engine that generates structured patient input sets.
+
+Each test input must simulate realistic clinical patient data.
+
+Patient input structure must include:
+
+sex
+age_range
+weight
+height
+metabolic_status
+primary_objective
+treatment_duration
+tempo
+
+BMI must be calculated dynamically.
+
+BMI calculation:
+
+BMI = weight / (height²)
+
+Height must be converted to meters.
+
+⸻
+
+For each protocol in the library, define at least one valid triggering scenario.
+
+These scenarios must represent realistic clinical cases.
+
+Examples:
+
+For WM-001 — GLP1 Foundation:
+
+Input:
+
+sex: female
+age_range: 36–50
+weight: 92
+height: 168
+metabolic_status: impaired
+primary_objective: weight_management
+tempo: standard
+duration: 12 weeks
+
+Expected result:
+
+Protocol Selected:
+
+WM-001
+
+Primary compound:
+
+Tirzepatide
+
+⸻
+
+For WM-002 — GLP1 + Metabolic Synergy:
+
+Input:
+
+sex: male
+age_range: 40–55
+weight: 105
+height: 175
+metabolic_status: insulin_resistance
+primary_objective: weight_management
+tempo: aggressive
+duration: 16 weeks
+
+Expected result:
+
+Protocol Selected:
+
+WM-002
+
+Primary compounds:
+
+Semaglutide
+AOD-9604
+MOTS-C
+
+⸻
+
+For WM-003 — Neuro Behavioral Support:
+
+Input:
+
+sex: female
+age_range: 28–40
+weight: 70
+height: 165
+metabolic_status: normal
+primary_objective: weight_behavior_support
+tempo: standard
+duration: 12 weeks
+
+Expected result:
+
+Protocol Selected:
+
+WM-003
+
+Primary compounds:
+
+Semax
+Selank
+
+⸻
+
+For WM-004 — Intensive Metabolic Reset:
+
+Input:
+
+sex: male
+age_range: 45–60
+weight: 118
+height: 172
+metabolic_status: metabolic_syndrome
+primary_objective: weight_management
+tempo: aggressive
+duration: 16 weeks
+
+Expected result:
+
+Protocol Selected:
+
+WM-004
+
+Primary compounds:
+
+Retatrutide
+MOTS-C
+Tesamorelin
+
+⸻
+
+Create similar test cases for:
+
+Cognitive Support protocols
+Hormonal protocols
+Immune protocols
+Energy protocols
+Longevity protocols
+Metabolic protocols
+
+Each protocol must have:
+
+At least one positive test case.
+At least one negative test case.
+
+Negative test case example:
+
+If BMI < 24:
+
+GLP1 protocol should NOT be first-line.
+
+⸻
+
+Implement automatic execution of all test cases.
+
+For each test case:
+
+Run full protocol selection pipeline.
+
+Capture:
+
+Selected protocol ID
+Selected compounds
+Generated timeline
+Calculated cost
+Safety validation result
+
+Compare output to expected results.
+
+If mismatch detected:
+
+Log failure.
+
+⸻
+
+Failure logging must include:
+
+protocol_expected
+protocol_selected
+input_parameters
+failure_reason
+
+Store all failures in:
+
+protocol_test_log.json
+
+⸻
+
+Implement validation checks for compound integrity.
+
+For each selected protocol:
+
+Verify:
+
+Each compound has:
+
+product_id
+dose
+route
+frequency
+
+If any compound is missing:
+
+Mark protocol as invalid.
+
+Log:
+
+compound_missing_error
+
+⸻
+
+Implement timeline validation.
+
+For each protocol timeline:
+
+Verify:
+
+All weeks populated.
+All injections resolved.
+No undefined injections.
+
+If undefined injection found:
+
+Block test.
+
+Log:
+
+timeline_resolution_error
+
+⸻
+
+Implement safety validation checks.
+
+Ensure:
+
+Safety status and alignment status remain consistent.
+
+If alignment error detected:
+
+Safety must not display “Verified Safe”.
+
+If contradiction detected:
+
+Log:
+
+safety_logic_conflict
+
+⸻
+
+Implement protocol usage tracking.
+
+Track:
+
+How many times each protocol is selected.
+
+Store statistics:
+
+protocol_usage_frequency
+
+Detect:
+
+Protocols never selected.
+
+If protocol never triggered:
+
+Flag:
+
+unused_protocol_detected
+
+This identifies orphan protocols.
+
+⸻
+
+Implement protocol priority validation.
+
+For Weight Management:
+
+GLP1 protocols must always appear first.
+
+If Cognitive Support appears before GLP1:
+
+Log:
+
+priority_violation_error
+
+⸻
+
+Implement runtime validation dashboard.
+
+Dashboard must show:
+
+Total protocols tested
+Successful selections
+Failed selections
+Unused protocols
+Timeline failures
+Safety conflicts
+
+Display:
+
+Pass rate percentage.
+
+⸻
+
+Add manual test mode.
+
+Allow developer to input:
+
+Custom patient profile.
+
+Run:
+
+Single protocol selection simulation.
+
+Display:
+
+Selected protocol
+Compound stack
+Timeline preview
+Safety status
+
+⸻
+
+Run automated validation across all protocols.
+
+Test execution must include:
+
+All defined protocols.
+All clinical categories.
+
+Test coverage must reach:
+
+100 percent protocol coverage.
+
+⸻
+
+After execution, generate validation report.
+
+Export:
+
+protocol_selection_validation_report.json
+
+Report must include:
+
+protocol_id
+test_status
+validation_result
+failure_logs
+
+⸻
+
+Block deployment if:
+
+Any critical failure detected.
+
+Critical failures include:
+
+Missing compounds
+Undefined injections
+Protocol mismatch
+Safety contradictions
+
+⸻
+
+Expected final system behavior after implementation:
+
+Every protocol defined in the model can be triggered.
+Every protocol is correctly selected when valid inputs are entered.
+No protocols remain unused.
+Timeline integrity is validated.
+Safety logic is synchronized.
+GLP1 protocols appear correctly when required.
+Protocol routing becomes clinically reliable.
+
+This test suite becomes the permanent validation engine for Protocol Builder 2.0.
+
+⸻
+
+Why this is extremely important
+
+This battery of tests will allow you to:
+	•	Detect routing failures automatically
+	•	Ensure Tirzepatide protocols activate
+	•	Detect unused protocols
+	•	Validate full clinical logic
+	•	Guarantee reliability before production
+
+And most importantly:
+
+It transforms your system from:
+
+Rule-based generator
+
+into:
+
+Clinically validated protocol engine.

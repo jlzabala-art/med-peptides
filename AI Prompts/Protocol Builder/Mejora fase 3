@@ -1,0 +1,115 @@
+Redesign the Safety Verification interface to improve clinical clarity, reduce visual noise, and guide corrective actions.
+
+==================================================
+OBJECTIVE
+==================================================
+
+Transform the Safety screen into a clear clinical decision interface that highlights risks, explains consequences, and guides corrective actions.
+
+==================================================
+SECTION 1 — ADD SAFETY SUMMARY BLOCK
+==================================================
+
+Create a top-level summary section containing:
+
+Safety Score
+Risk Level
+Primary Issues
+Next Required Action
+
+Example:
+
+Safety Score: 40 / 100
+Risk Level: Moderate Risk
+
+Primary Issues:
+• Missing required parameters
+• Monitoring interval undefined
+
+Next Action:
+[ Fix Required Parameters ]
+
+==================================================
+SECTION 2 — REDESIGN DOMAIN CARDS
+==================================================
+
+Each validation domain card must include:
+
+Status icon
+Domain name
+Short consequence statement
+Contextual action button
+
+Remove large red background fills.
+
+Use:
+
+white background
+colored border
+status badge
+
+==================================================
+SECTION 3 — INTRODUCE SEVERITY LEVELS
+==================================================
+
+Add status categories:
+
+ERROR (red)
+WARNING (amber)
+SAFE (green)
+
+Display status badge clearly on each card.
+
+==================================================
+SECTION 4 — CONTEXTUAL ACTION BUTTONS
+==================================================
+
+Replace generic:
+
+Review Parameters
+
+With:
+
+Fix Missing Inputs
+Review Monitoring
+Adjust Dosage
+
+Make action context-specific.
+
+==================================================
+SECTION 5 — ENABLE INLINE DETAIL EXPANSION
+==================================================
+
+Allow "View Details" to expand inline.
+
+Display:
+
+Specific missing or incorrect values.
+
+==================================================
+SECTION 6 — SYNCHRONIZE SAFETY SCORE
+==================================================
+
+Ensure the Safety Score in sidebar matches the main score.
+
+Avoid conflicting values.
+
+==================================================
+SECTION 7 — REDUCE RED DOMINANCE
+==================================================
+
+Remove large red backgrounds.
+
+Use:
+
+left border accent
+badge
+icon
+
+Keep content readable.
+
+==================================================
+FINAL OBJECTIVE
+==================================================
+
+Create a safety verification interface that supports fast clinical interpretation, reduces cognitive load, and clearly guides corrective actions.

@@ -1,0 +1,186 @@
+{
+  "totalAudited": 101,
+  "validatedLegacyMatches": 70,
+  "mismatchedOverridesActive": 8,
+  "discrepancies": [
+    {
+      "name": "TB-500",
+      "strength": "2 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "GLOW",
+      "strength": "10/10/75 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "KLOW",
+      "strength": "10/10/75/10 mg",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": 70,
+      "wholesaleVialPrice": 154,
+      "difference": 84
+    },
+    {
+      "name": "KPV",
+      "strength": "5 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "ARA-290",
+      "strength": "16 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "5-AMINO 1 MQ",
+      "strength": "50 mg/tablet",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "SLU PP-332",
+      "strength": "50 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "NMN",
+      "strength": "50 mg/tablet",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": 92,
+      "wholesaleVialPrice": 66,
+      "difference": 26
+    },
+    {
+      "name": "Semax",
+      "strength": "5 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "Pinealon",
+      "strength": "10 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "DSIP",
+      "strength": "2 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "IGF-1 LR3",
+      "strength": "0.1 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "PEG MGF",
+      "strength": "2 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "MK-677",
+      "strength": "10 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "HGH",
+      "strength": "10iu/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": 40,
+      "wholesaleVialPrice": 33,
+      "difference": 7
+    },
+    {
+      "name": "HCG",
+      "strength": "5000iu/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": 18,
+      "wholesaleVialPrice": 44,
+      "difference": 26
+    },
+    {
+      "name": "HMG",
+      "strength": "75iu/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": 30,
+      "wholesaleVialPrice": 33,
+      "difference": 3
+    },
+    {
+      "name": "Ipamorelin",
+      "strength": "2 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "Sermorelin",
+      "strength": "2 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "Tesamorelin",
+      "strength": "2 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "PNC-27",
+      "strength": "5 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "Thymosin Alpha 1",
+      "strength": "5 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "Cartalax",
+      "strength": "10 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "Cardiogen",
+      "strength": "10 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "Thymagen",
+      "strength": "10 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "Prostamax",
+      "strength": "10 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "Testagen",
+      "strength": "10 mg",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "Bacteriostatic Water",
+      "strength": "30ml/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": 11,
+      "wholesaleVialPrice": 22,
+      "difference": 11
+    },
+    {
+      "name": "Precision Insulin Syringes",
+      "strength": "Box of 100",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "BPC-157",
+      "strength": "10 mg",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": 154,
+      "wholesaleVialPrice": 44,
+      "difference": 110
+    },
+    {
+      "name": "KLOW (BPC-157/TB-500/GHK-Cu/KPV)",
+      "strength": "10 mg",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": 33,
+      "wholesaleVialPrice": 154,
+      "difference": 121
+    }
+  ]
+}

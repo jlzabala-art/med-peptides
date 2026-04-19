@@ -1,0 +1,478 @@
+Perfecto — ahora te preparo el mismo prompt maestro, pero en formato limpio, continuo y sin bloques fragmentados, para que puedas copiar y pegar todo directamente en Antigravity sin perder estructura.
+
+Este será el prompt único definitivo, integrando:
+	•	Tirzepatide no priorizado
+	•	Validación clínica completa
+	•	Fix de routing
+	•	Timeline
+	•	Compound mapping
+	•	Persistencia
+	•	UX
+	•	Export safety
+	•	Validación de protocolos normalizados
+
+⸻
+
+MASTER PROMPT — FULL WEIGHT MANAGEMENT PROTOCOL FIX (COPY–PASTE READY)
+
+Project: ReGen PEPT — Protocol Builder 2.0
+Location: /protocol builder 2.0
+Target Module: Weight Management Workflow
+Platform: Desktop Version
+Priority: CRITICAL — Clinical Routing and Protocol Integrity
+
+⸻
+
+GLOBAL CONTEXT
+
+The current Weight Management workflow presents several structural and clinical inconsistencies across the full protocol lifecycle.
+
+Observed problems include:
+	•	Tirzepatide-based protocols are not displayed as primary recommendations.
+	•	Cognitive Support protocols (Semax + Selank) appear first instead of metabolic-first protocols.
+	•	GLP1 protocols may be filtered when BMI is missing.
+	•	Timeline sometimes displays “undefined injection”.
+	•	Safety shows “Verified Safe” while alignment errors exist.
+	•	Protocol cost values are unrealistically low.
+	•	Navigating backward resets previously entered data.
+	•	Multiple protocols can be selected simultaneously.
+	•	Phase numbers are missing in some views.
+	•	Timeline builds even when dosing is incomplete.
+	•	Export allows invalid protocols.
+	•	Clinical coherence between steps is inconsistent.
+	•	Some warnings are missing or too aggressive.
+	•	Some normalized protocols exist but are not properly routed or resolved.
+
+These behaviors compromise clinical validity and reliability.
+
+⸻
+
+PRIMARY OBJECTIVES
+
+Implement system-wide corrections to:
+	1.	Fix protocol prioritization.
+	2.	Ensure Tirzepatide appears correctly.
+	3.	Remove BMI blocking logic.
+	4.	Validate protocol alignment to normalized library.
+	5.	Fix compound resolution.
+	6.	Prevent invalid timeline generation.
+	7.	Synchronize safety and alignment.
+	8.	Preserve data between steps.
+	9.	Enforce single protocol selection.
+	10.	Improve UX workflow consistency.
+	11.	Prevent invalid export.
+	12.	Validate clinical completeness.
+
+⸻
+
+PART 1 — FIX PROTOCOL PRIORITY (GLP1 FIRST)
+
+Current incorrect behavior:
+
+Weight Management → Cognitive Support shown first.
+
+Correct behavior:
+
+Weight Management must prioritize GLP1/GIP axis protocols.
+
+Implement priority routing:
+
+If objective equals “Weight Management”:
+
+Set protocol priority order:
+
+Tier 1 — GLP1/GIP Axis
+Tirzepatide
+Retatrutide
+Semaglutide
+
+Tier 2 — Metabolic Support
+MOTS-C
+AOD-9604
+
+Tier 3 — Behavioral Support
+Semax
+Selank
+
+Always display Tier 1 protocols first.
+
+⸻
+
+PART 2 — REMOVE BMI FILTERING
+
+Current suspected logic:
+
+If BMI missing, GLP1 protocols are hidden.
+
+This must be removed.
+
+Replace with:
+
+If BMI missing:
+
+Still display GLP1 protocols.
+
+Show warning:
+
+“Weight and height recommended for optimized metabolic protocol selection.”
+
+Never hide GLP1 protocols.
+
+⸻
+
+PART 3 — ENFORCE SINGLE PROTOCOL SELECTION
+
+Multiple protocols are currently selectable.
+
+Fix:
+
+Enable single selection mode.
+
+When selecting a protocol:
+
+Automatically unselect previously selected protocol.
+
+Selected protocol:
+
+Primary border highlight
+Subtle background color
+
+Unselected protocols:
+
+Neutral styling.
+
+⸻
+
+PART 4 — VALIDATE PROTOCOL IDENTITY
+
+Every generated protocol must match normalized library entries.
+
+Allowed protocol IDs:
+
+WM-001 — GLP1 Foundation
+WM-002 — GLP1 + Metabolic Synergy
+WM-003 — Neuro-Behavioral Support
+WM-004 — Intensive Metabolic Reset
+
+If generated protocol ID not found:
+
+Block progression.
+
+Display:
+
+“Protocol identity validation failed.”
+
+⸻
+
+PART 5 — FIX COMPOUND RESOLUTION
+
+Current error observed:
+
+“undefined injection”
+
+This indicates unresolved compound mapping.
+
+Implement validation:
+
+Before building timeline:
+
+For each compound:
+
+If product_id missing
+Or dose missing
+Or route missing
+
+Then:
+
+Block timeline generation.
+
+Display:
+
+“Compound configuration incomplete.”
+
+⸻
+
+PART 6 — BLOCK PLACEHOLDER DOSING
+
+Invalid example observed:
+
+“Standard mg”
+
+Replace with:
+
+If dose template unresolved:
+
+Block timeline.
+
+Display:
+
+“Dosing protocol must be defined before scheduling.”
+
+⸻
+
+PART 7 — SYNCHRONIZE SAFETY AND ALIGNMENT
+
+Invalid state observed:
+
+“Verified Safe” together with “Alignment Error”.
+
+Fix logic:
+
+If alignment error exists:
+
+Set verification status to Pending.
+
+Do not display “Verified Safe”.
+
+⸻
+
+PART 8 — FIX DATA PERSISTENCE
+
+Navigating backward currently resets data.
+
+Fix:
+
+When navigating backward:
+
+Load stored session state.
+
+Do not reset fields.
+
+Persist:
+
+Patient data
+Protocol selection
+Timeline configuration
+Safety data
+Monitoring data
+
+⸻
+
+PART 9 — VALIDATE CLINICAL COMPLETENESS
+
+Before allowing progression:
+
+Check:
+
+BMI validity
+Compound presence
+Dose validity
+Timeline validity
+Monitoring presence
+
+If any missing:
+
+Block progression.
+
+⸻
+
+PART 10 — VERIFY TIRZEPATIDE GENERATION
+
+Run automatic validation test:
+
+Input:
+
+Sex: Female
+Age: 36–50
+Weight: 92
+Height: 168
+Metabolic Status: Impaired
+Objective: Weight Management
+Tempo: Standard
+Duration: 12 weeks
+
+Expected output:
+
+Recommended Protocol:
+
+WM-001 — GLP1 Foundation
+
+Primary Compound:
+
+Tirzepatide
+
+Schedule:
+
+Week 1–4: 2.5 mg weekly
+Week 5–8: 5 mg weekly
+Week 9–12: 7.5 mg weekly
+
+If not generated:
+
+Log:
+
+“GLP1 routing failure detected.”
+
+⸻
+
+PART 11 — FIX COST CALCULATION
+
+Observed:
+
+Unrealistic cost values.
+
+Implement cost calculation using:
+
+Vial cost
+Dose frequency
+Duration
+
+Display:
+
+Weekly cost
+Injection cost
+Total protocol cost
+
+⸻
+
+PART 12 — FIX TIMELINE GENERATION
+
+Timeline must not build until:
+
+Compound valid
+Dose valid
+
+If invalid:
+
+Block timeline.
+
+⸻
+
+PART 13 — DISPLAY PHASE NUMBERS
+
+Ensure all phases display:
+
+Phase 1
+Phase 2
+Phase 3
+
+Visible in:
+
+Cards
+Timeline
+Navigation
+
+⸻
+
+PART 14 — FAVORITE PROTOCOL FEATURE
+
+Add:
+
+Favorite protocol selection.
+
+Store:
+
+favorite_protocols[user_id]
+
+Display:
+
+Star icon.
+
+⸻
+
+PART 15 — BLOCK INVALID EXPORT
+
+Before export:
+
+Run validation:
+
+Compound check
+Timeline check
+Safety check
+Alignment check
+Cost check
+
+If any failure:
+
+Block export.
+
+⸻
+
+PART 16 — IMPROVE WARNING STYLE
+
+Replace aggressive notifications.
+
+Use:
+
+Inline warnings.
+
+Example:
+
+“⚠ BMI missing — optional but recommended.”
+
+⸻
+
+PART 17 — ADD DEBUG LOGGING
+
+Log failures:
+
+Protocol ID
+Phase key
+Compound ID
+Error type
+
+⸻
+
+PART 18 — VALIDATE NORMALIZED MATCH
+
+Automatically verify:
+
+Protocol ID exists
+Compounds valid
+Phases complete
+
+If mismatch detected:
+
+Block progression.
+
+⸻
+
+PART 19 — VERIFY TIMELINE INTEGRITY
+
+Ensure:
+
+All injections mapped
+No undefined events
+All weeks populated
+
+⸻
+
+PART 20 — FINAL VALIDATION ENGINE
+
+Before final approval:
+
+Run:
+
+Full protocol validation.
+
+Check:
+
+Routing
+Compounds
+Timeline
+Safety
+Alignment
+Cost
+Export readiness
+
+Only allow progression when all pass.
+
+⸻
+
+EXPECTED FINAL SYSTEM BEHAVIOR
+
+After implementation:
+	•	Tirzepatide protocols appear correctly
+	•	GLP1 protocols prioritized
+	•	Timeline valid
+	•	No undefined injections
+	•	Safety consistent
+	•	Cost realistic
+	•	Navigation stable
+	•	Protocol identity validated
+	•	Export protected
+	•	Clinical workflow reliable
+
+System behaves as:
+
+Metabolic-first clinical protocol builder aligned with modern weight loss standards.

@@ -1,0 +1,109 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper: Determine if user is a basic administrator
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == 'jose@mediluxeme.com' ||
+        request.auth.token.email == 'kasia@mediluxeme.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+
+    // Helper: Determine if user is a Super Admin (Jose/Kasia)
+    function isSuperAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == 'jose@mediluxeme.com' ||
+        request.auth.token.email == 'kasia@mediluxeme.com'
+      );
+    }
+
+    // Public Clinical Data: Read-only for authenticated professionals
+    match /products/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /productDetails/{id} { allow read: if request.auth != null; allow write: if isAdmin(); }
+    match /formulations/{id} { allow read: if request.auth != null; allow write: if isAdmin(); }
+    match /product_variants/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /pricing_profiles/{id} { allow read: if request.auth != null; allow write: if isSuperAdmin(); }
+    match /categories/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /subcategories/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /settings/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /dosing_templates/{id} { allow read: if request.auth != null; allow write: if isAdmin(); }
+    
+    // Metadata and Support
+    match /faq/{id} { allow read: if request.auth != null; allow write: if isAdmin(); }
+    match /faqs/{id} { allow read: if request.auth != null; allow write: if isAdmin(); }
+    match /publications/{id} { allow read: if request.auth != null; allow write: if isAdmin(); }
+    match /discovery_engine/{id} { allow read: if request.auth != null; allow write: if isAdmin(); }
+    
+    // User Management
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      
+      match /request_drafts/{draftId} { allow read, write: if request.auth != null && request.auth.uid == userId; }
+      match /prescriptions/{prescriptionId} { allow read, write: if request.auth != null && request.auth.uid == userId; }
+      match /favorites/{favoriteId} { allow read, write: if request.auth != null && request.auth.uid == userId; }
+      match /recentlyViewed/{viewId} { allow read, write: if request.auth != null && request.auth.uid == userId; }
+    }
+
+    // Clinical Workspace: Private to the practitioner
+    match /requests/{requestId} {
+      allow read, create, update, delete: if request.auth != null && (
+        resource == null || 
+        resource.data.user_id == request.auth.uid || 
+        resource.data.created_by == request.auth.uid ||
+        isAdmin()
+      );
+      
+      match /request_items/{itemId} { allow read, write: if request.auth != null; }
+    }
+    
+    // Production Prescriptions
+    match /prescriptions/{prescriptionId} {
+      allow read: if request.auth != null && (
+        resource.data.doctorId == request.auth.uid ||
+        resource.data.user_id == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && (
+        resource.data.doctorId == request.auth.uid ||
+        resource.data.user_id == request.auth.uid ||
+        isAdmin()
+      );
+    }
+    
+    // Email Transmission
+    match /mail/{mailId} { allow create: if request.auth != null; }
+
+    // Protocols and Clinical Assets
+    match /protocols/{protocolId} {
+      allow read: if request.auth != null && (
+        resource.data.visibility == 'public' || 
+        resource.data.ownerId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && (
+        resource.data.ownerId == request.auth.uid ||
+        isAdmin()
+      );
+      match /protocol_items/{itemId} { allow read, write: if request.auth != null; }
+    }
+    
+    match /attachments/{attachmentId} {
+      allow read, write: if request.auth != null && (
+        resource == null || 
+        resource.data.user_id == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
+    // Global Admin Catch-all
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

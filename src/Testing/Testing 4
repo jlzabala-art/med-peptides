@@ -1,0 +1,345 @@
+Project: ReGen PEPT
+Module: Restricted Knowledge Section (Enhanced FAQ)
+Priority: Critical
+Platform: Desktop First
+
+Objective:
+Fix incorrect access blocking for registered users and build the enhanced FAQ structure organized by Protocol and Product. The section must be accessible only to verified users, but must correctly recognize authenticated users and render the FAQ content once available.
+
+Part 1 — Fix Access Control Logic
+
+Problem:
+The system displays "Restricted Access" even when the user is logged in. The header confirms authenticated session, but authorization logic fails.
+
+Required Behavior:
+
+A user should be allowed to access this section if:
+
+user.isAuthenticated == true
+AND
+(
+user.role == "verified_medical"
+OR
+user.role == "clinic"
+OR
+user.role == "pharmacy"
+OR
+user.role == "distributor"
+OR
+user.isVerified == true
+)
+
+Only block users when:
+
+user.isAuthenticated == false
+
+OR
+
+user.role == "guest"
+AND
+user.isVerified != true
+
+Implementation Rules:
+
+1. Do not rely only on frontend state.
+2. Validate role using session token payload.
+3. Confirm hydration after login.
+4. Reload role state after authentication.
+
+Add debugging logs:
+
+log.user.role
+log.user.isVerified
+log.sessionLoaded
+
+If access denied:
+
+Show diagnostic message in console:
+
+ACCESS_DENIED_REASON:
+- missing_role
+- not_verified
+- session_not_loaded
+
+UI Rule:
+
+If user is authenticated but not verified:
+
+Show:
+
+"Your account is registered but not yet verified.
+Please contact support to activate professional access."
+
+Instead of generic Restricted Access.
+
+---
+
+Part 2 — Replace Restricted Screen with Enhanced FAQ Module
+
+When access is granted, render:
+
+Enhanced Clinical FAQ System
+
+Organized in two main blocks:
+
+1. Protocol-Based FAQ
+2. Product-Based FAQ
+
+Layout Structure:
+
+Top Navigation:
+
+[ Protocol FAQ ]   [ Product FAQ ]
+
+Default view:
+
+Protocol FAQ
+
+---
+
+Protocol FAQ Structure
+
+Each protocol must have its own FAQ node.
+
+Initial Protocol Categories:
+
+Weight Loss Protocols
+Metabolic Health Protocols
+Cognitive Support Protocols
+Recovery Protocols
+Longevity Protocols
+Hormonal Optimization Protocols
+
+Each protocol entry must contain:
+
+Protocol Name
+Short Description
+Primary Compounds
+Clinical Objectives
+FAQ Blocks
+
+Example:
+
+Protocol:
+Weight Loss — Standard GLP Pathway
+
+Primary Compound:
+Tirzepatide
+
+FAQ Items:
+
+- Starting Dose Guidelines
+- Titration Schedule
+- Expected Response Timeline
+- Side Effects Management
+- Monitoring Requirements
+- Contraindications
+- Storage Requirements
+- Missed Dose Handling
+
+---
+
+Product FAQ Structure
+
+Organized by compound.
+
+Initial Product Categories:
+
+Tirzepatide
+Semaglutide
+Retatrutide
+Cagrilintide
+Tesamorelin
+MOTS-C
+Selank
+Semax
+
+Each Product must include:
+
+Mechanism of Action
+Clinical Use Cases
+Recommended Protocols
+Storage Guidelines
+Stability Information
+Reconstitution Guide
+Compatibility Notes
+Safety Warnings
+
+---
+
+Part 3 — Content Placeholder Generation
+
+Since FAQ content is not yet created:
+
+Generate placeholder entries automatically.
+
+Each placeholder must include:
+
+Title
+Short description
+"Content pending clinical documentation."
+
+Example:
+
+Tirzepatide FAQ
+
+- Reconstitution
+Content pending clinical documentation.
+
+- Storage
+Content pending clinical documentation.
+
+- Dose Escalation
+Content pending clinical documentation.
+
+---
+
+Part 4 — Search and Filtering
+
+Add search field:
+
+Search across:
+
+Protocol Name
+Compound Name
+FAQ Title
+Keywords
+
+Filters:
+
+Protocol Type
+Compound
+Clinical Objective
+
+---
+
+Part 5 — UX Requirements
+
+Replace blank restricted screen with:
+
+Professional Knowledge Portal layout.
+
+Must include:
+
+Expandable accordion sections
+Sticky sidebar navigation
+Breadcrumb navigation
+
+Example Breadcrumb:
+
+Home > Resources > Clinical Knowledge > Weight Loss > Tirzepatide
+
+Accordion Rules:
+
+Collapsed by default
+One open at a time
+Smooth transitions
+
+---
+
+Part 6 — Role Visibility Logic
+
+Visibility matrix:
+
+Guest:
+Cannot access section
+
+Registered but not verified:
+Can see locked preview
+
+Verified:
+Full access
+
+Preview Mode must show:
+
+Protocol list titles
+But content blurred
+
+And message:
+
+"Full clinical documentation available after verification."
+
+---
+
+Part 7 — Data Model Requirements
+
+Create structure:
+
+faq_protocols:
+
+id
+protocol_name
+protocol_category
+primary_compounds[]
+faq_items[]
+
+faq_products:
+
+id
+product_name
+compound_type
+faq_items[]
+
+faq_items:
+
+id
+title
+description
+keywords[]
+status
+
+status values:
+
+placeholder
+draft
+approved
+
+---
+
+Part 8 — Testing Requirements
+
+Run test cases:
+
+Test 1:
+Authenticated verified user → must access FAQ
+
+Test 2:
+Authenticated non-verified → preview mode
+
+Test 3:
+Guest → blocked
+
+Test 4:
+Reload session → role persists
+
+Test 5:
+Protocol navigation works
+
+Test 6:
+Product navigation works
+
+Test 7:
+Search returns relevant items
+
+Test 8:
+Accordion expands correctly
+
+---
+
+Part 9 — Success Criteria
+
+Access logic behaves correctly.
+Registered verified users never see Restricted Access incorrectly.
+FAQ framework renders even with placeholder content.
+Protocols and Products appear structured.
+System ready to receive future clinical content.
+
+---
+
+End State:
+
+This section becomes:
+
+Clinical Knowledge Hub
+
+Not just a locked placeholder screen.

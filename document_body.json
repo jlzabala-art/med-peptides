@@ -1,0 +1,1486 @@
+{
+  "fields": {
+    "protocol_id": {
+      "stringValue": "sa_001"
+    },
+    "protocol_slug": {
+      "stringValue": "skin-aesthetics-ghkcu-structured"
+    },
+    "protocol_title": {
+      "stringValue": "Structured Skin & Aesthetics Protocol"
+    },
+    "protocol_version": {
+      "stringValue": "v6.0"
+    },
+    "status": {
+      "stringValue": "approved"
+    },
+    "active": {
+      "booleanValue": true
+    },
+    "metadata": {
+      "mapValue": {
+        "fields": {
+          "primary_goal": {
+            "stringValue": "skin_aesthetics"
+          },
+          "primary_condition": {
+            "stringValue": "skin_quality_photoaging_barrier_support"
+          },
+          "complexity_level": {
+            "stringValue": "standard"
+          },
+          "visibility": {
+            "stringValue": "public"
+          },
+          "source_type": {
+            "stringValue": "curated_library"
+          },
+          "source_reference": {
+            "stringValue": "ReGen_PEPT_Skin_Aesthetics_Protocol_2026"
+          },
+          "author": {
+            "mapValue": {
+              "fields": {
+                "name": {
+                  "stringValue": "ReGen PEPT Clinical Team"
+                },
+                "organization": {
+                  "stringValue": "ReGen PEPT"
+                },
+                "title": {
+                  "stringValue": "Peptide Specialists"
+                }
+              }
+            }
+          },
+          "review": {
+            "mapValue": {
+              "fields": {
+                "review_status": {
+                  "stringValue": "approved"
+                },
+                "last_reviewed_at": {
+                  "stringValue": "2026-04-01"
+                }
+              }
+            }
+          },
+          "created_at": {
+            "stringValue": "2026-04-01T00:00:00.000Z"
+          },
+          "updated_at": {
+            "stringValue": "2026-04-01T00:00:00.000Z"
+          },
+          "evidence_basis": {
+            "mapValue": {
+              "fields": {
+                "core_active": {
+                  "stringValue": "GHK-Cu"
+                },
+                "optional_repair_variant": {
+                  "stringValue": "BPC-157"
+                },
+                "optional_procedure_support": {
+                  "stringValue": "microneedling_checkpoint_logic"
+                },
+                "evidence_grade_notes": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "stringValue": "GHK-Cu-centered skin remodeling has stronger translational and human-supportive literature than most peptide alternatives."
+                      },
+                      {
+                        "stringValue": "BPC-157 remains primarily translational / preclinical for skin-focused use."
+                      },
+                      {
+                        "stringValue": "Procedure support logic is optional and intended for aesthetic-clinic workflows."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "eligibility_rules": {
+      "mapValue": {
+        "fields": {
+          "supported_age_groups": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "18-35"
+                },
+                {
+                  "stringValue": "36-50"
+                },
+                {
+                  "stringValue": "51-65"
+                },
+                {
+                  "stringValue": "65+"
+                }
+              ]
+            }
+          },
+          "supported_sex": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "female"
+                },
+                {
+                  "stringValue": "male"
+                }
+              ]
+            }
+          },
+          "supported_goals": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "skin_aesthetics"
+                },
+                {
+                  "stringValue": "photoaging_support"
+                },
+                {
+                  "stringValue": "texture_refinement"
+                },
+                {
+                  "stringValue": "post_procedure_recovery"
+                },
+                {
+                  "stringValue": "barrier_repair"
+                },
+                {
+                  "stringValue": "pigment_support"
+                }
+              ]
+            }
+          },
+          "required_patient_inputs": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "primary_clinical_focus"
+                },
+                {
+                  "stringValue": "patient_demographic"
+                },
+                {
+                  "stringValue": "age_group"
+                },
+                {
+                  "stringValue": "start_date"
+                },
+                {
+                  "stringValue": "skin_goal_profile"
+                }
+              ]
+            }
+          },
+          "contraindications": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "active_skin_infection"
+                },
+                {
+                  "stringValue": "known_copper_hypersensitivity"
+                },
+                {
+                  "stringValue": "active_inflammatory_flare_requiring_medical_management"
+                },
+                {
+                  "stringValue": "pregnancy_if_local_policy_requires_exclusion"
+                }
+              ]
+            }
+          },
+          "relative_cautions": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "very_reactive_skin"
+                },
+                {
+                  "stringValue": "history_of_postinflammatory_hyperpigmentation"
+                },
+                {
+                  "stringValue": "recent_ablative_procedure"
+                },
+                {
+                  "stringValue": "impaired_wound_healing_history"
+                },
+                {
+                  "stringValue": "active_melasma_flare"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "variant_rules": {
+      "mapValue": {
+        "fields": {
+          "age_variants": {
+            "mapValue": {
+              "fields": {
+                "18-35": {
+                  "mapValue": {
+                    "fields": {
+                      "default_duration_weeks": {
+                        "integerValue": "8"
+                      },
+                      "ghkcu_intensity": {
+                        "stringValue": "standard"
+                      },
+                      "recovery_support": {
+                        "stringValue": "light"
+                      },
+                      "monitoring_intensity": {
+                        "stringValue": "standard"
+                      }
+                    }
+                  }
+                },
+                "36-50": {
+                  "mapValue": {
+                    "fields": {
+                      "default_duration_weeks": {
+                        "integerValue": "12"
+                      },
+                      "ghkcu_intensity": {
+                        "stringValue": "standard_plus"
+                      },
+                      "recovery_support": {
+                        "stringValue": "moderate"
+                      },
+                      "monitoring_intensity": {
+                        "stringValue": "moderate"
+                      }
+                    }
+                  }
+                },
+                "51-65": {
+                  "mapValue": {
+                    "fields": {
+                      "default_duration_weeks": {
+                        "integerValue": "16"
+                      },
+                      "ghkcu_intensity": {
+                        "stringValue": "extended"
+                      },
+                      "recovery_support": {
+                        "stringValue": "moderate"
+                      },
+                      "monitoring_intensity": {
+                        "stringValue": "moderate"
+                      }
+                    }
+                  }
+                },
+                "65+": {
+                  "mapValue": {
+                    "fields": {
+                      "default_duration_weeks": {
+                        "integerValue": "16"
+                      },
+                      "ghkcu_intensity": {
+                        "stringValue": "extended_conservative"
+                      },
+                      "recovery_support": {
+                        "stringValue": "enhanced"
+                      },
+                      "monitoring_intensity": {
+                        "stringValue": "enhanced"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "sex_variants": {
+            "mapValue": {
+              "fields": {
+                "female": {
+                  "mapValue": {
+                    "fields": {
+                      "recommended_flags": {
+                        "arrayValue": {
+                          "values": [
+                            {
+                              "stringValue": "pigment_reactivity_watch"
+                            },
+                            {
+                              "stringValue": "barrier_flare_watch"
+                            }
+                          ]
+                        }
+                      },
+                      "special_notes": {
+                        "arrayValue": {
+                          "values": [
+                            {
+                              "stringValue": "Use more conservative escalation if PIH or melasma tendency is present."
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                "male": {
+                  "mapValue": {
+                    "fields": {
+                      "recommended_flags": {
+                        "arrayValue": {
+                          "values": [
+                            {
+                              "stringValue": "sebaceous_activity_watch"
+                            },
+                            {
+                              "stringValue": "post_shave_irritation_watch"
+                            }
+                          ]
+                        }
+                      },
+                      "special_notes": {
+                        "arrayValue": {
+                          "values": [
+                            {
+                              "stringValue": "Barrier-repair emphasis may be useful in high-friction or shaving-related irritation patterns."
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "duration_variants": {
+            "mapValue": {
+              "fields": {
+                "8_weeks": {
+                  "mapValue": {
+                    "fields": {
+                      "mode": {
+                        "stringValue": "short_rejuvenation"
+                      },
+                      "procedure_support": {
+                        "booleanValue": false
+                      },
+                      "repair_variant_optional": {
+                        "booleanValue": false
+                      }
+                    }
+                  }
+                },
+                "12_weeks": {
+                  "mapValue": {
+                    "fields": {
+                      "mode": {
+                        "stringValue": "standard_rejuvenation"
+                      },
+                      "procedure_support": {
+                        "booleanValue": true
+                      },
+                      "repair_variant_optional": {
+                        "booleanValue": true
+                      }
+                    }
+                  }
+                },
+                "16_weeks": {
+                  "mapValue": {
+                    "fields": {
+                      "mode": {
+                        "stringValue": "extended_remodeling"
+                      },
+                      "procedure_support": {
+                        "booleanValue": true
+                      },
+                      "repair_variant_optional": {
+                        "booleanValue": true
+                      }
+                    }
+                  }
+                },
+                "20_weeks": {
+                  "mapValue": {
+                    "fields": {
+                      "mode": {
+                        "stringValue": "extended_remodeling_plus"
+                      },
+                      "procedure_support": {
+                        "booleanValue": true
+                      },
+                      "repair_variant_optional": {
+                        "booleanValue": true
+                      },
+                      "extra_checkpoint_logic": {
+                        "booleanValue": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tempo_variants": {
+            "mapValue": {
+              "fields": {
+                "conservative": {
+                  "mapValue": {
+                    "fields": {
+                      "dose_step_interval_weeks": {
+                        "integerValue": "4"
+                      },
+                      "monitoring_intensity_modifier": {
+                        "stringValue": "up"
+                      },
+                      "procedure_frequency_modifier": {
+                        "stringValue": "down"
+                      }
+                    }
+                  }
+                },
+                "standard": {
+                  "mapValue": {
+                    "fields": {
+                      "dose_step_interval_weeks": {
+                        "integerValue": "4"
+                      },
+                      "monitoring_intensity_modifier": {
+                        "stringValue": "none"
+                      },
+                      "procedure_frequency_modifier": {
+                        "stringValue": "standard"
+                      }
+                    }
+                  }
+                },
+                "aggressive": {
+                  "mapValue": {
+                    "fields": {
+                      "dose_step_interval_weeks": {
+                        "integerValue": "2"
+                      },
+                      "monitoring_intensity_modifier": {
+                        "stringValue": "up"
+                      },
+                      "procedure_frequency_modifier": {
+                        "stringValue": "up"
+                      },
+                      "restricted_to": {
+                        "arrayValue": {
+                          "values": [
+                            {
+                              "stringValue": "18-35"
+                            },
+                            {
+                              "stringValue": "36-50"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "goal_variants": {
+            "mapValue": {
+              "fields": {
+                "photoaging_support": {
+                  "mapValue": {
+                    "fields": {
+                      "primary_metric_focus": {
+                        "arrayValue": {
+                          "values": [
+                            {
+                              "stringValue": "fine_lines"
+                            },
+                            {
+                              "stringValue": "firmness"
+                            },
+                            {
+                              "stringValue": "texture"
+                            }
+                          ]
+                        }
+                      },
+                      "procedure_support": {
+                        "stringValue": "optional"
+                      }
+                    }
+                  }
+                },
+                "post_procedure_recovery": {
+                  "mapValue": {
+                    "fields": {
+                      "primary_metric_focus": {
+                        "arrayValue": {
+                          "values": [
+                            {
+                              "stringValue": "erythema_resolution"
+                            },
+                            {
+                              "stringValue": "barrier_recovery"
+                            },
+                            {
+                              "stringValue": "downtime_reduction"
+                            }
+                          ]
+                        }
+                      },
+                      "procedure_support": {
+                        "stringValue": "recommended"
+                      }
+                    }
+                  }
+                },
+                "pigment_support": {
+                  "mapValue": {
+                    "fields": {
+                      "primary_metric_focus": {
+                        "arrayValue": {
+                          "values": [
+                            {
+                              "stringValue": "tone_evenness"
+                            },
+                            {
+                              "stringValue": "postinflammatory_mark_resolution"
+                            }
+                          ]
+                        }
+                      },
+                      "tempo_default": {
+                        "stringValue": "conservative"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "phase_blueprints": {
+      "arrayValue": {
+        "values": [
+          {
+            "mapValue": {
+              "fields": {
+                "phase_key": {
+                  "stringValue": "barrier_priming"
+                },
+                "phase_title": {
+                  "stringValue": "Barrier Priming"
+                },
+                "default_start_week": {
+                  "integerValue": "1"
+                },
+                "default_duration_weeks": {
+                  "integerValue": "4"
+                },
+                "clinical_purpose": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "stringValue": "barrier_support"
+                      },
+                      {
+                        "stringValue": "tolerance_building"
+                      },
+                      {
+                        "stringValue": "early_remodeling_signal"
+                      }
+                    ]
+                  }
+                },
+                "drugs": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "mapValue": {
+                          "fields": {
+                            "product_id": {
+                              "stringValue": "prd_ghkcu"
+                            },
+                            "product_title": {
+                              "stringValue": "GHK-Cu"
+                            },
+                            "route": {
+                              "stringValue": "topical_or_local_protocol_defined"
+                            },
+                            "dose_logic": {
+                              "mapValue": {
+                                "fields": {
+                                  "dose_unit": {
+                                    "stringValue": "protocol_defined"
+                                  },
+                                  "starting_intensity": {
+                                    "stringValue": "standard"
+                                  },
+                                  "administration_frequency": {
+                                    "stringValue": "daily"
+                                  },
+                                  "administration_days_default": {
+                                    "arrayValue": {
+                                      "values": [
+                                        {
+                                          "stringValue": "Monday"
+                                        },
+                                        {
+                                          "stringValue": "Tuesday"
+                                        },
+                                        {
+                                          "stringValue": "Wednesday"
+                                        },
+                                        {
+                                          "stringValue": "Thursday"
+                                        },
+                                        {
+                                          "stringValue": "Friday"
+                                        },
+                                        {
+                                          "stringValue": "Saturday"
+                                        },
+                                        {
+                                          "stringValue": "Sunday"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "timing_hint": {
+                                    "stringValue": "evening_or_post_cleansing"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "clinical_events": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "mapValue": {
+                          "fields": {
+                            "week": {
+                              "integerValue": "1"
+                            },
+                            "event_type": {
+                              "stringValue": "baseline_skin_review"
+                            },
+                            "title": {
+                              "stringValue": "Baseline texture, pigment, and barrier review"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "phase_key": {
+                  "stringValue": "remodeling"
+                },
+                "phase_title": {
+                  "stringValue": "Remodeling"
+                },
+                "default_start_week": {
+                  "integerValue": "5"
+                },
+                "default_duration_weeks": {
+                  "integerValue": "4"
+                },
+                "clinical_purpose": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "stringValue": "collagen_support"
+                      },
+                      {
+                        "stringValue": "texture_refinement"
+                      },
+                      {
+                        "stringValue": "wrinkle_support"
+                      }
+                    ]
+                  }
+                },
+                "drugs": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "mapValue": {
+                          "fields": {
+                            "product_id": {
+                              "stringValue": "prd_ghkcu"
+                            },
+                            "product_title": {
+                              "stringValue": "GHK-Cu"
+                            },
+                            "route": {
+                              "stringValue": "topical_or_local_protocol_defined"
+                            },
+                            "dose_logic": {
+                              "mapValue": {
+                                "fields": {
+                                  "dose_unit": {
+                                    "stringValue": "protocol_defined"
+                                  },
+                                  "intensity": {
+                                    "stringValue": "standard_plus"
+                                  },
+                                  "administration_frequency": {
+                                    "stringValue": "daily"
+                                  },
+                                  "administration_days_default": {
+                                    "arrayValue": {
+                                      "values": [
+                                        {
+                                          "stringValue": "Monday"
+                                        },
+                                        {
+                                          "stringValue": "Tuesday"
+                                        },
+                                        {
+                                          "stringValue": "Wednesday"
+                                        },
+                                        {
+                                          "stringValue": "Thursday"
+                                        },
+                                        {
+                                          "stringValue": "Friday"
+                                        },
+                                        {
+                                          "stringValue": "Saturday"
+                                        },
+                                        {
+                                          "stringValue": "Sunday"
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "mapValue": {
+                          "fields": {
+                            "product_id": {
+                              "stringValue": "prd_bpc157"
+                            },
+                            "product_title": {
+                              "stringValue": "BPC-157"
+                            },
+                            "route": {
+                              "stringValue": "optional_local_repair_variant"
+                            },
+                            "dose_logic": {
+                              "mapValue": {
+                                "fields": {
+                                  "dose_unit": {
+                                    "stringValue": "protocol_defined"
+                                  },
+                                  "intensity": {
+                                    "stringValue": "low_optional"
+                                  },
+                                  "administration_frequency": {
+                                    "stringValue": "3x_week"
+                                  },
+                                  "administration_days_default": {
+                                    "arrayValue": {
+                                      "values": [
+                                        {
+                                          "stringValue": "Monday"
+                                        },
+                                        {
+                                          "stringValue": "Wednesday"
+                                        },
+                                        {
+                                          "stringValue": "Friday"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "activation_condition": {
+                                    "stringValue": "post_procedure_recovery_variant_or_repair_focus"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "clinical_events": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "mapValue": {
+                          "fields": {
+                            "week": {
+                              "integerValue": "6"
+                            },
+                            "event_type": {
+                              "stringValue": "milestone_review"
+                            },
+                            "title": {
+                              "stringValue": "Texture and tolerance reassessment"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "mapValue": {
+                          "fields": {
+                            "week": {
+                              "integerValue": "8"
+                            },
+                            "event_type": {
+                              "stringValue": "optional_procedure_checkpoint"
+                            },
+                            "title": {
+                              "stringValue": "Optional microneedling / controlled skin-stimulation checkpoint"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "phase_key": {
+                  "stringValue": "consolidation"
+                },
+                "phase_title": {
+                  "stringValue": "Consolidation"
+                },
+                "default_start_week": {
+                  "integerValue": "9"
+                },
+                "default_duration_weeks": {
+                  "integerValue": "4"
+                },
+                "clinical_purpose": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "stringValue": "barrier_recovery"
+                      },
+                      {
+                        "stringValue": "tone_evening"
+                      },
+                      {
+                        "stringValue": "maintenance_of_response"
+                      }
+                    ]
+                  }
+                },
+                "drugs": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "mapValue": {
+                          "fields": {
+                            "product_id": {
+                              "stringValue": "prd_ghkcu"
+                            },
+                            "product_title": {
+                              "stringValue": "GHK-Cu"
+                            },
+                            "route": {
+                              "stringValue": "topical_or_local_protocol_defined"
+                            },
+                            "dose_logic": {
+                              "mapValue": {
+                                "fields": {
+                                  "dose_unit": {
+                                    "stringValue": "protocol_defined"
+                                  },
+                                  "intensity": {
+                                    "stringValue": "maintenance"
+                                  },
+                                  "administration_frequency": {
+                                    "stringValue": "5x_week"
+                                  },
+                                  "administration_days_default": {
+                                    "arrayValue": {
+                                      "values": [
+                                        {
+                                          "stringValue": "Monday"
+                                        },
+                                        {
+                                          "stringValue": "Tuesday"
+                                        },
+                                        {
+                                          "stringValue": "Wednesday"
+                                        },
+                                        {
+                                          "stringValue": "Thursday"
+                                        },
+                                        {
+                                          "stringValue": "Friday"
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "mapValue": {
+                          "fields": {
+                            "product_id": {
+                              "stringValue": "prd_bpc157"
+                            },
+                            "product_title": {
+                              "stringValue": "BPC-157"
+                            },
+                            "route": {
+                              "stringValue": "optional_local_repair_variant"
+                            },
+                            "dose_logic": {
+                              "mapValue": {
+                                "fields": {
+                                  "dose_unit": {
+                                    "stringValue": "protocol_defined"
+                                  },
+                                  "intensity": {
+                                    "stringValue": "conditional"
+                                  },
+                                  "administration_frequency": {
+                                    "stringValue": "2x_week"
+                                  },
+                                  "administration_days_default": {
+                                    "arrayValue": {
+                                      "values": [
+                                        {
+                                          "stringValue": "Tuesday"
+                                        },
+                                        {
+                                          "stringValue": "Friday"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "activation_condition": {
+                                    "stringValue": "if_repair_signal_or_post_procedure_need_persists"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "clinical_events": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "mapValue": {
+                          "fields": {
+                            "week": {
+                              "integerValue": "12"
+                            },
+                            "event_type": {
+                              "stringValue": "outcome_review"
+                            },
+                            "title": {
+                              "stringValue": "Firmness, texture, tone, and recovery review"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "monitoring_plan": {
+      "mapValue": {
+        "fields": {
+          "baseline_required": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "standardized_photography"
+                },
+                {
+                  "stringValue": "wrinkle_severity_baseline"
+                },
+                {
+                  "stringValue": "texture_baseline"
+                },
+                {
+                  "stringValue": "pigment_baseline"
+                },
+                {
+                  "stringValue": "barrier_reactivity_baseline"
+                },
+                {
+                  "stringValue": "procedure_history"
+                }
+              ]
+            }
+          },
+          "scheduled_checkpoints": {
+            "arrayValue": {
+              "values": [
+                {
+                  "mapValue": {
+                    "fields": {
+                      "week": {
+                        "integerValue": "4"
+                      },
+                      "type": {
+                        "stringValue": "tolerance_and_barrier_review"
+                      },
+                      "measures": {
+                        "arrayValue": {
+                          "values": [
+                            {
+                              "stringValue": "erythema"
+                            },
+                            {
+                              "stringValue": "irritation"
+                            },
+                            {
+                              "stringValue": "dryness"
+                            },
+                            {
+                              "stringValue": "subjective_tolerance"
+                            }
+                          ]
+                        }
+                      },
+                      "purpose": {
+                        "stringValue": "Confirm barrier readiness and treatment tolerance"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "week": {
+                        "integerValue": "8"
+                      },
+                      "type": {
+                        "stringValue": "remodeling_reassessment"
+                      },
+                      "measures": {
+                        "arrayValue": {
+                          "values": [
+                            {
+                              "stringValue": "texture_change"
+                            },
+                            {
+                              "stringValue": "fine_line_change"
+                            },
+                            {
+                              "stringValue": "tone_evenness"
+                            },
+                            {
+                              "stringValue": "downtime_if_procedure_used"
+                            }
+                          ]
+                        }
+                      },
+                      "purpose": {
+                        "stringValue": "Assess remodeling response and need for procedure-support variation"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "week": {
+                        "integerValue": "12"
+                      },
+                      "type": {
+                        "stringValue": "final_outcome_review"
+                      },
+                      "measures": {
+                        "arrayValue": {
+                          "values": [
+                            {
+                              "stringValue": "global_skin_quality"
+                            },
+                            {
+                              "stringValue": "wrinkle_support_response"
+                            },
+                            {
+                              "stringValue": "tone_evenness"
+                            },
+                            {
+                              "stringValue": "barrier_status"
+                            }
+                          ]
+                        }
+                      },
+                      "purpose": {
+                        "stringValue": "End-of-cycle assessment"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "expected_outcomes": {
+      "mapValue": {
+        "fields": {
+          "qualitative": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "improved texture"
+                },
+                {
+                  "stringValue": "better skin tone consistency"
+                },
+                {
+                  "stringValue": "barrier-support improvement"
+                },
+                {
+                  "stringValue": "support for fine line and firmness appearance"
+                }
+              ]
+            }
+          },
+          "quantitative_ranges": {
+            "mapValue": {
+              "fields": {
+                "texture_improvement_expected": {
+                  "stringValue": "moderate"
+                },
+                "fine_line_improvement_expected": {
+                  "stringValue": "mild_to_moderate"
+                },
+                "recovery_time_reduction_expected": {
+                  "stringValue": "variable_if_procedure_support_used"
+                },
+                "tone_evenness_improvement_expected": {
+                  "stringValue": "mild_to_moderate"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "generator_rules": {
+      "mapValue": {
+        "fields": {
+          "selection_priority": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "goal_match"
+                },
+                {
+                  "stringValue": "age_variant_match"
+                },
+                {
+                  "stringValue": "sex_variant_match"
+                },
+                {
+                  "stringValue": "duration_variant_match"
+                },
+                {
+                  "stringValue": "reactivity_risk_flags"
+                },
+                {
+                  "stringValue": "procedure_support_need"
+                }
+              ]
+            }
+          },
+          "ghkcu_intensity_profiles": {
+            "mapValue": {
+              "fields": {
+                "standard": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "stringValue": "daily"
+                      },
+                      {
+                        "stringValue": "daily"
+                      },
+                      {
+                        "stringValue": "daily"
+                      },
+                      {
+                        "stringValue": "daily"
+                      }
+                    ]
+                  }
+                },
+                "standard_plus": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "stringValue": "daily"
+                      },
+                      {
+                        "stringValue": "daily"
+                      },
+                      {
+                        "stringValue": "daily"
+                      },
+                      {
+                        "stringValue": "5x_week"
+                      }
+                    ]
+                  }
+                },
+                "extended": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "stringValue": "daily"
+                      },
+                      {
+                        "stringValue": "daily"
+                      },
+                      {
+                        "stringValue": "5x_week"
+                      },
+                      {
+                        "stringValue": "5x_week"
+                      }
+                    ]
+                  }
+                },
+                "extended_conservative": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "stringValue": "5x_week"
+                      },
+                      {
+                        "stringValue": "5x_week"
+                      },
+                      {
+                        "stringValue": "5x_week"
+                      },
+                      {
+                        "stringValue": "5x_week"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "repair_variant_profiles": {
+            "mapValue": {
+              "fields": {
+                "none": {
+                  "arrayValue": {
+                    "values": []
+                  }
+                },
+                "light": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "stringValue": "2x_week"
+                      }
+                    ]
+                  }
+                },
+                "moderate": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "stringValue": "3x_week"
+                      }
+                    ]
+                  }
+                },
+                "conditional": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "stringValue": "activate_only_if_post_procedure_or_repair_signal"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "generated_protocol_template": {
+      "mapValue": {
+        "fields": {
+          "patient_context": {
+            "mapValue": {
+              "fields": {
+                "primary_clinical_focus": {
+                  "nullValue": null
+                },
+                "patient_demographic": {
+                  "nullValue": null
+                },
+                "age_group": {
+                  "nullValue": null
+                },
+                "skin_goal_profile": {
+                  "nullValue": null
+                },
+                "metabolic_status": {
+                  "nullValue": null
+                },
+                "duration_weeks": {
+                  "nullValue": null
+                },
+                "start_date": {
+                  "nullValue": null
+                },
+                "tempo_preference": {
+                  "stringValue": "standard"
+                },
+                "procedure_support_enabled": {
+                  "booleanValue": false
+                }
+              }
+            }
+          },
+          "applied_variants": {
+            "mapValue": {
+              "fields": {
+                "age_variant": {
+                  "nullValue": null
+                },
+                "sex_variant": {
+                  "nullValue": null
+                },
+                "duration_variant": {
+                  "nullValue": null
+                },
+                "tempo_variant": {
+                  "stringValue": "standard"
+                },
+                "goal_variant": {
+                  "nullValue": null
+                }
+              }
+            }
+          },
+          "resolved_phases": {
+            "arrayValue": {
+              "values": []
+            }
+          },
+          "resolved_timeline": {
+            "arrayValue": {
+              "values": []
+            }
+          },
+          "resolved_monitoring": {
+            "arrayValue": {
+              "values": []
+            }
+          },
+          "resolved_costs": {
+            "mapValue": {
+              "fields": {}
+            }
+          },
+          "validation": {
+            "mapValue": {
+              "fields": {
+                "state": {
+                  "stringValue": "NOT_EVALUATED"
+                },
+                "modules": {
+                  "arrayValue": {
+                    "values": []
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "legacy_compatibility": {
+      "mapValue": {
+        "fields": {
+          "enabled": {
+            "booleanValue": true
+          },
+          "deprecated_fields": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "phases"
+                },
+                {
+                  "stringValue": "computedTimeline"
+                },
+                {
+                  "stringValue": "computedCost"
+                }
+              ]
+            }
+          },
+          "notes": {
+            "stringValue": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode."
+          }
+        }
+      }
+    }
+  }
+}

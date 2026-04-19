@@ -1,0 +1,93 @@
+[
+  {
+    "id": "adv_metabolic_16w",
+    "name": "Advanced Metabolic & Longevity Protocol",
+    "category": "weight_management",
+    "author": "Clinical Longevity Protocol Team",
+    "source_reference": "Advanced Metabolic & Longevity Protocol — 16 Week Clinical Program",
+    "version": "1.0",
+    "tags": ["metabolic", "longevity", "visceral fat", "mitochondrial"],
+    "duration_weeks": 16,
+    "clinical_goals": [
+      "Stabilize glucose response",
+      "Enhance insulin sensitivity",
+      "Initiate appetite suppression",
+      "Promote fat oxidation",
+      "Reduce visceral fat",
+      "Improve mitochondrial function",
+      "Prevent metabolic rebound",
+      "Maintain lean muscle mass",
+      "Enhance skin integrity during weight loss"
+    ],
+    "phases": [
+      {
+        "phase_name": "Metabolic Priming",
+        "weeks": "1–4",
+        "objectives": [
+          "Stabilize glucose response",
+          "Prepare mitochondrial function",
+          "Initiate appetite suppression",
+          "Target visceral fat initiation"
+        ],
+        "medications": [
+          { "compound": "Retatrutide", "dose": "1 mg (W1-2) -> 2 mg (W3-4)", "frequency": "Weekly", "notes": "Incremental titration" },
+          { "compound": "MOTS-c", "dose": "5 mg", "frequency": "3x Weekly", "notes": "Mitochondrial priming" },
+          { "compound": "Tesamorelin", "dose": "1 mg", "frequency": "Nightly (5 days/week)", "notes": "Visceral fat targeting" },
+          { "compound": "SS-31", "dose": "5 mg", "frequency": "2x Weekly", "notes": "Oxidative stress reduction" },
+          { "compound": "GHK-Cu", "dose": "2 mg", "frequency": "3x Weekly", "notes": "Skin & tissue integrity" }
+        ]
+      },
+      {
+        "phase_name": "Active Fat Loss",
+        "weeks": "5–12",
+        "objectives": [
+          "Maximize fat oxidation",
+          "Mobilize visceral fat",
+          "Prevent metabolic plateau",
+          "Increase metabolic rate"
+        ],
+        "medications": [
+          { "compound": "Retatrutide", "dose": "3 mg (W5-6) -> 4 mg (W7-8) -> 5-6 mg (W9-12)", "frequency": "Weekly", "notes": "Active weight reduction" },
+          { "compound": "MOTS-c", "dose": "5 mg", "frequency": "3x Weekly", "notes": "Metabolic support" },
+          { "compound": "AOD-9604", "dose": "Standard therapeutic dose", "frequency": "Daily Morning", "notes": "Lipolysis activation" },
+          { "compound": "Tesamorelin", "dose": "1 mg", "frequency": "Nightly (5 days/week)", "notes": "GH/IGF-1 optimization" },
+          { "compound": "SS-31", "dose": "5 mg", "frequency": "2x Weekly", "notes": "Mitochondrial support" },
+          { "compound": "GHK-Cu", "dose": "2 mg", "frequency": "3x Weekly", "notes": "Longevity pathways" }
+        ]
+      },
+      {
+        "phase_name": "Metabolic Stabilization",
+        "weeks": "13–16",
+        "objectives": [
+          "Maintain fat loss",
+          "Stabilize metabolic set-point",
+          "Prevent rebound",
+          "Support mitochondrial health"
+        ],
+        "medications": [
+          { "compound": "Retatrutide", "dose": "4–6 mg", "frequency": "Weekly", "notes": "Maintenance dose" },
+          { "compound": "MOTS-c", "dose": "5 mg", "frequency": "2x Weekly", "notes": "Longevity pulse" },
+          { "compound": "Tesamorelin", "dose": "1 mg", "frequency": "Nightly", "notes": "Structural integrity" },
+          { "compound": "SS-31", "dose": "5 mg", "frequency": "Weekly", "notes": "Mitochondrial maintenance" },
+          { "compound": "GHK-Cu", "dose": "2 mg", "frequency": "2x Weekly", "notes": "Tissue support" }
+        ]
+      }
+    ],
+    "monitoring": {
+      "baseline_labs": ["Glucose", "HbA1c", "Insulin", "Lipid Profile", "ALT", "AST", "CRP"],
+      "midpoint_labs": ["Glucose", "HbA1c", "Lipid Profile", "ALT", "AST"],
+      "final_labs": ["Glucose", "HbA1c", "Insulin", "Lipid Profile", "CRP"]
+    },
+    "lifestyle": {
+      "nutrition": "High protein, minimize processed carbs, reduce sugar",
+      "activity": "8000–10000 steps daily, Strength training 3x weekly",
+      "hydration": "Minimum 2.5 liters daily",
+      "sleep": "Minimum 7 hours nightly"
+    },
+    "metadata": {
+      "version": "1.0",
+      "date_created": "2026-03-29",
+      "status": "saved"
+    }
+  }
+]

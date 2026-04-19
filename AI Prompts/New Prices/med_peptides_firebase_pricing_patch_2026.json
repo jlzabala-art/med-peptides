@@ -1,0 +1,1339 @@
+{
+  "project": "med-peptides firebase product pricing and variants patch",
+  "version": "2026-wholesale-prices-v1",
+  "source": {
+    "file": "WHOLESALE Peptide Price List 2026.pptx.pdf",
+    "pricingTerms": "Ex-Works Europe - shipping NOT included"
+  },
+  "strategy": {
+    "mode": "patch_existing_documents_only",
+    "doNotOverwrite": [
+      "semanticKeywords",
+      "tags",
+      "faqTags",
+      "relatedGoals",
+      "relatedProtocolSlugs",
+      "faq",
+      "product_faq_mapping",
+      "description",
+      "scientificResources",
+      "pubmed",
+      "quality",
+      "mechanismOfAction",
+      "stability"
+    ]
+  },
+  "familyVariantMap": [
+    {
+      "familySlug": "5-amino-1mq",
+      "variantCount": 1,
+      "variantSlugs": [
+        "5-amino-1mq-10mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "aod-9604",
+      "variantCount": 2,
+      "variantSlugs": [
+        "aod-9604-2mg-vial",
+        "aod-9604-5mg-vial"
+      ],
+      "hasVariants": true
+    },
+    {
+      "familySlug": "ara-290",
+      "variantCount": 1,
+      "variantSlugs": [
+        "ara-290-10mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "bacteriostatic-water",
+      "variantCount": 2,
+      "variantSlugs": [
+        "bacteriostatic-water-30ml-bottle",
+        "bacteriostatic-water-3ml-10bottles"
+      ],
+      "hasVariants": true
+    },
+    {
+      "familySlug": "bpc-157",
+      "variantCount": 4,
+      "variantSlugs": [
+        "bpc-157-10mg-vial",
+        "bpc-157-20mg-vial",
+        "bpc-157-2mg-vial",
+        "bpc-157-5mg-vial"
+      ],
+      "hasVariants": true
+    },
+    {
+      "familySlug": "cagrilintide",
+      "variantCount": 2,
+      "variantSlugs": [
+        "cagrilintide-10mg-vial",
+        "cagrilintide-5mg-vial"
+      ],
+      "hasVariants": true
+    },
+    {
+      "familySlug": "cardiogen",
+      "variantCount": 1,
+      "variantSlugs": [
+        "cardiogen-25mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "cartalax",
+      "variantCount": 1,
+      "variantSlugs": [
+        "cartalax-25mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "cjc-1295-with-dac",
+      "variantCount": 1,
+      "variantSlugs": [
+        "cjc-1295-with-dac-2mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "cjc-1295-without-dac",
+      "variantCount": 3,
+      "variantSlugs": [
+        "cjc-1295-without-dac-10mg-vial",
+        "cjc-1295-without-dac-2mg-vial",
+        "cjc-1295-without-dac-5mg-vial"
+      ],
+      "hasVariants": true
+    },
+    {
+      "familySlug": "dsip",
+      "variantCount": 1,
+      "variantSlugs": [
+        "dsip-5mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "epithalon",
+      "variantCount": 1,
+      "variantSlugs": [
+        "epithalon-10mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "fst-344",
+      "variantCount": 1,
+      "variantSlugs": [
+        "fst-344-1mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "ghk-cu",
+      "variantCount": 2,
+      "variantSlugs": [
+        "ghk-cu-100mg-vial",
+        "ghk-cu-50mg-vial"
+      ],
+      "hasVariants": true
+    },
+    {
+      "familySlug": "ghrp-2",
+      "variantCount": 1,
+      "variantSlugs": [
+        "ghrp-2-5mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "glow",
+      "variantCount": 1,
+      "variantSlugs": [
+        "glow-blend-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "gw-501516",
+      "variantCount": 1,
+      "variantSlugs": [
+        "gw-501516-10mg-bottle"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "hcg",
+      "variantCount": 1,
+      "variantSlugs": [
+        "hcg-5000iu-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "hexarelin",
+      "variantCount": 2,
+      "variantSlugs": [
+        "hexarelin-2mg-vial",
+        "hexarelin-5mg-vial"
+      ],
+      "hasVariants": true
+    },
+    {
+      "familySlug": "hgh",
+      "variantCount": 1,
+      "variantSlugs": [
+        "hgh-10iu-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "hmg",
+      "variantCount": 1,
+      "variantSlugs": [
+        "hmg-75iu-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "igf-lr3",
+      "variantCount": 1,
+      "variantSlugs": [
+        "igf-lr3-0.1mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "insulin-syringes",
+      "variantCount": 1,
+      "variantSlugs": [
+        "insulin-syringes-box"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "ipamorelin",
+      "variantCount": 1,
+      "variantSlugs": [
+        "ipamorelin-10mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "kisspeptin-10",
+      "variantCount": 1,
+      "variantSlugs": [
+        "kisspeptin-10-5mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "klow",
+      "variantCount": 1,
+      "variantSlugs": [
+        "klow-blend-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "kpv",
+      "variantCount": 1,
+      "variantSlugs": [
+        "kpv-10mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "mk-677",
+      "variantCount": 1,
+      "variantSlugs": [
+        "mk-677-12mg-bottle"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "mots-c",
+      "variantCount": 1,
+      "variantSlugs": [
+        "mots-c-10mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "mt2",
+      "variantCount": 1,
+      "variantSlugs": [
+        "mt2-10mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "nad-plus",
+      "variantCount": 2,
+      "variantSlugs": [
+        "nad-plus-1000mg-vial",
+        "nad-plus-500mg-vial"
+      ],
+      "hasVariants": true
+    },
+    {
+      "familySlug": "nmn",
+      "variantCount": 1,
+      "variantSlugs": [
+        "nmn-50mg-bottle"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "oxytocin-acetate",
+      "variantCount": 1,
+      "variantSlugs": [
+        "oxytocin-acetate-2mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "pe-22-28",
+      "variantCount": 1,
+      "variantSlugs": [
+        "pe-22-28-10mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "peg-mgf",
+      "variantCount": 1,
+      "variantSlugs": [
+        "peg-mgf-5mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "pinealon",
+      "variantCount": 1,
+      "variantSlugs": [
+        "pinealon-16mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "pnc-27",
+      "variantCount": 1,
+      "variantSlugs": [
+        "pnc-27-10mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "prostamax",
+      "variantCount": 1,
+      "variantSlugs": [
+        "prostamax-25mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "pt-141",
+      "variantCount": 2,
+      "variantSlugs": [
+        "pt-141-10mg-vial",
+        "pt-141-5mg-vial"
+      ],
+      "hasVariants": true
+    },
+    {
+      "familySlug": "retatrutide",
+      "variantCount": 2,
+      "variantSlugs": [
+        "retatrutide-10mg-vial",
+        "retatrutide-20mg-vial"
+      ],
+      "hasVariants": true
+    },
+    {
+      "familySlug": "selank",
+      "variantCount": 1,
+      "variantSlugs": [
+        "selank-5mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "semaglutide",
+      "variantCount": 3,
+      "variantSlugs": [
+        "semaglutide-10mg-vial",
+        "semaglutide-2mg-vial",
+        "semaglutide-5mg-vial"
+      ],
+      "hasVariants": true
+    },
+    {
+      "familySlug": "semax",
+      "variantCount": 1,
+      "variantSlugs": [
+        "semax-10mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "sermorelin",
+      "variantCount": 2,
+      "variantSlugs": [
+        "sermorelin-10mg-vial",
+        "sermorelin-5mg-vial"
+      ],
+      "hasVariants": true
+    },
+    {
+      "familySlug": "slu-pp-332",
+      "variantCount": 1,
+      "variantSlugs": [
+        "slu-pp-332-250mcg-bottle"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "snap-8",
+      "variantCount": 1,
+      "variantSlugs": [
+        "snap-8-10mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "ss-31",
+      "variantCount": 1,
+      "variantSlugs": [
+        "ss-31-10mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "syringe-bac-water-bundle",
+      "variantCount": 1,
+      "variantSlugs": [
+        "syringe-bac-water-bundle"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "tb-500",
+      "variantCount": 3,
+      "variantSlugs": [
+        "tb-500-10mg-vial",
+        "tb-500-2mg-vial",
+        "tb-500-5mg-vial"
+      ],
+      "hasVariants": true
+    },
+    {
+      "familySlug": "tesamorelin",
+      "variantCount": 1,
+      "variantSlugs": [
+        "tesamorelin-10mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "testagen",
+      "variantCount": 1,
+      "variantSlugs": [
+        "testagen-25mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "thymogen",
+      "variantCount": 1,
+      "variantSlugs": [
+        "thymogen-25mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "thymosin-alpha-1",
+      "variantCount": 1,
+      "variantSlugs": [
+        "thymosin-alpha-1-10mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "thymulin",
+      "variantCount": 1,
+      "variantSlugs": [
+        "thymulin-10mg-vial"
+      ],
+      "hasVariants": false
+    },
+    {
+      "familySlug": "tirzepatide",
+      "variantCount": 5,
+      "variantSlugs": [
+        "tirzepatide-10mg-vial",
+        "tirzepatide-15mg-vial",
+        "tirzepatide-30mg-vial",
+        "tirzepatide-5mg-vial",
+        "tirzepatide-60mg-vial"
+      ],
+      "hasVariants": true
+    }
+  ],
+  "productsPricingPatch": [
+    {
+      "familySlug": "retatrutide",
+      "displayName": "Retatrutide",
+      "variantSlug": "retatrutide-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 99.0,
+      "kit10PriceUSD": 638.0
+    },
+    {
+      "familySlug": "retatrutide",
+      "displayName": "Retatrutide",
+      "variantSlug": "retatrutide-20mg-vial",
+      "strength": "20 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 143.0,
+      "kit10PriceUSD": 935.0
+    },
+    {
+      "familySlug": "tirzepatide",
+      "displayName": "Tirzepatide",
+      "variantSlug": "tirzepatide-5mg-vial",
+      "strength": "5 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 44.0,
+      "kit10PriceUSD": 308.0
+    },
+    {
+      "familySlug": "tirzepatide",
+      "displayName": "Tirzepatide",
+      "variantSlug": "tirzepatide-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 66.0,
+      "kit10PriceUSD": 429.0
+    },
+    {
+      "familySlug": "tirzepatide",
+      "displayName": "Tirzepatide",
+      "variantSlug": "tirzepatide-15mg-vial",
+      "strength": "15 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 99.0,
+      "kit10PriceUSD": 550.0
+    },
+    {
+      "familySlug": "tirzepatide",
+      "displayName": "Tirzepatide",
+      "variantSlug": "tirzepatide-30mg-vial",
+      "strength": "30 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 154.0,
+      "kit10PriceUSD": 935.0
+    },
+    {
+      "familySlug": "tirzepatide",
+      "displayName": "Tirzepatide",
+      "variantSlug": "tirzepatide-60mg-vial",
+      "strength": "60 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 297.0,
+      "kit10PriceUSD": 1705.0
+    },
+    {
+      "familySlug": "semaglutide",
+      "displayName": "Semaglutide",
+      "variantSlug": "semaglutide-2mg-vial",
+      "strength": "2 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 27.5,
+      "kit10PriceUSD": 165.0
+    },
+    {
+      "familySlug": "semaglutide",
+      "displayName": "Semaglutide",
+      "variantSlug": "semaglutide-5mg-vial",
+      "strength": "5 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 41.8,
+      "kit10PriceUSD": 308.0
+    },
+    {
+      "familySlug": "semaglutide",
+      "displayName": "Semaglutide",
+      "variantSlug": "semaglutide-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 77.0,
+      "kit10PriceUSD": 440.0
+    },
+    {
+      "familySlug": "aod-9604",
+      "displayName": "AOD-9604",
+      "variantSlug": "aod-9604-2mg-vial",
+      "strength": "2 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 33.0,
+      "kit10PriceUSD": 165.0
+    },
+    {
+      "familySlug": "aod-9604",
+      "displayName": "AOD-9604",
+      "variantSlug": "aod-9604-5mg-vial",
+      "strength": "5 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 66.0,
+      "kit10PriceUSD": 330.0
+    },
+    {
+      "familySlug": "ara-290",
+      "displayName": "ARA-290",
+      "variantSlug": "ara-290-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 66.0,
+      "kit10PriceUSD": 330.0
+    },
+    {
+      "familySlug": "bpc-157",
+      "displayName": "BPC-157",
+      "variantSlug": "bpc-157-2mg-vial",
+      "strength": "2 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 16.5,
+      "kit10PriceUSD": 99.0
+    },
+    {
+      "familySlug": "bpc-157",
+      "displayName": "BPC-157",
+      "variantSlug": "bpc-157-5mg-vial",
+      "strength": "5 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 27.5,
+      "kit10PriceUSD": 165.0
+    },
+    {
+      "familySlug": "bpc-157",
+      "displayName": "BPC-157",
+      "variantSlug": "bpc-157-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 44.0,
+      "kit10PriceUSD": 275.0
+    },
+    {
+      "familySlug": "bpc-157",
+      "displayName": "BPC-157",
+      "variantSlug": "bpc-157-20mg-vial",
+      "strength": "20 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 66.0,
+      "kit10PriceUSD": 385.0
+    },
+    {
+      "familySlug": "cjc-1295-with-dac",
+      "displayName": "CJC-1295 with DAC",
+      "variantSlug": "cjc-1295-with-dac-2mg-vial",
+      "strength": "2 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 33.0,
+      "kit10PriceUSD": 165.0
+    },
+    {
+      "familySlug": "cjc-1295-without-dac",
+      "displayName": "CJC-1295 without DAC",
+      "variantSlug": "cjc-1295-without-dac-2mg-vial",
+      "strength": "2 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 22.0,
+      "kit10PriceUSD": 110.0
+    },
+    {
+      "familySlug": "cjc-1295-without-dac",
+      "displayName": "CJC-1295 without DAC",
+      "variantSlug": "cjc-1295-without-dac-5mg-vial",
+      "strength": "5 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 33.0,
+      "kit10PriceUSD": 176.0
+    },
+    {
+      "familySlug": "cjc-1295-without-dac",
+      "displayName": "CJC-1295 without DAC",
+      "variantSlug": "cjc-1295-without-dac-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 55.0,
+      "kit10PriceUSD": 297.0
+    },
+    {
+      "familySlug": "5-amino-1mq",
+      "displayName": "5-AMINO 1 MQ",
+      "variantSlug": "5-amino-1mq-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 33.0,
+      "kit10PriceUSD": 165.0
+    },
+    {
+      "familySlug": "cartalax",
+      "displayName": "Cartalax",
+      "variantSlug": "cartalax-25mg-vial",
+      "strength": "25 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 77.0,
+      "kit10PriceUSD": 418.0
+    },
+    {
+      "familySlug": "cardiogen",
+      "displayName": "Cardiogen",
+      "variantSlug": "cardiogen-25mg-vial",
+      "strength": "25 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 77.0,
+      "kit10PriceUSD": 418.0
+    },
+    {
+      "familySlug": "thymogen",
+      "displayName": "Thymogen",
+      "variantSlug": "thymogen-25mg-vial",
+      "strength": "25 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 77.0,
+      "kit10PriceUSD": 418.0
+    },
+    {
+      "familySlug": "prostamax",
+      "displayName": "Prostamax",
+      "variantSlug": "prostamax-25mg-vial",
+      "strength": "25 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 77.0,
+      "kit10PriceUSD": 418.0
+    },
+    {
+      "familySlug": "testagen",
+      "displayName": "Testagen",
+      "variantSlug": "testagen-25mg-vial",
+      "strength": "25 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 77.0,
+      "kit10PriceUSD": 418.0
+    },
+    {
+      "familySlug": "cagrilintide",
+      "displayName": "Cagrilintide",
+      "variantSlug": "cagrilintide-5mg-vial",
+      "strength": "5 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 44.0,
+      "kit10PriceUSD": 275.0
+    },
+    {
+      "familySlug": "cagrilintide",
+      "displayName": "Cagrilintide",
+      "variantSlug": "cagrilintide-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 88.0,
+      "kit10PriceUSD": 495.0
+    },
+    {
+      "familySlug": "dsip",
+      "displayName": "DSIP",
+      "variantSlug": "dsip-5mg-vial",
+      "strength": "5 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 44.0,
+      "kit10PriceUSD": 198.0
+    },
+    {
+      "familySlug": "epithalon",
+      "displayName": "Epithalon",
+      "variantSlug": "epithalon-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 33.0,
+      "kit10PriceUSD": 165.0
+    },
+    {
+      "familySlug": "fst-344",
+      "displayName": "FST-344",
+      "variantSlug": "fst-344-1mg-vial",
+      "strength": "1 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 99.0,
+      "kit10PriceUSD": 528.0
+    },
+    {
+      "familySlug": "ghk-cu",
+      "displayName": "GHK-Cu (Copper Peptide)",
+      "variantSlug": "ghk-cu-50mg-vial",
+      "strength": "50 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 27.5,
+      "kit10PriceUSD": 143.0
+    },
+    {
+      "familySlug": "ghk-cu",
+      "displayName": "GHK-Cu (Copper Peptide)",
+      "variantSlug": "ghk-cu-100mg-vial",
+      "strength": "100 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 44.0,
+      "kit10PriceUSD": 198.0
+    },
+    {
+      "familySlug": "ghrp-2",
+      "displayName": "GHRP-2",
+      "variantSlug": "ghrp-2-5mg-vial",
+      "strength": "5 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 19.8,
+      "kit10PriceUSD": 143.0
+    },
+    {
+      "familySlug": "glow",
+      "displayName": "GLOW (BPC-157/TB-500/GHK-Cu)",
+      "variantSlug": "glow-blend-vial",
+      "strength": "10 mg/10 mg/75 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 132.0,
+      "kit10PriceUSD": 825.0
+    },
+    {
+      "familySlug": "klow",
+      "displayName": "KLOW (BPC-157/TB-500/GHK-Cu/KPV)",
+      "variantSlug": "klow-blend-vial",
+      "strength": "10 mg/10 mg/75 mg/10 mg vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 154.0,
+      "kit10PriceUSD": 935.0
+    },
+    {
+      "familySlug": "hcg",
+      "displayName": "HCG",
+      "variantSlug": "hcg-5000iu-vial",
+      "strength": "5000iu/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 44.0,
+      "kit10PriceUSD": 275.0
+    },
+    {
+      "familySlug": "hexarelin",
+      "displayName": "Hexarelin",
+      "variantSlug": "hexarelin-2mg-vial",
+      "strength": "2 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 22.0,
+      "kit10PriceUSD": 110.0
+    },
+    {
+      "familySlug": "hexarelin",
+      "displayName": "Hexarelin",
+      "variantSlug": "hexarelin-5mg-vial",
+      "strength": "5 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 44.0,
+      "kit10PriceUSD": 198.0
+    },
+    {
+      "familySlug": "hgh",
+      "displayName": "HGH 10iu",
+      "variantSlug": "hgh-10iu-vial",
+      "strength": "10iu/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 33.0,
+      "kit10PriceUSD": 165.0
+    },
+    {
+      "familySlug": "hmg",
+      "displayName": "HMG",
+      "variantSlug": "hmg-75iu-vial",
+      "strength": "75iu/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 33.0,
+      "kit10PriceUSD": 132.0
+    },
+    {
+      "familySlug": "igf-lr3",
+      "displayName": "IGF-LR3",
+      "variantSlug": "igf-lr3-0.1mg-vial",
+      "strength": "0.1 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 33.0,
+      "kit10PriceUSD": 198.0
+    },
+    {
+      "familySlug": "ipamorelin",
+      "displayName": "Ipamorelin",
+      "variantSlug": "ipamorelin-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 38.5,
+      "kit10PriceUSD": 286.0
+    },
+    {
+      "familySlug": "kisspeptin-10",
+      "displayName": "Kisspeptin-10",
+      "variantSlug": "kisspeptin-10-5mg-vial",
+      "strength": "5 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 44.0,
+      "kit10PriceUSD": 275.0
+    },
+    {
+      "familySlug": "kpv",
+      "displayName": "KPV",
+      "variantSlug": "kpv-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 33.0,
+      "kit10PriceUSD": 198.0
+    },
+    {
+      "familySlug": "mk-677",
+      "displayName": "MK-677",
+      "variantSlug": "mk-677-12mg-bottle",
+      "strength": "12 mg",
+      "packageType": "bottle",
+      "quantityLabel": "100tabs/bottle",
+      "unitDisplay": "bottle",
+      "unitPriceUSD": 132.0,
+      "kit10PriceUSD": 132.0
+    },
+    {
+      "familySlug": "gw-501516",
+      "displayName": "GW-501516",
+      "variantSlug": "gw-501516-10mg-bottle",
+      "strength": "10 mg",
+      "packageType": "bottle",
+      "quantityLabel": "100tabs/bottle",
+      "unitDisplay": "bottle",
+      "unitPriceUSD": 88.0,
+      "kit10PriceUSD": 88.0
+    },
+    {
+      "familySlug": "slu-pp-332",
+      "displayName": "SLU PP-332",
+      "variantSlug": "slu-pp-332-250mcg-bottle",
+      "strength": "250mcg/tablet",
+      "packageType": "bottle",
+      "quantityLabel": "90tabs/bottle",
+      "unitDisplay": "bottle",
+      "unitPriceUSD": 88.0,
+      "kit10PriceUSD": 88.0
+    },
+    {
+      "familySlug": "mots-c",
+      "displayName": "MOTS-C",
+      "variantSlug": "mots-c-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 77.0,
+      "kit10PriceUSD": 418.0
+    },
+    {
+      "familySlug": "mt2",
+      "displayName": "MT2",
+      "variantSlug": "mt2-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 27.5,
+      "kit10PriceUSD": 165.0
+    },
+    {
+      "familySlug": "nad-plus",
+      "displayName": "NAD+",
+      "variantSlug": "nad-plus-500mg-vial",
+      "strength": "500 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 33.0,
+      "kit10PriceUSD": 198.0
+    },
+    {
+      "familySlug": "nad-plus",
+      "displayName": "NAD+",
+      "variantSlug": "nad-plus-1000mg-vial",
+      "strength": "1000 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 55.0,
+      "kit10PriceUSD": 308.0
+    },
+    {
+      "familySlug": "nmn",
+      "displayName": "NMN",
+      "variantSlug": "nmn-50mg-bottle",
+      "strength": "50 mg/tablet",
+      "packageType": "bottle",
+      "quantityLabel": "90 tab/bottle",
+      "unitDisplay": "bottle",
+      "unitPriceUSD": 66.0,
+      "kit10PriceUSD": 66.0
+    },
+    {
+      "familySlug": "oxytocin-acetate",
+      "displayName": "Oxytocin Acetate",
+      "variantSlug": "oxytocin-acetate-2mg-vial",
+      "strength": "2 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 33.0,
+      "kit10PriceUSD": 198.0
+    },
+    {
+      "familySlug": "pinealon",
+      "displayName": "Pinealon",
+      "variantSlug": "pinealon-16mg-vial",
+      "strength": "16 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 44.0,
+      "kit10PriceUSD": 330.0
+    },
+    {
+      "familySlug": "pe-22-28",
+      "displayName": "PE-22 28",
+      "variantSlug": "pe-22-28-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 33.0,
+      "kit10PriceUSD": 220.0
+    },
+    {
+      "familySlug": "pnc-27",
+      "displayName": "PNC-27",
+      "variantSlug": "pnc-27-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 66.0,
+      "kit10PriceUSD": 418.0
+    },
+    {
+      "familySlug": "peg-mgf",
+      "displayName": "PEG MGF",
+      "variantSlug": "peg-mgf-5mg-vial",
+      "strength": "5 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 33.0,
+      "kit10PriceUSD": 220.0
+    },
+    {
+      "familySlug": "pt-141",
+      "displayName": "PT-141",
+      "variantSlug": "pt-141-5mg-vial",
+      "strength": "5 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 27.5,
+      "kit10PriceUSD": 198.0
+    },
+    {
+      "familySlug": "pt-141",
+      "displayName": "PT-141",
+      "variantSlug": "pt-141-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 49.5,
+      "kit10PriceUSD": 385.0
+    },
+    {
+      "familySlug": "selank",
+      "displayName": "Selank",
+      "variantSlug": "selank-5mg-vial",
+      "strength": "5 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 27.5,
+      "kit10PriceUSD": 198.0
+    },
+    {
+      "familySlug": "semax",
+      "displayName": "Semax",
+      "variantSlug": "semax-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 44.0,
+      "kit10PriceUSD": 220.0
+    },
+    {
+      "familySlug": "sermorelin",
+      "displayName": "Sermorelin",
+      "variantSlug": "sermorelin-5mg-vial",
+      "strength": "5 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 55.0,
+      "kit10PriceUSD": 297.0
+    },
+    {
+      "familySlug": "sermorelin",
+      "displayName": "Sermorelin",
+      "variantSlug": "sermorelin-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 99.0,
+      "kit10PriceUSD": 528.0
+    },
+    {
+      "familySlug": "snap-8",
+      "displayName": "Snap-8",
+      "variantSlug": "snap-8-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 33.0,
+      "kit10PriceUSD": 165.0
+    },
+    {
+      "familySlug": "ss-31",
+      "displayName": "SS-31",
+      "variantSlug": "ss-31-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 77.0,
+      "kit10PriceUSD": 418.0
+    },
+    {
+      "familySlug": "thymulin",
+      "displayName": "Thymulin",
+      "variantSlug": "thymulin-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 44.0,
+      "kit10PriceUSD": 308.0
+    },
+    {
+      "familySlug": "tesamorelin",
+      "displayName": "Tesamorelin",
+      "variantSlug": "tesamorelin-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 88.0,
+      "kit10PriceUSD": 638.0
+    },
+    {
+      "familySlug": "thymosin-alpha-1",
+      "displayName": "Thymosin Alpha 1",
+      "variantSlug": "thymosin-alpha-1-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 88.0,
+      "kit10PriceUSD": 418.0
+    },
+    {
+      "familySlug": "tb-500",
+      "displayName": "Thymosin B4 (TB-500)",
+      "variantSlug": "tb-500-2mg-vial",
+      "strength": "2 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 27.5,
+      "kit10PriceUSD": 110.0
+    },
+    {
+      "familySlug": "tb-500",
+      "displayName": "Thymosin B4 (TB-500)",
+      "variantSlug": "tb-500-5mg-vial",
+      "strength": "5 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 38.5,
+      "kit10PriceUSD": 220.0
+    },
+    {
+      "familySlug": "tb-500",
+      "displayName": "Thymosin B4 (TB-500)",
+      "variantSlug": "tb-500-10mg-vial",
+      "strength": "10 mg/vial",
+      "packageType": "vial",
+      "quantityLabel": "10 vial/kit",
+      "unitDisplay": "vial",
+      "unitPriceUSD": 66.0,
+      "kit10PriceUSD": 385.0
+    },
+    {
+      "familySlug": "insulin-syringes",
+      "displayName": "Insulin Syringes",
+      "variantSlug": "insulin-syringes-box",
+      "strength": "1/2ml - 31G x 8mm",
+      "packageType": "box",
+      "quantityLabel": "100 Counts",
+      "unitDisplay": "box",
+      "unitPriceUSD": 16.5,
+      "kit10PriceUSD": 16.5
+    },
+    {
+      "familySlug": "bacteriostatic-water",
+      "displayName": "Bacteriostatic Water",
+      "variantSlug": "bacteriostatic-water-30ml-bottle",
+      "strength": "30ml / bottle",
+      "packageType": "bottle",
+      "quantityLabel": "1 bottle",
+      "unitDisplay": "bottle",
+      "unitPriceUSD": 22.0,
+      "kit10PriceUSD": 22.0
+    },
+    {
+      "familySlug": "bacteriostatic-water",
+      "displayName": "Bacteriostatic Water",
+      "variantSlug": "bacteriostatic-water-3ml-10bottles",
+      "strength": "3ml * 10 bottles",
+      "packageType": "box",
+      "quantityLabel": "10 bottles/box",
+      "unitDisplay": "box",
+      "unitPriceUSD": 5.5,
+      "kit10PriceUSD": 33.0
+    },
+    {
+      "familySlug": "syringe-bac-water-bundle",
+      "displayName": "Syringe & Bac Water Bundle",
+      "variantSlug": "syringe-bac-water-bundle",
+      "strength": "100 Syringes + 30ml Bac Water",
+      "packageType": "bundle",
+      "quantityLabel": "1 Bundle",
+      "unitDisplay": "bundle",
+      "unitPriceUSD": 33.0,
+      "kit10PriceUSD": 33.0
+    }
+  ]
+}

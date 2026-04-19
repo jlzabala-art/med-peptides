@@ -1,0 +1,323 @@
+{
+  "timestamp": "2026-04-04T14:46:11.936Z",
+  "total_protocols_in_library": 16,
+  "summary": {
+    "total": 10,
+    "passed": 10,
+    "failed": 0,
+    "warnings": 0,
+    "pass_rate": "100.0%",
+    "unused_protocol_count": 7
+  },
+  "protocol_usage": {
+    "wm_001": 1,
+    "wm_002": 1,
+    "wm_003": 0,
+    "wm_004": 1,
+    "cog_001": 2,
+    "cog_002": 0,
+    "energy_001": 1,
+    "energy_002": 0,
+    "horm_001": 1,
+    "horm_002": 0,
+    "immune_001": 1,
+    "immune_002": 0,
+    "lon_001": 1,
+    "lon_002": 0,
+    "met_001": 1,
+    "sa_001": 0
+  },
+  "details": [
+    {
+      "test_id": "TC-WM-001",
+      "name": "WM-001 — GLP1 Foundation, Standard/Impaired",
+      "status": "PASS",
+      "expected": "wm_001",
+      "got": "wm_001",
+      "compound_stack": [
+        "Tirzepatide",
+        "MOTS-C"
+      ],
+      "phases_generated": 3,
+      "timeline_weeks": 12,
+      "compound_errors": [],
+      "timeline_errors": [],
+      "failure_reason": null,
+      "input_parameters": {
+        "patientType": "female",
+        "age": 42,
+        "ageGroup": "36-50",
+        "weight": 92,
+        "height": 168,
+        "metabolicStatus": "impaired",
+        "primaryCondition": "Weight Management / Obesity",
+        "tempo": "standard",
+        "durationWeeks": 12
+      }
+    },
+    {
+      "test_id": "TC-WM-002",
+      "name": "WM-002 — GLP1 + Metabolic Synergy, Insulin Resistance",
+      "status": "PASS",
+      "expected": "wm_002",
+      "got": "wm_002",
+      "compound_stack": [
+        "Semaglutide",
+        "Cagrilintide"
+      ],
+      "phases_generated": 3,
+      "timeline_weeks": 16,
+      "compound_errors": [],
+      "timeline_errors": [],
+      "failure_reason": null,
+      "input_parameters": {
+        "patientType": "male",
+        "age": 48,
+        "ageGroup": "36-50",
+        "weight": 105,
+        "height": 175,
+        "metabolicStatus": "insulin_resistance",
+        "primaryCondition": "Weight Management / Obesity",
+        "tempo": "aggressive",
+        "durationWeeks": 16
+      }
+    },
+    {
+      "test_id": "TC-WM-004",
+      "name": "WM-004 — Intensive Metabolic Reset, Metabolic Syndrome",
+      "status": "PASS",
+      "expected": "wm_004",
+      "got": "wm_004",
+      "compound_stack": [
+        "Tirzepatide",
+        "MOTS-C"
+      ],
+      "phases_generated": 2,
+      "timeline_weeks": 16,
+      "compound_errors": [],
+      "timeline_errors": [],
+      "failure_reason": null,
+      "input_parameters": {
+        "patientType": "male",
+        "age": 52,
+        "ageGroup": "51-65",
+        "weight": 118,
+        "height": 172,
+        "metabolicStatus": "metabolic_syndrome",
+        "primaryCondition": "Weight Management / Obesity",
+        "tempo": "aggressive",
+        "durationWeeks": 16
+      }
+    },
+    {
+      "test_id": "TC-COG-001",
+      "name": "COG-001 — Cognitive Support Standard",
+      "status": "PASS",
+      "expected": "cog_001",
+      "got": "cog_001",
+      "compound_stack": [
+        "Semax",
+        "Selank"
+      ],
+      "phases_generated": 3,
+      "timeline_weeks": 8,
+      "compound_errors": [],
+      "timeline_errors": [],
+      "failure_reason": null,
+      "input_parameters": {
+        "patientType": "female",
+        "age": 28,
+        "ageGroup": "18-35",
+        "primaryCondition": "Cognitive Support",
+        "tempo": "standard",
+        "durationWeeks": 8
+      }
+    },
+    {
+      "test_id": "TC-MET-001",
+      "name": "MET-001 — Metabolic Optimization",
+      "status": "PASS",
+      "expected": "met_001",
+      "got": "met_001",
+      "compound_stack": [
+        "Tirzepatide",
+        "MOTS-c"
+      ],
+      "phases_generated": 3,
+      "timeline_weeks": 12,
+      "compound_errors": [],
+      "timeline_errors": [],
+      "failure_reason": null,
+      "input_parameters": {
+        "patientType": "male",
+        "age": 44,
+        "ageGroup": "36-50",
+        "weight": 88,
+        "height": 176,
+        "metabolicStatus": "impaired",
+        "primaryCondition": "Metabolic Optimization",
+        "tempo": "standard",
+        "durationWeeks": 12
+      }
+    },
+    {
+      "test_id": "TC-ENERGY-001",
+      "name": "ENERGY-001 — Mitochondrial Energy",
+      "status": "PASS",
+      "expected": "energy_001",
+      "got": "energy_001",
+      "compound_stack": [
+        "MOTS-c",
+        "Elamipretide"
+      ],
+      "phases_generated": 3,
+      "timeline_weeks": 12,
+      "compound_errors": [],
+      "timeline_errors": [],
+      "failure_reason": null,
+      "input_parameters": {
+        "patientType": "male",
+        "age": 40,
+        "ageGroup": "36-50",
+        "weight": 76,
+        "height": 178,
+        "primaryCondition": "Mitochondrial Energy",
+        "tempo": "standard",
+        "durationWeeks": 12
+      }
+    },
+    {
+      "test_id": "TC-HORM-001",
+      "name": "HORM-001 — Hormonal Optimization",
+      "status": "PASS",
+      "expected": "horm_001",
+      "got": "horm_001",
+      "compound_stack": [
+        "Kisspeptin",
+        "Gonadorelin"
+      ],
+      "phases_generated": 3,
+      "timeline_weeks": 12,
+      "compound_errors": [],
+      "timeline_errors": [],
+      "failure_reason": null,
+      "input_parameters": {
+        "patientType": "female",
+        "age": 48,
+        "ageGroup": "36-50",
+        "primaryCondition": "Hormonal Support",
+        "tempo": "standard",
+        "durationWeeks": 12
+      }
+    },
+    {
+      "test_id": "TC-LON-001",
+      "name": "LON-001 — Longevity Foundation",
+      "status": "PASS",
+      "expected": "lon_001",
+      "got": "lon_001",
+      "compound_stack": [
+        "MOTS-c",
+        "Thymosin Alpha-1"
+      ],
+      "phases_generated": 3,
+      "timeline_weeks": 12,
+      "compound_errors": [],
+      "timeline_errors": [],
+      "failure_reason": null,
+      "input_parameters": {
+        "patientType": "male",
+        "age": 58,
+        "ageGroup": "51-65",
+        "weight": 74,
+        "height": 172,
+        "primaryCondition": "Longevity Foundation",
+        "tempo": "conservative",
+        "durationWeeks": 12
+      }
+    },
+    {
+      "test_id": "TC-IMM-001",
+      "name": "IMMUNE-001 — Immune Support",
+      "status": "PASS",
+      "expected": "immune_001",
+      "got": "immune_001",
+      "compound_stack": [
+        "Thymosin Alpha-1",
+        "Thymosin Beta-4"
+      ],
+      "phases_generated": 3,
+      "timeline_weeks": 8,
+      "compound_errors": [],
+      "timeline_errors": [],
+      "failure_reason": null,
+      "input_parameters": {
+        "patientType": "female",
+        "age": 35,
+        "ageGroup": "18-35",
+        "primaryCondition": "Immune Modulation",
+        "tempo": "standard",
+        "durationWeeks": 8
+      }
+    },
+    {
+      "test_id": "TC-NEG-001",
+      "name": "NEGATIVE — Cognitive objective must NOT return wm_001",
+      "status": "PASS",
+      "expected": "NOT wm_001",
+      "got": "cog_001",
+      "compound_stack": [
+        "Semax",
+        "Selank"
+      ],
+      "phases_generated": 3,
+      "timeline_weeks": 8,
+      "compound_errors": [],
+      "timeline_errors": [],
+      "failure_reason": null,
+      "input_parameters": {
+        "patientType": "female",
+        "age": 25,
+        "ageGroup": "18-35",
+        "weight": 55,
+        "height": 170,
+        "primaryCondition": "Cognitive Support",
+        "tempo": "standard",
+        "durationWeeks": 8
+      }
+    }
+  ],
+  "unused_protocols": [
+    {
+      "protocol_id": "wm_003",
+      "flag": "unused_protocol_detected"
+    },
+    {
+      "protocol_id": "cog_002",
+      "flag": "unused_protocol_detected"
+    },
+    {
+      "protocol_id": "energy_002",
+      "flag": "unused_protocol_detected"
+    },
+    {
+      "protocol_id": "horm_002",
+      "flag": "unused_protocol_detected"
+    },
+    {
+      "protocol_id": "immune_002",
+      "flag": "unused_protocol_detected"
+    },
+    {
+      "protocol_id": "lon_002",
+      "flag": "unused_protocol_detected"
+    },
+    {
+      "protocol_id": "sa_001",
+      "flag": "unused_protocol_detected"
+    }
+  ],
+  "priority_validation": {
+    "glp1_first_in_wm": "PASS"
+  }
+}

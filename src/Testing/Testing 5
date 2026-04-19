@@ -1,0 +1,262 @@
+Project: ReGen PEPT
+Module: Home Page + Protocol Builder Deep Linking
+Priority: High
+Platform: Desktop first
+
+Objective:
+Add a new section on the home page to showcase a small set of high-scientific-evidence protocols. When the user clicks one of them, they must be redirected into the Protocol Builder with prefilled input data that makes that protocol clinically coherent and likely to be recommended.
+
+Section name:
+Evidence-Based Clinical Protocols
+
+Primary business goal:
+Use the homepage to surface clinically strong protocol examples and drive users directly into the Protocol Builder with realistic starting conditions.
+
+Functional requirements:
+
+1. Add a new homepage section below the main hero or in a visible mid-page position.
+2. Title:
+   Evidence-Based Clinical Protocols
+3. Subtitle:
+   Explore clinically structured pathways supported by current therapeutic rationale and protocol logic.
+4. Show between 4 and 6 featured protocol cards.
+5. Each card must include:
+   - protocol title
+   - primary clinical objective
+   - main compounds
+   - short scientific rationale
+   - evidence badge
+   - CTA button: “Open in Protocol Builder”
+
+Protocol cards should be based on real protocol families already supported by Protocol Builder 2.0.
+
+Initial recommended cards:
+1. Structured Weight Management Protocol
+2. Metabolic Optimization Protocol
+3. Cognitive Support Protocol
+4. Mitochondrial Energy Protocol
+5. Skin & Aesthetics Protocol
+6. Longevity Foundation Protocol
+
+Card content requirements:
+
+For each card show:
+- Protocol title
+- Clinical objective
+- 1-line compound stack
+- Short evidence rationale
+- Evidence strength label
+
+Example content model:
+
+Structured Weight Management Protocol
+Objective: Weight Management
+Compounds: Tirzepatide + MOTS-C
+Rationale: GLP-1 metabolic support combined with mitochondrial signaling optimization.
+Evidence: High Clinical Relevance
+
+Metabolic Optimization Protocol
+Objective: Metabolic Health
+Compounds: Retatrutide + MOTS-C
+Rationale: Multi-axis metabolic signaling support with body-composition and glucose-handling focus.
+Evidence: Emerging / High Interest
+
+Cognitive Support Protocol
+Objective: Cognitive Support
+Compounds: Semax + Selank
+Rationale: Neuroregulatory support oriented to focus, stress modulation, and resilience.
+Evidence: Moderate / Investigational
+
+Mitochondrial Energy Protocol
+Objective: Mitochondrial Energy
+Compounds: SS-31 + MOTS-C
+Rationale: Energy production support and mitochondrial function optimization.
+Evidence: Mechanistic / Translational
+
+Skin & Aesthetics Protocol
+Objective: Skin & Aesthetics
+Compounds: GHK-Cu + Epitalon
+Rationale: Regenerative support oriented to skin quality and recovery signaling.
+Evidence: Regenerative / Investigational
+
+Longevity Foundation Protocol
+Objective: Longevity
+Compounds: Epitalon + MOTS-C
+Rationale: Foundational longevity support with circadian and metabolic resilience focus.
+Evidence: Exploratory / Preventive
+
+Deep linking behavior:
+
+When user clicks “Open in Protocol Builder”, redirect to Protocol Builder with a prefilled query state or session payload.
+
+The builder must open with input data that make the protocol clinically coherent.
+
+Implement route:
+ /protocol-builder?template=<template_id>&prefill=<encoded_payload>
+
+Or equivalent state-based navigation if needed.
+
+Each featured protocol must include a recommended prefill payload.
+
+Example payloads:
+
+1. Structured Weight Management Protocol
+template_id: wm_001
+prefill:
+- objective: Weight Management
+- sex: female
+- age_range: 36-50
+- metabolic_status: impaired
+- weight: 92
+- height: 168
+- tempo: standard
+- duration: 12_weeks
+
+2. Metabolic Optimization Protocol
+template_id: met_001
+prefill:
+- objective: Metabolic Health
+- sex: male
+- age_range: 36-50
+- metabolic_status: impaired
+- weight: 88
+- height: 176
+- tempo: standard
+- duration: 12_weeks
+
+3. Cognitive Support Protocol
+template_id: cog_001
+prefill:
+- objective: Cognitive Support
+- sex: female
+- age_range: 18-35
+- metabolic_status: normal
+- weight: 60
+- height: 165
+- tempo: standard
+- duration: 12_weeks
+
+4. Mitochondrial Energy Protocol
+template_id: energy_001
+prefill:
+- objective: Mitochondrial Energy
+- sex: male
+- age_range: 36-50
+- metabolic_status: normal
+- weight: 76
+- height: 178
+- tempo: standard
+- duration: 12_weeks
+
+5. Skin & Aesthetics Protocol
+template_id: skin_001
+prefill:
+- objective: Skin & Aesthetics
+- sex: female
+- age_range: 36-50
+- metabolic_status: normal
+- weight: 58
+- height: 164
+- tempo: standard
+- duration: 12_weeks
+
+6. Longevity Foundation Protocol
+template_id: lon_001
+prefill:
+- objective: Longevity
+- sex: male
+- age_range: 51-65
+- metabolic_status: normal
+- weight: 74
+- height: 172
+- tempo: conservative
+- duration: 12_weeks
+
+Builder behavior after landing:
+
+1. Inputs must appear already filled.
+2. Homepage source must be tracked.
+3. The selected evidence protocol must be stored as source_template.
+4. User must still be allowed to edit all inputs.
+5. If user changes inputs, protocols can be regenerated normally.
+6. Show a subtle banner at the top of Protocol Builder:
+   “Prefilled from Evidence-Based Clinical Protocols”
+
+Analytics requirements:
+
+Track:
+- homepage_protocol_card_view
+- homepage_protocol_click
+- builder_prefill_loaded
+- builder_prefill_converted_to_selection
+
+Track fields:
+- protocol_template_id
+- homepage_slot_position
+- protocol_objective
+- evidence_label
+
+UX requirements:
+
+Desktop:
+- 3 cards per row or 2 cards per row depending on width
+- strong visual hierarchy
+- elegant scientific look aligned with ReGen PEPT
+- cards must feel premium and clinical, not retail
+
+Card design:
+- protocol title in strong heading
+- compact metadata row
+- scientific rationale in 2 lines max
+- badge on top right for evidence strength
+- button at bottom: Open in Protocol Builder
+
+Use evidence badge styles:
+- High Clinical Relevance
+- Strong Mechanistic Basis
+- Emerging Clinical Interest
+- Investigational
+
+Do not overstate evidence.
+Keep wording conservative and professional.
+
+Validation rules:
+
+1. Clicking a card must always open Protocol Builder with valid prefilled values.
+2. The prefill must correspond to the selected protocol objective.
+3. The selected protocol should be likely to appear among top recommendations.
+4. If the exact protocol is not returned due to ranking changes, the builder must still load coherent data and display relevant protocol family options.
+5. Invalid template IDs must fail gracefully.
+
+Fallback behavior:
+
+If deep-link protocol template is unavailable:
+- Load builder with the prefilled data
+- Show:
+  “This evidence profile has been loaded. Available protocols have been recalculated.”
+
+Content management structure:
+
+Create a structured data source for homepage featured protocols:
+featured_protocols_home = [
+  {
+    id,
+    title,
+    objective,
+    compounds,
+    rationale,
+    evidence_label,
+    template_id,
+    prefill
+  }
+]
+
+This must be editable and reusable.
+
+Success criteria:
+
+- Home page displays evidence-based protocols section
+- Clicking any protocol opens Protocol Builder with coherent prefilled patient data
+- Builder recognizes the source and loads values correctly
+- User can continue editing and generating protocols normally
+- Section improves conversion from homepage to protocol builder

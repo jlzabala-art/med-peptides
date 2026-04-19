@@ -1,0 +1,120 @@
+Refine the Timeline function to improve scanability, clinical clarity, and visual hierarchy.
+
+The current direction is good, but the timeline still feels too compressed and not explicit enough for real clinical execution.
+
+Do not redesign the workflow.
+Enhance the operational usability of the timeline screen.
+
+==================================================
+PRIMARY OBJECTIVE
+==================================================
+
+Make the timeline behave like a real clinical execution workspace.
+
+Users must be able to instantly understand:
+
+- what happens this week
+- on which day it happens
+- whether the event is an injection, monitoring action, or milestone
+- how the selected week relates to the global protocol
+
+==================================================
+SECTION 1 — ENLARGE TIMELINE WORKSPACE
+==================================================
+
+Increase the effective width and visual dominance of the central timeline area.
+
+Reduce excessive surrounding whitespace.
+
+The timeline must feel like a primary workspace, not a small embedded card.
+
+==================================================
+SECTION 2 — IMPROVE DAY-BY-DAY SCANABILITY
+==================================================
+
+Make each day row easier to scan visually.
+
+Add stronger visual encoding for event type:
+
+- injection day
+- monitoring day
+- milestone day
+- no activity day
+
+Use clear visual markers such as pills, badges, or icons.
+
+Avoid forcing the user to read every row to understand activity patterns.
+
+==================================================
+SECTION 3 — MAKE DAILY EVENTS MORE EXPLICIT
+==================================================
+
+For each active day, show the real event content.
+
+Examples:
+
+Tirzepatide — 2.5 mg  
+MOTS-C — 10 mg  
+Clinical Response Checkpoint  
+Hematology Review  
+
+Do not rely only on generic event labels.
+
+==================================================
+SECTION 4 — CONNECT MILESTONES TO THE SELECTED WEEK
+==================================================
+
+When the active week contains a milestone or monitoring checkpoint:
+
+- highlight the corresponding milestone card above
+- show a visible relationship between the selected week and milestone block
+
+This should improve continuity between summary and execution.
+
+==================================================
+SECTION 5 — IMPROVE SUMMARY METRICS
+==================================================
+
+Replace vague counters such as "36 Events" with clinically meaningful summary values.
+
+Example:
+
+- Total Injections: 24
+- Monitoring Events: 4
+- Milestones: 3
+
+==================================================
+SECTION 6 — ADD VIEW MODE TOGGLE
+==================================================
+
+Add:
+
+Compact View | Detailed View
+
+Compact View:
+shows condensed event summary
+
+Detailed View:
+shows full day-by-day clinical schedule
+
+==================================================
+SECTION 7 — MAINTAIN CURRENT STRUCTURE
+==================================================
+
+Keep:
+
+- top summary row
+- milestones area
+- left week navigation
+- central administration log
+- right protocol context card
+
+Do not remove the current structure.
+
+Refine clarity and usability only.
+
+==================================================
+FINAL OBJECTIVE
+==================================================
+
+Turn the timeline into a clinically usable execution interface where the selected week is easy to understand, event types are immediately visible, and operational scheduling is clear at a glance.

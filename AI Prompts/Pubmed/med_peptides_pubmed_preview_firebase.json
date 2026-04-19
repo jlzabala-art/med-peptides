@@ -1,0 +1,91 @@
+{
+  "project": "med-peptides pubmed preview integration",
+  "version": "1.0",
+  "objective": "Implement an internal PubMed preview layer for product pages using PubMed API, with optional Firebase caching.",
+  "collections_to_reuse": [
+    "products",
+    "faq",
+    "product_faq_mapping",
+    "protocols",
+    "protocol_faq_mapping",
+    "discovery_engine"
+  ],
+  "new_collections": [
+    {
+      "name": "pubmed_cache",
+      "purpose": "Cache PubMed preview results per product to reduce repeated API calls and keep users inside the application.",
+      "fields": {
+        "productSlug": "string",
+        "queryUsed": "string",
+        "articles": [
+          {
+            "pmid": "string",
+            "title": "string",
+            "journal": "string",
+            "year": "number",
+            "summary": "string",
+            "abstract": "string",
+            "pubmedUrl": "string"
+          }
+        ],
+        "source": "pubmed_api",
+        "lastUpdated": "timestamp",
+        "expiresAt": "timestamp",
+        "status": "fresh | stale | error"
+      }
+    }
+  ],
+  "search_input_strategy": {
+    "primary_fields": [
+      "name",
+      "semanticKeywords",
+      "tags"
+    ],
+    "query_pattern_examples": [
+      "BPC-157 tendon healing inflammation",
+      "MOTS-C metabolism mitochondria energy",
+      "Semax cognitive support stress"
+    ],
+    "max_keywords": 5
+  },
+  "ui_behavior": {
+    "entry_point": "Browse PubMed button inside Scientific Resources accordion",
+    "interaction": "Open internal literature preview panel instead of external redirect",
+    "panel_title": "Scientific Literature",
+    "desktop_panel_width": "40%",
+    "mobile_panel_mode": "full_screen",
+    "articles_to_show": 3,
+    "fields_to_render": [
+      "title",
+      "journal",
+      "year",
+      "summary"
+    ],
+    "actions_per_article": [
+      "View Abstract",
+      "Open in PubMed"
+    ]
+  },
+  "cache_rules": {
+    "enabled": true,
+    "ttl_days": 7,
+    "refresh_on_expiry": true,
+    "fallback_if_api_fails": "show stale cached results if available"
+  },
+  "visibility_rules": {
+    "public_users": "may see literature preview on public products",
+    "professional_users": "same behavior unless deeper scientific blocks are added later"
+  },
+  "compatibility_rules": [
+    "Do not break current product page routes",
+    "Do not remove existing accordion structure",
+    "Do not remove FAQ logic",
+    "Do not remove semantic search logic",
+    "Do not rename existing Firebase fields such as slug, tags, semanticKeywords"
+  ],
+  "recommended_indexes": [
+    "pubmed_cache.productSlug",
+    "pubmed_cache.expiresAt",
+    "pubmed_cache.lastUpdated"
+  ]
+}

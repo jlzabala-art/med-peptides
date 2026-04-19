@@ -1,0 +1,1458 @@
+[
+  {
+    "priority": 100,
+    "faqId": "faq_5_amino_1mq_availability_format",
+    "peptideName": "5-AMINO 1 MQ",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_5_amino_1mq_how_to_choose",
+    "peptideName": "5-AMINO 1 MQ",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_5_amino_1mq_related_peptides",
+    "peptideName": "5-AMINO 1 MQ",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_5_amino_1mq_what_is_it",
+    "peptideName": "5-AMINO 1 MQ",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_aod_9604_availability_format",
+    "peptideName": "AOD-9604",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_aod_9604_how_to_choose",
+    "peptideName": "AOD-9604",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_aod_9604_related_peptides",
+    "peptideName": "AOD-9604",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_aod_9604_what_is_it",
+    "peptideName": "AOD-9604",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ara_290_availability_format",
+    "peptideName": "ARA-290",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ara_290_how_to_choose",
+    "peptideName": "ARA-290",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ara_290_related_peptides",
+    "peptideName": "ARA-290",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ara_290_what_is_it",
+    "peptideName": "ARA-290",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_bpc_157_availability_format",
+    "peptideName": "BPC-157",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_bpc_157_how_to_choose",
+    "peptideName": "BPC-157",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_bpc_157_related_peptides",
+    "peptideName": "BPC-157",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_bpc_157_what_is_it",
+    "peptideName": "BPC-157",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cagrilintide_availability_format",
+    "peptideName": "Cagrilintide",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cagrilintide_how_to_choose",
+    "peptideName": "Cagrilintide",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cagrilintide_related_peptides",
+    "peptideName": "Cagrilintide",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cagrilintide_what_is_it",
+    "peptideName": "Cagrilintide",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cardiogen_availability_format",
+    "peptideName": "Cardiogen",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cardiogen_how_to_choose",
+    "peptideName": "Cardiogen",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cardiogen_related_peptides",
+    "peptideName": "Cardiogen",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cardiogen_what_is_it",
+    "peptideName": "Cardiogen",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cartalax_availability_format",
+    "peptideName": "Cartalax",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cartalax_how_to_choose",
+    "peptideName": "Cartalax",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cartalax_related_peptides",
+    "peptideName": "Cartalax",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cartalax_what_is_it",
+    "peptideName": "Cartalax",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cjc_1295_with_dac_availability_format",
+    "peptideName": "CJC-1295 with DAC",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cjc_1295_with_dac_how_to_choose",
+    "peptideName": "CJC-1295 with DAC",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cjc_1295_with_dac_related_peptides",
+    "peptideName": "CJC-1295 with DAC",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cjc_1295_with_dac_what_is_it",
+    "peptideName": "CJC-1295 with DAC",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cjc_1295_without_dac_availability_format",
+    "peptideName": "CJC-1295 without DAC (Modified GRF 1-29)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cjc_1295_without_dac_how_to_choose",
+    "peptideName": "CJC-1295 without DAC (Modified GRF 1-29)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cjc_1295_without_dac_related_peptides",
+    "peptideName": "CJC-1295 without DAC (Modified GRF 1-29)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_cjc_1295_without_dac_what_is_it",
+    "peptideName": "CJC-1295 without DAC (Modified GRF 1-29)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_dsip_availability_format",
+    "peptideName": "DSIP",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_dsip_how_to_choose",
+    "peptideName": "DSIP",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_dsip_related_peptides",
+    "peptideName": "DSIP",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_dsip_what_is_it",
+    "peptideName": "DSIP",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_epithalon_availability_format",
+    "peptideName": "Epithalon",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_epithalon_how_to_choose",
+    "peptideName": "Epithalon",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_epithalon_related_peptides",
+    "peptideName": "Epithalon",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_epithalon_what_is_it",
+    "peptideName": "Epithalon",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_fst_344_availability_format",
+    "peptideName": "FST-344 (Follistatin)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_fst_344_how_to_choose",
+    "peptideName": "FST-344 (Follistatin)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_fst_344_related_peptides",
+    "peptideName": "FST-344 (Follistatin)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_fst_344_what_is_it",
+    "peptideName": "FST-344 (Follistatin)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ghk_cu_copper_peptide_availability_format",
+    "peptideName": "GHK-Cu (Copper Peptide)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ghk_cu_copper_peptide_how_to_choose",
+    "peptideName": "GHK-Cu (Copper Peptide)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ghk_cu_copper_peptide_related_peptides",
+    "peptideName": "GHK-Cu (Copper Peptide)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ghk_cu_copper_peptide_what_is_it",
+    "peptideName": "GHK-Cu (Copper Peptide)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ghrp_2_availability_format",
+    "peptideName": "GHRP-2",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ghrp_2_how_to_choose",
+    "peptideName": "GHRP-2",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ghrp_2_related_peptides",
+    "peptideName": "GHRP-2",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ghrp_2_what_is_it",
+    "peptideName": "GHRP-2",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_glow_bpc_157_tb_500_ghk_cu_availability_format",
+    "peptideName": "BPC-157",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_glow_bpc_157_tb_500_ghk_cu_how_to_choose",
+    "peptideName": "BPC-157",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_glow_bpc_157_tb_500_ghk_cu_related_peptides",
+    "peptideName": "BPC-157",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_glow_bpc_157_tb_500_ghk_cu_what_is_it",
+    "peptideName": "BPC-157",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_gw_501516_availability_format",
+    "peptideName": "GW-501516",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_gw_501516_how_to_choose",
+    "peptideName": "GW-501516",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_gw_501516_related_peptides",
+    "peptideName": "GW-501516",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_gw_501516_what_is_it",
+    "peptideName": "GW-501516",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_hcg_availability_format",
+    "peptideName": "HCG",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_hcg_how_to_choose",
+    "peptideName": "HCG",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_hcg_related_peptides",
+    "peptideName": "HCG",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_hcg_what_is_it",
+    "peptideName": "HCG",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_hexarelin_availability_format",
+    "peptideName": "Hexarelin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_hexarelin_how_to_choose",
+    "peptideName": "Hexarelin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_hexarelin_related_peptides",
+    "peptideName": "Hexarelin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_hexarelin_what_is_it",
+    "peptideName": "Hexarelin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_hgh_10iu_availability_format",
+    "peptideName": "HGH",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_hgh_10iu_how_to_choose",
+    "peptideName": "HGH",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_hgh_10iu_related_peptides",
+    "peptideName": "HGH",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_hgh_10iu_what_is_it",
+    "peptideName": "HGH",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_hmg_availability_format",
+    "peptideName": "HMG",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_hmg_how_to_choose",
+    "peptideName": "HMG",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_hmg_related_peptides",
+    "peptideName": "HMG",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_hmg_what_is_it",
+    "peptideName": "HMG",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_igf_lr3_availability_format",
+    "peptideName": "IGF-1 LR3",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_igf_lr3_how_to_choose",
+    "peptideName": "IGF-1 LR3",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_igf_lr3_related_peptides",
+    "peptideName": "IGF-1 LR3",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_igf_lr3_what_is_it",
+    "peptideName": "IGF-1 LR3",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ipamorelin_availability_format",
+    "peptideName": "Ipamorelin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ipamorelin_how_to_choose",
+    "peptideName": "Ipamorelin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ipamorelin_related_peptides",
+    "peptideName": "Ipamorelin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ipamorelin_what_is_it",
+    "peptideName": "Ipamorelin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_kisspeptin_10_availability_format",
+    "peptideName": "Kisspeptin-10",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_kisspeptin_10_how_to_choose",
+    "peptideName": "Kisspeptin-10",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_kisspeptin_10_related_peptides",
+    "peptideName": "Kisspeptin-10",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_kisspeptin_10_what_is_it",
+    "peptideName": "Kisspeptin-10",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_klow_bpc_157_tb_500_ghk_cu_kpv_availability_format",
+    "peptideName": "BPC-157",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_klow_bpc_157_tb_500_ghk_cu_kpv_how_to_choose",
+    "peptideName": "BPC-157",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_klow_bpc_157_tb_500_ghk_cu_kpv_related_peptides",
+    "peptideName": "BPC-157",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_klow_bpc_157_tb_500_ghk_cu_kpv_what_is_it",
+    "peptideName": "BPC-157",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_kpv_availability_format",
+    "peptideName": "KPV",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_kpv_how_to_choose",
+    "peptideName": "KPV",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_kpv_related_peptides",
+    "peptideName": "KPV",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_kpv_what_is_it",
+    "peptideName": "KPV",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_mk_677_availability_format",
+    "peptideName": "MK-677 (Ibutamoren)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_mk_677_how_to_choose",
+    "peptideName": "MK-677 (Ibutamoren)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_mk_677_related_peptides",
+    "peptideName": "MK-677 (Ibutamoren)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_mk_677_what_is_it",
+    "peptideName": "MK-677 (Ibutamoren)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_mots_c_availability_format",
+    "peptideName": "MOTS-C",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_mots_c_how_to_choose",
+    "peptideName": "MOTS-C",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_mots_c_related_peptides",
+    "peptideName": "MOTS-C",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_mots_c_what_is_it",
+    "peptideName": "MOTS-C",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_mt2_availability_format",
+    "peptideName": "MT2 (Melanotan II)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_mt2_how_to_choose",
+    "peptideName": "MT2 (Melanotan II)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_mt2_related_peptides",
+    "peptideName": "MT2 (Melanotan II)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_mt2_what_is_it",
+    "peptideName": "MT2 (Melanotan II)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_nad_plus_availability_format",
+    "peptideName": "NAD+",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_nad_plus_how_to_choose",
+    "peptideName": "NAD+",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_nad_plus_related_peptides",
+    "peptideName": "NAD+",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_nad_plus_what_is_it",
+    "peptideName": "NAD+",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_nmn_availability_format",
+    "peptideName": "NMN",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_nmn_how_to_choose",
+    "peptideName": "NMN",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_nmn_related_peptides",
+    "peptideName": "NMN",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_nmn_what_is_it",
+    "peptideName": "NMN",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_oxytocin_acetate_availability_format",
+    "peptideName": "Oxytocin Acetate",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_oxytocin_acetate_how_to_choose",
+    "peptideName": "Oxytocin Acetate",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_oxytocin_acetate_related_peptides",
+    "peptideName": "Oxytocin Acetate",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_oxytocin_acetate_what_is_it",
+    "peptideName": "Oxytocin Acetate",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_pe_22_28_availability_format",
+    "peptideName": "PE-22 28",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_pe_22_28_how_to_choose",
+    "peptideName": "PE-22 28",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_pe_22_28_related_peptides",
+    "peptideName": "PE-22 28",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_pe_22_28_what_is_it",
+    "peptideName": "PE-22 28",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_peg_mgf_availability_format",
+    "peptideName": "PEG MGF",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_peg_mgf_how_to_choose",
+    "peptideName": "PEG MGF",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_peg_mgf_related_peptides",
+    "peptideName": "PEG MGF",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_peg_mgf_what_is_it",
+    "peptideName": "PEG MGF",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_pinealon_availability_format",
+    "peptideName": "Pinealon",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_pinealon_how_to_choose",
+    "peptideName": "Pinealon",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_pinealon_related_peptides",
+    "peptideName": "Pinealon",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_pinealon_what_is_it",
+    "peptideName": "Pinealon",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_pnc_27_availability_format",
+    "peptideName": "PNC-27",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_pnc_27_how_to_choose",
+    "peptideName": "PNC-27",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_pnc_27_related_peptides",
+    "peptideName": "PNC-27",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_pnc_27_what_is_it",
+    "peptideName": "PNC-27",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_prostamax_availability_format",
+    "peptideName": "Prostamax",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_prostamax_how_to_choose",
+    "peptideName": "Prostamax",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_prostamax_related_peptides",
+    "peptideName": "Prostamax",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_prostamax_what_is_it",
+    "peptideName": "Prostamax",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_pt_141_availability_format",
+    "peptideName": "PT-141 (Bremelanotide)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_pt_141_how_to_choose",
+    "peptideName": "PT-141 (Bremelanotide)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_pt_141_related_peptides",
+    "peptideName": "PT-141 (Bremelanotide)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_pt_141_what_is_it",
+    "peptideName": "PT-141 (Bremelanotide)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_retatrutide_availability_format",
+    "peptideName": "Retatrutide",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_retatrutide_how_to_choose",
+    "peptideName": "Retatrutide",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_retatrutide_related_peptides",
+    "peptideName": "Retatrutide",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_retatrutide_what_is_it",
+    "peptideName": "Retatrutide",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_selank_availability_format",
+    "peptideName": "Selank",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_selank_how_to_choose",
+    "peptideName": "Selank",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_selank_related_peptides",
+    "peptideName": "Selank",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_selank_what_is_it",
+    "peptideName": "Selank",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_semaglutide_availability_format",
+    "peptideName": "Semaglutide",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_semaglutide_how_to_choose",
+    "peptideName": "Semaglutide",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_semaglutide_related_peptides",
+    "peptideName": "Semaglutide",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_semaglutide_what_is_it",
+    "peptideName": "Semaglutide",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_semax_availability_format",
+    "peptideName": "Semax",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_semax_how_to_choose",
+    "peptideName": "Semax",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_semax_related_peptides",
+    "peptideName": "Semax",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_semax_what_is_it",
+    "peptideName": "Semax",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_sermorelin_availability_format",
+    "peptideName": "Sermorelin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_sermorelin_how_to_choose",
+    "peptideName": "Sermorelin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_sermorelin_related_peptides",
+    "peptideName": "Sermorelin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_sermorelin_what_is_it",
+    "peptideName": "Sermorelin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_slu_pp_332_availability_format",
+    "peptideName": "SLU PP-332",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_slu_pp_332_how_to_choose",
+    "peptideName": "SLU PP-332",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_slu_pp_332_related_peptides",
+    "peptideName": "SLU PP-332",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_slu_pp_332_what_is_it",
+    "peptideName": "SLU PP-332",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_snap_8_availability_format",
+    "peptideName": "Snap-8",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_snap_8_how_to_choose",
+    "peptideName": "Snap-8",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_snap_8_related_peptides",
+    "peptideName": "Snap-8",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_snap_8_what_is_it",
+    "peptideName": "Snap-8",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ss_31_availability_format",
+    "peptideName": "SS-31",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ss_31_how_to_choose",
+    "peptideName": "SS-31",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ss_31_related_peptides",
+    "peptideName": "SS-31",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_ss_31_what_is_it",
+    "peptideName": "SS-31",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_tesamorelin_availability_format",
+    "peptideName": "Tesamorelin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_tesamorelin_how_to_choose",
+    "peptideName": "Tesamorelin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_tesamorelin_related_peptides",
+    "peptideName": "Tesamorelin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_tesamorelin_what_is_it",
+    "peptideName": "Tesamorelin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_testagen_availability_format",
+    "peptideName": "Testagen",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_testagen_how_to_choose",
+    "peptideName": "Testagen",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_testagen_related_peptides",
+    "peptideName": "Testagen",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_testagen_what_is_it",
+    "peptideName": "Testagen",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_thymagen_availability_format",
+    "peptideName": "Thymagen",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_thymagen_how_to_choose",
+    "peptideName": "Thymagen",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_thymagen_related_peptides",
+    "peptideName": "Thymagen",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_thymagen_what_is_it",
+    "peptideName": "Thymagen",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_thymosin_alpha_1_availability_format",
+    "peptideName": "Thymosin Alpha 1",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_thymosin_alpha_1_how_to_choose",
+    "peptideName": "Thymosin Alpha 1",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_thymosin_alpha_1_related_peptides",
+    "peptideName": "Thymosin Alpha 1",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_thymosin_alpha_1_what_is_it",
+    "peptideName": "Thymosin Alpha 1",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_thymosin_b4_tb_500_availability_format",
+    "peptideName": "TB-500 (Thymosin β4)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_thymosin_b4_tb_500_how_to_choose",
+    "peptideName": "TB-500 (Thymosin β4)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_thymosin_b4_tb_500_related_peptides",
+    "peptideName": "TB-500 (Thymosin β4)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_thymosin_b4_tb_500_what_is_it",
+    "peptideName": "TB-500 (Thymosin β4)",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_thymulin_availability_format",
+    "peptideName": "Thymulin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_thymulin_how_to_choose",
+    "peptideName": "Thymulin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_thymulin_related_peptides",
+    "peptideName": "Thymulin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_thymulin_what_is_it",
+    "peptideName": "Thymulin",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_tirzepatide_availability_format",
+    "peptideName": "Tirzepatide",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_tirzepatide_how_to_choose",
+    "peptideName": "Tirzepatide",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_tirzepatide_related_peptides",
+    "peptideName": "Tirzepatide",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  },
+  {
+    "priority": 100,
+    "faqId": "faq_tirzepatide_what_is_it",
+    "peptideName": "Tirzepatide",
+    "mappingType": "exact_product",
+    "familySlug": "none"
+  }
+]

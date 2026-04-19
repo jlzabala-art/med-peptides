@@ -1,0 +1,869 @@
+{
+    "generated_protocol_id": "gp_wm_001_female_36_50_16w_standard_20260402",
+    "protocol_id": "wm_001",
+    "protocol_slug": "weight-management-structured",
+    "protocol_title": "Structured Weight Management Protocol",
+    "protocol_version": "v6.0",
+    "patient_context": {
+        "primary_clinical_focus": "weight_management",
+        "primary_condition": "obesity_metabolic_dysfunction",
+        "patient_demographic": "female",
+        "age_group": "36-50",
+        "baseline_weight_kg": 84,
+        "height_cm": 165,
+        "bmi": 30.9,
+        "metabolic_status": "insulin_resistance",
+        "duration_weeks": 16,
+        "start_date": "2026-04-02",
+        "tempo_preference": "standard"
+    },
+    "applied_variants": {
+        "age_variant": "36-50",
+        "sex_variant": "female",
+        "duration_variant": "16_weeks",
+        "tempo_variant": "standard",
+        "tirzepatide_escalation_profile": "moderate",
+        "monitoring_intensity": "moderate"
+    },
+    "clinical_summary": {
+        "goal": "Progressive fat loss with metabolic correction",
+        "expected_outcomes": {
+            "weight_loss_percent": "7-12%",
+            "waist_reduction_cm": "5-10",
+            "HbA1c_reduction_percent": "0.4-1.0",
+            "fat_mass_reduction_percent": "4-8%"
+        },
+        "risk_level": "moderate",
+        "requires_baseline_labs": true,
+        "requires_extended_monitoring": true
+    },
+    "resolved_phases": [
+        {
+            "phase_key": "initiation",
+            "phase_title": "Initiation",
+            "start_week": 1,
+            "end_week": 4,
+            "duration_weeks": 4,
+            "clinical_purpose": [
+                "tolerance_building",
+                "initial_appetite_control",
+                "mitochondrial_activation"
+            ],
+            "drugs": [
+                {
+                    "product_id": "prd_tirzepatide",
+                    "product_title": "Tirzepatide",
+                    "route": "subcutaneous",
+                    "weekly_dose_mg": 2.5,
+                    "administration_frequency": "weekly",
+                    "administration_days": [
+                        "Monday"
+                    ]
+                },
+                {
+                    "product_id": "prd_motsc",
+                    "product_title": "MOTS-C",
+                    "route": "subcutaneous",
+                    "dose_per_administration_mg": 10,
+                    "administration_frequency": "3x_week",
+                    "administration_days": [
+                        "Monday",
+                        "Wednesday",
+                        "Friday"
+                    ]
+                }
+            ],
+            "clinical_events": [
+                {
+                    "week": 1,
+                    "event_type": "baseline_review",
+                    "title": "Baseline metabolic and tolerance review"
+                },
+                {
+                    "week": 4,
+                    "event_type": "checkpoint",
+                    "title": "Early tolerance and metabolic response review"
+                }
+            ]
+        },
+        {
+            "phase_key": "escalation_1",
+            "phase_title": "Escalation I",
+            "start_week": 5,
+            "end_week": 8,
+            "duration_weeks": 4,
+            "clinical_purpose": [
+                "dose_optimization",
+                "metabolic_response_assessment"
+            ],
+            "drugs": [
+                {
+                    "product_id": "prd_tirzepatide",
+                    "product_title": "Tirzepatide",
+                    "route": "subcutaneous",
+                    "weekly_dose_mg": 5,
+                    "administration_frequency": "weekly",
+                    "administration_days": [
+                        "Monday"
+                    ]
+                },
+                {
+                    "product_id": "prd_motsc",
+                    "product_title": "MOTS-C",
+                    "route": "subcutaneous",
+                    "dose_per_administration_mg": 10,
+                    "administration_frequency": "3x_week",
+                    "administration_days": [
+                        "Monday",
+                        "Wednesday",
+                        "Friday"
+                    ]
+                },
+                {
+                    "product_id": "prd_aod9604",
+                    "product_title": "AOD-9604",
+                    "route": "subcutaneous",
+                    "dose_per_administration_mg": 2,
+                    "administration_frequency": "daily",
+                    "administration_days": [
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday",
+                        "Saturday",
+                        "Sunday"
+                    ],
+                    "timing_hint": "morning_fasting"
+                }
+            ],
+            "clinical_events": [
+                {
+                    "week": 8,
+                    "event_type": "metabolic_reassessment",
+                    "title": "Mid-course metabolic review"
+                }
+            ]
+        },
+        {
+            "phase_key": "escalation_2",
+            "phase_title": "Escalation II",
+            "start_week": 9,
+            "end_week": 12,
+            "duration_weeks": 4,
+            "clinical_purpose": [
+                "fat_loss_acceleration",
+                "dose_stabilization"
+            ],
+            "drugs": [
+                {
+                    "product_id": "prd_tirzepatide",
+                    "product_title": "Tirzepatide",
+                    "route": "subcutaneous",
+                    "weekly_dose_mg": 7.5,
+                    "administration_frequency": "weekly",
+                    "administration_days": [
+                        "Monday"
+                    ]
+                },
+                {
+                    "product_id": "prd_motsc",
+                    "product_title": "MOTS-C",
+                    "route": "subcutaneous",
+                    "dose_per_administration_mg": 10,
+                    "administration_frequency": "2x_week",
+                    "administration_days": [
+                        "Tuesday",
+                        "Thursday"
+                    ]
+                }
+            ],
+            "clinical_events": [
+                {
+                    "week": 12,
+                    "event_type": "outcome_review",
+                    "title": "Secondary response and safety review"
+                }
+            ]
+        },
+        {
+            "phase_key": "maintenance_extended",
+            "phase_title": "Maintenance / Consolidation",
+            "start_week": 13,
+            "end_week": 16,
+            "duration_weeks": 4,
+            "clinical_purpose": [
+                "habit_consolidation",
+                "maintenance_of_response",
+                "rebound_prevention"
+            ],
+            "drugs": [
+                {
+                    "product_id": "prd_tirzepatide",
+                    "product_title": "Tirzepatide",
+                    "route": "subcutaneous",
+                    "weekly_dose_mg": 7.5,
+                    "administration_frequency": "weekly",
+                    "administration_days": [
+                        "Monday"
+                    ]
+                },
+                {
+                    "product_id": "prd_motsc",
+                    "product_title": "MOTS-C",
+                    "route": "subcutaneous",
+                    "dose_per_administration_mg": 10,
+                    "administration_frequency": "2x_week",
+                    "administration_days": [
+                        "Tuesday",
+                        "Thursday"
+                    ]
+                }
+            ],
+            "clinical_events": [
+                {
+                    "week": 16,
+                    "event_type": "final_review",
+                    "title": "Final response review and continuation decision"
+                }
+            ]
+        }
+    ],
+    "resolved_monitoring": {
+        "baseline_required": [
+            "HbA1c",
+            "fasting_glucose",
+            "insulin",
+            "lipid_profile",
+            "AST",
+            "ALT",
+            "creatinine",
+            "TSH",
+            "free_T4",
+            "ferritin",
+            "vitamin_D",
+            "blood_pressure",
+            "waist_circumference",
+            "body_weight"
+        ],
+        "scheduled_checkpoints": [
+            {
+                "week": 4,
+                "date_label": "2026-04-23",
+                "type": "tolerance_and_safety",
+                "labs": [
+                    "fasting_glucose",
+                    "AST",
+                    "ALT",
+                    "body_weight",
+                    "blood_pressure"
+                ],
+                "purpose": "Early tolerance and metabolic response review"
+            },
+            {
+                "week": 8,
+                "date_label": "2026-05-21",
+                "type": "metabolic_reassessment",
+                "labs": [
+                    "HbA1c",
+                    "fasting_glucose",
+                    "insulin",
+                    "lipid_profile"
+                ],
+                "purpose": "Mid-course metabolic reassessment"
+            },
+            {
+                "week": 12,
+                "date_label": "2026-06-18",
+                "type": "secondary_outcome_review",
+                "labs": [
+                    "HbA1c",
+                    "fasting_glucose",
+                    "AST",
+                    "ALT",
+                    "creatinine"
+                ],
+                "purpose": "Secondary response and safety review"
+            },
+            {
+                "week": 16,
+                "date_label": "2026-07-16",
+                "type": "final_outcome_review",
+                "labs": [
+                    "HbA1c",
+                    "lipid_profile",
+                    "AST",
+                    "ALT",
+                    "creatinine",
+                    "TSH",
+                    "ferritin"
+                ],
+                "purpose": "Final evaluation and continuation decision"
+            }
+        ]
+    },
+    "resolved_timeline": [
+        {
+            "week": 1,
+            "phase_name": "Initiation",
+            "date_range": "Apr 2 - Apr 8, 2026",
+            "events": [
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "Tirzepatide",
+                    "dose": "2.5 mg",
+                    "route": "subcutaneous"
+                },
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg",
+                    "route": "subcutaneous"
+                },
+                {
+                    "day": "Wednesday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg",
+                    "route": "subcutaneous"
+                },
+                {
+                    "day": "Friday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg",
+                    "route": "subcutaneous"
+                }
+            ]
+        },
+        {
+            "week": 2,
+            "phase_name": "Initiation",
+            "date_range": "Apr 9 - Apr 15, 2026",
+            "events": [
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "Tirzepatide",
+                    "dose": "2.5 mg"
+                },
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Wednesday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Friday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                }
+            ]
+        },
+        {
+            "week": 3,
+            "phase_name": "Initiation",
+            "date_range": "Apr 16 - Apr 22, 2026",
+            "events": [
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "Tirzepatide",
+                    "dose": "2.5 mg"
+                },
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Wednesday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Friday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                }
+            ]
+        },
+        {
+            "week": 4,
+            "phase_name": "Initiation",
+            "date_range": "Apr 23 - Apr 29, 2026",
+            "events": [
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "Tirzepatide",
+                    "dose": "2.5 mg"
+                },
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Wednesday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Friday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Thursday",
+                    "type": "monitoring",
+                    "title": "Checkpoint Labs",
+                    "details": [
+                        "fasting_glucose",
+                        "AST",
+                        "ALT",
+                        "body_weight",
+                        "blood_pressure"
+                    ]
+                }
+            ]
+        },
+        {
+            "week": 5,
+            "phase_name": "Escalation I",
+            "date_range": "Apr 30 - May 6, 2026",
+            "events": [
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "Tirzepatide",
+                    "dose": "5 mg"
+                },
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Wednesday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Friday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Daily",
+                    "type": "medication",
+                    "title": "AOD-9604",
+                    "dose": "2 mg",
+                    "timing": "morning_fasting"
+                }
+            ]
+        },
+        {
+            "week": 6,
+            "phase_name": "Escalation I",
+            "date_range": "May 7 - May 13, 2026",
+            "events": [
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "Tirzepatide",
+                    "dose": "5 mg"
+                },
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Wednesday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Friday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Daily",
+                    "type": "medication",
+                    "title": "AOD-9604",
+                    "dose": "2 mg",
+                    "timing": "morning_fasting"
+                }
+            ]
+        },
+        {
+            "week": 7,
+            "phase_name": "Escalation I",
+            "date_range": "May 14 - May 20, 2026",
+            "events": [
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "Tirzepatide",
+                    "dose": "5 mg"
+                },
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Wednesday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Friday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Daily",
+                    "type": "medication",
+                    "title": "AOD-9604",
+                    "dose": "2 mg",
+                    "timing": "morning_fasting"
+                }
+            ]
+        },
+        {
+            "week": 8,
+            "phase_name": "Escalation I",
+            "date_range": "May 21 - May 27, 2026",
+            "events": [
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "Tirzepatide",
+                    "dose": "5 mg"
+                },
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Wednesday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Friday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Daily",
+                    "type": "medication",
+                    "title": "AOD-9604",
+                    "dose": "2 mg",
+                    "timing": "morning_fasting"
+                },
+                {
+                    "day": "Thursday",
+                    "type": "monitoring",
+                    "title": "Metabolic Reassessment",
+                    "details": [
+                        "HbA1c",
+                        "fasting_glucose",
+                        "insulin",
+                        "lipid_profile"
+                    ]
+                }
+            ]
+        },
+        {
+            "week": 9,
+            "phase_name": "Escalation II",
+            "date_range": "May 28 - Jun 3, 2026",
+            "events": [
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "Tirzepatide",
+                    "dose": "7.5 mg"
+                },
+                {
+                    "day": "Tuesday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Thursday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                }
+            ]
+        },
+        {
+            "week": 10,
+            "phase_name": "Escalation II",
+            "date_range": "Jun 4 - Jun 10, 2026",
+            "events": [
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "Tirzepatide",
+                    "dose": "7.5 mg"
+                },
+                {
+                    "day": "Tuesday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Thursday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                }
+            ]
+        },
+        {
+            "week": 11,
+            "phase_name": "Escalation II",
+            "date_range": "Jun 11 - Jun 17, 2026",
+            "events": [
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "Tirzepatide",
+                    "dose": "7.5 mg"
+                },
+                {
+                    "day": "Tuesday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Thursday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                }
+            ]
+        },
+        {
+            "week": 12,
+            "phase_name": "Escalation II",
+            "date_range": "Jun 18 - Jun 24, 2026",
+            "events": [
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "Tirzepatide",
+                    "dose": "7.5 mg"
+                },
+                {
+                    "day": "Tuesday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Thursday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Thursday",
+                    "type": "monitoring",
+                    "title": "Secondary Outcome Review",
+                    "details": [
+                        "HbA1c",
+                        "fasting_glucose",
+                        "AST",
+                        "ALT",
+                        "creatinine"
+                    ]
+                }
+            ]
+        },
+        {
+            "week": 13,
+            "phase_name": "Maintenance / Consolidation",
+            "date_range": "Jun 25 - Jul 1, 2026",
+            "events": [
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "Tirzepatide",
+                    "dose": "7.5 mg"
+                },
+                {
+                    "day": "Tuesday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Thursday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                }
+            ]
+        },
+        {
+            "week": 14,
+            "phase_name": "Maintenance / Consolidation",
+            "date_range": "Jul 2 - Jul 8, 2026",
+            "events": [
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "Tirzepatide",
+                    "dose": "7.5 mg"
+                },
+                {
+                    "day": "Tuesday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Thursday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                }
+            ]
+        },
+        {
+            "week": 15,
+            "phase_name": "Maintenance / Consolidation",
+            "date_range": "Jul 9 - Jul 15, 2026",
+            "events": [
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "Tirzepatide",
+                    "dose": "7.5 mg"
+                },
+                {
+                    "day": "Tuesday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Thursday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                }
+            ]
+        },
+        {
+            "week": 16,
+            "phase_name": "Maintenance / Consolidation",
+            "date_range": "Jul 16 - Jul 22, 2026",
+            "events": [
+                {
+                    "day": "Monday",
+                    "type": "medication",
+                    "title": "Tirzepatide",
+                    "dose": "7.5 mg"
+                },
+                {
+                    "day": "Tuesday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Thursday",
+                    "type": "medication",
+                    "title": "MOTS-C",
+                    "dose": "10 mg"
+                },
+                {
+                    "day": "Thursday",
+                    "type": "monitoring",
+                    "title": "Final Outcome Review",
+                    "details": [
+                        "HbA1c",
+                        "lipid_profile",
+                        "AST",
+                        "ALT",
+                        "creatinine",
+                        "TSH",
+                        "ferritin"
+                    ]
+                }
+            ]
+        }
+    ],
+    "resolved_costs": {
+        "currency": "USD",
+        "estimated_total_cost": 2250,
+        "estimated_weekly_cost": 141,
+        "aggregate": [
+            {
+                "product_id": "prd_tirzepatide",
+                "name": "Tirzepatide",
+                "estimated_total_vials": 4,
+                "price_per_vial": 297
+            },
+            {
+                "product_id": "prd_motsc",
+                "name": "MOTS-C",
+                "estimated_total_vials": 16,
+                "price_per_vial": 50
+            },
+            {
+                "product_id": "prd_aod9604",
+                "name": "AOD-9604",
+                "estimated_total_vials": 4,
+                "price_per_vial": 50
+            }
+        ]
+    },
+    "validation": {
+        "state": "READY_FOR_VALIDATION",
+        "pre_validation_notes": [
+            "Baseline labs must be completed before activation.",
+            "Female-specific ferritin and thyroid markers added.",
+            "Tirzepatide escalation moderated for 36-50 age group."
+        ]
+    }
+}

@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TC-WM-001",
+    "name": "Weight Management - Tirzepatide Priority",
+    "formData": {
+      "primaryCondition": "Weight Management / Obesity",
+      "specificGoal": "obesity_metabolic_dysfunction",
+      "weight": "100",
+      "height": "170",
+      "ageGroup": "36-50",
+      "patientType": "Female",
+      "tempo": "standard"
+    },
+    "expectations": {
+      "primaryProtocolId": "WM-001",
+      "minBmi": 34.0,
+      "maxBmi": 35.0,
+      "containsCompound": "Tirzepatide"
+    }
+  },
+  {
+    "id": "TC-WM-002",
+    "name": "Weight Management - Retatrutide Tier 1",
+    "formData": {
+      "primaryCondition": "Weight Management / Obesity",
+      "specificGoal": "obesity_metabolic_dysfunction",
+      "weight": "120",
+      "height": "165",
+      "ageGroup": "18-35",
+      "patientType": "Male",
+      "tempo": "aggressive"
+    },
+    "expectations": {
+      "topTierMatches": ["WM-004", "WM-001"],
+      "containsCompound": "Retatrutide"
+    }
+  },
+  {
+    "id": "TC-COG-001",
+    "name": "Neuro-Cognitive Prioritization",
+    "formData": {
+      "primaryCondition": "Cognitive / Neuro-Protection",
+      "specificGoal": "cognitive_enhancement",
+      "ageGroup": "51-65",
+      "patientType": "Male"
+    },
+    "expectations": {
+      "primaryProtocolId": "COG-001",
+      "containsCompound": "Semax"
+    }
+  }
+]

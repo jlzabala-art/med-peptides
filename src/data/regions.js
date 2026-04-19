@@ -1,0 +1,10 @@
+export const REGION_FLAGS = {
+  ae: '🇦🇪',
+  qa: '🇶🇦',
+  kw: '🇰🇼',
+  sa: '🇸🇦',
+  eu: '🇪🇺',
+  gb: '🇬🇧',
+  us: '🇺🇸',
+  row: '🌐'
+};

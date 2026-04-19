@@ -1,0 +1,49 @@
+{
+  "project": "med-peptides protocol builder v2",
+  "version": "2.0-clinical",
+  "newFeatures": [
+    "patient_context_layer",
+    "confidence_panel",
+    "timeline_visualization",
+    "cost_summary",
+    "alternative_reasoning"
+  ],
+  "patientContextFields": [
+    "patientType",
+    "ageGroup",
+    "primaryCondition",
+    "contraindications",
+    "formatTolerance",
+    "injectionTolerance"
+  ],
+  "newUIBlocks": [
+    "protocol_confidence_panel",
+    "protocol_timeline_view",
+    "protocol_cost_summary",
+    "alternative_reasoning_panel"
+  ],
+  "confidencePanel": {
+    "fields": [
+      "confidenceScore",
+      "matchedSignals",
+      "conflictingSignals",
+      "reasoningSummary"
+    ]
+  },
+  "timelineView": {
+    "display": "phased timeline",
+    "fields": [
+      "phaseName",
+      "phaseDuration",
+      "phaseObjective",
+      "phaseProducts"
+    ]
+  },
+  "costSummary": {
+    "fields": [
+      "totalEstimatedCost",
+      "costPerWeek",
+      "costPerPhase"
+    ]
+  }
+}

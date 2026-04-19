@@ -1,0 +1,277 @@
+{
+  "fields": {
+    "active": {
+      "booleanValue": true
+    },
+    "author": {
+      "stringValue": "system"
+    },
+    "complexity_level": {
+      "stringValue": "standard"
+    },
+    "created_at": {
+      "stringValue": "2026-04-02T05:40:00.000Z"
+    },
+    "economics": {
+      "mapValue": {
+        "fields": {
+          "total_protocol_cost_estimate": {
+            "integerValue": "1140"
+          },
+          "total_vials_required": {
+            "integerValue": "12"
+          }
+        }
+      }
+    },
+    "monitoring_plan": {
+      "mapValue": {
+        "fields": {
+          "baseline_required": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "photography"
+                },
+                {
+                  "stringValue": "skin_scoring"
+                }
+              ]
+            }
+          },
+          "checkpoints": {
+            "arrayValue": {
+              "values": [
+                {
+                  "mapValue": {
+                    "fields": {
+                      "week": {
+                        "integerValue": "4"
+                      },
+                      "type": {
+                        "stringValue": "barrier_review"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "week": {
+                        "integerValue": "8"
+                      },
+                      "type": {
+                        "stringValue": "remodeling_review"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "week": {
+                        "integerValue": "12"
+                      },
+                      "type": {
+                        "stringValue": "final_review"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "phases": {
+      "arrayValue": {
+        "values": [
+          {
+            "mapValue": {
+              "fields": {
+                "phase_key": {
+                  "stringValue": "barrier_priming"
+                },
+                "phase_title": {
+                  "stringValue": "Barrier Priming"
+                },
+                "default_duration_weeks": {
+                  "integerValue": "4"
+                },
+                "drugs": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "mapValue": {
+                          "fields": {
+                            "product_id": {
+                              "stringValue": "prd_ghkcu"
+                            },
+                            "product_title": {
+                              "stringValue": "GHK-Cu"
+                            },
+                            "route": {
+                              "stringValue": "topical"
+                            },
+                            "dose_intensity": {
+                              "stringValue": "standard"
+                            },
+                            "administration_frequency": {
+                              "stringValue": "daily"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "phase_key": {
+                  "stringValue": "remodeling"
+                },
+                "phase_title": {
+                  "stringValue": "Active Remodeling"
+                },
+                "default_duration_weeks": {
+                  "integerValue": "4"
+                },
+                "drugs": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "mapValue": {
+                          "fields": {
+                            "product_id": {
+                              "stringValue": "prd_ghkcu"
+                            },
+                            "product_title": {
+                              "stringValue": "GHK-Cu"
+                            },
+                            "route": {
+                              "stringValue": "topical"
+                            },
+                            "dose_intensity": {
+                              "stringValue": "standard_plus"
+                            },
+                            "administration_frequency": {
+                              "stringValue": "daily"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "mapValue": {
+                          "fields": {
+                            "product_id": {
+                              "stringValue": "prd_bpc157"
+                            },
+                            "product_title": {
+                              "stringValue": "BPC-157"
+                            },
+                            "product_slug": {
+                              "stringValue": "bpc-157"
+                            },
+                            "route": {
+                              "stringValue": "localized_optional"
+                            },
+                            "dose_intensity": {
+                              "stringValue": "low_optional"
+                            },
+                            "administration_frequency": {
+                              "stringValue": "3x_week"
+                            },
+                            "activation_condition": {
+                              "stringValue": "post_procedure_support"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "phase_key": {
+                  "stringValue": "consolidation"
+                },
+                "phase_title": {
+                  "stringValue": "Consolidation & Maintenance"
+                },
+                "default_duration_weeks": {
+                  "integerValue": "4"
+                },
+                "drugs": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "mapValue": {
+                          "fields": {
+                            "product_id": {
+                              "stringValue": "prd_ghkcu"
+                            },
+                            "product_title": {
+                              "stringValue": "GHK-Cu"
+                            },
+                            "route": {
+                              "stringValue": "topical"
+                            },
+                            "dose_intensity": {
+                              "stringValue": "maintenance"
+                            },
+                            "administration_frequency": {
+                              "stringValue": "5x_week"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "primary_goal": {
+      "stringValue": "Skin / Anti-Aging"
+    },
+    "protocol_duration_weeks": {
+      "integerValue": "12"
+    },
+    "protocol_id": {
+      "stringValue": "sa_001"
+    },
+    "protocol_is_curated": {
+      "booleanValue": true
+    },
+    "protocol_is_physician_authored": {
+      "booleanValue": false
+    },
+    "protocol_slug": {
+      "stringValue": "skin-aesthetics-ghkcu-structured"
+    },
+    "protocol_title": {
+      "stringValue": "Structured Skin & Aesthetics Protocol"
+    },
+    "status": {
+      "stringValue": "approved"
+    },
+    "updated_at": {
+      "stringValue": "2026-04-02T05:40:00.000Z"
+    },
+    "visibility": {
+      "stringValue": "public"
+    }
+  }
+}

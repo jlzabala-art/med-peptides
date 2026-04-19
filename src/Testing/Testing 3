@@ -1,0 +1,152 @@
+Project: ReGen PEPT
+Module: Institutional & Clinical Inquiries page
+Priority: High
+Platform: Desktop first
+
+Objective:
+Implement and validate the inquiry form so that:
+1. The “Schedule Video Call” action opens the correct booking page:
+   https://us.bigin.online/org900319019/bookings/mhs
+2. The booking-related email shown and used in contact workflows is:
+   business@med-peptides.com
+3. The selected value in “Identify your inquiry type” is reflected correctly in the form state and submission payload.
+4. The form cannot be submitted unless all required fields are completed correctly.
+5. Add a small validation test suite to confirm the form works.
+
+Context:
+Current page includes:
+- Inquiry type selector with options such as Clinics, Pharmacies, Researchers, Distributors
+- Institutional Inquiry form with fields:
+  Full Name
+  Email Address
+  Phone Number
+  Inquiry Type
+  Message / Details
+  Supporting Files (optional)
+- “Schedule Video Call” CTA
+- General contact area
+
+Required implementation:
+
+A. Booking CTA
+- Wire the “Schedule Video Call” CTA to open:
+  https://us.bigin.online/org900319019/bookings/mhs
+- Open in a new tab.
+- Track click event:
+  booking_cta_clicked
+- Store source metadata:
+  page = institutional_inquiry
+  region = current selected region
+  inquiry_type = current selected inquiry type if available
+
+B. Contact Email
+- Replace any old booking/contact email for this section with:
+  business@med-peptides.com
+- Use this email consistently in:
+  visible contact blocks
+  fallback contact actions
+  submission metadata if email routing is needed
+
+C. Inquiry Type Reflection
+- The selection in “Identify your inquiry type” must sync with the actual form field “Inquiry Type”.
+- If user clicks:
+  Clinics → Inquiry Type defaults to “Clinic Inquiry”
+  Pharmacies → Inquiry Type defaults to “Pharmacy Inquiry”
+  Researchers → Inquiry Type defaults to “Research Inquiry”
+  Distributors → Inquiry Type defaults to “Distributor Inquiry”
+- If user later changes the dropdown manually, keep the manual value and do not overwrite it unless they intentionally switch inquiry type again.
+- Highlight the selected inquiry type button clearly.
+
+D. Required Field Validation
+Make these fields required:
+- Full Name
+- Email Address
+- Phone Number
+- Inquiry Type
+- Message / Details
+
+Validation rules:
+- Full Name:
+  minimum 2 words preferred
+  minimum 3 characters
+- Email Address:
+  valid email format required
+- Phone Number:
+  must contain valid numeric content after country code
+  minimum sensible length by international standards
+- Inquiry Type:
+  cannot be empty
+- Message / Details:
+  minimum 10 characters
+  trim whitespace
+- Supporting Files:
+  optional
+
+E. Submission Blocking
+- Disable the submit button until required fields are valid.
+- If user tries to submit with invalid data, show inline validation under each invalid field.
+- Do not use browser-native ugly validation popups.
+- Use clean inline error messages.
+
+Suggested error copy:
+- Full Name: “Please enter your full name.”
+- Email Address: “Please enter a valid email address.”
+- Phone Number: “Please enter a valid phone number.”
+- Inquiry Type: “Please select an inquiry type.”
+- Message / Details: “Please provide a short description of your request.”
+
+F. UX Improvements
+- If an inquiry type card is selected, mirror that state visibly in the form.
+- Keep the selected card persistent while editing the form.
+- Add success state after submit:
+  “Your inquiry has been submitted successfully. Our team will contact you shortly.”
+- Keep response expectation text:
+  “Response within 24 hours (Business Days)”
+- Ensure the WhatsApp indicator is only visual and does not break layout.
+
+G. Submission Payload
+On submit, send/store:
+- full_name
+- email
+- country_code
+- phone_number
+- inquiry_type
+- message
+- supporting_files metadata if any
+- source_page = institutional_inquiry
+- selected_inquiry_card
+- region
+- timestamp
+- user_id if logged in
+
+H. Testing
+Create a lightweight form test suite covering:
+1. Clinics card selection updates Inquiry Type field correctly
+2. Pharmacies card selection updates Inquiry Type field correctly
+3. Researchers card selection updates Inquiry Type field correctly
+4. Distributors card selection updates Inquiry Type field correctly
+5. Submit button remains disabled when required fields are empty
+6. Invalid email blocks submission
+7. Empty message blocks submission
+8. Valid form enables submission
+9. Schedule Video Call opens the correct Bigin booking URL
+10. business@med-peptides.com appears in the correct contact area
+
+I. Manual QA checklist
+Run these manual checks:
+- Select each inquiry type card and verify form sync
+- Enter invalid email and confirm inline error
+- Leave message empty and confirm submission blocked
+- Submit a valid inquiry and confirm success state
+- Click “Schedule Video Call” and verify it opens:
+  https://us.bigin.online/org900319019/bookings/mhs
+- Confirm visible email is:
+  business@med-peptides.com
+
+J. Success criteria
+- Inquiry type card and form field remain synchronized
+- Required field validation works correctly
+- Form cannot be submitted with incomplete required data
+- Booking CTA opens the correct page
+- business@med-peptides.com is used consistently
+- No broken states, no silent submission failures, no browser-native validation popups

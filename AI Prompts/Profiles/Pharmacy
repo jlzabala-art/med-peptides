@@ -1,0 +1,290 @@
+Create a dedicated Pharmacy role environment with operational tools designed for preparation, batching, and inventory planning.
+
+GOAL
+
+Provide pharmacy-specific workflow tools that convert clinical protocols into physical preparation requirements.
+
+Focus first on:
+
+- Kit Builder
+- Bulk Vial Calculator
+
+Then extend into:
+
+- Reconstitution Calculator
+- Inventory Projection
+- Batch Preparation Planner
+
+==================================================
+SECTION 1 — PHARMACY ROLE ACTIVATION
+==================================================
+
+When user selects:
+
+Pharmacy
+
+Activate:
+
+role = pharmacy
+
+Load pharmacy-specific dashboard.
+
+Hide unnecessary clinical-only tools.
+
+Prioritize:
+
+Preparation  
+Volume  
+Inventory  
+Batching
+
+==================================================
+SECTION 2 — KIT BUILDER MODULE
+==================================================
+
+Create a new module:
+
+Kit Builder
+
+Purpose:
+
+Convert protocols into physical preparation kits.
+
+User Inputs:
+
+- Protocol selection
+- Duration (weeks)
+- Number of patients
+- Packaging mode:
+
+  Individual Patient Kits  
+  Bulk Pharmacy Kits
+
+System Processing:
+
+Read protocol data:
+
+- peptide names
+- dose schedule
+- frequency
+- escalation
+- duration
+
+Calculate:
+
+- total dose required
+- total mg required
+- number of vials required
+- diluent required
+- consumables required
+
+Outputs:
+
+Kit Summary:
+
+Peptide Requirements:
+
+Tirzepatide — XX vials  
+MOTS-C — XX vials  
+
+Consumables:
+
+Diluent — XX units  
+Syringes — XX  
+Alcohol wipes — XX  
+
+Final Output:
+
+Total kits required  
+Total vial count  
+Safety buffer recommendation
+
+==================================================
+SECTION 3 — BULK VIAL CALCULATOR
+==================================================
+
+Create:
+
+Bulk Vial Calculator
+
+Purpose:
+
+Estimate vial quantities based on dosage requirements.
+
+User Inputs:
+
+- Peptide
+- Dose per administration
+- Frequency
+- Duration (weeks)
+- Patients
+- Vial strength
+
+System Calculates:
+
+Total mg required
+
+Total vials required
+
+Optional:
+
+Add safety buffer:
+
+Default:
+
++10%
+
+Output:
+
+Total Vials Required  
+Recommended Order Quantity
+
+==================================================
+SECTION 4 — BUFFER LOGIC
+==================================================
+
+Allow configurable safety buffer.
+
+Options:
+
+0%  
+5%  
+10%  
+15%
+
+Default:
+
+10%
+
+Apply buffer to:
+
+Total vial requirement.
+
+==================================================
+SECTION 5 — VISUAL OUTPUT FORMAT
+==================================================
+
+Display results using structured panels.
+
+Example:
+
+Peptide Requirements
+
+Tirzepatide:
+Required: 150 vials  
+Buffer: +15  
+Final: 165 vials
+
+Use:
+
+Clear readable layout  
+No dense tables  
+Structured grouping
+
+==================================================
+SECTION 6 — RECONSTITUTION TOOL (PHASE 2)
+==================================================
+
+Add:
+
+Reconstitution Calculator
+
+User Inputs:
+
+- Vial strength
+- Diluent volume
+- Target dose
+
+Outputs:
+
+Concentration  
+Injection volume
+
+Show:
+
+Calculated concentration clearly.
+
+==================================================
+SECTION 7 — INVENTORY PROJECTION (PHASE 3)
+==================================================
+
+Create:
+
+Inventory Projection Engine
+
+Inputs:
+
+- Active protocol count
+- Patient volume
+- Weekly growth
+
+Outputs:
+
+Expected monthly usage  
+Stock alerts  
+Reorder recommendations
+
+==================================================
+SECTION 8 — EXPORT OPTIONS
+==================================================
+
+Allow export of:
+
+Kit Builder output  
+Bulk calculations  
+
+Formats:
+
+PDF  
+CSV  
+Excel
+
+Use:
+
+Professional pharmacy-ready formatting.
+
+==================================================
+SECTION 9 — ROLE-SPECIFIC NAVIGATION
+==================================================
+
+For Pharmacy role:
+
+Primary navigation:
+
+Kit Builder  
+Bulk Calculator  
+Reconstitution  
+Inventory  
+Batch Planner  
+
+Do not prioritize:
+
+Protocol design UI.
+
+==================================================
+SECTION 10 — FUTURE EXPANSION SUPPORT
+==================================================
+
+Ensure architecture supports:
+
+- multi-location pharmacies
+- warehouse logic
+- regional inventory
+- batch tracking
+
+Design modules as scalable components.
+
+==================================================
+FINAL OBJECTIVE
+==================================================
+
+Transform the Pharmacy experience into a preparation-focused workflow environment that translates clinical protocols into actionable operational requirements.
+
+The user must be able to:
+
+Select protocol  
+Calculate kits  
+Plan inventory  
+Prepare safely  
+
+Without manual calculations.
