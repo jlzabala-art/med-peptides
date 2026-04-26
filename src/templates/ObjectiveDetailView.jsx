@@ -15,8 +15,7 @@ export default function ObjectiveDetailView({
   onSelectProduct, 
   isProfessional, 
   products,
-  allFaqs,
-  allMappings
+  allFaqs
 }) {
   const [activeFAQProduct, setActiveFAQProduct] = useState(null);
   const [faqItems, setFaqItems] = useState([]);
@@ -30,7 +29,7 @@ export default function ObjectiveDetailView({
 
   const handleOpenFAQ = async (product) => {
     setActiveFAQProduct(product);
-    const faqs = getFAQForProduct(product.name, allFaqs || [], allMappings || [], isProfessional);
+    const faqs = getFAQForProduct(product.name, allFaqs || [], product.id, isProfessional);
     setFaqItems(faqs);
     setShowFAQModal(true);
   };
@@ -113,10 +112,10 @@ export default function ObjectiveDetailView({
                   <td style={{ padding: '1.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                       <img 
-                        src={product.image || `/assets/vials/${product.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.png`} 
+                        src={product.image || '/peptide-placeholder.png'} 
                         alt={product.name}
                         style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '10px', border: '1px solid var(--border)' }}
-                        onError={(e) => { e.target.src = '/assets/vials/generic-vial.png'; }}
+                        onError={(e) => { e.target.src = '/peptide-placeholder.png'; }}
                       />
                       <div>
                         <div onClick={() => onSelectProduct(product.name)} style={{ fontWeight: 800, color: 'var(--primary)', cursor: 'pointer', fontSize: '1.1rem' }}>{product.name}</div>
@@ -174,7 +173,6 @@ export default function ObjectiveDetailView({
               isProfessional={isProfessional}
               products={products}
               allFaqs={allFaqs}
-              allMappings={allMappings}
             />
           ))}
         </div>

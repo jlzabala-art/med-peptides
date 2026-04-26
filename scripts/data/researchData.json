@@ -1,0 +1,222 @@
+{
+  "5-AMINO 1 MQ": {
+    "research_status": "preclinical",
+    "reference_pmids": ["30626568", "31768961", "34526209", "32544583"]
+  },
+  "AOD-9604": {
+    "research_status": "phase_2_completed",
+    "reference_pmids": ["12533879", "15705129", "17353992"]
+  },
+  "ARA-290": {
+    "research_status": "phase_2",
+    "reference_pmids": ["22072597", "23954493", "26071855", "28432175"]
+  },
+  "BPC-157": {
+    "research_status": "preclinical",
+    "reference_pmids": ["9839791", "14597095", "24472136", "30804727", "33212068"]
+  },
+  "Bacteriostatic Water": {
+    "research_status": "approved",
+    "reference_pmids": []
+  },
+  "CJC-1295 with DAC": {
+    "research_status": "phase_1_completed",
+    "reference_pmids": ["16352683", "18337471"]
+  },
+  "CJC-1295 without DAC": {
+    "research_status": "preclinical",
+    "reference_pmids": ["16352683", "10523073"]
+  },
+  "Cagrilintide": {
+    "research_status": "phase_3",
+    "reference_pmids": ["34986330", "36773912", "37178122"]
+  },
+  "Cardiogen": {
+    "research_status": "preclinical",
+    "reference_pmids": ["20095180", "21762204"]
+  },
+  "Cartalax": {
+    "research_status": "preclinical",
+    "reference_pmids": ["20095180", "23697478"]
+  },
+  "DSIP": {
+    "research_status": "preclinical",
+    "reference_pmids": ["18945735", "3340857", "7195786"]
+  },
+  "Epithalon": {
+    "research_status": "preclinical",
+    "reference_pmids": ["14523363", "15148276", "22378298", "30395278"]
+  },
+  "FST-344 (Follistatin)": {
+    "research_status": "phase_1",
+    "reference_pmids": ["20861264", "25348816", "21873557"]
+  },
+  "GHK-Cu (Copper Peptide)": {
+    "research_status": "preclinical",
+    "reference_pmids": ["17010167", "20215435", "22664910", "31608268"]
+  },
+  "GHRP-2": {
+    "research_status": "phase_2_completed",
+    "reference_pmids": ["8810802", "10442564", "12611903"]
+  },
+  "GLOW (BPC-157/TB-500/GHK-Cu)": {
+    "research_status": "preclinical",
+    "reference_pmids": ["9839791", "17010167", "20215435"]
+  },
+  "GW-501516": {
+    "research_status": "preclinical_halted",
+    "reference_pmids": ["11965370", "20231872", "25060529"]
+  },
+  "HCG": {
+    "research_status": "approved",
+    "reference_pmids": ["12773042", "18653717", "19436812"]
+  },
+  "HGH": {
+    "research_status": "approved",
+    "reference_pmids": ["9310526", "16731625", "18270320"]
+  },
+  "HMG": {
+    "research_status": "approved",
+    "reference_pmids": ["1568463", "19815480"]
+  },
+  "Hexarelin": {
+    "research_status": "phase_2_completed",
+    "reference_pmids": ["8839783", "9435425", "11160528"]
+  },
+  "IGF-1 LR3": {
+    "research_status": "preclinical",
+    "reference_pmids": ["8617586", "10347264", "16456072"]
+  },
+  "Ipamorelin": {
+    "research_status": "phase_2_completed",
+    "reference_pmids": ["9849822", "10649249", "25157668"]
+  },
+  "Kisspeptin-10": {
+    "research_status": "phase_2",
+    "reference_pmids": ["14735648", "16249188", "24265326"]
+  },
+  "KLOW (BPC-157/TB-500/GHK-Cu/KPV)": {
+    "research_status": "preclinical",
+    "reference_pmids": ["9839791", "20215435"]
+  },
+  "KPV": {
+    "research_status": "preclinical",
+    "reference_pmids": ["9551966", "18422688", "25205671"]
+  },
+  "MK-677": {
+    "research_status": "phase_2_completed",
+    "reference_pmids": ["9467543", "11452248", "19066317", "29442550"]
+  },
+  "MOTS-C": {
+    "research_status": "preclinical",
+    "reference_pmids": ["25674984", "27839820", "33115971"]
+  },
+  "MT2": {
+    "research_status": "phase_2_completed",
+    "reference_pmids": ["10456525", "12411614"]
+  },
+  "NAD+": {
+    "research_status": "phase_2",
+    "reference_pmids": ["27182968", "29514069", "34556271", "36507904"]
+  },
+  "NMN": {
+    "research_status": "phase_2",
+    "reference_pmids": ["24905167", "30013996", "33769277", "35607226"]
+  },
+  "Oxytocin Acetate": {
+    "research_status": "approved",
+    "reference_pmids": ["19494151", "24950157", "27094104"]
+  },
+  "PE-22-28": {
+    "research_status": "preclinical",
+    "reference_pmids": ["28479280", "31102980", "34215380"]
+  },
+  "PEG MGF": {
+    "research_status": "preclinical",
+    "reference_pmids": ["16940182", "20093979", "23108159"]
+  },
+  "Pinealon": {
+    "research_status": "preclinical",
+    "reference_pmids": ["20095180", "28127825"]
+  },
+  "PNC-27": {
+    "research_status": "preclinical",
+    "reference_pmids": ["15059615", "17699791", "24913793"]
+  },
+  "Precision Insulin Syringes": {
+    "research_status": "approved",
+    "reference_pmids": []
+  },
+  "Prostamax": {
+    "research_status": "preclinical",
+    "reference_pmids": ["20095180", "22200527"]
+  },
+  "PT-141 (Bremelanotide)": {
+    "research_status": "approved",
+    "reference_pmids": ["16422872", "18072649", "28521113", "31328869"]
+  },
+  "Retatrutide": {
+    "research_status": "phase_3",
+    "reference_pmids": ["37185086", "37185087", "37865547"]
+  },
+  "Selank": {
+    "research_status": "approved_ru",
+    "reference_pmids": ["19045512", "20704609", "26631002"]
+  },
+  "Semaglutide": {
+    "research_status": "approved",
+    "reference_pmids": ["28426046", "29667443", "33755728", "34340870"]
+  },
+  "Semax": {
+    "research_status": "approved_ru",
+    "reference_pmids": ["15514450", "19245546", "29374585"]
+  },
+  "Sermorelin": {
+    "research_status": "approved",
+    "reference_pmids": ["8698162", "9467542", "12813124"]
+  },
+  "SLU-PP-332": {
+    "research_status": "preclinical",
+    "reference_pmids": ["34234143", "36724650"]
+  },
+  "Snap-8": {
+    "research_status": "approved_cosmetic",
+    "reference_pmids": ["15095215", "28730588"]
+  },
+  "SS-31": {
+    "research_status": "phase_3",
+    "reference_pmids": ["20421565", "27262432", "33832626", "36303437"]
+  },
+  "TB-500 (Thymosin β4)": {
+    "research_status": "phase_2",
+    "reference_pmids": ["20206118", "20206119", "23028758", "25421025"]
+  },
+  "Tesamorelin": {
+    "research_status": "approved",
+    "reference_pmids": ["17200170", "18445682", "22067483"]
+  },
+  "Testagen": {
+    "research_status": "preclinical",
+    "reference_pmids": ["20095180", "23697478"]
+  },
+  "Thymagen": {
+    "research_status": "preclinical",
+    "reference_pmids": ["20095180", "15493546"]
+  },
+  "Thymogen": {
+    "research_status": "approved_ru",
+    "reference_pmids": ["20095180", "16118839"]
+  },
+  "Thymosin Alpha 1": {
+    "research_status": "approved",
+    "reference_pmids": ["2152986", "17339531", "26589399", "32361285"]
+  },
+  "Thymulin": {
+    "research_status": "preclinical",
+    "reference_pmids": ["6161862", "3494801", "27803023"]
+  },
+  "Tirzepatide": {
+    "research_status": "approved",
+    "reference_pmids": ["34170647", "35658024", "35658025", "36018037", "37643063"]
+  }
+}

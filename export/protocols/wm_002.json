@@ -1,0 +1,604 @@
+{
+  "active": true,
+  "bundleVersion": "2.0",
+  "number_of_phases": 3,
+  "physician_supervision_required": true,
+  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "protocol_author_organization": "ReGen PEPT",
+  "protocol_duration_weeks": 12,
+  "protocol_id": "wm_002",
+  "protocol_is_curated": true,
+  "protocol_version": "v6.0",
+  "washout_recommended_weeks": 4,
+  "metadata": {
+    "longDescription": "This protocol pairs semaglutide (a GLP-1 receptor agonist approved for chronic weight management) with cagrilintide (a long-acting amylin analogue). Semaglutide reduces energy intake via hypothalamic GLP-1R activation and slows gastric emptying (Wilding et al., NEJM 2021). Cagrilintide targets amylin receptors in the hypothalamus and area postrema, providing complementary satiety signalling beyond GLP-1 pathways (Enebo et al., Lancet 2021). The REDEFINE-1 trial of the fixed-dose combination (CagriSema) demonstrated superior weight reduction vs. either monotherapy (Knop et al., Lancet 2023). AOD-9604 is added in the escalation phase to enhance lipolysis via truncated GH fragment activity without promoting insulin resistance.",
+    "primary_goal": "Weight Management / Obesity",
+    "keywords": [
+      "semaglutide",
+      "cagrilintide",
+      "CagriSema",
+      "GLP-1",
+      "amylin",
+      "dual hormone weight loss"
+    ],
+    "references": [
+      {
+        "pmid": "33567185",
+        "citation": "Wilding JPH et al. NEJM 2021 — STEP 1 trial."
+      },
+      {
+        "pmid": "34126063",
+        "citation": "Enebo LB et al. Lancet 2021 — Cagrilintide trial."
+      },
+      {
+        "pmid": "38161985",
+        "citation": "Knop FK et al. Lancet 2023 — CagriSema trial."
+      }
+    ],
+    "visibility": "restricted_research",
+    "scientificName": "Semaglutide + Cagrilintide GLP-1 & Long-Acting Amylin Dual-Hormone Protocol",
+    "description": "12-week dual-hormone weight-loss protocol pairing semaglutide GLP-1 agonism with cagrilintide amylin receptor activation for sustained appetite suppression and adiposity reduction.",
+    "primary_condition": "obesity_metabolic_dysfunction",
+    "version": "1.0",
+    "clinical_summary": "Structured multi-phase metabolic protocol designed to improve adiposity regulation, insulin sensitivity, metabolic flexibility, and progressive body composition optimization through staged pharmacologic and peptide-based interventions.",
+    "evidence_grade": "A",
+    "schema_version": "antigravity_v2",
+    "complexity_level": "advanced",
+    "abbreviatedName": "Semaglutide + Cagrilintide",
+    "shortCode": "WMT-002"
+  },
+  "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
+  "protocol_is_physician_authored": false,
+  "seeded_at": "2026-04-25T06:10:36.133Z",
+  "protocol_source_version": "v5.0",
+  "schema_version": "antigravity_v2",
+  "dosing_enrichment": {
+    "titration_note": "Weeks 1-2: AOD-9604 at 150 mcg/day SC to assess tolerability. Weeks 3-8: increase to 300 mcg/day. Weeks 9-16: maintain 300 mcg/day with caloric deficit protocol. 5-Amino-1MQ can be added from week 3 at 50 mg 2x/day to boost NNMT inhibition and adipocyte metabolic rate.",
+    "cycling_recommendation": "16-week active protocol (divided as 8-week primary + 8-week consolidation). 4-6 week washout before repeat cycle. AOD-9604 receptor sensitivity maintained with cycling; continuous use beyond 20 weeks not recommended.",
+    "maintenance_dose": "AOD-9604: 300 mcg/day SC (pre-breakfast, fasted). 5-Amino-1MQ (if included): 50-100 mg orally 2x/day. Fragment 176-191 (if used): 500 mcg/day SC on training days.",
+    "timing_optimization": "AOD-9604: administer 30 minutes before breakfast in fasted state for maximal lipolytic effect via GHSR-independent beta-3 adrenergic activation. Avoid carbohydrate intake within 30 minutes post-injection to preserve insulin-independent fat mobilization."
+  },
+  "complexity_level": "advanced",
+  "eligibility_rules": {
+    "contraindications": [
+      "history_of_pancreatitis",
+      "MEN2_syndrome",
+      "medullary_thyroid_carcinoma_history",
+      "pregnancy",
+      "severe_gi_disorder"
+    ],
+    "supported_goals": [
+      "weight_management",
+      "obesity",
+      "metabolic_health"
+    ],
+    "relative_cautions": [
+      "gallbladder_disease",
+      "rapid_weight_loss_history",
+      "advanced_renal_impairment"
+    ],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "patient_demographic",
+      "age_group",
+      "start_date",
+      "baseline_weight",
+      "height_cm",
+      "bmi",
+      "metabolic_status",
+      "tolerance_profile",
+      "duration_weeks"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "normalizedAt": "2026-04-26T11:19:09.485Z",
+  "generated_protocol_template": {
+    "patient_context": {
+      "age_group": null,
+      "baseline_weight": null,
+      "duration_weeks": null,
+      "height_cm": null,
+      "metabolic_status": null,
+      "patient_demographic": null,
+      "physician_supervision_required": true,
+      "primary_clinical_focus": null,
+      "protocol_id": "wm_002",
+      "sex": null,
+      "tempo_preference": "standard",
+      "tolerance_profile": "average",
+      "bmi": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_group": "adult",
+      "duration_weeks": 12,
+      "intensity": "standard",
+      "sex": "universal",
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "validated_at": null,
+      "validated_by": null,
+      "validation_notes": "Auto-generated template. Pending clinical review.",
+      "validation_status": "NOT_EVALUATED",
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "protocol_author_notes": "Official curated protocol for general clinical use.",
+  "protocol_last_reviewed_at": "2026-03-29",
+  "protocol_source_reference": "internal_guide",
+  "expected_outcomes": {
+    "qualitative": [
+      "Progressive reduction in visceral and subcutaneous adipose tissue",
+      "Improved lipid panel: reduction in LDL and triglycerides",
+      "Reduced appetite and improved satiety signaling",
+      "Preservation of lean mass during caloric deficit",
+      "Improved fasting glucose and insulin sensitivity"
+    ],
+    "time_to_onset_weeks": 3,
+    "quantitative_ranges": {
+      "week_16": "Total body fat reduction of 8-14% with caloric deficit; visceral fat area reduction 15-25% (Heffernan 2001)",
+      "week_8": "Total body fat reduction 4-6%; LDL reduction 8-12% from baseline; fasting insulin decrease 15-20%",
+      "week_4": "Weight loss of 1.5-3 kg vs baseline; waist circumference reduction of 2-4 cm; appetite VAS improvement 20-35%"
+    },
+    "responder_rate_pct": "65-75% for fat loss greater than 5% body fat; ~60% for lipid normalization"
+  },
+  "phase_blueprints": [
+    {
+      "phase_key": "initiation",
+      "phase_title": "Initiation",
+      "default_start_week": 1,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "tolerance_building",
+        "early_satiety_induction"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_semaglutide",
+          "product_title": "Semaglutide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "starting_weekly_dose": 0.25,
+            "administration_frequency": "weekly",
+            "administration_days_default": [
+              "Monday"
+            ]
+          }
+        },
+        {
+          "product_id": "prd_cagrilintide",
+          "product_title": "Cagrilintide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "starting_weekly_dose": 0.3,
+            "administration_frequency": "weekly",
+            "administration_days_default": [
+              "Monday"
+            ]
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 1,
+          "event_type": "baseline_review",
+          "title": "Baseline metabolic review"
+        },
+        {
+          "week": 4,
+          "event_type": "outcome_review",
+          "title": "Phase outcome and safety review"
+        }
+      ]
+    },
+    {
+      "phase_key": "escalation",
+      "phase_title": "Escalation",
+      "default_start_week": 5,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "dose_escalation",
+        "fat_loss_acceleration"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_semaglutide",
+          "product_title": "Semaglutide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "default_weekly_dose": 0.5,
+            "possible_next_step_dose": 1,
+            "administration_frequency": "weekly",
+            "administration_days_default": [
+              "Monday"
+            ]
+          }
+        },
+        {
+          "product_id": "prd_cagrilintide",
+          "product_title": "Cagrilintide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "default_weekly_dose": 0.6,
+            "possible_next_step_dose": 1.2,
+            "administration_frequency": "weekly"
+          }
+        },
+        {
+          "product_id": "prd_aod-9604",
+          "product_title": "AOD-9604",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mcg",
+            "dose_per_administration": 300,
+            "administration_frequency": "daily",
+            "timing_hint": "morning_fasting"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 5,
+          "event_type": "baseline_review",
+          "title": "Baseline metabolic review"
+        },
+        {
+          "week": 8,
+          "event_type": "outcome_review",
+          "title": "Phase outcome and safety review"
+        }
+      ]
+    },
+    {
+      "phase_key": "maintenance",
+      "phase_title": "Maintenance",
+      "default_start_week": 9,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "weight_stabilization",
+        "habit_consolidation"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_semaglutide",
+          "product_title": "Semaglutide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "default_weekly_dose": 1,
+            "max_weekly_dose": 2.4,
+            "administration_frequency": "weekly"
+          }
+        },
+        {
+          "product_id": "prd_cagrilintide",
+          "product_title": "Cagrilintide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "default_weekly_dose": 1.2,
+            "administration_frequency": "weekly"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 9,
+          "event_type": "baseline_review",
+          "title": "Baseline metabolic review"
+        },
+        {
+          "week": 12,
+          "event_type": "outcome_review",
+          "title": "Phase outcome and safety review"
+        }
+      ]
+    }
+  ],
+  "protocol_slug": "weight-management-cagrisem-12w",
+  "phases": [
+    {
+      "phase_number": 1,
+      "phase_title": "Initiation",
+      "start_week": 1,
+      "end_week": 4,
+      "drugs_used": [
+        {
+          "product_slug": "semaglutide",
+          "selected_strength": "5mg",
+          "route": "subcutaneous",
+          "weekly_dose": "0.25mg",
+          "vials_required_for_phase": 1,
+          "faq_ref": "semaglutide_faq",
+          "pubmed_ref": "semaglutide_pubmed"
+        },
+        {
+          "product_slug": "cagrilintide",
+          "selected_strength": "5mg",
+          "route": "subcutaneous",
+          "weekly_dose": "0.3mg",
+          "vials_required_for_phase": 1,
+          "faq_ref": "cagrilintide_faq",
+          "pubmed_ref": "cagrilintide_pubmed"
+        }
+      ]
+    },
+    {
+      "phase_number": 2,
+      "phase_title": "Escalation",
+      "start_week": 5,
+      "end_week": 8,
+      "drugs_used": [
+        {
+          "product_slug": "semaglutide",
+          "selected_strength": "5mg",
+          "weekly_dose": "0.5mg",
+          "vials_required_for_phase": 1
+        },
+        {
+          "product_slug": "cagrilintide",
+          "selected_strength": "5mg",
+          "weekly_dose": "0.6mg",
+          "vials_required_for_phase": 1
+        },
+        {
+          "product_slug": "aod-9604",
+          "selected_strength": "5mg",
+          "dosing_frequency": "daily",
+          "vials_required_for_phase": 4,
+          "productId": "AOD-9604-5mg-vial"
+        }
+      ]
+    },
+    {
+      "phase_number": 3,
+      "phase_title": "Maintenance",
+      "start_week": 9,
+      "end_week": 12,
+      "drugs_used": [
+        {
+          "product_slug": "semaglutide",
+          "selected_strength": "10mg",
+          "weekly_dose": "1mg",
+          "vials_required_for_phase": 1
+        },
+        {
+          "product_slug": "cagrilintide",
+          "selected_strength": "10mg",
+          "weekly_dose": "1.2mg",
+          "vials_required_for_phase": 1
+        }
+      ]
+    }
+  ],
+  "riskManagement": {
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (10–30%)",
+        "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+      },
+      {
+        "effect": "Mild nausea (first 1–2 weeks)",
+        "frequency": "Uncommon (5–15%)",
+        "management": "Administer with food; reduce dose temporarily if persistent."
+      },
+      {
+        "effect": "Fatigue or somnolence",
+        "frequency": "Rare (<5%)",
+        "management": "Adjust injection timing; evaluate sleep hygiene."
+      },
+      {
+        "effect": "Headache",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Hydration; paracetamol as needed; review dosing."
+      }
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "contraindications": [
+      "Type 1 diabetes (insulin-dependent, use with caution)",
+      "Severe renal impairment",
+      "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+    ],
+    "escalation_criteria": [
+      "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+      "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+      "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+      "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+    ]
+  },
+  "primary_goal": "Weight Management / Obesity",
+  "risk_class": "low_to_moderate",
+  "protocol_review_status": "approved",
+  "protocol_source_type": "curated_library",
+  "overview_summary": "Three-phase dual-hormone metabolic weight management protocol combining GLP-1 receptor agonism with long-acting amylin signaling.",
+  "monitoring_plan": {
+    "baseline_required": [
+      "HbA1c",
+      "fasting_glucose",
+      "fasting_insulin",
+      "lipid_profile",
+      "AST",
+      "ALT",
+      "creatinine",
+      "body_weight",
+      "waist_circumference",
+      "body_composition",
+      "blood_pressure"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "week": 4,
+        "type": "tolerance_review",
+        "labs": [
+          "fasting_glucose",
+          "body_weight",
+          "blood_pressure"
+        ],
+        "purpose": "Assess GI tolerance and early response"
+      },
+      {
+        "week": 8,
+        "type": "metabolic_reassessment",
+        "labs": [
+          "HbA1c",
+          "fasting_glucose",
+          "lipid_profile"
+        ],
+        "purpose": "Evaluate metabolic improvements"
+      },
+      {
+        "week": 12,
+        "type": "final_outcome_review",
+        "labs": [
+          "HbA1c",
+          "lipid_profile",
+          "AST",
+          "ALT",
+          "creatinine"
+        ],
+        "purpose": "Final metabolic and safety evaluation"
+      }
+    ]
+  },
+  "economics": {
+    "total_protocol_cost_estimate": 520,
+    "total_vials_required": 9
+  },
+  "protocol_author_title": "Peptide Specialists",
+  "confidence_score": 93,
+  "protocol_title": "Semaglutide + Cagrilintide Dual-Hormone Protocol",
+  "safety_profile": {
+    "drug_interactions": [
+      "AOD-9604 does not stimulate GH axis - safe to co-administer with GH-releasing peptides",
+      "Avoid high carbohydrate meals within 30 min of AOD-9604 injection (insulin antagonizes lipolytic effect)",
+      "5-Amino-1MQ may interact with methylation-pathway medications - caution with folate antagonists"
+    ],
+    "monitoring_required": [
+      "Body composition (DXA or BIA) at baseline and week 8/16",
+      "Fasting glucose, HbA1c, fasting insulin at weeks 0 and 8",
+      "Lipid panel at weeks 0 and 12",
+      "Weight and waist circumference monthly"
+    ],
+    "adverse_events_serious": [
+      "No serious adverse events in AOD-9604 Phase II/III trials (Heffernan 2001, Baker 2009)",
+      "5-Amino-1MQ: insufficient long-term human safety data - use with informed consent"
+    ],
+    "washout_recommended_weeks": 4,
+    "adverse_events_common": [
+      "Mild injection site reactions with AOD-9604 SC (10-15%)",
+      "Transient nausea in first 1-2 weeks at higher doses (5-10%)",
+      "Mild hypoglycemia risk if combined with insulin sensitizers - monitor glucose"
+    ]
+  },
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 6,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "Fasting glucose",
+        "Insulin",
+        "HOMA-IR",
+        "Lipid panel"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 12,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "HbA1c",
+        "Full lipid panel",
+        "Body composition (DEXA or impedance)"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "status": "approved",
+  "generator_rules": {
+    "allow_acceleration": false,
+    "base_duration_weeks": 12,
+    "notes": "Default generator rules – pending clinical review.",
+    "tempo_variants": [
+      "standard"
+    ],
+    "allow_extension": false
+  },
+  "_syncSource": "export/protocols/wm_002.json",
+  "_patchedAt": {
+    "schema_gap_fix": "2026-04-26T12:37:11Z"
+  },
+  "_schemaVersion": "antigravity_v2",
+  "_patchSchema": "antigravity_v2",
+  "variant_rules": {
+    "tempo": {
+      "standard": {
+        "notes": "Standard tempo – no adjustment.",
+        "phase_duration_multiplier": 1
+      },
+      "accelerated": {
+        "notes": "Accelerated tempo – physician review required.",
+        "phase_duration_multiplier": 0.75
+      },
+      "extended": {
+        "notes": "Extended tempo – for slower responders.",
+        "phase_duration_multiplier": 1.33
+      }
+    }
+  },
+  "legacy_compatibility": {
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ],
+    "notes": "Legacy fields retained for backward compatibility; phase_blueprints are preferred when present.",
+    "enabled": true
+  },
+  "_syncedAt": "2026-04-26T12:46:38.765Z"
+}

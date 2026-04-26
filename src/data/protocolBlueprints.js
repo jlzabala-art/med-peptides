@@ -65,6 +65,14 @@ export const PROTOCOL_BLUEPRINTS = {
     safety: {
       sideEffects: ["Nausea", "Mild reflux", "Reduced appetite"],
       recommendedTests: ["Blood glucose", "HbA1c", "Lipids", "Liver enzymes"]
+    },
+    clinical_metadata: {
+      clinical_goal: "weight_loss",
+      secondary_goals: ["fat_loss", "insulin_sensitivity", "metabolic_health"],
+      primary_compounds: ["tirzepatide", "mots_c", "aod_9604"],
+      protocol_class: "glp1_based",
+      duration_weeks: 16,
+      intensity_level: "high"
     }
   },
   recoveryInjury: {
@@ -115,6 +123,14 @@ export const PROTOCOL_BLUEPRINTS = {
     safety: {
       sideEffects: ["Injection site redness (especially GHK-Cu)", "Mild fatigue"],
       recommendedTests: ["Inflammatory panels"]
+    },
+    clinical_metadata: {
+      clinical_goal: "recovery",
+      secondary_goals: ["anti_inflammatory", "tissue_repair", "joint_mobility"],
+      primary_compounds: ["bpc_157", "tb_500", "ghk_cu"],
+      protocol_class: "regenerative_based",
+      duration_weeks: 12,
+      intensity_level: "moderate"
     }
   },
   cognitiveSupport: {
@@ -163,6 +179,14 @@ export const PROTOCOL_BLUEPRINTS = {
     safety: {
       sideEffects: ["Mild headache", "Over-stimulation if taken late"],
       recommendedTests: ["Standard metabolic panel"]
+    },
+    clinical_metadata: {
+      clinical_goal: "cognitive_support",
+      secondary_goals: ["neuroprotection", "mental_clarity", "stress_reduction"],
+      primary_compounds: ["semax", "cerebrolysin", "selank", "dihexa"],
+      protocol_class: "nootropic_based",
+      duration_weeks: 8,
+      intensity_level: "moderate"
     }
   },
   sleepSupport: {
@@ -210,6 +234,14 @@ export const PROTOCOL_BLUEPRINTS = {
     safety: {
       sideEffects: ["Morning grogginess (rare)"],
       recommendedTests: ["Cortisol curve"]
+    },
+    clinical_metadata: {
+      clinical_goal: "longevity",
+      secondary_goals: ["sleep_quality", "circadian_reset", "anti_aging"],
+      primary_compounds: ["dsip", "epitalon"],
+      protocol_class: "epigenetic_based",
+      duration_weeks: 6,
+      intensity_level: "low"
     }
   },
   hormonalSupport: {
@@ -259,6 +291,14 @@ export const PROTOCOL_BLUEPRINTS = {
     safety: {
       sideEffects: ["Water retention", "Tingling in hands", "Mild insulin resistance"],
       recommendedTests: ["IGF-1", "HbA1c"]
+    },
+    clinical_metadata: {
+      clinical_goal: "longevity",
+      secondary_goals: ["body_composition", "fat_loss", "recovery"],
+      primary_compounds: ["ipamorelin", "cjc_1295", "tesamorelin"],
+      protocol_class: "gh_secretagogue_based",
+      duration_weeks: 16,
+      intensity_level: "moderate"
     }
   },
   skinAntiAging: {
@@ -306,6 +346,14 @@ export const PROTOCOL_BLUEPRINTS = {
     safety: {
       sideEffects: ["Post-injection pain (GHK-Cu)"],
       recommendedTests: ["Copper/Zinc ratio"]
+    },
+    clinical_metadata: {
+      clinical_goal: "longevity",
+      secondary_goals: ["anti_aging", "skin_health", "cellular_rejuvenation"],
+      primary_compounds: ["ghk_cu", "epitalon", "foxo4_dri"],
+      protocol_class: "epigenetic_based",
+      duration_weeks: 10,
+      intensity_level: "low"
     }
   },
   immuneInflammation: {
@@ -353,6 +401,14 @@ export const PROTOCOL_BLUEPRINTS = {
     safety: {
       sideEffects: ["Mild fatigue during initial immune response"],
       recommendedTests: ["CBC"]
+    },
+    clinical_metadata: {
+      clinical_goal: "anti_inflammatory",
+      secondary_goals: ["immune_modulation", "longevity", "recovery"],
+      primary_compounds: ["thymosin_alpha1", "ll_37"],
+      protocol_class: "immunomodulatory_based",
+      duration_weeks: 8,
+      intensity_level: "moderate"
     }
   },
   energyMitochondrial: {
@@ -401,6 +457,14 @@ export const PROTOCOL_BLUEPRINTS = {
     safety: {
       sideEffects: ["Intravenous/injection NAD+ can cause transient chest pressure/nausea"],
       recommendedTests: ["Standard Bloods"]
+    },
+    clinical_metadata: {
+      clinical_goal: "metabolic_health",
+      secondary_goals: ["longevity", "mitochondrial_support", "anti_inflammatory"],
+      primary_compounds: ["mots_c", "ss_31", "nad_plus"],
+      protocol_class: "mitochondrial_based",
+      duration_weeks: 12,
+      intensity_level: "high"
     }
   },
   generalSupport: {
@@ -436,6 +500,14 @@ export const PROTOCOL_BLUEPRINTS = {
     safety: {
       sideEffects: ["Minimal side effects expected"],
       recommendedTests: []
+    },
+    clinical_metadata: {
+      clinical_goal: "recovery",
+      secondary_goals: ["anti_inflammatory", "longevity", "sleep_quality"],
+      primary_compounds: ["bpc_157", "cjc_1295", "ipamorelin"],
+      protocol_class: "regenerative_based",
+      duration_weeks: 8,
+      intensity_level: "low"
     }
   }
 };

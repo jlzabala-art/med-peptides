@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { ROUTE } from '../constants/productEnums';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
@@ -173,24 +174,30 @@ export default function UserDashboard({ onBack }) {
       // Build a minimal rawProtocol structure from the order's Firestore data.
       // generateClinicalProtocol is flexible and falls back gracefully for missing fields.
       const rawProtocol = order.protocol ?? {
+        protocol_title: `Order ${order.orderId || order.id}`,
         phases: order.items?.map((item, idx) => ({
           phase_number: idx + 1,
-          phase_name: item.name,
-          duration_weeks: item.durationWeeks ?? null,
+          phase_title: item.name,             // pdfService reads phase_title
+          start_week: idx === 0 ? 1 : null,
+          end_week: null,
           drugs_used: [{
             product_title: item.name,
-            strength: item.strength ?? '',
-            weekly_dose: item.dose ?? '',
-            dosing_frequency: item.frequency ?? 'As directed',
-            route: item.route ?? 'Subcutaneous',
+            product_slug: item.name?.toLowerCase().replace(/\s+/g, '-') ?? '',
+            // item.variant stores the dosage string e.g. "5mg" or "2mg/0.5ml"
+            strength: item.variant ?? '',
+            weekly_dose: item.variant ?? '',
+            dosing_frequency: 'As directed',
+            route: ROUTE.SC,
           }],
         })) ?? [],
       };
 
       const formData = order.formData ?? {
-        patientName: user?.displayName ?? 'Research Patient',
-        practitionerName: order.customer?.name ?? '',
-        clinic: order.customer?.clinic ?? '',
+        patientName: order.customer?.fullName ??
+          (`${order.customer?.firstName ?? ''} ${order.customer?.lastName ?? ''}`.trim() ||
+          user?.displayName) ?? 'Research Patient',
+        practitionerName: order.customer?.fullName ?? '',
+        clinic: order.customer?.institution ?? '',
         orderId: order.orderId,
       };
 

@@ -1,0 +1,162 @@
+TASK: REFACTOR 4 PROTOCOL COMPONENTS INTO A UNIFIED SYSTEM
+
+FILES:
+
+InjectionDoseChart.jsx  
+ProtocolHeaderCharts.jsx  
+ProtocolSupplyEngine.jsx  
+ProtocolTimeline.jsx  
+
+OBJECTIVE:
+
+Improve:
+
+- performance
+- UX
+- functionality
+- architectural stability
+
+-------------------------------------
+
+PHASE 1 — CREATE CENTRAL COMPUTATION ENGINE
+
+Inside ProtocolSupplyEngine.jsx:
+
+Create:
+
+useProtocolComputation(protocol)
+
+Return:
+
+{
+  weeklySchedule,
+  phaseBoundaries,
+  compounds,
+  totalMg,
+  totalVials,
+  totalWeeks,
+  compoundTotals
+}
+
+-------------------------------------
+
+PHASE 2 — REMOVE DUPLICATED CALCULATIONS
+
+Remove all calculation logic from:
+
+InjectionDoseChart.jsx  
+ProtocolHeaderCharts.jsx  
+ProtocolTimeline.jsx  
+
+Replace with:
+
+computedProtocolData
+
+-------------------------------------
+
+PHASE 3 — MEMOIZATION
+
+Wrap computation:
+
+useMemo()
+
+Dependency:
+
+protocol.id
+
+Not:
+
+protocol object
+
+-------------------------------------
+
+PHASE 4 — OPTIMIZE GRAPH RENDERING
+
+Wrap:
+
+InjectionDoseChart.jsx
+
+With:
+
+React.memo()
+
+Prevent unnecessary rerenders.
+
+-------------------------------------
+
+PHASE 5 — INTERACTIVE LEGEND
+
+Allow:
+
+Click compound → toggle visibility  
+Double-click → isolate compound  
+
+-------------------------------------
+
+PHASE 6 — PHASE ZOOM
+
+Click phase:
+
+Initiation  
+Escalation  
+Maintenance  
+
+Zoom chart to selected weeks.
+
+-------------------------------------
+
+PHASE 7 — TOOLTIP ENHANCEMENT
+
+Display:
+
+Week  
+Phase  
+Compound doses  
+Total weekly load  
+
+-------------------------------------
+
+PHASE 8 — HERO SUMMARY STANDARDIZATION
+
+Hero must display:
+
+Total Weeks  
+Total Compounds  
+Total Vials  
+Total mg  
+
+Do not repeat elsewhere.
+
+-------------------------------------
+
+PHASE 9 — MOBILE OPTIMIZATION
+
+Stack layout:
+
+Title  
+Metrics  
+Chart  
+
+Use 2x2 metric grid.
+
+-------------------------------------
+
+PHASE 10 — ERROR SAFETY
+
+Wrap computeProtocol:
+
+try/catch
+
+Return fallback values.
+
+-------------------------------------
+
+SUCCESS:
+
+System becomes:
+
+- deterministic
+- fast
+- scalable
+- clinically usable
+- visually clean

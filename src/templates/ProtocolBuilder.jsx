@@ -585,7 +585,7 @@ const PathwayCard = ({ protocol, index, isSelected, isHovered, onSelect, onMouse
 
 // --- MAIN TEMPLATE ---
 
-export default function ProtocolBuilder({ region, products, cart, updateCart, setCartMetadata, onOpenCart }) {
+export default function ProtocolBuilder({ region, products, cart, updateCart, setCartMetadata, onOpenCart, addProtocolRequest }) {
   const navigate = useNavigate();
   const { isProfessional } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -919,6 +919,23 @@ export default function ProtocolBuilder({ region, products, cart, updateCart, se
         };
         
         const docId = await saveProtocol(protocolData, formData, options);
+        
+        // ── Add to protocol cart (no extra Firestore read needed) ──────────
+        if (addProtocolRequest) {
+          const agentNames = (protocolData.costData?.aggregateVials || [])
+            .map(v => v.name || v.drug || v.agent)
+            .filter(Boolean);
+          addProtocolRequest({
+            id:            docId,
+            name:          protocolData.blueprint?.title || protocolData.protocol_name || 'Protocol',
+            goal:          formData.primaryCondition || formData.goal || '',
+            phases:        (protocolData.blueprint?.phases || protocolData.phases || []).length,
+            products:      agentNames,
+            estimatedCost: protocolData.costData?.totalCostUSD ?? protocolData.costData?.total ?? 0,
+          });
+          if (onOpenCart) onOpenCart();
+        }
+        // ───────────────────────────────────────────────────────────────────
         
         // Update protocolData with save info
         setProtocolData(prev => ({

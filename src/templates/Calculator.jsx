@@ -1,11 +1,18 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, memo, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useResponsive } from '../hooks/useResponsive';
+import { usePageMeta } from '../hooks/usePageMeta';
 import SyringeVisualizer from '../components/SyringeVisualizer';
 import { jsPDF } from 'jspdf';
-import { FlaskConical, Download, BookOpen, Droplets, Syringe, ChevronRight } from 'lucide-react';
+import {
+  FlaskConical,
+  Download,
+  BookOpen,
+  ChevronRight,
+  AlertCircle,
+} from 'lucide-react';
 
-/* ─── helpers ─────────────────────────────────────────────────────────────── */
+/* ─── Math engine ─────────────────────────────────────────────────────────── */
 function calcUnits(mg, ml, dose) {
   const m = parseFloat(mg);
   const l = parseFloat(ml);
@@ -15,7 +22,7 @@ function calcUnits(mg, ml, dose) {
   return ((d / totalMcg) * l * 100).toFixed(1);
 }
 
-/* ─── PDF export ───────────────────────────────────────────────────────────── */
+/* ─── PDF export (unchanged logic) ───────────────────────────────────────── */
 function exportPDF({ mg, ml, dose, units }) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const now = new Date().toLocaleString();
@@ -119,115 +126,137 @@ function exportPDF({ mg, ml, dose, units }) {
   doc.save(`RegenPept_Reconstitution_${Date.now()}.pdf`);
 }
 
-/* ─── component ────────────────────────────────────────────────────────────── */
+/* ─── InputField — memoised ────────────────────────────────────────────────── */
+const InputField = memo(function InputField({ label, unit, hint, value, onChange, invalid }) {
+  return (
+    <div className="calc-field">
+      <label className="calc-field__label">
+        {label}
+        <span className="calc-field__unit">{unit}</span>
+      </label>
+      <div className="calc-field__wrap">
+        <input
+          type="number"
+          inputMode="decimal"
+          value={value}
+          onChange={onChange}
+          className={`calc-field__input${invalid ? ' calc-field__input--invalid' : ''}`}
+        />
+      </div>
+      <div className="calc-field__hint-row">
+        {invalid && (
+          <span className="calc-field__err">
+            <AlertCircle size={10} /> Must be &gt; 0
+          </span>
+        )}
+        {!invalid && <small className="calc-field__hint">{hint}</small>}
+      </div>
+    </div>
+  );
+});
+
+/* ─── Result number — glow animation when value changes ─────────────────────── */
+const ResultDisplay = memo(function ResultDisplay({ units }) {
+  const [glow, setGlow] = useState(false);
+  const prevRef = useRef(units);
+
+  useEffect(() => {
+    if (units !== prevRef.current && units !== '—') {
+      prevRef.current = units;
+      setGlow(true);
+      const t = setTimeout(() => setGlow(false), 600);
+      return () => clearTimeout(t);
+    }
+  }, [units]);
+
+  return (
+    <div className={`calc-result__number${glow ? ' calc-result__number--glow' : ''}`}>
+      {units}
+    </div>
+  );
+});
+
+/* ─── Main component ────────────────────────────────────────────────────────── */
 export default function Calculator() {
+  usePageMeta({
+    title: 'Peptide Reconstitution Calculator',
+    description: 'Free peptide reconstitution calculator for researchers — compute concentration, dose volume, and vial usage based on peptide mass and bacteriostatic water.',
+    path: '/calculator',
+  });
+
   const isMobile = useResponsive('(max-width: 767px)');
-  const isTablet = useResponsive('(max-width: 1099px)');
   const [reconData, setReconData] = useState({ mg: '5', ml: '2', dose: '250' });
 
+  // Memoised calculation
   const units = useMemo(
     () => calcUnits(reconData.mg, reconData.ml, reconData.dose),
     [reconData]
   );
 
-  const handleChange = (field) => (e) =>
-    setReconData((prev) => ({ ...prev, [field]: e.target.value }));
+  // Validation per field
+  const invalid = useMemo(() => ({
+    mg:   !reconData.mg   || parseFloat(reconData.mg)   <= 0,
+    ml:   !reconData.ml   || parseFloat(reconData.ml)   <= 0,
+    dose: !reconData.dose || parseFloat(reconData.dose) <= 0,
+  }), [reconData]);
 
-  const handleExport = () =>
-    exportPDF({ mg: reconData.mg, ml: reconData.ml, dose: reconData.dose, units });
+  const handleChange = useCallback((field) => (e) =>
+    setReconData((prev) => ({ ...prev, [field]: e.target.value })),
+    []
+  );
+
+  const handleExport = useCallback(
+    () => exportPDF({ mg: reconData.mg, ml: reconData.ml, dose: reconData.dose, units }),
+    [reconData, units]
+  );
 
   return (
-    <div style={{ backgroundColor: '#f7f9fc', minHeight: '100vh' }}>
+    <div className="calc-page">
 
-      {/* ── Hero Header ──────────────────────────────────────────────────── */}
-      <div style={{
-        background: 'linear-gradient(135deg, #002b4d 0%, #004b87 60%, #005fa3 100%)',
-        paddingTop: 'clamp(5rem, 12vw, 8rem)',
-        paddingBottom: 'clamp(3rem, 6vw, 5rem)',
-        textAlign: 'center',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        {/* Decorative circles */}
-        <div style={{
-          position: 'absolute', top: '-4rem', right: '-4rem',
-          width: '24rem', height: '24rem',
-          background: 'rgba(255,255,255,0.04)', borderRadius: '50%',
-          pointerEvents: 'none'
-        }} />
-        <div style={{
-          position: 'absolute', bottom: '-6rem', left: '-6rem',
-          width: '32rem', height: '32rem',
-          background: 'rgba(255,255,255,0.03)', borderRadius: '50%',
-          pointerEvents: 'none'
-        }} />
-
-        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-          {/* Badge */}
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-            backgroundColor: 'rgba(255,255,255,0.12)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            padding: '0.4rem 1rem', borderRadius: '999px',
-            color: 'rgba(255,255,255,0.9)', fontSize: '0.78rem',
-            fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
-            marginBottom: '1.5rem'
-          }}>
+      {/* ── Hero ──────────────────────────────────────────────────────────── */}
+      <div className="calc-hero">
+        <div className="calc-hero__orb calc-hero__orb--a" />
+        <div className="calc-hero__orb calc-hero__orb--b" />
+        <div className="container calc-hero__inner">
+          <div className="calc-hero__badge">
             <FlaskConical size={13} /> Research Tool
           </div>
-
-          <h1 style={{
-            fontSize: 'clamp(2rem, 5vw, 3.25rem)',
-            color: 'white', fontWeight: 850,
-            letterSpacing: '-0.03em', lineHeight: 1.1,
-            margin: '0 auto 1rem auto', maxWidth: '700px'
-          }}>
+          <h1 className="calc-hero__title">
             Precision Reconstitution<br />
-            <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '0.75em' }}>
-              Calculator
-            </span>
+            <span className="calc-hero__subtitle">Calculator</span>
           </h1>
-
-          <p style={{
-            color: 'rgba(255,255,255,0.65)', fontSize: 'clamp(0.95rem, 2vw, 1.1rem)',
-            maxWidth: '520px', margin: '0 auto', lineHeight: 1.6
-          }}>
+          <p className="calc-hero__tagline">
             Determine the exact insulin syringe units for your peptide dosage.
             Always verify with analytical standards.
           </p>
         </div>
       </div>
 
-      {/* ── Main Content ─────────────────────────────────────────────────── */}
-      <div className="container" style={{ paddingTop: '3rem', paddingBottom: '4rem' }}>
+      {/* ── Content ───────────────────────────────────────────────────────── */}
+      <div className="container calc-body">
 
-        {/* Primary grid: inputs + result side by side */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 1fr' : '1fr 380px',
-          gap: '1.5rem',
-          maxWidth: '900px',
-          margin: '0 auto 1.5rem auto',
-        }}>
+        {/* Mobile Picture-in-Picture syringe strip */}
+        {isMobile && (
+          <div className="calc-pip">
+            <div className="calc-pip__result">
+              <span className="calc-pip__label">Units to Inject</span>
+              <ResultDisplay units={units} />
+            </div>
+            <div className="calc-pip__syringe">
+              <SyringeVisualizer units={units} compact />
+            </div>
+          </div>
+        )}
 
-          {/* ── Input Panel ──────────────────────────────────────────────── */}
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '20px',
-            border: '1px solid #e8eef5',
-            boxShadow: '0 4px 24px rgba(0,43,77,0.06)',
-            padding: 'clamp(1.5rem, 4vw, 2.5rem)',
-          }}>
-            <h2 style={{
-              fontSize: '1.05rem', fontWeight: 800,
-              color: 'var(--primary)', marginBottom: '0.3rem',
-              letterSpacing: '-0.01em'
-            }}>
-              Research Parameters
-            </h2>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '2rem' }}>
-              Enter your vial specifications below.
-            </p>
+        {/* Primary grid */}
+        <div className={`calc-grid${isMobile ? ' calc-grid--mobile' : ''}`}>
+
+          {/* ── Input panel ─────────────────────────────────────────────── */}
+          <div className="calc-panel calc-panel--inputs">
+            <div className="calc-panel__head">
+              <h2 className="calc-panel__title">Research Parameters</h2>
+              <p className="calc-panel__desc">Enter your vial specifications below.</p>
+            </div>
 
             <InputField
               label="Peptide Quantity"
@@ -235,6 +264,7 @@ export default function Calculator() {
               hint={`e.g. ${reconData.mg} mg BPC-157 vial`}
               value={reconData.mg}
               onChange={handleChange('mg')}
+              invalid={invalid.mg}
             />
             <InputField
               label="Bacteriostatic Water"
@@ -242,6 +272,7 @@ export default function Calculator() {
               hint={`e.g. ${reconData.ml} ml added to vial`}
               value={reconData.ml}
               onChange={handleChange('ml')}
+              invalid={invalid.ml}
             />
             <InputField
               label="Desired Dose"
@@ -249,193 +280,99 @@ export default function Calculator() {
               hint={`e.g. ${reconData.dose} mcg per injection`}
               value={reconData.dose}
               onChange={handleChange('dose')}
+              invalid={invalid.dose}
             />
 
             {/* Formula breakdown */}
-            <div style={{
-              backgroundColor: '#f0f6ff',
-              borderRadius: '12px',
-              padding: '1rem 1.25rem',
-              border: '1px solid #d0e4f7',
-              marginTop: '0.5rem'
-            }}>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>
-                Formula
-              </div>
-              <code style={{ fontSize: '0.82rem', color: '#334', wordBreak: 'break-all', display: 'block', lineHeight: 1.5 }}>
+            <div className="calc-formula">
+              <div className="calc-formula__label">Formula</div>
+              <code className="calc-formula__eq">
                 ({reconData.dose} mcg ÷ ({reconData.mg} mg × 1000)) × {reconData.ml} ml × 100
-                {' '}= <strong style={{ color: 'var(--primary)' }}>{units} units</strong>
+                {' '}= <strong className="calc-formula__result">{units} units</strong>
               </code>
             </div>
           </div>
 
-          {/* ── Result Panel ─────────────────────────────────────────────── */}
-          <div style={{
-            background: 'linear-gradient(160deg, #002b4d 0%, #004b87 100%)',
-            borderRadius: '20px',
-            boxShadow: '0 8px 32px rgba(0,43,77,0.2)',
-            padding: 'clamp(1.5rem, 4vw, 2.5rem)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center',
-            gap: '1rem',
-            order: isMobile ? -1 : 0,
-          }}>
-            <div style={{
-              fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.12em',
-              textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)'
-            }}>
-              Calculated Research Dose
-            </div>
+          {/* ── Result panel — sticky on desktop ────────────────────────── */}
+          {!isMobile && (
+            <div className="calc-panel calc-panel--result">
+              <div className="calc-result">
+                <div className="calc-result__label">Units to Inject</div>
+                <ResultDisplay units={units} />
+                <div className="calc-result__units-label">UNITS</div>
 
-            <div style={{
-              fontSize: 'clamp(4rem, 10vw, 5.5rem)',
-              fontWeight: 850, color: 'white', lineHeight: 1,
-              letterSpacing: '-0.03em'
-            }}>
-              {units}
-            </div>
-            <div style={{
-              fontSize: '1.25rem', fontWeight: 700,
-              color: 'rgba(255,255,255,0.7)', letterSpacing: '0.08em',
-              marginTop: '-0.75rem'
-            }}>
-              UNITS
-            </div>
+                <SyringeVisualizer units={units} />
 
-            {/* Syringe visualizer */}
-            <SyringeVisualizer units={units} />
+                <div className="calc-result__tip">
+                  Pull the syringe to the{' '}
+                  <strong>{units}</strong> mark on a standard{' '}
+                  <strong>U-100 (1ml)</strong> insulin syringe.
+                </div>
 
-            <div style={{
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              borderRadius: '12px',
-              padding: '0.9rem 1.1rem',
-              border: '1px solid rgba(255,255,255,0.15)',
-              fontSize: '0.88rem',
-              color: 'rgba(255,255,255,0.85)',
-              lineHeight: 1.6,
-              width: '100%',
-            }}>
-              Pull the syringe to the{' '}
-              <strong style={{ color: 'white' }}>{units}</strong>{' '}
-              mark on a standard <strong>U-100 (1ml)</strong> insulin syringe.
-            </div>
-
-            <button
-              onClick={handleExport}
-              style={{
-                width: '100%',
-                padding: '0.85rem 1.5rem',
-                backgroundColor: 'white',
-                color: 'var(--primary)',
-                fontWeight: 800,
-                fontSize: '0.9rem',
-                borderRadius: '12px',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-                transition: 'opacity 0.2s, transform 0.2s',
-                letterSpacing: '0.02em',
-                marginTop: 'auto',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; }}
-            >
-              <Download size={16} /> Export PDF Report
-            </button>
-          </div>
-        </div>
-
-        {/* ── Secondary row: Coffee tip + Guide side by side ─────────────── */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-          gap: '1.5rem',
-          maxWidth: '900px',
-          margin: '0 auto 1.5rem auto',
-        }}>
-
-          {/* Coffee analogy */}
-          <div style={{
-            backgroundColor: '#fffbf5',
-            borderRadius: '20px',
-            border: '1px solid #f0ddb8',
-            padding: '1.75rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.75rem',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <span style={{ fontSize: '2rem', lineHeight: 1 }}>☕</span>
-              <div>
-                <span style={{
-                  display: 'inline-block',
-                  padding: '0.15rem 0.6rem',
-                  borderRadius: '999px',
-                  backgroundColor: '#fbbf24',
-                  color: '#78350f',
-                  fontSize: '0.68rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  marginBottom: '0.25rem',
-                }}>Quick Tip</span>
-                <h3 style={{ margin: 0, color: '#7a4c10', fontSize: '1rem', fontWeight: 800 }}>
-                  The Coffee Analogy
-                </h3>
+                {/* Minimalist PDF button */}
+                <button className="calc-pdf-btn" onClick={handleExport}>
+                  <Download size={14} strokeWidth={1.5} />
+                  Download PDF
+                </button>
               </div>
             </div>
+          )}
+        </div>
 
-            <p style={{ color: '#5a3a0a', fontSize: '0.88rem', lineHeight: 1.7, margin: 0 }}>
+        {/* Mobile PDF button (below inputs) */}
+        {isMobile && (
+          <button className="calc-pdf-btn calc-pdf-btn--mobile" onClick={handleExport}>
+            <Download size={14} strokeWidth={1.5} />
+            Download PDF Report
+          </button>
+        )}
+
+        {/* ── Secondary row ────────────────────────────────────────────────── */}
+        <div className={`calc-secondary${isMobile ? ' calc-secondary--mobile' : ''}`}>
+
+          {/* Coffee analogy */}
+          <div className="calc-card calc-card--amber">
+            <div className="calc-card__head">
+              <span className="calc-card__emoji">☕</span>
+              <div>
+                <span className="calc-card__badge">Quick Tip</span>
+                <h3 className="calc-card__title">The Coffee Analogy</h3>
+              </div>
+            </div>
+            <p className="calc-card__text">
               Think of your peptide{' '}
-              <strong style={amberVal}>{reconData.mg} mg</strong>{' '}
+              <mark style={amberVal}>{reconData.mg} mg</mark>{' '}
               as coffee grounds and{' '}
-              <strong style={amberVal}>{reconData.ml} ml</strong>{' '}
+              <mark style={amberVal}>{reconData.ml} ml</mark>{' '}
               of water as your brew. To get your{' '}
-              <strong style={amberVal}>{reconData.dose} mcg</strong>{' '}
+              <mark style={amberVal}>{reconData.dose} mcg</mark>{' '}
               dose, draw{' '}
-              <strong style={amberValLg}>{units} units</strong>{' '}
+              <mark style={amberValLg}>{units} units</mark>{' '}
               into your syringe.
             </p>
-
-            <p style={{ color: '#5a3a0a', fontSize: '0.85rem', lineHeight: 1.6, margin: 0, opacity: 0.8 }}>
+            <p className="calc-card__sub">
               More water dilutes the coffee. Less water makes it stronger —
               your reconstitution ratio determines how concentrated each unit is.
             </p>
           </div>
 
           {/* Reconstitution guide */}
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '20px',
-            border: '1px solid #e8eef5',
-            boxShadow: '0 4px 24px rgba(0,43,77,0.05)',
-            padding: '1.75rem',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.25rem' }}>
-              <BookOpen size={18} color="var(--primary)" />
-              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--primary)' }}>
+          <div className="calc-card calc-card--white">
+            <div className="calc-card__head">
+              <BookOpen size={16} color="var(--primary)" />
+              <h3 className="calc-card__title" style={{ color: 'var(--primary)' }}>
                 Reconstitution Guide
               </h3>
             </div>
-            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+            <ul className="calc-guide-list">
               {[
                 'Use <strong>Bacteriostatic Water</strong> for multi-dose research vials.',
                 'Gently swirl; <strong>never shake</strong> — shaking damages the molecular structure.',
                 'Store at <strong>2°C – 8°C</strong>, away from light, after reconstitution.',
                 'U-100 syringes have <strong>100 units per 1ml</strong>. Each unit = 0.01 ml.',
               ].map((tip, i) => (
-                <li key={i} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                  <span style={{
-                    flexShrink: 0, width: '20px', height: '20px',
-                    backgroundColor: 'rgba(0,43,77,0.08)',
-                    borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: 'var(--primary)', fontSize: '0.65rem', fontWeight: 800, marginTop: '1px'
-                  }}>{i + 1}</span>
+                <li key={i} className="calc-guide-list__item">
+                  <span className="calc-guide-list__num">{i + 1}</span>
                   <span dangerouslySetInnerHTML={{ __html: tip }} />
                 </li>
               ))}
@@ -444,116 +381,31 @@ export default function Calculator() {
         </div>
 
         {/* ── Supply CTAs ──────────────────────────────────────────────────── */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-          gap: '1rem',
-          maxWidth: '900px',
-          margin: '0 auto',
-        }}>
-          {/* Bacteriostatic Water */}
-          <Link to="/supplies" style={{ textDecoration: 'none' }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '1.25rem 1.5rem',
-              background: 'linear-gradient(135deg, #e8f4ff 0%, #f0f9ff 100%)',
-              borderRadius: '16px',
-              border: '1px solid #bfdbfe',
-              cursor: 'pointer',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,43,77,0.12)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                <span style={{ fontSize: '1.75rem' }}>💧</span>
-                <div>
-                  <p style={{ margin: '0 0 0.15rem 0', fontWeight: 800, color: 'var(--primary)', fontSize: '0.95rem' }}>
-                    Bacteriostatic Water
-                  </p>
-                  <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    Sterile 30 ml vials · 0.9% benzyl alcohol
-                  </p>
-                </div>
+        <div className={`calc-ctas${isMobile ? ' calc-ctas--mobile' : ''}`}>
+          <Link to="/supplies" className="calc-cta calc-cta--water">
+            <div className="calc-cta__left">
+              <span className="calc-cta__emoji">💧</span>
+              <div>
+                <p className="calc-cta__name">Bacteriostatic Water</p>
+                <p className="calc-cta__sub">Sterile 30 ml vials · 0.9% benzyl alcohol</p>
               </div>
-              <ChevronRight size={18} color="var(--primary)" />
             </div>
+            <ChevronRight size={17} className="calc-cta__arrow" />
           </Link>
 
-          {/* Syringes */}
-          <Link to="/supplies" style={{ textDecoration: 'none' }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '1.25rem 1.5rem',
-              background: 'linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%)',
-              borderRadius: '16px',
-              border: '1px solid #bbf7d0',
-              cursor: 'pointer',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(4,120,87,0.1)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                <span style={{ fontSize: '1.75rem' }}>💉</span>
-                <div>
-                  <p style={{ margin: '0 0 0.15rem 0', fontWeight: 800, color: '#065f46', fontSize: '0.95rem' }}>
-                    Precision Syringes
-                  </p>
-                  <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    31G × 8 mm · U-100 sterile insulin syringes
-                  </p>
-                </div>
+          <Link to="/supplies" className="calc-cta calc-cta--syringe">
+            <div className="calc-cta__left">
+              <span className="calc-cta__emoji">💉</span>
+              <div>
+                <p className="calc-cta__name">Precision Syringes</p>
+                <p className="calc-cta__sub">31G × 8 mm · U-100 sterile insulin syringes</p>
               </div>
-              <ChevronRight size={18} color="#065f46" />
             </div>
+            <ChevronRight size={17} className="calc-cta__arrow" />
           </Link>
         </div>
 
       </div>
-    </div>
-  );
-}
-
-/* ─── Input field sub-component ────────────────────────────────────────────── */
-function InputField({ label, unit, hint, value, onChange }) {
-  return (
-    <div style={{ marginBottom: '1.5rem' }}>
-      <label style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        fontSize: '0.88rem', fontWeight: 700, marginBottom: '0.5rem',
-        color: 'var(--text-main)'
-      }}>
-        {label}
-        <span style={{
-          fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)',
-          backgroundColor: 'rgba(0,43,77,0.07)', padding: '0.1rem 0.5rem',
-          borderRadius: '999px'
-        }}>{unit}</span>
-      </label>
-      <input
-        type="number"
-        inputMode="decimal"
-        value={value}
-        onChange={onChange}
-        style={{
-          width: '100%',
-          padding: '0.75rem 1rem',
-          borderRadius: '10px',
-          border: '1.5px solid #dde6f0',
-          fontSize: '1.05rem',
-          fontWeight: 600,
-          boxSizing: 'border-box',
-          touchAction: 'manipulation',
-          transition: 'border-color 0.2s, box-shadow 0.2s',
-          outline: 'none',
-          color: 'var(--text-main)',
-          backgroundColor: '#fafcff',
-        }}
-        onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,43,77,0.08)'; }}
-        onBlur={(e) => { e.currentTarget.style.borderColor = '#dde6f0'; e.currentTarget.style.boxShadow = 'none'; }}
-      />
-      <small style={{ color: 'var(--text-muted)', display: 'block', marginTop: '0.3rem', fontSize: '0.8rem' }}>{hint}</small>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { ROUTE_LABELS, ROUTE } from '../constants/productEnums.js';
 
 
 const formatDate = (dateString) => {
@@ -25,7 +26,10 @@ const normalizeDosing = (d) => {
   if (freq.toLowerCase() === '2x_week' || freq.toLowerCase() === '2x week') freq = '2x/week';
   if (freq.toLowerCase() === '5x_week' || freq.toLowerCase() === '5x/week') freq = '5x/week';
 
-  const route = d.route ? d.route.charAt(0).toUpperCase() + d.route.slice(1).toLowerCase() : 'Subcutaneous';
+  // Resolve canonical code (e.g. 'SC') → human label (e.g. 'Subcutaneous (SC)').
+  // Falls back gracefully for legacy raw strings that are already readable.
+  const rawRoute = d.variantRef?.route ?? d.route ?? ROUTE.SC;
+  const route = ROUTE_LABELS[rawRoute] ?? (rawRoute.charAt(0).toUpperCase() + rawRoute.slice(1).toLowerCase());
   
   return { compound, strength, dose, freq, route };
 };
@@ -75,8 +79,65 @@ const generateWeeklyPattern = (phase) => {
 const validateAndEnrichProtocol = (p) => {
   if (!p) return {};
   
-  const title = p.protocol_title || p.blueprint?.title || "Custom Clinical Protocol";
-  const phases = p.phases || p.blueprint?.phases || [];
+  const title = p.metadata?.scientificName
+    || p.blueprint?.metadata?.scientificName
+    || p.protocol_title
+    || p.blueprint?.title
+    || "Custom Clinical Protocol";
+
+  // ── Resolve phases: v2 uses phase_blueprints, legacy uses phases ──────────
+  const rawPhases = p.phases || p.blueprint?.phases || p.phase_blueprints || [];
+
+  // Normalise each phase to the canonical shape the rest of pdfService expects.
+  // v2 phase_blueprints use:
+  //   • .drugs | .compounds | .drugs_used   (compound list)
+  //   • .duration_weeks | .default_duration_weeks  (no start_week/end_week)
+  //   • .name | .phase_name | .title → phase_title
+  let cumulativeWeek = 0;
+  const phases = rawPhases.map((ph) => {
+    // Normalise compound list → drugs_used
+    const rawDrugs = ph.drugs_used || ph.drugs || ph.compounds || [];
+    const drugs_used = rawDrugs.map((d) => ({
+      // Canonical name fields
+      product_title: d.product_title || d.name || d.product_slug?.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ') || 'Compound',
+      name:          d.name || d.product_title || d.product_slug || '',
+      product_slug:  d.product_slug || d.slug || d.name || '',
+      // Dosing
+      strength:      d.strength || d.selected_strength || d.vial_strength_used || '',
+      weekly_dose:   d.weekly_dose || d.dose || d.per_administration_dose || '',
+      per_administration_dose: d.per_administration_dose || d.dose || d.weekly_dose || '',
+      dosing_frequency: d.dosing_frequency || d.frequency || 'daily',
+      route:         d.route || 'SC',
+      variantRef:    d.variantRef || null,
+      vial_strength_used: d.vial_strength_used || d.selected_strength || d.strength || '5mg',
+      selected_strength:  d.selected_strength || d.strength || '5mg',
+      // Passthrough everything else
+      ...d,
+    }));
+
+    // Resolve timing
+    const durationWks = ph.duration_weeks || ph.default_duration_weeks || 0;
+    const startWeek = ph.start_week ?? (cumulativeWeek + 1);
+    const endWeek   = ph.end_week   ?? (cumulativeWeek + durationWks);
+    cumulativeWeek  = endWeek;
+
+    return {
+      phase_title: ph.phase_title || ph.phase_name || ph.name || ph.title || `Phase ${rawPhases.indexOf(ph) + 1}`,
+      phase_objectives: ph.phase_objectives || ph.objectives || [],
+      computed_date_label: ph.computed_date_label || '',
+      start_week: startWeek,
+      end_week:   endWeek,
+      drugs_used,
+      // Passthrough
+      ...ph,
+      // Override with normalised versions (prevent spread from overwriting)
+      drugs_used,
+      phase_title: ph.phase_title || ph.phase_name || ph.name || ph.title || `Phase ${rawPhases.indexOf(ph) + 1}`,
+      start_week: startWeek,
+      end_week:   endWeek,
+    };
+  });
+
   const numPhases = (p.number_of_phases && p.number_of_phases > 0) ? p.number_of_phases : phases.length;
   
   let duration = p.protocol_duration_weeks || 0;
@@ -95,6 +156,7 @@ const validateAndEnrichProtocol = (p) => {
     phases
   };
 };
+
 
 const setupBrandingHeader = (doc) => {
   doc.setFontSize(22);
@@ -219,7 +281,7 @@ const renderStructuredReferences = (doc, yPos, evidence) => {
 /**
  * CLINICAL PROTOCOL: Structured & Grouped
  */
-export const generateClinicalProtocol = async (rawProtocol, formData) => {
+export const generateClinicalProtocol = async (rawProtocol, formData, chartDataUrl = null) => {
   const [jsPdfModule, autoTableModule] = await Promise.all([
     import('jspdf'),
     import('jspdf-autotable')
@@ -230,6 +292,7 @@ export const generateClinicalProtocol = async (rawProtocol, formData) => {
   const protocol = validateAndEnrichProtocol(rawProtocol);
   const doc = new jsPDF();
   const dateStr = formatDate(null);
+  const contentWidth = 182; // mm  (A4 210 – 14*2 margins)
   
   let yPos = setupBrandingHeader(doc);
   
@@ -242,7 +305,35 @@ export const generateClinicalProtocol = async (rawProtocol, formData) => {
   doc.setFontSize(10);
   doc.setTextColor(100, 116, 139);
   doc.text(`Clinical Report Generated: ${dateStr}`, 14, yPos);
-  yPos += 12;
+  yPos += 10;
+
+  // ── DOSE ESCALATION CHART (from header) ──────────────────────────────────
+  if (chartDataUrl) {
+    try {
+      yPos = checkPageBreak(doc, yPos, 80);
+
+      // Section label above chart
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(56, 189, 248); // #38bdf8 – matches the chart's cyan accent
+      doc.text('DOSE ESCALATION SCHEDULE', 14, yPos);
+      yPos += 4;
+
+      // Dark background rectangle for visual contrast
+      const chartH = 58; // mm — approx 4:3-ish crop of the SVG
+      doc.setFillColor(8, 13, 24); // #080d18 — same as chart bg
+      doc.roundedRect(14, yPos, contentWidth, chartH, 3, 3, 'F');
+
+      // Embed the rasterized chart PNG
+      doc.addImage(chartDataUrl, 'PNG', 14, yPos, contentWidth, chartH);
+      yPos += chartH + 8;
+    } catch (imgErr) {
+      console.warn('[pdfService] Chart image could not be embedded:', imgErr);
+      yPos += 4;
+    }
+  }
+
+  yPos += 2;
 
   // I — Patient Clinical Profile
   doc.setFontSize(11);
@@ -286,15 +377,33 @@ export const generateClinicalProtocol = async (rawProtocol, formData) => {
     doc.text(splitSummary, 14, yPos);
     yPos += (splitSummary.length * 5) + 6;
 
-    if (protocol.expected_outcomes && protocol.expected_outcomes.length > 0) {
+    // Support both legacy array format and new enriched object format
+    const eoData = protocol.expected_outcomes;
+    const eoList = Array.isArray(eoData)
+      ? eoData
+      : eoData?.qualitative || [];
+    if (eoList.length > 0) {
       doc.setFont('helvetica', 'bold');
       doc.text("Expected Clinical Outcomes:", 14, yPos);
       yPos += 5;
       doc.setFont('helvetica', 'normal');
-      protocol.expected_outcomes.forEach(o => {
+      eoList.forEach(o => {
         doc.text(`• ${o}`, 18, yPos);
         yPos += 5;
       });
+      // Also render quantitative milestones if present
+      const qr = eoData?.quantitative_ranges;
+      if (qr && !Array.isArray(eoData)) {
+        yPos += 2;
+        doc.setFont('helvetica', 'bold');
+        doc.text("Quantitative Benchmarks:", 14, yPos);
+        yPos += 5;
+        doc.setFont('helvetica', 'normal');
+        Object.entries(qr).forEach(([k, v]) => {
+          doc.text(`• ${k.replace(/_/g,' ')}: ${v}`, 18, yPos);
+          yPos += 5;
+        });
+      }
       yPos += 6;
     }
   }
@@ -315,14 +424,17 @@ export const generateClinicalProtocol = async (rawProtocol, formData) => {
 
     doc.setFontSize(10);
     doc.setTextColor(0, 54, 102);
-    doc.text(`STAGE ${idx + 1}: ${phase.phase_title.toUpperCase()}`, 14, yPos);
+    doc.text(`STAGE ${idx + 1}: ${(phase.phase_title || phase.phase_name || `Phase ${idx + 1}`).toUpperCase()}`, 14, yPos);
     doc.setFontSize(9);
     doc.setTextColor(100, 116, 139);
     const phaseTiming = phase.computed_date_label || `Weeks ${phase.start_week} to ${phase.end_week}`;
     doc.text(phaseTiming, 140, yPos);
     yPos += 8;
 
-    const objectives = phase.phase_objectives || protocol.expected_outcomes || [];
+    // Normalise objectives: support both legacy array and enriched object
+    const rawEo = protocol.expected_outcomes;
+    const fallbackEo = Array.isArray(rawEo) ? rawEo : rawEo?.qualitative || [];
+    const objectives = phase.phase_objectives || fallbackEo;
     if (objectives.length > 0) {
       doc.setFontSize(9);
       doc.setTextColor(15, 23, 42);
@@ -483,7 +595,7 @@ export const generateClinicalProtocol = async (rawProtocol, formData) => {
       head: [['Week', 'Metric / Required Labs', 'Clinical Rationale']],
       body: monitoring.map(m => [
         m.week === 0 ? "Week 0 (Baseline)" : `Week ${m.week}`, 
-        m.labs.join(', '), 
+        (m.labs || []).join(', '), 
         m.note || 'Safety monitoring'
       ]),
       theme: 'striped',
@@ -603,7 +715,7 @@ export const generatePatientGuide = async (rawProtocol, formData) => {
     const splitPhaseStr = phase.computed_date_label ? 
        `(${phase.computed_date_label} / Wks ${phase.start_week}-${phase.end_week})` : 
        `(Weeks ${phase.start_week}-${phase.end_week})`;
-    doc.text(`STAGE ${idx + 1}: ${phase.phase_title} ${splitPhaseStr}`, 18, yPos + 7);
+    doc.text(`STAGE ${idx + 1}: ${phase.phase_title || phase.phase_name || `Phase ${idx + 1}`} ${splitPhaseStr}`, 18, yPos + 7);
     yPos += 15;
 
     // Instructions as sentences
@@ -615,7 +727,8 @@ export const generatePatientGuide = async (rawProtocol, formData) => {
       const compound = d.product_title || d.name || 'Product';
       const strength = d.strength ? ` (${d.strength})` : '';
       const dose = d.weekly_dose || d.per_administration_dose || 'Titrated';
-      const route = d.route || 'subcutaneous';
+      const rawRoute = d.variantRef?.route ?? d.route ?? ROUTE.SC;
+      const route = ROUTE_LABELS[rawRoute] ?? (rawRoute.charAt(0).toUpperCase() + rawRoute.slice(1).toLowerCase());
       
       let instruction = `Take ${compound}${strength} at ${dose} once per week via ${route} injection.`;
       if (freq.includes('daily')) instruction = `Inject ${compound}${strength} (${dose}) daily via ${route} administration.`;
@@ -943,7 +1056,7 @@ export const generateDosageGuide = async (rawProtocol, formData) => {
       ? `${phase.computed_date_label} | Wks ${phase.start_week}–${phase.end_week}`
       : `Weeks ${phase.start_week}–${phase.end_week}`;
     doc.text(
-      `STAGE ${idx + 1}: ${phase.phase_title.toUpperCase()}    [${phaseWeeks}]`,
+      `STAGE ${idx + 1}: ${(phase.phase_title || phase.phase_name || `Phase ${idx + 1}`).toUpperCase()}    [${phaseWeeks}]`,
       18, yPos + 5.5
     );
     yPos += 12;
@@ -1105,7 +1218,7 @@ export const generateDosageGuide = async (rawProtocol, formData) => {
         .join(', ');
       checklistRows.push([
         `Week ${w}`,
-        phase.phase_title,
+        phase.phase_title || phase.phase_name || `Phase ${idx + 1}`,
         compounds,
         '☐ Dose Administered',
         '☐ Dose Withheld',

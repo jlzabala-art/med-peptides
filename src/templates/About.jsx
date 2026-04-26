@@ -1,5 +1,6 @@
 import React, { useState, useEffect, memo } from 'react';
 import { Globe, MapPin, Plus, Minus, Shield, Thermometer, GraduationCap } from 'lucide-react';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 // 1. Sub-componente memoizado para evitar re-renders de la lista
 const LocationCard = memo(({ loc, idx, isExpanded, onToggle }) => (
@@ -58,6 +59,12 @@ const LocationCard = memo(({ loc, idx, isExpanded, onToggle }) => (
 ));
 
 export default function About() {
+  usePageMeta({
+    title: 'About Med-Peptides',
+    description: 'Learn about Med-Peptides — our global network, institutional standards, and commitment to supplying verified research-grade peptides to professionals worldwide.',
+    path: '/about',
+  });
+
   const [expandedIndex, setExpandedIndex] = useState(0); // Primer elemento abierto por defecto
 
   useEffect(() => {

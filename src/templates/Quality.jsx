@@ -1,5 +1,6 @@
 import { ShieldCheck, Target, Layers, FileText, Award, Microscope } from 'lucide-react';
 import { useEffect } from 'react';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const features = [
   {
@@ -44,6 +45,12 @@ const TRUST_STATS = [
 ];
 
 export default function Quality() {
+  usePageMeta({
+    title: 'Quality & Analytical Standards',
+    description: 'Every Med-Peptides batch is verified by HPLC and Mass Spectrometry. Discover our rigorous quality control process and compliance certifications.',
+    path: '/quality',
+  });
+
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
   return (

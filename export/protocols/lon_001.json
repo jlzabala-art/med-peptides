@@ -1,0 +1,518 @@
+{
+  "protocol_duration_weeks": 12,
+  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "bundleVersion": "2.0",
+  "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
+  "protocol_is_physician_authored": false,
+  "seeded_at": "2026-04-25T06:10:36.132Z",
+  "protocol_source_version": "v5.0",
+  "dosing_enrichment": {
+    "titration_note": "Week 1: MOTS-c 5 mg SC 3x/week + Epitalon 10 mg/day SC for days 1-10. Week 2-12: MOTS-c 5-10 mg SC 3x/week + NMN 500 mg daily. Optional week 8 Epitalon re-pulse (10 mg/day x 10 days) for telomere signaling maintenance. Do not exceed MOTS-c 10 mg 3x/week without specialist guidance.",
+    "cycling_recommendation": "12-week active protocol followed by 6-8 week washout. Annual 2-cycle rotation recommended for longevity maintenance. Continuous use of MOTS-c beyond 16 weeks lacks long-term safety data in humans; periodic biomarker review required.",
+    "maintenance_dose": "MOTS-c: 5-10 mg SC 3x/week. Epitalon (adjunct): 10 mg SC daily for 10-day pulse at cycle start (repeat pulse at week 8). NAD+ precursor (NMN 500 mg or NR 300 mg): daily oral supplementation throughout cycle.",
+    "timing_optimization": "MOTS-c: morning injection on exercise or active days (exercise amplifies AMPK signaling and mitochondrial biogenesis synergy). Epitalon 10-day pulse: begin on day 1 of cycle, administer before sleep to align with pineal circadian window. NMN/NR: with morning meal."
+  },
+  "complexity_level": "moderate",
+  "eligibility_rules": {
+    "contraindications": [
+      "active_malignancy",
+      "pregnancy_or_breastfeeding",
+      "severe_hepatic_or_renal_impairment",
+      "known_hypersensitivity_to_protocol_compounds"
+    ],
+    "supported_goals": [
+      "longevity",
+      "mitochondrial_health",
+      "metabolic_flexibility",
+      "healthy_aging"
+    ],
+    "relative_cautions": [
+      "uncontrolled_diabetes",
+      "active_autoimmune_flare",
+      "recent_major_illness",
+      "frailty_with_low_oral_intake"
+    ],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "age_group",
+      "metabolic_status",
+      "baseline_energy_score",
+      "start_date"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "tempo_preference": "standard",
+      "age_group": null,
+      "patient_demographic": null,
+      "duration_weeks": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "protocol_author_notes": "Official curated protocol for general clinical use.",
+  "_schemaVersion": "antigravity_v2",
+  "protocol_author_organization": "ReGen PEPT",
+  "protocol_last_reviewed_at": "2026-03-29",
+  "protocol_source_reference": "internal_guide",
+  "expected_outcomes": {
+    "qualitative": [
+      "Improved mitochondrial biogenesis and cellular energy capacity",
+      "Reduced biological aging markers (telomere attrition rate)",
+      "Enhanced exercise capacity and VO2 max",
+      "Improved insulin sensitivity and metabolic flexibility",
+      "Reduced systemic oxidative stress and inflammatory burden",
+      "Subjective improvements in vitality, energy, and cognitive clarity"
+    ],
+    "time_to_onset_weeks": 3,
+    "quantitative_ranges": {
+      "week_8": "Mitochondrial function markers (CoQ10 efficiency, ATP production rate) improved 15-25%; CRP reduction 20-30% in inflammatory baseline subjects",
+      "week_4": "AMPK pathway activation markers (pACC) upregulated within 2 weeks; fasting glucose improved 5-12% from baseline; subjective energy improvement in 60-70%",
+      "week_12": "VO2 max improvement 8-15% in sedentary-to-active subjects; mtDNA copy number increase 20-30% (Lee C 2015); telomere length attrition rate slowed (Epitalon: Khavinson 2003)"
+    },
+    "responder_rate_pct": "65-75% for energy and mitochondrial biomarker response; ~60% for measurable VO2 max improvement"
+  },
+  "protocol_slug": "longevity-foundation-12w",
+  "phases": [
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "3x_week",
+          "productId": "MOTS-C-10mg-vial",
+          "product_slug": "mots-c",
+          "selected_strength": "5mg",
+          "vials_required_for_phase": 18
+        }
+      ],
+      "end_week": 6,
+      "phase_number": 1,
+      "phase_title": "Cellular Activation",
+      "start_week": 1
+    },
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "2x_week",
+          "productId": "MOTS-C-10mg-vial",
+          "product_slug": "mots-c",
+          "selected_strength": "5mg",
+          "vials_required_for_phase": 12
+        }
+      ],
+      "end_week": 12,
+      "phase_number": 2,
+      "phase_title": "Maintenance",
+      "start_week": 7
+    }
+  ],
+  "protocol_is_curated": true,
+  "number_of_phases": 2,
+  "primary_goal": "Longevity",
+  "risk_class": "moderate",
+  "protocol_review_status": "approved",
+  "protocol_source_type": "curated_library",
+  "active": true,
+  "overview_summary": "Longevity foundation protocol using MOTS-c-driven mitochondrial signaling to support AMPK activation, metabolic flexibility, exercise capacity, and cellular aging resilience.",
+  "protocol_id": "lon_001",
+  "protocol_version": "v6.1",
+  "economics": {
+    "total_protocol_cost_estimate": 1800,
+    "total_vials_required": 30
+  },
+  "protocol_author_title": "Peptide Specialists",
+  "confidence_score": 91,
+  "protocol_title": "MOTS-c Longevity Foundation Protocol",
+  "legacy_compatibility": {
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ],
+    "notes": "Enhanced protocol preserves legacy fields while supporting canonical blueprint-based loading.",
+    "enabled": true
+  },
+  "physician_supervision_required": true,
+  "status": "approved",
+  "_importedAt": {
+    "_nanoseconds": 365000000,
+    "_seconds": 1777189742
+  },
+  "_patchSchema": "antigravity_v2",
+  "id": "lon_001",
+  "phase_blueprints": [
+    {
+      "phase_key": "cellular_activation",
+      "phase_title": "Cellular Activation",
+      "default_start_week": 1,
+      "default_duration_weeks": 6,
+      "clinical_purpose": [
+        "legacy_phase_mapping",
+        "protocol_continuity"
+      ],
+      "drugs": [
+        {
+          "product_id": "MOTS-C-10mg-vial",
+          "product_title": "Mots C",
+          "route": "protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "3x_week",
+            "selected_strength": "5mg",
+            "vials_required_for_phase": 18,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "MOTS-C-10mg-vial",
+            "route": "protocol_defined"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 1,
+          "event_type": "phase_start",
+          "title": "Start Cellular Activation"
+        },
+        {
+          "week": 6,
+          "event_type": "phase_review",
+          "title": "Review Cellular Activation"
+        }
+      ]
+    },
+    {
+      "phase_key": "maintenance",
+      "phase_title": "Maintenance",
+      "default_start_week": 7,
+      "default_duration_weeks": 6,
+      "clinical_purpose": [
+        "legacy_phase_mapping",
+        "protocol_continuity"
+      ],
+      "drugs": [
+        {
+          "product_id": "MOTS-C-10mg-vial",
+          "product_title": "Mots C",
+          "route": "protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "2x_week",
+            "selected_strength": "5mg",
+            "vials_required_for_phase": 12,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "MOTS-C-10mg-vial",
+            "route": "protocol_defined"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 7,
+          "event_type": "phase_start",
+          "title": "Start Maintenance"
+        },
+        {
+          "week": 12,
+          "event_type": "phase_review",
+          "title": "Review Maintenance"
+        }
+      ]
+    }
+  ],
+  "category": "Longevity",
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 6,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "Telomere length proxy (TruAge or similar)",
+        "Oxidative stress markers (8-OHdG optional)"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 12,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "Biological age reassessment",
+        "NAD⁺ levels (if available)",
+        "Epigenetic clock score"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "riskManagement": {
+    "contraindications": [
+      "Active cancer or history of hormone-sensitive malignancy",
+      "Severe hepatic impairment",
+      "Pregnancy"
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (15–35%)",
+        "management": "Rotate sites; use proper aseptic technique."
+      },
+      {
+        "effect": "Fluid retention / mild edema",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Reduce dose; monitor blood pressure; salt restriction."
+      },
+      {
+        "effect": "Nausea / GI discomfort",
+        "frequency": "Common (10–25%)",
+        "management": "Dose with food; split doses; titrate slowly."
+      },
+      {
+        "effect": "Elevated fasting glucose",
+        "frequency": "Uncommon (5%)",
+        "management": "Monitor fasting glucose weekly; consult if persistent."
+      },
+      {
+        "effect": "Mood changes / irritability",
+        "frequency": "Rare (<3%)",
+        "management": "Reduce dose; psychological support if needed."
+      }
+    ],
+    "escalation_criteria": [
+      "Severe or worsening edema — STOP, cardiovascular evaluation",
+      "Fasting glucose > 7.0 mmol/L (126 mg/dL) on two occasions — Endocrinology referral",
+      "Allergic reaction — STOP, emergency protocol",
+      "Hypertensive urgency (BP > 180/110) — STOP, immediate medical attention"
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ]
+  },
+  "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+  "clinical_evidence_update_2026": {
+    "evidence_limitations": [
+      "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+      "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+      "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+    ],
+    "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+    "last_updated_at": "2026-04-26T08:05:00.000Z",
+    "latest_clinical_notes": [
+      "MOTS-c remains investigational with strong mechanistic and preclinical rationale but limited human therapeutic evidence.",
+      "Longevity claims should be framed as mitochondrial/metabolic support, not age reversal.",
+      "Monitor metabolic markers, body composition, fatigue/energy scales, and avoid use in active malignancy or uncontrolled systemic disease."
+    ],
+    "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+    "regulatory_status": "MOTS-c, Epitalon/Epithalon and DSIP are not FDA- or EMA-approved for longevity, circadian support, or anti-aging. Evidence remains mostly preclinical, translational, or region-specific.",
+    "evidence_update": "Keep evidence grade B/C depending on components, include active malignancy and pregnancy contraindications, and preserve washout/cycling recommendations.",
+    "updated_at": "2026-04-26T09:05:00+02:00",
+    "source_refs": [],
+    "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+  },
+  "_importBundle": "ReGen PEPT Core Clinical Protocol Library",
+  "_syncSource": "export/protocols/lon_001.json",
+  "metadata": {
+    "longDescription": "MOTS-c (mitochondrial open reading frame of the 12S rRNA-c) is an endogenous mitochondria-derived peptide encoded within the mitochondrial genome — the first peptide shown to be transcribed from mitochondrial rRNA rather than nuclear DNA (Lee C et al., Cell Metab 2015). MOTS-c circulates systemically and translocates to the nucleus under metabolic stress, where it activates AMPK (AMP-activated protein kinase), regulates the folate–methionine cycle, and modulates gene expression related to metabolic homeostasis, antioxidant defense, and insulin sensitivity. Circulating MOTS-c levels decline significantly with age, linking its reduction to age-associated metabolic decline (Reynolds JC et al., Nat Aging 2021). This 12-week foundation protocol delivers sustained MOTS-c supplementation across two phases — activation and maintenance — targeting the mitochondrial and metabolic hallmarks of aging as defined by López-Otín et al. (Cell 2023).",
+    "primary_goal": "Longevity",
+    "keywords": [
+      "MOTS-c longevity protocol",
+      "AMPK activator peptide aging",
+      "mitochondria peptide longevity",
+      "cellular aging peptide",
+      "anti-aging mitokine",
+      "longevity peptide protocol"
+    ],
+    "references": [
+      {
+        "citation": "Lee C et al. The Mitochondrial-Derived Peptide MOTS-c Promotes Metabolic Homeostasis. Cell Metab 2015;21:443-454.",
+        "pmid": "25738459"
+      },
+      {
+        "citation": "Reynolds JC et al. MOTS-c is an exercise-induced mitochondrial-encoded regulator of age-dependent physical decline. Nat Aging 2021;1:147-159.",
+        "pmid": "34282400"
+      },
+      {
+        "citation": "López-Otín C et al. Hallmarks of aging: An expanding universe. Cell 2023;186:243-278.",
+        "pmid": "37832556"
+      }
+    ],
+    "visibility": "public",
+    "scientificName": "MOTS-c Mitokine AMPK-Activating Longevity Foundation Protocol",
+    "description": "12-week longevity protocol using MOTS-c mitochondria-derived peptide to activate AMPK, improve insulin sensitivity, and support cellular hallmarks of healthy aging.",
+    "primary_condition": "cellular_aging_longevity",
+    "version": "1.0",
+    "schema_version": "antigravity_v2",
+    "updated_at": "2026-04-25T00:00:00.000Z",
+    "abbreviatedName": "MOTS-C + Tα1 · Longevity Axis",
+    "shortCode": "LON-001",
+    "created_at": "2026-04-02T00:00:00.000Z",
+    "clinical_summary": "MOTS-c is a mitochondria-encoded peptide that activates AMPK and nuclear AICAR pathways to improve mitochondrial biogenesis, metabolic flexibility, and stress resilience. In longevity protocols it is dosed cyclically to maintain AMPK sensitivity and preserve age-related decline in metabolic adaptation. This foundational protocol establishes the metabolic baseline before layering additional longevity agents.",
+    "evidence_grade": "B",
+    "source_quality_note": "Clinical content consolidated from protocol library and public biomedical literature; final medical use requires qualified clinician review.",
+    "review": {
+      "last_external_evidence_review_at": "2026-04-26",
+      "last_reviewed_at": "2026-04-25",
+      "review_status": "approved"
+    },
+    "regulatory_note": "Updated 2026: MOTS-c is not FDA/EMA-approved for longevity, metabolic disease, or anti-aging indications."
+  },
+  "monitoring_plan": {
+    "baseline_required": [
+      "biological_age_marker_if_available",
+      "fasting_glucose",
+      "HbA1c",
+      "lipid_profile",
+      "CRP",
+      "IL_6_if_available",
+      "body_composition",
+      "VO2max_or_exercise_tolerance",
+      "sleep_quality",
+      "energy_score"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "labs": [
+          "fasting_glucose",
+          "energy_score",
+          "exercise_tolerance"
+        ],
+        "purpose": "Assess early mitochondrial and metabolic response.",
+        "type": "early_longevity_response",
+        "week": 4
+      },
+      {
+        "labs": [
+          "HbA1c",
+          "lipid_profile",
+          "CRP"
+        ],
+        "purpose": "Evaluate metabolic flexibility and inflammatory response.",
+        "type": "metabolic_and_inflammatory_review",
+        "week": 8
+      },
+      {
+        "labs": [
+          "biological_age_marker_if_available",
+          "fasting_glucose",
+          "HbA1c",
+          "CRP",
+          "VO2max_or_exercise_tolerance"
+        ],
+        "purpose": "End-of-cycle longevity and mitochondrial response review.",
+        "type": "cycle_outcome_review",
+        "week": 12
+      }
+    ]
+  },
+  "generator_rules": {
+    "allow_acceleration": false,
+    "base_duration_weeks": 12,
+    "notes": "Default generator rules – pending clinical review.",
+    "tempo_variants": [
+      "standard"
+    ],
+    "allow_extension": false
+  },
+  "_schemaGapFixed": {
+    "_nanoseconds": 399000000,
+    "_seconds": 1777190723
+  },
+  "_patchedAt": {
+    "schema_gap_fix": "2026-04-26T12:37:11Z"
+  },
+  "_patchBundle": "ReGen PEPT Protocol Export - Clinical Update 2026-04-26",
+  "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
+  "variant_rules": {
+    "tempo": {
+      "standard": {
+        "notes": "Standard tempo – no adjustment.",
+        "phase_duration_multiplier": 1
+      },
+      "accelerated": {
+        "notes": "Accelerated tempo – physician review required.",
+        "phase_duration_multiplier": 0.75
+      },
+      "extended": {
+        "notes": "Extended tempo – for slower responders.",
+        "phase_duration_multiplier": 1.33
+      }
+    }
+  },
+  "safety_profile": {
+    "drug_interactions": [
+      "MOTS-c potentiates metformin's AMPK activation - consider dose reduction if both are used",
+      "NMN/NR may elevate NAD+ beyond target range with concurrent IV NAD+ therapy - avoid stacking",
+      "Epitalon: no known clinically significant drug interactions at immunomodulatory peptide doses"
+    ],
+    "monitoring_required": [
+      "Biological age markers: GlycanAge or TruAge methylation panel at baseline and end of cycle",
+      "Mitochondrial function: CoQ10 serum levels, CBC with differential at weeks 0 and 12",
+      "Metabolic panel: fasting glucose, HbA1c, lipids at weeks 0, 8, 12",
+      "VO2 max assessment or exercise tolerance test at baseline and week 12",
+      "CRP and IL-6 for inflammatory baseline and response tracking"
+    ],
+    "adverse_events_serious": [
+      "MOTS-c: no serious AEs in published animal or human pilot data at 5-10 mg doses",
+      "Epitalon: low-dose peptide with long-term rodent safety data; human long-term data limited to 15-year observational studies (Khavinson 2003)",
+      "Theoretical concern with NAD+ precursors in cancer-proliferating contexts - screen for active malignancy before initiation"
+    ],
+    "adverse_events_common": [
+      "Mild injection site reactions with MOTS-c SC (10-15%)",
+      "Transient fatigue or flu-like symptoms in week 1 (mitochondrial adaptation response, 5-10%)",
+      "Mild GI discomfort with NMN/NR supplementation at higher doses (5-8%)"
+    ]
+  },
+  "canonical_enrichment": {
+    "compatibleWith": "antigravity_v2_firebase_import",
+    "generatedAt": "2026-04-26T09:05:00+02:00",
+    "auditFieldsCompleted": [
+      "phase_blueprints_legacy_mapped"
+    ]
+  },
+  "_syncedAt": "2026-04-26T12:46:30.063Z"
+}

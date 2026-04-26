@@ -1,0 +1,484 @@
+TASK:
+Implement a dynamic "Related Protocols" system
+that identifies clinically relevant protocols
+based on structured protocol metadata.
+
+The system must NOT return static or fixed results.
+
+Protocols must be selected using clinical similarity logic.
+
+Display must reuse the existing "Trending Protocols"
+visual card component used on the Home page.
+
+-----------------------------------------
+GLOBAL OBJECTIVE
+-----------------------------------------
+
+Each protocol page must automatically show:
+
+Clinically relevant protocols
+
+Not random.
+
+Not static.
+
+Not manually assigned.
+
+Matching must be based on:
+
+Clinical logic.
+
+-----------------------------------------
+PHASE 1 — DEFINE CLINICAL MATCHING METADATA
+-----------------------------------------
+
+OBJECTIVE:
+
+Add structured clinical metadata to each protocol.
+
+-----------------------------------------
+
+REQUIRED FIELDS:
+
+clinical_goal:
+
+Examples:
+
+weight_loss  
+metabolic_health  
+longevity  
+cognitive_support  
+recovery  
+anti_inflammatory  
+
+-----------------------------------------
+
+secondary_goals:
+
+Array
+
+Examples:
+
+fat_loss  
+insulin_sensitivity  
+mitochondrial_support  
+
+-----------------------------------------
+
+primary_compounds:
+
+Array
+
+Examples:
+
+tirzepatide  
+mots_c  
+aod_9604  
+
+-----------------------------------------
+
+protocol_class:
+
+Examples:
+
+glp1_based  
+mitochondrial_based  
+lipolytic_based  
+
+-----------------------------------------
+
+duration_weeks:
+
+Numeric.
+
+-----------------------------------------
+
+intensity_level:
+
+low  
+moderate  
+high  
+
+-----------------------------------------
+
+SUCCESS:
+
+Each protocol becomes searchable clinically.
+
+-----------------------------------------
+PHASE 2 — BUILD MATCHING SCORING ENGINE
+-----------------------------------------
+
+OBJECTIVE:
+
+Compute similarity score between protocols.
+
+-----------------------------------------
+
+MATCHING RULES:
+
+Assign weighted scoring.
+
+-----------------------------------------
+
+WEIGHTS:
+
+Same clinical_goal → +50 points  
+
+Shared primary_compounds → +25 points  
+
+Shared protocol_class → +20 points  
+
+Similar duration (±2 weeks) → +10 points  
+
+Shared secondary_goals → +15 points  
+
+-----------------------------------------
+
+TOTAL SCORE:
+
+Maximum theoretical score: ~120
+
+-----------------------------------------
+
+FILTER:
+
+Exclude:
+
+Current protocol ID.
+
+-----------------------------------------
+
+SORT:
+
+Descending score.
+
+-----------------------------------------
+
+LIMIT:
+
+Return:
+
+Top 4 protocols.
+
+-----------------------------------------
+
+SUCCESS:
+
+Results become clinically relevant.
+
+-----------------------------------------
+PHASE 3 — IMPLEMENT RELATED PROTOCOLS QUERY
+-----------------------------------------
+
+OBJECTIVE:
+
+Fetch dynamically matched protocols.
+
+-----------------------------------------
+
+FUNCTION:
+
+getRelatedProtocols(protocolId)
+
+-----------------------------------------
+
+LOGIC:
+
+Fetch current protocol metadata.
+
+Run scoring engine.
+
+Return sorted list.
+
+-----------------------------------------
+
+PERFORMANCE:
+
+Cache results for:
+
+5 minutes.
+
+-----------------------------------------
+
+SUCCESS:
+
+Matching becomes fast.
+
+-----------------------------------------
+PHASE 4 — REUSE TRENDING PROTOCOL CARD UI
+-----------------------------------------
+
+OBJECTIVE:
+
+Use existing card system.
+
+Avoid creating new UI.
+
+-----------------------------------------
+
+COMPONENT:
+
+Reuse:
+
+TrendingProtocolCard
+
+-----------------------------------------
+
+DISPLAY FIELDS:
+
+Protocol name  
+Protocol badge  
+Duration  
+Primary compounds  
+Estimated cost  
+
+Mini phase indicator.
+
+-----------------------------------------
+
+LAYOUT:
+
+4 cards per row (desktop)
+
+Scrollable row (mobile)
+
+-----------------------------------------
+
+SUCCESS:
+
+Visual consistency maintained.
+
+-----------------------------------------
+PHASE 5 — ADD "RELATED PROTOCOLS" SECTION
+-----------------------------------------
+
+OBJECTIVE:
+
+Insert section after accordions.
+
+-----------------------------------------
+
+LOCATION:
+
+Below:
+
+Pricing Accordion.
+
+-----------------------------------------
+
+SECTION TITLE:
+
+Related Protocols
+
+-----------------------------------------
+
+SUBTITLE:
+
+Clinically similar protocols
+based on treatment strategy.
+
+-----------------------------------------
+
+SUCCESS:
+
+User naturally discovers alternatives.
+
+-----------------------------------------
+PHASE 6 — ADD EXPLANATION BADGES
+-----------------------------------------
+
+OBJECTIVE:
+
+Explain why protocol is suggested.
+
+-----------------------------------------
+
+DISPLAY:
+
+Small match badge.
+
+-----------------------------------------
+
+EXAMPLES:
+
+Shared GLP-1 strategy  
+
+Similar duration  
+
+Same metabolic target  
+
+-----------------------------------------
+
+LOGIC:
+
+Show top matching reason.
+
+-----------------------------------------
+
+SUCCESS:
+
+User trusts recommendations.
+
+-----------------------------------------
+PHASE 7 — ADD FALLBACK MATCHING
+-----------------------------------------
+
+OBJECTIVE:
+
+Handle edge cases.
+
+-----------------------------------------
+
+IF:
+
+No strong matches found.
+
+-----------------------------------------
+
+FALLBACK:
+
+Use:
+
+Same clinical_goal only.
+
+-----------------------------------------
+
+IF STILL EMPTY:
+
+Show:
+
+Trending Protocols.
+
+-----------------------------------------
+
+SUCCESS:
+
+Never display empty section.
+
+-----------------------------------------
+PHASE 8 — MOBILE OPTIMIZATION
+-----------------------------------------
+
+OBJECTIVE:
+
+Make section mobile-friendly.
+
+-----------------------------------------
+
+IMPLEMENT:
+
+Horizontal swipe scroll.
+
+-----------------------------------------
+
+CARD WIDTH:
+
+80% viewport.
+
+-----------------------------------------
+
+VISIBLE:
+
+1 card at a time.
+
+-----------------------------------------
+
+SUCCESS:
+
+Mobile browsing becomes smooth.
+
+-----------------------------------------
+PHASE 9 — ADD "SEE MORE LIKE THIS" ACTION
+-----------------------------------------
+
+OBJECTIVE:
+
+Allow deeper exploration.
+
+-----------------------------------------
+
+BUTTON:
+
+See More Similar Protocols
+
+-----------------------------------------
+
+ACTION:
+
+Open filtered Protocol Library.
+
+-----------------------------------------
+
+FILTERS APPLIED:
+
+clinical_goal  
+protocol_class  
+
+-----------------------------------------
+
+SUCCESS:
+
+User enters discovery workflow.
+
+-----------------------------------------
+PHASE 10 — OPTIONAL FUTURE AI MATCHING
+-----------------------------------------
+
+OBJECTIVE:
+
+Prepare for advanced logic.
+
+-----------------------------------------
+
+FUTURE MODE:
+
+Semantic similarity engine.
+
+-----------------------------------------
+
+INPUT:
+
+Protocol rationale text.
+
+-----------------------------------------
+
+METHOD:
+
+Vector similarity search.
+
+-----------------------------------------
+
+SUCCESS:
+
+Highly intelligent matching.
+
+-----------------------------------------
+FINAL VALIDATION CHECKLIST
+-----------------------------------------
+
+Verify:
+
+Matching is dynamic.
+
+Protocols are clinically relevant.
+
+Cards reuse Trending UI.
+
+Mobile scroll works.
+
+Fallback logic works.
+
+Performance remains fast.
+
+-----------------------------------------
+SUCCESS STATE
+-----------------------------------------
+
+Protocol pages become:
+
+Clinically intelligent  
+Context-aware  
+Discovery-driven  
+Scalable  
+Scientifically structured

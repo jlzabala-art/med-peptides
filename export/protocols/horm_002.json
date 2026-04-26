@@ -1,0 +1,723 @@
+{
+  "protocol_duration_weeks": 12,
+  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "bundleVersion": "2.0",
+  "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
+  "protocol_is_physician_authored": false,
+  "seeded_at": "2026-04-25T06:10:36.133Z",
+  "protocol_source_version": "v5.0",
+  "generator_rules": {
+    "profile_notes": [
+      "Prefer conservative tempo in edema-prone or headache-prone profiles."
+    ],
+    "selection_priority": [
+      "goal_match",
+      "sleep_profile",
+      "recovery_pattern",
+      "age_variant_match"
+    ]
+  },
+  "dosing_enrichment": {
+    "titration_note": "Weeks 1-4: Ipamorelin 200 mcg + CJC-1295 100 mcg 2x/day. Week 4: check IGF-1. Weeks 5-8: escalate to 300 mcg Ipamorelin + 200 mcg CJC-1295 3x/day. Weeks 9-16: consider adding Tesamorelin if IGF-1 response is suboptimal or visceral fat is a primary target.",
+    "cycling_recommendation": "16-week active cycle followed by 6-week washout. Pituitary somatotroph desensitization is minimal with GHRP/GHRH cycling; IGF-1 normalization within 4-6 weeks off protocol confirmed. Advanced protocol may use 20-week continuous with pulse-rest schedule.",
+    "maintenance_dose": "Ipamorelin: 300 mcg subcutaneous 3x/day. CJC-1295 no DAC: 200 mcg 3x/day co-administered. Advanced: add Tesamorelin 1-2 mg/day subcutaneous for visceral fat targeting (weeks 5-16 if IGF-1 response confirmed).",
+    "timing_optimization": "Identical to horm_001: fasted state, bedtime dose most important. Tesamorelin (if added) should be administered at bedtime only to capture nocturnal GH surge window. Morning dose 90 min before breakfast."
+  },
+  "complexity_level": "advanced",
+  "eligibility_rules": {
+    "contraindications": [
+      "active_malignancy_or_history_of_hormone_sensitive_cancer",
+      "uncontrolled_hypertension",
+      "active_thromboembolic_disease",
+      "pregnancy_or_breastfeeding",
+      "severe_hepatic_impairment"
+    ],
+    "supported_goals": [
+      "gh_axis_support",
+      "sleep_recovery_support",
+      "body_composition_support",
+      "recovery_support"
+    ],
+    "relative_cautions": [],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "patient_demographic",
+      "age_group",
+      "start_date"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "tempo_preference": "standard",
+      "age_group": null,
+      "patient_demographic": null,
+      "duration_weeks": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "protocol_author_notes": "Official curated protocol for general clinical use.",
+  "_schemaVersion": "antigravity_v2",
+  "protocol_author_organization": "ReGen PEPT",
+  "protocol_last_reviewed_at": "2026-03-29",
+  "protocol_source_reference": "internal_guide",
+  "expected_outcomes": {
+    "qualitative": [
+      "Significant lean mass accrual and visceral fat reduction",
+      "IGF-1 normalization to upper-normal young-adult reference range",
+      "Enhanced sleep architecture (SWS/delta sleep improvement)",
+      "Improved skin collagen density and wound healing"
+    ],
+    "time_to_onset_weeks": 2,
+    "quantitative_ranges": {
+      "week_16": "IGF-1 increase 40-60%; lean mass gain 3-5 kg; visceral fat reduction 12-20% (Tesamorelin arm); sleep quality (PSQI) improvement 25-40%",
+      "week_8": "Body composition shift visible; GH pulse amplitude increase 40-60% above baseline; fasting glucose unchanged or mildly improved",
+      "week_4": "IGF-1 increase 20-30%; subjective recovery improvement in 75-80% of patients"
+    },
+    "responder_rate_pct": "80-85% for IGF-1 response; 75% for body composition improvement"
+  },
+  "phase_blueprints": [
+    {
+      "clinical_events": [
+        {
+          "event_type": "baseline_review",
+          "title": "Baseline recovery, sleep, and body-composition review",
+          "week": 1
+        }
+      ],
+      "clinical_purpose": [
+        "ghrh_support",
+        "sleep_recovery_support",
+        "tolerance_building"
+      ],
+      "default_duration_weeks": 4,
+      "default_start_week": 1,
+      "drugs": [
+        {
+          "dose_logic": {
+            "administration_days_default": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ],
+            "administration_frequency": "5x_week",
+            "dose_unit": "protocol_defined",
+            "starting_intensity": "standard",
+            "timing_hint": "evening"
+          },
+          "product_id": "prd_sermorelin",
+          "product_title": "Sermorelin",
+          "route": "subcutaneous_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_sermorelin",
+            "route": "SC",
+            "type": "resolved"
+          }
+        },
+        {
+          "dose_logic": {
+            "activation_condition": "if_recovery_support_variant_enabled",
+            "administration_days_default": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "administration_frequency": "3x_week",
+            "dose_unit": "protocol_defined",
+            "starting_intensity": "optional_low"
+          },
+          "product_id": "prd_ipamorelin",
+          "product_title": "Ipamorelin",
+          "route": "subcutaneous_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_ipamorelin",
+            "route": "SC",
+            "type": "resolved"
+          }
+        }
+      ],
+      "phase_key": "priming",
+      "phase_title": "Axis Priming"
+    },
+    {
+      "clinical_events": [
+        {
+          "event_type": "checkpoint",
+          "title": "Sleep and recovery reassessment",
+          "week": 8
+        }
+      ],
+      "clinical_purpose": [
+        "gh_axis_support",
+        "recovery_capacity",
+        "body_composition_support"
+      ],
+      "default_duration_weeks": 4,
+      "default_start_week": 5,
+      "drugs": [
+        {
+          "dose_logic": {
+            "administration_days_default": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ],
+            "administration_frequency": "5x_week",
+            "dose_unit": "protocol_defined",
+            "intensity": "standard_plus",
+            "timing_hint": "evening"
+          },
+          "product_id": "prd_sermorelin",
+          "product_title": "Sermorelin",
+          "route": "subcutaneous_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_sermorelin",
+            "route": "SC",
+            "type": "resolved"
+          }
+        },
+        {
+          "dose_logic": {
+            "activation_condition": "if_conservative_secretagogue_pairing_approved",
+            "administration_days_default": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ],
+            "administration_frequency": "5x_week",
+            "dose_unit": "protocol_defined",
+            "intensity": "conditional"
+          },
+          "product_id": "prd_ipamorelin",
+          "product_title": "Ipamorelin",
+          "route": "subcutaneous_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_ipamorelin",
+            "route": "SC",
+            "type": "resolved"
+          }
+        }
+      ],
+      "phase_key": "optimization",
+      "phase_title": "Recovery Optimization"
+    },
+    {
+      "clinical_events": [
+        {
+          "event_type": "outcome_review",
+          "title": "Final GH-axis support review",
+          "week": 12
+        }
+      ],
+      "clinical_purpose": [
+        "maintenance_of_response",
+        "recovery_stability"
+      ],
+      "default_duration_weeks": 4,
+      "default_start_week": 9,
+      "drugs": [
+        {
+          "dose_logic": {
+            "administration_days_default": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "administration_frequency": "3x_week",
+            "dose_unit": "protocol_defined",
+            "intensity": "maintenance",
+            "timing_hint": "evening"
+          },
+          "product_id": "prd_sermorelin",
+          "product_title": "Sermorelin",
+          "route": "subcutaneous_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_sermorelin",
+            "route": "SC",
+            "type": "resolved"
+          }
+        }
+      ],
+      "phase_key": "maintenance",
+      "phase_title": "Maintenance"
+    }
+  ],
+  "protocol_slug": "gh-axis-support-12w",
+  "phases": [
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "daily",
+          "faq_ref": "tesamorelin_faq",
+          "productId": "Tesamorelin-2mg-vial",
+          "product_slug": "tesamorelin",
+          "pubmed_ref": "tesamorelin_pubmed",
+          "route": "subcutaneous",
+          "selected_strength": "5mg",
+          "vials_required_for_phase": 4
+        },
+        {
+          "dosing_frequency": "5x_week",
+          "faq_ref": "ipamorelin_faq",
+          "productId": "Ipamorelin-5mg-vial",
+          "product_slug": "ipamorelin",
+          "pubmed_ref": "ipamorelin_pubmed",
+          "route": "subcutaneous",
+          "selected_strength": "5mg",
+          "vials_required_for_phase": 4
+        }
+      ],
+      "end_week": 4,
+      "phase_number": 1,
+      "phase_title": "Priming",
+      "start_week": 1
+    },
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "daily",
+          "productId": "Tesamorelin-2mg-vial",
+          "product_slug": "tesamorelin",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 4
+        },
+        {
+          "dosing_frequency": "daily",
+          "productId": "Ipamorelin-5mg-vial",
+          "product_slug": "ipamorelin",
+          "selected_strength": "5mg",
+          "vials_required_for_phase": 4
+        }
+      ],
+      "end_week": 8,
+      "phase_number": 2,
+      "phase_title": "Stimulation",
+      "start_week": 5
+    },
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "5x_week",
+          "productId": "Ipamorelin-5mg-vial",
+          "product_slug": "ipamorelin",
+          "selected_strength": "5mg",
+          "vials_required_for_phase": 4
+        }
+      ],
+      "end_week": 12,
+      "phase_number": 3,
+      "phase_title": "Maintenance",
+      "start_week": 9
+    }
+  ],
+  "protocol_is_curated": true,
+  "number_of_phases": 3,
+  "primary_goal": "Hormonal Support",
+  "risk_class": "moderate",
+  "protocol_review_status": "approved",
+  "protocol_source_type": "curated_library",
+  "active": true,
+  "overview_summary": "Three-phase protocol using tesamorelin with ipamorelin to support GH-axis signaling and body-composition oriented hormonal support.",
+  "protocol_id": "horm_002",
+  "protocol_version": "v6.0",
+  "economics": {
+    "total_protocol_cost_estimate": 1120,
+    "total_vials_required": 20
+  },
+  "protocol_author_title": "Peptide Specialists",
+  "confidence_score": 93,
+  "uploadedAt": "2026-04-20T09:29:12.819Z",
+  "protocol_title": "Tesamorelin + Ipamorelin GH-Axis Protocol",
+  "variant_rules": {
+    "tempo_variants": {
+      "standard": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "none"
+      },
+      "conservative": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "up"
+      },
+      "aggressive": {
+        "dose_step_interval_weeks": 2,
+        "monitoring_intensity_modifier": "up"
+      }
+    },
+    "duration_variants": {
+      "20_weeks": {
+        "mode": "extended_plus",
+        "extra_monitoring": true
+      },
+      "16_weeks": {
+        "mode": "extended",
+        "extra_monitoring": true
+      },
+      "12_weeks": {
+        "mode": "standard",
+        "extra_monitoring": false
+      },
+      "8_weeks": {
+        "mode": "short",
+        "extra_monitoring": false
+      }
+    },
+    "sex_variants": {
+      "female": {
+        "special_notes": [
+          "Use conservative ramping if sensitivity profile is high."
+        ],
+        "recommended_flags": []
+      },
+      "male": {
+        "special_notes": [
+          "Reassess tolerance and response before escalation."
+        ],
+        "recommended_flags": [
+          "sleep_recovery_watch"
+        ]
+      }
+    },
+    "age_variants": {
+      "51-65": {
+        "monitoring_intensity": "enhanced",
+        "default_duration_weeks": 16
+      },
+      "36-50": {
+        "monitoring_intensity": "moderate",
+        "default_duration_weeks": 12
+      },
+      "18-35": {
+        "monitoring_intensity": "standard",
+        "default_duration_weeks": 8
+      },
+      "65+": {
+        "monitoring_intensity": "enhanced",
+        "default_duration_weeks": 16
+      }
+    }
+  },
+  "legacy_compatibility": {
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ],
+    "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode.",
+    "enabled": true
+  },
+  "physician_supervision_required": true,
+  "status": "approved",
+  "_patchedAt": {},
+  "_importedAt": {
+    "_nanoseconds": 171000000,
+    "_seconds": 1777189741
+  },
+  "_patchSchema": "antigravity_v2",
+  "id": "horm_002",
+  "category": "Hormonal Support",
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 6,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "IGF-1",
+        "GH stimulation panel",
+        "Cortisol AM"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 12,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "Full hormone panel: IGF-1, GH, cortisol, thyroid (TSH, fT4)",
+        "Bone density marker (P1NP optional)"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "riskManagement": {
+    "contraindications": [
+      "Active malignancy (GH-sensitive)",
+      "Diabetic retinopathy",
+      "Pregnancy",
+      "Active intracranial hypertension"
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (15–35%)",
+        "management": "Rotate sites; use proper aseptic technique."
+      },
+      {
+        "effect": "Fluid retention / mild edema",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Reduce dose; monitor blood pressure; salt restriction."
+      },
+      {
+        "effect": "Nausea / GI discomfort",
+        "frequency": "Common (10–25%)",
+        "management": "Dose with food; split doses; titrate slowly."
+      },
+      {
+        "effect": "Elevated fasting glucose",
+        "frequency": "Uncommon (5%)",
+        "management": "Monitor fasting glucose weekly; consult if persistent."
+      },
+      {
+        "effect": "Mood changes / irritability",
+        "frequency": "Rare (<3%)",
+        "management": "Reduce dose; psychological support if needed."
+      }
+    ],
+    "escalation_criteria": [
+      "Severe or worsening edema — STOP, cardiovascular evaluation",
+      "Fasting glucose > 7.0 mmol/L (126 mg/dL) on two occasions — Endocrinology referral",
+      "Allergic reaction — STOP, emergency protocol",
+      "Hypertensive urgency (BP > 180/110) — STOP, immediate medical attention"
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ]
+  },
+  "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+  "clinical_evidence_update_2026": {
+    "evidence_limitations": [
+      "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+      "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+      "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+    ],
+    "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+    "last_updated_at": "2026-04-26T08:05:00.000Z",
+    "latest_clinical_notes": [
+      "Tesamorelin evidence is strongest for HIV-associated lipodystrophy, not general obesity or non-HIV weight loss.",
+      "Strengthen IGF-1, glucose/HbA1c, edema, arthralgia, carpal tunnel symptoms, malignancy history, and pituitary-axis screening.",
+      "CJC-1295 and ipamorelin remain non-approved/research-oriented in many jurisdictions."
+    ],
+    "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+    "regulatory_status": "Tesamorelin (Egrifta SV) is indicated only for reducing excess abdominal fat in HIV-infected adults with lipodystrophy. It is not indicated for general weight loss management, and long-term cardiovascular safety has not been established.",
+    "evidence_update": "Any non-HIV visceral fat, longevity, or body-composition use must be described as off-label and should include risk/benefit review and IGF-1/glucose monitoring.",
+    "updated_at": "2026-04-26T09:05:00+02:00",
+    "source_refs": [
+      {
+        "type": "label",
+        "source": "Egrifta SV prescribing information",
+        "date": "2026-01-04",
+        "note": "Indication limited to excess abdominal fat in HIV lipodystrophy; not for weight loss management; CV safety not established."
+      }
+    ],
+    "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+  },
+  "canonical_enrichment": {
+    "compatibleWith": "antigravity_v2_firebase_import",
+    "auditFieldsCompleted": [
+      "monitoring_plan",
+      "safety_profile",
+      "clinical_evidence_update_2026",
+      "regulatory_status_2026"
+    ],
+    "generatedAt": "2026-04-26T09:05:00+02:00"
+  },
+  "_importBundle": "ReGen PEPT Core Clinical Protocol Library",
+  "_syncSource": "export/protocols/horm_002.json",
+  "metadata": {
+    "longDescription": "Tesamorelin (TransCon hGH; Egrifta) is an FDA-approved synthetic GHRH analogue (GHRH 1-44 with trans-3-hexenoic acid modification) validated in Phase 3 RCTs for reducing visceral adipose tissue (VAT) in HIV-associated lipodystrophy and studied for metabolic benefits in non-HIV populations (Falutz J et al., NEJM 2007; Stanley TL et al., J Clin Endocrinol Metab 2012). Tesamorelin acts on pituitary GHRH receptors to amplify endogenous GH pulse amplitude while preserving the physiological feedback regulation of the GH axis — unlike exogenous GH administration, which suppresses endogenous production. Ipamorelin (selective GHSR agonist; see horm_001) is combined to add discrete pulsatile GH peaks beyond the tonic effect of tesamorelin, enhancing total GH bioavailability while maintaining physiological rhythmicity. This protocol is particularly suited for adults with abdominal adiposity, low IGF-1, age-related GH decline (somatopause), or metabolic syndrome with a visceral fat component.",
+    "primary_goal": "Hormonal Support",
+    "target_patient_profile": "Adults 35-70 with clinical somatopause, significant visceral adiposity, inadequate response to horm_001, or post-bariatric patients. Also suited for individuals with documented low IGF-1 (<100 ng/mL) seeking optimization to upper-normal reference range. Requires baseline pituitary function assessment.",
+    "short_description": "An advanced 16-week GH axis stimulation protocol using high-dose Ipamorelin/CJC-1295 and optional Tesamorelin for patients requiring aggressive body composition optimization, visceral fat reduction, and GH axis restoration.",
+    "keywords": [
+      "Tesamorelin protocol",
+      "Ipamorelin GH protocol",
+      "visceral fat peptide protocol",
+      "GHRH analogue therapy",
+      "somatopause treatment peptide",
+      "GH axis restoration protocol"
+    ],
+    "references": [
+      {
+        "citation": "Falutz J et al. Tesamorelin reduces visceral adiposity in HIV. NEJM 2007;357:2349-2361.",
+        "pmid": "17715405"
+      },
+      {
+        "citation": "Stanley TL et al. Tesamorelin decreases liver fat and waist circumference. J Clin Endocrinol Metab 2012;97:2212-2221.",
+        "pmid": "22539587"
+      },
+      {
+        "citation": "Raun K et al. Ipamorelin, a new GH releasing peptide. Eur J Endocrinol 1998;139:552-561.",
+        "pmid": "9625695"
+      }
+    ],
+    "visibility": "public",
+    "scientificName": "Tesamorelin + Ipamorelin GHRH-Axis Visceral Adiposity & GH Restoration Protocol",
+    "author": {
+      "organization": "ReGen PEPT",
+      "name": "ReGen PEPT Clinical Team",
+      "title": "Peptide Specialists"
+    },
+    "evidence_grade_note": "GRADE A- due to FDA approval of Tesamorelin (Egrifta) for HIV-lipodystrophy visceral fat reduction (Falutz J, NEJM 2010). Ipamorelin/CJC-1295 component remains GRADE B (Phase II data). Combined protocol is clinical extrapolation.",
+    "description": "12-week GH-axis protocol pairing FDA-approved Tesamorelin GHRH analogue with Ipamorelin ghrelin-mimetic for clinically validated visceral fat reduction and pulsatile GH restoration.",
+    "primary_condition": "female_hormonal_optimization",
+    "version": "1.0",
+    "clinical_summary": "The GH Axis Support Protocol (horm_002) is an intensified version of horm_001, featuring higher-dose Ipamorelin/CJC-1295 with optional Tesamorelin (a GHRH analog FDA-approved for HIV-associated lipodystrophy) for targeted visceral fat reduction. This protocol is appropriate for patients who have plateaued on horm_001 or require more aggressive GH axis stimulation for body composition, visceral adiposity, or severe somatopause. Tesamorelin's FDA approval provides a stronger regulatory foundation for its visceral fat indication.",
+    "evidence_grade": "A-",
+    "schema_version": "antigravity_v2",
+    "pubmed_references": [
+      {
+        "authors": "Raun K et al.",
+        "journal": "Eur J Endocrinol",
+        "pmid": "9849822",
+        "title": "Ipamorelin, the first selective growth hormone secretagogue",
+        "year": 1998
+      },
+      {
+        "authors": "Falutz J et al.",
+        "journal": "N Engl J Med",
+        "pmid": "20220177",
+        "title": "Effects of Tesamorelin on Visceral Fat and Liver Fat in HIV-Infected Patients",
+        "year": 2010
+      },
+      {
+        "authors": "Stanley TL et al.",
+        "journal": "J Clin Endocrinol Metab",
+        "pmid": "21178887",
+        "title": "Tesamorelin decreases liver fat in HIV-infected patients with abdominal fat accumulation",
+        "year": 2011
+      }
+    ],
+    "updated_at": "2026-04-23T00:00:00.000Z",
+    "abbreviatedName": "Sermorelin + Ipamorelin · GH Pulsatile",
+    "shortCode": "HOR-002",
+    "created_at": "2026-04-02T00:00:00.000Z",
+    "source_quality_note": "Clinical content consolidated from protocol library and public biomedical literature; final medical use requires qualified clinician review.",
+    "review": {
+      "last_external_evidence_review_at": "2026-04-26",
+      "last_reviewed_at": "2026-04-23",
+      "review_status": "approved"
+    },
+    "regulatory_note": "Ipamorelin and CJC-1295: not FDA-approved; compounding pharmacy access under physician supervision. Tesamorelin: FDA-approved (Egrifta SV) for HIV-associated lipodystrophy; off-label use for visceral fat reduction in non-HIV patients requires physician discretion and informed consent. Updated 2026: Tesamorelin (Egrifta SV) remains indicated for reduction of excess abdominal fat in HIV-infected adults with lipodystrophy, is not indicated for weight-loss management, and long-term cardiovascular safety has not been established in labeling."
+  },
+  "_schemaGapFixed": {
+    "_nanoseconds": 447000000,
+    "_seconds": 1777190719
+  },
+  "_patchBundle": "ReGen PEPT Protocol Export - Clinical Update 2026-04-26",
+  "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
+  "safety_profile": {
+    "drug_interactions": [
+      "Insulin and antidiabetics: GH counterregulatory - glucose monitoring essential",
+      "Glucocorticoids: attenuate GH response - avoid concurrent use if possible",
+      "Thyroid replacement: hypothyroidism reduces GH response - optimize thyroid status first",
+      "Antiestrogens (men): may further enhance GH response - monitor IGF-1 closely"
+    ],
+    "monitoring_required": [
+      "IGF-1 at baseline, week 4, week 8, week 12, week 16 (target: upper-normal, not supraphysiologic)",
+      "Fasting glucose and HbA1c at baseline and week 12",
+      "DEXA body composition at baseline and week 16",
+      "PSQI sleep score at baseline, week 4, week 12, week 16",
+      "Blood pressure and peripheral edema assessment at each visit"
+    ],
+    "adverse_events_serious": [
+      "IGF-1 excess (>300 ng/mL): acromegaloid features possible at supraphysiologic doses - monitor monthly",
+      "Glucose intolerance: GH counterregulatory effect; monitor HbA1c at baseline and week 12",
+      "Contraindicated in active malignancy - IGF-1 is mitogenic; absolute contraindication",
+      "Tesamorelin: anti-Tesamorelin antibodies in 49% at 26 weeks (no clinical significance identified)"
+    ],
+    "adverse_events_common": [
+      "Water retention: 15-25% in first 4-6 weeks; resolves with dose stability or reduction",
+      "Peripheral edema: 10-15% - dose-dependent, reduce if symptomatic",
+      "Increased appetite: 20-25% - Ipamorelin ghrelin-axis effect",
+      "Injection site reactions: 5-15% - rotate sites; Tesamorelin has higher local reaction rate"
+    ]
+  },
+  "monitoring_plan": {
+    "baseline_required": [
+      "sleep_quality",
+      "recovery_score",
+      "body_composition_baseline",
+      "fatigue_score"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "measures": [
+          "sleep",
+          "recovery",
+          "edema_or_headache_watch"
+        ],
+        "purpose": "Early tolerance and sleep review",
+        "type": "tolerance_review",
+        "week": 4
+      },
+      {
+        "measures": [
+          "recovery",
+          "body_composition_direction",
+          "sleep"
+        ],
+        "purpose": "Midpoint assessment",
+        "type": "axis_reassessment",
+        "week": 8
+      },
+      {
+        "measures": [
+          "overall_recovery",
+          "sleep_quality"
+        ],
+        "purpose": "End-of-cycle evaluation",
+        "type": "final_outcome_review",
+        "week": 12
+      }
+    ]
+  },
+  "_syncedAt": "2026-04-26T12:46:28.640Z"
+}

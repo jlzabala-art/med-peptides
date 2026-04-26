@@ -1,0 +1,389 @@
+{
+  "active": true,
+  "complexity_level": "advanced",
+  "confidence_score": 90,
+  "number_of_phases": 2,
+  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "protocol_author_organization": "ReGen PEPT",
+  "protocol_author_title": "Peptide Specialists",
+  "protocol_duration_weeks": 8,
+  "protocol_id": "rec_002",
+  "protocol_is_curated": true,
+  "protocol_is_physician_authored": false,
+  "protocol_last_reviewed_at": "2026-03-29",
+  "protocol_review_status": "approved",
+  "protocol_slug": "neuro-musculoskeletal-repair-8w",
+  "protocol_source_type": "curated_library",
+  "economics": {
+    "total_protocol_cost_estimate": 1180,
+    "total_vials_required": 20
+  },
+  "protocol_author_notes": "Official curated protocol for general clinical use.",
+  "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
+  "protocol_source_reference": "internal_guide",
+  "overview_summary": "Advanced neuro-musculoskeletal recovery protocol combining BPC-157, TB-500, and ARA-290 for structural repair, angiogenesis, nerve recovery, and neuropathic symptom support.",
+  "protocol_title": "BPC-157, TB-500 & ARA-290 Neuro-Musculoskeletal Protocol",
+  "protocol_source_version": "v5.0",
+  "status": "approved",
+  "seeded_at": "2026-04-25T06:10:36.133Z",
+  "phases": [
+    {
+      "phase_number": 1,
+      "phase_title": "Acute Repair",
+      "start_week": 1,
+      "end_week": 4,
+      "drugs_used": [
+        {
+          "product_slug": "bpc-157",
+          "selected_strength": "10mg",
+          "route": "subcutaneous",
+          "dosing_frequency": "daily",
+          "vials_required_for_phase": 4,
+          "faq_ref": "bpc157_faq",
+          "pubmed_ref": "bpc157_pubmed",
+          "productId": "BPC-157-5mg-vial"
+        },
+        {
+          "product_slug": "tb-500",
+          "selected_strength": "5mg",
+          "dosing_frequency": "weekly",
+          "vials_required_for_phase": 4,
+          "faq_ref": "tb500_faq",
+          "pubmed_ref": "tb500_pubmed",
+          "productId": "TB-500-5mg-vial"
+        },
+        {
+          "product_slug": "ara-290",
+          "selected_strength": "10mg",
+          "dosing_frequency": "3x_week",
+          "vials_required_for_phase": 4,
+          "faq_ref": "ara290_faq",
+          "pubmed_ref": "ara290_pubmed",
+          "productId": "ARA-290-16mg-vial"
+        }
+      ]
+    },
+    {
+      "phase_number": 2,
+      "phase_title": "Consolidation",
+      "start_week": 5,
+      "end_week": 8,
+      "drugs_used": [
+        {
+          "product_slug": "bpc-157",
+          "selected_strength": "5mg",
+          "dosing_frequency": "3x_week",
+          "vials_required_for_phase": 6,
+          "productId": "BPC-157-5mg-vial"
+        },
+        {
+          "product_slug": "ara-290",
+          "selected_strength": "10mg",
+          "dosing_frequency": "2x_week",
+          "vials_required_for_phase": 2,
+          "productId": "ARA-290-16mg-vial"
+        }
+      ]
+    }
+  ],
+  "bundleVersion": "2.0",
+  "protocol_version": "v6.1",
+  "legacy_compatibility": {
+    "enabled": true,
+    "notes": "Enhanced protocol preserves legacy fields while supporting canonical blueprint-based loading.",
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ]
+  },
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "tempo_preference": "standard",
+      "age_group": null,
+      "patient_demographic": null,
+      "duration_weeks": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "monitoring_plan": {
+    "baseline_required": [
+      "injury_type",
+      "pain_score",
+      "neuropathic_pain_score",
+      "range_of_motion",
+      "functional_score",
+      "wound_status_if_applicable",
+      "vascular_status_if_relevant",
+      "medication_review"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "week": 2,
+        "type": "acute_neuro_repair_review",
+        "measures": [
+          "pain_score",
+          "neuropathic_pain_score",
+          "swelling",
+          "wound_status_if_applicable"
+        ],
+        "purpose": "Assess early combined tissue and nerve-repair signal."
+      },
+      {
+        "week": 4,
+        "type": "repair_transition_review",
+        "measures": [
+          "functional_score",
+          "range_of_motion",
+          "neuropathic_pain_score"
+        ],
+        "purpose": "Determine response before consolidation phase."
+      },
+      {
+        "week": 8,
+        "type": "final_neuro_musculoskeletal_review",
+        "measures": [
+          "functional_score",
+          "pain_score",
+          "neuropathic_pain_score",
+          "return_to_activity_status"
+        ],
+        "purpose": "Assess recovery of structural and neural compartments."
+      }
+    ]
+  },
+  "eligibility_rules": {
+    "supported_goals": [
+      "neuro_musculoskeletal_recovery",
+      "nerve_repair_support",
+      "post_surgical_recovery",
+      "neuropathic_pain_support"
+    ],
+    "contraindications": [
+      "active_malignancy",
+      "pregnancy_or_breastfeeding",
+      "active_uncontrolled_infection_at_injury_site",
+      "known_hypersensitivity_to_protocol_compounds"
+    ],
+    "relative_cautions": [
+      "polyneuropathy_of_unknown_origin",
+      "severe_vascular_insufficiency",
+      "anticoagulant_use",
+      "recent_surgery_without_surgeon_clearance"
+    ],
+    "required_patient_inputs": [
+      "injury_type",
+      "neuropathic_symptom_profile",
+      "pain_score",
+      "functional_limitation",
+      "surgical_status",
+      "age_group",
+      "start_date"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "dosing_enrichment": {
+    "cycling_recommendation": "8-week neuro-musculoskeletal repair cycle. Consider 4-8 week pause and reassessment before repeating, especially when neuropathic pain or post-surgical recovery is the main indication.",
+    "maintenance_dose": "BPC-157: 250-500 mcg 3x/week during consolidation. ARA-290: reduce to 2x/week if neuropathic symptoms improve. TB-500 generally reserved for acute repair phase.",
+    "timing_optimization": "BPC-157 may be dosed daily in early repair and reduced later. ARA-290 is best administered consistently on non-consecutive days. TB-500 should remain weekly during acute repair.",
+    "titration_note": "Weeks 1-4 should prioritize combined structural and neural support. Weeks 5-8 should reduce complexity and continue only BPC-157 + ARA-290 if neural symptoms or functional deficits persist."
+  },
+  "risk_class": "moderate_to_high",
+  "physician_supervision_required": true,
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 4,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "Fasting glucose",
+        "Insulin",
+        "HOMA-IR",
+        "Lipid panel"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 8,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "HbA1c",
+        "Full lipid panel",
+        "Body composition (DEXA or impedance)"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "riskManagement": {
+    "contraindications": [
+      "Type 1 diabetes (insulin-dependent, use with caution)",
+      "Severe renal impairment",
+      "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (10–30%)",
+        "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+      },
+      {
+        "effect": "Mild nausea (first 1–2 weeks)",
+        "frequency": "Uncommon (5–15%)",
+        "management": "Administer with food; reduce dose temporarily if persistent."
+      },
+      {
+        "effect": "Fatigue or somnolence",
+        "frequency": "Rare (<5%)",
+        "management": "Adjust injection timing; evaluate sleep hygiene."
+      },
+      {
+        "effect": "Headache",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Hydration; paracetamol as needed; review dosing."
+      }
+    ],
+    "escalation_criteria": [
+      "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+      "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+      "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+      "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ]
+  },
+  "category": "Recovery & Neurology",
+  "generator_rules": {
+    "allow_acceleration": false,
+    "base_duration_weeks": 8,
+    "notes": "Default generator rules – pending clinical review.",
+    "tempo_variants": [
+      "standard"
+    ],
+    "allow_extension": false
+  },
+  "primary_goal": "Recovery / Injury",
+  "_syncSource": "export/protocols/rec_002.json",
+  "metadata": {
+    "visibility": "public",
+    "primary_condition": "acute_injury_post_surgical_recovery",
+    "abbreviatedName": "REC-002 · Tissue Repair Fixed – 8wk",
+    "version": "1.0",
+    "longDescription": "This advanced protocol expands the BPC-157 / TB-500 tissue-repair backbone with ARA-290, a cyclic helix B surface peptide derived from the non-erythropoietic region of erythropoietin (EPO). ARA-290 activates the innate repair receptor (IRR/β common receptor complex) to promote peripheral nerve regeneration, reduce neuropathic pain, and suppress chronic neuroinflammation without the haematopoietic side effects of full EPO (Brines M & Cerami A, Nat Rev Drug Discov 2008; Pulman KG et al., Handb Exp Pharmacol 2019). When combined with BPC-157 (structural tissue healing) and TB-500 (angiogenesis and actin remodeling), the three-compound regimen addresses soft tissue, vascular, and neural compartments simultaneously. Particularly suited for complex injury presentations involving neuropathic pain, nerve damage, or post-surgical peripheral neuropathy.",
+    "keywords": [
+      "BPC-157 TB-500 ARA-290",
+      "neuropathic pain peptide",
+      "peripheral nerve regeneration protocol",
+      "erythropoietin mimetic peptide",
+      "neuro-musculoskeletal protocol",
+      "advanced recovery peptide stack"
+    ],
+    "references": [
+      {
+        "pmid": "18552849",
+        "citation": "Brines M, Cerami A. Erythropoietin-mediated tissue protection. Nat Rev Drug Discov 2008;7:784-791."
+      },
+      {
+        "pmid": "29998482",
+        "citation": "Sikiric P et al. BPC 157 and the CNS. Curr Pharm Des 2018;24:1821-1832."
+      },
+      {
+        "pmid": "22295120",
+        "citation": "Goldstein AL et al. Thymosin β4: A multi-functional regenerative peptide. Ann N Y Acad Sci 2012;1269:1-8."
+      }
+    ],
+    "scientificName": "BPC-157, Thymosin β4 & ARA-290 Neuro-Musculoskeletal Regeneration Protocol",
+    "description": "Advanced 12-week neuro-musculoskeletal protocol adding ARA-290 erythropoietin-mimetic neuroprotection to BPC-157 and TB-500 tissue repair for nerve and structural healing.",
+    "schema_version": "antigravity_v2",
+    "updated_at": "2026-04-25T00:00:00.000Z",
+    "review": {
+      "last_reviewed_at": "2026-04-25",
+      "review_status": "approved"
+    },
+    "shortCode": "REC-002",
+    "primary_goal": "Recovery / Injury"
+  },
+  "_patchedAt": {
+    "schema_gap_fix": "2026-04-26T12:37:11Z"
+  },
+  "_schemaVersion": "antigravity_v2",
+  "_patchSchema": "antigravity_v2",
+  "expected_outcomes": {
+    "qualitative": [
+      "Improvement in primary protocol goal",
+      "Enhanced patient-reported wellbeing"
+    ],
+    "time_to_onset_weeks": null,
+    "quantitative_ranges": {},
+    "responder_rate_pct": "Pending clinical data"
+  },
+  "variant_rules": {
+    "tempo": {
+      "standard": {
+        "notes": "Standard tempo – no adjustment.",
+        "phase_duration_multiplier": 1
+      },
+      "accelerated": {
+        "notes": "Accelerated tempo – physician review required.",
+        "phase_duration_multiplier": 0.75
+      },
+      "extended": {
+        "notes": "Extended tempo – for slower responders.",
+        "phase_duration_multiplier": 1.33
+      }
+    }
+  },
+  "phase_blueprints": [],
+  "safety_profile": {
+    "risk_level": "moderate",
+    "common_side_effects": [],
+    "monitoring_flags": [],
+    "serious_adverse_events": [],
+    "contraindication_summary": "See eligibility_rules.contraindications."
+  },
+  "_syncedAt": "2026-04-26T12:46:33.076Z"
+}

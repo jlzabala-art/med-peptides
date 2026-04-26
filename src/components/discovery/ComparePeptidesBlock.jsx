@@ -118,9 +118,9 @@ export default function ComparePeptidesBlock({ block, allProducts = [], onProduc
             let cellValue = '–';
 
             if (product) {
-              if (dim === 'goal' || dim === 'goal_tags') cellValue = (product.goalTags || product.goal_tags || []).map(t => t.replace(/_/g, ' ')).join(', ') || '–';
-              else if (dim === 'family' || dim === 'family_tags') cellValue = (product.familyTags || product.family_tags || []).map(t => t.replace(/_/g, ' ')).join(', ') || '–';
-              else if (dim === 'format' || dim === 'formats') cellValue = (product.formats || []).map(t => t.replace(/_or_/g, '/')).join(', ') || '–';
+              if (dim === 'goal' || dim === 'goal_tags') { const arr = Array.isArray(product.goalTags) ? product.goalTags : Array.isArray(product.goal_tags) ? product.goal_tags : []; cellValue = arr.map(t => String(t).replace(/_/g, ' ')).join(', ') || '–'; }
+              else if (dim === 'family' || dim === 'family_tags') { const arr = Array.isArray(product.familyTags) ? product.familyTags : Array.isArray(product.family_tags) ? product.family_tags : []; cellValue = arr.map(t => String(t).replace(/_/g, ' ')).join(', ') || '–'; }
+              else if (dim === 'format' || dim === 'formats') { const arr = Array.isArray(product.formats) ? product.formats : []; cellValue = arr.map(t => String(t).replace(/_or_/g, '/')).join(', ') || '–'; }
               else if (dim === 'route') cellValue = product.route?.replace(/_/g, ' ') || '–';
               else if (dim === 'visibility') cellValue = product.visibility || '–';
               else cellValue = product[dim] || '–';

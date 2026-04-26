@@ -1,93 +1,136 @@
-import { Menu, X, ShoppingCart, Search, ChevronDown, LogIn, LogOut, ShieldCheck, MapPin, User, LayoutDashboard, Settings, FlaskConical, HelpCircle, Info, Phone, FileText, Globe } from 'lucide-react';
+import { memo, useState, useRef, useEffect, useCallback } from 'react';
+import { Menu, X, ShoppingCart, Search, ChevronDown, LogIn, LogOut, User, LayoutDashboard, Globe, Home, ShieldCheck } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import ReactDOM from 'react-dom';
 import { REGION_FLAGS } from '../data/regions';
 import { COUNTRIES } from '../data/countries';
-import { useState, useRef, useEffect } from 'react';
-import ReactDOM from 'react-dom';
-import { productCategories } from '../data/productConstants';
 import { useAuth } from '../context/AuthContext';
-
 import BrandLogo from '../components/common/BrandLogo';
+import { TOP_NAV, ACADEMIA_MENU, RESOURCES_MENU } from '../navigation/navConfig';
+import CatalogMegaMenu from '../navigation/CatalogMegaMenu';
 
-const KNOWLEDGE_ITEMS = ['Calculator', 'FAQ', 'Legal'];
-const COMPANY_ITEMS = [
-  { label: 'About', path: '/about', icon: <Info size={16} /> },
-  { label: 'Contact', path: '/contact', icon: <Phone size={16} /> },
-  { label: 'FAQ', path: '/faq', icon: <HelpCircle size={16} /> },
-  { label: 'Legal & Privacy', path: '/legal', icon: <FileText size={16} /> }
-];
-const CATALOG_ITEMS = ['Research Catalog', 'Investigational Pathways', 'Supplies', 'Custom Synthesis'];
-const TOP_NAV = [
-  { label: 'Home', path: '/' },
-  { label: 'Quality', path: '/quality' },
-  { label: 'Protocol Builder', path: '/protocol-builder' },
-  { label: 'Calculator', path: '/calculator' }
-];
+import ResourcesDropdown from '../navigation/ResourcesDropdown';
+import WorkplaceDropdown from '../navigation/WorkplaceDropdown';
+import UserDropdown from '../navigation/UserDropdown';
+
+// ── Static style constants (allocated once, not per render) ──────────────────
+const S = {
+  drawerLink: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.85rem',
+    padding: '0.8rem 1rem',
+    color: 'var(--text-main)',
+    fontWeight: 600,
+    fontSize: '1rem',
+    textDecoration: 'none',
+    borderRadius: '10px',
+    transition: 'background 0.18s ease',
+    cursor: 'pointer',
+    background: 'none',
+    border: 'none',
+    width: '100%',
+    textAlign: 'left',
+    fontFamily: 'inherit',
+  },
+  sectionTitle: {
+    fontSize: '0.68rem',
+    fontWeight: 800,
+    color: 'var(--text-muted)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.12em',
+    padding: '1.25rem 1rem 0.4rem',
+    display: 'block',
+  },
+  dropdownCard: {
+    position: 'absolute',
+    top: 'calc(100% + 0.75rem)',
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.10)',
+    border: '0.5px solid var(--border)',
+    overflow: 'hidden',
+    zIndex: 200,
+  },
+  dropdownItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '0.7rem 1.25rem',
+    textDecoration: 'none',
+    color: 'var(--text-main)',
+    fontWeight: 500,
+    fontSize: '0.875rem',
+    borderBottom: '0.5px solid var(--background)',
+    transition: 'background 0.15s',
+    cursor: 'pointer',
+    background: 'none',
+    border: 'none',
+    width: '100%',
+    textAlign: 'left',
+    fontFamily: 'inherit',
+  },
+};
 
 
-export default function Header({ scrolled, cartCount, onOpenCart, onOpenSearch, region, selectedCountryCode, onOpenRegion, onSelectProduct, onSelectCategory, isHome, onGoHome, products }) {
+
+
+function Header({ scrolled, cartCount, cartBreakdown = {}, onOpenCart, onOpenSearch, region, selectedCountryCode, onOpenRegion, onSelectProduct, onSelectCategory, isHome, onGoHome, products }) {
   const isOpaque = scrolled || !isHome;
   const { user, isProfessional, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
+
+  // ── Mobile drawer ────────────────────────────────────────────────────────────
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [companyOpen, setCompanyOpen] = useState(false);
-  const [catalogOpen, setCatalogOpen] = useState(false);
-  const [objectivesSubOpen, setObjectivesSubOpen] = useState(false);
-  const [mobileCompanyOpen, setMobileCompanyOpen] = useState(false);
-  const [mobileCatalogOpen, setMobileCatalogOpen] = useState(false);
-  const [mobileObjectivesOpen, setMobileObjectivesOpen] = useState(false);
-  const [accountOpen, setAccountOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [mobileSettingsOpen, setMobileSettingsOpen] = useState(false);
-  const companyRef = useRef(null);
-  const catalogRef = useRef(null);
-  const accountRef = useRef(null);
-  const settingsRef = useRef(null);
+  // Single string tracks which accordion is open: null | 'catalog' | 'academia' | 'resources' | 'settings'
+  const [mobileExpanded, setMobileExpanded] = useState(null);
+  const toggleMobile = (key) => setMobileExpanded(prev => (prev === key ? null : key));
+
+  // ── Desktop dropdowns — single source of truth ───────────────────────────────
+  // Possible values: null | 'catalog' | 'academia' | 'resources' | 'workplace' | 'user'
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const navRef = useRef(null);
+
+  const role = isAdmin ? 'admin' : isProfessional ? 'professional' : 'guest';
   
   // Universal Flag & Name Lookup
   const currentCountry = COUNTRIES.find(c => c.code === (selectedCountryCode || region));
   const displayFlag = REGION_FLAGS[selectedCountryCode] || currentCountry?.flag || REGION_FLAGS[region] || '🌐';
   const displayCountryName = currentCountry?.name || (region === 'row' ? 'Global' : (region || 'Global').toUpperCase());
 
-  // Close dropdown when clicking outside
+  // Close any open dropdown when clicking outside the nav bar
   useEffect(() => {
     const handler = (e) => {
-      if (companyRef.current && !companyRef.current.contains(e.target)) {
-        setCompanyOpen(false);
-      }
-      if (catalogRef.current && !catalogRef.current.contains(e.target)) {
-        setCatalogOpen(false);
-        setObjectivesSubOpen(false);
-      }
-      if (accountRef.current && !accountRef.current.contains(e.target)) {
-        setAccountOpen(false);
-      }
-      if (settingsRef.current && !settingsRef.current.contains(e.target)) {
-        setSettingsOpen(false);
+      if (navRef.current && !navRef.current.contains(e.target)) {
+        setActiveDropdown(null);
       }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  const closeAll = useCallback(() => {
+    setActiveDropdown(null);
+    setMobileMenuOpen(false);
+  }, []);
+
   const handleNav = (path) => {
     navigate(path);
-    setCompanyOpen(false);
-    setCatalogOpen(false);
-    setObjectivesSubOpen(false);
-    setMobileMenuOpen(false);
+    closeAll();
   };
 
+  const navColor = isOpaque ? 'var(--text-main)' : 'rgba(255,255,255,0.9)';
   const navLinkStyle = {
-    color: isOpaque ? 'var(--text-main)' : 'rgba(255,255,255,0.9)',
+    color: navColor,
     fontWeight: 500,
-    fontSize: '0.95rem',
+    fontSize: '0.875rem',
     cursor: 'pointer',
     textDecoration: 'none',
     background: 'none',
     border: 'none',
     padding: 0,
     fontFamily: 'inherit',
+    letterSpacing: '0.01em',
   };
 
   // Lock/unlock body scroll when mobile menu opens
@@ -110,10 +153,10 @@ export default function Header({ scrolled, cartCount, onOpenCart, onOpenSearch, 
       zIndex: 50,
       padding: 0,
       transition: 'all 0.3s ease',
-      backgroundColor: isOpaque ? 'rgba(255, 255, 255, 0.97)' : 'transparent',
-      backdropFilter: isOpaque ? 'blur(12px)' : 'none',
-      borderBottom: isOpaque ? '1px solid var(--border)' : '1px solid transparent',
-      boxShadow: isOpaque ? 'var(--shadow-sm)' : 'none'
+      backgroundColor: isOpaque ? 'rgba(255,255,255,0.96)' : 'transparent',
+      backdropFilter: isOpaque ? 'blur(16px) saturate(180%)' : 'none',
+      borderBottom: isOpaque ? '0.5px solid rgba(0,0,0,0.09)' : '0.5px solid transparent',
+      boxShadow: isOpaque ? '0 1px 0 rgba(0,0,0,0.04)' : 'none'
     }}>
       {/* Disclaimer Top Bar */}
       <div style={{
@@ -157,193 +200,107 @@ export default function Header({ scrolled, cartCount, onOpenCart, onOpenSearch, 
         </div>
         
         {/* Right Side: Desktop Nav + Actions + Mobile Hamburger */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div ref={navRef} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {/* Desktop Nav */}
           <nav className="desktop-nav" style={{ gap: '1.5rem' }}>
-            {TOP_NAV.map(nav => (
-              <Link
-                key={nav.path}
-                to={nav.path}
-                style={navLinkStyle}
-                onMouseOver={(e) => { e.currentTarget.style.color = isOpaque ? 'var(--secondary)' : 'white'; }}
-                onMouseOut={(e) => { e.currentTarget.style.color = isOpaque ? 'var(--text-main)' : 'rgba(255,255,255,0.9)'; }}
-              >
-                {nav.label}
-              </Link>
-            ))}
+            {TOP_NAV.map(nav => {
+              const isDropdown = !!nav.dropdown;
+              const isActive = activeDropdown === nav.dropdown;
 
-            {/* Catalog Dropdown */}
-            <div ref={catalogRef} style={{ position: 'relative' }}>
-              <button
-                onClick={() => {
-                  setCatalogOpen(!catalogOpen);
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  margin: 0,
-                  lineHeight: 'inherit',
-                  fontFamily: 'inherit',
-                  fontWeight: 500,
-                  fontSize: '0.95rem',
-                  color: isOpaque ? 'var(--text-main)' : 'rgba(255,255,255,0.9)',
-                  cursor: 'pointer',
-                }}
-                onMouseOver={(e) => { e.currentTarget.style.color = isOpaque ? 'var(--secondary)' : 'white' }}
-                onMouseOut={(e) => { e.currentTarget.style.color = isOpaque ? 'var(--text-main)' : 'rgba(255,255,255,0.9)' }}
-              >
-                Catalog <ChevronDown size={14} style={{ transition: 'transform 0.2s', transform: catalogOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
-              </button>
-              {catalogOpen && (
-                <div style={{
-                  position: 'absolute',
-                  top: 'calc(100% + 0.75rem)',
-                  left: 0,
-                  backgroundColor: 'white',
-                  borderRadius: 'var(--radius-md)',
-                  boxShadow: 'var(--shadow-md)',
-                  border: '1px solid var(--border)',
-                  minWidth: '220px',
-                  overflow: 'visible',
-                  zIndex: 100,
-                }}>
-                  {CATALOG_ITEMS.map((item) => (
-                    <div key={item} style={{ position: 'relative' }}>
-                      <Link 
-                        to={
-                          item === 'Research Catalog' ? '/products' : 
-                          item === 'Investigational Pathways' ? '/collection/investigation-pathways' : 
-                          item === 'Supplies' ? '/supplies' : 
-                          '/custom-synthesis'
-                        }
-                        onClick={() => {
-                          setCatalogOpen(false);
-                        }}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          width: '100%',
-                          textAlign: 'left',
-                          padding: '0.75rem 1.25rem',
-                          textDecoration: 'none',
-                          color: 'var(--text-main)',
-                          fontWeight: 500,
-                          fontSize: '0.9rem',
-                          cursor: 'pointer',
-                          fontFamily: 'inherit',
-                          borderBottom: '1px solid var(--background)',
-                          transition: 'background 0.15s',
-                        }}
-                        onMouseOver={(e) => { e.currentTarget.style.background = 'var(--background)'; e.currentTarget.style.color = 'var(--primary)'; }}
-                        onMouseOut={(e) => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-main)'; }}
-                      >
-                        {item}
-                      </Link>
+              if (!isDropdown) {
+                return (
+                  <Link
+                    key={nav.path}
+                    to={nav.path}
+                    style={navLinkStyle}
+                    onMouseOver={(e) => { e.currentTarget.style.color = isOpaque ? 'var(--secondary)' : 'white'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.color = navColor; }}
+                  >
+                    {nav.label}
+                  </Link>
+                );
+              }
+
+              return (
+                <div key={nav.label} style={{ position: 'relative' }}>
+                  <button
+                    onClick={() => setActiveDropdown(isActive ? null : nav.dropdown)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '0.25rem',
+                      background: 'none', border: 'none', padding: 0, margin: 0,
+                      lineHeight: 'inherit', fontFamily: 'inherit',
+                      fontWeight: 500, fontSize: '0.875rem',
+                      color: navColor, cursor: 'pointer',
+                    }}
+                    onMouseOver={(e) => { e.currentTarget.style.color = isOpaque ? 'var(--secondary)' : 'white'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.color = navColor; }}
+                  >
+                    {nav.label}
+                    <ChevronDown size={13} style={{ transition: 'transform 0.2s', transform: isActive ? 'rotate(180deg)' : 'rotate(0)' }} />
+                  </button>
+
+                  {isActive && nav.dropdown === 'catalog' && (
+                    <CatalogMegaMenu onClose={() => setActiveDropdown(null)} />
+                  )}
+                  {isActive && nav.dropdown === 'academia' && (
+                    <div style={{
+                      position: 'absolute', top: 'calc(100% + 12px)', left: '50%',
+                      transform: 'translateX(-50%)',
+                      background: 'var(--surface)', border: '1px solid var(--border)',
+                      borderRadius: '14px', padding: '0.5rem',
+                      minWidth: '220px', boxShadow: '0 12px 40px rgba(0,0,0,0.18)',
+                      display: 'flex', flexDirection: 'column', gap: '2px', zIndex: 1000,
+                    }}>
+                      {ACADEMIA_MENU.map(item => (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          onClick={() => setActiveDropdown(null)}
+                          style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '0.6rem 1rem', borderRadius: '10px',
+                            fontSize: '0.875rem', fontWeight: 500,
+                            color: 'var(--text-primary)', textDecoration: 'none',
+                            transition: 'background 0.15s',
+                            pointerEvents: item.soon ? 'none' : 'auto',
+                            opacity: item.soon ? 0.5 : 1,
+                          }}
+                          onMouseOver={e => !item.soon && (e.currentTarget.style.background = 'var(--background)')}
+                          onMouseOut={e => (e.currentTarget.style.background = 'transparent')}
+                        >
+                          {item.label}
+                          {item.soon && (
+                            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--secondary)', background: 'var(--secondary-alpha, rgba(100,200,150,0.12))', padding: '2px 7px', borderRadius: '20px', letterSpacing: '0.05em' }}>COMING SOON</span>
+                          )}
+                        </Link>
+                      ))}
                     </div>
-                  ))}
+                  )}
+                  {isActive && nav.dropdown === 'resources' && (
+                    <ResourcesDropdown onClose={() => setActiveDropdown(null)} />
+                  )}
                 </div>
-              )}
-            </div>
-
-            {/* Company Dropdown */}
-            <div ref={companyRef} style={{ position: 'relative' }}>
-              <button
-                onClick={() => {
-                  setCompanyOpen(!companyOpen);
-                  setCatalogOpen(false);
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  margin: 0,
-                  lineHeight: 'inherit',
-                  fontFamily: 'inherit',
-                  fontWeight: 500,
-                  fontSize: '0.95rem',
-                  color: isOpaque ? 'var(--text-main)' : 'rgba(255,255,255,0.9)',
-                  cursor: 'pointer',
-                }}
-                onMouseOver={(e) => { e.currentTarget.style.color = isOpaque ? 'var(--secondary)' : 'white' }}
-                onMouseOut={(e) => { e.currentTarget.style.color = isOpaque ? 'var(--text-main)' : 'rgba(255,255,255,0.9)' }}
-              >
-                Resources <ChevronDown size={14} style={{ transition: 'transform 0.2s', transform: companyOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
-              </button>
-              {companyOpen && (
-                <div style={{
-                  position: 'absolute',
-                  top: 'calc(100% + 0.75rem)',
-                  right: 0,
-                  backgroundColor: 'white',
-                  borderRadius: 'var(--radius-md)',
-                  boxShadow: 'var(--shadow-md)',
-                  border: '1px solid var(--border)',
-                  minWidth: '200px',
-                  overflow: 'hidden',
-                  zIndex: 100,
-                }}>
-                  {COMPANY_ITEMS.map((item) => (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      onClick={() => setCompanyOpen(false)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.75rem',
-                        width: '100%',
-                        textAlign: 'left',
-                        padding: '0.75rem 1.25rem',
-                        textDecoration: 'none',
-                        color: 'var(--text-main)',
-                        fontWeight: 500,
-                        fontSize: '0.9rem',
-                        cursor: 'pointer',
-                        fontFamily: 'inherit',
-                        borderBottom: '1px solid var(--background)',
-                        transition: 'background 0.15s',
-                      }}
-                      onMouseOver={(e) => { e.currentTarget.style.background = 'var(--background)'; e.currentTarget.style.color = 'var(--primary)'; }}
-                      onMouseOut={(e) => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-main)'; }}
-                    >
-                      <span style={{ color: 'var(--primary)', display: 'flex' }}>{item.icon}</span>
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
+              );
+            })}
           </nav>
+
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: '0.5rem' }}>
 
 
-            {/* Unified User & Region Selector (Desktop) */}
-            <div className="desktop-only" ref={settingsRef} style={{ position: 'relative' }}>
+
+            {/* User / Settings Dropdown (Desktop) */}
+            <div className="desktop-only" style={{ position: 'relative' }}>
               <button
-                onClick={() => setSettingsOpen(!settingsOpen)}
+                onClick={() => setActiveDropdown(activeDropdown === 'user' ? null : 'user')}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
+                  display: 'flex', alignItems: 'center', gap: '0.5rem',
                   padding: '0.4rem 0.75rem',
                   backgroundColor: isOpaque ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.1)',
                   border: `1px solid ${isOpaque ? 'var(--border)' : 'rgba(255,255,255,0.2)'}`,
-                  borderRadius: '999px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
+                  borderRadius: '999px', cursor: 'pointer', transition: 'all 0.2s ease',
                   color: isOpaque ? 'var(--text-main)' : 'white',
-                  fontSize: '0.8rem',
-                  fontWeight: 600
+                  fontSize: '0.8rem', fontWeight: 600,
                 }}
                 onMouseOver={(e) => { e.currentTarget.style.backgroundColor = isOpaque ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.2)'; }}
                 onMouseOut={(e) => { e.currentTarget.style.backgroundColor = isOpaque ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.1)'; }}
@@ -359,148 +316,29 @@ export default function Header({ scrolled, cartCount, onOpenCart, onOpenSearch, 
                     <span>Login</span>
                   </div>
                 )}
-                <ChevronDown size={12} style={{ transform: settingsOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
+                <ChevronDown size={12} style={{ transform: activeDropdown === 'user' ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
               </button>
 
-              {settingsOpen && (
-                <div style={{
-                  position: 'absolute',
-                  top: 'calc(100% + 10px)',
-                  right: 0,
-                  width: '280px',
-                  backgroundColor: 'white',
-                  borderRadius: '20px',
-                  boxShadow: 'var(--shadow-lg)',
-                  border: '1px solid var(--border)',
-                  padding: '1.25rem',
-                  zIndex: 1000,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem',
-                  animation: 'headerFadeIn 0.2s ease-out'
-                }}>
-                  {/* User Section */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                           {user ? (user.displayName || user.email) : 'Guest Scientist'}
-                        </span>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: user ? (isProfessional ? 'var(--success)' : 'var(--primary)') : 'var(--text-muted)' }}>
-                           {user ? (isProfessional ? 'Professional Account' : 'Standard Account') : 'No account detected'}
-                        </span>
-                     </div>
-                     {!user && (
-                        <button 
-                          onClick={() => { handleNav('/login'); setSettingsOpen(false); }}
-                          style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', fontWeight: 700, borderRadius: '8px', border: 'none', background: 'var(--primary)', cursor: 'pointer', color: 'white' }}
-                        >
-                          Login
-                        </button>
-                     )}
-                  </div>
-
-                  {user && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                      <button
-                        onClick={() => { handleNav('/dashboard'); setSettingsOpen(false); }}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: '0.75rem',
-                          padding: '0.6rem 0.75rem', background: 'none', border: 'none',
-                          color: 'var(--text-main)', fontSize: '0.85rem', fontWeight: 600,
-                          cursor: 'pointer', borderRadius: '10px', textAlign: 'left',
-                          transition: 'background 0.2s', width: '100%'
-                        }}
-                        onMouseOver={(e) => e.currentTarget.style.background = 'var(--background)'}
-                        onMouseOut={(e) => e.currentTarget.style.background = 'none'}
-                      >
-                        <LayoutDashboard size={16} color="var(--primary)" /> Dashboard
-                      </button>
-                      {isAdmin && (
-                        <button
-                          onClick={() => { handleNav('/admin'); setSettingsOpen(false); }}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: '0.75rem',
-                            padding: '0.6rem 0.75rem', background: 'none', border: 'none',
-                            color: 'var(--error, #ef4444)', fontSize: '0.85rem', fontWeight: 600,
-                            cursor: 'pointer', borderRadius: '10px', textAlign: 'left',
-                            transition: 'background 0.2s', width: '100%'
-                          }}
-                          onMouseOver={(e) => e.currentTarget.style.background = 'rgba(239,68,68,0.07)'}
-                          onMouseOut={(e) => e.currentTarget.style.background = 'none'}
-                        >
-                          <LayoutDashboard size={16} color="var(--error, #ef4444)" /> Admin Board
-                        </button>
-                      )}
-                      <button
-                        onClick={() => { handleNav('/settings'); setSettingsOpen(false); }}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: '0.75rem',
-                          padding: '0.6rem 0.75rem', background: 'none', border: 'none',
-                          color: 'var(--text-main)', fontSize: '0.85rem', fontWeight: 600,
-                          cursor: 'pointer', borderRadius: '10px', textAlign: 'left',
-                          transition: 'background 0.2s', width: '100%'
-                        }}
-                        onMouseOver={(e) => e.currentTarget.style.background = 'var(--background)'}
-                        onMouseOut={(e) => e.currentTarget.style.background = 'none'}
-                      >
-                        <User size={16} color="var(--primary)" /> Profile Settings
-                      </button>
-                      <button
-                        onClick={() => { logout(); setSettingsOpen(false); }}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: '0.75rem',
-                          padding: '0.6rem 0.75rem', background: 'none', border: 'none',
-                          color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600,
-                          cursor: 'pointer', borderRadius: '10px', textAlign: 'left',
-                          transition: 'background 0.2s', width: '100%'
-                        }}
-                        onMouseOver={(e) => e.currentTarget.style.background = 'var(--background)'}
-                        onMouseOut={(e) => e.currentTarget.style.background = 'none'}
-                      >
-                        <LogOut size={16} /> Logout
-                      </button>
-                    </div>
-                  )}
-
-                  <div style={{ height: '1px', background: 'var(--border)', margin: '0.2rem 0' }} />
-                  
-                  {/* Region & Currency Section */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Research Region</span>
-                        <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                          {displayFlag} {displayCountryName}
-                        </span>
-                      </div>
-                      <button 
-                        onClick={() => { onOpenRegion(); setSettingsOpen(false); }}
-                        style={{ padding: '0.35rem 0.6rem', fontSize: '0.7rem', fontWeight: 700, borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--background)', cursor: 'pointer', color: 'var(--primary)' }}
-                      >
-                        Change
-                      </button>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Trading Currency</span>
-                        <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>USD (US Dollar)</span>
-                    </div>
-                  </div>
-
-                  <div style={{ 
-                    padding: '0.6rem', 
-                    backgroundColor: 'var(--background)', 
-                    borderRadius: '10px',
-                    fontSize: '0.65rem',
-                    lineHeight: '1.4',
-                    color: 'var(--text-muted)',
-                    border: '1px solid var(--border)'
-                  }}>
-                    Prices shown in USD. Global logistics hubs manage dispatch for {region?.toUpperCase()}.
-                  </div>
-                </div>
+              {activeDropdown === 'user' && (
+                <UserDropdown
+                  user={user}
+                  isProfessional={isProfessional}
+                  isAdmin={isAdmin}
+                  role={role}
+                  displayFlag={displayFlag}
+                  displayCountryName={displayCountryName}
+                  region={region}
+                  onOpenRegion={onOpenRegion}
+                  onNav={handleNav}
+                  onLogout={() => { logout(); setActiveDropdown(null); }}
+                  onClose={() => setActiveDropdown(null)}
+                />
               )}
             </div>
+
+
+
+
 
             {/* Search button — desktop AND mobile header */}
             <button 
@@ -541,22 +379,56 @@ export default function Header({ scrolled, cartCount, onOpenCart, onOpenSearch, 
               onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
             >
               <ShoppingCart size={24} />
-              {cartCount > 0 && (
-                <span style={{
-                  position: 'absolute',
-                  top: '-2px',
-                  right: '-2px',
-                  backgroundColor: 'var(--secondary)',
-                  color: 'white',
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  padding: '2px 6px',
-                  borderRadius: '10px',
-                  border: '2px solid white'
-                }}>
-                  {cartCount}
-                </span>
-              )}
+              {cartCount > 0 && (() => {
+                const { protocols = 0, kits = 0, peptides = 0 } = cartBreakdown;
+                const hasBreakdown = protocols > 0 || kits > 0 || peptides > 0;
+
+                if (hasBreakdown) {
+                  // Multi-type pill: show each non-zero type
+                  return (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-6px',
+                      right: '-8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '2px',
+                      background: 'rgba(0,212,255,0.15)',
+                      border: '1.5px solid rgba(0,212,255,0.6)',
+                      borderRadius: '12px',
+                      padding: '1px 5px',
+                      backdropFilter: 'blur(8px)',
+                      fontSize: '0.58rem',
+                      fontWeight: 800,
+                      color: '#00d4ff',
+                      whiteSpace: 'nowrap',
+                      lineHeight: 1.2,
+                    }}>
+                      {protocols > 0 && <span title="Protocols">🧬{protocols}</span>}
+                      {kits > 0 && <span title="Kits" style={{ marginLeft: protocols > 0 ? '3px' : 0 }}>📦{kits}</span>}
+                      {peptides > 0 && <span title="Peptides" style={{ marginLeft: (protocols > 0 || kits > 0) ? '3px' : 0 }}>🧪{peptides}</span>}
+                    </span>
+                  );
+                }
+
+                // Fallback: simple numeric badge
+                return (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-2px',
+                    right: '-2px',
+                    backgroundColor: 'var(--secondary)',
+                    color: 'white',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    padding: '2px 6px',
+                    borderRadius: '10px',
+                    border: '2px solid white'
+                  }}>
+                    {cartCount}
+                  </span>
+                );
+              })()}
             </button>
           </div>
 
@@ -666,114 +538,102 @@ export default function Header({ scrolled, cartCount, onOpenCart, onOpenSearch, 
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
-              {/* Main Navigation */}
-              <span className="drawer-section-title">Navigation</span>
-              <Link to="/" className="drawer-link" onClick={() => setMobileMenuOpen(false)}>Home</Link>
-              <Link to="/quality" className="drawer-link" onClick={() => setMobileMenuOpen(false)}>Quality Assurance</Link>
-              <Link to="/protocol-builder" className="drawer-link" onClick={() => setMobileMenuOpen(false)}>Protocol Builder</Link>
-              <Link to="/calculator" className="drawer-link" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--primary)', fontWeight: 700 }}><FlaskConical size={18} /> Calculator</Link>
-              
-              <div style={{ marginTop: '0.5rem' }}>
-                <button 
-                  onClick={() => setMobileCatalogOpen(!mobileCatalogOpen)}
-                  style={{ 
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    width: '100%', background: 'none', border: 'none', padding: '0.85rem 1rem',
-                    color: 'var(--text-main)', fontWeight: 600, fontSize: '1.05rem', textAlign: 'left'
-                  }}
-                >
-                  Catalog <ChevronDown size={18} style={{ transform: mobileCatalogOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.3s' }} />
-                </button>
-                {mobileCatalogOpen && (
-                  <div style={{ paddingLeft: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    {CATALOG_ITEMS.map(item => (
-                      <Link 
-                        key={item} 
-                        to={
-                          item === 'Research Catalog' ? '/products' : 
-                          item === 'Investigational Pathways' ? '/collection/investigation-pathways' : 
-                          item === 'Supplies' ? '/supplies' : 
-                          '/custom-synthesis'
-                        } 
-                        className="drawer-link" 
-                        style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {item}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
 
-              <div style={{ marginTop: '0.25rem' }}>
-                <button 
-                  onClick={() => setMobileCompanyOpen(!mobileCompanyOpen)}
-                  style={{ 
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    width: '100%', background: 'none', border: 'none', padding: '0.85rem 1rem',
-                    color: 'var(--text-main)', fontWeight: 600, fontSize: '1.05rem', textAlign: 'left'
-                  }}
-                >
-                  Resources <ChevronDown size={18} style={{ transform: mobileCompanyOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.3s' }} />
-                </button>
-                {mobileCompanyOpen && (
-                  <div style={{ paddingLeft: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    {COMPANY_ITEMS.map(item => (
-                      <Link 
-                        key={item.path} 
-                        to={item.path} 
-                        className="drawer-link" 
-                        style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
+              {/* ── Main links ─────────────────────────────────── */}
+              <span style={S.sectionTitle}>Navigation</span>
+              <Link to="/" style={S.drawerLink} onClick={() => setMobileMenuOpen(false)}>
+                <Home size={18} /> Home
+              </Link>
 
-              {/* Research Settings Section (Moved to Submenu) */}
-              <div style={{ marginTop: '0.25rem' }}>
-                <button 
-                  onClick={() => setMobileSettingsOpen(!mobileSettingsOpen)}
-                  style={{ 
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    width: '100%', background: 'none', border: 'none', padding: '0.85rem 1rem',
-                    color: 'var(--text-main)', fontWeight: 600, fontSize: '1.05rem', textAlign: 'left'
-                  }}
-                >
-                  Regional Settings <Globe size={18} style={{ opacity: 0.6 }} />
-                </button>
-                {mobileSettingsOpen && (
-                  <div style={{ 
-                    margin: '0 0.5rem 0.5rem 0.5rem', 
-                    padding: '1.25rem', 
-                    backgroundColor: 'var(--background)', 
-                    borderRadius: '16px',
-                    border: '1px solid var(--border)'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                      <div>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Research Region</span>
-                        <span style={{ fontSize: '0.95rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                          {displayFlag} {displayCountryName}
-                        </span>
-                      </div>
-                      <button 
-                        onClick={() => { onOpenRegion(); setMobileMenuOpen(false); }}
-                        style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem', fontWeight: 700, borderRadius: '8px', border: '1px solid var(--primary)', background: 'white', color: 'var(--primary)' }}
-                      >
-                        Change
-                      </button>
+
+              {/* ── Academia accordion ────────────────────────── */}
+              <button
+                style={S.drawerLink}
+                onClick={() => toggleMobile('academia')}
+                aria-expanded={mobileExpanded === 'academia'}
+              >
+                <LayoutDashboard size={18} /> Academia
+                <ChevronDown size={16} style={{ marginLeft: 'auto', transform: mobileExpanded === 'academia' ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.25s' }} />
+              </button>
+              {mobileExpanded === 'academia' && (
+                <div style={{ paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column' }}>
+                  {ACADEMIA_MENU.map(item => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      style={{
+                        ...S.drawerLink, fontSize: '0.9rem',
+                        color: item.soon ? 'var(--text-muted)' : 'var(--text-primary)',
+                        paddingTop: '0.55rem', paddingBottom: '0.55rem',
+                        opacity: item.soon ? 0.55 : 1,
+                        pointerEvents: item.soon ? 'none' : 'auto',
+                        display: 'flex', alignItems: 'center', gap: '0.5rem',
+                      }}
+                      onClick={() => !item.soon && setMobileMenuOpen(false)}
+                    >
+                      {item.label}
+                      {item.soon && (
+                        <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--secondary)', background: 'var(--secondary-alpha, rgba(100,200,150,0.12))', padding: '2px 6px', borderRadius: '20px' }}>COMING SOON</span>
+                      )}
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {/* ── Resources accordion ───────────────────────── */}
+              <button
+                style={S.drawerLink}
+                onClick={() => toggleMobile('resources')}
+                aria-expanded={mobileExpanded === 'resources'}
+              >
+                <Globe size={18} /> Resources
+                <ChevronDown size={16} style={{ marginLeft: 'auto', transform: mobileExpanded === 'resources' ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.25s' }} />
+              </button>
+              {mobileExpanded === 'resources' && (
+                <div style={{ paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column' }}>
+                  {RESOURCES_MENU.map(item => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      style={{ ...S.drawerLink, fontSize: '0.9rem', color: 'var(--text-muted)', paddingTop: '0.55rem', paddingBottom: '0.55rem' }}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {/* ── Regional settings accordion ───────────────── */}
+              <button
+                style={S.drawerLink}
+                onClick={() => toggleMobile('settings')}
+                aria-expanded={mobileExpanded === 'settings'}
+              >
+                <Globe size={18} /> Regional Settings
+                <ChevronDown size={16} style={{ marginLeft: 'auto', transform: mobileExpanded === 'settings' ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.25s', opacity: 0.6 }} />
+              </button>
+              {mobileExpanded === 'settings' && (
+                <div style={{ margin: '0 0.5rem 0.5rem 0.5rem', padding: '1.25rem', backgroundColor: 'var(--background)', borderRadius: '16px', border: '1px solid var(--border)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                    <div>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Research Region</span>
+                      <span style={{ fontSize: '0.95rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        {displayFlag} {displayCountryName}
+                      </span>
                     </div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                      Currency: <strong style={{ color: 'var(--text-main)' }}>USD</strong>
-                    </div>
+                    <button
+                      onClick={() => { onOpenRegion(); setMobileMenuOpen(false); }}
+                      style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem', fontWeight: 700, borderRadius: '8px', border: '1px solid var(--primary)', background: 'white', color: 'var(--primary)' }}
+                    >
+                      Change
+                    </button>
                   </div>
-                )}
-              </div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    Currency: <strong style={{ color: 'var(--text-main)' }}>USD</strong>
+                  </div>
+                </div>
+              )}
 
               {/* User Account Section */}
               <span className="drawer-section-title">Professional Account</span>
@@ -803,14 +663,22 @@ export default function Header({ scrolled, cartCount, onOpenCart, onOpenSearch, 
                     </button>
                   </div>
                 ) : (
-                  <div style={{ padding: '0.5rem' }}>
-                    <Link 
-                      to="/login" 
-                      className="drawer-link" 
-                      style={{ backgroundColor: 'var(--primary)', color: 'white', justifyContent: 'center' }}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.5rem' }}>
+                    <Link
+                      to="/login"
+                      className="drawer-link"
+                      style={{ backgroundColor: 'var(--primary)', color: 'white', justifyContent: 'center', borderRadius: '12px' }}
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      Login / Register
+                      <LogIn size={18} /> Login
+                    </Link>
+                    <Link
+                      to={{ pathname: '/login', search: '?tab=register' }}
+                      className="drawer-link"
+                      style={{ backgroundColor: 'transparent', color: 'var(--primary)', justifyContent: 'center', border: '1.5px solid var(--primary)', borderRadius: '12px' }}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <LogIn size={18} /> Register
                     </Link>
                   </div>
                 )}
@@ -830,3 +698,5 @@ export default function Header({ scrolled, cartCount, onOpenCart, onOpenSearch, 
     </>
   );
 }
+
+export default memo(Header);

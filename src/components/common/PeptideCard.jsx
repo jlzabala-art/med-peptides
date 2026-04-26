@@ -4,20 +4,22 @@ import { ArrowRight } from 'lucide-react';
 /**
  * PeptideCard — componente compartido para TrendingPeptides y NovelAcquisitions.
  * Props:
- *   name       {string}   — nombre del péptido (también sirve para la imagen)
- *   slug       {string}   — para navegación
- *   tag        {string}   — etiqueta badge superior
- *   desc       {string}   — descripción
- *   footerIcon {ReactNode} — icono del footer (Zap, Sparkles, etc.)
- *   footerText {string}   — texto junto al icono footer
- *   mobileCTA  {string}   — texto del botón mobile (ej: "Ver Detalles")
- *   onClick    {Function} — handler de click
+ *   name          {string}    — nombre del péptido (también sirve para la imagen)
+ *   slug          {string}    — para navegación
+ *   tag           {string}    — etiqueta badge superior
+ *   desc          {string}    — descripción
+ *   dosage        {string}    — dosage info single string (e.g. "0.5–2 mg/week")
+ *   dosageElement {ReactNode} — override: render this instead of the plain dosage string (for multi-variant pills)
+ *   footerIcon    {ReactNode} — icono del footer (Zap, Sparkles, etc.)
+ *   footerText    {string}    — texto junto al icono footer
+ *   mobileCTA     {string}    — texto del botón mobile (ej: "Ver Detalles")
+ *   onClick       {Function}  — handler de click
  */
-function PeptideCard({ name, slug, tag, desc, footerIcon, footerText, mobileCTA = 'Ver Detalles', onClick }) {
+function PeptideCard({ name, slug, tag, desc, dosage, dosageElement, footerIcon, footerText, mobileCTA = 'Ver Detalles', onClick }) {
   const [visible, setVisible] = useState(false);
   const cardRef = useRef(null);
 
-  // Fase 4: Animate on viewport entry
+  // Animate on viewport entry
   useEffect(() => {
     const el = cardRef.current;
     if (!el) return;
@@ -44,7 +46,7 @@ function PeptideCard({ name, slug, tag, desc, footerIcon, footerText, mobileCTA 
       {/* Tag badge */}
       <div className="peptide-card__tag">{tag}</div>
 
-      {/* Vial image — Fase 4: lazy + decoding async */}
+      {/* Vial image */}
       <img
         src={imagePath}
         alt={`Vial de ${name}`}
@@ -59,6 +61,20 @@ function PeptideCard({ name, slug, tag, desc, footerIcon, footerText, mobileCTA 
       {/* Body */}
       <div className="peptide-card__body">
         <h3 className="peptide-card__title">{name}</h3>
+
+        {/* dosageElement takes priority; fall back to plain dosage string */}
+        {dosageElement ? (
+          <div className="peptide-card__dosage">
+            <span className="peptide-card__dosage-label">Dosage</span>
+            {dosageElement}
+          </div>
+        ) : dosage ? (
+          <div className="peptide-card__dosage">
+            <span className="peptide-card__dosage-label">Dosage</span>
+            <span className="peptide-card__dosage-value">{dosage}</span>
+          </div>
+        ) : null}
+
         <p className="peptide-card__desc">{desc}</p>
 
         {footerText && (

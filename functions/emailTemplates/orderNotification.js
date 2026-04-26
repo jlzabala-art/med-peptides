@@ -10,8 +10,10 @@
  * @returns {string} Full HTML string ready to send.
  */
 function buildOrderNotificationHtml(order) {
+  // orderId — support both id (from Firestore doc) and explicit orderId field
+  const orderId = order.id || order.orderId || '—';
+
   const {
-    orderId = '—',
     createdAt,
     customer = {},
     items = [],
@@ -26,9 +28,18 @@ function buildOrderNotificationHtml(order) {
   const fmt = (amount) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency }).format(amount);
 
-  const dateStr = createdAt
-    ? new Date(createdAt).toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' })
-    : new Date().toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' });
+  // createdAt can be a Firestore Timestamp, a JS Date, or an ISO string
+  let dateObj;
+  if (createdAt && typeof createdAt.toDate === 'function') {
+    dateObj = createdAt.toDate(); // Firestore Timestamp
+  } else if (createdAt) {
+    dateObj = new Date(createdAt);
+  } else {
+    dateObj = new Date();
+  }
+  const dateStr = isNaN(dateObj.getTime())
+    ? new Date().toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' })
+    : dateObj.toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' });
 
   const itemsRows = items
     .map(
@@ -112,7 +123,7 @@ function buildOrderNotificationHtml(order) {
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="padding-bottom:8px;">
-                      <p style="margin:0;font-size:14px;color:#1e293b;"><strong>${customer.fullName || customer.name || '—'}</strong></p>
+                      <p style="margin:0;font-size:14px;color:#1e293b;"><strong>${customer.fullName || customer.name || [customer.firstName, customer.lastName].filter(Boolean).join(' ') || '—'}</strong></p>
                     </td>
                   </tr>
                   <tr>

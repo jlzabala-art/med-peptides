@@ -1,0 +1,497 @@
+{
+  "active": true,
+  "bundleVersion": "2.0",
+  "physician_supervision_required": true,
+  "protocol_duration_weeks": 16,
+  "protocol_id": "wm_003",
+  "protocol_is_curated": true,
+  "protocol_is_physician_authored": true,
+  "protocol_review_status": "reviewed",
+  "protocol_version": "v6.0",
+  "washout_recommended_weeks": 4,
+  "metadata": {
+    "longDescription": "This advanced protocol bridges metabolic weight management with longevity biology by combining GLP-1 receptor agonism (appetite and insulin regulation) with mitochondrial peptides (MOTS-c) that activate AMPK, improve insulin sensitivity, and modulate the folate cycle. The compound selection targets the intersection of metabolic syndrome and accelerated cellular aging: excess adiposity promotes senescence, systemic inflammation, and mitochondrial dysfunction. By addressing these pathways concurrently, the protocol aims for body-composition remodeling alongside hallmarks-of-aging improvements (López-Otín et al., Cell 2023). Appropriate for patients with metabolic syndrome who have failed monotherapy approaches.",
+    "primary_goal": "Weight Management / Obesity",
+    "keywords": [
+      "advanced weight management protocol",
+      "metabolic longevity peptides",
+      "MOTS-c GLP-1 combined protocol",
+      "body composition remodeling",
+      "metabolic syndrome peptide",
+      "anti-aging weight loss"
+    ],
+    "references": [
+      {
+        "pmid": "37832556",
+        "citation": "López-Otín C et al. Hallmarks of aging: An expanding universe. Cell 2023;186:243-278."
+      },
+      {
+        "pmid": "25738459",
+        "citation": "Lee C et al. The Mitochondrial-Derived Peptide MOTS-c Promotes Metabolic Homeostasis. Cell Metab 2015;21:443-454."
+      },
+      {
+        "pmid": "36205685",
+        "citation": "Jastreboff AM et al. Tirzepatide Once Weekly for the Treatment of Obesity. NEJM 2022;387:205-216."
+      }
+    ],
+    "visibility": "restricted_research",
+    "scientificName": "Integrated GLP-1 & Mitokine Metabolic–Longevity Protocol",
+    "description": "Advanced multi-compound weight and longevity protocol combining GLP-1-class agonism with mitochondrial peptides for body-composition remodeling and cellular rejuvenation.",
+    "primary_condition": "obesity_metabolic_dysfunction",
+    "version": "1.0",
+    "clinical_summary": "Structured multi-phase metabolic protocol designed to improve adiposity regulation, insulin sensitivity, metabolic flexibility, and progressive body composition optimization through staged pharmacologic and peptide-based interventions.",
+    "evidence_grade": "B",
+    "schema_version": "antigravity_v2",
+    "abbreviatedName": "Retatrutide · Triple Agonist Intensive",
+    "shortCode": "WMT-003"
+  },
+  "protocol_author_name": "Clinical Longevity Protocol Team",
+  "seeded_at": "2026-04-25T06:10:36.134Z",
+  "protocol_source_version": "1.0",
+  "schema_version": "antigravity_v2",
+  "dosing_enrichment": {
+    "titration_note": "Weeks 1-2: Ipamorelin 100 mcg SC 3x/day. Weeks 3-8: increase to 200-300 mcg 3x/day. CJC-1295 DAC 1 mg/week from week 2, increase to 2 mg/week by week 4. Add AOD-9604 300 mcg/day from week 9 for lipolytic phase intensification.",
+    "cycling_recommendation": "16-week body recomposition cycle: 8 weeks anabolic emphasis (Ipamorelin + CJC-1295), then 8 weeks lipolytic emphasis (AOD-9604 + MK-677 taper). 6-week washout required. Maximum 2 cycles per year.",
+    "maintenance_dose": "Ipamorelin: 200-300 mcg SC 3x/day (pre-meal + pre-sleep). CJC-1295 DAC: 2 mg SC 1x/week. AOD-9604: 250-300 mcg/day SC fasted (added at week 8 in lipolytic phase).",
+    "timing_optimization": "Ipamorelin: pre-meal injections leverage GH pulse amplification during insulin-independent windows. Pre-sleep dose maximizes nocturnal GH surge for anabolic recovery. CJC-1295 DAC weekly injection on rest days to avoid blunting acute GH peaks."
+  },
+  "complexity_level": "moderate",
+  "eligibility_rules": {
+    "indications": [
+      "Obesity with metabolic syndrome",
+      "Insulin resistance",
+      "Visceral adiposity",
+      "Failure of single-agent weight-loss therapy"
+    ],
+    "contraindications": [
+      "Active malignancy",
+      "Pregnancy or breastfeeding",
+      "Uncontrolled diabetes (HbA1c > 9%)",
+      "Severe hepatic impairment",
+      "History of pancreatitis"
+    ],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "patient_demographic",
+      "age_group",
+      "start_date",
+      "baseline_weight",
+      "height_cm",
+      "bmi",
+      "metabolic_status",
+      "tolerance_profile",
+      "duration_weeks"
+    ],
+    "baseline_requirements": [
+      "Fasting glucose",
+      "HbA1c",
+      "IGF-1",
+      "Lipid panel",
+      "Thyroid profile",
+      "Body composition (DXA or BIA)"
+    ]
+  },
+  "normalizedAt": "2026-04-26T11:19:09.774Z",
+  "generated_protocol_template": {
+    "patient_context": {
+      "age_group": null,
+      "baseline_weight": null,
+      "duration_weeks": null,
+      "height_cm": null,
+      "metabolic_status": null,
+      "patient_demographic": null,
+      "physician_supervision_required": true,
+      "primary_clinical_focus": null,
+      "protocol_id": "wm_003",
+      "sex": null,
+      "tempo_preference": "standard",
+      "tolerance_profile": "average",
+      "bmi": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_group": "adult",
+      "duration_weeks": 16,
+      "intensity": "standard",
+      "sex": "universal",
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "validated_at": null,
+      "validated_by": null,
+      "validation_notes": "Auto-generated template. Pending clinical review.",
+      "validation_status": "NOT_EVALUATED",
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "protocol_author_organization": "ReGen Clinical",
+  "protocol_last_reviewed_at": "2026-03-29",
+  "protocol_source_reference": "Advanced Metabolic & Longevity Protocol — 16 Week Clinical Program",
+  "expected_outcomes": {
+    "qualitative": [
+      "Visceral fat reduction",
+      "Improved insulin sensitivity",
+      "Enhanced mitochondrial function",
+      "Body composition remodeling",
+      "Progressive reduction in visceral adipose tissue",
+      "Improved metabolic flexibility",
+      "Reduced appetite and improved satiety",
+      "Improved body composition"
+    ],
+    "quantitative_ranges": {
+      "week_8": "Fat mass reduction 3–6%",
+      "week_4": "Weight reduction 1–3% from baseline",
+      "week_12": "Total body weight reduction 5–10%"
+    }
+  },
+  "phase_blueprints": [],
+  "protocol_slug": "advanced-metabolic-longevity-16w",
+  "phases": [
+    {
+      "phase_number": 1,
+      "phase_title": "Metabolic Priming",
+      "start_week": 1,
+      "end_week": 4,
+      "drugs_used": [
+        {
+          "product_slug": "retatrutide",
+          "selected_strength": "5mg",
+          "weekly_dose": "2mg",
+          "route": "subcutaneous",
+          "dosing_frequency": "weekly",
+          "vials_required_for_phase": 2,
+          "productId": "Retatrutide-10mg-vial"
+        },
+        {
+          "product_slug": "mots-c",
+          "selected_strength": "5mg",
+          "weekly_dose": "15mg",
+          "per_administration_dose": "5mg",
+          "route": "subcutaneous",
+          "dosing_frequency": "3x_week",
+          "vials_required_for_phase": 12,
+          "productId": "MOTS-C-10mg-vial"
+        },
+        {
+          "product_slug": "tesamorelin",
+          "selected_strength": "10mg",
+          "weekly_dose": "5mg",
+          "per_administration_dose": "1mg",
+          "route": "subcutaneous",
+          "dosing_frequency": "5x_week",
+          "vials_required_for_phase": 4,
+          "productId": "Tesamorelin-2mg-vial"
+        },
+        {
+          "product_slug": "ss-31",
+          "selected_strength": "10mg",
+          "weekly_dose": "10mg",
+          "per_administration_dose": "5mg",
+          "route": "subcutaneous",
+          "dosing_frequency": "2x_week",
+          "vials_required_for_phase": 4,
+          "productId": "SS-31-5mg-vial"
+        },
+        {
+          "product_slug": "ghk-cu",
+          "selected_strength": "10mg",
+          "weekly_dose": "7mg",
+          "route": "subcutaneous",
+          "dosing_frequency": "daily",
+          "vials_required_for_phase": 3,
+          "productId": "GHK-Cu_(Copper_Peptide)-5mg-vial"
+        }
+      ]
+    },
+    {
+      "phase_number": 2,
+      "phase_title": "Active Fat Loss",
+      "start_week": 5,
+      "end_week": 12,
+      "drugs_used": [
+        {
+          "product_slug": "retatrutide",
+          "selected_strength": "5mg",
+          "weekly_dose": "6mg",
+          "route": "subcutaneous",
+          "dosing_frequency": "weekly",
+          "vials_required_for_phase": 10,
+          "productId": "Retatrutide-10mg-vial"
+        },
+        {
+          "product_slug": "aod-9604",
+          "selected_strength": "5mg",
+          "weekly_dose": "2.1mg",
+          "route": "subcutaneous",
+          "dosing_frequency": "daily",
+          "vials_required_for_phase": 8,
+          "productId": "AOD-9604-5mg-vial"
+        },
+        {
+          "product_slug": "mots-c",
+          "selected_strength": "5mg",
+          "weekly_dose": "15mg",
+          "per_administration_dose": "5mg",
+          "route": "subcutaneous",
+          "dosing_frequency": "3x_week",
+          "vials_required_for_phase": 24,
+          "productId": "MOTS-C-10mg-vial"
+        },
+        {
+          "product_slug": "ghk-cu",
+          "selected_strength": "10mg",
+          "weekly_dose": "3.5mg",
+          "route": "subcutaneous",
+          "dosing_frequency": "3x_week",
+          "vials_required_for_phase": 3,
+          "productId": "GHK-Cu_(Copper_Peptide)-5mg-vial"
+        },
+        {
+          "product_slug": "nad",
+          "selected_strength": "500mg",
+          "weekly_dose": "2x_week",
+          "route": "subcutaneous",
+          "dosing_frequency": "2x_week",
+          "vials_required_for_phase": 2
+        }
+      ]
+    },
+    {
+      "phase_number": 3,
+      "phase_title": "Metabolic Stabilization",
+      "start_week": 13,
+      "end_week": 16,
+      "drugs_used": [
+        {
+          "product_slug": "retatrutide",
+          "selected_strength": "5mg",
+          "weekly_dose": "4mg",
+          "route": "subcutaneous",
+          "dosing_frequency": "weekly",
+          "vials_required_for_phase": 4,
+          "productId": "Retatrutide-10mg-vial"
+        },
+        {
+          "product_slug": "mots-c",
+          "selected_strength": "5mg",
+          "weekly_dose": "10mg",
+          "per_administration_dose": "5mg",
+          "route": "subcutaneous",
+          "dosing_frequency": "2x_week",
+          "vials_required_for_phase": 8,
+          "productId": "MOTS-C-10mg-vial"
+        },
+        {
+          "product_slug": "ghk-cu",
+          "selected_strength": "10mg",
+          "weekly_dose": "2mg",
+          "route": "subcutaneous",
+          "dosing_frequency": "2x_week",
+          "vials_required_for_phase": 1,
+          "productId": "GHK-Cu_(Copper_Peptide)-5mg-vial"
+        }
+      ]
+    }
+  ],
+  "metadata.shortCode": "WMT-003",
+  "number_of_phases": 3,
+  "riskManagement": {
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (10–30%)",
+        "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+      },
+      {
+        "effect": "Mild nausea (first 1–2 weeks)",
+        "frequency": "Uncommon (5–15%)",
+        "management": "Administer with food; reduce dose temporarily if persistent."
+      },
+      {
+        "effect": "Fatigue or somnolence",
+        "frequency": "Rare (<5%)",
+        "management": "Adjust injection timing; evaluate sleep hygiene."
+      },
+      {
+        "effect": "Headache",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Hydration; paracetamol as needed; review dosing."
+      }
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "contraindications": [
+      "Type 1 diabetes (insulin-dependent, use with caution)",
+      "Severe renal impairment",
+      "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+    ],
+    "escalation_criteria": [
+      "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+      "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+      "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+      "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+    ]
+  },
+  "metadata.scientificName": "Integrated GLP-1 & Mitokine Metabolic–Longevity Protocol",
+  "primary_goal": "Weight Management / Obesity",
+  "metadata.visibility": "restricted_research",
+  "protocol_source_type": "clinical_program",
+  "metadata.primary_goal": "Weight Management / Obesity",
+  "overview_summary": "Intensive 16-week metabolic optimization and fat loss program focusing on visceral fat reduction and mitochondrial priming.",
+  "monitoring_plan": {
+    "week_16": [
+      "Full metabolic panel",
+      "Body composition",
+      "HbA1c",
+      "IGF-1"
+    ],
+    "week_8": [
+      "IGF-1",
+      "Fasting glucose",
+      "Body composition",
+      "Blood pressure"
+    ],
+    "monthly": [
+      "Weight",
+      "Waist circumference",
+      "Blood pressure"
+    ],
+    "baseline": [
+      "Weight",
+      "Waist circumference",
+      "Fasting glucose",
+      "HbA1c",
+      "IGF-1",
+      "Lipid panel"
+    ]
+  },
+  "metadata.schema_version": "antigravity_v2",
+  "protocol_author_title": "Clinic Lead",
+  "confidence_score": 93,
+  "protocol_title": "Advanced Metabolic & Longevity Protocol",
+  "safety_profile": {
+    "drug_interactions": [
+      "Avoid concurrent GH replacement therapy - additive effect may cause IGF-1 supraphysiological elevation",
+      "Corticosteroids blunt GH secretagogue response - avoid concurrent use",
+      "AOD-9604 is GH-axis-independent and safe to stack with Ipamorelin/CJC-1295"
+    ],
+    "monitoring_required": [
+      "IGF-1 serum at baseline, week 8, and week 16",
+      "Fasting glucose and HbA1c at weeks 0, 8, 16",
+      "DXA or BIA body composition at baseline and week 8/16",
+      "Blood pressure and resting heart rate monthly",
+      "Thyroid function (TSH) at baseline and end of cycle"
+    ],
+    "adverse_events_serious": [
+      "Elevated IGF-1 beyond 350 ng/mL - dose reduction required; monitor for acromegalic features",
+      "Insulin resistance worsening possible with prolonged high-dose GH stimulation - monitor fasting glucose"
+    ],
+    "washout_recommended_weeks": 4,
+    "adverse_events_common": [
+      "Transient water retention in first 2-4 weeks (15-20%)",
+      "Mild injection site reactions (10-15%)",
+      "Transient headache or flushing post-Ipamorelin injection (5-10%)",
+      "Mild cortisol blunting effect - monitor energy and stress resilience"
+    ]
+  },
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 8,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "Fasting glucose",
+        "Insulin",
+        "HOMA-IR",
+        "Lipid panel"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 16,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "HbA1c",
+        "Full lipid panel",
+        "Body composition (DEXA or impedance)"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "status": "approved",
+  "generator_rules": {
+    "allow_acceleration": false,
+    "base_duration_weeks": 16,
+    "notes": "Default generator rules – pending clinical review.",
+    "tempo_variants": [
+      "standard"
+    ],
+    "allow_extension": false
+  },
+  "_syncSource": "export/protocols/wm_003.json",
+  "risk_class": "moderate",
+  "economics": {
+    "total_protocol_cost_estimate": null,
+    "total_vials_required": null
+  },
+  "_patchedAt": {
+    "schema_gap_fix": "2026-04-26T12:37:11Z"
+  },
+  "_schemaVersion": "antigravity_v2",
+  "_patchSchema": "antigravity_v2",
+  "variant_rules": {
+    "tempo": {
+      "standard": {
+        "notes": "Standard tempo – no adjustment.",
+        "phase_duration_multiplier": 1
+      },
+      "accelerated": {
+        "notes": "Accelerated tempo – physician review required.",
+        "phase_duration_multiplier": 0.75
+      },
+      "extended": {
+        "notes": "Extended tempo – for slower responders.",
+        "phase_duration_multiplier": 1.33
+      }
+    }
+  },
+  "legacy_compatibility": {
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ],
+    "notes": "Legacy fields retained for backward compatibility; phase_blueprints are preferred when present.",
+    "enabled": true
+  },
+  "_syncedAt": "2026-04-26T12:46:39.587Z"
+}

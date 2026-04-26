@@ -1,8 +1,17 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Mail, Phone, User, Send, ChevronDown, ArrowLeft, CheckCircle2, Globe, FileText, Users, Clock, MessageSquare, Calendar, CloudUpload, ShieldCheck } from 'lucide-react';
 import { COUNTRIES } from '../data/countries';
+import { useAuth } from '../context/AuthContext';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, region }) {
+  usePageMeta({
+    title: 'Contact Us',
+    description: 'Get in touch with the Med-Peptides team for product inquiries, order support, wholesale requests, or professional collaboration.',
+    path: '/contact',
+  });
+
+  const { user, userProfile } = useAuth();
   const [submitted, setSubmitted] = useState(false);
   const [topic, setTopic] = useState('Product Information');
   const [userType, setUserType] = useState(null);
@@ -118,6 +127,34 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // Pre-fill form if user is logged in
+  useEffect(() => {
+    if (userProfile || user) {
+      setLocalFormData(prev => ({
+        ...prev,
+        name: prev.name || userProfile?.fullName || user?.displayName || '',
+        email: prev.email || userProfile?.email || user?.email || '',
+        phone: prev.phone || userProfile?.phone || ''
+      }));
+
+      // If user has a specific role, we can also default the userType and topic
+      if (userProfile?.userType || userProfile?.role) {
+        const role = (userProfile?.userType || userProfile?.role).toLowerCase();
+        let detectedType = null;
+        
+        if (role.includes('clinic')) detectedType = USER_TYPES.find(t => t.id === 'clinics');
+        else if (role.includes('pharmacy')) detectedType = USER_TYPES.find(t => t.id === 'pharmacies');
+        else if (role.includes('researcher')) detectedType = USER_TYPES.find(t => t.id === 'researchers');
+        else if (role.includes('distributor')) detectedType = USER_TYPES.find(t => t.id === 'distributors');
+
+        if (detectedType && !userType) {
+          setUserType(detectedType.id);
+          setTopic(detectedType.defaultInquiry);
+        }
+      }
+    }
+  }, [user, userProfile, userType]);
 
   // We rely on Formspree for actual email delivery securely without a backend
   // The user specifies they want the email to go to business@med-peptides.com

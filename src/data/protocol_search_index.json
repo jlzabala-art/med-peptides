@@ -1,0 +1,406 @@
+[
+  {
+    "protocol_id": "wm_001",
+    "protocol_slug": "weight-management-structured-12w",
+    "name": "Tirzepatide + MOTS-c Metabolic Protocol",
+    "category": "Weight Management / Obesity",
+    "tags": [
+      "Weight Management / Obesity",
+      "standard",
+      "Reduced appetite",
+      "Progressive fat loss",
+      "Improved metabolic efficiency"
+    ],
+    "duration_weeks": 12,
+    "products_used": [
+      "tirzepatide",
+      "mots c",
+      "aod 9604"
+    ],
+    "clinical_focus": "Three-phase structured metabolic weight reduction protocol using GLP-based support and mitochondrial optimization.",
+    "metadata": {
+      "scientificName": "Incretin-Mitochondrial Metabolic Synergistic Axis",
+      "shortCode": "IMM-SYN-12W"
+    }
+  },
+  {
+    "protocol_id": "met_001",
+    "protocol_slug": "metabolic-optimization-10w",
+    "name": "MOTS-c & AOD-9604 Metabolic Activation Protocol",
+    "category": "Metabolic Health",
+    "tags": [
+      "Metabolic Health",
+      "moderate"
+    ],
+    "duration_weeks": 10,
+    "products_used": [
+      "mots c",
+      "aod 9604"
+    ],
+    "clinical_focus": ""
+  },
+  {
+    "protocol_id": "rec_001",
+    "protocol_slug": "injury-recovery-8w",
+    "name": "BPC-157 & TB-500 Tissue Repair Protocol",
+    "category": "Recovery / Injury",
+    "tags": [
+      "Recovery / Injury",
+      "standard"
+    ],
+    "duration_weeks": 8,
+    "products_used": [
+      "bpc 157",
+      "tb 500"
+    ],
+    "clinical_focus": ""
+  },
+  {
+    "protocol_id": "cog_001",
+    "protocol_slug": "cognitive-support-6w",
+    "name": "Semax & Selank Neurocognitive Protocol",
+    "category": "Cognitive Support",
+    "tags": [
+      "Cognitive Support",
+      "simple"
+    ],
+    "duration_weeks": 6,
+    "products_used": [
+      "semax",
+      "selank"
+    ],
+    "clinical_focus": ""
+  },
+  {
+    "protocol_id": "lon_001",
+    "protocol_slug": "longevity-foundation-12w",
+    "name": "MOTS-c Longevity Foundation Protocol",
+    "category": "Longevity",
+    "tags": [
+      "Longevity",
+      "moderate"
+    ],
+    "duration_weeks": 12,
+    "products_used": [
+      "mots c"
+    ],
+    "clinical_focus": "",
+    "metadata": {
+      "scientificName": "Mitochondrial Open Reading Frame of the 12S rRNA-c Metabolic Anchor",
+      "shortCode": "MLF-ANC-12W"
+    }
+  },
+  {
+    "protocol_id": "sleep_001",
+    "protocol_slug": "sleep-restoration-8w",
+    "name": "DSIP & Selank Sleep Restoration Protocol",
+    "category": "Sleep Support",
+    "tags": [
+      "Sleep Support",
+      "moderate"
+    ],
+    "duration_weeks": 8,
+    "products_used": [
+      "dsip",
+      "selank"
+    ],
+    "clinical_focus": "Protocol designed to improve sleep architecture, reduce stress activation, and support circadian recovery."
+  },
+  {
+    "protocol_id": "horm_001",
+    "protocol_slug": "hormonal-support-12w",
+    "name": "CJC-1295 / Ipamorelin GH Optimization Protocol",
+    "category": "Hormonal Support",
+    "tags": [
+      "Hormonal Support",
+      "advanced"
+    ],
+    "duration_weeks": 12,
+    "products_used": [
+      "cjc 1295 ipamorelin",
+      "tesamorelin"
+    ],
+    "clinical_focus": "Advanced protocol for hormonal optimization using growth hormone secretagogues."
+  },
+  {
+    "protocol_id": "skin_001",
+    "protocol_slug": "skin-rejuvenation-12w",
+    "name": "GHK-Cu Collagen Rejuvenation Protocol",
+    "category": "Skin / Anti-Aging",
+    "tags": [
+      "Skin / Anti-Aging",
+      "moderate"
+    ],
+    "duration_weeks": 12,
+    "products_used": [
+      "ghk cu"
+    ],
+    "clinical_focus": "Protocol focused on collagen activation and skin tissue rejuvenation."
+  },
+  {
+    "protocol_id": "immune_001",
+    "protocol_slug": "immune-modulation-8w",
+    "name": "Thymosin Alpha-1 & TB-500 Immune Modulation Protocol",
+    "category": "Immune / Inflammation",
+    "tags": [
+      "Immune / Inflammation",
+      "moderate"
+    ],
+    "duration_weeks": 8,
+    "products_used": [
+      "thymosin alpha 1",
+      "tb 500"
+    ],
+    "clinical_focus": "Protocol designed to modulate immune response and support systemic inflammation reduction."
+  },
+  {
+    "protocol_id": "energy_001",
+    "protocol_slug": "mitochondrial-energy-10w",
+    "name": "MOTS-c Mitochondrial Energy Protocol",
+    "category": "Energy / Mitochondrial",
+    "tags": [
+      "Energy / Mitochondrial",
+      "moderate"
+    ],
+    "duration_weeks": 10,
+    "products_used": [
+      "mots c"
+    ],
+    "clinical_focus": "Protocol focused on mitochondrial optimization and ATP production efficiency."
+  },
+  {
+    "protocol_id": "wm_002",
+    "protocol_slug": "weight-management-cagrisem-12w",
+    "name": "Semaglutide + Cagrilintide Dual-Agonist Protocol",
+    "category": "Weight Management / Obesity",
+    "tags": [
+      "Weight Management / Obesity",
+      "advanced"
+    ],
+    "duration_weeks": 12,
+    "products_used": [
+      "semaglutide",
+      "cagrilintide",
+      "aod 9604"
+    ],
+    "clinical_focus": "Three-phase weight management protocol combining semaglutide-based escalation with cagrilintide support to intensify appetite and weight-control signaling."
+  },
+  {
+    "protocol_id": "met_002",
+    "protocol_slug": "metabolic-retatrutide-motsc-12w",
+    "name": "Retatrutide + MOTS-c Metabolic Intensification Protocol",
+    "category": "Metabolic Health",
+    "tags": [
+      "Metabolic Health",
+      "advanced"
+    ],
+    "duration_weeks": 12,
+    "products_used": [
+      "retatrutide",
+      "mots c",
+      "ss 31"
+    ],
+    "clinical_focus": "Three-phase metabolic protocol built around retatrutide escalation with MOTS-C support for glucose handling, body-composition shift, and mitochondrial signaling."
+  },
+  {
+    "protocol_id": "rec_002",
+    "protocol_slug": "neuro-musculoskeletal-repair-8w",
+    "name": "BPC-157, TB-500 & ARA-290 Neuro-Musculoskeletal Protocol",
+    "category": "Recovery / Injury",
+    "tags": [
+      "Recovery / Injury",
+      "advanced"
+    ],
+    "duration_weeks": 8,
+    "products_used": [
+      "bpc 157",
+      "tb 500",
+      "ara 290"
+    ],
+    "clinical_focus": "Two-phase recovery protocol combining BPC-157 and TB-500 with ARA-290 support where tissue repair and neuropathic recovery overlap."
+  },
+  {
+    "protocol_id": "cog_002",
+    "protocol_slug": "focus-resilience-8w",
+    "name": "Semax & Pinealon Neuro-Executive Protocol",
+    "category": "Cognitive Support",
+    "tags": [
+      "Cognitive Support",
+      "moderate"
+    ],
+    "duration_weeks": 8,
+    "products_used": [
+      "semax",
+      "pinealon"
+    ],
+    "clinical_focus": "Eight-week cognitive protocol pairing Semax with Pinealon to support attention, executive function, and neuroprotective signaling."
+  },
+  {
+    "protocol_id": "lon_002",
+    "protocol_slug": "longevity-circadian-mitochondrial-12w",
+    "name": "Epithalon + MOTS-c Circadian Longevity Protocol",
+    "category": "Longevity",
+    "tags": [
+      "Longevity",
+      "moderate"
+    ],
+    "duration_weeks": 12,
+    "products_used": [
+      "epithalon",
+      "mots c"
+    ],
+    "clinical_focus": "Longevity-oriented protocol combining Epithalon for circadian and aging-related signaling with MOTS-C for mitochondrial and metabolic support."
+  },
+  {
+    "protocol_id": "sleep_002",
+    "protocol_slug": "sleep-circadian-6w",
+    "name": "DSIP & Epithalon Circadian Sleep Protocol",
+    "category": "Sleep Support",
+    "tags": [
+      "Sleep Support",
+      "simple"
+    ],
+    "duration_weeks": 6,
+    "products_used": [
+      "dsip",
+      "epithalon"
+    ],
+    "clinical_focus": "Six-week sleep-support protocol centered on DSIP with Epithalon added to reinforce circadian and nocturnal rhythm support."
+  },
+  {
+    "protocol_id": "horm_002",
+    "protocol_slug": "gh-axis-support-12w",
+    "name": "Tesamorelin + Ipamorelin GH-Axis Protocol",
+    "category": "Hormonal Support",
+    "tags": [
+      "Hormonal Support",
+      "advanced"
+    ],
+    "duration_weeks": 12,
+    "products_used": [
+      "tesamorelin",
+      "ipamorelin"
+    ],
+    "clinical_focus": "Three-phase protocol using tesamorelin with ipamorelin to support GH-axis signaling and body-composition oriented hormonal support."
+  },
+  {
+    "protocol_id": "skin_002",
+    "protocol_slug": "skin-repair-aging-10w",
+    "name": "GHK-Cu & Epithalon Cellular Repair Protocol",
+    "category": "Skin / Anti-Aging",
+    "tags": [
+      "Skin / Anti-Aging",
+      "moderate"
+    ],
+    "duration_weeks": 10,
+    "products_used": [
+      "ghk cu",
+      "epithalon"
+    ],
+    "clinical_focus": "Ten-week skin-focused protocol using GHK-Cu as the repair anchor and Epithalon as an adjunctive anti-aging support layer."
+  },
+  {
+    "protocol_id": "immune_002",
+    "protocol_slug": "immune-kpv-thymosin-8w",
+    "name": "Thymosin Alpha-1 & KPV Anti-Inflammatory Protocol",
+    "category": "Immune / Inflammation",
+    "tags": [
+      "Immune / Inflammation",
+      "moderate"
+    ],
+    "duration_weeks": 8,
+    "products_used": [
+      "thymosin alpha 1",
+      "kpv"
+    ],
+    "clinical_focus": "Immune-support protocol using thymosin alpha 1 as the core immune regulator with KPV added as an anti-inflammatory adjunct."
+  },
+  {
+    "protocol_id": "energy_002",
+    "protocol_slug": "mitochondrial-resilience-10w",
+    "name": "SS-31 & NMN Bioenergetic Resilience Protocol",
+    "category": "Energy / Mitochondrial",
+    "tags": [
+      "Energy / Mitochondrial",
+      "advanced"
+    ],
+    "duration_weeks": 10,
+    "products_used": [
+      "ss 31",
+      "nmn",
+      "mots c"
+    ],
+    "clinical_focus": "Mitochondrial support protocol using SS-31 and NMN with MOTS-C for broader metabolic and bioenergetic support."
+  },
+  {
+    "protocol_id": "neuro_001",
+    "protocol_slug": "lxv-neuro-restoration-12w",
+    "name": "BPC-157, SS-31 & Pinealon Neuro-Restoration Protocol",
+    "category": "Recovery / Injury",
+    "tags": [
+      "Recovery / Injury",
+      "advanced",
+      "Improved energy and awareness",
+      "Progressive cognitive responsiveness",
+      "Support for speech and neurofunctional recovery"
+    ],
+    "duration_weeks": 12,
+    "products_used": [
+      "bpc 157",
+      "ss 31",
+      "pinealon"
+    ],
+    "clinical_focus": "Two-phase physician-authored neuro-restoration protocol focused on mitochondrial support, vagal repair, neuroplasticity, and microcirculation recovery.",
+    "metadata": {
+      "scientificName": "Neurofunctional Vagal & Mitochondrial Restorative System",
+      "shortCode": "LXV-NRS-12W"
+    }
+  },
+  {
+    "protocol_id": "wm_003",
+    "protocol_slug": "advanced-metabolic-longevity-16w",
+    "name": "Advanced Metabolic & Longevity Protocol",
+    "category": "Weight Management / Obesity",
+    "tags": [
+      "Weight Management / Obesity",
+      "moderate",
+      "Significant visceral fat reduction",
+      "Enhanced insulin sensitivity",
+      "Cellular energy optimization",
+      "Metabolic stabilization"
+    ],
+    "duration_weeks": 16,
+    "products_used": [
+      "retatrutide",
+      "mots c",
+      "tesamorelin",
+      "ss 31",
+      "ghk cu",
+      "aod 9604",
+      "nad"
+    ],
+    "clinical_focus": "Intensive 16-week metabolic optimization and fat loss program focusing on visceral fat reduction and mitochondrial priming."
+  },
+  {
+    "protocol_id": "wm_004",
+    "protocol_slug": "personalized-metabolic-weight-loss-12w",
+    "name": "Tirzepatide + AOD-9604 & MOTS-c Metabolic Protocol",
+    "category": "Weight Management / Obesity",
+    "tags": [
+      "Weight Management / Obesity",
+      "moderate",
+      "Sustainable fat loss",
+      "Improved metabolic rate",
+      "Cellular rejuvenation",
+      "Body composition optimization"
+    ],
+    "duration_weeks": 12,
+    "products_used": [
+      "tirzepatide",
+      "bpc 157",
+      "aod 9604",
+      "mots c"
+    ],
+    "clinical_focus": "Twelve-week intensive personalized weight loss protocol focusing on metabolic flexibility through dual-action GLP-1/GIP and mitochondrial support."
+  }
+]

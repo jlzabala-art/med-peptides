@@ -1,4 +1,4 @@
-import { ArrowRight, RefreshCw, ShieldCheck, BarChart3, FileSpreadsheet, Sparkles, UserCheck } from 'lucide-react';
+import { ArrowRight, RefreshCw, ShieldCheck, BarChart3, FileSpreadsheet, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -45,7 +45,7 @@ export default function Hero({ onNavigate, mode = 'guest' }) {
                 padding: '0.4rem 0.8rem',
                 borderRadius: '100px'
               }}>
-                <Sparkles size={12} /> PROFESSIONAL DASHBOARD
+                <Sparkles size={12} /> Clinical Intelligence Platform
               </div>
             )}
 
@@ -58,8 +58,8 @@ export default function Hero({ onNavigate, mode = 'guest' }) {
               color: 'white'
             }}>
               {mode === 'professional'
-                ? 'Accelerate Your Clinical Protocols'
-                : 'Clinical-Grade Peptide Protocols in Seconds'}
+                ? 'Clinical Peptides and Protocols, Ready to Deploy'
+                : 'Clinical Peptides and Protocols, Ready to Deploy'}
             </h1>
 
             <p className="hero-subheadline" style={{
@@ -70,8 +70,8 @@ export default function Hero({ onNavigate, mode = 'guest' }) {
               maxWidth: '620px'
             }}>
               {mode === 'professional'
-                ? 'Centralized hub for multi-phase titration, safety validation, and economic forecasting.'
-                : 'Transform research objectives into structured schedules with automated safety validation and real-time forecasting.'}
+                ? 'Browse evidence-based peptide protocols and compounds curated for clinical practice.'
+                : 'Explore our catalog of clinical-grade peptides, ready-to-use protocols, and evidence-based guides.'}
             </p>
 
             {/* Feature Grid - Optimizada para Mobile */}
@@ -94,21 +94,15 @@ export default function Hero({ onNavigate, mode = 'guest' }) {
 
             <div className="cta-group">
               <button
-                onClick={() => navigate(mode === 'professional' ? '/protocol-builder' : '/products')}
+                onClick={() => navigate('/protocols')}
                 className="cta-button primary"
               >
-                {mode === 'professional' ? 'Create Protocol' : 'Browse Products'} <ArrowRight size={20} />
+                Browse Protocols <ArrowRight size={20} />
               </button>
 
-              {user ? (
-                <button onClick={() => navigate('/protocol-builder')} className="cta-button secondary">
-                  Dashboard
-                </button>
-              ) : (
-                <button onClick={() => navigate('/auth')} className="cta-button secondary">
-                  <UserCheck size={18} /> Verified Access
-                </button>
-              )}
+              <button onClick={() => navigate('/peptides')} className="cta-button secondary">
+                Explore Peptides
+              </button>
             </div>
           </div>
 
@@ -116,7 +110,7 @@ export default function Hero({ onNavigate, mode = 'guest' }) {
           <div className="hero-image-container">
             <div className="image-wrapper">
               <img
-                src="/assets/protocol-builder-hero.png"
+                src="/assets/peptides-hero.png"
                 alt="Interface Preview"
                 className="hero-artwork"
               />

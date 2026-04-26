@@ -68,12 +68,12 @@ async function cachedFetch(key, fetcher) {
 export const configService = {
 
   /**
-   * Returns all active blueprints from the `blueprints` collection.
+   * Returns all active blueprints from the `protocols` collection.
    * Filters for `active: true` client-side to avoid requiring a composite index.
    */
   async getBlueprints() {
-    return cachedFetch('blueprints', async () => {
-      const snapshot = await getDocs(collection(db, 'blueprints'));
+    return cachedFetch('protocols', async () => {
+      const snapshot = await getDocs(collection(db, 'protocols'));
       const all = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       return all.filter(b => b.active !== false);
     });
@@ -116,7 +116,7 @@ export const configService = {
 
   /** Clears all cached config values — useful after admin edits. */
   clearCache() {
-    ['blueprints', 'pathways', 'productCategories', 'dosageUnits'].forEach(k => {
+    ['protocols', 'pathways', 'productCategories', 'dosageUnits'].forEach(k => {
       sessionStorage.removeItem(CACHE_PREFIX + k);
     });
   },

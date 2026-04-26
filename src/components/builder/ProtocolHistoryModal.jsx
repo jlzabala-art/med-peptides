@@ -213,7 +213,14 @@ const ProtocolHistoryModal = ({ isOpen, onClose, onSelect, onCompare }) => {
                         </div>
                         <div style={{ flex: 1 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <h4 style={{ margin: 0, fontWeight: 800, fontSize: '0.95rem', color: 'var(--primary)' }}>{p.protocol_name}</h4>
+                            <h4 style={{ margin: 0, fontWeight: 800, fontSize: '0.95rem', color: 'var(--primary)' }}>
+                              {p.metadata?.scientificName || p.protocol_name}
+                            </h4>
+                            {p.metadata?.scientificName && (
+                              <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontStyle: 'italic', fontWeight: 500 }}>
+                                {p.protocol_name}
+                              </span>
+                            )}
                             <span style={{ backgroundColor: s.bg, color: s.text, border: `1px solid ${s.border}`, padding: '1px 8px', borderRadius: '6px', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase' }}>{p.status}</span>
                             {p.is_latest && <span style={{ backgroundColor: '#f0fdf4', color: '#16a34a', padding: '1px 8px', borderRadius: '6px', fontSize: '0.65rem', fontWeight: 900 }}>LATEST</span>}
                           </div>

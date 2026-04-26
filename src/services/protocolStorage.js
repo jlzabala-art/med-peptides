@@ -317,7 +317,119 @@ export const getSessionId = () => {
     }
 };
 
+// ── DTO (Phase 7) ──────────────────────────────────────────────────────────────
+/**
+ * Minimal shape needed by homepage cards.
+ * Keeps components decoupled from raw Firestore schema.
+ *
+ * @typedef {Object} ProtocolCardDTO
+ * @property {string}  id
+ * @property {string}  title
+ * @property {string}  category
+ * @property {string}  primary_goal
+ * @property {number|null} duration_weeks
+ * @property {number|null} phase_count
+ * @property {number|null} compound_count
+ * @property {string}  tagline
+ * @property {string}  status
+ * @property {string}  short_code
+ * @property {string}  version
+ * @property {number|null} total_cost
+ * @property {string}  currency
+ * @property {string}  intensity
+ * @property {string[]} tags
+ * @property {Object}  metadata
+ * @property {Object}  timeline
+ * @property {Array}   phase_blueprints
+ * @property {Array}   phases
+ */
+
+/** @param {Object} raw — raw Firestore document data + id */
+function toProtocolCardDTO(raw) {
+    // protocol_id is stored as a field in blueprints docs; raw.id is the Firestore doc key (same value).
+    const protocolId = raw.protocol_id || raw.id;
+
+    return {
+        // identity — keep protocol_id so normalizeBlueprint / filter helpers work
+        id:              protocolId,
+        protocol_id:     protocolId,
+        slug:            raw.protocol_slug || protocolId,
+        short_code:      raw.short_code      || raw.metadata?.shortCode || protocolId || null,
+        version:         raw.version         || raw.protocol_version || raw.metadata?.version || null,
+        // display
+        title:           raw.title || raw.protocol_title || raw.name || raw.protocol_name || 'Unnamed Protocol',
+        category:        raw.category        || raw.metadata?.primary_condition || raw.primary_goal || raw.metadata?.primary_goal || '',
+        primary_goal:    raw.primary_goal    || raw.metadata?.primary_goal || '',
+        tagline:         raw.tagline         || raw.overview_summary || raw.summary || raw.description || raw.metadata?.description || '',
+        intensity:       raw.intensity       || raw.complexity_level || raw.metadata?.intensity || raw.metadata?.complexity_level || '',
+        status:          raw.approval_status || raw.status || raw.metadata?.review?.review_status || '',
+        // stats
+        duration_weeks:  raw.duration_weeks  || raw.protocol_duration_weeks || raw.timeline?.total_duration_weeks || null,
+        phase_count:     (raw.phase_blueprints || raw.phases || []).length || raw.number_of_phases || null,
+        compound_count:  (() => {
+            const src = raw.phase_blueprints?.length ? raw.phase_blueprints : (raw.phases || []);
+            const names = new Set(
+                src.flatMap(ph => ph.drugs || ph.drugs_used || ph.compounds || ph.peptides || [])
+                   .map(d => d.product_slug || d.product_title || d.name || d.compound || d.peptide_name)
+                   .filter(Boolean)
+            );
+            return names.size || null;
+        })(),
+        total_cost:      raw.total_cost      || raw.estimated_cost || raw.economics?.total_protocol_cost_estimate || raw.economics?.estimated_total_cost || null,
+        currency:        raw.currency        || raw.economics?.currency || 'USD',
+        // pass-through for badge / filter logic
+        tags:            raw.tags            || [],
+        metadata:        raw.metadata        || {},
+        timeline:        raw.timeline        || {},
+        phase_blueprints: raw.phase_blueprints || [],
+        phases:          raw.phases          || [],
+        // raw fields needed by normalizeBlueprint in FeaturedProtocols
+        overview_summary:        raw.overview_summary        || '',
+        protocol_duration_weeks: raw.protocol_duration_weeks || null,
+        legacy_compatibility:    raw.legacy_compatibility    || {},
+        economics:               raw.economics               || {},
+    };
+}
+
+// ── Session cache (Phase 8) — 5-minute TTL ────────────────────────────────────
+const _cache = new Map(); // key → { data, ts }
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 min
+
+function _getCached(key) {
+    const entry = _cache.get(key);
+    if (!entry) return null;
+    if (Date.now() - entry.ts > CACHE_TTL_MS) { _cache.delete(key); return null; }
+    return entry.data;
+}
+
+function _setCache(key, data) {
+    _cache.set(key, { data, ts: Date.now() });
+}
+
 // ── Admin-only functions ───────────────────────────────────────────────────────
+
+/**
+ * Fetch publicly-visible protocols from Firebase (no auth required).
+ * Queries the `protocols` collection where active == true.
+ * Used by homepage FeaturedProtocols section.
+ *
+ * Results are cached in-memory for 5 min per session.
+ * No local fallback — if Firebase returns 0 docs, returns []; if it throws, re-throws.
+ */
+export const getPublicProtocols = async () => {
+    const CACHE_KEY = 'public_protocols_home_all';
+    const cached = _getCached(CACHE_KEY);
+    if (cached) return cached;
+
+    const q = query(
+        collection(db, 'protocols'),
+        where('active', '==', true)
+    );
+    const snap = await getDocs(q);
+    const result = snap.docs.map(d => toProtocolCardDTO({ id: d.id, ...d.data() }));
+    _setCache(CACHE_KEY, result);
+    return result;
+};
 
 /**
  * Fetch ALL protocols (all users) ordered by created_at desc.

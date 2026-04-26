@@ -1,0 +1,153 @@
+TASK: ENHANCE PROTOCOL TIMELINE UX, PERFORMANCE, AND CLINICAL FUNCTIONALITY
+
+OBJECTIVE:
+
+Improve the protocol timeline visualization to:
+
+- reduce visual density
+- enable interactive phase navigation
+- improve performance
+- support clinical workflows
+- enable mobile usability
+
+------------------------------------------------
+
+PHASE 1 — RESTRUCTURE TIMELINE HEADER
+
+Split header information into:
+
+PRIMARY HEADER:
+
+Protocol Name  
+Approval Status  
+Total Duration  
+Number of Phases  
+Number of Compounds  
+
+SECONDARY METRICS:
+
+Estimated Cost  
+Intensity  
+Frequency  
+
+Reduce visual clutter.
+
+------------------------------------------------
+
+PHASE 2 — ENABLE INTERACTIVE PHASES
+
+Make each phase clickable.
+
+On click:
+
+Display Phase Detail Panel.
+
+Panel must include:
+
+Compound name  
+Dose  
+Frequency  
+Phase duration  
+
+------------------------------------------------
+
+PHASE 3 — ADD COMPOUND TOGGLE FILTER
+
+Create compound chips above the timeline.
+
+Example:
+
+[Tirzepatide]  
+[MOTS-c]  
+[AOD-9604]
+
+Allow:
+
+Toggle visibility on/off.
+
+This improves readability and performance.
+
+------------------------------------------------
+
+PHASE 4 — ADD CLINICAL EVENT MARKERS
+
+Allow optional markers:
+
+Blood tests  
+Reviews  
+Milestones  
+
+Display as:
+
+Icon markers on timeline.
+
+------------------------------------------------
+
+PHASE 5 — MOBILE ADAPTATION
+
+Implement:
+
+Horizontal scroll timeline.
+
+OR:
+
+Vertical phase cards mode.
+
+Never compress the chart.
+
+Maintain readability.
+
+------------------------------------------------
+
+PHASE 6 — PERFORMANCE OPTIMIZATION
+
+Memoize timeline data.
+
+Use:
+
+useMemo()
+
+Avoid recalculating on every render.
+
+If timeline exceeds:
+
+24 weeks
+
+Implement virtualization.
+
+------------------------------------------------
+
+PHASE 7 — ADD EXPORT CAPABILITIES
+
+Allow:
+
+Export timeline as:
+
+PNG  
+PDF  
+CSV  
+
+------------------------------------------------
+
+PHASE 8 — ADD COST BREAKDOWN PANEL
+
+Allow clicking cost block.
+
+Show:
+
+Cost per compound  
+Cost per phase  
+Cost per week  
+
+------------------------------------------------
+
+SUCCESS CRITERIA:
+
+Timeline becomes:
+
+- interactive
+- readable
+- clinically useful
+- mobile-friendly
+- scalable
+- exportable

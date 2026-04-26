@@ -1,12 +1,12 @@
 import React from 'react';
-import { Zap, Clock, Target, ChevronRight } from 'lucide-react';
+import { Activity, Clock, Target, ChevronRight } from 'lucide-react';
 
 const featuredCategories = [
   {
     name: "Weight & Metabolic", // Nombre más corto para mobile
     fullName: "Weight Management & Metabolic",
     desc: "Next-generation metabolic regulators and agonists.",
-    icon: <Zap size={26} />,
+    icon: <Activity size={26} />,
     color: "#10B981",
     colorBg: "rgba(16, 185, 129, 0.1)",
     colorBorder: "rgba(16, 185, 129, 0.3)"

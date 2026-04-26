@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useCallback } from 'react';
 import { Droplets, Syringe, Info, CheckCircle, ShieldCheck, FlaskConical } from 'lucide-react';
+import { resolveVariantPrice } from '../utils/resolvePrice';
+import { usePricingTier } from '../hooks/usePricingTier';
 
 const SuppliesView = ({
   onSelectProduct,
@@ -9,6 +11,7 @@ const SuppliesView = ({
   isProfessional,
   EXCHANGE_RATES
 }) => {
+  const { tier } = usePricingTier();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -23,22 +26,27 @@ const SuppliesView = ({
 
     filtered.forEach(item => {
       const existing = map.get(item.name);
-      // Preferimos entradas con precio sobre entradas vacías (Legacy cleanup)
-      if (!existing || (!existing.guestVialPrice && item.guestVialPrice)) {
+      // Prefer entries with a resolved price over price-less entries
+      const variant = item.defaultVariant ?? item.variants?.[0] ?? item;
+      const hasPrice = (p) => {
+        const v = p.defaultVariant ?? p.variants?.[0] ?? p;
+        return resolveVariantPrice(v, { tier }).perUnit != null;
+      };
+      if (!existing || (!hasPrice(existing) && hasPrice(item))) {
         map.set(item.name, item);
       }
     });
 
     return Array.from(map.values());
-  }, [products]);
+  }, [products, tier]);
 
-  // FASE 1.1: Formateo de precios eficiente
+  // FASE 1.1: Formateo de precios — resuelto desde datos de variante en Firestore
   const formatPrice = useCallback((item) => {
     if (!region || !EXCHANGE_RATES[region]) return '---';
 
-    const priceUSD = isProfessional
-      ? parseFloat(item.proVialPrice || 0)
-      : parseFloat(item.guestVialPrice || 0);
+    const variant = item.defaultVariant ?? item.variants?.[0] ?? item;
+    const resolved = resolveVariantPrice(variant, { tier });
+    const priceUSD = resolved.perUnit ?? 0;
 
     const formatValue = (val) => val.toLocaleString(region === 'row' ? 'en-US' : 'de-DE');
 

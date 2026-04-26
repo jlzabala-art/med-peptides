@@ -3,7 +3,7 @@ import { ArrowLeft, Info, FlaskConical, Beaker, Zap, Activity, HelpCircle, BookO
 import MobileProductCard from '../snippets/MobileProductCard';
 import FAQModal from '../components/discovery/FAQModal';
 import PubMedPreviewPanel from '../components/discovery/PubMedPreviewPanel';
-import { getFAQForProduct } from '../utils/discoveryEngine';
+import { getFAQForProduct, searchFAQ } from '../utils/discoveryEngine';
 
 export default function CategoryDetailView({ 
   category, 
@@ -11,8 +11,7 @@ export default function CategoryDetailView({
   onSelectProduct, 
   isProfessional,
   products,
-  allFaqs,
-  allMappings
+  allFaqs
 }) {
   const [activeFAQProduct, setActiveFAQProduct] = useState(null);
   const [faqItems, setFaqItems] = useState([]);
@@ -24,10 +23,19 @@ export default function CategoryDetailView({
     window.scrollTo(0, 0);
   }, [category]);
 
-  const handleOpenFAQ = async (product) => {
+  const handleOpenFAQ = (product) => {
     setActiveFAQProduct(product);
-    const faqs = getFAQForProduct(product.name, allFaqs || [], allMappings || [], isProfessional);
-    setFaqItems(faqs);
+
+    // getFAQForProduct now derives all slug variants from product.name internally,
+    // so a single call is enough to match FAQs tagged with any variant of the name.
+    let faqs = getFAQForProduct(product.name, allFaqs || [], product.id, isProfessional, 8);
+
+    // Final fallback: full-text search by product name in FAQ question/answer/tags
+    if (!faqs.length) {
+      faqs = searchFAQ(allFaqs || [], product.name, isProfessional).slice(0, 8);
+    }
+
+    setFaqItems(faqs.slice(0, 8));
     setShowFAQModal(true);
   };
 
@@ -46,9 +54,21 @@ export default function CategoryDetailView({
           allStrengths: []
         };
       }
-      const strength = p.dosage || p.quantity || 'Standard';
-      if (!groups[familyName].allStrengths.includes(strength)) {
-        groups[familyName].allStrengths.push(strength);
+      // Read variants[] array first (canonical Firestore shape), then fall back to flat fields
+      const variantStrengths = Array.isArray(p.variants) && p.variants.length > 0
+        ? p.variants.map(v => v.dosage || v.strength || v.label).filter(Boolean)
+        : [];
+      if (variantStrengths.length > 0) {
+        variantStrengths.forEach(s => {
+          if (!groups[familyName].allStrengths.includes(s)) {
+            groups[familyName].allStrengths.push(s);
+          }
+        });
+      } else {
+        const strength = p.dosage || p.quantity || 'Standard';
+        if (!groups[familyName].allStrengths.includes(strength)) {
+          groups[familyName].allStrengths.push(strength);
+        }
       }
     });
     return Object.values(groups);
@@ -179,7 +199,6 @@ export default function CategoryDetailView({
               isProfessional={isProfessional}
               products={products}
               allFaqs={allFaqs}
-              allMappings={allMappings}
             />
           ))}
         </div>

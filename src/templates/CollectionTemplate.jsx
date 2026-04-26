@@ -43,7 +43,6 @@ export default function CollectionTemplate({
   products,
   EXCHANGE_RATES,
   allFaqs,
-  allMappings,
 }) {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -94,7 +93,6 @@ export default function CollectionTemplate({
       onBack={() => navigate(-1)}
       onSelectProduct={handleProductSelect}
       allFaqs={allFaqs}
-      allMappings={allMappings}
     />
   );
 }

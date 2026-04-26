@@ -52,7 +52,7 @@ export function AuthProvider({ children }) {
   // Sync with Zoho SalesIQ
   useEffect(() => {
     if (user && window.$zoho?.salesiq) {
-      const name = userProfile?.fullName || user.displayName || 'Researcher';
+      const name = [userProfile?.firstName, userProfile?.lastName].filter(Boolean).join(' ') || user.displayName || 'Researcher';
       const email = user.email || '';
       
       try {
@@ -71,25 +71,16 @@ export function AuthProvider({ children }) {
   const isProfessional = user !== null && (isVerified || allowedRoles.some(role => userRole.includes(role)));
   const isAdmin = user !== null && userProfile?.role === 'admin';
   
-  // Debugging logs for Testing 4 logic
+  // Dev-only session diagnostic (stripped from production builds)
   useEffect(() => {
-    if (user) {
-      console.log('[AuthContext] Session Hydrated:', {
-        uid: user.uid,
-        role: userRole,
-        isVerified,
-        isProfessional,
-        sessionLoaded: !loading
-      });
-      
-      if (!isProfessional && !loading) {
-        console.warn('ACCESS_DENIED_DIAGNOSTIC:', {
-          reason: !userProfile ? 'session_not_loaded' : (!isVerified ? 'not_verified' : 'missing_role'),
-          role: userRole,
-          isVerified
-        });
-      }
-    }
+    if (!user || import.meta.env.PROD) return;
+    console.log('[AuthContext] Session Hydrated:', {
+      uid: user.uid,
+      role: userRole,
+      isVerified,
+      isProfessional,
+      sessionLoaded: !loading,
+    });
   }, [user, userProfile, isProfessional, isVerified, loading, userRole]);
 
   const login = async (email, password) => {
@@ -107,12 +98,27 @@ export function AuthProvider({ children }) {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     // Update display name
     await updateProfile(cred.user, { displayName: fullName });
+    // Split fullName into firstName / lastName for the canonical schema
+    const nameParts = (fullName || '').trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
     // Create Firestore profile (pending approval)
     const profile = {
-      fullName,
+      firstName,
+      lastName,
       email,
       institution: institution || '',
       userType: userType || '',
+      phone: '',
+      shippingStreet: '',
+      shippingCity: '',
+      shippingZip: '',
+      shippingCountry: '',
+      billingStreet: '',
+      billingCity: '',
+      billingZip: '',
+      billingCountry: '',
+      taxId: '',
       approved: false,
       createdAt: new Date().toISOString()
     };
@@ -140,12 +146,24 @@ export function AuthProvider({ children }) {
     const docSnap = await getDoc(docRef);
     
     if (!docSnap.exists()) {
+      const nameParts = (cred.user.displayName || '').trim().split(' ');
       const profile = {
-        fullName: cred.user.displayName || '',
+        firstName: nameParts[0] || '',
+        lastName: nameParts.slice(1).join(' ') || '',
         email: cred.user.email,
         institution: '',
         userType: '',
-        approved: false, // Professional access still needs manual approval
+        phone: '',
+        shippingStreet: '',
+        shippingCity: '',
+        shippingZip: '',
+        shippingCountry: '',
+        billingStreet: '',
+        billingCity: '',
+        billingZip: '',
+        billingCountry: '',
+        taxId: '',
+        approved: false,
         createdAt: new Date().toISOString()
       };
       await setDoc(docRef, profile);
@@ -163,9 +181,12 @@ export function AuthProvider({ children }) {
     await setDoc(docRef, data, { merge: true });
     // Update local state
     setUserProfile(prev => ({ ...prev, ...data }));
-    // If name changed, update firebase auth profile
-    if (data.fullName) {
-      await updateProfile(user, { displayName: data.fullName });
+    // Sync displayName from firstName + lastName
+    const first = data.firstName ?? user._profile?.firstName ?? '';
+    const last = data.lastName ?? user._profile?.lastName ?? '';
+    const displayName = [first, last].filter(Boolean).join(' ');
+    if (displayName) {
+      await updateProfile(user, { displayName });
     }
   };
 

@@ -1,0 +1,395 @@
+{
+  "protocol_id": "horm_002",
+  "protocol_slug": "gh-axis-support-structured",
+  "protocol_title": "GH Axis Support Protocol",
+  "protocol_version": "v6.0",
+  "status": "approved",
+  "active": true,
+  "metadata": {
+    "primary_goal": "gh_axis_support",
+    "primary_condition": "ghrh_gh_secretagogue_support_sleep_recovery_body_composition_support",
+    "complexity_level": "standard",
+    "visibility": "public",
+    "source_type": "curated_library",
+    "source_reference": "ReGen_PEPT_HORM_002_Protocol_2026",
+    "author": {
+      "name": "ReGen PEPT Clinical Team",
+      "organization": "ReGen PEPT",
+      "title": "Peptide Specialists"
+    },
+    "review": {
+      "review_status": "approved",
+      "last_reviewed_at": "2026-04-02"
+    },
+    "created_at": "2026-04-02T00:00:00.000Z",
+    "updated_at": "2026-04-02T00:00:00.000Z",
+    "evidence_basis": {
+      "core_active": "Sermorelin",
+      "optional_support": "Ipamorelin",
+      "evidence_strength": "mixed_clinical_basis",
+      "evidence_notes": [
+        "Sermorelin has legacy clinical use as a GHRH analogue.",
+        "Secretagogue pairing is treated as optional and should remain conservative."
+      ]
+    }
+  },
+  "eligibility_rules": {
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ],
+    "supported_goals": [
+      "gh_axis_support",
+      "sleep_recovery_support",
+      "body_composition_support",
+      "recovery_support"
+    ],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "patient_demographic",
+      "age_group",
+      "start_date"
+    ],
+    "contraindications": [],
+    "relative_cautions": []
+  },
+  "variant_rules": {
+    "age_variants": {
+      "18-35": {
+        "default_duration_weeks": 8,
+        "monitoring_intensity": "standard"
+      },
+      "36-50": {
+        "default_duration_weeks": 12,
+        "monitoring_intensity": "moderate"
+      },
+      "51-65": {
+        "default_duration_weeks": 16,
+        "monitoring_intensity": "enhanced"
+      },
+      "65+": {
+        "default_duration_weeks": 16,
+        "monitoring_intensity": "enhanced"
+      }
+    },
+    "sex_variants": {
+      "female": {
+        "recommended_flags": [],
+        "special_notes": [
+          "Use conservative ramping if sensitivity profile is high."
+        ]
+      },
+      "male": {
+        "recommended_flags": [
+          "sleep_recovery_watch"
+        ],
+        "special_notes": [
+          "Reassess tolerance and response before escalation."
+        ]
+      }
+    },
+    "duration_variants": {
+      "8_weeks": {
+        "mode": "short",
+        "extra_monitoring": false
+      },
+      "12_weeks": {
+        "mode": "standard",
+        "extra_monitoring": false
+      },
+      "16_weeks": {
+        "mode": "extended",
+        "extra_monitoring": true
+      },
+      "20_weeks": {
+        "mode": "extended_plus",
+        "extra_monitoring": true
+      }
+    },
+    "tempo_variants": {
+      "conservative": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "up"
+      },
+      "standard": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "none"
+      },
+      "aggressive": {
+        "dose_step_interval_weeks": 2,
+        "monitoring_intensity_modifier": "up"
+      }
+    }
+  },
+  "phase_blueprints": [
+    {
+      "phase_key": "priming",
+      "phase_title": "Axis Priming",
+      "default_start_week": 1,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "ghrh_support",
+        "sleep_recovery_support",
+        "tolerance_building"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_sermorelin",
+          "product_title": "Sermorelin",
+          "route": "subcutaneous_or_protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "5x_week",
+            "starting_intensity": "standard",
+            "administration_days_default": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ],
+            "timing_hint": "evening"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_sermorelin",
+            "route": "SC"
+          }
+        },
+        {
+          "product_id": "prd_ipamorelin",
+          "product_title": "Ipamorelin",
+          "route": "subcutaneous_or_protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "3x_week",
+            "starting_intensity": "optional_low",
+            "administration_days_default": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "activation_condition": "if_recovery_support_variant_enabled"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_ipamorelin",
+            "route": "SC"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 1,
+          "event_type": "baseline_review",
+          "title": "Baseline recovery, sleep, and body-composition review"
+        }
+      ]
+    },
+    {
+      "phase_key": "optimization",
+      "phase_title": "Recovery Optimization",
+      "default_start_week": 5,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "gh_axis_support",
+        "recovery_capacity",
+        "body_composition_support"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_sermorelin",
+          "product_title": "Sermorelin",
+          "route": "subcutaneous_or_protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "5x_week",
+            "intensity": "standard_plus",
+            "administration_days_default": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ],
+            "timing_hint": "evening"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_sermorelin",
+            "route": "SC"
+          }
+        },
+        {
+          "product_id": "prd_ipamorelin",
+          "product_title": "Ipamorelin",
+          "route": "subcutaneous_or_protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "5x_week",
+            "intensity": "conditional",
+            "administration_days_default": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ],
+            "activation_condition": "if_conservative_secretagogue_pairing_approved"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_ipamorelin",
+            "route": "SC"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 8,
+          "event_type": "checkpoint",
+          "title": "Sleep and recovery reassessment"
+        }
+      ]
+    },
+    {
+      "phase_key": "maintenance",
+      "phase_title": "Maintenance",
+      "default_start_week": 9,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "maintenance_of_response",
+        "recovery_stability"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_sermorelin",
+          "product_title": "Sermorelin",
+          "route": "subcutaneous_or_protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "3x_week",
+            "intensity": "maintenance",
+            "administration_days_default": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "timing_hint": "evening"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_sermorelin",
+            "route": "SC"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 12,
+          "event_type": "outcome_review",
+          "title": "Final GH-axis support review"
+        }
+      ]
+    }
+  ],
+  "monitoring_plan": {
+    "baseline_required": [
+      "sleep_quality",
+      "recovery_score",
+      "body_composition_baseline",
+      "fatigue_score"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "week": 4,
+        "type": "tolerance_review",
+        "measures": [
+          "sleep",
+          "recovery",
+          "edema_or_headache_watch"
+        ],
+        "purpose": "Early tolerance and sleep review"
+      },
+      {
+        "week": 8,
+        "type": "axis_reassessment",
+        "measures": [
+          "recovery",
+          "body_composition_direction",
+          "sleep"
+        ],
+        "purpose": "Midpoint assessment"
+      },
+      {
+        "week": 12,
+        "type": "final_outcome_review",
+        "measures": [
+          "overall_recovery",
+          "sleep_quality"
+        ],
+        "purpose": "End-of-cycle evaluation"
+      }
+    ]
+  },
+  "expected_outcomes": {
+    "qualitative": [
+      "better sleep recovery",
+      "better recovery consistency",
+      "supportive body-composition signal"
+    ],
+    "quantitative_ranges": {
+      "sleep_recovery_support_expected": "mild_to_moderate"
+    }
+  },
+  "generator_rules": {
+    "selection_priority": [
+      "goal_match",
+      "sleep_profile",
+      "recovery_pattern",
+      "age_variant_match"
+    ],
+    "profile_notes": [
+      "Prefer conservative tempo in edema-prone or headache-prone profiles."
+    ]
+  },
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "patient_demographic": null,
+      "age_group": null,
+      "duration_weeks": null,
+      "start_date": null,
+      "tempo_preference": "standard"
+    },
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "resolved_monitoring": [],
+    "resolved_costs": {},
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    }
+  },
+  "legacy_compatibility": {
+    "enabled": true,
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ],
+    "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode."
+  }
+}

@@ -1,5 +1,7 @@
 import { protocolRepository } from '../repositories/protocolRepository.js';
 import { runClinicalValidation } from './validationEngine.js';
+import { resolveVariantPrice } from '../utils/resolvePrice.js';
+import { PRICING_TIER } from '../constants/productEnums.js';
 
 /**
  * REGEN PEPT - Clinical Protocol Engine 2.0
@@ -61,16 +63,22 @@ export const ProtocolEngine2 = {
     }
 
     if (!all || all.length === 0) {
-        // Fallback to the new 2.0 bundle (Note: in a real build, this would be a single JSON)
-        // For now, we point to the primary Weight Management structured file as a safe default
-        // or we can import the new_wm_payloads.json if it exists and is valid.
+      // Firebase returned empty — only use the local bundle as a dev-time safety net.
+      // In production (med-peptides-app) blueprints/ must be seeded via
+      // `node scripts/uploadProtocolBundle.mjs` before deploying.
+      if (import.meta.env?.DEV) {
         try {
-            const bundleMod = await import('./protocol_builder_2_0_protocols_bundle/index.js');
-            all = bundleMod.protocolBundle;
+          const bundleMod = await import('./protocol_builder_2_0_protocols_bundle/index.js');
+          all = bundleMod.protocolBundle;
+          console.warn('[ProtocolEngine2] ⚠ Firebase returned 0 blueprints — using local bundle (DEV only)');
         } catch (e) {
-            const legacyMod = await import('../data/protocolBlueprintsV2.json');
-            all = legacyMod.default;
+          console.error('[ProtocolEngine2] Local bundle fallback also failed:', e);
+          all = [];
         }
+      } else {
+        console.error('[ProtocolEngine2] Firebase blueprints/ collection is empty in production!');
+        all = [];
+      }
     }
     
     // Filter by objective — normalize underscores to spaces for consistent matching
@@ -247,6 +255,12 @@ export const ProtocolEngine2 = {
 
   /**
    * 5. Resolve Medication Schedule
+   *
+   * Phase 2: reads `variantRef` from each drug entry when present.
+   * variantRef shape:
+   *   { type: 'exact' | 'resolved', variantId?: string, productId: string, route: string }
+   *
+   * Falls back gracefully for blueprints that don't carry variantRef yet.
    */
   resolveMedicationSchedule(resolvedPhases, blueprint, appliedVariants) {
     const escalationRules = blueprint.variant_rules?.tirzepatide_escalation || {
@@ -264,7 +278,15 @@ export const ProtocolEngine2 = {
             const isTirzepatide = compoundName.includes('tirzepatide');
             const isRetatrutide = compoundName.includes('retatrutide');
             const isSemaglutide = compoundName.includes('semaglutide');
-            
+
+            // --- Phase 2: resolve variantRef ---
+            // If the blueprint supplies a typed variantRef, we honour it.
+            // type=exact → variantId is authoritative; engine skips supplier selection.
+            // type=resolved → engine picks the best available variant at runtime.
+            const variantRef = d.variantRef || null;
+            // The effective route comes from variantRef first, then the legacy `route` field.
+            const effectiveRoute = variantRef?.route || d.route || "subcutaneous";
+
             let resolvedDose = d.dose_per_admin_mg || d.dose || "Standard";
             
             if (isTirzepatide || isRetatrutide || isSemaglutide) {
@@ -278,11 +300,13 @@ export const ProtocolEngine2 = {
                     weekly_dose_mg: resolvedDose,
                     administration_frequency: d.administration_frequency || d.frequency || "weekly",
                     administration_days: d.administration_days || ["Monday"],
-                    route: d.route || "subcutaneous"
+                    route: effectiveRoute,
+                    // Propagate typed reference downstream (e.g. for pricing & stock checks)
+                    variantRef: variantRef ?? { type: 'resolved', productId: d.product_id, route: effectiveRoute }
                 };
             }
 
-            // Normalization check
+            // Normalization for non-GLP-1 compounds
             const title = d.product_title || d.compound || "Unresolved Compound";
             
             return {
@@ -290,7 +314,8 @@ export const ProtocolEngine2 = {
                 product_title: title,
                 dose_per_administration_mg: resolvedDose,
                 administration_frequency: d.administration_frequency || d.frequency || "weekly",
-                route: d.route || "subcutaneous"
+                route: effectiveRoute,
+                variantRef: variantRef ?? { type: 'resolved', productId: d.product_id, route: effectiveRoute }
             };
         });
 
@@ -411,8 +436,12 @@ export const ProtocolEngine2 = {
 
   /**
    * 8. Calculate Clinical Cost
+   * Resolves pricing directly from the Firestore variant data via resolveVariantPrice.
+   * @param {Array}  resolvedPhases - Protocol phases with drug lists
+   * @param {Array}  products       - Product catalog loaded from Firestore
+   * @param {string} [tier]         - Pricing tier (PRICING_TIER constant). Defaults to retail.
    */
-  calculateClinicalCost(resolvedPhases, products) {
+  calculateClinicalCost(resolvedPhases, products, tier = PRICING_TIER.RETAIL) {
     let totalCost = 0;
     const compoundBreakdown = {};
     
@@ -425,13 +454,18 @@ export const ProtocolEngine2 = {
             if (!name) return;
 
             const productMatch = products.find(p => p.name?.toLowerCase().includes(name?.toLowerCase()));
-            
-            // Testing 1 - Part 11: Real-world cost adjustments
-            const pricePerVial = productMatch?.perVialPriceUSD || 80;
-            const kitPrice = productMatch?.kitPriceUSD;
-            
-            // Simplified clinical modeling: 1 vial every 4 weeks per compound unless high frequency
-            const freq = (med.administration_frequency || "").toLowerCase();
+
+            // Resolve price from Firestore variant data — no hardcoded fallbacks.
+            const variant = productMatch?.defaultVariant ?? productMatch?.variants?.[0];
+            const { perUnit: pricePerVial, kit: kitPrice } = variant
+                ? resolveVariantPrice(variant, { tier })
+                : { perUnit: null, kit: null };
+
+            // Skip compounds with no pricing data rather than using a magic number.
+            if (!pricePerVial) return;
+
+            // Clinical modeling: 1 vial per 4 weeks unless high-frequency dosing.
+            const freq = (med.administration_frequency || '').toLowerCase();
             const vialsPer4Weeks = freq.includes('daily') ? 4 : 1;
             const vialsReq = Math.ceil((phaseWeeks / 4) * vialsPer4Weeks);
             
@@ -441,7 +475,7 @@ export const ProtocolEngine2 = {
                 const singles = vialsReq % 10;
                 phaseMedCost = (kits * kitPrice) + (singles * pricePerVial);
             } else {
-                phaseMedCost = (vialsReq * pricePerVial);
+                phaseMedCost = vialsReq * pricePerVial;
             }
 
             totalCost += phaseMedCost;
@@ -456,7 +490,7 @@ export const ProtocolEngine2 = {
     return {
         total: Math.round(totalCost),
         weekly: Math.round(totalCost / totalWeeks),
-        injection: Math.round(totalCost / (totalWeeks * 1.5)), // Estimated average frequency
+        injection: Math.round(totalCost / (totalWeeks * 1.5)),
         totalWeeks,
         breakdown: compoundBreakdown
     };
@@ -489,7 +523,8 @@ export const ProtocolEngine2 = {
     
     const monitoringSchedule = this.buildMonitoringSchedule(blueprint, patientProfile, appliedVariants);
     const timeline = this.generateTimeline(resolvedPhases, patientProfile, monitoringSchedule, products);
-    const cost = this.calculateClinicalCost(resolvedPhases, products || []);
+    // Pass through the caller's pricing tier so cost reflects the user's actual role.
+    const cost = this.calculateClinicalCost(resolvedPhases, products || [], formData?.pricingTier ?? PRICING_TIER.RETAIL);
     
     // Clinical Validation
     const validation = runClinicalValidation({ phases: resolvedPhases, monitoringSchedule: monitoringSchedule.scheduled_checkpoints }, patientProfile);

@@ -1,139 +1,343 @@
-import React from 'react';
-import { ChevronRight, PlayCircle, BookOpen, Award, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronRight, PlayCircle, BookOpen, Award, Clock, ChevronDown, CheckCircle2, Circle, GraduationCap, HelpCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { usePageMeta } from '../hooks/usePageMeta';
 
+// ── FAQ Data ──────────────────────────────────────────────────────────────────
+const FAQ_ITEMS = [
+  {
+    q: '¿Qué es la terapia con péptidos en medicina clínica?',
+    a: 'Los péptidos son cadenas cortas de aminoácidos que actúan como señalizadores biológicos. En medicina clínica se utilizan para optimizar la recuperación, el metabolismo, la neurobiología y la longevidad con alta especificidad y mínimos efectos secundarios.',
+  },
+  {
+    q: '¿Cómo accedo a los materiales de los cursos?',
+    a: 'Una vez matriculado, recibirás acceso a la plataforma educativa online con todos los módulos, grabaciones y materiales descargables. El acceso se mantiene activo durante 12 meses desde la fecha de inicio.',
+  },
+  {
+    q: '¿Los cursos ofrecen certificación oficial?',
+    a: 'Sí. Todos los cursos completados otorgan un Certificado Oficial de ReGen PEPT / Renewal EU, reconocido en múltiples jurisdicciones médicas europeas y latinoamericanas.',
+  },
+  {
+    q: '¿Puedo acceder a los protocolos clínicos directamente desde la Academy?',
+    a: 'Sí. La sección de Protocolos Clínicos está disponible para todos los profesionales verificados. Puedes acceder a los blueprints completos desde la sección de Protocolos en el menú principal.',
+  },
+  {
+    q: '¿Con qué frecuencia se actualizan los contenidos?',
+    a: 'Los contenidos se actualizan trimestralmente con las últimas evidencias científicas, nuevos protocolos aprobados y lecciones magistrales de expertos internacionales.',
+  },
+  {
+    q: '¿Hay requisitos previos para inscribirse?',
+    a: 'Es necesario contar con título profesional en ciencias de la salud (medicina, farmacia, enfermería avanzada u otras) y completar el proceso de verificación profesional de ReGen PEPT.',
+  },
+];
+
+// ── Course Data ───────────────────────────────────────────────────────────────
+const COURSES = [
+  {
+    id: 'renewal-master-protocols',
+    title: 'Renewal Master Protocols',
+    subtitle: 'Peptide Therapy for Human Optimization',
+    category: 'Global Lecture Series',
+    duration: '8 semanas',
+    modules: 8,
+    status: 'available', // available | enrolled | completed
+    startDate: '24 Mar 2026',
+    certification: true,
+  },
+  {
+    id: 'metabolic-optimization-masterclass',
+    title: 'Metabolic Optimization Masterclass',
+    subtitle: 'GLP-1, GIP & metabolic pathways in precision medicine',
+    category: 'Clinical Workshop',
+    duration: '4 semanas',
+    modules: 6,
+    status: 'upcoming',
+    startDate: 'Mayo 2026',
+    certification: true,
+  },
+  {
+    id: 'longevity-neuro-series',
+    title: 'Longevity & Neuroprotection Series',
+    subtitle: 'Anti-aging peptides and cognitive enhancement protocols',
+    category: 'Advanced Track',
+    duration: '6 semanas',
+    modules: 10,
+    status: 'upcoming',
+    startDate: 'Julio 2026',
+    certification: true,
+  },
+];
+
+// ── FAQ Accordion Item ────────────────────────────────────────────────────────
+function FAQItem({ item, isOpen, onToggle }) {
+  return (
+    <div
+      style={{
+        borderBottom: '1px solid rgba(0,54,102,0.08)',
+        overflow: 'hidden',
+      }}
+    >
+      <button
+        onClick={onToggle}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '1.1rem 0',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          textAlign: 'left',
+          gap: '1rem',
+          fontFamily: 'var(--font-sans)',
+        }}
+      >
+        <span style={{ fontSize: '0.97rem', fontWeight: 600, color: 'var(--primary)', lineHeight: 1.4 }}>
+          {item.q}
+        </span>
+        <ChevronDown
+          size={18}
+          style={{
+            flexShrink: 0,
+            color: 'var(--secondary)',
+            transition: 'transform 0.25s ease',
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+          }}
+        />
+      </button>
+      <div
+        style={{
+          maxHeight: isOpen ? '300px' : '0',
+          overflow: 'hidden',
+          transition: 'max-height 0.3s ease',
+        }}
+      >
+        <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)', lineHeight: 1.7, paddingBottom: '1.1rem', margin: 0 }}>
+          {item.a}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ── Course Card ───────────────────────────────────────────────────────────────
+const STATUS_CONFIG = {
+  available:  { label: 'Disponible',  color: '#16a34a', bg: 'rgba(22,163,74,0.1)',  icon: Circle },
+  enrolled:   { label: 'Matriculado', color: '#2563eb', bg: 'rgba(37,99,235,0.1)',  icon: PlayCircle },
+  completed:  { label: 'Completado',  color: '#7c3aed', bg: 'rgba(124,58,237,0.1)', icon: CheckCircle2 },
+  upcoming:   { label: 'Próximamente',color: '#d97706', bg: 'rgba(217,119,6,0.1)',  icon: Clock },
+};
+
+function CourseCard({ course, onSelect }) {
+  const cfg = STATUS_CONFIG[course.status] || STATUS_CONFIG.available;
+  const Icon = cfg.icon;
+  return (
+    <div
+      onClick={() => onSelect && onSelect(course.id)}
+      style={{
+        background: 'white',
+        border: '1px solid rgba(0,54,102,0.09)',
+        borderRadius: '16px',
+        padding: '1.5rem',
+        cursor: course.status !== 'upcoming' ? 'pointer' : 'default',
+        transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.85rem',
+        boxShadow: '0 2px 8px rgba(0,54,102,0.04)',
+      }}
+      onMouseEnter={e => {
+        if (course.status !== 'upcoming') {
+          e.currentTarget.style.transform = 'translateY(-4px)';
+          e.currentTarget.style.boxShadow = '0 12px 30px rgba(0,54,102,0.1)';
+        }
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,54,102,0.04)';
+      }}
+    >
+      {/* Header row */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem' }}>
+        <span style={{
+          fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em',
+          textTransform: 'uppercase', color: 'var(--secondary)',
+          background: 'rgba(0,163,224,0.08)', padding: '0.2rem 0.6rem', borderRadius: '99px',
+        }}>
+          {course.category}
+        </span>
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+          fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.06em',
+          color: cfg.color, background: cfg.bg, padding: '0.2rem 0.65rem', borderRadius: '99px',
+        }}>
+          <Icon size={11} />
+          {cfg.label}
+        </span>
+      </div>
+
+      {/* Title */}
+      <div>
+        <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--primary)', margin: '0 0 0.25rem 0', lineHeight: 1.3 }}>
+          {course.title}
+        </h3>
+        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
+          {course.subtitle}
+        </p>
+      </div>
+
+      {/* Meta */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', color: '#64748b', background: '#f1f5f9', padding: '0.2rem 0.6rem', borderRadius: '6px' }}>
+          <Clock size={11} /> {course.duration}
+        </span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', color: '#64748b', background: '#f1f5f9', padding: '0.2rem 0.6rem', borderRadius: '6px' }}>
+          <BookOpen size={11} /> {course.modules} módulos
+        </span>
+        {course.certification && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', color: '#64748b', background: '#f1f5f9', padding: '0.2rem 0.6rem', borderRadius: '6px' }}>
+            <Award size={11} /> Certificado
+          </span>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid #f1f5f9' }}>
+        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+          Inicio: <strong>{course.startDate}</strong>
+        </span>
+        {course.status !== 'upcoming' && (
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', fontWeight: 600, color: 'var(--secondary)' }}>
+            Ver detalles <ChevronRight size={14} />
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Main Component ────────────────────────────────────────────────────────────
 export default function AcademyView({ onSelectCourse }) {
+  usePageMeta({
+    title: 'Professional Academy',
+    description: 'Access exclusive educational content on peptide therapy, clinical protocols, and research methodology — available to verified medical professionals.',
+    path: '/academy',
+  });
+
   const { isProfessional } = useAuth();
+  const [openFaq, setOpenFaq] = useState(null);
 
   if (!isProfessional) {
     return (
       <div className="container" style={{ paddingTop: '120px', minHeight: '60vh', textAlign: 'center' }}>
-        <h2>Restricted Access</h2>
-        <p>This section is exclusively available to verified medical professionals.</p>
+        <h2>Acceso Restringido</h2>
+        <p>Esta sección está disponible exclusivamente para profesionales médicos verificados.</p>
       </div>
     );
   }
 
   return (
     <div style={{ paddingTop: '120px', paddingBottom: '4rem', minHeight: '80vh', backgroundColor: 'var(--background)' }}>
-      {/* Hero Section */}
+
+      {/* ── Hero ── */}
       <div className="container" style={{ marginBottom: '3rem' }}>
-        <h1 style={{ 
-          fontSize: '2.5rem', 
-          fontWeight: 800, 
-          color: 'var(--primary)',
-          marginBottom: '1rem'
-        }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--secondary)', background: 'rgba(0,163,224,0.08)', border: '1px solid rgba(0,163,224,0.2)', padding: '0.3rem 0.9rem', borderRadius: '99px', marginBottom: '1rem' }}>
+          <GraduationCap size={14} />
+          Professional Academy
+        </div>
+        <h1 style={{ fontSize: 'clamp(2rem,5vw,3rem)', fontWeight: 800, color: 'var(--primary)', marginBottom: '0.75rem', letterSpacing: '-0.03em' }}>
           Knowledge & Academy
         </h1>
-        <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', maxWidth: '800px' }}>
-          Exclusive educational resources, advanced clinical protocols, and masterclasses designed for professionals ready to expand their impact in precision medicine and peptide therapy.
+        <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', maxWidth: '700px', lineHeight: 1.65 }}>
+          Recursos educativos exclusivos, protocolos clínicos avanzados y masterclasses diseñadas para profesionales de la medicina de precisión y terapia peptídica.
         </p>
       </div>
 
-      <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <div style={{ width: '100%', maxWidth: '1000px', marginBottom: '1.5rem', borderBottom: '2px solid var(--border)', paddingBottom: '0.5rem' }}>
-          <h2 style={{ fontSize: '1.5rem', color: 'var(--text-main)', margin: 0 }}>
-            Available Courses
-          </h2>
+      {/* ── Featured Course ── */}
+      <div className="container" style={{ marginBottom: '4rem' }}>
+        <div style={{ width: '100%', borderBottom: '2px solid var(--border)', paddingBottom: '0.5rem', marginBottom: '1.5rem' }}>
+          <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)', margin: 0 }}>Curso Destacado</h2>
         </div>
 
-        {/* Featured Course Card */}
-        <div 
-          onClick={() => onSelectCourse('renewal-master-protocols')}
+        <div
+          onClick={() => onSelectCourse && onSelectCourse('renewal-master-protocols')}
           style={{
-            backgroundColor: 'white',
-            borderRadius: 'var(--radius-lg)',
-            boxShadow: 'var(--shadow-md)',
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-            cursor: 'pointer',
-            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-            border: '1px solid var(--border)',
-            width: '100%',
-            maxWidth: '1000px',
-            position: 'relative'
+            background: 'white', borderRadius: '20px', boxShadow: '0 8px 32px rgba(0,54,102,0.1)',
+            overflow: 'hidden', cursor: 'pointer', border: '1px solid rgba(0,54,102,0.08)',
+            transition: 'transform 0.3s ease, box-shadow 0.3s ease', position: 'relative',
           }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.transform = 'translateY(-5px)';
-            e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-          }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,54,102,0.14)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,54,102,0.1)'; }}
         >
-          {/* Tag */}
-          <div style={{
-            position: 'absolute',
-            top: '20px',
-            right: '25px',
-            backgroundColor: 'var(--primary)',
-            color: 'white',
-            padding: '0.4rem 1rem',
-            borderRadius: '999px',
-            fontSize: '0.8rem',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            zIndex: 10
-          }}>
+          <div style={{ position: 'absolute', top: '20px', right: '24px', background: 'var(--primary)', color: 'white', padding: '0.35rem 0.9rem', borderRadius: '99px', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', zIndex: 10 }}>
             New Masterclass
           </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)', gap: '0' }}>
-            {/* Image Placeholder */}
-            <div style={{
-              backgroundColor: '#0a192f',
-              backgroundImage: 'radial-gradient(circle at top right, #112240, #0a192f)',
-              padding: '3rem 2rem',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              color: 'white',
-              minHeight: '300px'
-            }}>
-              <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--secondary)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Global Lecture Series</span>
-              <h3 style={{ fontSize: '2.2rem', fontWeight: 800, lineHeight: 1.1, margin: '0 0 1rem 0' }}>
-                Renewal Master Protocols
-              </h3>
-              <p style={{ fontSize: '1.1rem', color: 'rgba(255,255,255,0.8)', margin: 0 }}>
-                Peptide Therapy for Human Optimization
-              </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1.2fr)' }}>
+            <div style={{ background: 'linear-gradient(135deg,#003666 0%,#005a9c 60%,#0070c0 100%)', padding: '3rem 2rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', color: 'white', minHeight: '260px' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--secondary)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Global Lecture Series</span>
+              <h3 style={{ fontSize: 'clamp(1.5rem,3vw,2.2rem)', fontWeight: 800, lineHeight: 1.15, margin: '0 0 0.75rem 0' }}>Renewal Master Protocols</h3>
+              <p style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.8)', margin: 0 }}>Peptide Therapy for Human Optimization</p>
             </div>
-
-            {/* Content */}
             <div style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-                  Learn all relevant clinical protocols for immunity, metabolism, neurobiology, and longevity guided by leading international experts.
-                </p>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-main)', fontSize: '0.95rem' }}>
-                    <PlayCircle size={18} color="var(--primary)" />
-                    <span><strong>Online Access:</strong> Starts March 24th, 2026</span>
+              <p style={{ fontSize: '0.98rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.65 }}>
+                Aprende todos los protocolos clínicos relevantes para inmunidad, metabolismo, neurobiología y longevidad de la mano de expertos internacionales líderes.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', marginBottom: '2rem' }}>
+                {[
+                  [PlayCircle, 'Acceso Online: 24 Mar 2026'],
+                  [Clock, 'Duración: 8 semanas (1 clase/sem)'],
+                  [Award, 'Certificación: Renewal EU oficial'],
+                ].map(([Icon, text], i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', fontSize: '0.9rem', color: 'var(--text-main)' }}>
+                    <Icon size={16} color="var(--primary)" />
+                    <span>{text}</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-main)', fontSize: '0.95rem' }}>
-                    <Clock size={18} color="var(--primary)" />
-                    <span><strong>Duration:</strong> 8 weeks (1 class/week)</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-main)', fontSize: '0.95rem' }}>
-                    <Award size={18} color="var(--primary)" />
-                    <span><strong>Certification:</strong> Official Renewal EU Certificate</span>
-                  </div>
-                </div>
+                ))}
               </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', color: 'var(--secondary)', fontWeight: 600, fontSize: '1.05rem', gap: '0.5rem' }}>
-                View Masterclass Details
-                <ChevronRight size={18} />
+              <div style={{ display: 'flex', alignItems: 'center', color: 'var(--secondary)', fontWeight: 600, fontSize: '0.95rem', gap: '0.4rem' }}>
+                Ver detalles del Masterclass <ChevronRight size={16} />
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* ── Course Catalog ── */}
+      <div className="container" style={{ marginBottom: '4rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid var(--border)', paddingBottom: '0.5rem', marginBottom: '1.5rem' }}>
+          <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)', margin: 0 }}>Catálogo de Cursos</h2>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{COURSES.length} cursos disponibles</span>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
+          {COURSES.map(course => (
+            <CourseCard
+              key={course.id}
+              course={course}
+              onSelect={onSelectCourse}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* ── FAQ ── */}
+      <div className="container">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', borderBottom: '2px solid var(--border)', paddingBottom: '0.5rem', marginBottom: '1.5rem' }}>
+          <HelpCircle size={18} color="var(--secondary)" />
+          <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)', margin: 0 }}>Preguntas Frecuentes</h2>
+        </div>
+        <div style={{ maxWidth: '780px' }}>
+          {FAQ_ITEMS.map((item, i) => (
+            <FAQItem
+              key={i}
+              item={item}
+              isOpen={openFaq === i}
+              onToggle={() => setOpenFaq(openFaq === i ? null : i)}
+            />
+          ))}
+        </div>
+      </div>
+
     </div>
   );
 }

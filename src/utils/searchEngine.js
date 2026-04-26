@@ -5,58 +5,101 @@
  * for hair, skin, and acne recommendations.
  */
 
-import { products as staticProducts } from '../data/products.js';
+
 // ─── Protocol Index Builder ──────────────────────────────────────────────
+// Supports blueprints v2.0 schema (single source of truth: 'blueprints' collection).
+// Falls back gracefully to older flat-field schemas.
 export const buildProtocolIndex = (templates) => {
   if (!templates || !Array.isArray(templates)) return [];
-  return templates.map(t => {
-    const products = new Set();
-    if (t.phases) {
-      t.phases.forEach(phase => {
-        if (phase.drugs_used) {
-          phase.drugs_used.forEach(drug => {
-            if (drug.product_slug) products.add(drug.product_slug.replace(/-/g, ' '));
-          });
-        }
-      });
-    }
-    
-    return {
-      protocol_id: t.protocol_id,
-      name: t.protocol_title || '',
-      category: t.primary_goal || '',
-      tags: [t.primary_goal, ...(t.tags || [])].filter(Boolean),
-      duration_weeks: t.protocol_duration_weeks || 12,
-      products_used: Array.from(products),
-      clinical_focus: t.clinical_focus || (t.protocol_description ? t.protocol_description.substring(0, 100) + '...' : '')
-    };
-  });
+  return templates
+    .filter(t => t && (t.protocol_title || t.name) && t.protocol_id) // skip ghost/empty docs
+    .map(t => {
+      const products = new Set();
+      const meta = t.metadata || {};  // blueprints v2.0: nested metadata object
+
+      // 1. blueprints v2.0: phase_blueprints[].drugs[]
+      if (Array.isArray(t.phase_blueprints)) {
+        t.phase_blueprints.forEach(phase => {
+          if (Array.isArray(phase.drugs)) {
+            phase.drugs.forEach(drug => {
+              if (drug.product_title) products.add(drug.product_title.toLowerCase());
+              if (drug.product_id)    products.add(drug.product_id.replace(/^prd_/, '').replace(/-/g, ' '));
+            });
+          }
+        });
+      }
+
+      // 2. Legacy: flat phases[].drugs_used[]
+      if (Array.isArray(t.phases)) {
+        t.phases.forEach(phase => {
+          if (Array.isArray(phase.drugs_used)) {
+            phase.drugs_used.forEach(drug => {
+              if (drug.product_slug)  products.add(drug.product_slug.replace(/-/g, ' '));
+              if (drug.product_name)  products.add(drug.product_name.toLowerCase());
+              if (drug.product_title) products.add(drug.product_title.toLowerCase());
+            });
+          }
+        });
+      }
+
+      // 3. Legacy: flat top-level products_used[]
+      if (Array.isArray(t.products_used)) {
+        t.products_used.forEach(p => {
+          if (typeof p === 'string') products.add(p.toLowerCase());
+          else if (p?.name) products.add(p.name.toLowerCase());
+          else if (p?.slug) products.add(p.slug.replace(/-/g, ' '));
+        });
+      }
+
+      // Category: blueprints v2.0 uses metadata.primary_goal
+      const category = meta.primary_goal || t.primary_goal || t.category || t.goal || '';
+
+      // Duration: blueprints v2.0 phase_blueprints durations summed, or flat field
+      let duration_weeks = t.protocol_duration_weeks || t.duration_weeks || 12;
+      if (!t.protocol_duration_weeks && !t.duration_weeks && Array.isArray(t.phase_blueprints)) {
+        duration_weeks = t.phase_blueprints.reduce((sum, p) => sum + (p.default_duration_weeks || 0), 0) || 12;
+      }
+
+      return {
+        protocol_id:    t.protocol_id,
+        protocol_slug:  t.protocol_slug || t.protocol_id,
+        name:           t.protocol_title || t.name || '',
+        category,
+        tags: [
+          category,
+          meta.primary_condition,
+          t.primary_goal,
+          t.category,
+          ...(t.tags || [])
+        ].filter(Boolean),
+        duration_weeks,
+        products_used: Array.from(products),
+        clinical_focus: meta.primary_condition ||
+          t.clinical_focus ||
+          t.description ||
+          (t.protocol_description ? t.protocol_description.substring(0, 120) + '...' : '')
+      };
+    });
 };
 
 // ─── FAQ Index Builder ─────────────────────────────────────────────────────
-export const buildFAQIndex = (faqs, mappings) => {
+// Reads product_ids and protocol_ids directly from each FAQ document.
+// No external mapping collection is needed.
+export const buildFAQIndex = (faqs) => {
   if (!faqs) return [];
-  return faqs.map(f => {
-    const relatedProducts = (mappings || [])
-      .filter(m => m.faqId === (f.faqId || f.id))
-      .map(m => m.productID)
-      .filter(Boolean)
-      .filter((v, i, a) => a.indexOf(v) === i);
-
-    return {
-      faq_id: f.faqId || f.id,
-      question: f.question,
-      short_answer: f.shortAnswer || f.answer?.substring(0, 120) + '...',
-      category: f.category || f.categoryId,
-      tags: f.tags || [],
-      related_products: relatedProducts,
-      related_protocols: f.relatedProtocols || [],
-      active: f.active ?? true,
-      visibility: f.visibility || 'public',
-      is_global: f.isGlobal || false,
-      answer: f.answer // Keep for full view
-    };
-  });
+  return faqs.map(f => ({
+    faq_id: f.faqId || f.id,
+    question: f.question,
+    short_answer: f.shortAnswer || (f.answer ? f.answer.substring(0, 120) + '...' : ''),
+    category: f.category || f.categoryId,
+    tags: f.tags || [],
+    related_products: Array.isArray(f.product_ids) ? f.product_ids : [],
+    related_protocols: Array.isArray(f.protocol_ids) ? f.protocol_ids : (f.relatedProtocols || []),
+    active: f.active ?? true,
+    visibility: f.visibility || 'public',
+    is_global: f.isGlobal || false,
+    answer: f.answer // Keep for full view
+  }));
 };
 
 // ─── Natural Language Intent Map ───────────────────────────────────────────
@@ -154,15 +197,14 @@ export const searchProducts = (query, products, protocolIndex = []) => {
   const { matchedGoals, matchedKeywords, intentBoost, intentLabels } = resolveIntents(normalizedQuery, tokens);
 
   const scoredResults = products.map(product => {
-    const staticVersion = staticProducts.find(p => p.name === product.name && p.dosage === p.dosage);
     const enrichedProduct = {
       ...product,
-      goals: product.goals?.length > 0 ? product.goals : (staticVersion?.goals || []),
-      secondaryFactors: product.secondaryFactors?.length > 0 ? product.secondaryFactors : (staticVersion?.secondaryFactors || []),
-      tags: product.tags?.length > 0 ? product.tags : (staticVersion?.tags || []),
-      mechanisms: product.mechanisms?.length > 0 ? product.mechanisms : (staticVersion?.mechanisms || []),
-      semanticKeywords: product.semanticKeywords?.length > 0 ? product.semanticKeywords : (staticVersion?.semanticKeywords || []),
-      synonyms: product.synonyms?.length > 0 ? product.synonyms : (staticVersion?.synonyms || []),
+      goals: product.goals?.length > 0 ? product.goals : [],
+      secondaryFactors: product.secondaryFactors?.length > 0 ? product.secondaryFactors : [],
+      tags: product.tags?.length > 0 ? product.tags : [],
+      mechanisms: product.mechanisms?.length > 0 ? product.mechanisms : [],
+      semanticKeywords: product.semanticKeywords?.length > 0 ? product.semanticKeywords : [],
+      synonyms: product.synonyms?.length > 0 ? product.synonyms : [],
     };
 
     let score = 0;
@@ -303,12 +345,36 @@ export const searchProducts = (query, products, protocolIndex = []) => {
         (p.name || p.displayName || "").toLowerCase().trim() === normalizedName
       );
 
-      const strengths = new Set(allFamilyMembers.map(p => p.dosage || p.strength).filter(Boolean));
+      // Collect strengths from: 1) top-level dosage/strength fields,
+      // 2) already-populated allStrengths, 3) subcollection variants array
+      const strengths = new Set();
+      allFamilyMembers.forEach(p => {
+        if (p.dosage) strengths.add(p.dosage);
+        if (p.strength) strengths.add(p.strength);
+        if (Array.isArray(p.allStrengths)) p.allStrengths.forEach(s => strengths.add(s));
+        if (Array.isArray(p.variants)) {
+          p.variants.forEach(v => {
+            if (v.strength) strengths.add(v.strength);
+            if (v.dosage) strengths.add(v.dosage);
+            if (v.label) strengths.add(v.label);
+          });
+        }
+      });
+      // Also include any strengths already on the scored product itself
+      if (Array.isArray(product.allStrengths)) product.allStrengths.forEach(s => strengths.add(s));
+      if (Array.isArray(product.variants)) {
+        product.variants.forEach(v => {
+          if (v.strength) strengths.add(v.strength);
+          if (v.dosage) strengths.add(v.dosage);
+          if (v.label) strengths.add(v.label);
+        });
+      }
 
+      const allStrengthsArr = Array.from(strengths).filter(Boolean);
       uniqueFamilies.set(normalizedName, {
         ...product,
-        strengthCount: strengths.size > 0 ? strengths.size : 1,
-        allStrengths: Array.from(strengths)
+        strengthCount: allStrengthsArr.length > 0 ? allStrengthsArr.length : 1,
+        allStrengths: allStrengthsArr
       });
     }
   });
@@ -319,40 +385,52 @@ export const searchProducts = (query, products, protocolIndex = []) => {
 // ─── Protocol Search Function ─────────────────────────────────────────────
 export const searchProtocols = (query, protocolIndex = []) => {
   if (!query || !query.trim() || !protocolIndex.length) return [];
-  const searchTerm = query.toLowerCase();
-  
+  const normalizedQuery = query.toLowerCase().trim();
+  const tokens = normalizedQuery.split(/\s+/).filter(t => t.length >= 2 && !STOP_WORDS.has(t));
+
   return protocolIndex.map(protocol => {
     let score = 0;
     const { name, category, tags, products_used, clinical_focus } = protocol;
-    
+
     const safeName = (name || '').toLowerCase();
     const safeCategory = (category || '').toLowerCase();
     const safeFocus = (clinical_focus || '').toLowerCase();
     const safeTags = Array.isArray(tags) ? tags : [];
     const safeProducts = Array.isArray(products_used) ? products_used : [];
 
-    // Direct match (Exact match on Protocol Title)
-    if (safeName === searchTerm) score += 100;
-    
-    // Title match
-    if (safeName.includes(searchTerm)) score += 50;
-    
-    // Tags match
-    if (safeTags.some(tag => (tag || '').toLowerCase().includes(searchTerm))) score += 30;
-    
-    // Products used match
-    if (safeProducts.some(p => (p || '').toLowerCase().includes(searchTerm))) score += 20;
-    
-    // Category match
-    if (safeCategory.includes(searchTerm)) score += 15;
-    
-    // Clinical focus match
-    if (safeFocus.includes(searchTerm)) score += 10;
-    
-    return { ...protocol, score };
+    // Exact protocol title match
+    if (safeName === normalizedQuery) score += 100;
+    // Partial title match
+    if (safeName.includes(normalizedQuery)) score += 50;
+
+    // Token-level scoring for multi-word queries
+    tokens.forEach(token => {
+      if (safeName.includes(token)) score += 15;
+      if (safeCategory.includes(token)) score += 10;
+      if (safeFocus.includes(token)) score += 6;
+      if (safeTags.some(tag => (tag || '').toLowerCase().includes(token))) score += 8;
+      if (safeProducts.some(p => (p || '').toLowerCase().includes(token))) score += 8;
+    });
+
+    // Full-query matches for secondary fields
+    if (safeTags.some(tag => (tag || '').toLowerCase().includes(normalizedQuery))) score += 30;
+    if (safeProducts.some(p => (p || '').toLowerCase().includes(normalizedQuery))) score += 20;
+    if (safeCategory.includes(normalizedQuery)) score += 15;
+    if (safeFocus.includes(normalizedQuery)) score += 10;
+
+    // Intent matching via INTENT_MAP
+    const { matchedGoals } = resolveIntents(normalizedQuery, tokens);
+    if (matchedGoals.size > 0) {
+      safeTags.forEach(tag => {
+        if (matchedGoals.has(tag) || matchedGoals.has(tag?.replace(/ /g, '_'))) score += 12;
+      });
+      if (matchedGoals.has(safeCategory) || matchedGoals.has(safeCategory.replace(/ /g, '_'))) score += 12;
+    }
+
+    return { ...protocol, searchScore: score };
   })
-  .filter(p => p.score > 0)
-  .sort((a, b) => b.score - a.score)
+  .filter(p => p.searchScore > 0)
+  .sort((a, b) => b.searchScore - a.searchScore)
   .slice(0, 5);
 };
 
@@ -361,7 +439,7 @@ export const searchFAQ = (query, faqIndex, isProfessional = false) => {
   if (!query || !faqIndex?.length) return [];
 
   const q = query.toLowerCase().trim();
-  const words = q.split(/\s+/).filter(w => !STOP_WORDS.has(w));
+  const words = q.split(/\s+/).filter(w => w.length >= 2 && !STOP_WORDS.has(w));
   const questionBoost = isQuestion(query) ? 1.5 : 1.0;
 
   const visibleItems = faqIndex.filter(
@@ -370,31 +448,54 @@ export const searchFAQ = (query, faqIndex, isProfessional = false) => {
 
   const scored = visibleItems.map((faq) => {
     let score = 0;
-    
+
     // Global items get a baseline visibility boost
-    if (faq.is_global) score += 2;
+    if (faq.is_global) score += 1;
 
     const searchFields = [
       faq.question || '',
       faq.short_answer || '',
       faq.answer || '',
       ...(faq.tags || []),
-      ...(faq.related_products || []),
     ].map((f) => f.toLowerCase());
 
     const combined = searchFields.join(' ');
 
+    // Exact query match in question/answer
     if (combined.includes(q)) score += 10;
-    
+
+    // Word-level scoring
     words.forEach((word) => {
       if (combined.includes(word)) score += 2;
     });
 
-    // Special Boost: If the query mentions a product this FAQ is mapped to
-    if (faq.related_products) {
-      faq.related_products.forEach(p => {
-        if (q.includes(p.toLowerCase())) score += 8;
+    // ── Product-relevance logic ──────────────────────────────────────────────
+    const hasRelatedProducts = Array.isArray(faq.related_products) && faq.related_products.length > 0;
+
+    if (hasRelatedProducts) {
+      let productBoost = 0;
+      let productMatch = false;
+
+      faq.related_products.forEach(pid => {
+        const pidLower = (pid || '').toLowerCase();
+        // Strong boost: query mentions this product directly
+        if (q.includes(pidLower) || pidLower.includes(q)) {
+          productBoost += 12;
+          productMatch = true;
+        }
+        // Partial token match
+        else if (words.some(w => pidLower.includes(w) || w.includes(pidLower.substring(0, 6)))) {
+          productBoost += 4;
+        }
       });
+
+      score += productBoost;
+
+      // Penalize product-specific FAQs when the query is about a different product
+      // (i.e., score > 0 from text but no product match)
+      if (!productMatch && score > 0 && !faq.is_global) {
+        score = Math.max(0, score - 6);
+      }
     }
 
     return { ...faq, searchScore: score * questionBoost };

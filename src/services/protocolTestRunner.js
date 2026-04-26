@@ -1,6 +1,8 @@
 import { protocolRepository } from '../repositories/protocolRepository';
 import { ProtocolEngine2 } from './protocolEngine2';
-import { products } from '../data/products';
+import { productRepository } from '../repositories/productRepository';
+import { ROUTE, VARIANT_REF_TYPE } from '../constants/productEnums';
+
 
 /**
  * MASTER CLINICAL TEST RUNNER 
@@ -67,7 +69,10 @@ export const ProtocolTestRunner = {
   async runSuite() {
     const startTime = Date.now();
     const results = [];
-    const fullSuite = await this.generateDynamicScenarios();
+    const [fullSuite, products] = await Promise.all([
+      this.generateDynamicScenarios(),
+      productRepository.getAllProducts()
+    ]);
     
     console.log(`[ClinicalSuite] Starting execution of ${fullSuite.length} scenarios...`);
 
@@ -93,7 +98,8 @@ export const ProtocolTestRunner = {
     const passed = results.filter(r => r.status === 'PASS').length;
     
     const finalReport = {
-      version: "3.1.0-STABLE",
+      version: "3.2.0-PHASE2",
+
       timestamp: new Date().toISOString(),
       durationMs: duration,
       summary: {
@@ -109,26 +115,26 @@ export const ProtocolTestRunner = {
   },
 
   validate(output, scenario) {
-    const errors = [];
+    const errors  = [];
+    const warnings = [];
     const start = Date.now();
-    
-    // 1. Identity Validation (Part 4)
-    const actualId = (output.protocol_id || '').toUpperCase();
+
+    // 1. Identity Validation
+    const actualId   = (output.protocol_id || '').toUpperCase();
     const expectedId = (scenario.expect.protocolId || '').toUpperCase();
-    
     if (!actualId.includes(expectedId)) {
         errors.push(`Identity Mismatch: Expected ${expectedId}, Got ${actualId}`);
     }
 
-    // 2. Compound Quality (Part 19)
-    const drugTitles = output.resolved_phases?.flatMap(p => (p.drugs || []).map(d => (d.product_title || '').toLowerCase())) || [];
+    // 2. Compound Quality
+    const allDrugs = output.resolved_phases?.flatMap(p => p.drugs || []) || [];
+    const drugTitles = allDrugs.map(d => (d.product_title || '').toLowerCase());
     const expectedCompound = (scenario.expect.containsCompound || '').toLowerCase();
-    
     if (expectedCompound && !drugTitles.some(t => t.includes(expectedCompound))) {
         errors.push(`Missing Required Compound: ${scenario.expect.containsCompound}`);
     }
 
-    // 3. Timeline Integrity (Part 19)
+    // 3. Timeline Integrity
     const weeksInTimeline = output.resolved_timeline?.length || 0;
     if (weeksInTimeline === 0) {
         errors.push('Timeline Logic Failure: 0 weeks generated');
@@ -136,25 +142,60 @@ export const ProtocolTestRunner = {
         errors.push(`Timeline Drift: Context expected ${output.patient_context?.duration_weeks}w, Timeline has ${weeksInTimeline}w`);
     }
 
-    // 4. Cost Integrity (Part 11)
+    // 4. Cost Integrity
     if ((output.computedCost?.total || 0) <= 0) {
         errors.push('Economic Validation Failed: Zero total cost');
     }
 
-    // 5. Safety Validation (Part 7)
+    // 5. Safety Validation
     if (output.validation?.status === 'error') {
         errors.push(`Clinical Safety Error: ${output.validation.errors?.[0]?.message || 'Internal check failed'}`);
     }
+
+    // ── Phase 2 Validations ─────────────────────────────────────────────────
+    const VALID_ROUTES = new Set(Object.values(ROUTE));
+    const VALID_TYPES  = new Set(Object.values(VARIANT_REF_TYPE));
+
+    allDrugs.forEach(d => {
+      const ref = d.variantRef;
+      const label = d.product_title || d.product_id || 'unknown';
+
+      // 6. variantRef presence (WARN — non-blocking during rollout)
+      if (!ref) {
+        warnings.push(`[Phase2-WARN] Drug '${label}' missing variantRef — engine fallback used`);
+        return;
+      }
+
+      // 7. variantRef.type integrity (ERROR)
+      if (!VALID_TYPES.has(ref.type)) {
+        errors.push(`[Phase2] Drug '${label}': invalid variantRef.type '${ref.type}' (must be ${Object.values(VARIANT_REF_TYPE).join('|')})`);
+      }
+
+      // 8. variantRef.route is a canonical enum value (ERROR)
+      if (!VALID_ROUTES.has(ref.route)) {
+        errors.push(`[Phase2] Drug '${label}': non-canonical route '${ref.route}' in variantRef (must be ${Object.values(ROUTE).join('|')})`);
+      }
+
+      // 9. exact ref must carry a variantId (ERROR)
+      if (ref.type === VARIANT_REF_TYPE.EXACT && !ref.variantId) {
+        errors.push(`[Phase2] Drug '${label}': variantRef.type='exact' but variantId is missing`);
+      }
+    });
+    // ─────────────────────────────────────────────────────────────────────────
 
     return {
       id: scenario.id,
       name: scenario.name,
       status: errors.length === 0 ? 'PASS' : 'FAIL',
-      errors: errors,
+      warnings,
+      errors,
       durationMs: Date.now() - start,
-      details: errors.length === 0 ? 'Clinical selection & math verified.' : errors.join(' | '),
+      details: errors.length === 0
+        ? `Clinical selection & math verified. Warnings: ${warnings.length}`
+        : errors.join(' | '),
       protocolId: output.protocol_id,
       compounds: [...new Set(drugTitles)]
     };
   }
 };
+

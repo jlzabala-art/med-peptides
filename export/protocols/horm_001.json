@@ -1,0 +1,740 @@
+{
+  "protocol_duration_weeks": 12,
+  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "bundleVersion": "2.0",
+  "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
+  "protocol_is_physician_authored": false,
+  "seeded_at": "2026-04-25T06:10:36.132Z",
+  "protocol_source_version": "v5.0",
+  "dosing_enrichment": {
+    "titration_note": "Start Ipamorelin 200 mcg + CJC-1295 100 mcg 2x/day (AM + bedtime) for weeks 1-4. If well tolerated and IGF-1 response confirmed at week 4, add midday dose (3x/day) for weeks 5-12. Monitor IGF-1 monthly.",
+    "cycling_recommendation": "12-week active cycle followed by 4-6 week washout. GH axis desensitization prevents with cycling; HPTA recovery confirmed within 4-6 weeks off protocol per IGF-1 normalization data.",
+    "maintenance_dose": "Ipamorelin: 300 mcg subcutaneous 3x/day (morning, pre-workout, bedtime). CJC-1295 (no DAC): 100-200 mcg subcutaneous 3x/day co-administered with Ipamorelin.",
+    "timing_optimization": "Administer in fasted state (90 min post-meal) for optimal GH pulse. Bedtime dose is most physiologically relevant - mimics natural nocturnal GH surge. Avoid administration after large carbohydrate meals as insulin blunts GH release."
+  },
+  "complexity_level": "advanced",
+  "eligibility_rules": {
+    "indications": [
+      "low_normal_IGF1_with_somatopause_symptoms",
+      "poor_recovery_or_reduced_lean_mass",
+      "sleep_architecture_disruption_with_low_recovery",
+      "age_related_decline_in_GH_axis_markers",
+      "body_composition_support_under_physician_supervision"
+    ],
+    "contraindications": [
+      "active_malignancy_or_history_of_hormone_sensitive_cancer",
+      "pituitary_adenoma_or_active_pituitary_disease",
+      "uncontrolled_diabetes_mellitus",
+      "severe_obstructive_sleep_apnea_untreated",
+      "pregnancy_or_breastfeeding",
+      "severe_carpal_tunnel_syndrome"
+    ],
+    "supported_goals": [
+      "hormonal_support",
+      "reproductive_axis_support",
+      "libido_signal_support",
+      "hpga_support"
+    ],
+    "relative_cautions": [],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "patient_demographic",
+      "age_group",
+      "start_date"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "tempo_preference": "standard",
+      "age_group": null,
+      "patient_demographic": null,
+      "duration_weeks": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "protocol_author_notes": "Official curated protocol for general clinical use.",
+  "protocol_author_organization": "ReGen PEPT",
+  "protocol_last_reviewed_at": "2026-03-29",
+  "protocol_source_reference": "internal_guide",
+  "expected_outcomes": {
+    "qualitative": [
+      "Increased lean muscle mass and reduced visceral fat",
+      "Improved sleep quality and recovery speed",
+      "Enhanced tissue repair and skin collagen production",
+      "Improved insulin sensitivity and metabolic rate",
+      "Improved recovery capacity and sleep quality",
+      "Support for lean mass preservation and body composition",
+      "Improved tissue repair signaling",
+      "Potential increase in IGF-1 within monitored physiological target range",
+      "Reduced subjective fatigue in GH-axis low-response phenotypes"
+    ],
+    "time_to_onset_weeks": 2,
+    "quantitative_ranges": {
+      "week_8": "IGF-1 near peak response; body composition shift visible; skin texture improvement reported in 60-70% of patients",
+      "week_4": "IGF-1 levels increase 15-25%; subjective sleep quality improvement in 70% of patients; recovery speed improvement",
+      "week_12": "IGF-1 increase 30-50% from baseline; lean mass gain 2-4 kg; fat mass reduction 3-5%; sleep quality (PSQI) improvement 20-35%"
+    },
+    "responder_rate_pct": "75-80% for IGF-1 response; 70% for body composition improvement; 80% for sleep quality improvement"
+  },
+  "phase_blueprints": [
+    {
+      "clinical_events": [
+        {
+          "event_type": "baseline_review",
+          "title": "Baseline hormonal rhythm and symptom review",
+          "week": 1
+        }
+      ],
+      "clinical_purpose": [
+        "hpga_signaling_support",
+        "hormonal_rhythm_support",
+        "tolerance_building"
+      ],
+      "default_duration_weeks": 4,
+      "default_start_week": 1,
+      "drugs": [
+        {
+          "dose_logic": {
+            "administration_days_default": [
+              "Tuesday",
+              "Thursday"
+            ],
+            "administration_frequency": "2x_week",
+            "dose_unit": "protocol_defined",
+            "starting_intensity": "standard",
+            "timing_hint": "consistent_time"
+          },
+          "product_id": "prd_kisspeptin",
+          "product_title": "Kisspeptin",
+          "route": "subcutaneous_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_kisspeptin",
+            "route": "SC",
+            "type": "resolved"
+          }
+        },
+        {
+          "dose_logic": {
+            "activation_condition": "if_clinician_enables_secondary_axis_support",
+            "administration_days_default": [
+              "Friday"
+            ],
+            "administration_frequency": "1x_week",
+            "dose_unit": "protocol_defined",
+            "starting_intensity": "optional_low"
+          },
+          "product_id": "prd_gonadorelin",
+          "product_title": "Gonadorelin",
+          "route": "subcutaneous_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_gonadorelin",
+            "route": "SC",
+            "type": "resolved"
+          }
+        }
+      ],
+      "phase_key": "axis_activation",
+      "phase_title": "Axis Activation"
+    },
+    {
+      "clinical_events": [
+        {
+          "event_type": "checkpoint",
+          "title": "Axis response reassessment",
+          "week": 8
+        }
+      ],
+      "clinical_purpose": [
+        "hormonal_pattern_support",
+        "symptom_reassessment"
+      ],
+      "default_duration_weeks": 4,
+      "default_start_week": 5,
+      "drugs": [
+        {
+          "dose_logic": {
+            "administration_days_default": [
+              "Tuesday",
+              "Thursday"
+            ],
+            "administration_frequency": "2x_week",
+            "dose_unit": "protocol_defined",
+            "intensity": "standard_plus"
+          },
+          "product_id": "prd_kisspeptin",
+          "product_title": "Kisspeptin",
+          "route": "subcutaneous_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_kisspeptin",
+            "route": "SC",
+            "type": "resolved"
+          }
+        },
+        {
+          "dose_logic": {
+            "activation_condition": "if_midpoint_axis_support_needed",
+            "administration_days_default": [
+              "Friday"
+            ],
+            "administration_frequency": "1x_week",
+            "dose_unit": "protocol_defined",
+            "intensity": "conditional"
+          },
+          "product_id": "prd_gonadorelin",
+          "product_title": "Gonadorelin",
+          "route": "subcutaneous_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_gonadorelin",
+            "route": "SC",
+            "type": "resolved"
+          }
+        }
+      ],
+      "phase_key": "regulation",
+      "phase_title": "Regulation"
+    },
+    {
+      "clinical_events": [
+        {
+          "event_type": "outcome_review",
+          "title": "Final hormonal support review",
+          "week": 12
+        }
+      ],
+      "clinical_purpose": [
+        "response_maintenance",
+        "symptom_stability"
+      ],
+      "default_duration_weeks": 4,
+      "default_start_week": 9,
+      "drugs": [
+        {
+          "dose_logic": {
+            "administration_days_default": [
+              "Thursday"
+            ],
+            "administration_frequency": "1x_week",
+            "dose_unit": "protocol_defined",
+            "intensity": "maintenance"
+          },
+          "product_id": "prd_kisspeptin",
+          "product_title": "Kisspeptin",
+          "route": "subcutaneous_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_kisspeptin",
+            "route": "SC",
+            "type": "resolved"
+          }
+        }
+      ],
+      "phase_key": "maintenance",
+      "phase_title": "Maintenance"
+    }
+  ],
+  "protocol_slug": "hormonal-support-12w",
+  "phases": [
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "daily",
+          "productId": "CJC-1295_without_DAC_Ipamorelin-5-5mg-vial",
+          "product_slug": "cjc-1295-ipamorelin",
+          "route": "subcutaneous",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 6
+        },
+        {
+          "dosing_frequency": "daily",
+          "productId": "Tesamorelin-2mg-vial",
+          "product_slug": "tesamorelin",
+          "selected_strength": "20mg",
+          "vials_required_for_phase": 6
+        }
+      ],
+      "end_week": 6,
+      "phase_number": 1,
+      "phase_title": "Hormonal Activation",
+      "start_week": 1
+    },
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "5x_week",
+          "productId": "CJC-1295_without_DAC_Ipamorelin-5-5mg-vial",
+          "product_slug": "cjc-1295-ipamorelin",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 6
+        }
+      ],
+      "end_week": 12,
+      "phase_number": 2,
+      "phase_title": "Maintenance",
+      "start_week": 7
+    }
+  ],
+  "protocol_is_curated": true,
+  "number_of_phases": 2,
+  "primary_goal": "Hormonal Support",
+  "risk_class": "moderate",
+  "protocol_review_status": "approved",
+  "protocol_source_type": "curated_library",
+  "washout_recommended_weeks": 4,
+  "active": true,
+  "overview_summary": "Advanced protocol for hormonal optimization using growth hormone secretagogues.",
+  "protocol_id": "horm_001",
+  "protocol_version": "v6.0",
+  "economics": {
+    "total_protocol_cost_estimate": 1200,
+    "total_vials_required": 18
+  },
+  "protocol_author_title": "Peptide Specialists",
+  "confidence_score": 93,
+  "uploadedAt": "2026-04-20T09:29:12.819Z",
+  "protocol_title": "CJC-1295 / Ipamorelin GH Optimization Protocol",
+  "variant_rules": {
+    "tempo_variants": {
+      "standard": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "none"
+      },
+      "conservative": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "up"
+      },
+      "aggressive": {
+        "dose_step_interval_weeks": 2,
+        "monitoring_intensity_modifier": "up"
+      }
+    },
+    "duration_variants": {
+      "20_weeks": {
+        "mode": "extended_plus",
+        "extra_monitoring": true
+      },
+      "16_weeks": {
+        "mode": "extended",
+        "extra_monitoring": true
+      },
+      "12_weeks": {
+        "mode": "standard",
+        "extra_monitoring": false
+      },
+      "8_weeks": {
+        "mode": "short",
+        "extra_monitoring": false
+      }
+    },
+    "sex_variants": {
+      "female": {
+        "special_notes": [
+          "Use conservative ramping if sensitivity profile is high."
+        ],
+        "recommended_flags": [
+          "hormonal_cyclicity_watch"
+        ]
+      },
+      "male": {
+        "special_notes": [
+          "Reassess tolerance and response before escalation."
+        ],
+        "recommended_flags": []
+      }
+    },
+    "age_variants": {
+      "51-65": {
+        "monitoring_intensity": "enhanced",
+        "default_duration_weeks": 16
+      },
+      "36-50": {
+        "monitoring_intensity": "moderate",
+        "default_duration_weeks": 12
+      },
+      "18-35": {
+        "monitoring_intensity": "standard",
+        "default_duration_weeks": 8
+      },
+      "65+": {
+        "monitoring_intensity": "enhanced",
+        "default_duration_weeks": 16
+      }
+    }
+  },
+  "legacy_compatibility": {
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ],
+    "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode.",
+    "enabled": true
+  },
+  "physician_supervision_required": true,
+  "status": "approved",
+  "_patchedAt": {},
+  "_patchSchema": "antigravity_v2",
+  "id": "horm_001",
+  "category": "Hormonal Support",
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 6,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "IGF-1",
+        "GH stimulation panel",
+        "Cortisol AM"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 12,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "Full hormone panel: IGF-1, GH, cortisol, thyroid (TSH, fT4)",
+        "Bone density marker (P1NP optional)"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "riskManagement": {
+    "contraindications": [
+      "Active malignancy (GH-sensitive)",
+      "Diabetic retinopathy",
+      "Pregnancy",
+      "Active intracranial hypertension"
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (15–35%)",
+        "management": "Rotate sites; use proper aseptic technique."
+      },
+      {
+        "effect": "Fluid retention / mild edema",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Reduce dose; monitor blood pressure; salt restriction."
+      },
+      {
+        "effect": "Nausea / GI discomfort",
+        "frequency": "Common (10–25%)",
+        "management": "Dose with food; split doses; titrate slowly."
+      },
+      {
+        "effect": "Elevated fasting glucose",
+        "frequency": "Uncommon (5%)",
+        "management": "Monitor fasting glucose weekly; consult if persistent."
+      },
+      {
+        "effect": "Mood changes / irritability",
+        "frequency": "Rare (<3%)",
+        "management": "Reduce dose; psychological support if needed."
+      }
+    ],
+    "escalation_criteria": [
+      "Severe or worsening edema — STOP, cardiovascular evaluation",
+      "Fasting glucose > 7.0 mmol/L (126 mg/dL) on two occasions — Endocrinology referral",
+      "Allergic reaction — STOP, emergency protocol",
+      "Hypertensive urgency (BP > 180/110) — STOP, immediate medical attention"
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ]
+  },
+  "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+  "_importBundle": "ReGen PEPT Clinical Protocol Library · Updated 2026-04-26",
+  "_schemaGapFixed": {
+    "_nanoseconds": 670000000,
+    "_seconds": 1777190718
+  },
+  "_schemaVersion": "antigravity_v2",
+  "_bundleCreatedAt": "2026-04-26T09:05:00+02:00",
+  "clinical_evidence_update_2026": {
+    "evidence_limitations": [
+      "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+      "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+      "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+    ],
+    "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+    "last_updated_at": "2026-04-26T08:05:00.000Z",
+    "latest_clinical_notes": [
+      "GH secretagogue combinations remain research/off-label in most jurisdictions.",
+      "Baseline IGF-1, fasting glucose/HbA1c, malignancy history, sleep apnea risk, edema, and carpal tunnel symptoms should be explicitly monitored.",
+      "Avoid implying equivalence with FDA-approved GH replacement."
+    ],
+    "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+    "regulatory_status": "CJC-1295, ipamorelin, kisspeptin, gonadorelin and related endocrine peptide protocols are not general FDA/EMA-approved longevity protocols. Use should remain physician-supervised with endocrine and cancer-screening precautions.",
+    "evidence_update": "Maintain IGF-1/glucose/pituitary/endocrine monitoring and avoid use in active malignancy or uncontrolled diabetes.",
+    "updated_at": "2026-04-26T09:05:00+02:00",
+    "source_refs": [],
+    "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+  },
+  "_syncSource": "export/protocols/horm_001.json",
+  "metadata": {
+    "longDescription": "CJC-1295 (a synthetic analogue of growth hormone-releasing hormone, GHRH 1-29, with Drug Affinity Complex modification) extends the half-life of endogenous GHRH from minutes to days by binding covalently to serum albumin, producing sustained elevation of GH and IGF-1 without desensitisation of the GHRH receptor (Teichman SL et al., J Clin Endocrinol Metab 2006). Ipamorelin (Aib-His-D-2Nal-D-Phe-Lys-NH₂) is a selective GH secretagogue receptor (GHSR) agonist (ghrelin mimetic) that stimulates pulsatile GH release with high receptor selectivity, causing minimal elevation of cortisol, prolactin, or ACTH compared to earlier secretagogues (Raun K et al., Eur J Endocrinol 1998). The combination produces synergistic GH release: CJC-1295 raises the baseline amplitude of GH secretion while Ipamorelin drives discrete pulsatile peaks, together approximating the physiological GH secretion pattern of younger adults. Tesamorelin is added during the activation phase for its validated visceral fat reduction in GH-deficient patients (Falutz J et al., NEJM 2007).",
+    "primary_goal": "Hormonal Support",
+    "target_patient_profile": "Adults 30-65 with low-normal IGF-1, age-related somatopause symptoms, poor recovery, reduced lean mass, or disrupted sleep architecture. Ideal for patients seeking anti-aging hormonal support without exogenous GH administration. Particularly indicated in individuals with GH deficiency features but normal pituitary function.",
+    "short_description": "A 12-week GH axis optimization protocol using Ipamorelin and CJC-1295 to stimulate physiological GH pulses, improve body composition, sleep quality, and tissue recovery.",
+    "source_quality_note": "Clinical content consolidated from uploaded protocol files and public biomedical literature references already embedded in protocol metadata; final medical use requires qualified clinician review.",
+    "keywords": [
+      "CJC-1295 Ipamorelin protocol",
+      "GH secretagogue protocol",
+      "GHRH analogue peptide",
+      "growth hormone optimization",
+      "Ipamorelin ghrelin mimetic",
+      "hormonal support peptide protocol"
+    ],
+    "references": [
+      {
+        "citation": "Teichman SL et al. CJC-1295 sustained GH release. J Clin Endocrinol Metab 2006;91:799-805.",
+        "pmid": "17018654"
+      },
+      {
+        "citation": "Raun K et al. Ipamorelin, a new growth hormone releasing peptide. Eur J Endocrinol 1998;139:552-561.",
+        "pmid": "9625695"
+      },
+      {
+        "citation": "Falutz J et al. Tesamorelin reduces visceral adiposity in HIV. NEJM 2007;357:2349-2361.",
+        "pmid": "17715405"
+      }
+    ],
+    "visibility": "public",
+    "scientificName": "CJC-1295 / Ipamorelin GHRH & Ghrelin-Mimetic GH Secretagogue Optimization Protocol",
+    "author": {
+      "organization": "ReGen PEPT",
+      "name": "ReGen PEPT Clinical Team",
+      "title": "Peptide Specialists"
+    },
+    "evidence_grade_note": "GRADE B: Ipamorelin Phase I/II data (Raun K, Eur J Endocrinol 1998); CJC-1295 Phase II human PK/PD data (Teichman SL, J Clin Endocrinol Metab 2006). IGF-1 endpoints well-validated. Limited long-term RCT data for body composition endpoints.",
+    "description": "12-week GH axis optimization protocol combining CJC-1295 GHRH analogue sustained release with Ipamorelin selective ghrelin-mimetic secretagogue for pulsatile physiological GH restoration.",
+    "primary_condition": "hormonal_imbalance",
+    "version": "1.0",
+    "clinical_summary": "Ipamorelin is a selective GH secretagogue that stimulates pituitary GH release without affecting cortisol, prolactin, or ACTH - providing a clean GH pulse with minimal side effects. CJC-1295 (without DAC) is a GHRH analog that amplifies and prolongs GH pulses via pituitary somatotroph stimulation. Used together, they synergistically maximize GH pulse amplitude and frequency, producing elevations in IGF-1 that drive anabolic, lipolytic, and reparative tissue effects.",
+    "evidence_grade": "B",
+    "pubmed_references": [
+      {
+        "authors": "Raun K et al.",
+        "journal": "Eur J Endocrinol",
+        "pmid": "9849822",
+        "title": "Ipamorelin, the first selective growth hormone secretagogue",
+        "year": 1998
+      },
+      {
+        "authors": "Teichman SL et al.",
+        "journal": "J Clin Endocrinol Metab",
+        "pmid": "16822952",
+        "title": "Prolonged stimulation of growth hormone (GH) and insulin-like growth factor I secretion by CJC-1295",
+        "year": 2006
+      },
+      {
+        "authors": "Sigalos JT and Pastuszak AW",
+        "journal": "Sex Med Rev",
+        "pmid": "28613543",
+        "title": "The Safety and Efficacy of Growth Hormone Secretagogues",
+        "year": 2018
+      }
+    ],
+    "updated_at": "2026-04-23T00:00:00.000Z",
+    "abbreviatedName": "Kisspeptin + Gonadorelin · HPG Axis",
+    "shortCode": "HOR-001",
+    "schema_version": "antigravity_v2",
+    "created_at": "2026-04-02T00:00:00.000Z",
+    "review": {
+      "last_external_evidence_review_at": "2026-04-26",
+      "last_reviewed_at": "2026-04-23",
+      "review_status": "approved"
+    },
+    "regulatory_note": "Ipamorelin and CJC-1295: Not FDA-approved for weight management, anti-aging, or body composition. FDA issued warning letters against compounding of these peptides in 2024 (Category 2 bulk substances). Available via 503A compounding pharmacies under physician supervision in jurisdictions where permitted. Not WADA-prohibited if used therapeutically."
+  },
+  "_patchBundle": "ReGen PEPT Protocol Export - Clinical Update 2026-04-26",
+  "canonical_enrichment": {
+    "compatibleWith": "antigravity_v2_firebase_import",
+    "auditFieldsCompleted": [
+      "eligibility_rules.indications",
+      "metadata.evidence_grade",
+      "metadata.clinical_summary",
+      "washout_recommended_weeks",
+      "expected_outcomes.qualitative",
+      "phase_blueprints",
+      "physician_supervision_required"
+    ],
+    "generatedAt": "2026-04-26T06:53:24Z"
+  },
+  "monitoring_plan": {
+    "baseline_required": [
+      "symptom_inventory",
+      "sleep_quality",
+      "stress_load",
+      "cycle_or_libido_pattern",
+      "IGF-1",
+      "fasting_glucose",
+      "HbA1c",
+      "fasting_insulin",
+      "lipid_profile",
+      "TSH",
+      "free_T4",
+      "blood_pressure",
+      "sleep_apnea_screening",
+      "body_composition"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "measures": [
+          "sleep",
+          "symptoms",
+          "tolerance"
+        ],
+        "purpose": "Confirm early tolerance",
+        "type": "tolerance_review",
+        "week": 4
+      },
+      {
+        "measures": [
+          "subjective_response",
+          "cycle_or_libido_stability"
+        ],
+        "purpose": "Mid-cycle reassessment",
+        "type": "axis_reassessment",
+        "week": 8
+      },
+      {
+        "measures": [
+          "overall_response",
+          "stability"
+        ],
+        "purpose": "End-of-cycle evaluation",
+        "type": "final_outcome_review",
+        "week": 12
+      },
+      {
+        "week": 4,
+        "type": "endocrine_tolerance_review",
+        "measures": [
+          "IGF-1",
+          "fasting_glucose",
+          "edema_symptoms",
+          "sleep_quality"
+        ],
+        "purpose": "Confirm early GH-axis response and tolerability."
+      },
+      {
+        "week": 8,
+        "type": "axis_reassessment",
+        "measures": [
+          "IGF-1",
+          "HbA1c",
+          "body_composition",
+          "blood_pressure"
+        ],
+        "purpose": "Assess endocrine response and cardiometabolic safety."
+      },
+      {
+        "week": 12,
+        "type": "final_outcome_review",
+        "measures": [
+          "IGF-1",
+          "fasting_glucose",
+          "sleep_quality",
+          "recovery_score"
+        ],
+        "purpose": "Determine continuation, taper, or washout plan."
+      }
+    ]
+  },
+  "generator_rules": {
+    "profile_notes": [
+      "Use clinician-supervised interpretation if pairing with other endocrine therapies."
+    ],
+    "selection_priority": [
+      "goal_match",
+      "sex_variant_match",
+      "age_variant_match",
+      "symptom_pattern"
+    ],
+    "base_duration_weeks": 12
+  },
+  "_enrichmentVersion": "content_v1",
+  "_syncedAt": "2026-04-26T12:46:28.116Z",
+  "_enrichedAt": "2026-04-26T12:45:55Z",
+  "safety_profile": {
+    "drug_interactions": [
+      "Insulin: GH counterregulatory effect may impair glucose homeostasis - monitor in diabetics",
+      "Glucocorticoids: blunt GH secretagogue response - avoid concurrent use if possible",
+      "Thyroid hormones: hypothyroidism attenuates GH response - ensure euthyroid state at baseline",
+      "SSRIs: no significant interaction at standard doses"
+    ],
+    "monitoring_required": [
+      "IGF-1 at baseline, week 4, week 8, week 12 (target: upper-normal range, not supraphysiologic)",
+      "Fasting glucose and HbA1c at baseline and week 12",
+      "Body composition (DEXA or InBody) at baseline and week 12",
+      "PSQI sleep score at baseline, week 4, week 12",
+      "Blood pressure at each visit"
+    ],
+    "adverse_events_serious": [
+      "No serious adverse events in Phase I/II trials at standard doses",
+      "Theoretical IGF-1 excess risk at supraphysiologic doses - maintain IGF-1 within upper normal range",
+      "Contraindicated in active malignancy - IGF-1 is mitogenic; avoid in cancer history without oncology clearance"
+    ],
+    "adverse_events_common": [
+      "Transient water retention: 10-20% in first 4 weeks, resolves with adaptation",
+      "Mild tingling or numbness in extremities (carpal tunnel-like): 8-12%",
+      "Injection site reactions: 5-10% - mild, rotate sites",
+      "Increased hunger: 15-20% - expected from ghrelin-receptor activity of Ipamorelin"
+    ],
+    "common_side_effects": [
+      "Injection-site redness, itching, or mild swelling (SC injection, ~25–30% of users)",
+      "Water retention and mild peripheral edema, particularly in weeks 2–4 (~20%)",
+      "Transient tingling or paresthesia in extremities (carpal tunnel-like, ~15%)",
+      "Flushing or facial warmth post-injection (~12%)",
+      "Fatigue or somnolence 30–60 minutes after evening injection (~10%)",
+      "Mild headache during initial GH axis stimulation (~8%)",
+      "Increased appetite and food cravings, especially in evening (~15%)",
+      "Transient hypoglycemic-like symptoms (light-headedness, sweating) post-injection (~5%)"
+    ],
+    "contraindication_summary": "Absolute contraindications: active malignancy or history of hormone-sensitive cancer (GH axis stimulation may promote tumor proliferation); pituitary adenoma or active pituitary pathology; uncontrolled diabetes mellitus (GH raises insulin resistance — monitor fasting glucose and HbA1c); untreated severe obstructive sleep apnea (GH pulses worsen OSA); pregnancy or breastfeeding. Relative contraindications: pre-existing carpal tunnel syndrome (fluid retention may exacerbate); active thyroid dysfunction (correct before initiating); concomitant exogenous GH or IGF-1 therapy. Monitor IGF-1 levels at baseline, week 6, and week 12. Physician supervision mandatory throughout."
+  }
+}

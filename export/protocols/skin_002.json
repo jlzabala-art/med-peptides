@@ -1,0 +1,435 @@
+{
+  "protocol_id": "skin_002",
+  "active": true,
+  "complexity_level": "moderate",
+  "confidence_score": 90,
+  "economics": {
+    "total_protocol_cost_estimate": 420,
+    "total_vials_required": 7
+  },
+  "number_of_phases": 2,
+  "overview_summary": "10-week skin repair and cellular-aging protocol combining GHK-Cu dermal remodeling with a pulsed Epithalon support layer for advanced anti-aging skin objectives.",
+  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "protocol_author_organization": "ReGen PEPT",
+  "protocol_author_title": "Peptide Specialists",
+  "protocol_duration_weeks": 10,
+  "protocol_is_curated": true,
+  "protocol_is_physician_authored": false,
+  "protocol_last_reviewed_at": "2026-03-29",
+  "protocol_review_status": "approved",
+  "protocol_slug": "skin-repair-aging-10w",
+  "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
+  "protocol_source_reference": "internal_guide",
+  "protocol_source_type": "curated_library",
+  "protocol_source_version": "v5.0",
+  "protocol_author_notes": "Official curated protocol for general clinical use.",
+  "protocol_title": "GHK-Cu & Epithalon Cellular Repair Protocol",
+  "status": "approved",
+  "seeded_at": "2026-04-25T06:10:36.133Z",
+  "phases": [
+    {
+      "phase_number": 1,
+      "phase_title": "Remodeling",
+      "start_week": 1,
+      "end_week": 5,
+      "drugs_used": [
+        {
+          "product_slug": "ghk-cu",
+          "selected_strength": "50mg",
+          "route": "topical_or_subcutaneous",
+          "dosing_frequency": "daily",
+          "vials_required_for_phase": 2,
+          "faq_ref": "ghkcu_faq",
+          "pubmed_ref": "ghkcu_pubmed",
+          "productId": "GHK-Cu_(Copper_Peptide)-5mg-vial"
+        },
+        {
+          "product_slug": "epithalon",
+          "selected_strength": "10mg",
+          "dosing_frequency": "daily_evening",
+          "vials_required_for_phase": 3,
+          "faq_ref": "epithalon_faq",
+          "pubmed_ref": "epithalon_pubmed",
+          "productId": "Epithalon-10mg-vial"
+        }
+      ]
+    },
+    {
+      "phase_number": 2,
+      "phase_title": "Maintenance",
+      "start_week": 6,
+      "end_week": 10,
+      "drugs_used": [
+        {
+          "product_slug": "ghk-cu",
+          "selected_strength": "50mg",
+          "dosing_frequency": "3x_week",
+          "vials_required_for_phase": 2,
+          "productId": "GHK-Cu_(Copper_Peptide)-5mg-vial"
+        }
+      ]
+    }
+  ],
+  "bundleVersion": "2.0",
+  "protocol_version": "v6.1",
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "tempo_preference": "standard",
+      "age_group": null,
+      "patient_demographic": null,
+      "duration_weeks": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "legacy_compatibility": {
+    "enabled": true,
+    "notes": "Legacy simplified fields are preserved for backward compatibility while canonical phase_blueprints are used for generation.",
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ]
+  },
+  "risk_class": "low_to_moderate",
+  "physician_supervision_required": true,
+  "dosing_enrichment": {
+    "cycling_recommendation": "10-week skin repair and cellular aging cycle. Epithalon should remain pulsed rather than continuous; repeat cycles should be separated by at least 6-8 weeks.",
+    "maintenance_dose": "GHK-Cu 3x/week during maintenance. Epithalon is used as an evening pulse during the remodeling phase only unless a clinician extends the circadian-longevity component.",
+    "timing_optimization": "GHK-Cu is best used in the evening or separated from strong exfoliating actives. Epithalon is preferably administered in the evening to align with pineal/circadian biology.",
+    "titration_note": "Begin GHK-Cu daily during weeks 1-5 with Epithalon evening pulse. Weeks 6-10 continue GHK-Cu 3x/week; reassess before repeating Epithalon."
+  },
+  "monitoring_plan": {
+    "baseline_required": [
+      "standardized_photography",
+      "skin_texture_score",
+      "skin_elasticity_score",
+      "sleep_quality_if_epithalon_used",
+      "irritation_score"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "week": 5,
+        "type": "remodeling_review",
+        "measures": [
+          "photography",
+          "skin_texture_score",
+          "sleep_quality"
+        ],
+        "purpose": "Assess combined structural and cellular-aging response."
+      },
+      {
+        "week": 10,
+        "type": "maintenance_review",
+        "measures": [
+          "photography",
+          "skin_elasticity_score",
+          "patient_satisfaction_score"
+        ],
+        "purpose": "Document outcome and determine maintenance or washout."
+      }
+    ]
+  },
+  "eligibility_rules": {
+    "supported_goals": [
+      "skin_repair",
+      "skin_anti_aging",
+      "collagen_support",
+      "cellular_skin_longevity"
+    ],
+    "contraindications": [
+      "active_malignant_skin_lesion",
+      "pregnancy_or_breastfeeding",
+      "known_hypersensitivity_to_copper_peptides",
+      "active_infection_at_application_or_injection_site"
+    ],
+    "relative_cautions": [
+      "uncontrolled_autoimmune_skin_disease",
+      "recent_aggressive_resurfacing",
+      "sleep_disruption_sensitive_to_evening_peptides"
+    ],
+    "required_patient_inputs": [
+      "skin_type",
+      "primary_clinical_focus",
+      "recent_procedure_history",
+      "sensitivity_profile",
+      "start_date"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "phase_blueprints": [
+    {
+      "phase_key": "remodeling",
+      "phase_title": "Remodeling",
+      "default_start_week": 1,
+      "default_duration_weeks": 5,
+      "clinical_purpose": [],
+      "drugs": [
+        {
+          "product_id": "prd_ghk_cu",
+          "product_title": "Ghk Cu",
+          "route": "topical_or_subcutaneous",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "daily",
+            "selected_strength": "50mg"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_ghk_cu",
+            "route": "topical_or_subcutaneous"
+          }
+        },
+        {
+          "product_id": "prd_epithalon",
+          "product_title": "Epithalon",
+          "route": "protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "daily_evening",
+            "selected_strength": "10mg"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_epithalon",
+            "route": "protocol_defined"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 1,
+          "event_type": "phase_start",
+          "title": "Remodeling"
+        }
+      ]
+    },
+    {
+      "phase_key": "maintenance",
+      "phase_title": "Maintenance",
+      "default_start_week": 6,
+      "default_duration_weeks": 5,
+      "clinical_purpose": [],
+      "drugs": [
+        {
+          "product_id": "prd_ghk_cu",
+          "product_title": "Ghk Cu",
+          "route": "protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "3x_week",
+            "selected_strength": "50mg"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_ghk_cu",
+            "route": "protocol_defined"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 6,
+          "event_type": "phase_start",
+          "title": "Maintenance"
+        }
+      ]
+    }
+  ],
+  "expected_outcomes": {
+    "qualitative": [],
+    "quantitative_ranges": {},
+    "time_to_onset_weeks": null
+  },
+  "safety_profile": {
+    "adverse_events_common": [],
+    "adverse_events_serious": [],
+    "drug_interactions": [],
+    "monitoring_required": []
+  },
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 5,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "Fasting glucose",
+        "Insulin",
+        "HOMA-IR",
+        "Lipid panel"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 10,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "HbA1c",
+        "Full lipid panel",
+        "Body composition (DEXA or impedance)"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "riskManagement": {
+    "contraindications": [
+      "Type 1 diabetes (insulin-dependent, use with caution)",
+      "Severe renal impairment",
+      "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (10–30%)",
+        "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+      },
+      {
+        "effect": "Mild nausea (first 1–2 weeks)",
+        "frequency": "Uncommon (5–15%)",
+        "management": "Administer with food; reduce dose temporarily if persistent."
+      },
+      {
+        "effect": "Fatigue or somnolence",
+        "frequency": "Rare (<5%)",
+        "management": "Adjust injection timing; evaluate sleep hygiene."
+      },
+      {
+        "effect": "Headache",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Hydration; paracetamol as needed; review dosing."
+      }
+    ],
+    "escalation_criteria": [
+      "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+      "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+      "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+      "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ]
+  },
+  "category": "Skin & Aesthetics",
+  "generator_rules": {
+    "allow_acceleration": false,
+    "base_duration_weeks": 10,
+    "notes": "Default generator rules – pending clinical review.",
+    "tempo_variants": [
+      "standard"
+    ],
+    "allow_extension": false
+  },
+  "primary_goal": "Skin / Anti-Aging",
+  "_syncSource": "export/protocols/skin_002.json",
+  "metadata": {
+    "visibility": "public",
+    "primary_condition": "wound_healing_skin_repair",
+    "abbreviatedName": "SKIN-002 · Copper Peptide Cyclic – 8wk",
+    "version": "1.0",
+    "longDescription": "This protocol adds Epithalon (Ala-Glu-Asp-Gly) to the GHK-Cu backbone to create a dual-mechanism cellular skin repair strategy. GHK-Cu drives structural dermal matrix remodeling (collagen, elastin, glycosaminoglycans; see skin_001) while Epithalon acts at the epigenetic and telomeric level — stimulating telomerase in fibroblasts, reducing chromosomal instability, and modulating age-related changes in skin stem cell behaviour (Khavinson VKh et al., Bull Exp Biol Med 2003; Anisimov VN et al., Mech Ageing Dev 2003). Telomere shortening in dermal fibroblasts is a key driver of skin aging, leading to senescent fibroblast accumulation that impairs collagen synthesis and promotes MMP upregulation. Epithalon’s telomerase-activating and pineal-modulating effects complement GHK-Cu’s structural repair activity. Together, this protocol targets both the structural (ECM, collagen network) and biological (cellular senescence, telomere integrity) dimensions of skin aging. Suited for patients seeking comprehensive anti-aging skin therapy.",
+    "keywords": [
+      "GHK-Cu Epithalon skin protocol",
+      "telomere skin aging peptide",
+      "epigenetic skin repair",
+      "advanced anti-aging peptide",
+      "skin longevity protocol",
+      "fibroblast senescence peptide"
+    ],
+    "references": [
+      {
+        "pmid": "29990473",
+        "citation": "Pickart L, Margolina A. Regenerative Actions of GHK-Cu. Biomedicines 2018;6:77."
+      },
+      {
+        "pmid": "12833276",
+        "citation": "Khavinson VKh et al. Epithalon peptide induces telomerase activity. Bull Exp Biol Med 2003;135:590-592."
+      },
+      {
+        "pmid": "12706490",
+        "citation": "Anisimov VN et al. Effect of Epitalon on life-span extension. Mech Ageing Dev 2003;124:721-731."
+      }
+    ],
+    "scientificName": "GHK-Cu & Epithalon Collagen–Epigenetic Cellular Skin Repair Protocol",
+    "description": "12-week advanced skin repair protocol combining GHK-Cu collagen induction and antioxidant gene activation with Epithalon telomere protection and pineal anti-aging epigenetic bioregulation.",
+    "author": {
+      "name": "ReGen PEPT Clinical Team",
+      "organization": "ReGen PEPT",
+      "title": "Peptide Specialists"
+    },
+    "review": {
+      "last_reviewed_at": "2026-03-29",
+      "review_status": "approved"
+    },
+    "source_type": "curated_library",
+    "source_reference": "internal_guide",
+    "schema_version": "antigravity_v2",
+    "complexity_level": "moderate",
+    "shortCode": "SKIN-002",
+    "primary_goal": "Skin / Anti-Aging"
+  },
+  "_patchedAt": {
+    "schema_gap_fix": "2026-04-26T12:37:11Z"
+  },
+  "_schemaVersion": "antigravity_v2",
+  "_patchSchema": "antigravity_v2",
+  "variant_rules": {
+    "tempo": {
+      "standard": {
+        "notes": "Standard tempo – no adjustment.",
+        "phase_duration_multiplier": 1
+      },
+      "accelerated": {
+        "notes": "Accelerated tempo – physician review required.",
+        "phase_duration_multiplier": 0.75
+      },
+      "extended": {
+        "notes": "Extended tempo – for slower responders.",
+        "phase_duration_multiplier": 1.33
+      }
+    }
+  },
+  "_syncedAt": "2026-04-26T12:46:35.268Z"
+}

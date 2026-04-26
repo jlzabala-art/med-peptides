@@ -7,8 +7,14 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 500,
     rollupOptions: {
+      // firebase-admin is a server-only SDK — never bundle it in the frontend
+      external: [
+        'firebase-admin',
+        'firebase-admin/app',
+        'firebase-admin/firestore',
+        'firebase-admin/auth',
+      ],
       output: {
-        // Vite 8 (rolldown) requires manualChunks as a function
         manualChunks(id) {
           if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) {
             return 'vendor-react';
@@ -21,6 +27,15 @@ export default defineConfig({
           }
           if (id.includes('node_modules/lucide-react/')) {
             return 'vendor-icons';
+          }
+          if (id.includes('node_modules/jspdf') || id.includes('node_modules/jspdf-autotable')) {
+            return 'vendor-pdf';
+          }
+          if (id.includes('node_modules/html2canvas')) {
+            return 'vendor-canvas';
+          }
+          if (id.includes('node_modules/react-select') || id.includes('node_modules/@emotion/')) {
+            return 'vendor-select';
           }
         },
       },

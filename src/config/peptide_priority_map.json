@@ -1,0 +1,36 @@
+{
+  "recovery": [
+    "BPC-157",
+    "TB-500",
+    "KPV"
+  ],
+  "immune": [
+    "Thymosin Alpha-1",
+    "KPV"
+  ],
+  "growth_hormone": [
+    "CJC-1295",
+    "Ipamorelin",
+    "Tesamorelin",
+    "Sermorelin",
+    "IGF-1"
+  ],
+  "mitochondrial": [
+    "SS-31",
+    "MOTS-c"
+  ],
+  "cognitive": [
+    "Selank",
+    "Semax"
+  ],
+  "longevity": [
+    "Epitalon",
+    "MOTS-c"
+  ],
+  "aesthetic": [
+    "GHK-Cu"
+  ],
+  "libido": [
+    "PT-141"
+  ]
+}

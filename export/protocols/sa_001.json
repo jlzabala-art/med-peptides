@@ -1,0 +1,406 @@
+{
+  "protocol_id": "sa_001",
+  "protocol_version": "v6.1",
+  "bundleVersion": "2.0",
+  "active": true,
+  "uploadedAt": "2026-04-20T09:29:12.821Z",
+  "protocol_title": "Structured Skin & Aesthetics Protocol",
+  "phase_blueprints": [
+    {
+      "phase_key": "barrier_priming",
+      "phase_title": "Barrier Priming",
+      "default_duration_weeks": 4,
+      "drugs": [
+        {
+          "product_id": "prd_ghkcu",
+          "product_title": "GHK-Cu",
+          "route": "topical",
+          "dose_logic": {
+            "administration_frequency": "daily",
+            "intensity": "standard"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_ghkcu",
+            "route": "TOP"
+          }
+        }
+      ],
+      "default_start_week": 1,
+      "clinical_events": []
+    },
+    {
+      "phase_key": "remodeling",
+      "phase_title": "Active Remodeling",
+      "default_duration_weeks": 4,
+      "drugs": [
+        {
+          "product_id": "prd_ghkcu",
+          "product_title": "GHK-Cu",
+          "route": "topical",
+          "dose_logic": {
+            "administration_frequency": "daily",
+            "intensity": "standard_plus"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_ghkcu",
+            "route": "TOP"
+          }
+        },
+        {
+          "product_id": "prd_bpc157",
+          "product_title": "BPC-157",
+          "route": "localized_optional",
+          "dose_logic": {
+            "administration_frequency": "3x_week",
+            "intensity": "low_optional"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_bpc157",
+            "route": "SC"
+          }
+        }
+      ],
+      "default_start_week": 5,
+      "clinical_events": []
+    },
+    {
+      "phase_key": "consolidation",
+      "phase_title": "Consolidation & Maintenance",
+      "default_duration_weeks": 4,
+      "drugs": [
+        {
+          "product_id": "prd_ghkcu",
+          "product_title": "GHK-Cu",
+          "route": "topical",
+          "dose_logic": {
+            "administration_frequency": "5x_week",
+            "intensity": "maintenance"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_ghkcu",
+            "route": "TOP"
+          }
+        }
+      ],
+      "default_start_week": 9,
+      "clinical_events": []
+    }
+  ],
+  "protocol_slug": "skin-aesthetics-ghkcu-structured",
+  "monitoring_plan": {
+    "baseline_required": [
+      "standardized_photography",
+      "skin_barrier_score",
+      "erythema_irritation_score",
+      "skin_texture_score",
+      "procedure_history_review"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "week": 4,
+        "type": "barrier_review",
+        "measures": [
+          "skin_barrier_score",
+          "irritation_score",
+          "photography"
+        ],
+        "purpose": "Assess tolerance, irritation, and early barrier response."
+      },
+      {
+        "week": 8,
+        "type": "remodeling_review",
+        "measures": [
+          "skin_texture_score",
+          "elasticity_subjective_score",
+          "photography"
+        ],
+        "purpose": "Evaluate dermal remodeling response and need for optional localized support."
+      },
+      {
+        "week": 12,
+        "type": "final_review",
+        "measures": [
+          "photography",
+          "skin_texture_score",
+          "patient_satisfaction_score"
+        ],
+        "purpose": "Document aesthetic response and define maintenance frequency."
+      }
+    ]
+  },
+  "status": "approved",
+  "eligibility_rules": {
+    "supported_goals": [
+      "skin_rejuvenation",
+      "barrier_support",
+      "aesthetic_repair",
+      "post_procedure_support"
+    ],
+    "contraindications": [
+      "active_inflammatory_skin_disease_at_application_or_injection_site",
+      "systemic_retinoid_therapy",
+      "pregnancy_or_breastfeeding",
+      "known_hypersensitivity_to_copper_peptides",
+      "active_malignant_skin_lesion"
+    ],
+    "relative_cautions": [
+      "rosacea_flare",
+      "active_acne_flare",
+      "recent_laser_or_peel_without_clearance",
+      "copper_sensitivity"
+    ],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "skin_type",
+      "recent_procedures",
+      "sensitivity_profile",
+      "start_date"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "protocol_review_status": "approved",
+  "protocol_is_curated": true,
+  "protocol_is_physician_authored": false,
+  "protocol_source_type": "curated_library",
+  "protocol_source_version": "v5.0",
+  "protocol_last_reviewed_at": "2026-04-25",
+  "seeded_at": "2026-04-25T13:21:19Z",
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "tempo_preference": "standard",
+      "age_group": null,
+      "patient_demographic": null,
+      "duration_weeks": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "legacy_compatibility": {
+    "enabled": true,
+    "notes": "Legacy simplified fields are preserved for backward compatibility while canonical phase_blueprints are used for generation.",
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ]
+  },
+  "risk_class": "low_to_moderate",
+  "physician_supervision_required": false,
+  "overview_summary": "12-week skin and aesthetics protocol using staged GHK-Cu barrier priming, active remodeling, and maintenance, with optional localized BPC-157 support when tissue repair is clinically relevant.",
+  "dosing_enrichment": {
+    "cycling_recommendation": "12-week aesthetic skin cycle followed by reassessment. GHK-Cu topical maintenance may continue 3-5x/week if well tolerated; localized injectable support should remain cyclic and clinician-supervised.",
+    "maintenance_dose": "GHK-Cu topical: once daily during loading, then 3-5x/week maintenance. BPC-157 localized support, if used: low-dose SC/localized 3x/week for 4 weeks only when tissue repair or procedure recovery is the target.",
+    "timing_optimization": "Apply topical GHK-Cu in the evening after cleansing and before occlusive moisturizers. Avoid simultaneous use with strong acids or retinoids if irritation occurs. Localized BPC-157 should be separated from topical actives and rotated by site.",
+    "titration_note": "Begin with nightly GHK-Cu for 2 weeks. If tolerated, continue daily through week 8. Reduce to 5x/week in weeks 9-12. Introduce localized BPC-157 only if there is procedure-related repair need, barrier compromise, or delayed recovery."
+  },
+  "expected_outcomes": {
+    "qualitative": [],
+    "quantitative_ranges": {},
+    "time_to_onset_weeks": null
+  },
+  "safety_profile": {
+    "adverse_events_common": [],
+    "adverse_events_serious": [],
+    "drug_interactions": [],
+    "monitoring_required": []
+  },
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 4,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "Fasting glucose",
+        "Insulin",
+        "HOMA-IR",
+        "Lipid panel"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 8,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "HbA1c",
+        "Full lipid panel",
+        "Body composition (DEXA or impedance)"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "riskManagement": {
+    "contraindications": [
+      "Type 1 diabetes (insulin-dependent, use with caution)",
+      "Severe renal impairment",
+      "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (10–30%)",
+        "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+      },
+      {
+        "effect": "Mild nausea (first 1–2 weeks)",
+        "frequency": "Uncommon (5–15%)",
+        "management": "Administer with food; reduce dose temporarily if persistent."
+      },
+      {
+        "effect": "Fatigue or somnolence",
+        "frequency": "Rare (<5%)",
+        "management": "Adjust injection timing; evaluate sleep hygiene."
+      },
+      {
+        "effect": "Headache",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Hydration; paracetamol as needed; review dosing."
+      }
+    ],
+    "escalation_criteria": [
+      "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+      "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+      "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+      "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ]
+  },
+  "category": "Sexual Health & Anti-Aging",
+  "primary_goal": "Skin / Anti-Aging",
+  "_syncSource": "export/protocols/sa_001.json",
+  "metadata": {
+    "complexity_level": "standard",
+    "visibility": "public",
+    "short_description": "A skin and aesthetic regeneration protocol using GHK-Cu and Epithalon to stimulate collagen synthesis, improve dermal density, and support cellular repair in skin tissue.",
+    "scientificName": "GHK-Cu Copper Peptide ECM Remodeling & Optional BPC-157 Localized Tissue Support Protocol",
+    "primary_condition": "skin_aging_barrier_support_ecm_repair",
+    "abbreviatedName": "GHK-Cu + BPC-157 · ECM Repair",
+    "version": "1.0",
+    "author": {
+      "name": "ReGen PEPT Clinical Team",
+      "organization": "ReGen PEPT",
+      "title": "Peptide Specialists"
+    },
+    "review": {
+      "last_reviewed_at": "2026-04-25",
+      "review_status": "approved"
+    },
+    "source_type": "curated_library",
+    "source_reference": "internal_guide",
+    "schema_version": "antigravity_v2",
+    "longDescription": "This structured skin and aesthetics protocol centers on GHK-Cu, an endogenous copper-binding tripeptide involved in extracellular matrix remodeling, collagen synthesis, antioxidant defense, and wound repair. The protocol uses a staged approach: barrier priming, active dermal remodeling, and consolidation. Optional localized BPC-157 support may be used in the remodeling phase when tissue repair, post-procedure recovery, or localized barrier compromise is present. The protocol is designed to improve dermal quality, skin texture, elasticity, and recovery capacity without positioning optional injectable support as mandatory for all aesthetic users.",
+    "keywords": [
+      "GHK-Cu",
+      "copper peptide",
+      "skin barrier",
+      "ECM remodeling",
+      "collagen support",
+      "aesthetic peptide",
+      "BPC-157 skin repair",
+      "dermal regeneration"
+    ],
+    "references": [
+      {
+        "pmid": "29990473",
+        "citation": "Pickart L, Margolina A. Regenerative and Protective Actions of the GHK-Cu Peptide. Biomedicines 2018;6:77."
+      },
+      {
+        "pmid": "25984600",
+        "citation": "Pickart L et al. GHK Peptide as a Natural Modulator of Multiple Cellular Pathways. J Aging Sci 2015;3:132."
+      },
+      {
+        "pmid": "29998482",
+        "citation": "Sikiric P et al. Brain-gut Axis and Pentadecapeptide BPC 157. Curr Pharm Des 2018;24:1821-1832."
+      }
+    ],
+    "description": "12-week staged skin and aesthetics protocol using GHK-Cu for barrier support and dermal matrix remodeling, with optional localized BPC-157 for tissue repair support.",
+    "primary_goal": "Skin / Anti-Aging",
+    "shortCode": "SKN-001"
+  },
+  "generator_rules": {
+    "allow_acceleration": false,
+    "base_duration_weeks": null,
+    "notes": "Default generator rules – pending clinical review.",
+    "tempo_variants": [
+      "standard"
+    ],
+    "allow_extension": false
+  },
+  "economics": {
+    "total_protocol_cost_estimate": null,
+    "total_vials_required": null
+  },
+  "complexity_level": "standard",
+  "_patchedAt": {
+    "schema_gap_fix": "2026-04-26T12:37:11Z"
+  },
+  "confidence_score": 75,
+  "_schemaVersion": "antigravity_v2",
+  "_patchSchema": "antigravity_v2",
+  "variant_rules": {
+    "tempo": {
+      "standard": {
+        "notes": "Standard tempo – no adjustment.",
+        "phase_duration_multiplier": 1
+      },
+      "accelerated": {
+        "notes": "Accelerated tempo – physician review required.",
+        "phase_duration_multiplier": 0.75
+      },
+      "extended": {
+        "notes": "Extended tempo – for slower responders.",
+        "phase_duration_multiplier": 1.33
+      }
+    }
+  },
+  "number_of_phases": 3,
+  "_syncedAt": "2026-04-26T12:46:33.843Z"
+}

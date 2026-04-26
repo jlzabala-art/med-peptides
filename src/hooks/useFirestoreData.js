@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { getCatalog } from '../repositories/productRepository';
 import { buildProtocolIndex } from '../utils/searchEngine';
+import localProtocolIndex from '../data/protocol_search_index.json';
 
 const SESSION_KEY_FAQS      = 'rp_cache_faqs';
-const SESSION_KEY_MAPPINGS  = 'rp_cache_mappings';
-const SESSION_KEY_PROTOCOLS = 'rp_cache_protocols';
+const SESSION_KEY_PROTOCOLS = 'rp_cache_protocols_v2';
 
 /** Read from sessionStorage; returns null if missing / parse error. */
 function readCache(key) {
@@ -30,16 +30,15 @@ function writeCache(key, value) {
 /**
  * Loads all core read-only Firestore data once per browser session.
  * - Products: fetched via getCatalog() (includes variants subcollection).
- * - FAQs, Mappings, Protocol Templates: getDocs + sessionStorage cache
+ * - FAQs, Protocol Templates: getDocs + sessionStorage cache
  *   (these collections don't change mid-session; no real-time listener needed).
  *
- * @returns {{ products, setProducts, allFaqs, allMappings, protocolIndex, loadingProducts }}
+ * @returns {{ products, setProducts, allFaqs, protocolIndex, loadingProducts }}
  */
 export function useFirestoreData() {
   const [products, setProducts]           = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [allFaqs, setAllFaqs]             = useState([]);
-  const [allMappings, setAllMappings]     = useState([]);
   const [protocolIndex, setProtocolIndex] = useState([]);
 
   // ── Products: one-time fetch via repository (includes variants subcollection) ──
@@ -69,33 +68,33 @@ export function useFirestoreData() {
       .catch((err) => console.warn('[useFirestoreData] FAQs error:', err.code));
   }, []);
 
-  // ── FAQ ↔ Peptide Mappings (cached per session) ───────────────────────────
-  useEffect(() => {
-    const cached = readCache(SESSION_KEY_MAPPINGS);
-    if (cached) { setAllMappings(cached); return; }
 
-    getDocs(collection(db, 'faq_peptide_mapping'))
-      .then((snap) => {
-        const data = snap.docs.map((d) => d.data());
-        writeCache(SESSION_KEY_MAPPINGS, data);
-        setAllMappings(data);
-      })
-      .catch((err) => console.warn('[useFirestoreData] Mappings error:', err.code));
-  }, []);
 
-  // ── Protocol Templates (cached per session) ────────────────────────────────
+  // ── Protocol Index for Search ─────────────────────────────────────────────
+  // Uses the lightweight local index (protocol_search_index.json, ~7KB) as the
+  // primary source. This is pre-built from protocolBlueprintsV2.json and contains
+  // the clinically accurate protocol names. Firestore blueprints are loaded
+  // separately only when a full protocol detail is needed (protocolEngine.js).
   useEffect(() => {
+    if (localProtocolIndex && localProtocolIndex.length > 0) {
+      // Use static local index — fast, no network request, always up-to-date names
+      setProtocolIndex(localProtocolIndex);
+      return;
+    }
+
+    // Fallback: fetch from Firestore and build index dynamically
     const cached = readCache(SESSION_KEY_PROTOCOLS);
     if (cached) { setProtocolIndex(buildProtocolIndex(cached)); return; }
 
-    getDocs(collection(db, 'protocol_templates'))
+    const q = query(collection(db, 'protocols'), where('active', '==', true));
+    getDocs(q)
       .then((snap) => {
         const templates = snap.docs.map((d) => ({ ...d.data(), id: d.id }));
         writeCache(SESSION_KEY_PROTOCOLS, templates);
         setProtocolIndex(buildProtocolIndex(templates));
       })
-      .catch((err) => console.warn('[useFirestoreData] Protocols error:', err.code));
+      .catch((err) => console.warn('[useFirestoreData] Protocols fallback error:', err.code));
   }, []);
 
-  return { products, setProducts, allFaqs, allMappings, protocolIndex, loadingProducts };
+  return { products, setProducts, allFaqs, protocolIndex, loadingProducts };
 }

@@ -9,6 +9,13 @@
           "med-peptides-app-27a3a"
         ]
       }
+    },
+    "regenpept-web-app": {
+      "hosting": {
+        "production": [
+          "regenpept-web-app"
+        ]
+      }
     }
   },
   "etags": {}

@@ -1,6 +1,8 @@
 import { getPubMedLiterature } from './pubmedService';
 import { protocolRepository } from '../repositories/protocolRepository';
 import { runClinicalValidation } from './validationEngine';
+import { resolveVariantPrice } from '../utils/resolvePrice';
+import { PRICING_TIER } from '../constants/productEnums';
 
 // Extracted from ProtocolBuilder.jsx
 export const GOAL_MAPPING = {
@@ -104,7 +106,6 @@ export const calculateClinicalCost = (blueprint, products) => {
   
   let totalWeeks = 0;
   blueprint.phases.forEach(phase => {
-    // Phase Duration Fallback
     const phaseDur = phase.phase_duration_weeks || phase.weeks || 
                     (phase.end_week - phase.start_week + 1) || 
                     (blueprint.protocol_duration_weeks ? Math.floor(blueprint.protocol_duration_weeks / (blueprint.phases.length || 1)) : 4);
@@ -114,13 +115,16 @@ export const calculateClinicalCost = (blueprint, products) => {
     meds.forEach(med => {
       const name = med.name || med.product_slug;
       const productMatch = products.find(p => p.name.toLowerCase().includes(name.toLowerCase()));
-      const pricePerVial = productMatch?.perVialPriceUSD || 50;
-      const kitPrice = productMatch?.kitPriceUSD;
+      // Resolve price from Firestore — no hardcoded fallback.
+      const variant = productMatch?.defaultVariant ?? productMatch?.variants?.[0];
+      const { perUnit: pricePerVial, kit: kitPrice } = variant
+        ? resolveVariantPrice(variant, { tier: PRICING_TIER.RETAIL })
+        : { perUnit: null, kit: null };
+      if (!pricePerVial) return;
       const mgPerVialActual = productMatch ? parseDosage(productMatch.dosage) : 5;
       const weeklyDose = parseFloat(med.weeklyDose || med.weekly_dose || 0);
       const calcInfo = calculateVialsNeeded(weeklyDose, phaseDur, mgPerVialActual);
       
-      // Kit Pricing Logic
       if (kitPrice && calcInfo.vialsRequired >= 10) {
         const kits = Math.floor(calcInfo.vialsRequired / 10);
         const singles = calcInfo.vialsRequired % 10;
@@ -193,7 +197,12 @@ const adaptTemplateForUI = (t, startDateStr = null, products = []) => {
         prod.id === d.product_id
       );
 
-      const drugCost = (d.vials_required_for_phase || 0) * (match?.perVialPriceUSD || 50);
+      // Resolve price from Firestore variant — no hardcoded fallback.
+      const drugVariant = match?.defaultVariant ?? match?.variants?.[0];
+      const { perUnit: drugPricePerVial = 0 } = drugVariant
+        ? resolveVariantPrice(drugVariant, { tier: PRICING_TIER.RETAIL })
+        : {};
+      const drugCost = (d.vials_required_for_phase || 0) * drugPricePerVial;
       phaseBreakdown.cost += drugCost;
       phaseBreakdown.vials.push({
         name,
@@ -303,15 +312,18 @@ const adaptTemplateForUI = (t, startDateStr = null, products = []) => {
           if (matches.length > 0) {
              const sortedMatches = matches.map(m => {
                const mg = parseDosage(m.dosage || m.name);
-               const price = m.perVialPriceUSD || 50;
-               return { ...m, parsedMg: mg, parsedPrice: price, kitPriceUSD: m.kitPriceUSD };
+               const mVariant = m.defaultVariant ?? m.variants?.[0];
+               const { perUnit: mPrice = 0, kit: mKitPrice = null } = mVariant
+                 ? resolveVariantPrice(mVariant, { tier: PRICING_TIER.RETAIL })
+                 : {};
+               return { ...m, parsedMg: mg, parsedPrice: mPrice, resolvedKitPrice: mKitPrice };
              }).sort((a, b) => b.parsedMg - a.parsedMg);
              
              const bestMatch = sortedMatches[0];
              if (bestMatch && bestMatch.parsedMg > 0) {
                  mgPerVialActual = bestMatch.parsedMg;
-                 pricePerVial = bestMatch.parsedPrice || 50;
-                 kitPrice = bestMatch.kitPriceUSD || null;
+                 pricePerVial = bestMatch.parsedPrice || 0;
+                 kitPrice = bestMatch.resolvedKitPrice || null;
              }
           }
       }

@@ -6,7 +6,7 @@ import ProductDetail from './ProductDetail';
  * ProductTemplate serves as the route-level data provider for the Product Detail Page.
  * URL Pattern: /product/:slug
  */
-export default function ProductTemplate({ region, isProfessional, isAdmin, cart, onAddToCart, products, allFaqs, allMappings }) {
+export default function ProductTemplate({ region, isProfessional, isAdmin, cart, onAddToCart, products, allFaqs }) {
   const { slug } = useParams();
   const navigate = useNavigate();
   
@@ -67,7 +67,6 @@ export default function ProductTemplate({ region, isProfessional, isAdmin, cart,
       }}
       onSelectObjective={(obj) => navigate(`/protocol/${obj.toLowerCase().replace(/ /g, '-')}`)}
       allFaqs={allFaqs}
-      allMappings={allMappings}
     />
   );
 }

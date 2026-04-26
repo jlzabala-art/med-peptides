@@ -1,133 +1,156 @@
-import { Layers, Search, FileText, FileBarChart, PiggyBank } from 'lucide-react';
+import React from 'react';
+import { Layers, Search, FileText, FileBarChart, PiggyBank, ArrowRight } from 'lucide-react';
 
 const capabilities = [
-  { title: 'Protocol Builder', icon: <Layers size={22} />, desc: 'AI-assisted logic generation for experimental scheduling.' },
-  { title: 'Batch Tracking', icon: <Search size={22} />, desc: 'End-to-end visibility of synthesis and QA lifecycle.' },
-  { title: 'Documentation', icon: <FileText size={22} />, desc: 'Immediate access to SDS, safety, and regulatory compliance.' },
-  { title: 'Analytical Reports', icon: <FileBarChart size={22} />, desc: 'HPLC & MS purity verification linked to every vial.' },
-  { title: 'Institutional Tier', icon: <PiggyBank size={22} />, desc: 'Automated scaled pricing for verified research facilities.' },
+  {
+    title: 'Protocol Builder',
+    icon: Layers,
+    desc: 'AI-assisted logic generation for experimental scheduling and multi-phase titration.',
+    tag: 'AI-Powered',
+    tagColor: '#6366f1',
+    tagBg: '#eef2ff',
+  },
+  {
+    title: 'Batch Tracking',
+    icon: Search,
+    desc: 'End-to-end visibility of synthesis and QA lifecycle from origin to vial.',
+    tag: 'Real-Time',
+    tagColor: '#0ea5e9',
+    tagBg: '#f0f9ff',
+  },
+  {
+    title: 'Documentation',
+    icon: FileText,
+    desc: 'Immediate access to SDS, safety data sheets, and regulatory compliance files.',
+    tag: 'Compliant',
+    tagColor: '#10b981',
+    tagBg: '#f0fdf4',
+  },
+  {
+    title: 'Analytical Reports',
+    icon: FileBarChart,
+    desc: 'HPLC & MS purity verification certificates linked to every individual vial.',
+    tag: 'Traceable',
+    tagColor: '#f59e0b',
+    tagBg: '#fffbeb',
+  },
+  {
+    title: 'Institutional Tier',
+    icon: PiggyBank,
+    desc: 'Automated scaled pricing for verified research facilities and procurement teams.',
+    tag: 'Volume Pricing',
+    tagColor: '#ec4899',
+    tagBg: '#fdf2f8',
+  },
 ];
 
 export default function PlatformCapabilities() {
   return (
-    <section className="section" style={{ backgroundColor: 'white', padding: 'clamp(3rem, 7vw, 6rem) 0' }}>
+    <section
+      style={{
+        backgroundColor: '#f8fafc',
+        padding: 'clamp(4rem, 8vw, 7rem) 0',
+        borderTop: '1px solid #e2e8f0',
+      }}
+    >
       <div className="container">
-        <div style={{ textAlign: 'center', marginBottom: 'clamp(2.5rem, 5vw, 4rem)', padding: '0 1rem' }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 'clamp(2.5rem, 5vw, 4.5rem)', padding: '0 1rem' }}>
           <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            color: '#00A3E0',
-            fontWeight: 800,
-            textTransform: 'uppercase',
-            letterSpacing: '0.2em',
-            fontSize: '0.7rem',
-            marginBottom: '0.75rem'
+            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+            color: '#00A3E0', fontWeight: 800, textTransform: 'uppercase',
+            letterSpacing: '0.2em', fontSize: '0.7rem', marginBottom: '1rem',
           }}>
             What We Offer
           </div>
-          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: '#0f172a', marginBottom: '1rem', fontWeight: 800, letterSpacing: '-0.03em' }}>
+          <h2 style={{
+            fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#0f172a',
+            fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '1rem',
+          }}>
             Platform Capabilities
           </h2>
-          <p style={{ color: '#64748b', fontSize: '1rem', maxWidth: '640px', margin: '0 auto', lineHeight: 1.6 }}>
-            Designed for clinical researchers and institutional buyers requiring absolute precision and traceability.
+          <p style={{ color: '#64748b', fontSize: '1.05rem', maxWidth: '560px', margin: '0 auto', lineHeight: 1.7 }}>
+            Built for clinical researchers and institutional buyers requiring absolute precision.
           </p>
         </div>
 
-        <style dangerouslySetInnerHTML={{
-          __html: `
-          .capabilities-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            padding: 0 1rem;
-          }
-          .capabilities-card {
-            padding: 2rem;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          }
-          .cap-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: rgba(0,163,224,0.08);
-            color: #00A3E0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-          }
-          
-          /* Desktop Hover */
-          @media (min-width: 1024px) {
-            .capabilities-card:hover {
-              border-color: #00A3E0;
-              background: white;
-              box-shadow: 0 20px 40px rgba(0,163,224,0.08);
-              transform: translateY(-5px);
-            }
-          }
-
-          @media (max-width: 1023px) {
-            .capabilities-grid { grid-template-columns: repeat(2, 1fr); }
-          }
-
-          /* MOBILE OPTIMIZATION */
-          @media (max-width: 640px) {
-            .capabilities-grid { 
-              grid-template-columns: 1fr; 
-              gap: 0.75rem; 
-            }
-            .capabilities-card { 
-              flex-direction: row; /* Cambio a horizontal */
-              align-items: center;
-              padding: 1.25rem;
-              gap: 1.25rem;
-              border-radius: 16px;
-            }
-            .cap-icon {
-              width: 42px;
-              height: 42px;
-              background: white; /* Contraste limpio en móvil */
-              border: 1px solid #e2e8f0;
-            }
-            .capabilities-card h3 {
-              font-size: 1rem !important;
-              margin-bottom: 0.15rem !important;
-            }
-            .capabilities-card p {
-              font-size: 0.85rem !important;
-              line-height: 1.4 !important;
-            }
-            .capabilities-card:active {
-              background: #f1f5f9;
-              transform: scale(0.98);
-            }
-          }
-        `}} />
-
-        <div className="capabilities-grid">
+        {/* Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '1.5rem',
+          padding: '0 1rem',
+        }}>
           {capabilities.map((cap, i) => (
-            <div key={i} className="capabilities-card">
-              <div className="cap-icon">{cap.icon}</div>
-              <div>
-                <h3 style={{ fontSize: '1.1rem', color: '#0f172a', fontWeight: 700, margin: '0 0 0.4rem 0' }}>
-                  {cap.title}
-                </h3>
-                <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0, lineHeight: 1.55 }}>
-                  {cap.desc}
-                </p>
-              </div>
-            </div>
+            <CapCard key={i} cap={cap} />
           ))}
         </div>
       </div>
     </section>
+  );
+}
+
+function CapCard({ cap }) {
+  const Icon = cap.icon;
+  const [hovered, setHovered] = React.useState(false);
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        backgroundColor: 'white',
+        border: '1px solid ' + (hovered ? '#00A3E0' : '#e2e8f0'),
+        borderRadius: '20px',
+        padding: '1.75rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1.25rem',
+        transition: 'all 0.25s ease',
+        transform: hovered ? 'translateY(-4px)' : 'translateY(0)',
+        boxShadow: hovered ? '0 20px 40px rgba(0,163,224,0.09)' : '0 1px 3px rgba(0,0,0,0.04)',
+        cursor: 'default',
+      }}
+    >
+      {/* Icon + Tag row */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div style={{
+          width: 48, height: 48, borderRadius: '14px',
+          backgroundColor: hovered ? '#e0f4fd' : '#f1f9fe',
+          color: '#00A3E0',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'background 0.25s',
+          flexShrink: 0,
+        }}>
+          <Icon size={22} strokeWidth={1.8} />
+        </div>
+        <span style={{
+          fontSize: '0.68rem', fontWeight: 700, color: cap.tagColor,
+          backgroundColor: cap.tagBg, padding: '3px 10px', borderRadius: '20px',
+          letterSpacing: '0.04em', textTransform: 'uppercase',
+        }}>
+          {cap.tag}
+        </span>
+      </div>
+
+      {/* Text */}
+      <div>
+        <h3 style={{ fontSize: '1.05rem', color: '#0f172a', fontWeight: 800, margin: '0 0 0.4rem 0' }}>
+          {cap.title}
+        </h3>
+        <p style={{ color: '#64748b', fontSize: '0.88rem', margin: 0, lineHeight: 1.65 }}>
+          {cap.desc}
+        </p>
+      </div>
+
+      {/* Learn more hint */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '0.4rem',
+        fontSize: '0.8rem', fontWeight: 700, color: hovered ? '#00A3E0' : '#cbd5e1',
+        transition: 'color 0.25s', marginTop: 'auto',
+      }}>
+        Learn more <ArrowRight size={14} />
+      </div>
+    </div>
   );
 }

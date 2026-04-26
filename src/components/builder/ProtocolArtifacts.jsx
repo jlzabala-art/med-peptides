@@ -211,7 +211,7 @@ export const PhysicianMonitoringChecklist = ({ data }) => {
                 <tr key={i} style={{ borderTop: '1px solid #e2e8f0' }}>
                   <td style={{ padding: '1.25rem', fontSize: '0.85rem', fontWeight: 700 }}>{m.week === 0 ? 'Baseline' : `Week ${m.week}`}</td>
                   <td style={{ padding: '1.25rem', fontSize: '0.85rem', fontWeight: 800 }}>Follow-up Check</td>
-                  <td style={{ padding: '1.25rem', fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>{m.labs.join(', ')}</td>
+                  <td style={{ padding: '1.25rem', fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>{(m.labs || []).join(', ')}</td>
                 </tr>
               ))
             ) : (
@@ -311,7 +311,7 @@ export const generateTimelineEvents = (data) => {
     events.push({
       title: `Clinical Monitoring: Week ${mon.week}`,
       date: eventDate.toISOString().split('T')[0],
-      desc: mon.labs.join(', '),
+      desc: (mon.labs || []).join(', '),
       category: 'Monitoring',
       week: mon.week
     });

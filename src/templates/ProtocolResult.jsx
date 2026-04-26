@@ -22,7 +22,7 @@ import {
 import { getProtocolById } from '../services/protocolStorage';
 import CostBreakdown from '../components/CostBreakdown';
 
-export default function ProtocolResult({ products, region, isProfessional, updateCart, onOpenCart }) {
+export default function ProtocolResult({ products, region, isProfessional, addProtocolRequest, onOpenCart }) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const protocolId = searchParams.get('id');
@@ -63,44 +63,30 @@ export default function ProtocolResult({ products, region, isProfessional, updat
   };
 
   const handleRequestProtocol = () => {
-    if (!protocol || !protocol.costCache || !protocol.costCache.breakdown) {
-      alert("Protocol data is incomplete. Please regenerate.");
-      return;
-    }
-
+    if (!protocol) return;
     setIsAddingToCart(true);
 
-    const metadata = {
-      protocolRequest: true,
-      protocolId: protocolId,
-      protocolGoal: protocol.formData?.goal || 'Custom Protocol',
-      generatedAt: protocol.createdAt || new Date()
-    };
+    // Read directly from the Firestore document fields — always available on load
+    const name = protocol.protocol_name || protocol.formData?.goal || 'Custom Protocol';
+    const productList = Array.isArray(protocol.products)
+      ? protocol.products.map(p => p.name || p).filter(Boolean)
+      : [];
+    const estimatedCost = protocol.cost_summary?.totalEstimatedCost
+      || protocol.cost_summary?.total
+      || 0;
+    const phaseCount = Array.isArray(protocol.phases) ? protocol.phases.length : 0;
 
-    let allAdded = true;
-    protocol.costCache.breakdown.forEach(item => {
-      if (item.vials && item.vials > 0) {
-        // find product to get correct dosage/name if needed, 
-        // but breakdown items usually have the right name/dosage
-        updateCart(
-          { name: item.name, dosage: item.dosage }, 
-          item.vials, 
-          metadata
-        );
-      } else {
-        allAdded = false;
-      }
+    addProtocolRequest({
+      id: protocolId,
+      name,
+      goal: protocol.patient_inputs?.primary_focus || protocol.formData?.goal || '',
+      phases: phaseCount,
+      products: productList,
+      estimatedCost,
     });
 
     setIsAddingToCart(false);
-
-    if (allAdded) {
-      if (window.confirm("Protocol items have been added to your research inquiry. Would you like to proceed to checkout?")) {
-        if (onOpenCart) onOpenCart();
-      }
-    } else {
-      alert("Some items could not be added automatically. Please check the economic audit.");
-    }
+    if (onOpenCart) onOpenCart();
   };
 
   if (loading) {
@@ -135,8 +121,15 @@ export default function ProtocolResult({ products, region, isProfessional, updat
   const validationStatus = data.status || 'pending';
   
   // Extract critical V4 caches
-  const timelineCache = Array.isArray(data.timelineCache) ? data.timelineCache : [];
-  const costCache = data.costCache || {};
+  // NOTE: protocolEngine.js outputs field as `timeline` (not `timelineCache`).
+  // Support both keys so protocols from live generation AND Firestore saved protocols work.
+  const timelineCache = Array.isArray(data.timelineCache)
+    ? data.timelineCache
+    : Array.isArray(data.timeline)
+      ? data.timeline
+      : [];
+  // protocolEngine returns `costData`; older saved protocols may use `costCache`
+  const costCache = data.costCache || data.costData || {};
   const patientGuide = data.patientGuide || null;
   const evidenceCache = data.evidenceCache || {};
 
@@ -394,10 +387,11 @@ export default function ProtocolResult({ products, region, isProfessional, updat
                           </h4>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.75rem' }}>
                             {(phase.items || []).map((item, i) => {
+                               const phaseItems = phase.items || [];
                                const catalogProduct = products ? products.find(p => p.name === item.name) : null;
                                const dosageToDisplay = item.dosage || catalogProduct?.strength || 'Administer as scheduled';
                                return (
-                                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: i !== (phase.items.length - 1) ? '0.5rem' : 0, borderBottom: i !== (phase.items.length - 1) ? '1px solid #f1f5f9' : 'none' }}>
+                                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: i !== (phaseItems.length - 1) ? '0.5rem' : 0, borderBottom: i !== (phaseItems.length - 1) ? '1px solid #f1f5f9' : 'none' }}>
                                    <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>{item.name}</strong>
                                    <span style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 700, backgroundColor: '#f0f9ff', padding: '0.2rem 0.6rem', borderRadius: '4px' }}>
                                      {dosageToDisplay}

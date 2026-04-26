@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { collection, query, getDocs, doc, updateDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, getDocs, doc, updateDoc, setDoc, deleteDoc, addDoc, serverTimestamp, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
-import { ShieldCheck, XCircle, CheckCircle2, Copy, Send, Mail, Search, Filter, Download, Upload, Trash2, Eye, EyeOff, ArrowUpRight, Percent, Settings, Globe, Truck, AlertTriangle, UserPlus, Info, Layers, ArrowLeft, FlaskConical, HardDrive, BookOpen } from 'lucide-react';
+import { ShieldCheck, XCircle, CheckCircle2, Copy, Send, Mail, Search, Filter, Download, Upload, Trash2, Eye, EyeOff, ArrowUpRight, Percent, Settings, Globe, Truck, AlertTriangle, UserPlus, Info, Layers, ArrowLeft, FlaskConical, HardDrive, BookOpen, MailPlus, Clock, CheckCheck, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import emailjs from '@emailjs/browser';
 import { getApprovalEmailHtml } from '../data/emailTemplate';
-import { products as staticProducts } from '../data/products';
+
 import AdminVariantsTab from '../components/admin/AdminVariantsTab';
 import AdminProtocolsTab from '../components/admin/AdminProtocolsTab';
 import AdminBlueprintsTab from '../components/admin/AdminBlueprintsTab';
@@ -37,6 +37,9 @@ export default function AdminDashboard({ onBack }) {
   const [costCurrency, setCostCurrency] = useState('usd');
   const [semanticSyncing, setSemanticSyncing] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [invitations, setInvitations] = useState([]);
+  const [inviteForm, setInviteForm] = useState({ name: '', email: '', message: '' });
+  const [sendingInvite, setSendingInvite] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
@@ -63,6 +66,7 @@ export default function AdminDashboard({ onBack }) {
     if (activeTab === 'users') fetchUsers();
     if (activeTab === 'products') fetchProducts();
     if (activeTab === 'settings') fetchSettings();
+    if (activeTab === 'invitations') fetchInvitations();
   }, [isAdmin, activeTab]);
 
   const fetchSettings = async () => {
@@ -131,87 +135,15 @@ export default function AdminDashboard({ onBack }) {
   };
 
   const handleMigrate = async () => {
-    if (!window.confirm("This will populate Firestore with static products and default prices. Continue?")) return;
-    setMigrating(true);
-    try {
-      for (const p of staticProducts) {
-        const productId = `${p.name}-${p.dosage}`.replace(/\//g, '-').replace(/\s+/g, '_');
-        const productRef = doc(db, 'products', productId);
-        
-        await setDoc(productRef, {
-          ...p,
-          sku: productId.substring(0, 8).toUpperCase(),
-          guestVialPrice: p.perVialPriceUSD,
-          guestKitPrice: p.kitPriceUSD,
-          proVialPrice: (p.perVialPriceUSD * 0.85).toFixed(2),
-          proKitPrice: (p.kitPriceUSD * 0.85).toFixed(2),
-          stock: 100,
-          warehouse: 'Poland',
-          supplier: 'Regpept',
-          costPrice: 0,
-          isActive: true,
-          goals: p.goals || [],
-          secondaryFactors: p.secondaryFactors || [],
-          tags: p.tags || [],
-          mechanisms: p.mechanisms || [],
-          semanticKeywords: p.semanticKeywords || [],
-          synonyms: p.synonyms || [],
-          objective: p.objective || '',
-          updatedAt: new Date().toISOString()
-        }, { merge: true });
-      }
-      alert("Migration complete!");
-      fetchProducts();
-    } catch (err) {
-      console.error("Migration error:", err);
-      alert("Error migrating products.");
-    } finally {
-      setMigrating(false);
-    }
+    alert("Migration already completed. Products live in Firestore.");
   };
 
   const handleSemanticSync = async () => {
-    if (!window.confirm("This will update all products in Firestore with the latest semantic metadata (goals, tags, synonyms, etc.) from products.js. Continue?")) return;
+    if (!window.confirm("This will refresh all products from Firestore. Continue?")) return;
     setSemanticSyncing(true);
-    let successCount = 0;
     try {
-      for (const p of staticProducts) {
-        const productId = `${p.name}-${p.dosage}`.replace(/\//g, '-').replace(/\s+/g, '_');
-        const productRef = doc(db, 'products', productId);
-        
-        // Only update semantic fields to avoid overwriting price/stock changes in DB
-        await updateDoc(productRef, {
-          goals: p.goals || [],
-          secondaryFactors: p.secondaryFactors || [],
-          tags: p.tags || [],
-          mechanisms: p.mechanisms || [],
-          semanticKeywords: p.semanticKeywords || [],
-          synonyms: p.synonyms || [],
-          objective: p.objective || '',
-          updatedAt: new Date().toISOString()
-        }).catch(async (err) => {
-          // If document doesn't exist, create it (fallback)
-          if (err.code === 'not-found') {
-            await setDoc(productRef, {
-              ...p,
-              sku: productId.substring(0, 8).toUpperCase(),
-              guestVialPrice: p.perVialPriceUSD,
-              guestKitPrice: p.kitPriceUSD,
-              proVialPrice: (p.perVialPriceUSD * 0.85).toFixed(2),
-              proKitPrice: (p.kitPriceUSD * 0.85).toFixed(2),
-              stock: 100,
-              warehouse: 'Poland',
-              isActive: true,
-              updatedAt: new Date().toISOString()
-            });
-          } else {
-            throw err;
-          }
-        });
-        successCount++;
-      }
-      alert(`Semantic sync complete! ${successCount} products updated.`);
-      fetchProducts();
+      await fetchProducts();
+      alert(`Semantic sync complete! ${products.length} products refreshed from Firestore.`);
     } catch (err) {
       console.error("Semantic sync error:", err);
       alert("Error syncing semantic data. Check console for details.");
@@ -470,6 +402,79 @@ export default function AdminDashboard({ onBack }) {
     }
   };
 
+  // ─── INVITATIONS ─────────────────────────────────────────────────────────
+  const INVITE_TEMPLATE_ID = 'template_invite'; // replace with your EmailJS invite template ID
+
+  const fetchInvitations = async () => {
+    try {
+      setLoading(true);
+      const q = query(collection(db, 'invitations'), orderBy('invitedAt', 'desc'));
+      const snap = await getDocs(q);
+      setInvitations(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    } catch (err) {
+      console.error('Error fetching invitations:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendInvitation = async () => {
+    const { name, email, message } = inviteForm;
+    if (!name.trim() || !email.trim()) {
+      alert('Por favor introduce nombre y email.');
+      return;
+    }
+    if (!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID) {
+      alert('Configuración de EmailJS pendiente.');
+      return;
+    }
+    setSendingInvite(true);
+    try {
+      // 1. Save to Firestore first
+      const docRef = await addDoc(collection(db, 'invitations'), {
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        message: message.trim(),
+        status: 'sent',
+        invitedAt: serverTimestamp(),
+        acceptedAt: null
+      });
+
+      // 2. Send email via EmailJS
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        INVITE_TEMPLATE_ID,
+        {
+          to_name: name.trim(),
+          to_email: email.trim().toLowerCase(),
+          custom_message: message.trim() || 'You have been invited to join the ReGen PEPT professional platform.',
+          invite_link: `https://med-peptides-app-27a3a.web.app/?ref=invite&id=${docRef.id}`,
+          reply_to: 'business@med-peptides.com'
+        },
+        EMAILJS_PUBLIC_KEY
+      );
+
+      setInviteForm({ name: '', email: '', message: '' });
+      await fetchInvitations();
+      alert(`✅ Invitación enviada a ${email}`);
+    } catch (err) {
+      console.error('Invitation error:', err);
+      alert('Error al enviar la invitación. Revisa la consola.');
+    } finally {
+      setSendingInvite(false);
+    }
+  };
+
+  const handleDeleteInvitation = async (id) => {
+    if (!window.confirm('¿Eliminar este registro de invitación?')) return;
+    try {
+      await deleteDoc(doc(db, 'invitations', id));
+      setInvitations(prev => prev.filter(i => i.id !== id));
+    } catch (err) {
+      console.error('Delete invitation error:', err);
+    }
+  };
+
   const handleSendEmail = async (user) => {
     if (!EMAILJS_PUBLIC_KEY || !EMAILJS_TEMPLATE_ID || !EMAILJS_SERVICE_ID) {
       alert("Configuración de EmailJS pendiente. Por favor, introduce tus claves en el código.");
@@ -671,6 +676,7 @@ export default function AdminDashboard({ onBack }) {
               <nav style={{ display: 'flex', gap: '0.25rem' }}>
                 {[
                   { id: 'users', label: 'Users', icon: ShieldCheck },
+                  { id: 'invitations', label: 'Invitations', icon: MailPlus },
                   { id: 'products', label: 'Products', icon: ArrowUpRight },
                   { id: 'costs', label: 'Costs', icon: ArrowUpRight },
                   { id: 'prices', label: 'Prices', icon: Globe },
@@ -680,7 +686,6 @@ export default function AdminDashboard({ onBack }) {
                   { id: 'data-tools', label: 'Data Tools', icon: HardDrive },
                   { id: 'variants', label: 'Variants', icon: Layers },
                   { id: 'protocols', label: 'Protocols', icon: FlaskConical },
-                  { id: 'blueprints', label: 'Blueprints', icon: BookOpen },
                   { id: 'settings', label: 'Settings', icon: Settings }
                 ].map(tab => (
                   <button 
@@ -790,7 +795,7 @@ export default function AdminDashboard({ onBack }) {
                   }}
                 >
                   <option value="All">All Categories</option>
-                  {[...new Set(staticProducts.map(p => p.category))].map(cat => (
+                  {[...new Set(products.map(p => p.category))].map(cat => (
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>
@@ -847,7 +852,7 @@ export default function AdminDashboard({ onBack }) {
                       style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--border)' }}
                     >
                       <option value="All">All Categories</option>
-                      {[...new Set(staticProducts.map(p => p.category))].map(cat => (
+                      {[...new Set(products.map(p => p.category))].map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
                       ))}
                     </select>
@@ -1391,7 +1396,7 @@ export default function AdminDashboard({ onBack }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {staticProducts.map(p => (
+                  {products.map(p => (
                     <tr key={p.name + p.dosage} style={{ borderBottom: '1px solid var(--border)' }}>
                       <td style={{ padding: '1rem' }}>
                         <div style={{ fontWeight: 700 }}>{p.name}</div>
@@ -1432,9 +1437,7 @@ export default function AdminDashboard({ onBack }) {
 
         {activeTab === 'variants' && <AdminVariantsTab />}
 
-        {activeTab === 'protocols' && <AdminProtocolsTab />}
-
-        {activeTab === 'blueprints' && <AdminBlueprintsTab />}
+        {activeTab === 'protocols' && <><AdminProtocolsTab /><AdminBlueprintsTab /></>}
 
         {activeTab === 'settings' && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem', marginBottom: '4rem' }}>
@@ -1553,6 +1556,137 @@ export default function AdminDashboard({ onBack }) {
               >
                 <Trash2 size={16} /> Clear App Cache &amp; Reload
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── INVITATIONS TAB ─────────────────────────────── */}
+        {activeTab === 'invitations' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: '2rem', alignItems: 'start' }}>
+
+            {/* LEFT – Send Invite Form */}
+            <div className="card" style={{ padding: '2rem' }}>
+              <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '1.4rem', marginBottom: '0.5rem' }}>
+                <MailPlus size={22} color="var(--primary)" /> New Invitation
+              </h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.75rem' }}>
+                Send a personalised access invitation. A record will be saved automatically.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, fontSize: '0.82rem', marginBottom: '0.4rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Full Name</label>
+                  <input
+                    type="text"
+                    placeholder="Dr. Jane Smith"
+                    value={inviteForm.name}
+                    onChange={e => setInviteForm(p => ({ ...p, name: e.target.value }))}
+                    style={{ width: '100%', padding: '0.7rem 1rem', borderRadius: '10px', border: '1.5px solid var(--border)', fontSize: '0.95rem', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, fontSize: '0.82rem', marginBottom: '0.4rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email Address</label>
+                  <input
+                    type="email"
+                    placeholder="jane@clinic.com"
+                    value={inviteForm.email}
+                    onChange={e => setInviteForm(p => ({ ...p, email: e.target.value }))}
+                    style={{ width: '100%', padding: '0.7rem 1rem', borderRadius: '10px', border: '1.5px solid var(--border)', fontSize: '0.95rem', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, fontSize: '0.82rem', marginBottom: '0.4rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Personal Message (optional)</label>
+                  <textarea
+                    rows={4}
+                    placeholder="Hi Jane, we'd love to have you join our professional platform..."
+                    value={inviteForm.message}
+                    onChange={e => setInviteForm(p => ({ ...p, message: e.target.value }))}
+                    style={{ width: '100%', padding: '0.7rem 1rem', borderRadius: '10px', border: '1.5px solid var(--border)', fontSize: '0.95rem', resize: 'vertical', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <button
+                  onClick={handleSendInvitation}
+                  disabled={sendingInvite}
+                  className="btn btn-primary"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', padding: '0.85rem 1.5rem', fontSize: '1rem', fontWeight: 700, borderRadius: '12px', opacity: sendingInvite ? 0.7 : 1 }}
+                >
+                  {sendingInvite ? (
+                    <><span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⏳</span> Sending...</>
+                  ) : (
+                    <><Send size={18} /> Send Invitation</>
+                  )}
+                </button>
+              </div>
+
+              {/* Stats strip */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--primary)' }}>{invitations.length}</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Total Sent</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--success)' }}>{invitations.filter(i => i.status === 'accepted').length}</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Accepted</div>
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT – Invitation Registry */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '1.4rem', margin: 0 }}>
+                  <Mail size={22} color="var(--primary)" /> Invitation Registry
+                </h2>
+                <button onClick={fetchInvitations} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>
+                  ↻ Refresh
+                </button>
+              </div>
+
+              {loading ? (
+                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>Loading...</div>
+              ) : invitations.length === 0 ? (
+                <div className="card" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  <MailPlus size={40} style={{ opacity: 0.3, marginBottom: '1rem' }} />
+                  <p style={{ margin: 0 }}>No invitations sent yet. Use the form to invite professionals.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {invitations.map(inv => {
+                    const isAccepted = inv.status === 'accepted';
+                    const date = inv.invitedAt?.toDate ? inv.invitedAt.toDate().toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+                    return (
+                      <div key={inv.id} className="card" style={{ padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', borderLeft: `4px solid ${isAccepted ? 'var(--success)' : 'var(--primary)'}` }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{inv.name}</div>
+                          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{inv.email}</div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                            padding: '0.3rem 0.75rem', borderRadius: '100px', fontSize: '0.78rem', fontWeight: 700,
+                            backgroundColor: isAccepted ? 'rgba(16,185,129,0.12)' : 'rgba(59,130,246,0.1)',
+                            color: isAccepted ? 'var(--success)' : 'var(--primary)'
+                          }}>
+                            {isAccepted ? <><CheckCheck size={13}/> Accepted</> : <><Clock size={13}/> Sent</>}
+                          </span>
+                          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{date}</span>
+                          <button
+                            onClick={() => handleDeleteInvitation(inv.id)}
+                            title="Delete record"
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', padding: '0.25rem', borderRadius: '6px', display: 'flex', alignItems: 'center' }}
+                          >
+                            <X size={15} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         )}

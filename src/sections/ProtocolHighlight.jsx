@@ -71,7 +71,7 @@ export default function ProtocolHighlight() {
               cursor: 'pointer'
             }}
           >
-            Launch Protocol Builder <ArrowRight size={20} />
+            Launch Blueprint Builder <ArrowRight size={20} />
           </button>
         </div>
 

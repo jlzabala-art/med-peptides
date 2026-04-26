@@ -320,7 +320,7 @@ export default function AdminBlueprintsTab() {
       setLoading(true);
       setError(null);
       try {
-        const snap = await getDocs(collection(db, 'blueprints'));
+        const snap = await getDocs(collection(db, 'protocols'));
         const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         // Sort by confidence score descending
         data.sort((a, b) => (b.confidence_score || 0) - (a.confidence_score || 0));

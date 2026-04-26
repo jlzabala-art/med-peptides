@@ -1,0 +1,434 @@
+{
+  "5-AMINO 1 MQ": {
+    "scientificName": "5-amino-1-methylquinolinium",
+    "molecular_weight": 174.20,
+    "molecular_formula": "C10H10N2",
+    "pharmacokinetics": { "half_life": "4–6h", "bioavailability": "~35% oral", "route": ["oral"], "metabolism": "Hepatic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Selective competitive inhibition of nicotinamide N-methyltransferase (NNMT)", "NAD+ pool restoration via methyl cycle redirection", "SIRT1/SIRT3 deacetylase activation", "Downregulation of adipogenesis transcription factors"]
+  },
+  "AOD-9604": {
+    "scientificName": "AOD9604; HGH Fragment 177-191",
+    "molecular_weight": 1815.12,
+    "molecular_formula": "C78H123N23O23S2",
+    "pharmacokinetics": { "half_life": "~30 min IV", "bioavailability": "Low oral; SC preferred", "route": ["subcutaneous", "intranasal"], "metabolism": "Proteolytic degradation" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Selective beta-3 adrenergic receptor stimulation in adipocytes", "Lipolytic activity without IGF-1 axis activation", "Prevention of diet-induced insulin resistance", "Stimulation of fat oxidation via fatty acid mobilization"]
+  },
+  "ARA-290": {
+    "scientificName": "Cibinetide; ARA-290",
+    "molecular_weight": 948.07,
+    "molecular_formula": "C39H60N10O14",
+    "pharmacokinetics": { "half_life": "~2–3h", "bioavailability": "SC preferred", "route": ["subcutaneous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Non-hematopoietic erythropoietin receptor (EPOR/βcR) agonism", "Peripheral neuroprotection via JAK2/STAT3 signaling", "Anti-inflammatory cytokine modulation (TNF-α, IL-6 suppression)", "Promotion of small fiber nerve regeneration"]
+  },
+  "BPC-157": {
+    "scientificName": "Body Protection Compound-157; PL 14736",
+    "molecular_weight": 1419.54,
+    "molecular_formula": "C62H98N16O22",
+    "pharmacokinetics": { "half_life": "~4h (estimated)", "bioavailability": "SC/IM preferred; oral active in GI", "route": ["subcutaneous", "intramuscular", "oral"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from light", "shelf_life": "24 months" },
+    "mechanisms": ["Upregulation of growth hormone receptor expression in tendon fibroblasts", "Nitric oxide (NO) pathway modulation promoting angiogenesis", "FAK-paxillin pathway activation for wound healing", "Cytoprotective gastric mucosa stabilization via PGE2 synthesis"]
+  },
+  "Bacteriostatic Water": {
+    "scientificName": "Water for injection with 0.9% benzyl alcohol",
+    "molecular_weight": 18.02,
+    "molecular_formula": "H2O",
+    "pharmacokinetics": { "half_life": "N/A", "bioavailability": "N/A", "route": ["subcutaneous", "intramuscular", "intravenous"], "metabolism": "N/A" },
+    "storage_conditions": { "temperature": "Room temperature (15–30°C)", "light": "Standard", "shelf_life": "28 days after first puncture" },
+    "mechanisms": ["Bacteriostatic preservation via benzyl alcohol (0.9% w/v)", "Isotonic reconstitution medium for lyophilized peptides"]
+  },
+  "CJC-1295 with DAC": {
+    "scientificName": "CJC-1295 DAC; Drug Affinity Complex-modified GRF(1-29)",
+    "molecular_weight": 3647.28,
+    "molecular_formula": "C165H271N47O46",
+    "pharmacokinetics": { "half_life": "~6–8 days (DAC extends half-life)", "bioavailability": "SC preferred", "route": ["subcutaneous"], "metabolism": "Proteolytic; DAC prolongs albumin binding" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["GHRH receptor agonism with drug affinity complex (DAC) albumin binding", "Sustained pulsatile GH secretion from anterior pituitary somatotrophs", "IGF-1 axis upregulation for anabolic and lipolytic effects"]
+  },
+  "CJC-1295 without DAC": {
+    "scientificName": "Modified GRF(1-29); Sermorelin analog",
+    "molecular_weight": 3367.07,
+    "molecular_formula": "C152H252N44O42",
+    "pharmacokinetics": { "half_life": "~30 min", "bioavailability": "SC preferred", "route": ["subcutaneous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["GHRH receptor agonism without DAC modification", "Short-burst GH secretion mimicking physiological pulses", "IGF-1 axis stimulation for tissue repair and fat metabolism"]
+  },
+  "Cagrilintide": {
+    "scientificName": "IcoSema; Amylin analog",
+    "molecular_weight": 4173.80,
+    "molecular_formula": "C185H285N49O57S",
+    "pharmacokinetics": { "half_life": "~7 days", "bioavailability": "SC", "route": ["subcutaneous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "2–8°C", "light": "Protect from light", "shelf_life": "24 months" },
+    "mechanisms": ["Long-acting amylin receptor agonism (AMY1, AMY2, AMY3)", "Central satiety signaling via area postrema and NTS", "Synergistic GLP-1 pathway potentiation for weight reduction", "Delayed gastric emptying and reduced caloric intake"]
+  },
+  "Epithalon": {
+    "scientificName": "Epitalon; Ala-Glu-Asp-Gly (tetrapeptide)",
+    "molecular_weight": 390.35,
+    "molecular_formula": "C14H22N4O9",
+    "pharmacokinetics": { "half_life": "~1–2h", "bioavailability": "SC/IV preferred", "route": ["subcutaneous", "intravenous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Telomerase (hTERT) gene expression upregulation in somatic cells", "Pineal gland melatonin secretion restoration", "Anti-oxidant gene expression enhancement (SOD, catalase)", "Cell cycle regulation via p53 pathway modulation"]
+  },
+  "FST-344 (Follistatin)": {
+    "scientificName": "Follistatin-344; FST-344",
+    "molecular_weight": 37000,
+    "molecular_formula": "N/A (glycoprotein)",
+    "pharmacokinetics": { "half_life": "~30 min (active) to 2h", "bioavailability": "IM/SC", "route": ["intramuscular", "subcutaneous"], "metabolism": "Proteolytic; receptor-mediated endocytosis" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["High-affinity activin and myostatin (GDF-8) binding and neutralization", "Skeletal muscle hypertrophy via Smad2/3 signaling suppression", "Follicle-stimulating hormone (FSH) bioavailability regulation"]
+  },
+  "GHK-Cu (Copper Peptide)": {
+    "scientificName": "Glycyl-L-histidyl-L-lysine copper(II)",
+    "molecular_weight": 340.38,
+    "molecular_formula": "C14H23N6O4Cu",
+    "pharmacokinetics": { "half_life": "~1h", "bioavailability": "Topical and SC", "route": ["subcutaneous", "topical"], "metabolism": "Proteolytic; copper recycled" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Copper-mediated superoxide dismutase (SOD) and ceruloplasmin activation", "TGF-β1 upregulation promoting collagen and elastin synthesis", "Anti-inflammatory NFκB pathway downregulation", "Stem cell chemoattraction and wound healing acceleration"]
+  },
+  "GHRP-2": {
+    "scientificName": "Growth Hormone Releasing Peptide-2; Pralmorelin",
+    "molecular_weight": 817.96,
+    "molecular_formula": "C45H55N9O6",
+    "pharmacokinetics": { "half_life": "~15–60 min", "bioavailability": "SC/IV", "route": ["subcutaneous", "intravenous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Ghrelin receptor (GHS-R1a) agonism in pituitary somatotrophs", "Stimulation of endogenous GH pulse amplitude", "Weak ghrelin-like appetite stimulation via hypothalamic NPY/AgRP neurons", "Mild cortisol and prolactin co-secretion (GHS-R1a off-target)"]
+  },
+  "HCG": {
+    "scientificName": "Human Chorionic Gonadotropin",
+    "molecular_weight": 36700,
+    "molecular_formula": "N/A (glycoprotein heterodimer)",
+    "pharmacokinetics": { "half_life": "~24–36h (beta subunit)", "bioavailability": "IM/SC", "route": ["intramuscular", "subcutaneous"], "metabolism": "Renal and hepatic" },
+    "storage_conditions": { "temperature": "2–8°C after reconstitution", "light": "Protect from light", "shelf_life": "30 days after reconstitution" },
+    "mechanisms": ["LH receptor (LHCGR) agonism in Leydig cells stimulating testosterone synthesis", "FSH receptor cross-reactivity at high doses", "Corpus luteum maintenance via progesterone induction", "Spermatogenesis support via intratesticular testosterone elevation"]
+  },
+  "HGH": {
+    "scientificName": "Somatropin; Recombinant Human Growth Hormone",
+    "molecular_weight": 22125,
+    "molecular_formula": "N/A (191-amino acid protein)",
+    "pharmacokinetics": { "half_life": "~3–4h SC", "bioavailability": "~80% SC", "route": ["subcutaneous", "intramuscular"], "metabolism": "Hepatic and renal proteolysis" },
+    "storage_conditions": { "temperature": "2–8°C", "light": "Protect from light", "shelf_life": "28 days after reconstitution" },
+    "mechanisms": ["Direct GH receptor (GHR) activation triggering JAK2/STAT5b signaling", "Hepatic IGF-1 synthesis induction for systemic anabolic effects", "Lipolysis via hormone-sensitive lipase (HSL) upregulation", "Protein synthesis enhancement via mTOR pathway activation"]
+  },
+  "Ipamorelin": {
+    "scientificName": "Ipamorelin; NNC 26-0161",
+    "molecular_weight": 711.87,
+    "molecular_formula": "C38H49N9O5",
+    "pharmacokinetics": { "half_life": "~2h", "bioavailability": "SC preferred", "route": ["subcutaneous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Highly selective GHS-R1a agonism without cortisol or prolactin co-secretion", "Pulsatile GH release from anterior pituitary somatotrophs", "IGF-1 axis stimulation for muscle anabolism and fat metabolism", "No desensitization of GH axis at therapeutic doses"]
+  },
+  "KPV": {
+    "scientificName": "Lys-Pro-Val; alpha-MSH C-terminal tripeptide",
+    "molecular_weight": 311.40,
+    "molecular_formula": "C15H29N3O4",
+    "pharmacokinetics": { "half_life": "~1h", "bioavailability": "SC/oral (partial)", "route": ["subcutaneous", "oral"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["MC1R-independent anti-inflammatory signaling via NFκB suppression", "IL-1β, TNF-α and IL-6 cytokine downregulation", "Intestinal epithelial barrier integrity restoration", "Melanocortin receptor partial agonism"]
+  },
+  "MK-677 (Ibutamoren)": {
+    "scientificName": "Ibutamoren; MK-677; L-163,191",
+    "molecular_weight": 624.77,
+    "molecular_formula": "C27H36N4O5S",
+    "pharmacokinetics": { "half_life": "~24h (oral)", "bioavailability": "~60–70% oral", "route": ["oral"], "metabolism": "Hepatic CYP3A4" },
+    "storage_conditions": { "temperature": "Room temperature (15–25°C)", "light": "Protect from moisture", "shelf_life": "24 months" },
+    "mechanisms": ["Non-peptide GHS-R1a agonist mimicking ghrelin action", "Sustained 24h GH and IGF-1 elevation via oral dosing", "REM sleep architecture enhancement via GH pulse amplification", "Appetite stimulation via hypothalamic NPY/AgRP pathway activation"]
+  },
+  "MOTS-C": {
+    "scientificName": "Mitochondrial Open Reading Frame of 12S rRNA-c",
+    "molecular_weight": 2174.50,
+    "molecular_formula": "C95H152N24O29",
+    "pharmacokinetics": { "half_life": "~4–8h (estimated)", "bioavailability": "SC preferred", "route": ["subcutaneous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["AMPK pathway activation improving glucose utilization", "Mitochondrial biogenesis enhancement via PGC-1α upregulation", "Retrograde mitochondria-to-nucleus signaling modulation", "Folate cycle and de novo purine synthesis regulation"]
+  },
+  "NAD+": {
+    "scientificName": "Nicotinamide adenine dinucleotide",
+    "molecular_weight": 663.43,
+    "molecular_formula": "C21H27N7O14P2",
+    "pharmacokinetics": { "half_life": "~1–2h IV", "bioavailability": "IV preferred; oral limited", "route": ["intravenous", "subcutaneous"], "metabolism": "Rapidly phosphorylated intracellularly" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV; extremely light-sensitive", "shelf_life": "12 months" },
+    "mechanisms": ["Sirtuin (SIRT1–7) deacetylase cosubstrate supporting epigenetic regulation", "PARP-1 DNA repair pathway cosubstrate", "Mitochondrial electron transport chain Complex I substrate", "CD38/CD157 ectonucleotidase substrate for calcium signaling"]
+  },
+  "PT-141 (Bremelanotide)": {
+    "scientificName": "Bremelanotide; PT-141",
+    "molecular_weight": 1025.19,
+    "molecular_formula": "C50H68N14O10",
+    "pharmacokinetics": { "half_life": "~2.7h", "bioavailability": "SC preferred", "route": ["subcutaneous", "intranasal"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Melanocortin MC4R agonism in hypothalamic nuclei mediating sexual arousal", "Dopaminergic pathway modulation in mesolimbic reward system", "Peripheral vasodilatation via MC3R activation", "FDA-approved (Vyleesi) for hypoactive sexual desire disorder in premenopausal women"]
+  },
+  "Retatrutide": {
+    "scientificName": "LY3437943; Triple agonist GIP/GLP-1/Glucagon",
+    "molecular_weight": 4765.40,
+    "molecular_formula": "C209H328N56O66S",
+    "pharmacokinetics": { "half_life": "~6 days", "bioavailability": "SC", "route": ["subcutaneous"], "metabolism": "Proteolytic; C18 fatty acid chain extends half-life" },
+    "storage_conditions": { "temperature": "2–8°C", "light": "Protect from light", "shelf_life": "24 months" },
+    "mechanisms": ["Selective triple agonism of GIP, GLP-1, and glucagon receptors (triagonist)", "Superior weight reduction vs. dual agonists via complementary metabolic pathways", "Hepatic glucagon receptor activation reducing liver fat", "GLP-1 mediated incretin effect improving insulin secretion and satiety"]
+  },
+  "Semaglutide": {
+    "scientificName": "Semaglutide; Ozempic; Wegovy",
+    "molecular_weight": 4113.58,
+    "molecular_formula": "C187H291N45O59",
+    "pharmacokinetics": { "half_life": "~7 days", "bioavailability": "SC ~89%; oral ~1%", "route": ["subcutaneous", "oral"], "metabolism": "Proteolytic and fatty acid beta-oxidation" },
+    "storage_conditions": { "temperature": "2–8°C (unused); room temp up to 28 days after first use", "light": "Protect from light", "shelf_life": "24 months" },
+    "mechanisms": ["Selective long-acting GLP-1 receptor agonism (94% sequence homology to native GLP-1)", "Glucose-dependent insulin secretion enhancement from pancreatic beta cells", "Glucagon suppression during hyperglycemia", "Central appetite suppression via hypothalamic GLP-1 receptors and vagal afferents"]
+  },
+  "Sermorelin": {
+    "scientificName": "Sermorelin; GRF(1-29)NH2",
+    "molecular_weight": 3357.93,
+    "molecular_formula": "C149H246N44O42S",
+    "pharmacokinetics": { "half_life": "~10–20 min", "bioavailability": "SC preferred", "route": ["subcutaneous", "intravenous"], "metabolism": "Proteolytic (DPP-IV)" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["GHRH receptor (GHRHR) agonism stimulating pulsatile somatotroph GH release", "Physiological GH axis stimulation without receptor downregulation at therapeutic doses", "IGF-1 hepatic synthesis induction", "Hypothalamic-pituitary feedback loop preservation"]
+  },
+  "Selank": {
+    "scientificName": "Selank; TP-7; Tuftsin analog",
+    "molecular_weight": 751.86,
+    "molecular_formula": "C33H57N11O9",
+    "pharmacokinetics": { "half_life": "~2–3h", "bioavailability": "Intranasal preferred", "route": ["intranasal", "subcutaneous"], "metabolism": "Proteolytic; enkephalinase-resistant" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Tuftsin receptor modulation enhancing innate immune surveillance", "GABAergic neurotransmission potentiation reducing anxiety", "BDNF and NGF neurotrophin upregulation", "Enkephalinase inhibition extending endogenous enkephalin activity"]
+  },
+  "TB-500 (Thymosin β4)": {
+    "scientificName": "Thymosin Beta-4; Tβ4",
+    "molecular_weight": 4963.44,
+    "molecular_formula": "C212H350N56O78S",
+    "pharmacokinetics": { "half_life": "~6–8h (estimated)", "bioavailability": "SC/IM preferred", "route": ["subcutaneous", "intramuscular"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["G-actin sequestration regulating actin cytoskeleton dynamics and cell migration", "Angiogenesis promotion via endothelial VEGF-A and FGF upregulation", "Anti-inflammatory modulation via NFκB and cyclooxygenase-2 suppression", "Cardiomyocyte regeneration and cardiac stem cell activation"]
+  },
+  "Tirzepatide": {
+    "scientificName": "Tirzepatide; LY3298176; Mounjaro; Zepbound",
+    "molecular_weight": 4813.48,
+    "molecular_formula": "C225H348N48O68",
+    "pharmacokinetics": { "half_life": "~5 days", "bioavailability": "SC ~>80%", "route": ["subcutaneous"], "metabolism": "Proteolytic and fatty acid beta-oxidation" },
+    "storage_conditions": { "temperature": "2–8°C (unused); room temp up to 21 days after first use", "light": "Protect from light", "shelf_life": "24 months" },
+    "mechanisms": ["Selective dual GIP and GLP-1 receptor agonist (twincretin)", "GIP receptor agonism potentiating insulin sensitivity in adipose and muscle tissue", "GLP-1 receptor agonism providing incretin effect and central satiety signaling", "Superior glycemic control and weight reduction vs. GLP-1 monotherapy (SURPASS trials)"]
+  },
+  "Cardiogen": {
+    "scientificName": "Ala-Glu-Asp-Arg (tetrapeptide)",
+    "molecular_weight": 487.48,
+    "molecular_formula": "C18H29N7O9",
+    "pharmacokinetics": { "half_life": "~1–2h", "bioavailability": "SC preferred", "route": ["subcutaneous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Cardioprotective gene expression regulation via epigenetic chromatin remodeling", "Cardiomyocyte differentiation and repair signaling", "Anti-apoptotic Bcl-2 pathway upregulation in cardiac tissue", "Reduction of oxidative stress markers in myocardial cells"]
+  },
+  "Cartalax": {
+    "scientificName": "Ala-Glu-Asp-Gly (tetrapeptide; cartilage-specific variant)",
+    "molecular_weight": 390.35,
+    "molecular_formula": "C14H22N4O9",
+    "pharmacokinetics": { "half_life": "~1–2h", "bioavailability": "SC preferred", "route": ["subcutaneous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Chondrocyte proliferation and cartilage matrix synthesis promotion", "TGF-β mediated collagen II and aggrecan expression upregulation", "Anti-inflammatory modulation in synovial tissue", "Epigenetic regulation of cartilage-specific gene expression"]
+  },
+  "DSIP": {
+    "scientificName": "Delta Sleep-Inducing Peptide; Trp-Ala-Gly-Gly-Asp-Ala-Ser-Gly-Glu",
+    "molecular_weight": 848.86,
+    "molecular_formula": "C35H48N10O15",
+    "pharmacokinetics": { "half_life": "~30 min–2h", "bioavailability": "SC/IV", "route": ["subcutaneous", "intravenous"], "metabolism": "Proteolytic; DPP-IV sensitive" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Hypothalamic sleep-wake cycle modulation via delta wave induction", "Cortisol and ACTH release normalization under stress", "Analgesic activity via endogenous opioid system modulation", "Antioxidant and neuroprotective gene expression upregulation"]
+  },
+  "GLOW": {
+    "scientificName": "GHK-Cu peptide topical blend (proprietary)",
+    "molecular_weight": 340.38,
+    "molecular_formula": "C14H23N6O4Cu",
+    "pharmacokinetics": { "half_life": "N/A (topical)", "bioavailability": "Topical transdermal", "route": ["topical"], "metabolism": "Local proteolytic and copper recycling" },
+    "storage_conditions": { "temperature": "15–25°C", "light": "Protect from UV", "shelf_life": "12 months" },
+    "mechanisms": ["Dermal collagen and elastin synthesis stimulation via TGF-β1", "Copper-dependent SOD activation reducing oxidative skin damage", "Epidermal stem cell chemoattraction for wound healing", "NFκB anti-inflammatory signaling reduction in dermal fibroblasts"]
+  },
+  "GW-501516": {
+    "scientificName": "GW501516; Cardarine; GW-516",
+    "molecular_weight": 453.49,
+    "molecular_formula": "C21H18F3NO3S2",
+    "pharmacokinetics": { "half_life": "~16–24h", "bioavailability": "~80% oral", "route": ["oral"], "metabolism": "Hepatic CYP3A4 and CYP2C8" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["PPARδ (peroxisome proliferator-activated receptor delta) selective agonism", "Fatty acid oxidation gene upregulation (CPT1, ABCA1) in skeletal muscle", "Mitochondrial biogenesis enhancement increasing slow-twitch fiber endurance", "HDL cholesterol elevation and triglyceride reduction via ABCA1 induction"]
+  },
+  "HMG": {
+    "scientificName": "Human Menopausal Gonadotropin; urofollitropin/lutropin mixture",
+    "molecular_weight": 34000,
+    "molecular_formula": "N/A (glycoprotein mixture)",
+    "pharmacokinetics": { "half_life": "FSH ~50h; LH ~20h", "bioavailability": "IM/SC", "route": ["intramuscular", "subcutaneous"], "metabolism": "Renal and hepatic" },
+    "storage_conditions": { "temperature": "2–8°C", "light": "Protect from light", "shelf_life": "24 months" },
+    "mechanisms": ["FSH receptor (FSHR) agonism stimulating follicular development and spermatogenesis", "LH receptor (LHCGR) agonism triggering ovulation and testosterone synthesis", "Synergistic gonadal stimulation for fertility protocols", "Hypothalamic-pituitary-gonadal (HPG) axis downstream activation"]
+  },
+  "Hexarelin": {
+    "scientificName": "Hexarelin; Examorelin; His-D-2-MeTrp-Ala-Trp-D-Phe-Lys-NH2",
+    "molecular_weight": 887.06,
+    "molecular_formula": "C47H58N12O6",
+    "pharmacokinetics": { "half_life": "~1–2h", "bioavailability": "SC/IV preferred", "route": ["subcutaneous", "intravenous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Potent GHS-R1a agonism producing strong GH pulse amplification", "Cardioprotective action via CD36/ghrelin receptor in cardiomyocytes", "Modest cortisol and prolactin co-secretion at high doses", "IGF-1 axis activation for muscle hypertrophy and fat loss"]
+  },
+  "IGF-1 LR3": {
+    "scientificName": "Insulin-like Growth Factor-1 Long Arg3; Long R3 IGF-1",
+    "molecular_weight": 9111.50,
+    "molecular_formula": "N/A (83-amino acid protein)",
+    "pharmacokinetics": { "half_life": "~20–30h (vs 12–15 min for native IGF-1)", "bioavailability": "SC/IM preferred", "route": ["subcutaneous", "intramuscular"], "metabolism": "Proteolytic; reduced IGFBP binding" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Insulin-like growth factor receptor 1 (IGF-1R) agonism driving PI3K/AKT/mTOR anabolic cascade", "Skeletal muscle satellite cell proliferation and differentiation", "Anti-apoptotic signaling via Bcl-2/Bcl-xL upregulation", "Reduced IGFBP binding compared to native IGF-1 extending bioactivity"]
+  },
+  "KLOW": {
+    "scientificName": "KPV topical analogue (proprietary low-dose formulation)",
+    "molecular_weight": 311.40,
+    "molecular_formula": "C15H29N3O4",
+    "pharmacokinetics": { "half_life": "N/A (topical)", "bioavailability": "Transdermal", "route": ["topical"], "metabolism": "Local proteolytic" },
+    "storage_conditions": { "temperature": "15–25°C", "light": "Protect from UV", "shelf_life": "12 months" },
+    "mechanisms": ["MC1R-independent anti-inflammatory NFκB suppression in skin", "IL-1β and TNF-α downregulation in dermal keratinocytes", "Skin barrier integrity restoration", "Low-dose anti-inflammatory modulation for sensitive skin applications"]
+  },
+  "Kisspeptin-10": {
+    "scientificName": "Kisspeptin-10; KP-10; metastin 45-54",
+    "molecular_weight": 1302.51,
+    "molecular_formula": "C63H83N15O13",
+    "pharmacokinetics": { "half_life": "~3–4 min IV; longer SC", "bioavailability": "SC preferred", "route": ["subcutaneous", "intravenous"], "metabolism": "Proteolytic (metalloendopeptidase)" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["GPR54 (KISS1R) agonism stimulating GnRH pulsatile release from hypothalamus", "LH and FSH downstream secretion triggering gonadal steroid production", "Reproductive axis gating: puberty onset and fertility maintenance", "Tumor metastasis suppression via KISS1 gene pathway (metastin activity)"]
+  },
+  "MT2": {
+    "scientificName": "Melanotan II; MT-II; cyclo[Nle4,D-Phe7]-α-MSH",
+    "molecular_weight": 1024.20,
+    "molecular_formula": "C50H69N15O9",
+    "pharmacokinetics": { "half_life": "~1.5–2h", "bioavailability": "SC preferred", "route": ["subcutaneous", "intranasal"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Non-selective melanocortin receptor (MC1R–MC5R) agonism", "MC1R activation increasing eumelanin synthesis for UV-independent skin pigmentation", "MC4R hypothalamic activation inducing sexual arousal and penile erection", "Appetite suppression and lipolysis via MC3R/MC4R signaling"]
+  },
+  "NMN": {
+    "scientificName": "Nicotinamide Mononucleotide; β-NMN",
+    "molecular_weight": 334.22,
+    "molecular_formula": "C11H15N2O8P",
+    "pharmacokinetics": { "half_life": "~3–5h", "bioavailability": "~60–75% oral; SC preferred for higher NAD+", "route": ["oral", "subcutaneous"], "metabolism": "Converted to NAD+ via NMN adenylyltransferase (NMNAT)" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV; moisture-sensitive", "shelf_life": "24 months" },
+    "mechanisms": ["NAD+ biosynthesis precursor via Preiss-Handler salvage pathway", "Sirtuin (SIRT1/SIRT3) deacetylase activation supporting epigenetic anti-aging", "PARP-1 DNA repair system cofactor replenishment", "Mitochondrial Complex I substrate restoration improving cellular energy metabolism"]
+  },
+  "Oxytocin Acetate": {
+    "scientificName": "Oxytocin; Cys-Tyr-Ile-Gln-Asn-Cys-Pro-Leu-Gly-NH2",
+    "molecular_weight": 1007.19,
+    "molecular_formula": "C43H66N12O12S2",
+    "pharmacokinetics": { "half_life": "~3–5 min IV; ~30 min IN", "bioavailability": "Intranasal/IV preferred", "route": ["intranasal", "intravenous", "subcutaneous"], "metabolism": "Oxytocinase (cystyl-aminopeptidase); hepatic and renal" },
+    "storage_conditions": { "temperature": "2–8°C", "light": "Protect from light", "shelf_life": "24 months" },
+    "mechanisms": ["Oxytocin receptor (OXTR) agonism in limbic system modulating social bonding and trust", "HPA axis cortisol blunting reducing anxiety and fear response", "Uterine smooth muscle contraction stimulation (parturition/lactation)", "Central dopaminergic reward pathway modulation enhancing prosocial behavior"]
+  },
+  "PE-22 28": {
+    "scientificName": "PE-22-28; Spadin analogue",
+    "molecular_weight": 908.06,
+    "molecular_formula": "C43H60N10O12",
+    "pharmacokinetics": { "half_life": "~2–4h (estimated)", "bioavailability": "SC preferred", "route": ["subcutaneous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["TREK-1 (K2P potassium channel) selective inhibition modulating neuronal excitability", "Rapid-onset antidepressant effect via serotonin pathway enhancement", "Hippocampal neurogenesis promotion", "Anxiolytic signaling via HPA axis normalization"]
+  },
+  "PEG MGF": {
+    "scientificName": "PEGylated Mechano Growth Factor; IGF-1Ec C-terminal peptide",
+    "molecular_weight": 2867.22,
+    "molecular_formula": "C121H200N42O39 + PEG",
+    "pharmacokinetics": { "half_life": "~72h (PEGylation extends vs ~30 min native MGF)", "bioavailability": "SC/IM preferred", "route": ["subcutaneous", "intramuscular"], "metabolism": "Proteolytic; PEG moiety renally cleared" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["IGF-1 receptor (IGF-1R) independent signaling via MGF E-peptide domain", "Satellite cell (muscle stem cell) activation and proliferation", "PEGylation extends circulatory half-life ~144x vs native MGF", "Post-exercise muscle repair and hypertrophic signaling"]
+  },
+  "PNC-27": {
+    "scientificName": "PNC-27; p53 C-terminal domain analog",
+    "molecular_weight": 3297.80,
+    "molecular_formula": "N/A (29-amino acid peptide)",
+    "pharmacokinetics": { "half_life": "~2–4h (estimated)", "bioavailability": "SC/IV", "route": ["subcutaneous", "intravenous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Selective cancer cell membrane disruption via HDM-2 transmembrane receptor binding", "p53-independent tumor cell apoptosis induction", "Non-toxic to normal cells lacking transmembrane HDM-2 expression", "Pore-forming necrotic mechanism in MDM2-overexpressing tumor cells"]
+  },
+  "Pinealon": {
+    "scientificName": "Glu-Asp-Arg (tripeptide; epitalamine-related)",
+    "molecular_weight": 387.36,
+    "molecular_formula": "C13H21N5O8",
+    "pharmacokinetics": { "half_life": "~1–2h", "bioavailability": "SC/intranasal", "route": ["subcutaneous", "intranasal"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Pineal gland peptide bioregulator restoring melatonin synthesis rhythmicity", "Neuroprotective epigenetic chromatin remodeling in cortical neurons", "Antioxidant gene expression upregulation (catalase, GPx) in neural tissue", "Circadian rhythm and sleep architecture normalization"]
+  },
+  "Precision Insulin Syringes": {
+    "scientificName": "N/A (medical device — insulin syringe 0.3 mL / 31G)",
+    "molecular_weight": 0,
+    "molecular_formula": "N/A",
+    "pharmacokinetics": { "half_life": "N/A", "bioavailability": "N/A", "route": ["subcutaneous"], "metabolism": "N/A" },
+    "storage_conditions": { "temperature": "Room temperature (15–30°C)", "light": "Standard", "shelf_life": "As per manufacturer expiry" },
+    "mechanisms": ["Precision subcutaneous peptide delivery device", "31G ultra-fine needle minimizing injection site discomfort", "0.3 mL volume suitable for research peptide reconstitution doses"]
+  },
+  "Prostamax": {
+    "scientificName": "Ala-Glu-Asp-Gln (tetrapeptide; prostate bioregulator)",
+    "molecular_weight": 460.44,
+    "molecular_formula": "C17H28N4O9",
+    "pharmacokinetics": { "half_life": "~1–2h", "bioavailability": "SC preferred", "route": ["subcutaneous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Prostate epithelial cell gene expression bioregulation via chromatin remodeling", "Anti-inflammatory modulation in prostate stromal tissue", "Cytoprotective signaling reducing oxidative stress in glandular cells", "Hormonal balance support in androgen-sensitive prostate tissue"]
+  },
+  "SLU-PP-332": {
+    "scientificName": "SLU-PP-332; ERR agonist",
+    "molecular_weight": 433.50,
+    "molecular_formula": "C25H27N3O4",
+    "pharmacokinetics": { "half_life": "~4–8h (estimated)", "bioavailability": "~40–60% oral (estimated)", "route": ["oral"], "metabolism": "Hepatic CYP450" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Pan-ERR (estrogen-related receptor α/β/γ) selective agonism", "Mitochondrial biogenesis and fatty acid oxidation gene transcription upregulation", "Exercise-mimetic metabolic effects improving endurance capacity", "PGC-1α co-activation driving oxidative phosphorylation gene expression"]
+  },
+  "SS-31": {
+    "scientificName": "Elamipretide; SS-31; D-Arg-dimethylTyr-Lys-Phe-NH2",
+    "molecular_weight": 639.78,
+    "molecular_formula": "C32H49N9O5",
+    "pharmacokinetics": { "half_life": "~2–3h SC", "bioavailability": "SC preferred", "route": ["subcutaneous", "intravenous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Cardiolipin-selective binding stabilizing inner mitochondrial membrane cristae architecture", "Electron transport chain Complex I/III efficiency restoration reducing ROS", "Mitochondrial permeability transition pore (mPTP) inhibition preventing apoptosis", "ATP synthesis enhancement in aged and failing mitochondria"]
+  },
+  "Semax": {
+    "scientificName": "Semax; Met-Glu-His-Phe-Pro-Gly-Pro; ACTH(4-7)PGP analog",
+    "molecular_weight": 813.95,
+    "molecular_formula": "C37H51N9O10S",
+    "pharmacokinetics": { "half_life": "~20 min IV; longer intranasal depot", "bioavailability": "Intranasal preferred (CNS delivery)", "route": ["intranasal", "subcutaneous"], "metabolism": "Proteolytic; DPP-IV resistant at Pro-Gly-Pro terminus" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["BDNF and NGF neurotrophin upregulation in prefrontal cortex and hippocampus", "Dopaminergic and serotonergic neurotransmitter system modulation", "Cholinergic pathway enhancement improving memory consolidation", "Neuroprotective anti-inflammatory signaling via NFκB suppression"]
+  },
+  "Snap-8": {
+    "scientificName": "SNAP-8; Acetyl Glutamyl Heptapeptide-3; acetyl-Glu-Glu-Met-Gln-Arg-Arg-Ala-Asp-NH2",
+    "molecular_weight": 1075.17,
+    "molecular_formula": "C41H68N16O17S",
+    "pharmacokinetics": { "half_life": "N/A (topical)", "bioavailability": "Topical transdermal", "route": ["topical"], "metabolism": "Local proteolytic" },
+    "storage_conditions": { "temperature": "2–8°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["SNAP-25 protein competitive inhibition attenuating neuromuscular junction signaling", "Reduction of acetylcholine vesicle release at facial neuromuscular synapses", "Muscle contraction-induced wrinkle depth reduction (Botox-like topical effect)", "Collagen type I synthesis stimulation in dermal fibroblasts"]
+  },
+  "Tesamorelin": {
+    "scientificName": "Tesamorelin; TH9507; Egrifta; trans-3-hexenoic acid-GRF(1-44)",
+    "molecular_weight": 5135.88,
+    "molecular_formula": "C221H366N72O67S",
+    "pharmacokinetics": { "half_life": "~26–38 min SC", "bioavailability": "SC preferred", "route": ["subcutaneous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "2–8°C (unreconstituted); use immediately after reconstitution", "light": "Protect from light", "shelf_life": "24 months" },
+    "mechanisms": ["GHRH receptor (GHRHR) agonism with trans-3-hexenoic acid N-terminal modification conferring DPP-IV resistance", "Pulsatile GH secretion from anterior pituitary somatotrophs", "FDA-approved reduction of HIV-associated visceral adiposity (lipodystrophy)", "IGF-1 axis stimulation for lean mass preservation and lipolysis"]
+  },
+  "Testagen": {
+    "scientificName": "Lys-Glu (dipeptide; testicular bioregulator)",
+    "molecular_weight": 275.30,
+    "molecular_formula": "C10H17N3O5",
+    "pharmacokinetics": { "half_life": "~0.5–1h", "bioavailability": "SC preferred", "route": ["subcutaneous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Leydig cell gene expression bioregulation supporting testosterone biosynthesis", "Sertoli cell function modulation supporting spermatogenesis", "Testicular tissue-specific chromatin remodeling via epigenetic peptide bioregulator mechanism", "HPG axis support at peripheral gonadal level"]
+  },
+  "Thymagen": {
+    "scientificName": "Glu-Trp (dipeptide; thymus bioregulator)",
+    "molecular_weight": 333.34,
+    "molecular_formula": "C15H19N3O5",
+    "pharmacokinetics": { "half_life": "~0.5–1h", "bioavailability": "SC preferred", "route": ["subcutaneous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Thymic peptide bioregulator enhancing T-lymphocyte differentiation", "IL-2 and interferon-γ immunomodulatory cytokine upregulation", "CD4+/CD8+ T-cell ratio normalization in immunocompromised states", "Chromatin remodeling in thymocyte gene expression for immune maturation"]
+  },
+  "Thymosin Alpha 1": {
+    "scientificName": "Thymalfasin; Tα1; acetyl-SDAAVDTSSEITTKDLKEKK-VVR-NH2",
+    "molecular_weight": 3108.45,
+    "molecular_formula": "C129H215N33O55",
+    "pharmacokinetics": { "half_life": "~2h SC", "bioavailability": "SC preferred", "route": ["subcutaneous"], "metabolism": "Proteolytic" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["TLR-2 and TLR-9 agonism activating innate antiviral and antifungal immunity", "Dendritic cell maturation and antigen presentation enhancement", "NK cell cytotoxic activity upregulation for tumor immunosurveillance", "Th1 cytokine (IFN-γ, IL-2) polarization and regulatory T-cell balance modulation"]
+  },
+  "Thymulin": {
+    "scientificName": "Thymulin; FTS; Facteur Thymique Sérique; pGlu-Ala-Lys-Ser-Gln-Gly-Gly-Ser-Asn-OH + Zn2+",
+    "molecular_weight": 857.00,
+    "molecular_formula": "C33H54N10O14 + Zn2+",
+    "pharmacokinetics": { "half_life": "~30 min–1h", "bioavailability": "SC preferred", "route": ["subcutaneous"], "metabolism": "Proteolytic; zinc-dependent activation" },
+    "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
+    "mechanisms": ["Zinc-dependent thymic hormone active only when complexed with Zn2+", "T-lymphocyte maturation and differentiation from bone marrow precursors", "Suppressor and cytotoxic T-cell phenotype induction", "Immunosenescence reversal via thymic function restoration in aged subjects"]
+  }
+}

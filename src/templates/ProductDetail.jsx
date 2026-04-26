@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
+import { usePageMeta } from '../hooks/usePageMeta';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, Check, FlaskConical, Beaker, FileText, ShieldCheck, Target, Layers, Plus, Minus, ChevronDown, ChevronUp, Maximize2, ExternalLink, Activity, Microscope, Truck, Lock, UserCheck } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Check, FlaskConical, Beaker, FileText, ShieldCheck, Target, Layers, Plus, Minus, ChevronDown, ChevronUp, Maximize2, ExternalLink, Activity, Microscope, Truck, Lock, UserCheck, BookOpen, Zap, Thermometer } from 'lucide-react';
 import ImageModal from '../snippets/ImageModal';
 import OptimizedImage from '../snippets/OptimizedImage';
 import FAQAccordion from '../components/discovery/FAQAccordion';
@@ -10,7 +11,8 @@ import { db } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { getFAQForProduct, getRelatedPeptides } from '../utils/discoveryEngine';
 import { lockScroll, unlockScroll } from '../utils/scrollLock';
-import { getWholesalePrice } from '../services/pricingService';
+import { resolveVariantPrice, formatPrice } from '../services/pricingService';
+import { usePricingTier } from '../hooks/usePricingTier';
 import { formatDose } from '../data/dosageUnits';
 import { useAuth } from '../context/AuthContext';
 
@@ -27,10 +29,18 @@ export default function ProductDetail({
   onSelectProduct,
   products,
   allFaqs,
-  allMappings
 }) {
+  usePageMeta({
+    title: product?.name || 'Product Detail',
+    description: product?.shortDesc
+      ? `${product.shortDesc} — Research-grade ${product.name} with verified purity, available in multiple formats from Med-Peptides.`
+      : `Detailed technical profile for ${product?.name || 'this peptide'} — purity data, dosage formats, and research references.`,
+    path: product?.name ? `/products/${product.name.toLowerCase().replace(/\s+/g, '-')}` : '/products',
+  });
+
   const navigate = useNavigate();
   const { loading: authLoading } = useAuth();
+  const { tier, isLoading: tierLoading } = usePricingTier();
   // ── Discovery Engine State ─────────────────────────────────────────────
   const [activeProduct, setActiveProduct] = useState(product);
   const [selectedVariant, setSelectedVariant] = useState(null); // Force explicit selection
@@ -97,22 +107,11 @@ export default function ProductDetail({
     return () => { cancelled = true; };
   }, [activeProduct?.name, isProfessional]);
 
-  // Memoized Variants — read from activeProduct.variants (getCatalog shape: one product doc + nested variants[])
+  // Memoized Variants — read from activeProduct.variants (canonical repository shape)
   // Sorted by numeric dosage (lowest dose first)
   const productVariants = useMemo(() => {
     const variants = activeProduct?.variants;
-    if (!variants || !Array.isArray(variants) || variants.length === 0) {
-      // Fallback: old flat-schema products array filtered by name (kept for legacy data)
-      if (!products || !activeProduct) return [];
-      return products
-        .filter(p => p.name === activeProduct.name && p.category === activeProduct.category && (isAdmin || p.isActive !== false))
-        .sort((a, b) => {
-          const numA = parseFloat((a.dosage || a.strength || '0').replace(/[^0-9.]/g, '')) || 0;
-          const numB = parseFloat((b.dosage || b.strength || '0').replace(/[^0-9.]/g, '')) || 0;
-          return numA - numB;
-        });
-    }
-    // New repository-pattern: filter by admin/active and sort by numeric dosage
+    if (!variants || !Array.isArray(variants) || variants.length === 0) return [];
     return [...variants]
       .filter(v => isAdmin || v.isActive !== false)
       .sort((a, b) => {
@@ -120,7 +119,7 @@ export default function ProductDetail({
         const numB = parseFloat((b.dosage || b.strength || '0').replace(/[^0-9.]/g, '')) || 0;
         return numA - numB;
       });
-  }, [activeProduct, isAdmin, products]);
+  }, [activeProduct, isAdmin]);
 
   // Always pre-select the lowest-dose variant (first after sort) when variants load
   // Also respect _preselectedVariantIndex from search navigation
@@ -136,8 +135,8 @@ export default function ProductDetail({
   // Memoized FAQs from Engine
   const productDiscoveryFaqs = useMemo(() => {
     if (!activeProduct?.name || !allFaqs) return [];
-    return getFAQForProduct(activeProduct.name, allFaqs, allMappings || [], isProfessional, 3);
-  }, [activeProduct?.name, allFaqs, allMappings, isProfessional]);
+    return getFAQForProduct(activeProduct.name, allFaqs, activeProduct.id || null, isProfessional, 3);
+  }, [activeProduct?.name, activeProduct?.id, allFaqs, isProfessional]);
 
   // Memoized Related Peptides
   const discoveryRelated = useMemo(
@@ -176,7 +175,7 @@ export default function ProductDetail({
   // Call: formatDose(raw, product.name) to get product-aware units (mg / IU / mcg …)
 
   const itemKey = selectedVariant ?
-    (selectedVariant.dosage ? `${selectedVariant.name} (${selectedVariant.dosage})` : selectedVariant.name)
+    (selectedVariant.dosage ? `${activeProduct.name} (${selectedVariant.dosage})` : activeProduct.name)
     : null;
   const currentQty = itemKey && cart[itemKey] ? cart[itemKey] : 0;
 
@@ -196,32 +195,25 @@ export default function ProductDetail({
     row: { rate: 1, currency: 'USD', name: 'Global' }
   };
 
-  const formatValue = (val) => val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  /**
+   * Resolve the display price for the currently selected variant.
+   * targetVariant is always a variant document (has .pricing).
+   * Falls back to productVariants[0] while selectedVariant hydrates.
+   */
+  const priceDisplay = (() => {
+    if (authLoading || tierLoading) return null; // Auth still hydrating
+    if (!selectedVariant && productVariants.length > 1) return null; // Prompt: pick a strength
 
-  const getPrice = () => {
-    if (authLoading) return null; // Auth still hydrating — defer price display
-    if (!selectedVariant && productVariants.length > 1) return null; // Signal to pick strength first
+    // Never fall back to activeProduct — it has no .pricing field
+    const targetVariant = selectedVariant ?? productVariants[0] ?? null;
+    if (!targetVariant?.pricing) return 'unavailable';
 
-    const targetVariant = selectedVariant || activeProduct;
+    const resolved = resolveVariantPrice(targetVariant, { tier });
+    const amount = selectionType === 'kit' ? resolved.kit : resolved.perUnit;
 
-    // Use Authoritative Pricing Service
-    const wholesalePrice = getWholesalePrice(activeProduct.name, targetVariant.dosage || targetVariant.strength);
-    let priceUSD = NaN;
-
-    if (wholesalePrice) {
-      priceUSD = selectionType === 'kit' ? wholesalePrice.kitPrice : wholesalePrice.vialPrice;
-    } else {
-      // Fallback local pricing
-      priceUSD = isProfessional
-        ? (selectionType === 'kit' ? parseFloat(targetVariant.proKitPrice) : parseFloat(targetVariant.proVialPrice))
-        : (selectionType === 'kit' ? parseFloat(targetVariant.guestKitPrice) : parseFloat(targetVariant.guestVialPrice));
-    }
-
-    if (isNaN(priceUSD)) return 'unavailable';
-    return `$${formatValue(priceUSD.toFixed(0))} USD`;
-  };
-
-  const priceDisplay = getPrice();
+    if (amount == null) return 'unavailable';
+    return formatPrice(amount, resolved.currency ?? 'USD');
+  })();
 
   return (
     <>
@@ -514,13 +506,22 @@ export default function ProductDetail({
                   border: '1px solid rgba(0, 75, 135, 0.1)'
                 }}
               >
-                {activeProduct.image ? (
-                  <OptimizedImage src={activeProduct.image} alt={activeProduct.name} className="pd-hero-img" eager={true} style={{ padding: '2rem', width: '100%', height: '100%' }} objectFit="contain" />
-                ) : (
-                  <div style={{ padding: '3rem', color: 'var(--primary)', opacity: 0.4 }}>
-                    {activeProduct.category === "Research Supplies" ? <Beaker size={80} /> : <FlaskConical size={80} />}
-                  </div>
-                )}
+                <OptimizedImage
+                  src={activeProduct.image || '/peptide-placeholder.png'}
+                  alt={activeProduct.name}
+                  className="pd-hero-img"
+                  eager={true}
+                  style={{ padding: '2rem', width: '100%', height: '100%' }}
+                  objectFit="contain"
+                  fallback={
+                    <img
+                      src="/peptide-placeholder.png"
+                      alt={activeProduct.name}
+                      className="pd-hero-img"
+                      style={{ padding: '2rem', width: '100%', height: '100%', objectFit: 'contain' }}
+                    />
+                  }
+                />
               </div>
             </div>
 
@@ -607,36 +608,51 @@ export default function ProductDetail({
 
               {productVariants.length > 0 && (
                 <div style={{ marginTop: '0.5rem' }}>
-                  {selectedVariant ? (
-                    <span style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: 'var(--secondary)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Selected Strength: {formatDose(selectedVariant.dosage || selectedVariant.strength, activeProduct.name, activeProduct.category)}</span>
-                  ) : (
-                    <span style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Please select a strength to view pricing.</span>
-                  )}
+                  <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Select Strength
+                  </span>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                     {productVariants.map((variant, idx) => {
-                      const isSelected = selectedVariant?.id === variant.id;
+                      const variantKey = `${variant._docId ?? ''}_${variant.id ?? idx}`;
+                      const selectedKey = `${selectedVariant?._docId ?? ''}_${selectedVariant?.id ?? ''}`;
+                      const isSelected = !!selectedVariant && variantKey === selectedKey;
                       return (
                         <button
                           key={idx}
                           onClick={() => setSelectedVariant(variant)}
                           style={{
-                            padding: '0.5rem 1rem',
-                            borderRadius: '8px',
-                            border: isSelected ? '2px solid var(--secondary)' : '1px solid var(--border)',
-                            backgroundColor: isSelected ? 'var(--secondary)' : 'white',
-                            color: isSelected ? 'white' : 'var(--text-main)',
-                            fontWeight: isSelected ? 800 : 600,
-                            fontSize: '0.9rem',
+                            padding: '0.55rem 1.1rem',
+                            borderRadius: '10px',
+                            border: isSelected ? '2.5px solid #0055cc' : '1.5px solid #cbd5e1',
+                            backgroundColor: isSelected ? '#0066cc' : '#f0f2f5',
+                            color: isSelected ? '#ffffff' : '#64748b',
+                            fontWeight: isSelected ? 800 : 500,
+                            fontSize: '0.88rem',
                             cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                            boxShadow: isSelected ? '0 4px 12px rgba(0, 163, 224, 0.2)' : 'none'
+                            transition: 'all 0.18s ease',
+                            boxShadow: isSelected ? '0 0 0 3px rgba(0,102,204,0.18), 0 4px 14px rgba(0,102,204,0.22)' : '0 1px 3px rgba(0,0,0,0.06)',
+                            letterSpacing: isSelected ? '0.01em' : '0',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.3rem',
                           }}
                         >
+                          {isSelected && (
+                            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style={{ flexShrink: 0 }}>
+                              <circle cx="6.5" cy="6.5" r="6.5" fill="rgba(255,255,255,0.25)" />
+                              <path d="M3 6.5L5.5 9L10 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          )}
                           {formatDose(variant.dosage || variant.strength, activeProduct.name, activeProduct.category)}
                         </button>
                       );
                     })}
                   </div>
+                  {selectedVariant && (
+                    <span style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#0066cc', marginTop: '0.4rem' }}>
+                      ✓ {formatDose(selectedVariant.dosage || selectedVariant.strength, activeProduct.name, activeProduct.category)} selected
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -682,7 +698,9 @@ export default function ProductDetail({
                 disabled={!priceDisplay || priceDisplay === 'unavailable'}
                 onClick={() => {
                   if (!selectedVariant && productVariants.length > 1) return;
-                  const target = selectedVariant || activeProduct;
+                  const target = selectedVariant
+                    ? { ...selectedVariant, name: activeProduct.name }
+                    : activeProduct;
                   onAddToCart(target, activeProduct.category === "Research Supplies" ? 1 : (selectionType === 'kit' ? 10 : 1));
                 }}
                 style={{ width: '100%', gap: '0.75rem', backgroundColor: (priceDisplay && priceDisplay !== 'unavailable') ? (selectionType === 'kit' ? 'var(--secondary)' : 'var(--primary)') : 'var(--border)', color: (priceDisplay && priceDisplay !== 'unavailable') ? 'white' : 'var(--text-muted)', padding: '1rem', fontSize: '1rem', fontWeight: 800, cursor: (priceDisplay && priceDisplay !== 'unavailable') ? 'pointer' : 'not-allowed' }}
@@ -881,23 +899,104 @@ export default function ProductDetail({
             </div>
 
             <div className="pd-mobile-order-5" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              {/* 2. Scientific Facts (Grid 2x2) */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
-                {[
+
+              {/* ── ADMIN ONLY: Supplier & Master Pricing Panel ── */}
+              {isAdmin && (() => {
+                const supplier = activeProduct.supplier || '—';
+                const masterVial = selectedVariant?.pricing?.master?.perUnit;
+                const masterKit  = selectedVariant?.pricing?.master?.kit;
+                const variantCount = activeProduct.variants?.length || 0;
+                return (
+                  <div style={{
+                    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+                    border: '1px solid #334155',
+                    borderRadius: '14px',
+                    padding: '1.1rem 1.25rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.75rem',
+                  }}>
+                    {/* Header */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid #334155', paddingBottom: '0.6rem' }}>
+                      <Lock size={13} color="#f59e0b" />
+                      <span style={{ fontSize: '0.62rem', fontWeight: 900, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                        Admin — Supplier Info
+                      </span>
+                    </div>
+                    {/* Supplier */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Supplier</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#f8fafc' }}>{supplier}</span>
+                    </div>
+                    {/* Master pricing */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
+                      {[
+                        { label: 'Master / Vial', value: masterVial != null ? `$${masterVial.toFixed(2)}` : '—' },
+                        { label: 'Master / Kit',  value: masterKit  != null ? `$${masterKit.toFixed(2)}`  : '—' },
+                        { label: 'Variants',       value: `${variantCount}` },
+                      ].map(({ label, value }) => (
+                        <div key={label} style={{
+                          background: '#0f172a',
+                          border: '1px solid #334155',
+                          borderRadius: '8px',
+                          padding: '0.55rem 0.6rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.2rem',
+                        }}>
+                          <span style={{ fontSize: '0.58rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</span>
+                          <span style={{ fontSize: '0.9rem', fontWeight: 900, color: '#34d399' }}>{value}</span>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Slug */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Slug / ID</span>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', fontFamily: 'monospace' }}>{activeProduct.slug || activeProduct.id}</span>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* 2. Scientific Facts (Grid — dynamic clinical data) */}
+              {(() => {
+                const storageDry = activeProduct.storage_conditions?.dry || '-20°C to -80°C';
+                const storageLiq = activeProduct.storage_conditions?.reconstituted || '2°C to 8°C (7 days)';
+                const mw = activeProduct.molecular_weight ? `${activeProduct.molecular_weight} Da` : null;
+                const formula = activeProduct.molecular_formula || null;
+                const baseSpecs = [
                   { label: 'Analytical Purity', value: '≥ 99%', icon: <Target size={14} /> },
                   { label: 'Verification', value: 'HPLC & MS Verified', icon: <ShieldCheck size={14} /> },
-                  { label: 'Storage (Dry)', value: '-20°C to -80°C', icon: <Layers size={14} /> },
-                  { label: 'Storage (Liquid)', value: '2°C to 8°C (7 days)', icon: <FlaskConical size={14} /> }
-                ].map((spec, i) => (
-                  <div key={i} style={{ padding: '0.85rem', backgroundColor: 'white', border: '1px solid var(--border)', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <div style={{ color: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                      {spec.icon}
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800 }}>{spec.label}</span>
+                  { label: 'Storage (Dry)', value: storageDry, icon: <Layers size={14} /> },
+                  { label: 'Storage (Liquid)', value: storageLiq, icon: <FlaskConical size={14} /> },
+                ];
+                const extraSpecs = [
+                  ...(mw ? [{ label: 'Molecular Weight', value: mw, icon: <Beaker size={14} /> }] : []),
+                  ...(formula ? [{ label: 'Molecular Formula', value: formula, icon: <FlaskConical size={14} /> }] : []),
+                ];
+                const allSpecs = [...baseSpecs, ...extraSpecs];
+                return (
+                  <div>
+                    {(mw || formula) && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.6rem' }}>
+                        <Microscope size={13} color="var(--secondary)" />
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Molecular Properties</span>
+                      </div>
+                    )}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+                      {allSpecs.map((spec, i) => (
+                        <div key={i} style={{ padding: '0.85rem', backgroundColor: 'white', border: '1px solid var(--border)', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                          <div style={{ color: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                            {spec.icon}
+                            <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800 }}>{spec.label}</span>
+                          </div>
+                          <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--primary)', wordBreak: 'break-all' }}>{spec.value}</div>
+                        </div>
+                      ))}
                     </div>
-                    <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--primary)' }}>{spec.value}</div>
                   </div>
-                ))}
-              </div>
+                );
+              })()}
 
               {/* 3. Scientific Literature Card */}
               <div
@@ -930,7 +1029,10 @@ export default function ProductDetail({
               {/* 4. Structural Accordions (Description at bottom) */}
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <details className="pd-accordion" open>
-                  <summary>Research Background</summary>
+                  <summary style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <BookOpen size={16} color="var(--primary)" />
+                    Research Background
+                  </summary>
                   <div className="pd-accordion-content">
                     <p style={{ color: 'var(--text-main)', fontSize: '0.9rem', lineHeight: '1.6', margin: 0 }}>{activeProduct.desc}</p>
                   </div>
@@ -969,7 +1071,10 @@ export default function ProductDetail({
                   </details>
                 ) : activeProduct.mechanisms && activeProduct.mechanisms.length > 0 && (
                   <details className="pd-accordion">
-                    <summary>Mechanism of Action</summary>
+                    <summary style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Zap size={16} color="var(--primary)" />
+                      Mechanism of Action
+                    </summary>
                     <div className="pd-accordion-content">
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                         {activeProduct.mechanisms.map((mech, i) => (
@@ -980,8 +1085,43 @@ export default function ProductDetail({
                   </details>
                 )}
 
+                {/* Pharmacokinetics accordion — populated by Phase-4 migration */}
+                {activeProduct.pharmacokinetics && (() => {
+                  const pk = activeProduct.pharmacokinetics;
+                  const rows = [
+                    pk.half_life && { label: 'Half-life', value: pk.half_life },
+                    pk.bioavailability && { label: 'Bioavailability', value: pk.bioavailability },
+                    pk.route && { label: 'Route', value: Array.isArray(pk.route) ? pk.route.join(', ') : pk.route },
+                    pk.onset && { label: 'Onset', value: pk.onset },
+                    pk.metabolism && { label: 'Metabolism', value: pk.metabolism },
+                    pk.elimination && { label: 'Elimination', value: pk.elimination },
+                  ].filter(Boolean);
+                  if (rows.length === 0) return null;
+                  return (
+                    <details className="pd-accordion">
+                      <summary style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Activity size={16} color="var(--primary)" />
+                        Pharmacokinetics
+                      </summary>
+                      <div className="pd-accordion-content">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          {rows.map((row, i) => (
+                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '0.45rem 0', borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none', gap: '1rem' }}>
+                              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0 }}>{row.label}</span>
+                              <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 500, textAlign: 'right' }}>{row.value}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </details>
+                  );
+                })()}
+
                 <details className="pd-accordion">
-                  <summary>Stability Note</summary>
+                  <summary style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Thermometer size={16} color="var(--primary)" />
+                    Stability Note
+                  </summary>
                   <div className="pd-accordion-content" style={{ backgroundColor: '#fff8f0' }}>
                     <p style={{ fontSize: '0.85rem', color: '#92400e', margin: 0, lineHeight: 1.5 }}>
                       Lyophilized peptides remain stable at room temperature during transit. Upon receipt, store in a laboratory freezer.
@@ -1023,7 +1163,9 @@ export default function ProductDetail({
               disabled={!priceDisplay || priceDisplay === 'unavailable' || authLoading}
               onClick={() => {
                 if (!selectedVariant && productVariants.length > 1) return;
-                const target = selectedVariant || activeProduct;
+                const target = selectedVariant
+                  ? { ...selectedVariant, name: activeProduct.name }
+                  : activeProduct;
                 onAddToCart(target, activeProduct.category === 'Research Supplies' ? 1 : (selectionType === 'kit' ? 10 : 1));
               }}
               style={{
@@ -1155,7 +1297,14 @@ export default function ProductDetail({
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
                 {relatedProtocols.map(protocol => (
                   <div key={protocol.id} style={{ padding: '1.5rem', border: '1px solid var(--border)', borderRadius: '12px', backgroundColor: '#fafbfd' }}>
-                    <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', color: 'var(--primary)' }}>{protocol.name || protocol.title}</h4>
+                    <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', color: 'var(--primary)' }}>
+                      {protocol.metadata?.scientificName || protocol.name || protocol.title}
+                    </h4>
+                    {protocol.metadata?.scientificName && (
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.25rem', fontStyle: 'italic' }}>
+                        {protocol.name || protocol.title}
+                      </div>
+                    )}
                     <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>{protocol.shortDescription}</p>
                     <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.25rem' }}>
                       {getPrice()}

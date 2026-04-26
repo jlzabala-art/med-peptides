@@ -43,7 +43,6 @@ const MobileProductCard = React.memo(function MobileProductCard({
   isProfessional,
   products,
   allFaqs,
-  allMappings,
   cart,
   onAddToCart,
 }) {
@@ -110,10 +109,10 @@ const MobileProductCard = React.memo(function MobileProductCard({
 
   const handleOpenFAQ = useCallback(async (p) => {
     setActiveFAQProduct(p);
-    const faqs = getFAQForProduct(p.name, allFaqs || [], allMappings || [], isProfessional);
+    const faqs = getFAQForProduct(p.name, allFaqs || [], p.id, isProfessional);
     setFaqItems(faqs);
     setShowFAQModal(true);
-  }, [allFaqs, allMappings, isProfessional]);
+  }, [allFaqs, isProfessional]);
 
   const handleOpenPubMed = useCallback((p) => {
     setActivePubMedProduct(p);

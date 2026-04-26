@@ -1,0 +1,284 @@
+[
+  {
+    "file": "cog_001.json",
+    "pid": "cog_001",
+    "missing": [
+      "generated_protocol_template",
+      "generator_rules",
+      "legacy_compatibility",
+      "overview_summary",
+      "variant_rules"
+    ],
+    "extra_vs_canonical": [],
+    "completeness_pct": 81.5
+  },
+  {
+    "file": "cog_002.json",
+    "pid": "cog_002",
+    "missing": [],
+    "extra_vs_canonical": [],
+    "completeness_pct": 100.0
+  },
+  {
+    "file": "energy_001.json",
+    "pid": "energy_001",
+    "missing": [],
+    "extra_vs_canonical": [],
+    "completeness_pct": 100.0
+  },
+  {
+    "file": "energy_002.json",
+    "pid": "energy_002",
+    "missing": [],
+    "extra_vs_canonical": [],
+    "completeness_pct": 100.0
+  },
+  {
+    "file": "horm_001.json",
+    "pid": "horm_001",
+    "missing": [],
+    "extra_vs_canonical": [],
+    "completeness_pct": 100.0
+  },
+  {
+    "file": "horm_002.json",
+    "pid": "horm_002",
+    "missing": [],
+    "extra_vs_canonical": [
+      "_importedAt"
+    ],
+    "completeness_pct": 100.0
+  },
+  {
+    "file": "immune_001.json",
+    "pid": "immune_001",
+    "missing": [
+      "generator_rules",
+      "variant_rules"
+    ],
+    "extra_vs_canonical": [
+      "_importedAt"
+    ],
+    "completeness_pct": 92.6
+  },
+  {
+    "file": "immune_002.json",
+    "pid": "immune_002",
+    "missing": [
+      "generator_rules",
+      "variant_rules"
+    ],
+    "extra_vs_canonical": [
+      "_importedAt"
+    ],
+    "completeness_pct": 92.6
+  },
+  {
+    "file": "lon_001.json",
+    "pid": "lon_001",
+    "missing": [
+      "generator_rules",
+      "variant_rules"
+    ],
+    "extra_vs_canonical": [
+      "_importedAt"
+    ],
+    "completeness_pct": 92.6
+  },
+  {
+    "file": "lon_002.json",
+    "pid": "lon_002",
+    "missing": [],
+    "extra_vs_canonical": [
+      "_importedAt"
+    ],
+    "completeness_pct": 100.0
+  },
+  {
+    "file": "met_001.json",
+    "pid": "met_001",
+    "missing": [],
+    "extra_vs_canonical": [
+      "_importedAt"
+    ],
+    "completeness_pct": 100.0
+  },
+  {
+    "file": "met_002.json",
+    "pid": "met_002",
+    "missing": [
+      "generator_rules",
+      "variant_rules"
+    ],
+    "extra_vs_canonical": [
+      "_importedAt"
+    ],
+    "completeness_pct": 92.6
+  },
+  {
+    "file": "neuro_001.json",
+    "pid": "neuro_001",
+    "missing": [
+      "generator_rules",
+      "variant_rules"
+    ],
+    "extra_vs_canonical": [
+      "_importedAt"
+    ],
+    "completeness_pct": 92.6
+  },
+  {
+    "file": "rec_001.json",
+    "pid": "rec_001",
+    "missing": [
+      "expected_outcomes",
+      "generator_rules",
+      "phase_blueprints",
+      "safety_profile",
+      "variant_rules"
+    ],
+    "extra_vs_canonical": [],
+    "completeness_pct": 81.5
+  },
+  {
+    "file": "rec_002.json",
+    "pid": "rec_002",
+    "missing": [
+      "expected_outcomes",
+      "generator_rules",
+      "phase_blueprints",
+      "safety_profile",
+      "variant_rules"
+    ],
+    "extra_vs_canonical": [],
+    "completeness_pct": 81.5
+  },
+  {
+    "file": "sa_001.json",
+    "pid": "sa_001",
+    "missing": [
+      "complexity_level",
+      "confidence_score",
+      "economics",
+      "generator_rules",
+      "number_of_phases",
+      "primary_goal",
+      "variant_rules"
+    ],
+    "extra_vs_canonical": [],
+    "completeness_pct": 74.1
+  },
+  {
+    "file": "skin_001.json",
+    "pid": "skin_001",
+    "missing": [
+      "generator_rules",
+      "variant_rules"
+    ],
+    "extra_vs_canonical": [],
+    "completeness_pct": 92.6
+  },
+  {
+    "file": "skin_002.json",
+    "pid": "skin_002",
+    "missing": [
+      "generator_rules",
+      "variant_rules"
+    ],
+    "extra_vs_canonical": [],
+    "completeness_pct": 92.6
+  },
+  {
+    "file": "sleep_001.json",
+    "pid": "sleep_001",
+    "missing": [
+      "generator_rules",
+      "variant_rules"
+    ],
+    "extra_vs_canonical": [],
+    "completeness_pct": 92.6
+  },
+  {
+    "file": "sleep_002.json",
+    "pid": "sleep_002",
+    "missing": [
+      "generator_rules",
+      "variant_rules"
+    ],
+    "extra_vs_canonical": [],
+    "completeness_pct": 92.6
+  },
+  {
+    "file": "wm_001.json",
+    "pid": "wm_001",
+    "missing": [],
+    "extra_vs_canonical": [],
+    "completeness_pct": 100.0
+  },
+  {
+    "file": "wm_002.json",
+    "pid": "wm_002",
+    "missing": [
+      "generator_rules",
+      "legacy_compatibility",
+      "variant_rules"
+    ],
+    "extra_vs_canonical": [],
+    "completeness_pct": 88.9
+  },
+  {
+    "file": "wm_003.json",
+    "pid": "wm_003",
+    "missing": [
+      "economics",
+      "generator_rules",
+      "legacy_compatibility",
+      "risk_class",
+      "variant_rules"
+    ],
+    "extra_vs_canonical": [
+      "metadata.primary_goal",
+      "metadata.schema_version",
+      "metadata.scientificName",
+      "metadata.shortCode",
+      "metadata.visibility"
+    ],
+    "completeness_pct": 81.5
+  },
+  {
+    "file": "wm_004.json",
+    "pid": "wm_004",
+    "missing": [
+      "dosing_enrichment",
+      "economics",
+      "generator_rules",
+      "legacy_compatibility",
+      "number_of_phases",
+      "protocol_slug",
+      "variant_rules"
+    ],
+    "extra_vs_canonical": [
+      "metadata.primary_goal",
+      "metadata.schema_version",
+      "metadata.scientificName",
+      "metadata.shortCode",
+      "metadata.visibility"
+    ],
+    "completeness_pct": 74.1
+  },
+  {
+    "file": "wm_005.json",
+    "pid": "wm_005",
+    "missing": [
+      "dosing_enrichment",
+      "economics",
+      "generator_rules",
+      "legacy_compatibility",
+      "number_of_phases",
+      "protocol_slug",
+      "variant_rules"
+    ],
+    "extra_vs_canonical": [],
+    "completeness_pct": 74.1
+  }
+]

@@ -33,13 +33,14 @@ service cloud.firestore {
     // --- Collection Rules ---
 
     // ── 1. PUBLIC DATA — Anyone can read, Admins can write ─────────────────
-    match /products/{id}               { allow read: if true; allow write: if isAdmin(); }
+    match /products/{productId}               { allow read: if true; allow write: if isAdmin(); }
+    match /products/{productId}/variants/{variantId} { allow read: if true; allow write: if isAdmin(); }
     match /catalogProducts/{id}        { allow read: if true; allow write: if isAdmin(); }
     match /categories/{id}             { allow read: if true; allow write: if isAdmin(); }
     match /subcategories/{id}          { allow read: if true; allow write: if isAdmin(); }
     match /settings/{id}               { allow read: if true; allow write: if isAdmin(); }
     match /product_variants/{id}       { allow read: if true; allow write: if isAdmin(); }
-    match /protocol_templates/{id}     { allow read: if true; allow write: if isAdmin(); }
+    match /blueprints/{id}              { allow read: if true; allow write: if isAdmin(); }
     match /monitoring_profiles/{id}    { allow read: if true; allow write: if isAdmin(); }
 
     // ── 2. FAQ & CONTENT DATA — Public read ────────────────────────────────
@@ -52,7 +53,16 @@ service cloud.firestore {
     match /discovery_config/{id}       { allow read: if true; allow write: if isAdmin(); }
     match /pubmed_cache/{id}           { allow read: if true; allow write: if isAdmin(); }
 
-    // ── 3. AUTHENTICATED DATA — Login required ─────────────────────────────
+    // ── 3. PROTOCOLS — Public protocols readable by anyone ─────────────────
+    match /protocols/{protocolId} {
+      // list queries: allow unconditionally (client query filters by visibility=="public")
+      // get (single doc): allow if public or authenticated
+      allow list: if true;
+      allow get: if resource.data.visibility == "public" || isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── 4. AUTHENTICATED DATA — Login required ─────────────────────────────
     match /saved_protocols/{id} {
       allow read: if isAuthenticated() && (isOwner(resource.data) || isAdmin());
       allow create: if isAuthenticated();
@@ -76,7 +86,18 @@ service cloud.firestore {
       }
     }
 
-    // ── 5. GENERIC AUTHENTICATED RULE (fallback for remaining collections) ──
+    // ── 5. ORDERS — Explicit rule (uid field, not userId) ───────────────────
+    match /orders/{orderId} {
+      // Any logged-in user can place an order for themselves
+      allow create: if isAuthenticated() &&
+        request.resource.data.uid == request.auth.uid;
+      // Only owner or admin can read / update their order
+      allow read: if isAuthenticated() &&
+        (resource.data.uid == request.auth.uid || isAdmin());
+      allow update, delete: if isOwner(resource.data) || isAdmin();
+    }
+
+    // ── 6. GENERIC AUTHENTICATED RULE (fallback for remaining collections) ──
     match /{collection}/{docId} {
       allow read: if isAuthenticated();
 
@@ -91,13 +112,13 @@ service cloud.firestore {
       allow update, delete: if isOwner(resource.data) || isAdmin();
     }
 
-    // ── 6. EMAIL LOGS ───────────────────────────────────────────────────────
+    // ── 7. EMAIL LOGS ───────────────────────────────────────────────────────
     match /mail/{mailId} {
       allow create: if isAuthenticated();
       allow read, update, delete: if isAdmin();
     }
 
-    // ── 7. GLOBAL CATCH-ALL FOR ADMINS ─────────────────────────────────────
+    // ── 8. GLOBAL CATCH-ALL FOR ADMINS ─────────────────────────────────────
     match /{document=**} {
       allow read, write: if isAdmin();
     }

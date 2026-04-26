@@ -70,7 +70,7 @@ for (let i = 0; i < list.length; i += BATCH_SIZE) {
   const chunk  = list.slice(i, i + BATCH_SIZE);
 
   for (const bp of chunk) {
-    const id = bp.id ?? bp.blueprint_id;
+    const id = bp.protocol_id ?? bp.id ?? bp.blueprint_id;
     if (!id) { skipped++; continue; }
 
     const ref = db.collection('blueprints').doc(String(id));

@@ -1,0 +1,666 @@
+{
+  "protocol_duration_weeks": 12,
+  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "bundleVersion": "2.0",
+  "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
+  "protocol_is_physician_authored": false,
+  "seeded_at": "2026-04-25T06:10:36.133Z",
+  "protocol_source_version": "v5.0",
+  "generator_rules": {
+    "profile_notes": [
+      "Prefer conservative tempo in highly sleep-fragile profiles."
+    ],
+    "selection_priority": [
+      "goal_match",
+      "sleep_profile",
+      "age_variant_match",
+      "stress_load"
+    ]
+  },
+  "dosing_enrichment": {
+    "titration_note": "Weeks 1-4: Epitalon 5x/week evening with optional DSIP 2x/week if sleep initiation support is needed. Weeks 5-8: continue Epitalon 5x/week if tolerated; use DSIP only if fragmentation persists. Weeks 9-12: reduce Epitalon to 3x/week maintenance.",
+    "cycling_recommendation": "12-week circadian longevity cycle followed by 4-8 week reassessment. Epitalon may be used as short evening pulses rather than continuous indefinite use. Repeat cycle may be considered if sleep timing, recovery rhythm, or circadian stability declines.",
+    "maintenance_dose": "Epitalon: 5-10 mg SC or protocol-defined route in evening 3x/week during maintenance phase. DSIP may be used 2x/week only if sleep initiation or fragmentation remains a dominant symptom.",
+    "timing_optimization": "Epitalon should be administered in the evening to align with pineal/circadian signaling. DSIP should be reserved for evening use on sleep-fragile days. Avoid late stimulant exposure and reinforce consistent wake time."
+  },
+  "complexity_level": "moderate",
+  "eligibility_rules": {
+    "contraindications": [
+      "active_malignancy",
+      "uncontrolled_autoimmune_disease",
+      "pregnancy_or_breastfeeding",
+      "severe_hepatic_or_renal_impairment"
+    ],
+    "supported_goals": [
+      "longevity_circadian",
+      "circadian_support",
+      "sleep_timing_support",
+      "recovery_rhythm_support"
+    ],
+    "relative_cautions": [],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "patient_demographic",
+      "age_group",
+      "start_date"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "tempo_preference": "standard",
+      "age_group": null,
+      "patient_demographic": null,
+      "duration_weeks": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "protocol_author_notes": "Official curated protocol for general clinical use.",
+  "_schemaVersion": "antigravity_v2",
+  "protocol_author_organization": "ReGen PEPT",
+  "protocol_last_reviewed_at": "2026-03-29",
+  "protocol_source_reference": "internal_guide",
+  "expected_outcomes": {
+    "qualitative": [
+      "better sleep timing consistency",
+      "improved circadian regularity",
+      "better recovery rhythm"
+    ],
+    "quantitative_ranges": {
+      "sleep_consistency_expected": "mild_to_moderate"
+    }
+  },
+  "phase_blueprints": [
+    {
+      "clinical_events": [
+        {
+          "event_type": "baseline_review",
+          "title": "Baseline sleep and circadian rhythm review",
+          "week": 1
+        }
+      ],
+      "clinical_purpose": [
+        "sleep_timing_support",
+        "rhythm_regularization",
+        "tolerance_building"
+      ],
+      "default_duration_weeks": 4,
+      "default_start_week": 1,
+      "drugs": [
+        {
+          "dose_logic": {
+            "administration_days_default": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ],
+            "administration_frequency": "5x_week",
+            "dose_unit": "protocol_defined",
+            "starting_intensity": "standard",
+            "timing_hint": "evening"
+          },
+          "product_id": "prd_epitalon",
+          "product_title": "Epitalon",
+          "route": "subcutaneous_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_epitalon",
+            "route": "SC",
+            "type": "resolved"
+          }
+        },
+        {
+          "dose_logic": {
+            "activation_condition": "if_sleep_initiation_support_needed",
+            "administration_days_default": [
+              "Tuesday",
+              "Thursday"
+            ],
+            "administration_frequency": "2x_week",
+            "dose_unit": "protocol_defined",
+            "starting_intensity": "optional_low"
+          },
+          "product_id": "prd_dsip",
+          "product_title": "DSIP",
+          "route": "subcutaneous_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_dsip",
+            "route": "SC",
+            "type": "resolved"
+          }
+        }
+      ],
+      "phase_key": "alignment",
+      "phase_title": "Circadian Alignment"
+    },
+    {
+      "clinical_events": [
+        {
+          "event_type": "checkpoint",
+          "title": "Sleep architecture reassessment",
+          "week": 8
+        }
+      ],
+      "clinical_purpose": [
+        "recovery_support",
+        "sleep_consistency",
+        "circadian_resilience"
+      ],
+      "default_duration_weeks": 4,
+      "default_start_week": 5,
+      "drugs": [
+        {
+          "dose_logic": {
+            "administration_days_default": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ],
+            "administration_frequency": "5x_week",
+            "dose_unit": "protocol_defined",
+            "intensity": "standard_plus",
+            "timing_hint": "evening"
+          },
+          "product_id": "prd_epitalon",
+          "product_title": "Epitalon",
+          "route": "subcutaneous_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_epitalon",
+            "route": "SC",
+            "type": "resolved"
+          }
+        },
+        {
+          "dose_logic": {
+            "activation_condition": "if_sleep_fragmentation_persists",
+            "administration_days_default": [
+              "Tuesday",
+              "Thursday"
+            ],
+            "administration_frequency": "2x_week",
+            "dose_unit": "protocol_defined",
+            "intensity": "conditional"
+          },
+          "product_id": "prd_dsip",
+          "product_title": "DSIP",
+          "route": "subcutaneous_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_dsip",
+            "route": "SC",
+            "type": "resolved"
+          }
+        }
+      ],
+      "phase_key": "stabilization",
+      "phase_title": "Rhythm Stabilization"
+    },
+    {
+      "clinical_events": [
+        {
+          "event_type": "outcome_review",
+          "title": "Final circadian support review",
+          "week": 12
+        }
+      ],
+      "clinical_purpose": [
+        "maintenance_of_response",
+        "schedule_stability"
+      ],
+      "default_duration_weeks": 4,
+      "default_start_week": 9,
+      "drugs": [
+        {
+          "dose_logic": {
+            "administration_days_default": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "administration_frequency": "3x_week",
+            "dose_unit": "protocol_defined",
+            "intensity": "maintenance",
+            "timing_hint": "evening"
+          },
+          "product_id": "prd_epitalon",
+          "product_title": "Epitalon",
+          "route": "subcutaneous_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_epitalon",
+            "route": "SC",
+            "type": "resolved"
+          }
+        }
+      ],
+      "phase_key": "maintenance",
+      "phase_title": "Maintenance"
+    }
+  ],
+  "protocol_slug": "longevity-circadian-mitochondrial-12w",
+  "phases": [
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "daily",
+          "faq_ref": "epithalon_faq",
+          "productId": "Epithalon-10mg-vial",
+          "product_slug": "epithalon",
+          "pubmed_ref": "epithalon_pubmed",
+          "route": "subcutaneous",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 6
+        },
+        {
+          "dosing_frequency": "2x_week",
+          "faq_ref": "motsc_faq",
+          "productId": "MOTS-C-10mg-vial",
+          "product_slug": "mots-c",
+          "pubmed_ref": "motsc_pubmed",
+          "selected_strength": "5mg",
+          "vials_required_for_phase": 12
+        }
+      ],
+      "end_week": 6,
+      "phase_number": 1,
+      "phase_title": "Circadian Reset",
+      "start_week": 1
+    },
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "3x_week",
+          "productId": "Epithalon-10mg-vial",
+          "product_slug": "epithalon",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 3
+        },
+        {
+          "dosing_frequency": "2x_week",
+          "productId": "MOTS-C-10mg-vial",
+          "product_slug": "mots-c",
+          "selected_strength": "5mg",
+          "vials_required_for_phase": 12
+        }
+      ],
+      "end_week": 12,
+      "phase_number": 2,
+      "phase_title": "Maintenance",
+      "start_week": 7
+    }
+  ],
+  "protocol_is_curated": true,
+  "number_of_phases": 2,
+  "primary_goal": "Longevity",
+  "risk_class": "low_to_moderate",
+  "protocol_review_status": "approved",
+  "protocol_source_type": "curated_library",
+  "active": true,
+  "overview_summary": "Circadian longevity protocol using Epitalon with optional DSIP to support sleep timing regularity, recovery rhythm, circadian resilience, and healthy aging signaling.",
+  "protocol_id": "lon_002",
+  "protocol_version": "v6.0",
+  "economics": {
+    "total_protocol_cost_estimate": 1350,
+    "total_vials_required": 33
+  },
+  "protocol_author_title": "Peptide Specialists",
+  "confidence_score": 88,
+  "uploadedAt": "2026-04-20T09:29:12.821Z",
+  "protocol_title": "Epithalon + MOTS-c Circadian Longevity Protocol",
+  "variant_rules": {
+    "tempo_variants": {
+      "standard": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "none"
+      },
+      "conservative": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "up"
+      },
+      "aggressive": {
+        "dose_step_interval_weeks": 2,
+        "monitoring_intensity_modifier": "up"
+      }
+    },
+    "duration_variants": {
+      "20_weeks": {
+        "mode": "extended_plus",
+        "extra_monitoring": true
+      },
+      "16_weeks": {
+        "mode": "extended",
+        "extra_monitoring": true
+      },
+      "12_weeks": {
+        "mode": "standard",
+        "extra_monitoring": false
+      },
+      "8_weeks": {
+        "mode": "short",
+        "extra_monitoring": false
+      }
+    },
+    "sex_variants": {
+      "female": {
+        "special_notes": [
+          "Use conservative ramping if sensitivity profile is high."
+        ],
+        "recommended_flags": [
+          "hormonal_cyclicity_watch"
+        ]
+      },
+      "male": {
+        "special_notes": [
+          "Reassess tolerance and response before escalation."
+        ],
+        "recommended_flags": [
+          "sleep_recovery_watch"
+        ]
+      }
+    },
+    "age_variants": {
+      "51-65": {
+        "monitoring_intensity": "enhanced",
+        "default_duration_weeks": 12
+      },
+      "36-50": {
+        "monitoring_intensity": "moderate",
+        "default_duration_weeks": 12
+      },
+      "18-35": {
+        "monitoring_intensity": "standard",
+        "default_duration_weeks": 8
+      },
+      "65+": {
+        "monitoring_intensity": "enhanced",
+        "default_duration_weeks": 16
+      }
+    }
+  },
+  "legacy_compatibility": {
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ],
+    "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode.",
+    "enabled": true
+  },
+  "physician_supervision_required": false,
+  "status": "approved",
+  "_patchedAt": {},
+  "_importedAt": {
+    "_nanoseconds": 735000000,
+    "_seconds": 1777189742
+  },
+  "_patchSchema": "antigravity_v2",
+  "id": "lon_002",
+  "category": "Longevity",
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 6,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "Telomere length proxy (TruAge or similar)",
+        "Oxidative stress markers (8-OHdG optional)"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 12,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "Biological age reassessment",
+        "NAD⁺ levels (if available)",
+        "Epigenetic clock score"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "riskManagement": {
+    "contraindications": [
+      "Active cancer or history of hormone-sensitive malignancy",
+      "Severe hepatic impairment",
+      "Pregnancy"
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (10–30%)",
+        "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+      },
+      {
+        "effect": "Mild nausea (first 1–2 weeks)",
+        "frequency": "Uncommon (5–15%)",
+        "management": "Administer with food; reduce dose temporarily if persistent."
+      },
+      {
+        "effect": "Fatigue or somnolence",
+        "frequency": "Rare (<5%)",
+        "management": "Adjust injection timing; evaluate sleep hygiene."
+      },
+      {
+        "effect": "Headache",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Hydration; paracetamol as needed; review dosing."
+      }
+    ],
+    "escalation_criteria": [
+      "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+      "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+      "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+      "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ]
+  },
+  "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+  "clinical_evidence_update_2026": {
+    "evidence_limitations": [
+      "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+      "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+      "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+    ],
+    "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+    "last_updated_at": "2026-04-26T08:05:00.000Z",
+    "latest_clinical_notes": [
+      "Epitalon/Epithalon and DSIP evidence remains exploratory and region-specific; clinical claims should be conservative.",
+      "Avoid direct claims of telomere extension or life-span extension in humans outside research context.",
+      "Emphasize circadian rhythm, sleep timing, and recovery tracking rather than anti-aging treatment claims."
+    ],
+    "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+    "regulatory_status": "MOTS-c, Epitalon/Epithalon and DSIP are not FDA- or EMA-approved for longevity, circadian support, or anti-aging. Evidence remains mostly preclinical, translational, or region-specific.",
+    "evidence_update": "Keep evidence grade B/C depending on components, include active malignancy and pregnancy contraindications, and preserve washout/cycling recommendations.",
+    "updated_at": "2026-04-26T09:05:00+02:00",
+    "source_refs": [],
+    "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+  },
+  "canonical_enrichment": {
+    "compatibleWith": "antigravity_v2_firebase_import",
+    "auditFieldsCompleted": [
+      "monitoring_plan",
+      "safety_profile",
+      "clinical_evidence_update_2026",
+      "regulatory_status_2026"
+    ],
+    "generatedAt": "2026-04-26T09:05:00+02:00"
+  },
+  "_importBundle": "ReGen PEPT Core Clinical Protocol Library",
+  "_syncSource": "export/protocols/lon_002.json",
+  "metadata": {
+    "longDescription": "Epithalon (Epitalon; Ala-Glu-Asp-Gly) is a synthetic tetrapeptide bioregulator developed by the St. Petersburg Institute of Bioregulation and Gerontology. It stimulates telomerase (TERT) activity in somatic cells, elongates telomeres in aged cell cultures, and has demonstrated life-extension effects in multiple animal models (Khavinson VKh et al., Bull Exp Biol Med 2003; Anisimov VN et al., Mech Ageing Dev 2003). Epithalon also modulates pineal melatonin secretion and normalises circadian gene expression (BMAL1, CLOCK), improving circadian amplitude — a key driver of healthy aging (Khavinson V et al., Adv Gerontol 2012). Combined with MOTS-c (mitochondrial AMPK activation, metabolic homeostasis, see lon_001), this protocol targets two independent pillars of the hallmarks of aging: replicative senescence/telomere shortening and mitochondrial dysfunction. The dual-phase structure allows maximal combined loading in weeks 1–6, followed by MOTS-c maintenance to sustain metabolic gains through week 12.",
+    "primary_goal": "Longevity",
+    "short_description": "An advanced longevity and healthspan protocol combining epigenetic regulators and trophic peptides to extend functional lifespan and reduce age-related tissue degradation.",
+    "keywords": [
+      "Epithalon telomerase protocol",
+      "Epitalon longevity peptide",
+      "telomere elongation peptide",
+      "MOTS-c Epithalon protocol",
+      "circadian longevity protocol",
+      "anti-aging bioregulator peptide"
+    ],
+    "references": [
+      {
+        "citation": "Khavinson VKh et al. Epithalon peptide induces telomerase activity. Bull Exp Biol Med 2003;135:590-592.",
+        "pmid": "12833276"
+      },
+      {
+        "citation": "Anisimov VN et al. Effect of Epitalon on life-span extension. Mech Ageing Dev 2003;124:721-731.",
+        "pmid": "12706490"
+      },
+      {
+        "citation": "Lee C et al. The Mitochondrial-Derived Peptide MOTS-c Promotes Metabolic Homeostasis. Cell Metab 2015;21:443-454.",
+        "pmid": "25738459"
+      }
+    ],
+    "visibility": "public",
+    "evidence_basis": {
+      "evidence_strength": "exploratory_translational",
+      "evidence_notes": [
+        "Circadian peptide literature is more exploratory than metabolic or immune peptide literature.",
+        "Use as a research-oriented circadian support blueprint."
+      ],
+      "optional_support": "DSIP",
+      "core_active": "Epitalon"
+    },
+    "scientificName": "Epithalon (Epitalon) + MOTS-c Telomere & Mitokine Circadian Longevity Protocol",
+    "author": {
+      "organization": "ReGen PEPT",
+      "name": "ReGen PEPT Clinical Team",
+      "title": "Peptide Specialists"
+    },
+    "created_at": "2026-04-02T00:00:00.000Z",
+    "description": "12-week longevity protocol combining Epithalon telomerase activation with MOTS-c mitochondrial AMPK signaling to target telomere attrition and metabolic aging hallmarks simultaneously.",
+    "primary_condition": "circadian_alignment_sleep_timing_recovery_support",
+    "source_type": "curated_library",
+    "version": "1.0",
+    "source_reference": "ReGen_PEPT_LON_002_Protocol_2026",
+    "schema_version": "antigravity_v2",
+    "complexity_level": "standard",
+    "updated_at": "2026-04-02T00:00:00.000Z",
+    "abbreviatedName": "Epitalon + DSIP · Telomere-Circadian",
+    "shortCode": "LON-002",
+    "clinical_summary": "Epithalon (Ala-Glu-Asp-Gly) is a synthetic tetrapeptide derived from the pineal gland extract Epithalamin. It activates telomerase (hTERT) in somatic cells, extends telomere length in culture and animal models, and normalises melatonin circadian secretion in aged subjects. MOTS-c adds mitochondrial metabolic support and AMPK-driven anabolic resilience. Together they address the dual hallmarks of aging: telomere erosion and mitochondrial dysfunction.",
+    "evidence_grade": "C",
+    "source_quality_note": "Clinical content consolidated from protocol library and public biomedical literature; final medical use requires qualified clinician review.",
+    "review": {
+      "last_external_evidence_review_at": "2026-04-26",
+      "last_reviewed_at": "2026-04-02",
+      "review_status": "approved"
+    },
+    "regulatory_note": "Updated 2026: Epitalon/Epithalon and DSIP are not FDA/EMA-approved for longevity, telomere extension, sleep disorders, or anti-aging treatment."
+  },
+  "_schemaGapFixed": {
+    "_nanoseconds": 114000000,
+    "_seconds": 1777190724
+  },
+  "_patchBundle": "ReGen PEPT Protocol Export - Clinical Update 2026-04-26",
+  "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
+  "safety_profile": {
+    "contraindications": [
+      "active_malignancy",
+      "uncontrolled_autoimmune_disease",
+      "pregnancy_or_breastfeeding",
+      "severe_hepatic_or_renal_impairment"
+    ],
+    "relative_cautions": [],
+    "drug_interactions": [],
+    "monitoring_required": [
+      "sleep_quality",
+      "sleep_timing",
+      "sleep_fragmentation",
+      "daytime_energy",
+      "Week 4: alignment_review",
+      "Week 8: rhythm_reassessment",
+      "Week 12: final_outcome_review"
+    ],
+    "adverse_events_serious": [],
+    "adverse_events_common": []
+  },
+  "monitoring_plan": {
+    "baseline_required": [
+      "sleep_quality",
+      "sleep_timing",
+      "sleep_fragmentation",
+      "daytime_energy"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "measures": [
+          "sleep_latency",
+          "waking_consistency",
+          "daytime_energy"
+        ],
+        "purpose": "Assess alignment response",
+        "type": "alignment_review",
+        "week": 4
+      },
+      {
+        "measures": [
+          "sleep_quality",
+          "sleep_fragmentation"
+        ],
+        "purpose": "Midpoint reassessment",
+        "type": "rhythm_reassessment",
+        "week": 8
+      },
+      {
+        "measures": [
+          "overall_circadian_support",
+          "sleep_consistency"
+        ],
+        "purpose": "End-of-cycle evaluation",
+        "type": "final_outcome_review",
+        "week": 12
+      }
+    ]
+  },
+  "_syncedAt": "2026-04-26T12:46:30.345Z"
+}

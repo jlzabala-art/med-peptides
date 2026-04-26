@@ -1,0 +1,535 @@
+{
+  "protocol_duration_weeks": 8,
+  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "bundleVersion": "2.0",
+  "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
+  "protocol_is_physician_authored": false,
+  "seeded_at": "2026-04-25T06:10:36.132Z",
+  "protocol_source_version": "v5.0",
+  "dosing_enrichment": {
+    "titration_note": "Begin at 1.5 mg SC 2x/week for weeks 1-4 to establish baseline immune activation. Maintain through week 12. In high-burden states, daily dosing at 1.5 mg/day for weeks 1-4 under physician supervision.",
+    "cycling_recommendation": "12-week active protocol followed by 6-8 week off-cycle assessment. Repeat cycle if NK cell counts and immune biomarkers remain suboptimal. Continuous use not advised beyond 16 weeks without biomarker re-evaluation.",
+    "maintenance_dose": "Thymosin Alpha-1: 1.5 mg SC 2x/week (standard). Option for 3x/week in immune-compromised patients or post-infectious recovery.",
+    "timing_optimization": "Administer in the morning, ideally post-fasting. Subcutaneous injection into the abdomen or thigh. Rotate injection sites."
+  },
+  "complexity_level": "moderate",
+  "eligibility_rules": {
+    "contraindications": [
+      "active_autoimmune_flare",
+      "organ_transplant_on_immunosuppression",
+      "pregnancy_or_breastfeeding",
+      "known_hypersensitivity_to_thymosin_peptides"
+    ],
+    "supported_goals": [
+      "immune_support",
+      "immune_recalibration",
+      "infection_resilience",
+      "inflammation_modulation"
+    ],
+    "relative_cautions": [
+      "history_of_autoimmune_disease",
+      "active_malignancy",
+      "current_high_dose_corticosteroid_use",
+      "uncontrolled_chronic_infection"
+    ],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "infection_history",
+      "autoimmune_history",
+      "baseline_CBC",
+      "age_group",
+      "start_date"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "tempo_preference": "standard",
+      "age_group": null,
+      "patient_demographic": null,
+      "duration_weeks": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "protocol_author_notes": "Official curated protocol for general clinical use.",
+  "_schemaVersion": "antigravity_v2",
+  "protocol_author_organization": "ReGen PEPT",
+  "protocol_last_reviewed_at": "2026-03-29",
+  "protocol_source_reference": "internal_guide",
+  "expected_outcomes": {
+    "qualitative": [
+      "Reduced frequency and severity of upper respiratory infections",
+      "Enhanced natural killer (NK) cell cytotoxic activity",
+      "Improved vaccine response in immunocompromised individuals",
+      "Reduced systemic inflammatory cytokine burden (IL-6, TNF-alpha)",
+      "Accelerated recovery after illness or immune stress events"
+    ],
+    "time_to_onset_weeks": 3,
+    "quantitative_ranges": {
+      "week_8": "IL-6 and TNF-alpha reduction of 25-40% in inflammatory responders; HBV/HCV response improvement in viral hepatitis adjunct use (Mutchnick 1991)",
+      "week_4": "NK cell activity increases 20-35% from baseline; CD4+ T-cell count rise measurable in immunocompromised subjects (Ershler 1989)",
+      "week_12": "Sustained NK activation in ~75% of responders; infection frequency reduction of 40-60% in immune-deficient populations (Romani 2012)"
+    },
+    "responder_rate_pct": "70-80% for NK cell enhancement; 60-70% for infection frequency reduction"
+  },
+  "protocol_slug": "immune-modulation-8w",
+  "phases": [
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "2x_week",
+          "productId": "Thymosin_Alpha1-6mg-vial",
+          "product_slug": "thymosin-alpha-1",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 4
+        },
+        {
+          "dosing_frequency": "weekly",
+          "productId": "TB-500-5mg-vial",
+          "product_slug": "tb-500",
+          "selected_strength": "5mg",
+          "vials_required_for_phase": 4
+        }
+      ],
+      "end_week": 4,
+      "phase_number": 1,
+      "phase_title": "Immune Activation",
+      "start_week": 1
+    },
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "weekly",
+          "productId": "Thymosin_Alpha1-6mg-vial",
+          "product_slug": "thymosin-alpha-1",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 4
+        }
+      ],
+      "end_week": 8,
+      "phase_number": 2,
+      "phase_title": "Immune Stabilization",
+      "start_week": 5
+    }
+  ],
+  "protocol_is_curated": true,
+  "number_of_phases": 2,
+  "primary_goal": "Immune / Inflammation",
+  "risk_class": "moderate",
+  "protocol_review_status": "approved",
+  "protocol_source_type": "curated_library",
+  "active": true,
+  "overview_summary": "Dual-thymosin immune modulation protocol combining Thymosin Alpha-1 and TB-500 to support T-cell function, innate immune calibration, tissue repair, and inflammation control.",
+  "protocol_id": "immune_001",
+  "protocol_version": "v6.1",
+  "economics": {
+    "total_protocol_cost_estimate": 650,
+    "total_vials_required": 12
+  },
+  "protocol_author_title": "Peptide Specialists",
+  "confidence_score": 89,
+  "protocol_title": "Thymosin Alpha-1 & TB-500 Immune Modulation Protocol",
+  "legacy_compatibility": {
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ],
+    "notes": "Enhanced protocol preserves legacy fields while supporting canonical blueprint-based loading.",
+    "enabled": true
+  },
+  "physician_supervision_required": true,
+  "status": "approved",
+  "_importedAt": {
+    "_nanoseconds": 647000000,
+    "_seconds": 1777189741
+  },
+  "_patchSchema": "antigravity_v2",
+  "id": "immune_001",
+  "phase_blueprints": [
+    {
+      "phase_key": "immune_activation",
+      "phase_title": "Immune Activation",
+      "default_start_week": 1,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "legacy_phase_mapping",
+        "protocol_continuity"
+      ],
+      "drugs": [
+        {
+          "product_id": "Thymosin_Alpha1-6mg-vial",
+          "product_title": "Thymosin Alpha 1",
+          "route": "protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "2x_week",
+            "selected_strength": "10mg",
+            "vials_required_for_phase": 4,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "Thymosin_Alpha1-6mg-vial",
+            "route": "protocol_defined"
+          }
+        },
+        {
+          "product_id": "TB-500-5mg-vial",
+          "product_title": "Tb 500",
+          "route": "protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "weekly",
+            "selected_strength": "5mg",
+            "vials_required_for_phase": 4,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "TB-500-5mg-vial",
+            "route": "protocol_defined"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 1,
+          "event_type": "phase_start",
+          "title": "Start Immune Activation"
+        },
+        {
+          "week": 4,
+          "event_type": "phase_review",
+          "title": "Review Immune Activation"
+        }
+      ]
+    },
+    {
+      "phase_key": "immune_stabilization",
+      "phase_title": "Immune Stabilization",
+      "default_start_week": 5,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "legacy_phase_mapping",
+        "protocol_continuity"
+      ],
+      "drugs": [
+        {
+          "product_id": "Thymosin_Alpha1-6mg-vial",
+          "product_title": "Thymosin Alpha 1",
+          "route": "protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "weekly",
+            "selected_strength": "10mg",
+            "vials_required_for_phase": 4,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "Thymosin_Alpha1-6mg-vial",
+            "route": "protocol_defined"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 5,
+          "event_type": "phase_start",
+          "title": "Start Immune Stabilization"
+        },
+        {
+          "week": 8,
+          "event_type": "phase_review",
+          "title": "Review Immune Stabilization"
+        }
+      ]
+    }
+  ],
+  "category": "Immune & Inflammation",
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 4,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "CRP",
+        "IL-6 (if available)",
+        "White cell differential"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 8,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "Full inflammatory panel: CRP, ESR, IL-6, TNF-α",
+        "Immune cell subsets (CD4/CD8 ratio)"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "riskManagement": {
+    "contraindications": [
+      "Active autoimmune disease flare",
+      "Concurrent immunosuppressive therapy (relative)",
+      "Pregnancy"
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (15–35%)",
+        "management": "Rotate sites; use proper aseptic technique."
+      },
+      {
+        "effect": "Fluid retention / mild edema",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Reduce dose; monitor blood pressure; salt restriction."
+      },
+      {
+        "effect": "Nausea / GI discomfort",
+        "frequency": "Common (10–25%)",
+        "management": "Dose with food; split doses; titrate slowly."
+      },
+      {
+        "effect": "Elevated fasting glucose",
+        "frequency": "Uncommon (5%)",
+        "management": "Monitor fasting glucose weekly; consult if persistent."
+      },
+      {
+        "effect": "Mood changes / irritability",
+        "frequency": "Rare (<3%)",
+        "management": "Reduce dose; psychological support if needed."
+      }
+    ],
+    "escalation_criteria": [
+      "Severe or worsening edema — STOP, cardiovascular evaluation",
+      "Fasting glucose > 7.0 mmol/L (126 mg/dL) on two occasions — Endocrinology referral",
+      "Allergic reaction — STOP, emergency protocol",
+      "Hypertensive urgency (BP > 180/110) — STOP, immediate medical attention"
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ]
+  },
+  "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+  "clinical_evidence_update_2026": {
+    "evidence_limitations": [
+      "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+      "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+      "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+    ],
+    "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+    "last_updated_at": "2026-04-26T08:05:00.000Z",
+    "latest_clinical_notes": [
+      "Thymosin alpha-1 has international clinical use in several countries but is not broadly FDA-approved as a US drug product.",
+      "TB-500/thymosin beta-4 use remains investigational; emphasize autoimmune flare and malignancy-history caution.",
+      "Immune protocols should document infection history, autoimmune history, CBC with differential, CRP, and liver function where relevant."
+    ],
+    "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+    "regulatory_status": "Thymosin Alpha-1 has international clinical use/approvals in several countries for immune-related indications but is not FDA-approved in the United States. TB-500, KPV, thymulin and related peptide uses remain investigational/compounded/research depending on jurisdiction.",
+    "evidence_update": "Immune protocols should retain physician supervision and autoimmune/malignancy cautions.",
+    "updated_at": "2026-04-26T09:05:00+02:00",
+    "source_refs": [],
+    "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+  },
+  "_importBundle": "ReGen PEPT Core Clinical Protocol Library",
+  "_syncSource": "export/protocols/immune_001.json",
+  "metadata": {
+    "longDescription": "Thymosin Alpha-1 (Tα1; Zadaxin) is a 28-amino acid peptide endogenously produced by thymic epithelial cells and the first thymic hormone to be fully sequenced. It promotes T-cell differentiation and maturation, augments NK cell activity, stimulates dendritic cell function, activates Toll-like receptors 2 and 9 (innate immunity), and modulates cytokine balance toward Th1-type responses (Goldstein AL & Goldstein A, Expert Opin Biol Ther 2009; King R & Tuthill C, Prog Mol Biol Transl Sci 2014). Tα1 is clinically approved in 35+ countries for hepatitis B, hepatitis C, and oncology supportive care. TB-500 (synthetic Thymosin β4 fragment) provides complementary immune modulation by suppressing pro-inflammatory cytokines (IL-1β, TNF-α), promoting regulatory T-cell function, and accelerating tissue repair via angiogenesis and actin remodeling (Goldstein AL et al., Ann N Y Acad Sci 2012). The 8-week dual-phase protocol delivers combined immunomodulation in weeks 1–4, transitioning to Tα1 maintenance for sustained immune calibration.",
+    "primary_goal": "Immune / Inflammation",
+    "keywords": [
+      "Thymosin Alpha-1 immune protocol",
+      "TB-500 immunomodulation",
+      "thymic peptide immune support",
+      "T-cell activation peptide",
+      "immune inflammation protocol",
+      "Zadaxin thymosin protocol"
+    ],
+    "references": [
+      {
+        "citation": "Goldstein AL, Goldstein A. From lab to bedside: emerging clinical applications of thymosin alpha 1. Expert Opin Biol Ther 2009;9:593-608.",
+        "pmid": "19519282"
+      },
+      {
+        "citation": "King R, Tuthill C. Immune Modulation with Thymosin Alpha 1 Treatment. Prog Mol Biol Transl Sci 2014;129:179-208.",
+        "pmid": "24411673"
+      },
+      {
+        "citation": "Goldstein AL et al. Thymosin β4: A multi-functional regenerative peptide. Ann N Y Acad Sci 2012;1269:1-8.",
+        "pmid": "22295120"
+      }
+    ],
+    "visibility": "public",
+    "scientificName": "Thymosin Alpha-1 & Thymosin β4 (TB-500) Thymic T-Cell & Innate Immune Modulation Protocol",
+    "description": "8-week dual-thymosin immunomodulation protocol combining Thymosin Alpha-1 T-cell maturation and toll-like receptor activation with TB-500 anti-inflammatory angiogenesis for comprehensive immune recalibration.",
+    "primary_condition": "immune_dysfunction_inflammation",
+    "version": "1.0",
+    "schema_version": "antigravity_v2",
+    "updated_at": "2026-04-25T00:00:00.000Z",
+    "abbreviatedName": "Tα1 + Tβ4 · Dual Immunomodulation",
+    "shortCode": "IMM-001",
+    "created_at": "2026-04-02T00:00:00.000Z",
+    "clinical_summary": "Thymosin Alpha-1 (Tα1) is a thymic peptide that activates dendritic cells and T-cell maturation via Toll-like receptor 9 signalling, increasing TH1 cytokine output (IL-12, IFN-γ) and NK cell activity. TB-500 (Thymosin Beta-4 fragment) reduces NF-κB-driven systemic inflammation, promotes angiogenesis and tissue repair, and modulates actin cytoskeleton dynamics in immune and stromal cells. Together they provide complementary immune restoration (Tα1) and anti-inflammatory tissue support (TB-500).",
+    "evidence_grade": "B",
+    "source_quality_note": "Clinical content consolidated from protocol library and public biomedical literature; final medical use requires qualified clinician review.",
+    "review": {
+      "last_external_evidence_review_at": "2026-04-26",
+      "last_reviewed_at": "2026-04-25",
+      "review_status": "approved"
+    },
+    "regulatory_note": "Updated 2026: Thymosin alpha-1 is approved/used in selected non-US markets for immune and viral-hepatitis-related indications, but is not broadly FDA-approved in the United States. TB-500/thymosin beta-4 remains investigational for clinical immune optimization."
+  },
+  "monitoring_plan": {
+    "baseline_required": [
+      "CBC_with_differential",
+      "CRP",
+      "ESR",
+      "NK_cell_panel_CD16_CD56",
+      "liver_function_tests",
+      "recent_infection_frequency_log",
+      "autoimmune_history_review"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "labs": [
+          "CBC_with_differential",
+          "CRP",
+          "injection_site_review"
+        ],
+        "purpose": "Assess early tolerability and inflammatory trend.",
+        "type": "early_immune_tolerance_review",
+        "week": 4
+      },
+      {
+        "labs": [
+          "CBC_with_differential",
+          "NK_cell_panel_CD16_CD56",
+          "CRP"
+        ],
+        "purpose": "Evaluate immune activation and response signal.",
+        "type": "immune_response_review",
+        "week": 8
+      },
+      {
+        "labs": [
+          "CBC_with_differential",
+          "CRP",
+          "infection_frequency_log"
+        ],
+        "purpose": "Determine whether repeat cycle or washout is appropriate.",
+        "type": "post_cycle_review",
+        "week": 12
+      }
+    ]
+  },
+  "generator_rules": {
+    "allow_acceleration": false,
+    "base_duration_weeks": 8,
+    "notes": "Default generator rules – pending clinical review.",
+    "tempo_variants": [
+      "standard"
+    ],
+    "allow_extension": false
+  },
+  "_schemaGapFixed": {
+    "_nanoseconds": 864000000,
+    "_seconds": 1777190720
+  },
+  "_patchedAt": {
+    "schema_gap_fix": "2026-04-26T12:37:11Z"
+  },
+  "_patchBundle": "ReGen PEPT Protocol Export - Clinical Update 2026-04-26",
+  "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
+  "variant_rules": {
+    "tempo": {
+      "standard": {
+        "notes": "Standard tempo – no adjustment.",
+        "phase_duration_multiplier": 1
+      },
+      "accelerated": {
+        "notes": "Accelerated tempo – physician review required.",
+        "phase_duration_multiplier": 0.75
+      },
+      "extended": {
+        "notes": "Extended tempo – for slower responders.",
+        "phase_duration_multiplier": 1.33
+      }
+    }
+  },
+  "safety_profile": {
+    "drug_interactions": [
+      "Avoid concurrent immunosuppressants (corticosteroids, tacrolimus) - antagonistic on T-cell activation",
+      "Synergistic with antivirals in HBV/HCV adjunct protocols",
+      "Potential additive effect with other thymosin-class peptides - avoid stacking without oversight"
+    ],
+    "monitoring_required": [
+      "NK cell panel (CD16+/CD56+) at baseline and week 8",
+      "CBC with differential at weeks 0, 6, 12",
+      "CRP and IL-6 if inflammatory reduction is primary goal",
+      "Liver function tests if used as viral hepatitis adjunct"
+    ],
+    "adverse_events_serious": [
+      "No serious adverse events in published trials at 1.5 mg doses",
+      "Theoretical risk of immune dysregulation in active autoimmune disease"
+    ],
+    "adverse_events_common": [
+      "Mild injection site reactions: redness, swelling (10-15%)",
+      "Transient flu-like symptoms in first 1-2 weeks (5-10%)",
+      "Mild headache during initial immune activation phase"
+    ]
+  },
+  "canonical_enrichment": {
+    "compatibleWith": "antigravity_v2_firebase_import",
+    "generatedAt": "2026-04-26T09:05:00+02:00",
+    "auditFieldsCompleted": [
+      "phase_blueprints_legacy_mapped"
+    ]
+  },
+  "_syncedAt": "2026-04-26T12:46:29.224Z"
+}

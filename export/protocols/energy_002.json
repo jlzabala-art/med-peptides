@@ -1,0 +1,731 @@
+{
+  "protocol_duration_weeks": 10,
+  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "bundleVersion": "2.0",
+  "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
+  "protocol_is_physician_authored": false,
+  "seeded_at": "2026-04-25T06:10:36.134Z",
+  "protocol_source_version": "v5.0",
+  "dosing_enrichment": {
+    "titration_note": "Weeks 1-4: MOTS-c 5 mg 3x/week + SS-31 40 mg/day. Weeks 5-8: increase MOTS-c to 10 mg 3x/week if well tolerated; maintain SS-31. Weeks 9-16: full dose with NR/NMN adjunct. Monitor VO2 and fatigue VAS at each phase.",
+    "cycling_recommendation": "16-week active protocol with 6-week washout. More aggressive than energy_001 due to higher SS-31 dose and potential NR/NMN precursor saturation. Cycling preserves mitochondrial autophagy (mitophagy) responsiveness.",
+    "maintenance_dose": "MOTS-c: 10 mg subcutaneous 3x/week (enhanced dose). SS-31: 40-80 mg/day subcutaneous. NR (Nicotinamide Riboside) 500 mg oral 2x/day or NMN 1000 mg oral daily as NAD+ precursor adjunct.",
+    "timing_optimization": "MOTS-c: fasted state, pre-exercise preferred. SS-31: morning subcutaneous. NAD+ precursor: with morning and evening meals. Avoid SS-31 within 2 hours of antioxidant supplementation (may attenuate mitohormesis)."
+  },
+  "complexity_level": "advanced",
+  "eligibility_rules": {
+    "indications": [
+      "moderate_to_severe_fatigue_with_impaired_recovery",
+      "post_viral_or_long_covid_fatigue_support_when_medically_assessed",
+      "mitochondrial_resilience_optimization",
+      "athletic_or_high_demand_recovery_support",
+      "non_response_to_baseline_mitochondrial_energy_protocol"
+    ],
+    "contraindications": [
+      "active_malignancy",
+      "pregnancy_or_breastfeeding",
+      "severe_hepatic_or_renal_impairment",
+      "known_hypersensitivity_to_protocol_compounds"
+    ],
+    "supported_goals": [
+      "mitochondrial_resilience",
+      "recovery_support",
+      "cellular_resilience",
+      "fatigue_resilience"
+    ],
+    "relative_cautions": [],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "patient_demographic",
+      "age_group",
+      "start_date"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "tempo_preference": "standard",
+      "age_group": null,
+      "patient_demographic": null,
+      "duration_weeks": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "protocol_author_notes": "Official curated protocol for general clinical use.",
+  "protocol_author_organization": "ReGen PEPT",
+  "protocol_last_reviewed_at": "2026-03-29",
+  "protocol_source_reference": "internal_guide",
+  "expected_outcomes": {
+    "qualitative": [
+      "Sustained mitochondrial biogenesis beyond baseline energy_001 protocol",
+      "Enhanced oxidative stress resilience (reduced mtROS)",
+      "Improved VO2max and physical endurance",
+      "Better post-exertional recovery - reduced DOMS and fatigue duration",
+      "Sustained mitochondrial biogenesis beyond baseline energy protocols",
+      "Enhanced oxidative stress resilience",
+      "Better post-exertional recovery and fatigue resilience"
+    ],
+    "time_to_onset_weeks": 3,
+    "quantitative_ranges": {
+      "week_16": "VO2max improvement 12-20%; CRP reduction 30-40%; HOMA-IR improvement 35-45%; subjective fatigue VAS decrease 40-55%",
+      "week_8": "Exercise endurance improvement 20-30%; IL-6 reduction 20-30%; NAD+ levels elevated 30-50% above baseline (if NR/NMN included)",
+      "week_4": "VAS fatigue reduction 25-35%; fasting glucose improvement 8-12%; sleep quality VAS improvement"
+    },
+    "responder_rate_pct": "70-80% for fatigue endpoints; 65-75% for objective metabolic markers"
+  },
+  "phase_blueprints": [
+    {
+      "phase_key": "repair",
+      "phase_title": "Mitochondrial Repair",
+      "default_start_week": 1,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "membrane_support",
+        "resilience_building",
+        "fatigue_recovery"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_elamipretide",
+          "product_title": "Elamipretide",
+          "route": "subcutaneous_or_protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "daily",
+            "starting_intensity": "standard",
+            "administration_days_default": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "timing_hint": "consistent_daily_use"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_elamipretide",
+            "route": "SC"
+          }
+        },
+        {
+          "product_id": "prd_motsc",
+          "product_title": "MOTS-c",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "2x_week",
+            "starting_intensity": "optional_low",
+            "administration_days_default": [
+              "Tuesday",
+              "Thursday"
+            ],
+            "activation_condition": "if_metabolic_adaptation_needed"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_motsc",
+            "route": "SC"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 1,
+          "event_type": "baseline_review",
+          "title": "Baseline resilience and fatigue review"
+        }
+      ]
+    },
+    {
+      "phase_key": "adaptation",
+      "phase_title": "Adaptive Resilience",
+      "default_start_week": 5,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "oxidative_stress_resilience",
+        "recovery_capacity",
+        "bioenergetic_stability"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_elamipretide",
+          "product_title": "Elamipretide",
+          "route": "subcutaneous_or_protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "daily",
+            "intensity": "standard_plus",
+            "administration_days_default": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ]
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_elamipretide",
+            "route": "SC"
+          }
+        },
+        {
+          "product_id": "prd_motsc",
+          "product_title": "MOTS-c",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "3x_week",
+            "intensity": "conditional",
+            "administration_days_default": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "activation_condition": "if_recovery_plateau"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_motsc",
+            "route": "SC"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 8,
+          "event_type": "checkpoint",
+          "title": "Resilience reassessment"
+        }
+      ]
+    },
+    {
+      "phase_key": "consolidation",
+      "phase_title": "Consolidation",
+      "default_start_week": 9,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "maintenance_of_response",
+        "fatigue_prevention"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_elamipretide",
+          "product_title": "Elamipretide",
+          "route": "subcutaneous_or_protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "5x_week",
+            "intensity": "maintenance",
+            "administration_days_default": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ]
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_elamipretide",
+            "route": "SC"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 12,
+          "event_type": "outcome_review",
+          "title": "Final mitochondrial resilience review"
+        }
+      ]
+    }
+  ],
+  "protocol_slug": "mitochondrial-resilience-10w",
+  "phases": [
+    {
+      "phase_number": 1,
+      "phase_title": "Mitochondrial Rescue",
+      "start_week": 1,
+      "end_week": 5,
+      "drugs_used": [
+        {
+          "product_slug": "ss-31",
+          "selected_strength": "10mg",
+          "route": "subcutaneous",
+          "dosing_frequency": "daily",
+          "vials_required_for_phase": 5,
+          "faq_ref": "ss31_faq",
+          "pubmed_ref": "ss31_pubmed",
+          "productId": "SS-31-5mg-vial"
+        },
+        {
+          "product_slug": "nmn",
+          "selected_strength": "50mg",
+          "route": "oral",
+          "dosing_frequency": "daily",
+          "vials_required_for_phase": 2,
+          "faq_ref": "nmn_faq",
+          "pubmed_ref": "nmn_pubmed",
+          "productId": "NMN-50mg-tablet"
+        }
+      ]
+    },
+    {
+      "phase_number": 2,
+      "phase_title": "Bioenergetic Maintenance",
+      "start_week": 6,
+      "end_week": 10,
+      "drugs_used": [
+        {
+          "product_slug": "mots-c",
+          "selected_strength": "5mg",
+          "route": "subcutaneous",
+          "dosing_frequency": "2x_week",
+          "vials_required_for_phase": 10,
+          "faq_ref": "motsc_faq",
+          "pubmed_ref": "motsc_pubmed",
+          "productId": "MOTS-C-10mg-vial"
+        },
+        {
+          "product_slug": "ss-31",
+          "selected_strength": "10mg",
+          "dosing_frequency": "3x_week",
+          "vials_required_for_phase": 3,
+          "productId": "SS-31-5mg-vial"
+        }
+      ]
+    }
+  ],
+  "protocol_is_curated": true,
+  "number_of_phases": 2,
+  "primary_goal": "Energy / Mitochondrial",
+  "risk_class": "moderate_to_advanced",
+  "protocol_review_status": "approved",
+  "protocol_source_type": "curated_library",
+  "washout_recommended_weeks": 6,
+  "active": true,
+  "overview_summary": "Mitochondrial support protocol using SS-31 and NMN with MOTS-C for broader metabolic and bioenergetic support.",
+  "protocol_id": "energy_002",
+  "protocol_version": "v6.0",
+  "economics": {
+    "total_protocol_cost_estimate": 1180,
+    "total_vials_required": 20
+  },
+  "protocol_author_title": "Peptide Specialists",
+  "confidence_score": 91,
+  "uploadedAt": "2026-04-20T09:29:12.819Z",
+  "protocol_title": "SS-31 & NMN Bioenergetic Resilience Protocol",
+  "variant_rules": {
+    "tempo_variants": {
+      "standard": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "none"
+      },
+      "conservative": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "up"
+      },
+      "aggressive": {
+        "dose_step_interval_weeks": 2,
+        "monitoring_intensity_modifier": "up"
+      }
+    },
+    "duration_variants": {
+      "20_weeks": {
+        "mode": "extended_plus",
+        "extra_monitoring": true
+      },
+      "16_weeks": {
+        "mode": "extended",
+        "extra_monitoring": true
+      },
+      "12_weeks": {
+        "mode": "standard",
+        "extra_monitoring": false
+      },
+      "8_weeks": {
+        "mode": "short",
+        "extra_monitoring": false
+      }
+    },
+    "sex_variants": {
+      "female": {
+        "special_notes": [
+          "Use conservative ramping if sensitivity profile is high."
+        ],
+        "recommended_flags": []
+      },
+      "male": {
+        "special_notes": [
+          "Reassess tolerance and response before escalation."
+        ],
+        "recommended_flags": []
+      }
+    },
+    "age_variants": {
+      "51-65": {
+        "monitoring_intensity": "enhanced",
+        "default_duration_weeks": 16
+      },
+      "36-50": {
+        "monitoring_intensity": "moderate",
+        "default_duration_weeks": 12
+      },
+      "18-35": {
+        "monitoring_intensity": "standard",
+        "default_duration_weeks": 8
+      },
+      "65+": {
+        "monitoring_intensity": "enhanced",
+        "default_duration_weeks": 20
+      }
+    }
+  },
+  "legacy_compatibility": {
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ],
+    "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode.",
+    "enabled": true
+  },
+  "physician_supervision_required": true,
+  "status": "approved",
+  "_patchedAt": {},
+  "_patchSchema": "antigravity_v2",
+  "id": "energy_002",
+  "category": "Energy & Metabolism",
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 5,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "Mitochondrial function markers (lactate, pyruvate if available)",
+        "Fatigue VAS score"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 10,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "VO₂ max estimate",
+        "HRV measurement",
+        "Energy/fatigue diary review"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "riskManagement": {
+    "contraindications": [
+      "Mitochondrial disease (consult specialist)",
+      "Severe renal impairment (CrCl < 30)",
+      "Pregnancy"
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (10–30%)",
+        "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+      },
+      {
+        "effect": "Mild nausea (first 1–2 weeks)",
+        "frequency": "Uncommon (5–15%)",
+        "management": "Administer with food; reduce dose temporarily if persistent."
+      },
+      {
+        "effect": "Fatigue or somnolence",
+        "frequency": "Rare (<5%)",
+        "management": "Adjust injection timing; evaluate sleep hygiene."
+      },
+      {
+        "effect": "Headache",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Hydration; paracetamol as needed; review dosing."
+      }
+    ],
+    "escalation_criteria": [
+      "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+      "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+      "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+      "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ]
+  },
+  "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+  "_importBundle": "ReGen PEPT Clinical Protocol Library · Updated 2026-04-26",
+  "_schemaGapFixed": {
+    "_nanoseconds": 912000000,
+    "_seconds": 1777190717
+  },
+  "_schemaVersion": "antigravity_v2",
+  "_bundleCreatedAt": "2026-04-26T09:05:00+02:00",
+  "clinical_evidence_update_2026": {
+    "evidence_limitations": [
+      "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+      "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+      "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+    ],
+    "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+    "last_updated_at": "2026-04-26T08:05:00.000Z",
+    "latest_clinical_notes": [
+      "Elamipretide evidence is strongest for rare mitochondrial disease contexts; broader fatigue use remains extrapolative.",
+      "NAD+ precursors retain a stronger supplement safety base than injectable peptide components, but efficacy endpoints remain heterogeneous.",
+      "Consider explicit monitoring for injection-site reactions and functional fatigue scales."
+    ],
+    "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+    "regulatory_status": "Elamipretide is FDA accelerated-approved as Forzinity for Barth syndrome in patients weighing at least 30 kg (approved September 19, 2025). Use for general fatigue, performance, mitochondrial optimization, long-COVID fatigue, or non-Barth mitochondrial support remains off-label/investigational and requires physician oversight.",
+    "evidence_update": "Forzinity approval strengthens the regulatory status of elamipretide for a narrow rare-disease indication only; it should not be represented as broadly approved for fatigue or longevity uses.",
+    "updated_at": "2026-04-26T09:05:00+02:00",
+    "source_refs": [
+      {
+        "type": "regulatory",
+        "source": "FDA",
+        "date": "2025-09-19",
+        "note": "Accelerated approval of Forzinity (elamipretide) for Barth syndrome, patients ≥30 kg."
+      }
+    ],
+    "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+  },
+  "_syncSource": "export/protocols/energy_002.json",
+  "metadata": {
+    "longDescription": "Energy_002 is an advanced mitochondrial resilience and bioenergetic optimization protocol intended for individuals with moderate to severe fatigue, impaired physical recovery, post-viral fatigue patterns, or reduced cellular energy output. The protocol integrates mitochondrial membrane stabilization using Elamipretide (SS-31), metabolic signaling activation through MOTS-c, and NAD+ restoration via NR or NMN. The coordinated mechanisms target cardiolipin stabilization, oxidative phosphorylation efficiency, AMPK-dependent mitochondrial biogenesis, and NAD+/NADH balance.",
+    "primary_goal": "performance",
+    "target_patient_profile": "Adults 25-70 with significant mitochondrial dysfunction, long COVID fatigue, primary mitochondrial myopathy, or athletes requiring advanced recovery optimization. Step-up from energy_001 for non-responders or those with more severe bioenergetic deficits. Requires baseline mitochondrial function assessment.",
+    "short_description": "An intensified 16-week mitochondrial resilience protocol combining high-dose MOTS-c, SS-31, and NAD+ precursors for advanced fatigue, post-viral recovery, and mitochondrial biogenesis.",
+    "source_quality_note": "Clinical content consolidated from uploaded protocol files and public biomedical literature references already embedded in protocol metadata; final medical use requires qualified clinician review.",
+    "keywords": [
+      "mitochondrial repair",
+      "fatigue recovery",
+      "SS-31",
+      "Elamipretide",
+      "MOTS-c",
+      "NAD+ restoration",
+      "metabolic resilience",
+      "long COVID fatigue",
+      "bioenergetic therapy"
+    ],
+    "references": [
+      {
+        "pmid": "25738459",
+        "citation": "Lee C et al. The mitochondrial-derived peptide MOTS-c promotes metabolic homeostasis. Cell Metab 2015;21:443-454."
+      },
+      {
+        "pmid": "29643207",
+        "citation": "Karaa A et al. Randomized dose-escalation trial of elamipretide in adults with primary mitochondrial myopathy. Neurology 2018;90:e1212-e1221."
+      },
+      {
+        "pmid": "29670205",
+        "citation": "Martens CR et al. Chronic nicotinamide riboside supplementation is well tolerated and elevates NAD+. Nat Commun 2018;9:1286."
+      },
+      {
+        "pmid": "24721741",
+        "citation": "Szeto HH. First-in-class cardiolipin-protective compound to restore mitochondrial bioenergetics. Br J Pharmacol 2014;171:2029-2050."
+      }
+    ],
+    "visibility": "public",
+    "scientificName": "Energy · Mitochondrial Membrane Repair + Resilience via SS-31 + MOTS-C · 8 Weeks",
+    "author": {
+      "organization": "ReGen PEPT",
+      "name": "ReGen PEPT Clinical Team",
+      "title": "Peptide Specialists"
+    },
+    "evidence_grade_note": "GRADE B: MOTS-c (Lee C, Cell Metab 2015); SS-31/Elamipretide MMPOWER-3 trial (Karaa 2018); NR human RCT data (Martens CR, Nat Commun 2018). Combined protocol evidence is extrapolated from individual components.",
+    "primary_condition": "energy_performance_optimization",
+    "version": "1.0",
+    "clinical_summary": "The Mitochondrial Resilience Protocol (energy_002) is an intensified version of energy_001, using higher-dose MOTS-c and SS-31 (Elamipretide) with NAD+ precursor co-supplementation (NR or NMN). This protocol targets patients with more significant mitochondrial dysfunction, post-viral fatigue syndromes (long COVID), or athletes seeking enhanced recovery. The dual mechanism - AMPK-mediated biogenesis (MOTS-c) plus inner membrane cardiolipin stabilization (SS-31) - is augmented by restoring the NAD+/NADH ratio critical for electron transport chain efficiency.",
+    "evidence_grade": "B",
+    "pubmed_references": [
+      {
+        "authors": "Lee C et al.",
+        "journal": "Cell Metab",
+        "pmid": "25738459",
+        "title": "MOTS-c: A Mitochondrial-Derived Peptide Regulating Muscle and Fat Metabolism",
+        "year": 2015
+      },
+      {
+        "authors": "Karaa A et al.",
+        "journal": "Neurology",
+        "pmid": "29643207",
+        "title": "Randomized dose-escalation trial of elamipretide in adults with primary mitochondrial myopathy",
+        "year": 2018
+      },
+      {
+        "authors": "Martens CR et al.",
+        "journal": "Nat Commun",
+        "pmid": "29670205",
+        "title": "Chronic nicotinamide riboside supplementation is well-tolerated and elevates NAD+ in healthy middle-aged and older adults",
+        "year": 2018
+      }
+    ],
+    "updated_at": "2026-04-23T00:00:00.000Z",
+    "abbreviatedName": "Elamipretide + MOTS-C · Membrane Repair",
+    "shortCode": "ENE-002",
+    "schema_version": "antigravity_v2",
+    "description": "Bioenergetic resilience protocol combining SS-31 and NMN to support mitochondrial membrane integrity, NAD+ repletion, and systemic energy recovery.",
+    "created_at": "2026-04-02T00:00:00.000Z",
+    "review": {
+      "last_external_evidence_review_at": "2026-04-26",
+      "last_reviewed_at": "2026-04-23",
+      "review_status": "approved"
+    },
+    "regulatory_note": "MOTS-c and SS-31: research peptides, not FDA-approved. NR (Nicotinamide Riboside): FDA GRAS-listed dietary supplement (Tru Niagen, BASIS). Available OTC. Use of peptide components requires physician oversight via compounding pharmacy. Updated 2026: Elamipretide (Forzinity) received FDA accelerated approval for Barth syndrome in patients weighing at least 30 kg. Its use for general mitochondrial resilience, chronic fatigue, long COVID fatigue, or athletic recovery remains off-label/research-oriented."
+  },
+  "_patchBundle": "ReGen PEPT Protocol Export - Clinical Update 2026-04-26",
+  "canonical_enrichment": {
+    "compatibleWith": "antigravity_v2_firebase_import",
+    "auditFieldsCompleted": [
+      "eligibility_rules.indications",
+      "metadata.evidence_grade",
+      "metadata.clinical_summary",
+      "washout_recommended_weeks",
+      "expected_outcomes.qualitative",
+      "phase_blueprints",
+      "physician_supervision_required"
+    ],
+    "generatedAt": "2026-04-26T06:53:24Z"
+  },
+  "monitoring_plan": {
+    "baseline_required": [
+      "fatigue_score",
+      "recovery_score",
+      "exercise_tolerance",
+      "sleep_quality"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "week": 4,
+        "type": "repair_review",
+        "measures": [
+          "fatigue",
+          "recovery",
+          "sleep"
+        ],
+        "purpose": "Confirm early repair signal"
+      },
+      {
+        "week": 8,
+        "type": "resilience_reassessment",
+        "measures": [
+          "stress_tolerance",
+          "fatigue_resilience"
+        ],
+        "purpose": "Assess midpoint response"
+      },
+      {
+        "week": 12,
+        "type": "final_outcome_review",
+        "measures": [
+          "overall_resilience",
+          "fatigue",
+          "recovery"
+        ],
+        "purpose": "End-of-cycle evaluation"
+      }
+    ]
+  },
+  "generator_rules": {
+    "profile_notes": [
+      "Prefer for recovery-fragile phenotypes over performance-first profiles."
+    ],
+    "selection_priority": [
+      "goal_match",
+      "recovery_pattern",
+      "fatigue_pattern",
+      "age_variant_match"
+    ],
+    "base_duration_weeks": 10
+  },
+  "_enrichmentVersion": "content_v1",
+  "_syncedAt": "2026-04-26T12:46:27.813Z",
+  "_enrichedAt": "2026-04-26T12:45:55Z",
+  "safety_profile": {
+    "drug_interactions": [
+      "Insulin and antidiabetics: additive glucose-lowering risk - adjust doses carefully",
+      "Metformin: synergistic AMPK activation - monitor for excessive lactate accumulation",
+      "Sirtuins (resveratrol supplements): NR/NMN may amplify sirtuin activation - generally beneficial",
+      "Anticoagulants: no known interaction; monitor empirically in thrombopenic patients"
+    ],
+    "monitoring_required": [
+      "VAS fatigue score at baseline, week 4, week 8, week 12, week 16",
+      "Fasting glucose and HOMA-IR at baseline and week 8 and week 16",
+      "VO2max or 6-minute walk test at baseline and week 16",
+      "CRP, IL-6, NAD+ levels (if measurable) at baseline and week 12",
+      "CBC to rule out anemia or mitochondrial cytopenias at baseline"
+    ],
+    "adverse_events_serious": [
+      "No serious adverse events in MOTS-c Phase I at standard doses",
+      "SS-31 at 80 mg/day: injection site induration in MMPOWER-3 (17%); no systemic serious events",
+      "NR: no serious adverse events in human RCTs up to 2000 mg/day"
+    ],
+    "adverse_events_common": [
+      "Injection site reactions (MOTS-c + SS-31): 15-25% - rotate sites aggressively",
+      "Mild GI discomfort with high-dose NR/NMN (10-15%) - split dose or take with food",
+      "Transient flushing with NR in some patients (5%)",
+      "Mild hypoglycemia if fasted protocol extended (8-12%) - monitor glucose"
+    ],
+    "common_side_effects": [
+      "Injection-site discomfort, erythema, or mild bruising (SS-31 SC, ~18–22% of users)",
+      "Mild flushing or skin warmth post-SS-31 injection (~10%)",
+      "GI discomfort (nausea, bloating) with oral NMN supplementation, especially >500 mg/day (~12–15%)",
+      "Transient fatigue in adaptation phase weeks 1–3 (~12%)",
+      "Mild headache during initial mitochondrial upregulation (~8%)",
+      "Sleep disruption if NMN taken in afternoon/evening (~10% — administer NMN before noon)"
+    ],
+    "contraindication_summary": "Contraindicated in active malignancy (SS-31 mitochondrial rescue and NMN NAD+ repletion may provide metabolic substrate to rapidly dividing cells — requires oncologist clearance). Avoid in pregnancy or breastfeeding (no safety data). Severe hepatic or renal impairment: exercise caution with NMN metabolism. Known hypersensitivity to any protocol compound is an absolute contraindication. NMN may interact with NAD+ precursor metabolism pathways — monitor in patients on warfarin or chemotherapy. Physician supervision required throughout protocol."
+  }
+}

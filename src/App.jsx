@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
+import { trackPageView } from './hooks/useAnalytics';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 
 // Always-mounted layout components (eager — never lazy)
@@ -31,7 +32,10 @@ const AdminDashboard    = lazy(() => import('./templates/AdminDashboard'));
 const DataToolsPage     = lazy(() => import('./admin/DataToolsPage'));
 const UserDashboard     = lazy(() => import('./templates/UserDashboard'));
 const LegalConditions   = lazy(() => import('./templates/LegalConditions'));
+const PrivacyPolicy     = lazy(() => import('./templates/PrivacyPolicy'));
+const TermsOfUse        = lazy(() => import('./templates/TermsOfUse'));
 const UserSettings      = lazy(() => import('./templates/UserSettings'));
+const CatalogPage       = lazy(() => import('./templates/CatalogPage'));
 
 // New Architecture Templates (code-split)
 const ProductTemplate    = lazy(() => import('./templates/ProductTemplate'));
@@ -44,12 +48,14 @@ const CompareTemplate    = lazy(() => import('./templates/CompareTemplate'));
 const ProtocolBuilder    = lazy(() => import('./templates/ProtocolBuilder'));
 const ProtocolHistory    = lazy(() => import('./templates/ProtocolHistory'));
 const ValidationDashboard = lazy(() => import('./templates/ValidationDashboard'));
+const ProtocolArchitect  = lazy(() => import('./templates/ProtocolArchitect'));
 
 import { db } from './firebase';
 import { onSnapshot, doc } from 'firebase/firestore';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useFirestoreData } from './hooks/useFirestoreData';
 import { configService } from './services/configService';
+import { useProtocolRequests } from './hooks/useProtocolRequests';
 
 import { clearScrollLocks } from './utils/scrollLock';
 
@@ -72,7 +78,7 @@ const DEFAULT_SETTINGS = {
     us: { rate: 1, currency: 'USD', name: 'USA' },
     row: { rate: 1, currency: 'USD', name: 'Global' }
   },
-  shippingCosts: { standard: 0, express: 50, courier: 30 },
+  shippingCosts: { standard: 40, express: 80, courier: 60 },
   deliveryTimes: { standard: '5-7 days', express: '2-3 days', courier: 'next day' }
 };
 
@@ -108,12 +114,14 @@ function App() {
       .catch(() => {}); // silently fall back to the default above
   }, []);
 
-  // Global Reset on Navigation
+  // Global Reset on Navigation + GA4 page_view
   useEffect(() => {
     // Force immediate scroll to top on every navigation
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     // Clear any residual scroll locks (e.g., from a closed modal)
     clearScrollLocks();
+    // Fire GA4 page_view on every SPA route change
+    trackPageView(location.pathname + location.search, document.title);
   }, [location.pathname, location.search]);
 
   // Mount-time cleanup: flush any residual touchAction/overflow from old deployments
@@ -146,12 +154,11 @@ function App() {
   }, [authLoading]);
 
 
-  // ── Core catalog data (products + variants, FAQs, mappings, protocol index) ──
+  // ── Core catalog data (products + variants, FAQs, protocol index) ──
   const {
     products,
     setProducts,
     allFaqs,
-    allMappings,
     protocolIndex,
     loadingProducts,
   } = useFirestoreData();
@@ -164,6 +171,8 @@ function App() {
       return {};
     }
   });
+
+  const { protocolRequests, addProtocolRequest, removeProtocolRequest } = useProtocolRequests();
 
   // Track metadata for items (e.g., if they were added via Protocol Builder)
   const [cartMetadata, setCartMetadata] = useState(() => {
@@ -380,6 +389,20 @@ function App() {
   };
 
   const cartCount = useMemo(() => Object.values(cart).reduce((a, b) => a + b, 0), [cart]);
+
+  // Breakdown by item type: protocols 🧬 | kits 📦 | peptides 🧪
+  const cartBreakdown = useMemo(() => {
+    const breakdown = { protocols: 0, kits: 0, peptides: 0 };
+    Object.entries(cart).forEach(([key, qty]) => {
+      const meta = cartMetadata[key];
+      const category = (meta?.category || meta?.type || '').toLowerCase();
+      if (category.includes('protocol')) breakdown.protocols += qty;
+      else if (category.includes('kit')) breakdown.kits += qty;
+      else breakdown.peptides += qty; // default: peptide/product
+    });
+    return breakdown;
+  }, [cart, cartMetadata]);
+
   const isHome = location.pathname === '/';
 
   // Memoised filtered product list — avoids 21 inline filter calls per render
@@ -625,6 +648,27 @@ function App() {
 
   return (
     <div className="app">
+      {/* ── Checkout Overlay (renders above all routes) ── */}
+      {showCheckout && (
+        <Suspense fallback={<RouteFallback />}>
+          <Checkout
+            cart={cart}
+            cartMetadata={cartMetadata}
+            region={region}
+            isProfessional={isProfessional}
+            EXCHANGE_RATES={settings.exchangeRates}
+            detectedCountry={settings.detectedCountry}
+            products={activeProducts}
+            shippingCosts={settings.shippingCosts}
+            onBack={() => setShowCheckout(false)}
+            onComplete={() => {
+              setCart({});
+              setCartMetadata({});
+            }}
+          />
+        </Suspense>
+      )}
+
       {!showCheckout && (
         <Header
           scrolled={scrolled}
@@ -636,6 +680,7 @@ function App() {
             try { localStorage.removeItem('mp_region'); } catch (e) { }
           }}
           cartCount={cartCount}
+          cartBreakdown={cartBreakdown}
           onOpenCart={() => setIsCartOpen(true)}
           onOpenSearch={() => setIsSearchOpen(true)}
           isCartOpen={isCartOpen}
@@ -666,7 +711,9 @@ function App() {
             />
           } />
 
-          <Route path="/catalog" element={<Navigate to="/products" replace />} />
+          <Route path="/catalog" element={
+            <CatalogPage onOpenSearch={openSearchWithQuery} />
+          } />
           <Route path="/products" element={
             <Catalog
               region={region}
@@ -696,7 +743,6 @@ function App() {
               onAddToCart={updateCart}
               products={activeProducts}
               allFaqs={allFaqs}
-              allMappings={allMappings}
             />
           } />
           <Route path="/collection/:slug" element={
@@ -715,13 +761,13 @@ function App() {
               EXCHANGE_RATES={settings.exchangeRates}
               products={activeProducts}
               allFaqs={allFaqs}
-              allMappings={allMappings}
             />
           } />
           {/* Protocol Redirects */}
           <Route path="/protocol" element={<Navigate to="/protocol-builder" replace />} />
           <Route path="/protocol/" element={<Navigate to="/protocol-builder" replace />} />
           <Route path="/protocol/builder" element={<Navigate to="/protocol-builder" replace />} />
+          <Route path="/protocols" element={<Navigate to="/protocol-builder" replace />} />
 
           <Route path="/protocol/:slug" element={
             <ProtocolTemplate
@@ -732,7 +778,19 @@ function App() {
               setRegion={setRegion}
               products={activeProducts}
               allFaqs={allFaqs}
-              allMappings={allMappings}
+            />
+          } />
+
+          {/* Plural alias — /protocols/:slug → same ProtocolTemplate */}
+          <Route path="/protocols/:slug" element={
+            <ProtocolTemplate
+              region={region}
+              isProfessional={isProfessional}
+              cart={cart}
+              updateCart={updateCart}
+              setRegion={setRegion}
+              products={activeProducts}
+              allFaqs={allFaqs}
             />
           } />
 
@@ -742,7 +800,6 @@ function App() {
             <SearchTemplate
               products={activeProducts}
               allFaqs={allFaqs}
-              allMappings={allMappings}
               protocolIndex={protocolIndex}
             />
           } />
@@ -769,15 +826,20 @@ function App() {
               setCartMetadata={setCartMetadata}
               onOpenCart={() => setIsCartOpen(true)}
               products={activeProducts}
+              addProtocolRequest={addProtocolRequest}
             />
           } />
 
           <Route path="/protocol-builder/history" element={<ProtocolHistory />} />
 
+          <Route path="/protocol-architect" element={<ProtocolArchitect />} />
+
           {/* ---- Previously missing routes (broken after React Router migration) ---- */}
           <Route path="/about" element={<About onBack={() => navigate(-1)} />} />
           <Route path="/quality" element={<Quality onBack={() => navigate(-1)} />} />
           <Route path="/legal" element={<LegalConditions onBack={() => navigate(-1)} />} />
+          <Route path="/privacy" element={<PrivacyPolicy onBack={() => navigate(-1)} />} />
+          <Route path="/terms" element={<TermsOfUse onBack={() => navigate(-1)} />} />
           <Route path="/supplies" element={
             <SuppliesView
               onBack={() => navigate(-1)}
@@ -812,6 +874,7 @@ function App() {
           <Route path="/login" element={
             <AuthPage onBack={() => navigate(-1)} />
           } />
+          <Route path="/register" element={<Navigate to="/login?tab=register" replace />} />
           <Route path="/auth" element={<Navigate to="/login" replace />} />
           <Route path="/academy" element={
             <AcademyView onSelectCourse={(courseId) => navigate(`/academy/${courseId}`)} />
@@ -823,23 +886,24 @@ function App() {
             <Calculator onBack={() => navigate(-1)} />
           } />
 
+          {/* ── Blueprint route — alias for /protocol/:id (reads from Firestore 'protocols' collection) ── */}
+          <Route path="/blueprint/:slug" element={
+            <ProtocolTemplate
+              region={region}
+              isProfessional={isProfessional}
+              cart={cart}
+              updateCart={updateCart}
+              setRegion={setRegion}
+              products={activeProducts}
+              allFaqs={allFaqs}
+            />
+          } />
+
+
+
           <Route path="*" element={
             <>
-              {showCheckout ? (
-                <Checkout
-                  cart={cart}
-                  region={region}
-                  isProfessional={isProfessional}
-                  EXCHANGE_RATES={settings.exchangeRates}
-                  detectedCountry={settings.detectedCountry}
-                  products={activeProducts}
-                  onBack={() => setShowCheckout(false)}
-                  onComplete={() => {
-                    setCart({});
-                    // Checkout has its own success view
-                  }}
-                />
-              ) : selectedProduct ? (
+              {selectedProduct ? (
                 <ProductDetail
                   product={selectedProduct}
                   onBack={() => setSelectedProduct(null)}
@@ -853,7 +917,6 @@ function App() {
                   onSelectProduct={handleProductSelect}
                   products={activeProducts}
                   allFaqs={allFaqs}
-                  allMappings={allMappings}
                 />
               ) : selectedCategory === 'Research Supplies' ? (
                 <SuppliesView
@@ -905,7 +968,6 @@ function App() {
                   EXCHANGE_RATES={settings.exchangeRates}
                   products={activeProducts}
                   allFaqs={allFaqs}
-                  allMappings={allMappings}
                 />
               ) : showObjectives ? (
                 <ObjectivesView
@@ -931,7 +993,6 @@ function App() {
                   isProfessional={isProfessional}
                   products={activeProducts}
                   allFaqs={allFaqs}
-                  allMappings={allMappings}
                 />
               ) : showCustomSynthesis ? (
                 <CustomSynthesis onBack={() => setShowCustomSynthesis(false)} />
@@ -949,7 +1010,7 @@ function App() {
                 <Quality onBack={() => setShowQuality(false)} />
               ) : showAuth ? (
                 <AuthPage onBack={() => setShowAuth(false)} />
-              ) : showAdmin ? (
+              ) : showAdmin && isAdmin ? (
                 <AdminDashboard onBack={() => setShowAdmin(false)} />
               ) : showDashboard ? (
                 <UserDashboard onBack={() => setShowDashboard(false)} />
@@ -1005,7 +1066,10 @@ function App() {
         region={region}
         isProfessional={isProfessional}
         EXCHANGE_RATES={settings.exchangeRates}
+        shippingCosts={settings.shippingCosts}
         products={activeProducts}
+        protocolRequests={protocolRequests}
+        removeProtocolRequest={removeProtocolRequest}
         onCheckout={() => {
           setIsCartOpen(false);
           setShowCheckout(true);
@@ -1019,6 +1083,7 @@ function App() {
           onOpenCart={() => setIsCartOpen(true)}
           onOpenProducts={() => navigate('/collection/peptides')}
           cartCount={cartCount}
+          cartBreakdown={cartBreakdown}
         />
       )}
 
@@ -1035,7 +1100,6 @@ function App() {
         }}
         products={products}
         allFaqs={allFaqs}
-        allMappings={allMappings}
         protocolIndex={protocolIndex}
         initialQuery={searchQuery}
         onQueryChange={setSearchQuery}

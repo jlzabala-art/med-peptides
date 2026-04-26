@@ -1,0 +1,403 @@
+{
+  "protocol_id": "met_001",
+  "protocol_slug": "metabolic-optimization-structured",
+  "protocol_title": "Metabolic Optimization Protocol",
+  "protocol_version": "v6.0",
+  "status": "approved",
+  "active": true,
+  "metadata": {
+    "primary_goal": "metabolic_optimization",
+    "primary_condition": "insulin_sensitivity_weight_metabolic_efficiency_support",
+    "complexity_level": "standard",
+    "visibility": "public",
+    "source_type": "curated_library",
+    "source_reference": "ReGen_PEPT_MET_001_Protocol_2026",
+    "author": {
+      "name": "ReGen PEPT Clinical Team",
+      "organization": "ReGen PEPT",
+      "title": "Peptide Specialists"
+    },
+    "review": {
+      "review_status": "approved",
+      "last_reviewed_at": "2026-04-02"
+    },
+    "created_at": "2026-04-02T00:00:00.000Z",
+    "updated_at": "2026-04-02T00:00:00.000Z",
+    "evidence_basis": {
+      "core_active": "Tirzepatide",
+      "optional_support": "MOTS-c",
+      "evidence_strength": "strong_for_core_active",
+      "evidence_notes": [
+        "Tirzepatide has the strongest human clinical basis in this set for metabolic / obesity support.",
+        "MOTS-c is included as an adaptive bioenergetic adjunct."
+      ]
+    }
+  },
+  "eligibility_rules": {
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ],
+    "supported_goals": [
+      "metabolic_optimization",
+      "insulin_sensitivity_support",
+      "weight_management",
+      "metabolic_health"
+    ],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "patient_demographic",
+      "age_group",
+      "start_date"
+    ],
+    "contraindications": [],
+    "relative_cautions": []
+  },
+  "variant_rules": {
+    "age_variants": {
+      "18-35": {
+        "default_duration_weeks": 8,
+        "monitoring_intensity": "standard"
+      },
+      "36-50": {
+        "default_duration_weeks": 12,
+        "monitoring_intensity": "moderate"
+      },
+      "51-65": {
+        "default_duration_weeks": 16,
+        "monitoring_intensity": "enhanced"
+      },
+      "65+": {
+        "default_duration_weeks": 20,
+        "monitoring_intensity": "enhanced"
+      }
+    },
+    "sex_variants": {
+      "female": {
+        "recommended_flags": [],
+        "special_notes": [
+          "Use conservative ramping if sensitivity profile is high."
+        ]
+      },
+      "male": {
+        "recommended_flags": [],
+        "special_notes": [
+          "Reassess tolerance and response before escalation."
+        ]
+      }
+    },
+    "duration_variants": {
+      "8_weeks": {
+        "mode": "short",
+        "extra_monitoring": false
+      },
+      "12_weeks": {
+        "mode": "standard",
+        "extra_monitoring": false
+      },
+      "16_weeks": {
+        "mode": "extended",
+        "extra_monitoring": true
+      },
+      "20_weeks": {
+        "mode": "extended_plus",
+        "extra_monitoring": true
+      }
+    },
+    "tempo_variants": {
+      "conservative": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "up"
+      },
+      "standard": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "none"
+      },
+      "aggressive": {
+        "dose_step_interval_weeks": 2,
+        "monitoring_intensity_modifier": "up"
+      }
+    }
+  },
+  "phase_blueprints": [
+    {
+      "phase_key": "initiation",
+      "phase_title": "Initiation",
+      "default_start_week": 1,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "appetite_control",
+        "metabolic_activation",
+        "tolerance_building"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_tirzepatide",
+          "product_title": "Tirzepatide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "starting_weekly_dose": 2.5,
+            "administration_frequency": "weekly",
+            "administration_days_default": [
+              "Monday"
+            ]
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_tirzepatide",
+            "route": "SC"
+          }
+        },
+        {
+          "product_id": "prd_motsc",
+          "product_title": "MOTS-c",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "2x_week",
+            "starting_intensity": "optional_low",
+            "administration_days_default": [
+              "Tuesday",
+              "Thursday"
+            ],
+            "activation_condition": "if_energy_or_metabolic_resilience_support_needed"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_motsc",
+            "route": "SC"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 1,
+          "event_type": "baseline_review",
+          "title": "Baseline metabolic and tolerance review"
+        }
+      ]
+    },
+    {
+      "phase_key": "optimization",
+      "phase_title": "Optimization",
+      "default_start_week": 5,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "fat_loss_support",
+        "insulin_sensitivity_support",
+        "recovery_support"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_tirzepatide",
+          "product_title": "Tirzepatide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "default_weekly_dose": 5,
+            "possible_next_step_dose": 7.5,
+            "administration_frequency": "weekly",
+            "administration_days_default": [
+              "Monday"
+            ]
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_tirzepatide",
+            "route": "SC"
+          }
+        },
+        {
+          "product_id": "prd_motsc",
+          "product_title": "MOTS-c",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "3x_week",
+            "intensity": "conditional",
+            "administration_days_default": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "activation_condition": "if_bioenergetic_support_priority"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_motsc",
+            "route": "SC"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 8,
+          "event_type": "metabolic_reassessment",
+          "title": "Mid-course metabolic review"
+        }
+      ]
+    },
+    {
+      "phase_key": "maintenance",
+      "phase_title": "Maintenance",
+      "default_start_week": 9,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "maintenance_of_response",
+        "rebound_prevention"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_tirzepatide",
+          "product_title": "Tirzepatide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "default_weekly_dose": 7.5,
+            "max_weekly_dose": 10,
+            "administration_frequency": "weekly",
+            "administration_days_default": [
+              "Monday"
+            ]
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_tirzepatide",
+            "route": "SC"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 12,
+          "event_type": "outcome_review",
+          "title": "Final metabolic outcome review"
+        }
+      ]
+    }
+  ],
+  "monitoring_plan": {
+    "baseline_required": [
+      "HbA1c",
+      "fasting_glucose",
+      "lipid_profile",
+      "AST",
+      "ALT",
+      "creatinine",
+      "body_weight",
+      "waist_circumference"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "week": 4,
+        "type": "tolerance_and_safety",
+        "measures": [
+          "body_weight",
+          "fasting_glucose",
+          "AST",
+          "ALT"
+        ],
+        "purpose": "Early tolerance and safety review"
+      },
+      {
+        "week": 8,
+        "type": "metabolic_reassessment",
+        "measures": [
+          "HbA1c",
+          "fasting_glucose",
+          "lipid_profile"
+        ],
+        "purpose": "Midpoint metabolic reassessment"
+      },
+      {
+        "week": 12,
+        "type": "final_outcome_review",
+        "measures": [
+          "HbA1c",
+          "body_weight",
+          "waist_circumference",
+          "lipid_profile"
+        ],
+        "purpose": "End-of-cycle evaluation"
+      }
+    ]
+  },
+  "expected_outcomes": {
+    "qualitative": [
+      "improved metabolic control",
+      "better appetite regulation",
+      "weight reduction support"
+    ],
+    "quantitative_ranges": {
+      "weight_loss_percent": "5-12%",
+      "HbA1c_reduction_percent": "0.5-1.2"
+    }
+  },
+  "generator_rules": {
+    "selection_priority": [
+      "goal_match",
+      "metabolic_status",
+      "age_variant_match",
+      "duration_variant_match"
+    ],
+    "tirzepatide_escalation_profiles": {
+      "standard": [
+        2.5,
+        5,
+        7.5,
+        10
+      ],
+      "moderate": [
+        2.5,
+        5,
+        7.5
+      ],
+      "conservative": [
+        2.5,
+        5,
+        5,
+        7.5
+      ]
+    }
+  },
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "patient_demographic": null,
+      "age_group": null,
+      "duration_weeks": null,
+      "start_date": null,
+      "tempo_preference": "standard"
+    },
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "resolved_monitoring": [],
+    "resolved_costs": {},
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    }
+  },
+  "legacy_compatibility": {
+    "enabled": true,
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ],
+    "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode."
+  }
+}

@@ -1,0 +1,566 @@
+{
+  "protocol_duration_weeks": 8,
+  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "bundleVersion": "2.0",
+  "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
+  "protocol_is_physician_authored": false,
+  "seeded_at": "2026-04-25T06:10:36.133Z",
+  "protocol_source_version": "v5.0",
+  "dosing_enrichment": {
+    "titration_note": "Week 1-2: BPC-157 at 250 mcg/day SC. Week 3 onward: increase to 500 mcg/day if well tolerated. Add Thymulin at 20 ng/day from week 2. If mucosal healing is primary goal, BPC-157 alone at 500-750 mcg/day for first 4 weeks before adding Thymulin.",
+    "cycling_recommendation": "10-12 week protocol with 4-6 week washout. BPC-157 can be cycled more frequently (2-3 rounds per year) due to its short half-life and gastric safety profile. Thymulin benefits plateau at 12 weeks; re-evaluate biomarkers before repeat cycle.",
+    "maintenance_dose": "BPC-157: 250-500 mcg/day SC or intranasally. Thymulin: 20-40 ng/day SC (nanoparticle or compounded formulation). Combine in split morning/evening administration.",
+    "timing_optimization": "BPC-157: morning SC injection (fasted or fed, no restriction). Thymulin: evening SC injection to align with thymic circadian release pattern. Avoid co-injection in same site."
+  },
+  "complexity_level": "moderate",
+  "eligibility_rules": {
+    "contraindications": [
+      "active_malignancy",
+      "pregnancy_or_breastfeeding",
+      "severe_uncontrolled_autoimmune_disease",
+      "known_hypersensitivity_to_protocol_compounds"
+    ],
+    "supported_goals": [
+      "gut_inflammation_support",
+      "immune_stabilization",
+      "mucosal_repair",
+      "mast_cell_and_cytokine_modulation"
+    ],
+    "relative_cautions": [
+      "history_of_cancer",
+      "active_immunosuppressive_therapy",
+      "severe_GI_bleeding",
+      "MCAS_with_high_sensitivity_profile"
+    ],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "gut_symptom_profile",
+      "inflammatory_history",
+      "autoimmune_history",
+      "age_group",
+      "start_date"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "tempo_preference": "standard",
+      "age_group": null,
+      "patient_demographic": null,
+      "duration_weeks": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "protocol_author_notes": "Official curated protocol for general clinical use.",
+  "_schemaVersion": "antigravity_v2",
+  "protocol_author_organization": "ReGen PEPT",
+  "protocol_last_reviewed_at": "2026-03-29",
+  "protocol_source_reference": "internal_guide",
+  "expected_outcomes": {
+    "qualitative": [
+      "Reduction in systemic inflammation and mucosal immune dysregulation",
+      "Improved gut barrier integrity (leaky gut correction)",
+      "Accelerated recovery from post-viral immune exhaustion",
+      "Restoration of Th1/Th2 immune balance post-chronic stress",
+      "Enhanced wound healing and tissue regenerative response"
+    ],
+    "time_to_onset_weeks": 3,
+    "quantitative_ranges": {
+      "week_8": "CRP normalization in 50-60% of inflammatory responders; subjective energy and immune resilience improvement in 70% (patient-reported)",
+      "week_4": "Gut permeability markers (zonulin, LPS) reduced 20-30% from baseline; NK cell count recovery begins (Gombotz 2007)",
+      "week_12": "Sustained reduction in TNF-alpha and IL-1beta in ~65-70% of responders; mucosal healing completion in GI inflammatory models (Sikiric 2018)"
+    },
+    "responder_rate_pct": "65-75% for inflammatory reduction; ~70% for tissue healing and mucosal repair endpoints"
+  },
+  "protocol_slug": "immune-kpv-thymosin-8w",
+  "phases": [
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "2x_week",
+          "faq_ref": "thymosinalpha1_faq",
+          "productId": "Thymosin_Alpha1-6mg-vial",
+          "product_slug": "thymosin-alpha-1",
+          "pubmed_ref": "thymosinalpha1_pubmed",
+          "route": "subcutaneous",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 4
+        },
+        {
+          "dosing_frequency": "daily",
+          "faq_ref": "kpv_faq",
+          "productId": "KPV-5mg-vial",
+          "product_slug": "kpv",
+          "pubmed_ref": "kpv_pubmed",
+          "route": "subcutaneous",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 4
+        }
+      ],
+      "end_week": 4,
+      "phase_number": 1,
+      "phase_title": "Immune Reset",
+      "start_week": 1
+    },
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "weekly",
+          "productId": "Thymosin_Alpha1-6mg-vial",
+          "product_slug": "thymosin-alpha-1",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 2
+        },
+        {
+          "dosing_frequency": "3x_week",
+          "productId": "KPV-5mg-vial",
+          "product_slug": "kpv",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 2
+        }
+      ],
+      "end_week": 8,
+      "phase_number": 2,
+      "phase_title": "Stabilization",
+      "start_week": 5
+    }
+  ],
+  "protocol_is_curated": true,
+  "number_of_phases": 2,
+  "primary_goal": "Immune / Inflammation",
+  "risk_class": "moderate",
+  "protocol_review_status": "approved",
+  "protocol_source_type": "curated_library",
+  "active": true,
+  "overview_summary": "Immune and inflammatory stabilization protocol combining Thymosin Alpha-1 with KPV to support T-cell calibration, NF-kB modulation, mucosal inflammation control, and mast-cell-related symptom reduction.",
+  "protocol_id": "immune_002",
+  "protocol_version": "v6.1",
+  "economics": {
+    "total_protocol_cost_estimate": 700,
+    "total_vials_required": 12
+  },
+  "protocol_author_title": "Peptide Specialists",
+  "confidence_score": 88,
+  "protocol_title": "Thymosin Alpha-1 & KPV Anti-Inflammatory Protocol",
+  "legacy_compatibility": {
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ],
+    "notes": "Enhanced protocol preserves legacy fields while supporting canonical blueprint-based loading.",
+    "enabled": true
+  },
+  "physician_supervision_required": true,
+  "status": "approved",
+  "_importedAt": {
+    "_nanoseconds": 991000000,
+    "_seconds": 1777189741
+  },
+  "_patchSchema": "antigravity_v2",
+  "id": "immune_002",
+  "phase_blueprints": [
+    {
+      "phase_key": "immune_reset",
+      "phase_title": "Immune Reset",
+      "default_start_week": 1,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "legacy_phase_mapping",
+        "protocol_continuity"
+      ],
+      "drugs": [
+        {
+          "product_id": "Thymosin_Alpha1-6mg-vial",
+          "product_title": "Thymosin Alpha 1",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "2x_week",
+            "selected_strength": "10mg",
+            "vials_required_for_phase": 4,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "Thymosin_Alpha1-6mg-vial",
+            "route": "subcutaneous"
+          }
+        },
+        {
+          "product_id": "KPV-5mg-vial",
+          "product_title": "Kpv",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "daily",
+            "selected_strength": "10mg",
+            "vials_required_for_phase": 4,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "KPV-5mg-vial",
+            "route": "subcutaneous"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 1,
+          "event_type": "phase_start",
+          "title": "Start Immune Reset"
+        },
+        {
+          "week": 4,
+          "event_type": "phase_review",
+          "title": "Review Immune Reset"
+        }
+      ]
+    },
+    {
+      "phase_key": "stabilization",
+      "phase_title": "Stabilization",
+      "default_start_week": 5,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "legacy_phase_mapping",
+        "protocol_continuity"
+      ],
+      "drugs": [
+        {
+          "product_id": "Thymosin_Alpha1-6mg-vial",
+          "product_title": "Thymosin Alpha 1",
+          "route": "protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "weekly",
+            "selected_strength": "10mg",
+            "vials_required_for_phase": 2,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "Thymosin_Alpha1-6mg-vial",
+            "route": "protocol_defined"
+          }
+        },
+        {
+          "product_id": "KPV-5mg-vial",
+          "product_title": "Kpv",
+          "route": "protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "3x_week",
+            "selected_strength": "10mg",
+            "vials_required_for_phase": 2,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "KPV-5mg-vial",
+            "route": "protocol_defined"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 5,
+          "event_type": "phase_start",
+          "title": "Start Stabilization"
+        },
+        {
+          "week": 8,
+          "event_type": "phase_review",
+          "title": "Review Stabilization"
+        }
+      ]
+    }
+  ],
+  "category": "Immune & Inflammation",
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 4,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "CRP",
+        "IL-6 (if available)",
+        "White cell differential"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 8,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "Full inflammatory panel: CRP, ESR, IL-6, TNF-α",
+        "Immune cell subsets (CD4/CD8 ratio)"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "riskManagement": {
+    "contraindications": [
+      "Active autoimmune disease flare",
+      "Concurrent immunosuppressive therapy (relative)",
+      "Pregnancy"
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (15–35%)",
+        "management": "Rotate sites; use proper aseptic technique."
+      },
+      {
+        "effect": "Fluid retention / mild edema",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Reduce dose; monitor blood pressure; salt restriction."
+      },
+      {
+        "effect": "Nausea / GI discomfort",
+        "frequency": "Common (10–25%)",
+        "management": "Dose with food; split doses; titrate slowly."
+      },
+      {
+        "effect": "Elevated fasting glucose",
+        "frequency": "Uncommon (5%)",
+        "management": "Monitor fasting glucose weekly; consult if persistent."
+      },
+      {
+        "effect": "Mood changes / irritability",
+        "frequency": "Rare (<3%)",
+        "management": "Reduce dose; psychological support if needed."
+      }
+    ],
+    "escalation_criteria": [
+      "Severe or worsening edema — STOP, cardiovascular evaluation",
+      "Fasting glucose > 7.0 mmol/L (126 mg/dL) on two occasions — Endocrinology referral",
+      "Allergic reaction — STOP, emergency protocol",
+      "Hypertensive urgency (BP > 180/110) — STOP, immediate medical attention"
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ]
+  },
+  "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+  "clinical_evidence_update_2026": {
+    "evidence_limitations": [
+      "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+      "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+      "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+    ],
+    "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+    "last_updated_at": "2026-04-26T08:05:00.000Z",
+    "latest_clinical_notes": [
+      "KPV remains exploratory/translational for gut inflammation and mast-cell modulation; human evidence remains limited.",
+      "Thymosin alpha-1 may be immunomodulatory; screen for autoimmune flare, immunosuppressive therapy, transplant status, malignancy history, and active infection.",
+      "Add stool/gut symptom tracking only as supportive monitoring, not diagnostic replacement."
+    ],
+    "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+    "regulatory_status": "Thymosin Alpha-1 has international clinical use/approvals in several countries for immune-related indications but is not FDA-approved in the United States. TB-500, KPV, thymulin and related peptide uses remain investigational/compounded/research depending on jurisdiction.",
+    "evidence_update": "Immune protocols should retain physician supervision and autoimmune/malignancy cautions.",
+    "updated_at": "2026-04-26T09:05:00+02:00",
+    "source_refs": [],
+    "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+  },
+  "_importBundle": "ReGen PEPT Core Clinical Protocol Library",
+  "_syncSource": "export/protocols/immune_002.json",
+  "metadata": {
+    "longDescription": "This protocol pairs Thymosin Alpha-1 (systemic T-cell and innate immune modulation; see immune_001) with KPV (Lys-Pro-Val), a tripeptide derived from the C-terminus of α-melanocyte-stimulating hormone (α-MSH). KPV exerts potent anti-inflammatory effects by inhibiting NF-κB nuclear translocation, reducing production of IL-1β, IL-6, TNF-α, and interferon-γ, and suppressing mast cell degranulation (Dalmasso G et al., Gastroenterology 2008; Catania A et al., Endocr Rev 2004). KPV has demonstrated efficacy in murine models of colitis, intestinal inflammation, and dermatitis, and penetrates epithelial barriers due to its small size, making it especially suitable for gut-associated inflammatory conditions. Combined with Tα1 (which restores Th1/Th2 balance and regulatory T-cell function), this protocol provides both upstream immune calibration and downstream cytokine suppression — a complementary dual strategy for conditions including IBD, systemic inflammation, mast-cell activation syndrome (MCAS), and autoimmune disorders.",
+    "primary_goal": "Immune / Inflammation",
+    "keywords": [
+      "KPV peptide anti-inflammatory",
+      "Thymosin Alpha-1 autoimmune protocol",
+      "NF-kB inhibitor peptide",
+      "alpha-MSH anti-inflammatory peptide",
+      "mast cell peptide protocol",
+      "gut inflammation peptide"
+    ],
+    "references": [
+      {
+        "citation": "Dalmasso G et al. The peptide KPV inhibits NF-κB in intestinal epithelial cells. Gastroenterology 2008;134:1255-1264.",
+        "pmid": "18471516"
+      },
+      {
+        "citation": "Catania A et al. The melanocortin system in control of inflammation. Endocr Rev 2004;25:956-983.",
+        "pmid": "15483236"
+      },
+      {
+        "citation": "Goldstein AL, Goldstein A. Thymosin alpha 1 clinical applications. Expert Opin Biol Ther 2009;9:593-608.",
+        "pmid": "19519282"
+      }
+    ],
+    "visibility": "public",
+    "scientificName": "Thymosin Alpha-1 & KPV Anti-Inflammatory Mast-Cell & NF-κB Inhibition Protocol",
+    "description": "10-week immune protocol combining Thymosin Alpha-1 T-cell immunomodulation with KPV α-MSH-derived anti-inflammatory NF-κB inhibition for gut inflammation, mast-cell hyperactivation, and autoimmune modulation.",
+    "primary_condition": "immune_support_maintenance",
+    "version": "1.0",
+    "schema_version": "antigravity_v2",
+    "updated_at": "2026-04-25T00:00:00.000Z",
+    "abbreviatedName": "Tα1 + BPC-157 · Immune-Cytoprotection",
+    "shortCode": "IMM-002",
+    "created_at": "2026-04-02T00:00:00.000Z",
+    "clinical_summary": "Thymosin Alpha-1 provides systemic immune restoration via TH1 cytokine activation and NK cell augmentation. KPV (Lys-Pro-Val), a C-terminal α-MSH tripeptide, binds MC1R/MC3R on immune and epithelial cells to suppress NF-κB, IL-1β, and TNF-α, making it the primary targeted anti-inflammatory agent for mucosal and gut inflammation. This protocol is suited for autoimmune-associated fatigue, IBD-pattern inflammation, or chronic low-grade systemic inflammation.",
+    "evidence_grade": "C",
+    "source_quality_note": "Clinical content consolidated from protocol library and public biomedical literature; final medical use requires qualified clinician review.",
+    "review": {
+      "last_external_evidence_review_at": "2026-04-26",
+      "last_reviewed_at": "2026-04-25",
+      "review_status": "approved"
+    },
+    "regulatory_note": "Updated 2026: KPV is not FDA/EMA-approved for inflammatory bowel disease, MCAS, autoimmune disease, or systemic inflammation; use remains research-oriented under clinician supervision."
+  },
+  "monitoring_plan": {
+    "baseline_required": [
+      "CBC_with_differential",
+      "CRP",
+      "ESR",
+      "gut_symptom_score",
+      "zonulin_if_available",
+      "TNF_alpha_if_available",
+      "IL_1beta_if_available",
+      "autoimmune_history_review"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "labs": [
+          "CRP",
+          "gut_symptom_score",
+          "CBC_with_differential"
+        ],
+        "purpose": "Assess early anti-inflammatory and gut barrier response.",
+        "type": "mucosal_inflammation_review",
+        "week": 4
+      },
+      {
+        "labs": [
+          "CRP",
+          "ESR",
+          "zonulin_if_available"
+        ],
+        "purpose": "Evaluate stabilization of inflammatory and mucosal markers.",
+        "type": "immune_stabilization_review",
+        "week": 8
+      },
+      {
+        "labs": [
+          "CBC_with_differential",
+          "CRP",
+          "symptom_recurrence_log"
+        ],
+        "purpose": "Assess durability of response and suitability for repeat cycle.",
+        "type": "follow_up_review",
+        "week": 12
+      }
+    ]
+  },
+  "generator_rules": {
+    "allow_acceleration": false,
+    "base_duration_weeks": 8,
+    "notes": "Default generator rules – pending clinical review.",
+    "tempo_variants": [
+      "standard"
+    ],
+    "allow_extension": false
+  },
+  "_schemaGapFixed": {
+    "_nanoseconds": 86000000,
+    "_seconds": 1777190722
+  },
+  "_patchedAt": {
+    "schema_gap_fix": "2026-04-26T12:37:11Z"
+  },
+  "_patchBundle": "ReGen PEPT Protocol Export - Clinical Update 2026-04-26",
+  "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
+  "variant_rules": {
+    "tempo": {
+      "standard": {
+        "notes": "Standard tempo – no adjustment.",
+        "phase_duration_multiplier": 1
+      },
+      "accelerated": {
+        "notes": "Accelerated tempo – physician review required.",
+        "phase_duration_multiplier": 0.75
+      },
+      "extended": {
+        "notes": "Extended tempo – for slower responders.",
+        "phase_duration_multiplier": 1.33
+      }
+    }
+  },
+  "safety_profile": {
+    "drug_interactions": [
+      "BPC-157 may attenuate NSAID-induced GI damage - beneficial interaction but monitor for altered pain perception",
+      "Avoid simultaneous immunosuppressants with Thymulin - antagonistic at T-cell differentiation level",
+      "BPC-157 theoretically potentiates angiogenic growth factors - use caution in cancer history"
+    ],
+    "monitoring_required": [
+      "Zonulin serum levels at baseline and week 8 for gut permeability tracking",
+      "CBC and CRP at weeks 0, 6, 12",
+      "TNF-alpha and IL-1beta if inflammatory recovery is primary endpoint",
+      "Subjective energy and illness frequency log (patient-reported monthly)"
+    ],
+    "adverse_events_serious": [
+      "No serious AEs reported in published BPC-157 rodent and human case literature at standard doses",
+      "Thymulin: insufficient long-term human data at immune-optimization doses - monitor for unexpected immune shifts"
+    ],
+    "adverse_events_common": [
+      "Mild nausea or GI discomfort with BPC-157 oral/SC (5-10%)",
+      "Transient injection site irritation (10-15%)",
+      "Mild dizziness in first 1-2 days at higher BPC-157 doses"
+    ]
+  },
+  "canonical_enrichment": {
+    "compatibleWith": "antigravity_v2_firebase_import",
+    "generatedAt": "2026-04-26T09:05:00+02:00",
+    "auditFieldsCompleted": [
+      "phase_blueprints_legacy_mapped"
+    ]
+  },
+  "_syncedAt": "2026-04-26T12:46:29.477Z"
+}

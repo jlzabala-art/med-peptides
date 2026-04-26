@@ -4,6 +4,7 @@ const { initializeApp } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const nodemailer = require("nodemailer");
 const { buildOrderEmail } = require("./emailTemplates/orderNotification");
+const { buildClientConfirmationEmail } = require("./emailTemplates/clientConfirmation");
 
 initializeApp();
 
@@ -15,8 +16,8 @@ const gmailAppPass = defineSecret("GMAIL_APP_PASS");
 
 /**
  * Triggered whenever a new document is created in the `orders` collection.
- * Fetches all admin users from Firestore and sends them an HTML order email
- * via Gmail SMTP using an App Password.
+ * 1. Fetches all admin users from Firestore and sends them an HTML order email.
+ * 2. Sends a confirmation email to the customer who placed the order.
  */
 exports.onNewOrder = onDocumentCreated(
   {
@@ -41,20 +42,6 @@ exports.onNewOrder = onDocumentCreated(
       .where("role", "==", "admin")
       .get();
 
-    if (adminSnap.empty) {
-      console.warn("No admin users found. Skipping email notification.");
-      return;
-    }
-
-    const adminEmails = adminSnap.docs
-      .map((doc) => doc.data().email)
-      .filter(Boolean);
-
-    if (adminEmails.length === 0) {
-      console.warn("Admin users found but none have an email field.");
-      return;
-    }
-
     // 2. Gmail SMTP transporter (requires App Password, not regular password)
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
@@ -66,17 +53,46 @@ exports.onNewOrder = onDocumentCreated(
       },
     });
 
-    // 3. Build and send email to every admin
-    const { subject, html } = buildOrderEmail(orderData);
     const fromAddress = `"Med-Peptides" <${gmailUser.value()}>`;
+    const sendPromises = [];
 
-    const sendPromises = adminEmails.map((to) =>
-      transporter.sendMail({ from: fromAddress, to, subject, html })
-    );
+    // 3a. Send notification to every admin
+    if (!adminSnap.empty) {
+      const adminEmails = adminSnap.docs
+        .map((doc) => doc.data().email)
+        .filter(Boolean);
 
+      if (adminEmails.length > 0) {
+        const { subject, html } = buildOrderEmail(orderData);
+        adminEmails.forEach((to) => {
+          sendPromises.push(
+            transporter.sendMail({ from: fromAddress, to, subject, html })
+          );
+        });
+        console.log(
+          `📧 Admin notification queued for: ${adminEmails.join(", ")}`
+        );
+      } else {
+        console.warn("Admin users found but none have an email field.");
+      }
+    } else {
+      console.warn("No admin users found. Skipping admin notification.");
+    }
+
+    // 3b. Send confirmation email to the customer
+    const customerEmail = orderData.customer?.email;
+    if (customerEmail) {
+      const { subject, html } = buildClientConfirmationEmail(orderData);
+      sendPromises.push(
+        transporter.sendMail({ from: fromAddress, to: customerEmail, subject, html })
+      );
+      console.log(`📧 Client confirmation queued for: ${customerEmail}`);
+    } else {
+      console.warn("Order has no customer email. Skipping client confirmation.");
+    }
+
+    // 4. Send all emails concurrently
     await Promise.all(sendPromises);
-    console.log(
-      `✅ Order ${orderId} notification sent to: ${adminEmails.join(", ")}`
-    );
+    console.log(`✅ All emails sent for order ${orderId}`);
   }
 );

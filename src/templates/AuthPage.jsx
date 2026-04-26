@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, User, Building2, ArrowLeft, ShieldCheck, Clock, CheckCircle, Microscope, ChevronDown, ChevronUp, GraduationCap } from 'lucide-react';
 
 export default function AuthPage({ onBack }) {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, userProfile, isProfessional, login, register, logout, resetPassword, loginWithGoogle } = useAuth();
-  const [tab, setTab] = useState('login');
+  const [tab, setTab] = useState(() => searchParams.get('tab') === 'register' ? 'register' : 'login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -14,6 +17,8 @@ export default function AuthPage({ onBack }) {
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [mobileBenefitsOpen, setMobileBenefitsOpen] = useState(false);
+
+  const handleBack = onBack ?? (() => navigate(-1));
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -26,7 +31,7 @@ export default function AuthPage({ onBack }) {
     try {
       await login(email, password);
       setSuccess('Logged in successfully!');
-      setTimeout(() => onBack?.(), 1500);
+      setTimeout(() => handleBack(), 1500);
     } catch (err) {
       if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
         setError('Invalid email or password.');
@@ -88,7 +93,7 @@ export default function AuthPage({ onBack }) {
     try {
       await loginWithGoogle();
       setSuccess('Logged in with Google successfully!');
-      setTimeout(() => onBack?.(), 1500);
+      setTimeout(() => handleBack(), 1500);
     } catch (err) {
       setError(err.message);
     }
@@ -299,7 +304,7 @@ export default function AuthPage({ onBack }) {
         
         {onBack && (
           <button
-            onClick={onBack}
+            onClick={handleBack}
             style={{
               display: 'flex', alignItems: 'center', gap: '8px',
               background: 'none', border: 'none', padding: '12px 0',

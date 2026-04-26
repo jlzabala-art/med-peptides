@@ -25,16 +25,47 @@
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
 
-    <!-- Twitter -->
+    <!-- Canonical -->
+    <link rel="canonical" href="https://med-peptides-app-27a3a.web.app/" />
+
+    <!-- Twitter / X -->
     <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:site" content="@medpeptides" />
     <meta property="twitter:url" content="https://med-peptides-app-27a3a.web.app/" />
     <meta property="twitter:title" content="Med-Peptides | Premium Research Compounds" />
     <meta property="twitter:description" content="Discover high-purity research peptides and analytical materials. Institutional pricing available for verified professionals." />
     <meta property="twitter:image" content="https://med-peptides-app-27a3a.web.app/og-preview.png" />
-    
+
+    <!-- Google Analytics 4 — G-782K5END43 -->
+    <!-- send_page_view:false → page_view fired manually on each SPA route change -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-782K5END43"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-782K5END43', { send_page_view: false });
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- JSON-LD: Organization structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Med-Peptides",
+      "url": "https://med-peptides-app-27a3a.web.app/",
+      "logo": "https://med-peptides-app-27a3a.web.app/logo.png",
+      "description": "Premium platform for high-purity research peptides and analytical materials. Verified purity and consistent analytical results for laboratory professionals.",
+      "sameAs": [],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "availableLanguage": ["English"]
+      }
+    }
+    </script>
   </body>
 </html>

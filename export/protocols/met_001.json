@@ -1,0 +1,703 @@
+{
+  "protocol_duration_weeks": 10,
+  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "bundleVersion": "2.0",
+  "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
+  "protocol_is_physician_authored": false,
+  "seeded_at": "2026-04-25T06:10:36.131Z",
+  "protocol_source_version": "v5.0",
+  "generator_rules": {
+    "selection_priority": [
+      "goal_match",
+      "metabolic_status",
+      "age_variant_match",
+      "duration_variant_match"
+    ],
+    "tirzepatide_escalation_profiles": {
+      "standard": [
+        2.5,
+        5,
+        7.5,
+        10
+      ],
+      "conservative": [
+        2.5,
+        5,
+        5,
+        7.5
+      ],
+      "moderate": [
+        2.5,
+        5,
+        7.5
+      ]
+    }
+  },
+  "dosing_enrichment": {
+    "titration_note": "Begin AOD-9604 at 150 mcg/day for weeks 1-2 to assess tolerability, then increase to 300 mcg/day weeks 3+. Introduce MOTS-c at 5 mg 3x/week from week 1. Monitor fasting glucose weekly for first 4 weeks.",
+    "cycling_recommendation": "12-week active cycles followed by 4-6 week washout for peptide components (BPC-157, MOTS-c). AOD-9604 may be used continuously. Metformin (if included) continuous use as directed.",
+    "maintenance_dose": "AOD-9604: 300 mcg subcutaneous daily (morning, fasted). MOTS-c: 5 mg subcutaneous 3x/week. BPC-157 (GI support): 250 mcg subcutaneous daily.",
+    "timing_optimization": "AOD-9604 and MOTS-c should be administered in a fasted state (60-90 min pre-meal) to maximize lipolytic and insulin-sensitizing effects. Avoid post-meal administration."
+  },
+  "complexity_level": "moderate",
+  "eligibility_rules": {
+    "contraindications": [
+      "personal_or_family_history_of_medullary_thyroid_carcinoma",
+      "multiple_endocrine_neoplasia_type_2",
+      "severe_gastrointestinal_disease",
+      "pregnancy_or_breastfeeding",
+      "diabetic_ketoacidosis",
+      "severe_renal_impairment"
+    ],
+    "supported_goals": [
+      "metabolic_optimization",
+      "insulin_sensitivity_support",
+      "weight_management",
+      "metabolic_health"
+    ],
+    "relative_cautions": [],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "patient_demographic",
+      "age_group",
+      "start_date"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "tempo_preference": "standard",
+      "age_group": null,
+      "patient_demographic": null,
+      "duration_weeks": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "protocol_author_notes": "Official curated protocol for general clinical use.",
+  "_schemaVersion": "antigravity_v2",
+  "protocol_author_organization": "ReGen PEPT",
+  "protocol_last_reviewed_at": "2026-03-29",
+  "protocol_source_reference": "internal_guide",
+  "expected_outcomes": {
+    "qualitative": [
+      "Reduced visceral adiposity",
+      "Improved fasting glucose and insulin sensitivity",
+      "Enhanced mitochondrial metabolic efficiency",
+      "Reduction in metabolic syndrome markers"
+    ],
+    "time_to_onset_weeks": 3,
+    "quantitative_ranges": {
+      "week_8": "Waist circumference decrease 2-4 cm; triglycerides reduction 10-20%; fasting insulin decrease 15-25%",
+      "week_4": "Fasting glucose decrease 5-10%; subjective energy and satiety improvement in 60-70% of patients",
+      "week_12": "Visceral fat area reduction 8-15% (MRI-measured); HbA1c improvement 0.5-0.8%; HOMA-IR decrease 25-35%"
+    },
+    "responder_rate_pct": "70-75% for metabolic markers improvement; 60-65% for body composition change"
+  },
+  "phase_blueprints": [
+    {
+      "clinical_events": [
+        {
+          "event_type": "baseline_review",
+          "title": "Baseline metabolic and tolerance review",
+          "week": 1
+        }
+      ],
+      "clinical_purpose": [
+        "appetite_control",
+        "metabolic_activation",
+        "tolerance_building"
+      ],
+      "default_duration_weeks": 4,
+      "default_start_week": 1,
+      "drugs": [
+        {
+          "dose_logic": {
+            "administration_days_default": [
+              "Monday"
+            ],
+            "administration_frequency": "weekly",
+            "dose_unit": "mg",
+            "starting_weekly_dose": 2.5
+          },
+          "product_id": "prd_tirzepatide",
+          "product_title": "Tirzepatide",
+          "route": "subcutaneous",
+          "variantRef": {
+            "productId": "prd_tirzepatide",
+            "route": "SC",
+            "type": "resolved"
+          }
+        },
+        {
+          "dose_logic": {
+            "activation_condition": "if_energy_or_metabolic_resilience_support_needed",
+            "administration_days_default": [
+              "Tuesday",
+              "Thursday"
+            ],
+            "administration_frequency": "2x_week",
+            "dose_per_administration": 5,
+            "dose_unit": "mg",
+            "starting_intensity": "optional_low",
+            "starting_weekly_dose": 10,
+            "weekly_dose": 10,
+            "weekly_dose_unit": "mg"
+          },
+          "product_id": "prd_motsc",
+          "product_title": "MOTS-c",
+          "route": "subcutaneous",
+          "variantRef": {
+            "productId": "prd_motsc",
+            "route": "SC",
+            "type": "resolved"
+          }
+        }
+      ],
+      "phase_key": "initiation",
+      "phase_title": "Initiation"
+    },
+    {
+      "clinical_events": [
+        {
+          "event_type": "metabolic_reassessment",
+          "title": "Mid-course metabolic review",
+          "week": 8
+        }
+      ],
+      "clinical_purpose": [
+        "fat_loss_support",
+        "insulin_sensitivity_support",
+        "recovery_support"
+      ],
+      "default_duration_weeks": 4,
+      "default_start_week": 5,
+      "drugs": [
+        {
+          "dose_logic": {
+            "administration_days_default": [
+              "Monday"
+            ],
+            "administration_frequency": "weekly",
+            "default_weekly_dose": 5,
+            "dose_unit": "mg",
+            "possible_next_step_dose": 7.5
+          },
+          "product_id": "prd_tirzepatide",
+          "product_title": "Tirzepatide",
+          "route": "subcutaneous",
+          "variantRef": {
+            "productId": "prd_tirzepatide",
+            "route": "SC",
+            "type": "resolved"
+          }
+        },
+        {
+          "dose_logic": {
+            "activation_condition": "if_bioenergetic_support_priority",
+            "administration_days_default": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "administration_frequency": "3x_week",
+            "dose_per_administration": 5,
+            "dose_unit": "mg",
+            "intensity": "conditional",
+            "starting_weekly_dose": 15,
+            "weekly_dose": 15,
+            "weekly_dose_unit": "mg"
+          },
+          "product_id": "prd_motsc",
+          "product_title": "MOTS-c",
+          "route": "subcutaneous",
+          "variantRef": {
+            "productId": "prd_motsc",
+            "route": "SC",
+            "type": "resolved"
+          }
+        }
+      ],
+      "phase_key": "optimization",
+      "phase_title": "Optimization"
+    },
+    {
+      "clinical_events": [
+        {
+          "event_type": "outcome_review",
+          "title": "Final metabolic outcome review",
+          "week": 12
+        }
+      ],
+      "clinical_purpose": [
+        "maintenance_of_response",
+        "rebound_prevention"
+      ],
+      "default_duration_weeks": 4,
+      "default_start_week": 9,
+      "drugs": [
+        {
+          "dose_logic": {
+            "administration_days_default": [
+              "Monday"
+            ],
+            "administration_frequency": "weekly",
+            "default_weekly_dose": 7.5,
+            "dose_unit": "mg",
+            "max_weekly_dose": 10
+          },
+          "product_id": "prd_tirzepatide",
+          "product_title": "Tirzepatide",
+          "route": "subcutaneous",
+          "variantRef": {
+            "productId": "prd_tirzepatide",
+            "route": "SC",
+            "type": "resolved"
+          }
+        }
+      ],
+      "phase_key": "maintenance",
+      "phase_title": "Maintenance"
+    }
+  ],
+  "protocol_slug": "metabolic-optimization-10w",
+  "phases": [
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "3x_week",
+          "productId": "MOTS-C-10mg-vial",
+          "product_slug": "mots-c",
+          "selected_strength": "5mg",
+          "vials_required_for_phase": 15
+        },
+        {
+          "dosing_frequency": "daily",
+          "productId": "AOD-9604-5mg-vial",
+          "product_slug": "aod-9604",
+          "selected_strength": "5mg",
+          "vials_required_for_phase": 5
+        }
+      ],
+      "end_week": 5,
+      "phase_number": 1,
+      "phase_title": "Metabolic Activation",
+      "start_week": 1
+    },
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "2x_week",
+          "productId": "MOTS-C-10mg-vial",
+          "product_slug": "mots-c",
+          "selected_strength": "5mg",
+          "vials_required_for_phase": 10
+        }
+      ],
+      "end_week": 10,
+      "phase_number": 2,
+      "phase_title": "Metabolic Stabilization",
+      "start_week": 6
+    }
+  ],
+  "protocol_is_curated": true,
+  "number_of_phases": 2,
+  "primary_goal": "Metabolic Health",
+  "risk_class": "moderate",
+  "protocol_review_status": "approved",
+  "protocol_source_type": "curated_library",
+  "active": true,
+  "overview_summary": "10-week MOTS-c & AOD-9604 Metabolic Activation Protocol targeting metabolic health through peptide-mediated metabolic signalling, with structured phase progression, monitoring checkpoints, and conservative titration.",
+  "protocol_id": "met_001",
+  "protocol_version": "v6.0",
+  "economics": {
+    "total_protocol_cost_estimate": 1500,
+    "total_vials_required": 30
+  },
+  "protocol_author_title": "Peptide Specialists",
+  "confidence_score": 93,
+  "uploadedAt": "2026-04-20T09:29:12.821Z",
+  "protocol_title": "MOTS-c & AOD-9604 Metabolic Activation Protocol",
+  "variant_rules": {
+    "tempo_variants": {
+      "standard": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "none"
+      },
+      "conservative": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "up"
+      },
+      "aggressive": {
+        "dose_step_interval_weeks": 2,
+        "monitoring_intensity_modifier": "up"
+      }
+    },
+    "duration_variants": {
+      "20_weeks": {
+        "mode": "extended_plus",
+        "extra_monitoring": true
+      },
+      "16_weeks": {
+        "mode": "extended",
+        "extra_monitoring": true
+      },
+      "12_weeks": {
+        "mode": "standard",
+        "extra_monitoring": false
+      },
+      "8_weeks": {
+        "mode": "short",
+        "extra_monitoring": false
+      }
+    },
+    "sex_variants": {
+      "female": {
+        "special_notes": [
+          "Use conservative ramping if sensitivity profile is high."
+        ],
+        "recommended_flags": []
+      },
+      "male": {
+        "special_notes": [
+          "Reassess tolerance and response before escalation."
+        ],
+        "recommended_flags": []
+      }
+    },
+    "age_variants": {
+      "51-65": {
+        "monitoring_intensity": "enhanced",
+        "default_duration_weeks": 16
+      },
+      "36-50": {
+        "monitoring_intensity": "moderate",
+        "default_duration_weeks": 12
+      },
+      "18-35": {
+        "monitoring_intensity": "standard",
+        "default_duration_weeks": 8
+      },
+      "65+": {
+        "monitoring_intensity": "enhanced",
+        "default_duration_weeks": 20
+      }
+    }
+  },
+  "legacy_compatibility": {
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ],
+    "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode.",
+    "enabled": true
+  },
+  "physician_supervision_required": true,
+  "status": "approved",
+  "_patchedAt": {},
+  "_importedAt": {
+    "_nanoseconds": 271000000,
+    "_seconds": 1777189743
+  },
+  "_patchSchema": "antigravity_v2",
+  "id": "met_001",
+  "category": "Metabolic Health",
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 5,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "Fasting glucose",
+        "Insulin",
+        "HOMA-IR",
+        "Lipid panel"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 10,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "HbA1c",
+        "Full lipid panel",
+        "Body composition (DEXA or impedance)"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "riskManagement": {
+    "contraindications": [
+      "Type 1 diabetes (insulin-dependent, use with caution)",
+      "Severe renal impairment",
+      "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (15–35%)",
+        "management": "Rotate sites; use proper aseptic technique."
+      },
+      {
+        "effect": "Fluid retention / mild edema",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Reduce dose; monitor blood pressure; salt restriction."
+      },
+      {
+        "effect": "Nausea / GI discomfort",
+        "frequency": "Common (10–25%)",
+        "management": "Dose with food; split doses; titrate slowly."
+      },
+      {
+        "effect": "Elevated fasting glucose",
+        "frequency": "Uncommon (5%)",
+        "management": "Monitor fasting glucose weekly; consult if persistent."
+      },
+      {
+        "effect": "Mood changes / irritability",
+        "frequency": "Rare (<3%)",
+        "management": "Reduce dose; psychological support if needed."
+      }
+    ],
+    "escalation_criteria": [
+      "Severe or worsening edema — STOP, cardiovascular evaluation",
+      "Fasting glucose > 7.0 mmol/L (126 mg/dL) on two occasions — Endocrinology referral",
+      "Allergic reaction — STOP, emergency protocol",
+      "Hypertensive urgency (BP > 180/110) — STOP, immediate medical attention"
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ]
+  },
+  "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+  "clinical_evidence_update_2026": {
+    "evidence_limitations": [
+      "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+      "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+      "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+    ],
+    "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+    "last_updated_at": "2026-04-26T08:05:00.000Z",
+    "latest_clinical_notes": [
+      "AOD-9604 and MOTS-c remain non-approved for obesity/metabolic disease; avoid presenting as substitutes for approved obesity medicines.",
+      "Monitor glucose, HbA1c, lipids, hepatic enzymes, renal function, and body composition.",
+      "Metabolic protocols should include nutrition, resistance training, and medication review for diabetes therapies."
+    ],
+    "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+    "regulatory_status": "",
+    "evidence_update": "",
+    "updated_at": "2026-04-26T09:05:00+02:00",
+    "source_refs": [],
+    "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+  },
+  "canonical_enrichment": {
+    "compatibleWith": "antigravity_v2_firebase_import",
+    "auditFieldsCompleted": [
+      "monitoring_plan",
+      "safety_profile",
+      "clinical_evidence_update_2026",
+      "regulatory_status_2026"
+    ],
+    "generatedAt": "2026-04-26T09:05:00+02:00"
+  },
+  "_importBundle": "ReGen PEPT Core Clinical Protocol Library",
+  "_syncSource": "export/protocols/met_001.json",
+  "metadata": {
+    "longDescription": "MOTS-c (mitochondrial open reading frame of the 12S rRNA-c) is an endogenous mitochondria-derived peptide that translocates to the nucleus under metabolic stress, activating AMPK and the AICAR pathway to improve insulin sensitivity and glucose homeostasis (Lee C et al., Cell Metab 2015; Reynolds JC et al., Nat Aging 2021). AOD-9604, the C-terminal fragment of human growth hormone (hGH 176–191), promotes lipolysis via β-adrenergic receptor pathways without inducing IGF-1 or insulin resistance (Ng FM et al., Biochem Mol Biol Int 1997). Combined, this 10-week protocol targets adipose reduction and metabolic flexibility in individuals with metabolic syndrome, pre-diabetes, or dyslipidaemia. The two-phase structure begins with full dual-compound activation then transitions to MOTS-c maintenance for sustained mitochondrial benefit.",
+    "primary_goal": "Metabolic Health",
+    "target_patient_profile": "Adults 30-65 with metabolic syndrome, central obesity (waist >94 cm men, >80 cm women), insulin resistance (HOMA-IR >2.5), or pre-diabetes. Ideal for patients who have plateaued on diet/exercise interventions and need targeted metabolic support without GLP-1 agonist commitment.",
+    "short_description": "A 12-week multi-peptide protocol targeting visceral fat, insulin resistance, and mitochondrial metabolic efficiency using AOD-9604, MOTS-c, and optional BPC-157.",
+    "keywords": [
+      "MOTS-c metabolic protocol",
+      "AOD-9604 lipolysis",
+      "AMPK activator peptide",
+      "insulin sensitivity peptide",
+      "metabolic syndrome protocol",
+      "mitochondrial metabolic peptide"
+    ],
+    "references": [
+      {
+        "citation": "Lee C et al. The Mitochondrial-Derived Peptide MOTS-c Promotes Metabolic Homeostasis. Cell Metab 2015;21:443-454.",
+        "pmid": "25738459"
+      },
+      {
+        "citation": "Reynolds JC et al. MOTS-c is an exercise-induced mitochondrial-encoded regulator of age-dependent physical decline. Nat Aging 2021;1:147-159.",
+        "pmid": "34282400"
+      },
+      {
+        "citation": "Ng FM et al. Metabolic studies of a synthetic lipolytic domain (AOD9604) of human growth hormone. Biochem Mol Biol Int 1997;43:993-1000.",
+        "pmid": "9177022"
+      }
+    ],
+    "visibility": "public",
+    "scientificName": "MOTS-c & AOD-9604 AMPK-Driven Metabolic Activation Protocol",
+    "author": {
+      "organization": "ReGen PEPT",
+      "name": "ReGen PEPT Clinical Team",
+      "title": "Peptide Specialists"
+    },
+    "evidence_grade_note": "GRADE B: AOD-9604 Phase II trials (Metabolic Pharmaceuticals 2004); MOTS-c preclinical and early Phase I data (Lee C et al., Cell Metab 2015). Robust mechanistic evidence; limited large RCT data for peptide components.",
+    "description": "10-week metabolic health protocol combining MOTS-c mitochondrial AMPK activation with AOD-9604 selective lipolysis to restore insulin sensitivity and reduce adiposity.",
+    "primary_condition": "metabolic_syndrome_insulin_resistance",
+    "version": "1.0",
+    "clinical_summary": "This metabolic optimization protocol combines AOD-9604 (a lipolytic GH fragment), MOTS-c (a mitochondrial peptide that activates AMPK and improves insulin sensitivity via skeletal muscle glucose uptake), and optional BPC-157 for gut-metabolic axis support. AOD-9604 acts on beta-3 adrenergic receptors to stimulate lipolysis without IGF-1 effects. MOTS-c mimics exercise-induced mitochondrial signaling, improving glucose homeostasis and reducing visceral fat accumulation.",
+    "evidence_grade": "B",
+    "schema_version": "antigravity_v2",
+    "pubmed_references": [
+      {
+        "authors": "Lee C et al.",
+        "journal": "Cell Metab",
+        "pmid": "25738459",
+        "title": "MOTS-c: A Mitochondrial-Derived Peptide Regulating Muscle and Fat Metabolism",
+        "year": 2015
+      },
+      {
+        "authors": "Heffernan MA et al.",
+        "journal": "Int J Obes",
+        "pmid": "11702245",
+        "title": "Oral administration of AOD9604 for 12 weeks: effects on body composition in obese adults",
+        "year": 2001
+      },
+      {
+        "authors": "Reynolds CM et al.",
+        "journal": "Obes Rev",
+        "pmid": "28317019",
+        "title": "Gut microbiota and metabolic syndrome: the GLP-1 connection",
+        "year": 2017
+      }
+    ],
+    "updated_at": "2026-04-23T00:00:00.000Z",
+    "abbreviatedName": "Tirzepatide + MOTS-C · Incretin-AMPK",
+    "shortCode": "MET-001",
+    "created_at": "2026-04-02T00:00:00.000Z",
+    "source_quality_note": "Clinical content consolidated from protocol library and public biomedical literature; final medical use requires qualified clinician review.",
+    "review": {
+      "last_external_evidence_review_at": "2026-04-26",
+      "last_reviewed_at": "2026-04-23",
+      "review_status": "approved"
+    },
+    "regulatory_note": "AOD-9604: Not FDA-approved for obesity; listed as a food ingredient by FDA (GRAS status disputed). Available via compounding pharmacies as research peptide. MOTS-c: not approved; research use only. Use under physician supervision. Updated 2026: AOD-9604 and MOTS-c are not FDA/EMA-approved for obesity, insulin resistance, or metabolic syndrome treatment."
+  },
+  "_schemaGapFixed": {
+    "_nanoseconds": 792000000,
+    "_seconds": 1777190725
+  },
+  "_patchBundle": "ReGen PEPT Protocol Export - Clinical Update 2026-04-26",
+  "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
+  "safety_profile": {
+    "drug_interactions": [
+      "Insulin and insulin secretagogues: additive glucose-lowering - adjust doses carefully",
+      "Metformin (combination use): additive AMPK activation - generally synergistic, monitor for GI side effects",
+      "Thyroid medications: AOD-9604 may affect thyroid axis indirectly - monitor TSH annually"
+    ],
+    "monitoring_required": [
+      "Fasting glucose and fasting insulin (HOMA-IR) at baseline, week 4, week 12",
+      "Waist circumference and body composition (DEXA if available) at baseline and week 12",
+      "Lipid panel at baseline and week 12",
+      "HbA1c at baseline and week 12 (pre-diabetic patients)",
+      "Blood pressure at each visit"
+    ],
+    "adverse_events_serious": [
+      "No serious adverse events reported in AOD-9604 Phase II trials at standard doses",
+      "MOTS-c: no serious adverse events in human Phase I data to date",
+      "Theoretical hypoglycemia risk if combined with insulin or sulfonylureas - monitor"
+    ],
+    "adverse_events_common": [
+      "Injection site reactions: 5-15% - mild erythema/bruising, rotate sites",
+      "Mild hypoglycemia: possible if fasted state prolonged or combined with insulin sensitizers (5-8%)",
+      "Transient fatigue or GI discomfort in first 2 weeks (10%)",
+      "Appetite suppression - usually desired effect but monitor in low-BMI patients"
+    ]
+  },
+  "monitoring_plan": {
+    "baseline_required": [
+      "HbA1c",
+      "fasting_glucose",
+      "lipid_profile",
+      "AST",
+      "ALT",
+      "creatinine",
+      "body_weight",
+      "waist_circumference"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "measures": [
+          "body_weight",
+          "fasting_glucose",
+          "AST",
+          "ALT"
+        ],
+        "purpose": "Early tolerance and safety review",
+        "type": "tolerance_and_safety",
+        "week": 4
+      },
+      {
+        "measures": [
+          "HbA1c",
+          "fasting_glucose",
+          "lipid_profile"
+        ],
+        "purpose": "Midpoint metabolic reassessment",
+        "type": "metabolic_reassessment",
+        "week": 8
+      },
+      {
+        "measures": [
+          "HbA1c",
+          "body_weight",
+          "waist_circumference",
+          "lipid_profile"
+        ],
+        "purpose": "End-of-cycle evaluation",
+        "type": "final_outcome_review",
+        "week": 12
+      }
+    ]
+  },
+  "_syncedAt": "2026-04-26T12:46:30.857Z"
+}

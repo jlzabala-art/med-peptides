@@ -1,63 +1,45 @@
-import Hero from '../sections/Hero';
+import { lazy, Suspense } from 'react';
+import HeroSearch from '../sections/HeroSearch';
 
-import PowerSearch from '../sections/PowerSearch';
-import TrustStrip from '../sections/TrustStrip';
-import UserSegmentEntry from '../sections/UserSegmentEntry';
-import PathwayNavigation from '../sections/PathwayNavigation';
-import ProtocolHighlight from '../sections/ProtocolHighlight';
-import TrendingPeptides from '../sections/TrendingPeptides';
-import NovelAcquisitions from '../sections/NovelAcquisitions';
-import InstitutionalSolutions from '../sections/InstitutionalSolutions';
-import CustomSynthesisBanner from '../sections/CustomSynthesisBanner';
-import EducationHub from '../sections/AcademyBanner';
-import GlobalLogistics from '../sections/GlobalLogistics';
-import PlatformCapabilities from '../sections/PlatformCapabilities';
-import ContactCTA from '../sections/ContactCTA';
+// Below-the-fold — lazy-loaded, no initial paint cost
+const FeaturedProtocols = lazy(() => import('../sections/FeaturedProtocols'));
+const KeyPeptides       = lazy(() => import('../sections/KeyPeptides'));
 
-export default function GuestHome({ onSelectCategory, onSelectProduct, onOpenSearch, activeProducts, searchQuery, setSearchQuery, isProfessional, userProfile }) {
+/**
+ * GuestHome — Minimal homepage (all users).
+ *
+ * Structure:
+ *   1. HeroSearch       — dominant search entry point
+ *   2. FeaturedProtocols — max 6 protocol cards (lazy)
+ *   3. KeyPeptides       — max 8 peptide cards (lazy)
+ *
+ * Search wires into the global SearchModal via onOpenSearch / setSearchQuery.
+ * No separate guest vs professional logic here.
+ */
+export default function GuestHome({
+  onSelectProduct,
+  onOpenSearch,
+  searchQuery,
+  setSearchQuery,
+}) {
   return (
-    <div className="guest-home">
-      {/* 1. Primary Entry & Hero */}
-      <Hero onNavigate={onSelectCategory} mode={isProfessional ? 'professional' : 'guest'} />
+    <div style={{ background: 'var(--background, #0A0F1E)' }}>
+      {/* 1 — Hero with integrated search */}
+      <HeroSearch
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        onOpenSearch={onOpenSearch}
+      />
 
+      {/* 2 — Featured Protocols */}
+      <Suspense fallback={null}>
+        <FeaturedProtocols searchQuery={searchQuery} />
+      </Suspense>
 
-
-      {/* 3. Unified Clinical Search */}
-      <PowerSearch onOpenSearch={onOpenSearch} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-
-      {/* 4. Operational Summary Strip */}
-      <TrustStrip />
-
-      {/* 5. Practitioner & Researcher Access */}
-      <UserSegmentEntry onNavigate={onSelectCategory} />
-
-      {/* 6. Research Focus / Application Areas */}
-      <PathwayNavigation onSelectCategory={onSelectCategory} />
-
-      {/* 7. Protocol Builder Feature Highlight */}
-      <ProtocolHighlight />
-
-      {/* 8. Product Discovery: Trending & New Arrivals */}
-      <TrendingPeptides onSelectProduct={onSelectProduct} onSelectCategory={onSelectCategory} />
-      <NovelAcquisitions onSelectCategory={onSelectCategory} onSelectProduct={onSelectProduct} />
-
-      {/* 9. Institutional Solutions (visible to logged-in professional users) */}
-      <InstitutionalSolutions isProfessional={isProfessional} onSelectCategory={onSelectCategory} />
-
-      {/* 10. Custom Synthesis Banner */}
-      <CustomSynthesisBanner onNavigate={onSelectCategory} />
-
-      {/* 11. Education Hub */}
-      <EducationHub onNavigate={onSelectCategory} />
-
-      {/* 12. Global Infrastructure */}
-      <GlobalLogistics />
-
-      {/* 13. Supporting Capabilities */}
-      <PlatformCapabilities />
-
-      {/* 14. Final Conversion */}
-      <ContactCTA />
+      {/* 3 — Key Peptides */}
+      <Suspense fallback={null}>
+        <KeyPeptides onSelectProduct={onSelectProduct} searchQuery={searchQuery} />
+      </Suspense>
     </div>
   );
 }

@@ -1,0 +1,1141 @@
+{
+  "audited_at": "2026-04-26T14:43:00Z",
+  "total": 25,
+  "protocols": [
+    {
+      "pid": "sa_001",
+      "fname": "sa_001.json",
+      "ok_count": 20,
+      "gap_count": 14,
+      "quality_pct": 58.8,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "protocol_duration_weeks",
+          "label": "duration"
+        },
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.indications",
+          "label": "indications list"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.clinical_summary",
+          "label": "clinical summary"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.evidence_grade",
+          "label": "evidence grade"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "economics.total_protocol_cost_estimate",
+          "label": "cost estimate"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "economics.total_vials_required",
+          "label": "vials required"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "expected_outcomes.qualitative",
+          "label": "qualitative outcomes"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "expected_outcomes.time_to_onset_weeks",
+          "label": "time to onset"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.responder_rate_pct",
+          "label": "responder rate"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "generator_rules.base_duration_weeks",
+          "label": "generator duration"
+        }
+      ]
+    },
+    {
+      "pid": "wm_004",
+      "fname": "wm_004.json",
+      "ok_count": 22,
+      "gap_count": 12,
+      "quality_pct": 64.7,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "metadata.description",
+          "label": "description"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "dosing_enrichment.titration_note",
+          "label": "titration note"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "dosing_enrichment.maintenance_dose",
+          "label": "maintenance dose"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "dosing_enrichment.cycling_recommendation",
+          "label": "cycling rec"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "economics.total_protocol_cost_estimate",
+          "label": "cost estimate"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "economics.total_vials_required",
+          "label": "vials required"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.time_to_onset_weeks",
+          "label": "time to onset"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.responder_rate_pct",
+          "label": "responder rate"
+        }
+      ]
+    },
+    {
+      "pid": "wm_005",
+      "fname": "wm_005.json",
+      "ok_count": 23,
+      "gap_count": 11,
+      "quality_pct": 67.6,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "dosing_enrichment.titration_note",
+          "label": "titration note"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "dosing_enrichment.maintenance_dose",
+          "label": "maintenance dose"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "dosing_enrichment.cycling_recommendation",
+          "label": "cycling rec"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "economics.total_protocol_cost_estimate",
+          "label": "cost estimate"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "economics.total_vials_required",
+          "label": "vials required"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.time_to_onset_weeks",
+          "label": "time to onset"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.responder_rate_pct",
+          "label": "responder rate"
+        }
+      ]
+    },
+    {
+      "pid": "neuro_001",
+      "fname": "neuro_001.json",
+      "ok_count": 24,
+      "gap_count": 10,
+      "quality_pct": 70.6,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.indications",
+          "label": "indications list"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "dosing_enrichment.maintenance_dose",
+          "label": "maintenance dose"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "economics.total_protocol_cost_estimate",
+          "label": "cost estimate"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.qualitative",
+          "label": "qualitative outcomes"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.time_to_onset_weeks",
+          "label": "time to onset"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.responder_rate_pct",
+          "label": "responder rate"
+        }
+      ]
+    },
+    {
+      "pid": "skin_001",
+      "fname": "skin_001.json",
+      "ok_count": 24,
+      "gap_count": 10,
+      "quality_pct": 70.6,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.indications",
+          "label": "indications list"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.clinical_summary",
+          "label": "clinical summary"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.evidence_grade",
+          "label": "evidence grade"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "expected_outcomes.qualitative",
+          "label": "qualitative outcomes"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "expected_outcomes.time_to_onset_weeks",
+          "label": "time to onset"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.responder_rate_pct",
+          "label": "responder rate"
+        }
+      ]
+    },
+    {
+      "pid": "skin_002",
+      "fname": "skin_002.json",
+      "ok_count": 24,
+      "gap_count": 10,
+      "quality_pct": 70.6,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.indications",
+          "label": "indications list"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.clinical_summary",
+          "label": "clinical summary"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.evidence_grade",
+          "label": "evidence grade"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "expected_outcomes.qualitative",
+          "label": "qualitative outcomes"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "expected_outcomes.time_to_onset_weeks",
+          "label": "time to onset"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.responder_rate_pct",
+          "label": "responder rate"
+        }
+      ]
+    },
+    {
+      "pid": "sleep_001",
+      "fname": "sleep_001.json",
+      "ok_count": 24,
+      "gap_count": 10,
+      "quality_pct": 70.6,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.indications",
+          "label": "indications list"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.clinical_summary",
+          "label": "clinical summary"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.evidence_grade",
+          "label": "evidence grade"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "expected_outcomes.qualitative",
+          "label": "qualitative outcomes"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "expected_outcomes.time_to_onset_weeks",
+          "label": "time to onset"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.responder_rate_pct",
+          "label": "responder rate"
+        }
+      ]
+    },
+    {
+      "pid": "sleep_002",
+      "fname": "sleep_002.json",
+      "ok_count": 24,
+      "gap_count": 10,
+      "quality_pct": 70.6,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.indications",
+          "label": "indications list"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.clinical_summary",
+          "label": "clinical summary"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.evidence_grade",
+          "label": "evidence grade"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "expected_outcomes.qualitative",
+          "label": "qualitative outcomes"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "expected_outcomes.time_to_onset_weeks",
+          "label": "time to onset"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.responder_rate_pct",
+          "label": "responder rate"
+        }
+      ]
+    },
+    {
+      "pid": "wm_003",
+      "fname": "wm_003.json",
+      "ok_count": 24,
+      "gap_count": 10,
+      "quality_pct": 70.6,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.supported_age_groups",
+          "label": "age groups"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "phase_blueprints",
+          "label": "phase blueprints"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "economics.total_protocol_cost_estimate",
+          "label": "cost estimate"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "economics.total_vials_required",
+          "label": "vials required"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.time_to_onset_weeks",
+          "label": "time to onset"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.responder_rate_pct",
+          "label": "responder rate"
+        }
+      ]
+    },
+    {
+      "pid": "rec_001",
+      "fname": "rec_001.json",
+      "ok_count": 25,
+      "gap_count": 9,
+      "quality_pct": 73.5,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.indications",
+          "label": "indications list"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.clinical_summary",
+          "label": "clinical summary"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.evidence_grade",
+          "label": "evidence grade"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "phase_blueprints",
+          "label": "phase blueprints"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "expected_outcomes.time_to_onset_weeks",
+          "label": "time to onset"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "expected_outcomes.responder_rate_pct",
+          "label": "responder rate"
+        }
+      ]
+    },
+    {
+      "pid": "rec_002",
+      "fname": "rec_002.json",
+      "ok_count": 25,
+      "gap_count": 9,
+      "quality_pct": 73.5,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.indications",
+          "label": "indications list"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.clinical_summary",
+          "label": "clinical summary"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.evidence_grade",
+          "label": "evidence grade"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "phase_blueprints",
+          "label": "phase blueprints"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "expected_outcomes.time_to_onset_weeks",
+          "label": "time to onset"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "expected_outcomes.responder_rate_pct",
+          "label": "responder rate"
+        }
+      ]
+    },
+    {
+      "pid": "lon_002",
+      "fname": "lon_002.json",
+      "ok_count": 26,
+      "gap_count": 8,
+      "quality_pct": 76.5,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.indications",
+          "label": "indications list"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.time_to_onset_weeks",
+          "label": "time to onset"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.responder_rate_pct",
+          "label": "responder rate"
+        },
+        {
+          "status": "MISSING",
+          "field": "generator_rules.base_duration_weeks",
+          "label": "generator duration"
+        }
+      ]
+    },
+    {
+      "pid": "wm_001",
+      "fname": "wm_001.json",
+      "ok_count": 26,
+      "gap_count": 8,
+      "quality_pct": 76.5,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.indications",
+          "label": "indications list"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.time_to_onset_weeks",
+          "label": "time to onset"
+        },
+        {
+          "status": "MISSING",
+          "field": "expected_outcomes.responder_rate_pct",
+          "label": "responder rate"
+        },
+        {
+          "status": "MISSING",
+          "field": "generator_rules.base_duration_weeks",
+          "label": "generator duration"
+        }
+      ]
+    },
+    {
+      "pid": "lon_001",
+      "fname": "lon_001.json",
+      "ok_count": 28,
+      "gap_count": 6,
+      "quality_pct": 82.4,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.indications",
+          "label": "indications list"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "PLACEHOLDER",
+          "field": "dosing_enrichment.cycling_recommendation",
+          "label": "cycling rec"
+        }
+      ]
+    },
+    {
+      "pid": "cog_001",
+      "fname": "cog_001.json",
+      "ok_count": 29,
+      "gap_count": 5,
+      "quality_pct": 85.3,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.contraindications",
+          "label": "contraindications"
+        },
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.required_patient_inputs",
+          "label": "required inputs"
+        },
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.supported_age_groups",
+          "label": "age groups"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        }
+      ]
+    },
+    {
+      "pid": "immune_001",
+      "fname": "immune_001.json",
+      "ok_count": 29,
+      "gap_count": 5,
+      "quality_pct": 85.3,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.indications",
+          "label": "indications list"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        }
+      ]
+    },
+    {
+      "pid": "immune_002",
+      "fname": "immune_002.json",
+      "ok_count": 29,
+      "gap_count": 5,
+      "quality_pct": 85.3,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.indications",
+          "label": "indications list"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        }
+      ]
+    },
+    {
+      "pid": "met_002",
+      "fname": "met_002.json",
+      "ok_count": 29,
+      "gap_count": 5,
+      "quality_pct": 85.3,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.indications",
+          "label": "indications list"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        }
+      ]
+    },
+    {
+      "pid": "wm_002",
+      "fname": "wm_002.json",
+      "ok_count": 29,
+      "gap_count": 5,
+      "quality_pct": 85.3,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.indications",
+          "label": "indications list"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.target_patient_profile",
+          "label": "target patient"
+        },
+        {
+          "status": "MISSING",
+          "field": "metadata.pubmed_references",
+          "label": "pubmed refs"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        }
+      ]
+    },
+    {
+      "pid": "horm_002",
+      "fname": "horm_002.json",
+      "ok_count": 30,
+      "gap_count": 4,
+      "quality_pct": 88.2,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.indications",
+          "label": "indications list"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "MISSING",
+          "field": "generator_rules.base_duration_weeks",
+          "label": "generator duration"
+        }
+      ]
+    },
+    {
+      "pid": "met_001",
+      "fname": "met_001.json",
+      "ok_count": 30,
+      "gap_count": 4,
+      "quality_pct": 88.2,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "eligibility_rules.indications",
+          "label": "indications list"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "MISSING",
+          "field": "generator_rules.base_duration_weeks",
+          "label": "generator duration"
+        }
+      ]
+    },
+    {
+      "pid": "cog_002",
+      "fname": "cog_002.json",
+      "ok_count": 31,
+      "gap_count": 3,
+      "quality_pct": 91.2,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "MISSING",
+          "field": "generator_rules.base_duration_weeks",
+          "label": "generator duration"
+        }
+      ]
+    },
+    {
+      "pid": "energy_001",
+      "fname": "energy_001.json",
+      "ok_count": 31,
+      "gap_count": 3,
+      "quality_pct": 91.2,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "MISSING",
+          "field": "generator_rules.base_duration_weeks",
+          "label": "generator duration"
+        }
+      ]
+    },
+    {
+      "pid": "energy_002",
+      "fname": "energy_002.json",
+      "ok_count": 31,
+      "gap_count": 3,
+      "quality_pct": 91.2,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "MISSING",
+          "field": "generator_rules.base_duration_weeks",
+          "label": "generator duration"
+        }
+      ]
+    },
+    {
+      "pid": "horm_001",
+      "fname": "horm_001.json",
+      "ok_count": 31,
+      "gap_count": 3,
+      "quality_pct": 91.2,
+      "gaps": [
+        {
+          "status": "MISSING",
+          "field": "safety_profile.common_side_effects",
+          "label": "side effects"
+        },
+        {
+          "status": "MISSING",
+          "field": "safety_profile.contraindication_summary",
+          "label": "contraindication summary"
+        },
+        {
+          "status": "MISSING",
+          "field": "generator_rules.base_duration_weeks",
+          "label": "generator duration"
+        }
+      ]
+    }
+  ]
+}

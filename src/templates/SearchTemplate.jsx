@@ -5,7 +5,7 @@ import SearchModal from '../snippets/SearchModal';
 /**
  * SearchTemplate wraps the Search view or modal for a dedicated /search route.
  */
-export default function SearchTemplate({ products, allFaqs = [], allMappings = [], protocolIndex = [] }) {
+export default function SearchTemplate({ products, allFaqs = [], protocolIndex = [] }) {
   const navigate = useNavigate();
 
   return (
@@ -19,7 +19,6 @@ export default function SearchTemplate({ products, allFaqs = [], allMappings = [
         }}
         products={products}
         allFaqs={allFaqs}
-        allMappings={allMappings}
         protocolIndex={protocolIndex}
       />
     </div>

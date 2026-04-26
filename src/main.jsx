@@ -1,23 +1,67 @@
 import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext'; // Asegúrate de envolver aquí
+import { AuthProvider } from './context/AuthContext';
 import './index.css';
 import App from './App.jsx';
+import { trackEvent } from './hooks/useAnalytics';
 
+// Core Web Vitals → GA4 (non-blocking, fires after paint)
+import { onCLS, onINP, onLCP, onFCP, onTTFB } from 'web-vitals';
+const reportVital = ({ name, value, rating }) =>
+  trackEvent('web_vitals', { metric_name: name, value: Math.round(value), rating });
+onCLS(reportVital);
+onINP(reportVital);
+onLCP(reportVital);
+onFCP(reportVital);
+onTTFB(reportVital);
+
+// ── Stale chunk recovery ─────────────────────────────────────────────────────
+// After a new deployment, old hashed chunk URLs no longer exist on the server.
+// The SPA fallback returns index.html → browser rejects it as text/html MIME.
+// Vite fires `vite:preloadError` for this case. We force a one-time reload
+// which fetches the freshly deployed chunks.
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault();
+  // Guard against reload loops: only reload once per session
+  const reloaded = sessionStorage.getItem('chunk_reload');
+  if (!reloaded) {
+    sessionStorage.setItem('chunk_reload', '1');
+    window.location.reload();
+  }
+});
+
+// ── Error Boundary ───────────────────────────────────────────────────────────
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, isChunkError: false };
   }
 
   static getDerivedStateFromError(error) {
-    return { hasError: true };
+    // Detect stale-chunk / MIME-type errors
+    const isChunkError =
+      error?.message?.includes('is not a valid JavaScript MIME type') ||
+      error?.message?.includes('Failed to fetch dynamically imported module') ||
+      error?.name === 'ChunkLoadError';
+    return { hasError: true, isChunkError };
   }
 
   componentDidCatch(error, errorInfo) {
-    // Aquí podrías enviar el error a un servicio como Sentry o LogRocket
-    console.error("Critical Render Error:", error, errorInfo);
+    console.error('Critical Render Error:', error, errorInfo);
+
+    // Auto-reload on chunk errors (guard against loops)
+    if (
+      error?.message?.includes('is not a valid JavaScript MIME type') ||
+      error?.message?.includes('Failed to fetch dynamically imported module') ||
+      error?.name === 'ChunkLoadError'
+    ) {
+      const reloaded = sessionStorage.getItem('chunk_reload');
+      if (!reloaded) {
+        sessionStorage.setItem('chunk_reload', '1');
+        window.location.reload();
+      }
+    }
   }
 
   render() {
@@ -35,13 +79,18 @@ class ErrorBoundary extends React.Component {
           fontFamily: 'sans-serif'
         }}>
           <h1 style={{ color: '#0f172a', fontSize: '1.5rem', marginBottom: '1rem' }}>
-            System Refresh Required
+            {this.state.isChunkError ? 'Updating Application…' : 'System Refresh Required'}
           </h1>
           <p style={{ color: '#64748b', marginBottom: '2rem', maxWidth: '400px' }}>
-            The clinical interface encountered a rendering synchronization issue.
+            {this.state.isChunkError
+              ? 'A new version was detected. Reloading automatically…'
+              : 'The clinical interface encountered a rendering synchronization issue.'}
           </p>
           <button
-            onClick={() => window.location.href = '/'}
+            onClick={() => {
+              sessionStorage.removeItem('chunk_reload');
+              window.location.href = '/';
+            }}
             style={{
               padding: '0.75rem 1.5rem',
               backgroundColor: '#00A3E0',
@@ -52,7 +101,7 @@ class ErrorBoundary extends React.Component {
               cursor: 'pointer'
             }}
           >
-            Restart Application
+            {this.state.isChunkError ? 'Reload Now' : 'Restart Application'}
           </button>
         </div>
       );

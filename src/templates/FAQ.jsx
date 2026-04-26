@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { HelpCircle, ChevronDown, Search, X } from 'lucide-react';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const faqData = [
   {
@@ -311,6 +312,12 @@ const FAQ_CTA_P_STYLE   = { marginBottom: '1.5rem', opacity: 0.9 };
 const FAQ_CTA_BTN_STYLE = { backgroundColor: 'white', color: 'var(--primary)', padding: '0.75rem 2rem' };
 
 export default function FAQ({ onBack }) {
+  usePageMeta({
+    title: 'Frequently Asked Questions',
+    description: 'Find answers to common questions about research peptides, purity standards, shipping, and how to order from Med-Peptides.',
+    path: '/faq',
+  });
+
   const [openIndex, setOpenIndex] = useState(0);
   // ── FASE 1: Estado de búsqueda ──
   const [searchTerm, setSearchTerm] = useState('');

@@ -1,13 +1,15 @@
 /**
  * discoveryEngine.js
  * Deterministic matching engine for the Med-Peptides Discovery System.
- * Uses the following priority order for matching:
- *   1. direct_mapping    → exact faq_peptide_mapping entries
- *   2. same_family       → shared familyTags
- *   3. shared_goals      → shared goalTags
- *   4. seo_overlap       → shared seoKeywords
- *   5. related_catalog_keywords → relatedCatalogKeywords overlap
- *   6. faq_tags          → general tag overlap
+ * Uses the following priority order for FAQ matching:
+ *   1. product_ids[]     → embedded canonical Firestore product IDs in FAQ docs (preferred)
+ *   2. relatedPeptideNames[] → fuzzy name fallback for legacy / unresolved associations
+ * Related-peptide matching additionally uses:
+ *   3. same_family       → shared familyTags
+ *   4. shared_goals      → shared goalTags
+ *   5. seo_overlap       → shared seoKeywords
+ *   6. related_catalog_keywords → relatedCatalogKeywords overlap
+ *   7. faq_tags          → general tag overlap
  */
 
 // ── Product Name Alias Table ─────────────────────────────────────────────────
@@ -113,59 +115,69 @@ export function getFAQByCategory(faqItems, categoryId, isProfessional = false) {
     .sort((a, b) => (b.searchWeight || 0) - (a.searchWeight || 0));
 }
 
-// ── FAQ for a specific Peptide (PDP) ──────────────────────────────────────
+// ── FAQ for a specific Product (PDP) ──────────────────────────────────────
 /**
- * Gets the top FAQs associated with a specific peptide for PDP display.
- * Step 1: Uses direct mappings from faqPeptideMappings.
- * Step 2: Falls back to relatedPeptideNames inside FAQ items themselves.
- * @param {string} peptideName
- * @param {Array}  faqItems
- * @param {Array}  faqMappings - from `faq_peptide_mapping` collection
+ * Gets the top FAQs associated with a specific product.
+ *
+ * Priority:
+ *   1. product_ids[] embedded in FAQ doc includes the canonical product ID
+ *   2. relatedPeptideNames[] fuzzy fallback (legacy / unresolved names)
+ *
+ * @param {string}  peptideName      - product display name (used for fuzzy fallback)
+ * @param {Array}   faqItems         - all FAQ documents (each with embedded product_ids[])
+ * @param {string}  [productId]      - canonical Firestore product doc ID (preferred)
  * @param {boolean} isProfessional
- * @param {number}  limit - max FAQs to return (default 5)
+ * @param {number}  limit            - max FAQs to return (default 5)
  */
-export function getFAQForProduct(peptideName, faqItems, mappings, isProfessional = false, limit = 5) {
-  if (!peptideName || !faqItems?.length || !mappings?.length) return [];
+export function getFAQForProduct(peptideName, faqItems, productId = null, isProfessional = false, limit = 5) {
+  if (!faqItems?.length) return [];
+
   const pName = resolveProductName(peptideName);
 
-  // Normalize a mapping's peptideName — handles both string and array formats
-  const mappingMatchesPeptide = (m) => {
-    if (!m.peptideName) return false;
-    // Array format: peptideName is an array of strings
-    if (Array.isArray(m.peptideName)) {
-      return m.peptideName.some(n => resolveProductName(n) === pName);
-    }
-    // String format: single peptide per doc (preferred)
-    return resolveProductName(m.peptideName) === pName;
-  };
+  // Build all slug variants of the product name to match against faq.product_ids[].
+  // FAQs in Firestore store slugified names (e.g. "5-amino_1_mq", "5-amino-1mq"),
+  // NOT the Firestore document IDs (e.g. "5-AMINO_1_MQ-2mg-vial").
+  const rawLower = (peptideName || '').toLowerCase().trim();
+  const nameVariants = new Set([
+    pName,                                     // canonical resolved name
+    rawLower,                                  // raw lowercase
+    rawLower.replace(/\s+/g, '-'),            // spaces → dashes
+    rawLower.replace(/\s+/g, '_'),            // spaces → underscores
+    rawLower.replace(/[\s-]+/g, '_'),         // dashes+spaces → underscores
+    rawLower.replace(/[\s_]+/g, '-'),         // underscores+spaces → dashes
+    rawLower.replace(/[^a-z0-9]+/g, '-'),     // non-alphanumeric → dashes
+    rawLower.replace(/[^a-z0-9]+/g, '_'),     // non-alphanumeric → underscores
+    (pName || '').replace(/[\s-]+/g, '_'),    // canonical with underscores
+    (pName || '').replace(/[\s_]+/g, '-'),    // canonical with dashes
+  ].filter(Boolean));
 
-  // 1. Get explicit mappings for this peptide only
-  const explicitFaqIds = mappings
-    .filter(mappingMatchesPeptide)
-    .sort((a, b) => (b.priority || 0) - (a.priority || 0))
-    .map(m => m.faqId)
-    .filter(Boolean);
+  const isVisible = (faq) =>
+    faq.active && (faq.visibility === 'public' || isProfessional);
 
-  // 2. Get FAQ items that directly match by explicit mapping
-  const directFaqs = faqItems.filter(
-    (faq) =>
-      faq.active &&
-      (faq.visibility === 'public' || isProfessional) &&
-      explicitFaqIds.includes(faq.faqId)
-  );
+  // 1. Match via faq.product_ids[] — try both the raw productId (doc ID) AND
+  //    all slug variants of the product name (what FAQs actually store).
+  const seen = new Set();
+  const matchByIds = faqItems.filter((faq) => {
+    if (!isVisible(faq)) return false;
+    if (!Array.isArray(faq.product_ids) || !faq.product_ids.length) return false;
+    const matched =
+      (productId && faq.product_ids.includes(productId)) ||
+      faq.product_ids.some((pid) => nameVariants.has(pid.toLowerCase().trim()));
+    if (matched) { seen.add(faq.faqId || faq.id); }
+    return matched;
+  });
 
-  // 3. Keyword match from relatedPeptideNames (only if we need more)
+  // 2. Fuzzy fallback: relatedPeptideNames in FAQ doc
   const relatedByName = faqItems.filter(
     (faq) =>
-      faq.active &&
-      (faq.visibility === 'public' || isProfessional) &&
-      !explicitFaqIds.includes(faq.faqId) &&
+      isVisible(faq) &&
+      !seen.has(faq.faqId || faq.id) &&
       faq.relatedPeptideNames?.some((rn) => resolveProductName(rn) === pName)
   );
 
-  const combined = [...directFaqs, ...relatedByName];
-  return combined.slice(0, limit);
+  return [...matchByIds, ...relatedByName].slice(0, limit);
 }
+
 
 // ── Related Peptides Engine ─────────────────────────────────────────────────
 /**

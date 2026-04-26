@@ -1,0 +1,221 @@
+{
+  "bundleVersion": "2.0",
+  "active": true,
+  "protocol_id": "wm_001",
+  "protocol_version": "v7.0",
+  "protocol_title": "Tirzepatide + MOTS-c Metabolic Optimization Protocol",
+  "protocol_slug": "weight-management-tirzepatide-motsc-12w",
+  "category": "Weight Management",
+  "primary_goal": "Weight Management / Obesity",
+  "protocol_duration_weeks": 12,
+  "number_of_phases": 3,
+  "complexity_level": "standard",
+  "risk_class": "moderate",
+  "physician_supervision_required": true,
+  "washout_recommended_weeks": 4,
+  "status": "approved",
+  "confidence_score": 95,
+  "overview_summary": "Structured 12-week metabolic optimization protocol combining tirzepatide-mediated appetite regulation with mitochondrial activation via MOTS-c to support progressive fat loss, insulin sensitivity, and metabolic flexibility.",
+  "eligibility_rules": {
+    "indications": [
+      "overweight_or_obesity",
+      "metabolic_syndrome",
+      "insulin_resistance",
+      "visceral_adiposity",
+      "difficulty_achieving_weight_loss",
+      "weight_regain_after_dieting",
+      "prediabetes",
+      "metabolic_flexibility_impairment"
+    ],
+    "contraindications": [
+      "history_of_pancreatitis",
+      "active_gallbladder_disease",
+      "pregnancy_or_breastfeeding",
+      "MEN2_syndrome",
+      "medullary_thyroid_carcinoma_history",
+      "severe_gastrointestinal_disorder"
+    ],
+    "relative_cautions": [
+      "frailty",
+      "advanced_renal_impairment",
+      "rapid_weight_loss_history",
+      "poor_nutritional_intake",
+      "history_of_severe_gastrointestinal_intolerance"
+    ],
+    "supported_goals": [
+      "weight_management",
+      "fat_loss",
+      "metabolic_health",
+      "insulin_sensitivity",
+      "body_composition_optimization"
+    ],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "patient_demographic",
+      "age_group",
+      "start_date",
+      "baseline_weight",
+      "height_cm",
+      "bmi",
+      "metabolic_status",
+      "tolerance_profile",
+      "duration_weeks"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "expected_outcomes": {
+    "qualitative": [
+      "Reduced appetite",
+      "Improved satiety regulation",
+      "Progressive fat mass reduction",
+      "Improved insulin sensitivity",
+      "Reduction in visceral adipose tissue",
+      "Improved metabolic flexibility",
+      "Improved energy regulation",
+      "Improved body composition"
+    ],
+    "quantitative_ranges": {
+      "week_4": "Weight reduction 1–3% from baseline",
+      "week_8": "Fat mass reduction 3–6%",
+      "week_12": "Total body weight reduction 5–12%"
+    },
+    "time_to_onset_weeks": 2,
+    "responder_rate_pct": "70–85% clinical responders in structured metabolic programs"
+  },
+  "phase_blueprints": [
+    {
+      "phase_key": "initiation",
+      "phase_title": "Initiation Phase",
+      "default_start_week": 1,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "tolerance_building",
+        "early_appetite_control",
+        "mitochondrial_activation",
+        "metabolic_priming"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_tirzepatide",
+          "product_title": "Tirzepatide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "starting_weekly_dose": 2.5,
+            "administration_frequency": "weekly",
+            "administration_days_default": [
+              "Monday"
+            ]
+          }
+        },
+        {
+          "product_id": "prd_mots-c",
+          "product_title": "MOTS-C",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "dose_per_administration": 10,
+            "administration_frequency": "3x_week",
+            "timing_hint": "morning_fasting",
+            "role": "metabolic_adjunct"
+          }
+        }
+      ]
+    },
+    {
+      "phase_key": "escalation",
+      "phase_title": "Escalation Phase",
+      "default_start_week": 5,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "dose_optimization",
+        "fat_loss_acceleration",
+        "metabolic_response_assessment"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_tirzepatide",
+          "product_title": "Tirzepatide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "default_weekly_dose": 5,
+            "possible_next_step_dose": 7.5,
+            "administration_frequency": "weekly"
+          }
+        },
+        {
+          "product_id": "prd_aod-9604",
+          "product_title": "AOD-9604",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "dose_per_administration": 2,
+            "administration_frequency": "daily",
+            "timing_hint": "morning_fasting"
+          }
+        }
+      ]
+    },
+    {
+      "phase_key": "maintenance",
+      "phase_title": "Maintenance Phase",
+      "default_start_week": 9,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "metabolic_stabilization",
+        "habit_consolidation",
+        "weight_loss_maintenance"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_tirzepatide",
+          "product_title": "Tirzepatide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "default_weekly_dose": 7.5,
+            "max_weekly_dose": 10,
+            "administration_frequency": "weekly"
+          }
+        },
+        {
+          "product_id": "prd_mots-c",
+          "product_title": "MOTS-C",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "dose_per_administration": 10,
+            "administration_frequency": "2x_week",
+            "timing_hint": "morning_fasting"
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "schema_version": "antigravity_v2",
+    "visibility": "public",
+    "shortCode": "WM-001",
+    "abbreviatedName": "Tirzepatide + MOTS-c",
+    "scientificName": "Tirzepatide Dual Incretin & MOTS-c Metabolic Optimization Protocol",
+    "primary_condition": "obesity_metabolic_dysfunction",
+    "clinical_summary": "This protocol combines incretin-based appetite regulation using tirzepatide with mitochondrial signaling via MOTS-c to support progressive fat reduction, insulin sensitivity, and metabolic flexibility. The staged escalation strategy reduces gastrointestinal intolerance while maximizing metabolic response.",
+    "evidence_grade": "A",
+    "review": {
+      "last_reviewed_at": "2026-04-26",
+      "review_status": "approved_for_clinical_use"
+    },
+    "version": "1.0"
+  },
+  "clinical_disclaimer": "For use by qualified healthcare professionals only. Requires clinical evaluation, monitoring, and adherence to local regulatory standards."
+}

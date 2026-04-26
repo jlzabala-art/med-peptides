@@ -1,0 +1,1246 @@
+{
+  "generated_at": "2026-04-26T12:59:33.284Z",
+  "total": 25,
+  "summary": {
+    "pass": 0,
+    "warn": 19,
+    "fail": 6,
+    "totalErr": 12,
+    "totalWarn": 85
+  },
+  "protocols": [
+    {
+      "id": "cog_001",
+      "protocol_id": "cog_001",
+      "protocol_title": "Semax & Selank Neurocognitive Protocol",
+      "shortCode": "COG-001",
+      "category": "Cognitive Support",
+      "complexity_level": "simple",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 6,
+      "num_phases": 1,
+      "num_drugs": 2,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 2,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 5,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "cog_002",
+      "protocol_id": "cog_002",
+      "protocol_title": "Semax & Pinealon Neuro-Executive Protocol",
+      "shortCode": "COG-002",
+      "category": "Cognitive Support",
+      "complexity_level": "moderate",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 8,
+      "num_phases": 2,
+      "num_drugs": 4,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 4,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[1] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 5,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "energy_001",
+      "protocol_id": "energy_001",
+      "protocol_title": "MOTS-c Mitochondrial Energy Protocol",
+      "shortCode": "ENE-001",
+      "category": "Energy & Metabolism",
+      "complexity_level": "moderate",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 10,
+      "num_phases": 2,
+      "num_drugs": 2,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 2,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 5,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "energy_002",
+      "protocol_id": "energy_002",
+      "protocol_title": "SS-31 & NMN Bioenergetic Resilience Protocol",
+      "shortCode": "ENE-002",
+      "category": "Energy & Metabolism",
+      "complexity_level": "advanced",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 10,
+      "num_phases": 2,
+      "num_drugs": 4,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 4,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[1] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 5,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "horm_001",
+      "protocol_id": "horm_001",
+      "protocol_title": "CJC-1295 / Ipamorelin GH Optimization Protocol",
+      "shortCode": "HOR-001",
+      "category": "Hormonal Support",
+      "complexity_level": "advanced",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 12,
+      "num_phases": 2,
+      "num_drugs": 3,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 3,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 5,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "horm_002",
+      "protocol_id": "horm_002",
+      "protocol_title": "Tesamorelin + Ipamorelin GH-Axis Protocol",
+      "shortCode": "HOR-002",
+      "category": "Hormonal Support",
+      "complexity_level": "advanced",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 12,
+      "num_phases": 3,
+      "num_drugs": 5,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 5,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[2].Drug[0] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 5,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "immune_001",
+      "protocol_id": "immune_001",
+      "protocol_title": "Thymosin Alpha-1 & TB-500 Immune Modulation Protocol",
+      "shortCode": "IMM-001",
+      "category": "Immune & Inflammation",
+      "complexity_level": "moderate",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 8,
+      "num_phases": 2,
+      "num_drugs": 3,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 3,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 5,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "immune_002",
+      "protocol_id": "immune_002",
+      "protocol_title": "Thymosin Alpha-1 & KPV Anti-Inflammatory Protocol",
+      "shortCode": "IMM-002",
+      "category": "Immune & Inflammation",
+      "complexity_level": "moderate",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 8,
+      "num_phases": 2,
+      "num_drugs": 4,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 4,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[1] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 5,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "lon_001",
+      "protocol_id": "lon_001",
+      "protocol_title": "MOTS-c Longevity Foundation Protocol",
+      "shortCode": "LON-001",
+      "category": "Longevity",
+      "complexity_level": "moderate",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 12,
+      "num_phases": 2,
+      "num_drugs": 2,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 2,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 5,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "lon_002",
+      "protocol_id": "lon_002",
+      "protocol_title": "Epithalon + MOTS-c Circadian Longevity Protocol",
+      "shortCode": "LON-002",
+      "category": "Longevity",
+      "complexity_level": "moderate",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 12,
+      "num_phases": 2,
+      "num_drugs": 4,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 4,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[1] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 5,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "met_001",
+      "protocol_id": "met_001",
+      "protocol_title": "MOTS-c & AOD-9604 Metabolic Activation Protocol",
+      "shortCode": "MET-001",
+      "category": "Metabolic Health",
+      "complexity_level": "moderate",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 10,
+      "num_phases": 2,
+      "num_drugs": 3,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 3,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 5,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "met_002",
+      "protocol_id": "met_002",
+      "protocol_title": "Retatrutide + MOTS-c Metabolic Intensification Protocol",
+      "shortCode": "MET-002",
+      "category": "Metabolic Health",
+      "complexity_level": "advanced",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 12,
+      "num_phases": 3,
+      "num_drugs": 6,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 3,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[2].Drug[1] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 5,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "neuro_001",
+      "protocol_id": "neuro_001",
+      "protocol_title": "BPC-157, SS-31 & Pinealon Neuro-Restoration Protocol",
+      "shortCode": "NEURO-001",
+      "category": "Recovery & Neurology",
+      "complexity_level": "advanced",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 12,
+      "num_phases": 2,
+      "num_drugs": 5,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 5,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[2] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 6,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": true
+        }
+      }
+    },
+    {
+      "id": "rec_001",
+      "protocol_id": "rec_001",
+      "protocol_title": "BPC-157 & TB-500 Tissue Repair Protocol",
+      "shortCode": "REC-001",
+      "category": "Recovery & Tissue Repair",
+      "complexity_level": "standard",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 8,
+      "num_phases": 2,
+      "num_drugs": 3,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 4,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Missing metadata.evidence_grade"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 5,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "rec_002",
+      "protocol_id": "rec_002",
+      "protocol_title": "BPC-157, TB-500 & ARA-290 Neuro-Musculoskeletal Protocol",
+      "shortCode": "REC-002",
+      "category": "Recovery & Neurology",
+      "complexity_level": "advanced",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 8,
+      "num_phases": 2,
+      "num_drugs": 5,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 6,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Missing metadata.evidence_grade"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[2] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[1] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 5,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "sa_001",
+      "protocol_id": "sa_001",
+      "protocol_title": "Structured Skin & Aesthetics Protocol",
+      "shortCode": "SKN-001",
+      "category": "Sexual Health & Anti-Aging",
+      "complexity_level": "standard",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 0,
+      "num_phases": 0,
+      "num_drugs": 0,
+      "active": true,
+      "status": "❌ FAIL",
+      "errors": 3,
+      "warnings": 1,
+      "issues": [
+        {
+          "level": "ERROR",
+          "msg": "Missing top-level field: protocol_duration_weeks"
+        },
+        {
+          "level": "ERROR",
+          "msg": "Missing top-level field: phases"
+        },
+        {
+          "level": "WARN",
+          "msg": "Missing metadata.evidence_grade"
+        },
+        {
+          "level": "ERROR",
+          "msg": "No phases defined"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 3,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": false,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": false,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "skin_001",
+      "protocol_id": "skin_001",
+      "protocol_title": "GHK-Cu Collagen Rejuvenation Protocol",
+      "shortCode": "SKIN-001",
+      "category": "Skin & Aesthetics",
+      "complexity_level": "moderate",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 12,
+      "num_phases": 2,
+      "num_drugs": 2,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 3,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Missing metadata.evidence_grade"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 4,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": false,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "skin_002",
+      "protocol_id": "skin_002",
+      "protocol_title": "GHK-Cu & Epithalon Cellular Repair Protocol",
+      "shortCode": "SKIN-002",
+      "category": "Skin & Aesthetics",
+      "complexity_level": "moderate",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 10,
+      "num_phases": 2,
+      "num_drugs": 3,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 4,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Missing metadata.evidence_grade"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 4,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": false,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "sleep_001",
+      "protocol_id": "sleep_001",
+      "protocol_title": "DSIP & Selank Sleep Restoration Protocol",
+      "shortCode": "SLP-001",
+      "category": "Sleep & Recovery",
+      "complexity_level": "moderate",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 8,
+      "num_phases": 2,
+      "num_drugs": 3,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 4,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Missing metadata.evidence_grade"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 4,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": false,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "sleep_002",
+      "protocol_id": "sleep_002",
+      "protocol_title": "DSIP & Epithalon Circadian Sleep Protocol",
+      "shortCode": "SLP-002",
+      "category": "Sleep & Recovery",
+      "complexity_level": "simple",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 6,
+      "num_phases": 2,
+      "num_drugs": 3,
+      "active": true,
+      "status": "⚠️  WARN",
+      "errors": 0,
+      "warnings": 4,
+      "issues": [
+        {
+          "level": "WARN",
+          "msg": "Missing metadata.evidence_grade"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 4,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": false,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "wm_001",
+      "protocol_id": "wm_001",
+      "protocol_title": "Tirzepatide + MOTS-c Metabolic Protocol",
+      "shortCode": "WMT-001",
+      "complexity_level": "standard",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 12,
+      "num_phases": 3,
+      "num_drugs": 7,
+      "active": true,
+      "status": "❌ FAIL",
+      "errors": 1,
+      "warnings": 7,
+      "issues": [
+        {
+          "level": "ERROR",
+          "msg": "Missing top-level field: category"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: dosing_frequency"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: dosing_frequency"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[1] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[2] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[2].Drug[0] missing: dosing_frequency"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[2].Drug[1] missing: weekly_dose"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 5,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "wm_002",
+      "protocol_id": "wm_002",
+      "protocol_title": "Semaglutide + Cagrilintide Dual-Hormone Protocol",
+      "shortCode": "WMT-002",
+      "complexity_level": "advanced",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 12,
+      "num_phases": 3,
+      "num_drugs": 7,
+      "active": true,
+      "status": "❌ FAIL",
+      "errors": 1,
+      "warnings": 7,
+      "issues": [
+        {
+          "level": "ERROR",
+          "msg": "Missing top-level field: category"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[0] missing: dosing_frequency"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[0].Drug[1] missing: dosing_frequency"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[0] missing: dosing_frequency"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[1] missing: dosing_frequency"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[1].Drug[2] missing: weekly_dose"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[2].Drug[0] missing: dosing_frequency"
+        },
+        {
+          "level": "WARN",
+          "msg": "Phase[2].Drug[1] missing: dosing_frequency"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 5,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "wm_003",
+      "protocol_id": "wm_003",
+      "protocol_title": "Advanced Metabolic & Longevity Protocol",
+      "shortCode": "WMT-003",
+      "complexity_level": "moderate",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 16,
+      "num_phases": 3,
+      "num_drugs": 13,
+      "active": true,
+      "status": "❌ FAIL",
+      "errors": 1,
+      "warnings": 0,
+      "issues": [
+        {
+          "level": "ERROR",
+          "msg": "Missing top-level field: category"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 6,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": true,
+          "drugs_have_route": true
+        }
+      }
+    },
+    {
+      "id": "wm_004",
+      "protocol_id": "wm_004",
+      "protocol_title": "Tirzepatide + AOD-9604 & MOTS-c Metabolic Protocol",
+      "shortCode": "WMT-004",
+      "complexity_level": "moderate",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 12,
+      "num_phases": 0,
+      "num_drugs": 0,
+      "active": true,
+      "status": "❌ FAIL",
+      "errors": 3,
+      "warnings": 1,
+      "issues": [
+        {
+          "level": "ERROR",
+          "msg": "Missing top-level field: category"
+        },
+        {
+          "level": "ERROR",
+          "msg": "Missing top-level field: phases"
+        },
+        {
+          "level": "WARN",
+          "msg": "Missing metadata.description"
+        },
+        {
+          "level": "ERROR",
+          "msg": "No phases defined"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 4,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": false,
+          "drugs_have_route": false
+        }
+      }
+    },
+    {
+      "id": "wm_005",
+      "protocol_id": "wm_005",
+      "protocol_title": "Advanced Weight Management & Metabolic Longevity Protocol",
+      "shortCode": "WML-005",
+      "complexity_level": "advanced",
+      "schema_version": "antigravity_v2",
+      "duration_weeks": 24,
+      "num_phases": 0,
+      "num_drugs": 0,
+      "active": true,
+      "status": "❌ FAIL",
+      "errors": 3,
+      "warnings": 0,
+      "issues": [
+        {
+          "level": "ERROR",
+          "msg": "Missing top-level field: category"
+        },
+        {
+          "level": "ERROR",
+          "msg": "Missing top-level field: phases"
+        },
+        {
+          "level": "ERROR",
+          "msg": "No phases defined"
+        }
+      ],
+      "pdf_readiness": {
+        "score": 4,
+        "total": 10,
+        "checks": {
+          "has_overview_summary": true,
+          "has_expected_outcomes": true,
+          "has_monitoring_schedule": true,
+          "has_risk_management": true,
+          "has_cost_data": false,
+          "has_evidence_cache": false,
+          "has_provenance": false,
+          "phases_have_objectives": false,
+          "drugs_have_strength": false,
+          "drugs_have_route": false
+        }
+      }
+    }
+  ]
+}

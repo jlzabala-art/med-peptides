@@ -6,8 +6,7 @@ import PubMedPreviewPanel from '../components/discovery/PubMedPreviewPanel';
 import { getFAQForProduct } from '../utils/discoveryEngine';
 import { configService } from '../services/configService';
 import { productCategories as _fallbackCategories } from '../data/productConstants';
-import { db } from '../firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 // ── FASE 4: Lazy Table Row ──────────────────────────────────────────────────
 // Renders a skeleton placeholder until the row enters the viewport,
@@ -110,8 +109,15 @@ const Catalog = React.memo(function Catalog({
   onOpenSearch,
   initialCategory,
   EXCHANGE_RATES,
-  products
+  products,
+  allFaqs,
 }) {
+  usePageMeta({
+    title: 'Research Peptide Catalog',
+    description: 'Browse our complete catalog of research-grade peptides organized by investigational pathway — verified purity, multiple formats, global shipping.',
+    path: '/catalog',
+  });
+
   const formatPrice = (val) => val?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   const [activeCategory, setActiveCategory] = useState(initialCategory || null);
   const [productCategories, setProductCategories] = useState(_fallbackCategories);
@@ -154,32 +160,14 @@ const Catalog = React.memo(function Catalog({
     setFaqLoading(true);
     setShowFAQModal(true);
     try {
-      const [faqSnap, mappingSnap] = await Promise.all([
-        getDocs(collection(db, 'peptide_faq')),
-        getDocs(collection(db, 'faq_peptide_mapping')),
-      ]);
-      const allFaqs = faqSnap.docs.map(d => ({ ...d.data(), faqId: d.id }));
-      const allMappings = mappingSnap.docs.map(d => d.data());
-
-      // ── DEBUG: log mismatch info ───────────────────────────────
-      const pNameLower = product.name?.toLowerCase().trim();
-      const directMatches = allMappings.filter(m => m.peptideName?.toLowerCase().trim() === pNameLower);
-      console.group(`[FAQ Debug] Product: "${product.name}"`);
-      console.log('Resolved name (lowercase):', pNameLower);
-      console.log('All mapping peptideNames:', allMappings.map(m => m.peptideName));
-      console.log('Direct mapping matches found:', directMatches.length, directMatches);
-      console.log('Total FAQ docs:', allFaqs.length);
-      console.groupEnd();
-
-      const resolved = getFAQForProduct(product.name, allFaqs, allMappings, isProfessional, 8);
-      console.log(`[FAQ Debug] Final resolved FAQs (${resolved.length}):`, resolved.map(f => f.question));
+      const resolved = getFAQForProduct(product.name, allFaqs || [], product.id, isProfessional, 8);
       setFaqItems(resolved);
     } catch (err) {
       console.error('FAQ fetch error:', err);
     } finally {
       setFaqLoading(false);
     }
-  }, [isProfessional]);
+  }, [allFaqs, isProfessional]);
 
   const handleOpenPubMed = useCallback((product) => {
     setActivePubMedProduct(product);

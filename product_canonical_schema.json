@@ -1,0 +1,390 @@
+{
+  "_schemaVersion": 2,
+  "_description": "Estructura canónica de productos RegenPept: Producto → Variantes",
+  "_conventions": {
+    "id": "slug derivado del nombre: lowercase, guiones, máx 80 chars",
+    "variantId": "{dosageMg}mg-{kitSize}{kitUnit}  ej: 10mg-10vial",
+    "sku": "{SLUG}-{DOSE}-{KIT}  ej: TIRZEPATIDE-10MG-10VIAL",
+    "status": "active | deprecated | coming_soon | out_of_stock",
+    "route": "injectable_vial | injectable_pen | oral_capsule | oral_tablet | topical | nasal"
+  },
+
+  "products": [
+    {
+      "id": "tirzepatide",
+      "name": "Tirzepatide",
+      "displayName": "Tirzepatide",
+      "scientificName": "",
+      "cas": "2023788-19-2",
+      "category": "Weight Management & Metabolic",
+      "status": "active",
+      "isBlend": false,
+      "blendComponents": [],
+
+      "identity": {
+        "synonyms": ["mounjaro", "zepbound"],
+        "searchAliases": ["tirzepatide", "2023788-19-2", "mounjaro", "zepbound"],
+        "semanticKeywords": [
+          "fat loss", "diabetes", "blood sugar", "appetite", "obesity",
+          "metabolic syndrome", "dual agonist", "GLP-1", "GIP",
+          "incretin", "metabolic peptide", "weight-management research"
+        ]
+      },
+
+      "science": {
+        "desc": "A dual GIP and GLP-1 receptor agonist fundamentally altering energy metabolism and insulin secretion profiles.",
+        "objective": "Weight Loss, Metabolic, Obesity, Insulin",
+        "mechanisms": ["dual receptor agonist", "insulin secretion stimulus", "gastric emptying delay"],
+        "mechanismSummary": "Dual incretin-pathway peptide acting on GIP and GLP-1 signaling in metabolic research contexts.",
+        "researchFocus": ["metabolism", "glucose-regulation research", "body composition"],
+        "safetyNote": "Peptide should be handled with extreme precision."
+      },
+
+      "classification": {
+        "goals": ["weight_loss", "metabolism", "obesity", "insulin_sensitivity"],
+        "secondaryFactors": ["appetite_suppression", "blood_sugar", "cardiovascular_health"],
+        "tags": ["Metabolism", "Weight Loss", "GLP-1", "GIP"]
+      },
+
+      "ui": {
+        "image": "/assets/vials/standard-vial.png",
+        "scientificModalEnabled": true,
+        "faqModalEnabled": true
+      },
+
+      "meta": {
+        "source": "wholesale",
+        "seedVersion": 2,
+        "createdAt": "2025-01-01T00:00:00.000Z",
+        "updatedAt": "2025-01-01T00:00:00.000Z"
+      },
+
+      "variants": [
+        {
+          "id": "10mg-10vial",
+          "productId": "tirzepatide",
+          "productName": "Tirzepatide",
+          "category": "Weight Management & Metabolic",
+          "sku": "TIRZEPATIDE-10MG-10VIAL",
+          "route": "injectable_vial",
+
+          "strength": {
+            "dosageMg": 10,
+            "dosageLabel": "10 mg",
+            "isBlendStrength": false
+          },
+
+          "kit": {
+            "size": 10,
+            "unit": "vial",
+            "label": "10 vial/kit"
+          },
+
+          "pricing": {
+            "base": {
+              "perVialUSD": 66,
+              "kitUSD": 429,
+              "currency": "USD"
+            },
+            "byCountry": {
+              "PL": { "kitLocal": 1720, "currency": "PLN", "vatIncluded": true },
+              "ES": { "kitLocal": 395, "currency": "EUR", "vatIncluded": false }
+            }
+          },
+
+          "stock": {
+            "available": true,
+            "note": ""
+          },
+
+          "isDefault": true,
+          "sortOrder": 1,
+
+          "meta": {
+            "seedVersion": 2,
+            "createdAt": "2025-01-01T00:00:00.000Z",
+            "updatedAt": "2025-01-01T00:00:00.000Z"
+          }
+        },
+        {
+          "id": "15mg-10vial",
+          "productId": "tirzepatide",
+          "productName": "Tirzepatide",
+          "category": "Weight Management & Metabolic",
+          "sku": "TIRZEPATIDE-15MG-10VIAL",
+          "route": "injectable_vial",
+
+          "strength": {
+            "dosageMg": 15,
+            "dosageLabel": "15 mg",
+            "isBlendStrength": false
+          },
+
+          "kit": {
+            "size": 10,
+            "unit": "vial",
+            "label": "10 vial/kit"
+          },
+
+          "pricing": {
+            "base": {
+              "perVialUSD": 99,
+              "kitUSD": 550,
+              "currency": "USD"
+            },
+            "byCountry": {}
+          },
+
+          "stock": {
+            "available": true,
+            "note": ""
+          },
+
+          "isDefault": false,
+          "sortOrder": 2,
+
+          "meta": {
+            "seedVersion": 2,
+            "createdAt": "2025-01-01T00:00:00.000Z",
+            "updatedAt": "2025-01-01T00:00:00.000Z"
+          }
+        },
+        {
+          "id": "30mg-10vial",
+          "productId": "tirzepatide",
+          "productName": "Tirzepatide",
+          "category": "Weight Management & Metabolic",
+          "sku": "TIRZEPATIDE-30MG-10VIAL",
+          "route": "injectable_vial",
+
+          "strength": {
+            "dosageMg": 30,
+            "dosageLabel": "30 mg",
+            "isBlendStrength": false
+          },
+
+          "kit": {
+            "size": 10,
+            "unit": "vial",
+            "label": "10 vial/kit"
+          },
+
+          "pricing": {
+            "base": {
+              "perVialUSD": 154,
+              "kitUSD": 935,
+              "currency": "USD"
+            },
+            "byCountry": {}
+          },
+
+          "stock": {
+            "available": true,
+            "note": ""
+          },
+
+          "isDefault": false,
+          "sortOrder": 3,
+
+          "meta": {
+            "seedVersion": 2,
+            "createdAt": "2025-01-01T00:00:00.000Z",
+            "updatedAt": "2025-01-01T00:00:00.000Z"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "bpc-157",
+      "name": "BPC-157",
+      "displayName": "BPC-157",
+      "scientificName": "",
+      "cas": "137525-51-0",
+      "category": "Healing & Recovery",
+      "status": "active",
+      "isBlend": false,
+      "blendComponents": [],
+
+      "identity": {
+        "synonyms": ["body protection compound 157", "pentadecapeptide", "bpc157"],
+        "searchAliases": ["bpc-157", "bpc157", "137525-51-0", "body protection compound 157", "pentadecapeptide"],
+        "semanticKeywords": [
+          "injury", "wound healing", "gut", "stomach", "joints", "tendons",
+          "ligaments", "soft tissue", "repair peptide", "recovery",
+          "tissue support", "healing research", "integrity support"
+        ]
+      },
+
+      "science": {
+        "desc": "A pentadecapeptide with potent cytoprotective, angiogenic, and wound-healing properties under experimental conditions.",
+        "objective": "Healing, Recovery, Inflammation, Repair",
+        "mechanisms": ["cytoprotective", "angiogenic", "collagen synthesis"],
+        "mechanismSummary": "Repair-oriented research peptide commonly surfaced in tissue-response, recovery, and integrity-related contexts.",
+        "researchFocus": ["recovery", "tissue support", "repair-related research"],
+        "safetyNote": "Ensure strictly for research purposes."
+      },
+
+      "classification": {
+        "goals": ["healing", "recovery", "inflammation", "repair"],
+        "secondaryFactors": ["gut_health", "joint_support", "tendon_repair"],
+        "tags": ["Healing", "Recovery", "Anti-inflammatory"]
+      },
+
+      "ui": {
+        "image": "/assets/vials/standard-vial.png",
+        "scientificModalEnabled": true,
+        "faqModalEnabled": true
+      },
+
+      "meta": {
+        "source": "wholesale",
+        "seedVersion": 2,
+        "createdAt": "2025-01-01T00:00:00.000Z",
+        "updatedAt": "2025-01-01T00:00:00.000Z"
+      },
+
+      "variants": [
+        {
+          "id": "5mg-10vial",
+          "productId": "bpc-157",
+          "productName": "BPC-157",
+          "category": "Healing & Recovery",
+          "sku": "BPC157-5MG-10VIAL",
+          "route": "injectable_vial",
+
+          "strength": {
+            "dosageMg": 5,
+            "dosageLabel": "5 mg",
+            "isBlendStrength": false
+          },
+
+          "kit": {
+            "size": 10,
+            "unit": "vial",
+            "label": "10 vial/kit"
+          },
+
+          "pricing": {
+            "base": {
+              "perVialUSD": 27.5,
+              "kitUSD": 165,
+              "currency": "USD"
+            },
+            "byCountry": {}
+          },
+
+          "stock": {
+            "available": true,
+            "note": ""
+          },
+
+          "isDefault": true,
+          "sortOrder": 1,
+
+          "meta": {
+            "seedVersion": 2,
+            "createdAt": "2025-01-01T00:00:00.000Z",
+            "updatedAt": "2025-01-01T00:00:00.000Z"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "glow",
+      "name": "GLOW",
+      "displayName": "GLOW",
+      "scientificName": "",
+      "cas": "Mixed",
+      "category": "Healing & Recovery",
+      "status": "deprecated",
+      "isBlend": true,
+      "blendComponents": ["BPC-157", "TB-500", "GHK-Cu"],
+
+      "identity": {
+        "synonyms": ["glow blend", "healing stack"],
+        "searchAliases": ["glow", "bpc-157/tb-500/ghk-cu", "glow blend", "healing stack"],
+        "semanticKeywords": [
+          "glow", "beauty", "skin", "repair", "complexion", "radiance",
+          "copper peptide", "skin support", "regeneration research",
+          "aesthetic research", "blend", "recovery formula"
+        ]
+      },
+
+      "science": {
+        "desc": "A proprietary experimental blend combining cytoprotective properties, angiogenic stimulation, and tissue remodeling mechanisms.",
+        "objective": "Healing, Recovery, Skin, Anti-Aging",
+        "mechanisms": ["cytoprotective", "angiogenic", "collagen stimulation"],
+        "mechanismSummary": "Recovery-oriented research peptide family commonly surfaced in repair, tissue-response, and performance-support exploration.",
+        "researchFocus": [],
+        "safetyNote": "Synergistic research compound."
+      },
+
+      "classification": {
+        "goals": ["skin_health", "healing", "anti_aging"],
+        "secondaryFactors": ["collagen_production", "wound_healing", "rejuvenation"],
+        "tags": ["Skin", "Healing", "Premium Blend"]
+      },
+
+      "ui": {
+        "image": "/assets/vials/standard-vial.png",
+        "scientificModalEnabled": true,
+        "faqModalEnabled": true
+      },
+
+      "meta": {
+        "source": "wholesale",
+        "seedVersion": 2,
+        "createdAt": "2025-01-01T00:00:00.000Z",
+        "updatedAt": "2025-01-01T00:00:00.000Z"
+      },
+
+      "variants": [
+        {
+          "id": "blend-10vial",
+          "productId": "glow",
+          "productName": "GLOW",
+          "category": "Healing & Recovery",
+          "sku": "GLOW-10-10-75MG-10VIAL",
+          "route": "injectable_vial",
+
+          "strength": {
+            "dosageMg": null,
+            "dosageLabel": "10/10/75 mg",
+            "isBlendStrength": true
+          },
+
+          "kit": {
+            "size": 10,
+            "unit": "vial",
+            "label": "10 vial/kit"
+          },
+
+          "pricing": {
+            "base": {
+              "perVialUSD": 70,
+              "kitUSD": 380,
+              "currency": "USD"
+            },
+            "byCountry": {}
+          },
+
+          "stock": {
+            "available": false,
+            "note": "Deprecated product"
+          },
+
+          "isDefault": true,
+          "sortOrder": 1,
+
+          "meta": {
+            "seedVersion": 2,
+            "createdAt": "2025-01-01T00:00:00.000Z",
+            "updatedAt": "2025-01-01T00:00:00.000Z"
+          }
+        }
+      ]
+    }
+  ]
+}

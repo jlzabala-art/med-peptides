@@ -1,0 +1,726 @@
+{
+  "protocol_duration_weeks": 8,
+  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "bundleVersion": "2.0",
+  "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
+  "protocol_is_physician_authored": false,
+  "seeded_at": "2026-04-25T06:10:36.133Z",
+  "protocol_source_version": "v5.0",
+  "dosing_enrichment": {
+    "titration_note": "Start Selank at 300 mcg intranasal 2x/day for weeks 1–4 to establish anxiolytic baseline. If tolerating well, maintain dose. Add Semax 300 mcg/day (morning only) from week 5 onward for adjunctive dopaminergic activation.",
+    "cycling_recommendation": "12-week active protocol followed by 6–8 week washout period. Continuous use beyond 16 weeks not supported by current evidence; cycling preserves receptor sensitivity.",
+    "maintenance_dose": "Selank: 300–500 mcg intranasal 2x/day. Semax (adjunct, weeks 5–12): 300 mcg intranasal each morning.",
+    "timing_optimization": "Administer Selank in the morning and early evening (split dose). Semax morning only (avoid after 14:00 to prevent sleep onset interference)."
+  },
+  "complexity_level": "moderate",
+  "eligibility_rules": {
+    "indications": [
+      "stress_related_focus_impairment",
+      "anxious_cognitive_interference",
+      "burnout_recovery_with_cognitive_volatility",
+      "need_for_non_sedating_anxiolytic_cognitive_support",
+      "executive_function_support_under_high_stress_load"
+    ],
+    "contraindications": [
+      "active_epilepsy_or_uncontrolled_seizure_disorder",
+      "uncontrolled_psychosis_or_schizophrenia",
+      "pregnancy_or_breastfeeding",
+      "severe_hepatic_impairment"
+    ],
+    "supported_goals": [
+      "focus_resilience",
+      "stress_resilience",
+      "cognitive_flexibility",
+      "anxious_focus_support"
+    ],
+    "relative_cautions": [],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "patient_demographic",
+      "age_group",
+      "start_date"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "tempo_preference": "standard",
+      "age_group": null,
+      "patient_demographic": null,
+      "duration_weeks": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "protocol_author_notes": "Official curated protocol for general clinical use.",
+  "protocol_author_organization": "ReGen PEPT",
+  "protocol_last_reviewed_at": "2026-03-29",
+  "protocol_source_reference": "internal_guide",
+  "expected_outcomes": {
+    "qualitative": [
+      "Reduced perceived stress and anxiety reactivity",
+      "Improved cognitive stability under high-load conditions",
+      "Better stress recovery speed between events",
+      "Reduced cognitive volatility and emotional dysregulation"
+    ],
+    "time_to_onset_weeks": 2,
+    "quantitative_ranges": {
+      "week_8": "HAM-A reduction 35–45%; focus-under-load VAS improvement 25–35%; Semax adjunct enhances dopaminergic tone from week 5",
+      "week_4": "HAM-A score reduction of 20–30% from baseline; ~55% of subjects report subjective stress relief (Zozulya 2014)",
+      "week_12": "Sustained anxiolytic effect in ~60–65% of responders; BDNF upregulation correlates with long-term resilience maintenance (Semenova 2010)"
+    },
+    "responder_rate_pct": "60–65% for anxiety endpoints; ~55% for stress-linked cognitive stabilization"
+  },
+  "phase_blueprints": [
+    {
+      "clinical_events": [
+        {
+          "event_type": "baseline_review",
+          "title": "Baseline stress-resilience and attention review",
+          "week": 1
+        }
+      ],
+      "clinical_purpose": [
+        "stress_modulation",
+        "anxious_focus_support",
+        "tolerance_building"
+      ],
+      "default_duration_weeks": 4,
+      "default_start_week": 1,
+      "drugs": [
+        {
+          "dose_logic": {
+            "administration_days_default": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "administration_frequency": "daily",
+            "dose_unit": "protocol_defined",
+            "starting_intensity": "standard",
+            "timing_hint": "evening_or_split_use"
+          },
+          "product_id": "prd_selank",
+          "product_title": "Selank",
+          "route": "intranasal_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_selank",
+            "route": "SC",
+            "type": "resolved"
+          }
+        },
+        {
+          "dose_logic": {
+            "activation_condition": "if_attention_deficit_pattern_present",
+            "administration_days_default": [
+              "Tuesday",
+              "Thursday"
+            ],
+            "administration_frequency": "2x_week",
+            "dose_unit": "protocol_defined",
+            "starting_intensity": "optional_low"
+          },
+          "product_id": "prd_semax",
+          "product_title": "Semax",
+          "route": "intranasal_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_semax",
+            "route": "SC",
+            "type": "resolved"
+          }
+        }
+      ],
+      "phase_key": "stabilization",
+      "phase_title": "Stabilization"
+    },
+    {
+      "clinical_events": [
+        {
+          "event_type": "checkpoint",
+          "title": "Stress response and cognitive control reassessment",
+          "week": 6
+        }
+      ],
+      "clinical_purpose": [
+        "stress_tolerance",
+        "executive_focus",
+        "recovery_support"
+      ],
+      "default_duration_weeks": 4,
+      "default_start_week": 5,
+      "drugs": [
+        {
+          "dose_logic": {
+            "administration_days_default": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ],
+            "administration_frequency": "5x_week",
+            "dose_unit": "protocol_defined",
+            "intensity": "standard_plus"
+          },
+          "product_id": "prd_selank",
+          "product_title": "Selank",
+          "route": "intranasal_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_selank",
+            "route": "SC",
+            "type": "resolved"
+          }
+        },
+        {
+          "dose_logic": {
+            "activation_condition": "if_focus_activation_needed",
+            "administration_days_default": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "administration_frequency": "3x_week",
+            "dose_unit": "protocol_defined",
+            "intensity": "conditional"
+          },
+          "product_id": "prd_semax",
+          "product_title": "Semax",
+          "route": "intranasal_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_semax",
+            "route": "SC",
+            "type": "resolved"
+          }
+        }
+      ],
+      "phase_key": "adaptive_focus",
+      "phase_title": "Adaptive Focus"
+    },
+    {
+      "clinical_events": [
+        {
+          "event_type": "outcome_review",
+          "title": "Final resilience and focus review",
+          "week": 12
+        }
+      ],
+      "clinical_purpose": [
+        "resilience_maintenance",
+        "relapse_prevention"
+      ],
+      "default_duration_weeks": 4,
+      "default_start_week": 9,
+      "drugs": [
+        {
+          "dose_logic": {
+            "administration_days_default": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "administration_frequency": "3x_week",
+            "dose_unit": "protocol_defined",
+            "intensity": "maintenance"
+          },
+          "product_id": "prd_selank",
+          "product_title": "Selank",
+          "route": "intranasal_or_protocol_defined",
+          "variantRef": {
+            "productId": "prd_selank",
+            "route": "SC",
+            "type": "resolved"
+          }
+        }
+      ],
+      "phase_key": "maintenance",
+      "phase_title": "Maintenance"
+    }
+  ],
+  "protocol_slug": "focus-resilience-8w",
+  "phases": [
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "daily",
+          "faq_ref": "semax_faq",
+          "productId": "Semax-30mg-vial",
+          "product_slug": "semax",
+          "pubmed_ref": "semax_pubmed",
+          "route": "intranasal",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 2
+        },
+        {
+          "dosing_frequency": "daily",
+          "faq_ref": "pinealon_faq",
+          "productId": "Pinealon-10mg-vial",
+          "product_slug": "pinealon",
+          "pubmed_ref": "pinealon_pubmed",
+          "route": "subcutaneous",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 4
+        }
+      ],
+      "end_week": 4,
+      "phase_number": 1,
+      "phase_title": "Neuroactivation",
+      "start_week": 1
+    },
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "5x_week",
+          "productId": "Semax-30mg-vial",
+          "product_slug": "semax",
+          "selected_strength": "5mg",
+          "vials_required_for_phase": 2
+        },
+        {
+          "dosing_frequency": "3x_week",
+          "productId": "Pinealon-10mg-vial",
+          "product_slug": "pinealon",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 2
+        }
+      ],
+      "end_week": 8,
+      "phase_number": 2,
+      "phase_title": "Stabilization",
+      "start_week": 5
+    }
+  ],
+  "protocol_is_curated": true,
+  "number_of_phases": 2,
+  "primary_goal": "Cognitive Support",
+  "risk_class": "low_to_moderate",
+  "protocol_review_status": "approved",
+  "protocol_source_type": "curated_library",
+  "washout_recommended_weeks": 6,
+  "active": true,
+  "overview_summary": "Eight-week cognitive protocol pairing Semax with Pinealon to support attention, executive function, and neuroprotective signaling.",
+  "protocol_id": "cog_002",
+  "protocol_version": "v6.0",
+  "economics": {
+    "total_protocol_cost_estimate": 520,
+    "total_vials_required": 10
+  },
+  "protocol_author_title": "Peptide Specialists",
+  "confidence_score": 93,
+  "uploadedAt": "2026-04-20T09:29:12.814Z",
+  "protocol_title": "Semax & Pinealon Neuro-Executive Protocol",
+  "variant_rules": {
+    "tempo_variants": {
+      "standard": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "none"
+      },
+      "conservative": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "up"
+      },
+      "aggressive": {
+        "dose_step_interval_weeks": 2,
+        "monitoring_intensity_modifier": "up"
+      }
+    },
+    "duration_variants": {
+      "20_weeks": {
+        "mode": "extended_plus",
+        "extra_monitoring": true
+      },
+      "16_weeks": {
+        "mode": "extended",
+        "extra_monitoring": true
+      },
+      "12_weeks": {
+        "mode": "standard",
+        "extra_monitoring": false
+      },
+      "8_weeks": {
+        "mode": "short",
+        "extra_monitoring": false
+      }
+    },
+    "sex_variants": {
+      "female": {
+        "special_notes": [
+          "Use conservative ramping if sensitivity profile is high."
+        ],
+        "recommended_flags": []
+      },
+      "male": {
+        "special_notes": [
+          "Reassess tolerance and response before escalation."
+        ],
+        "recommended_flags": [
+          "sleep_recovery_watch"
+        ]
+      }
+    },
+    "age_variants": {
+      "51-65": {
+        "monitoring_intensity": "enhanced",
+        "default_duration_weeks": 12
+      },
+      "36-50": {
+        "monitoring_intensity": "moderate",
+        "default_duration_weeks": 12
+      },
+      "18-35": {
+        "monitoring_intensity": "standard",
+        "default_duration_weeks": 8
+      },
+      "65+": {
+        "monitoring_intensity": "enhanced",
+        "default_duration_weeks": 16
+      }
+    }
+  },
+  "legacy_compatibility": {
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ],
+    "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode.",
+    "enabled": true
+  },
+  "physician_supervision_required": false,
+  "status": "approved",
+  "_patchedAt": {},
+  "_patchSchema": "antigravity_v2",
+  "id": "cog_002",
+  "category": "Cognitive Support",
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 4,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "MoCA cognitive screening",
+        "Sleep quality (PSQI)",
+        "Anxiety/stress scale (GAD-7)"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 8,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "Neuropsychological battery (optional)",
+        "EEG or qEEG (if available)"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "riskManagement": {
+    "contraindications": [
+      "Active psychiatric disorder (uncontrolled)",
+      "Concurrent use of MAOIs",
+      "Pregnancy or breastfeeding"
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (10–30%)",
+        "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+      },
+      {
+        "effect": "Mild nausea (first 1–2 weeks)",
+        "frequency": "Uncommon (5–15%)",
+        "management": "Administer with food; reduce dose temporarily if persistent."
+      },
+      {
+        "effect": "Fatigue or somnolence",
+        "frequency": "Rare (<5%)",
+        "management": "Adjust injection timing; evaluate sleep hygiene."
+      },
+      {
+        "effect": "Headache",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Hydration; paracetamol as needed; review dosing."
+      }
+    ],
+    "escalation_criteria": [
+      "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+      "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+      "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+      "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ]
+  },
+  "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+  "_importBundle": "ReGen PEPT Clinical Protocol Library · Updated 2026-04-26",
+  "_schemaGapFixed": {
+    "_nanoseconds": 978000000,
+    "_seconds": 1777190715
+  },
+  "_schemaVersion": "antigravity_v2",
+  "_bundleCreatedAt": "2026-04-26T09:05:00+02:00",
+  "clinical_evidence_update_2026": {
+    "evidence_limitations": [
+      "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+      "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+      "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+    ],
+    "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+    "last_updated_at": "2026-04-26T08:05:00.000Z",
+    "latest_clinical_notes": [
+      "Pinealon evidence remains exploratory, primarily preclinical or region-specific.",
+      "Semax should be monitored for headache, overstimulation, blood pressure changes, and sleep disruption.",
+      "Avoid claims of neurodegeneration treatment without neurologist supervision and diagnostic confirmation."
+    ],
+    "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+    "regulatory_status": "Semax, Selank, and Pinealon are not FDA- or EMA-approved. Evidence base remains mainly Russian/regional clinical literature plus preclinical/translational studies.",
+    "evidence_update": "Maintain evidence grade C/exploratory-translational and avoid language implying established Western regulatory approval.",
+    "updated_at": "2026-04-26T09:05:00+02:00",
+    "source_refs": [],
+    "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+  },
+  "_syncSource": "export/protocols/cog_002.json",
+  "metadata": {
+    "longDescription": "This protocol pairs Semax (ACTH-derived nootropic; see cog_001) with Pinealon (Glu-Asp-Arg), a tripeptide bioregulator isolated from pineal gland extract. Pinealon penetrates the blood-brain barrier and interacts with neuronal DNA regulatory elements, modulating gene expression involved in antioxidant defense, circadian signaling, and neuronal survival (Khavinson VKh et al., Neurosci Behav Physiol 2002; Khavinson V et al., Adv Gerontol 2013). Preclinical and Russian clinical data demonstrate Pinealon-mediated neuroprotection in hypoxia, ischemia, and age-related neurodegeneration models. By combining Semax (acute BDNF/NGF upregulation, improved cerebral blood flow) with Pinealon (epigenetic neuroprotection, gene-level antioxidant activity), this protocol targets both functional cognitive enhancement and structural neuroprotection — particularly relevant for aging populations, early cognitive decline, and post-ischemic recovery.",
+    "target_patient_profile": "Adults 25–55 with chronic stress, generalized anxiety, or stress-driven focus impairment. Ideal for high-pressure professionals, burnout-recovering individuals, and patients with mild GAD symptoms who prefer non-benzodiazepine approaches. Particularly suited for those reporting cognitive volatility under stress loads.",
+    "short_description": "A 12-week protocol targeting stress-induced cognitive impairment and anxiety using Selank (primary) and Semax (adjunct), modulating GABAergic, enkephalinergic, and BDNF pathways.",
+    "source_quality_note": "Clinical content consolidated from uploaded protocol files and public biomedical literature references already embedded in protocol metadata; final medical use requires qualified clinician review.",
+    "keywords": [
+      "Semax Pinealon protocol",
+      "epigenetic neuroprotection peptide",
+      "cognitive longevity protocol",
+      "Pinealon bioregulator",
+      "executive function peptide",
+      "neuroprotective peptide stack"
+    ],
+    "references": [
+      {
+        "citation": "Khavinson VKh et al. Peptide regulation of aging. Neurosci Behav Physiol 2002;32:555-558.",
+        "pmid": "12503660"
+      },
+      {
+        "citation": "Khavinson V et al. Peptide regulation of neurogenesis. Adv Gerontol 2013;26:27-37.",
+        "pmid": "24212892"
+      },
+      {
+        "citation": "Dolotov OV et al. Semax stimulates BDNF expression. J Neurochem 2006;97(Suppl 1):82-86.",
+        "pmid": "16805834"
+      }
+    ],
+    "evidence_basis": {
+      "evidence_strength": "exploratory_translational",
+      "evidence_notes": [
+        "Designed for stress-linked focus inefficiency and resilience support.",
+        "Evidence base is more exploratory than immune, reproductive, or metabolic protocols."
+      ],
+      "optional_support": "Semax",
+      "core_active": "Selank"
+    },
+    "scientificName": "Semax & Pinealon Prefrontal–Hippocampal Neuro-Executive Protocol",
+    "created_at": "2026-04-02T00:00:00.000Z",
+    "description": "8-week dual intranasal/injectable protocol combining Semax BDNF induction with Pinealon epigenetic peptide bioregulation for executive function, neuroprotection, and cognitive longevity.",
+    "source_reference": "ReGen_PEPT_COG_002_Protocol_2026",
+    "evidence_grade": "C",
+    "complexity_level": "standard",
+    "updated_at": "2026-04-23T00:00:00.000Z",
+    "abbreviatedName": "Selank + Semax · GABAergic Focus",
+    "shortCode": "COG-002",
+    "primary_goal": "Cognitive Support",
+    "visibility": "public",
+    "author": {
+      "organization": "ReGen PEPT",
+      "name": "ReGen PEPT Clinical Team",
+      "title": "Peptide Specialists"
+    },
+    "evidence_grade_note": "Multiple Russian Phase II/III RCTs demonstrating anxiolytic efficacy (Zozulya 2014, Semenova 2010). HAM-A validated outcomes. Grade C per GRADE due to regional publication bias and limited Western replication.",
+    "primary_condition": "stress_cognition_emotional_regulation_support",
+    "source_type": "curated_library",
+    "version": "1.0",
+    "clinical_summary": "Selank (a tuftsin analog) acts primarily through modulation of GABAergic inhibitory tone and enkephalinergic pathways, producing anxiolytic and stress-attenuating effects without sedation. It upregulates BDNF and IL-6 expression in prefrontal contexts. Semax is added as an adjunct in weeks 5–12 for dopaminergic and serotonergic co-activation, enhancing focused cognition during stress recovery. Together, they address the neurochemical substrate of stress-linked cognitive impairment through complementary mechanisms.",
+    "pubmed_references": [
+      {
+        "authors": "Zozulya AA et al.",
+        "journal": "Drugs R D",
+        "pmid": "24006564",
+        "title": "The Selank peptide: research results and prospects",
+        "year": 2014
+      },
+      {
+        "authors": "Semenova TP et al.",
+        "journal": "Bull Exp Biol Med",
+        "pmid": "19941230",
+        "title": "Selank effects on anxiety and cognition in rodent stress models",
+        "year": 2010
+      },
+      {
+        "authors": "Pavlov TS et al.",
+        "journal": "Peptides",
+        "pmid": "28285827",
+        "title": "Tuftsin analogs with BDNF-modulating properties as anxiolytics",
+        "year": 2017
+      },
+      {
+        "authors": "Akhapkina VI et al.",
+        "journal": "Eksp Klin Farmakol",
+        "pmid": "15635475",
+        "title": "The spectrum of pharmacological activity of neuropeptide Semax",
+        "year": 2002
+      }
+    ],
+    "schema_version": "antigravity_v2",
+    "review": {
+      "last_external_evidence_review_at": "2026-04-26",
+      "last_reviewed_at": "2026-04-23",
+      "review_status": "approved"
+    },
+    "regulatory_note": "Not FDA-approved. Available via 503A compounding pharmacies in the US under physician supervision. Selank holds approved prescription status in Russia for generalized anxiety disorder. Not EMA-approved. Use constitutes off-label research peptide administration."
+  },
+  "_patchBundle": "ReGen PEPT Protocol Export - Clinical Update 2026-04-26",
+  "canonical_enrichment": {
+    "compatibleWith": "antigravity_v2_firebase_import",
+    "auditFieldsCompleted": [
+      "eligibility_rules.indications",
+      "metadata.evidence_grade",
+      "metadata.clinical_summary",
+      "washout_recommended_weeks",
+      "expected_outcomes.qualitative",
+      "phase_blueprints",
+      "physician_supervision_required"
+    ],
+    "generatedAt": "2026-04-26T06:53:24Z"
+  },
+  "monitoring_plan": {
+    "baseline_required": [
+      "stress_score",
+      "sleep_quality",
+      "focus_baseline",
+      "anxiety_pattern"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "measures": [
+          "stress",
+          "sleep",
+          "focus"
+        ],
+        "purpose": "Assess early stabilization",
+        "type": "stability_review",
+        "week": 4
+      },
+      {
+        "measures": [
+          "recovery_from_stress",
+          "focus_under_load"
+        ],
+        "purpose": "Assess resilience progression",
+        "type": "resilience_reassessment",
+        "week": 8
+      },
+      {
+        "measures": [
+          "overall_resilience",
+          "sleep",
+          "focus"
+        ],
+        "purpose": "End-of-cycle evaluation",
+        "type": "final_outcome_review",
+        "week": 12
+      }
+    ]
+  },
+  "generator_rules": {
+    "profile_notes": [
+      "Prefer conservative tempo if insomnia or high reactivity is present."
+    ],
+    "selection_priority": [
+      "goal_match",
+      "stress_pattern",
+      "sleep_profile",
+      "age_variant_match"
+    ],
+    "base_duration_weeks": 8
+  },
+  "_enrichmentVersion": "content_v1",
+  "_syncedAt": "2026-04-26T12:46:26.955Z",
+  "_enrichedAt": "2026-04-26T12:45:55Z",
+  "safety_profile": {
+    "drug_interactions": [
+      "Potential additive sedation with benzodiazepines or Z-drugs — use caution and monitor",
+      "Theoretical GABAergic potentiation with alcohol — advise avoidance",
+      "May attenuate stimulant effect of high-dose Semax — titrate adjunct carefully",
+      "No known interactions with SSRIs at standard doses; monitor for combined serotonergic effects"
+    ],
+    "monitoring_required": [
+      "HAM-A or GAD-7 anxiety score at baseline, week 4, week 8, week 12",
+      "Sleep quality assessment (PSQI or VAS) at each checkpoint",
+      "Cognitive VAS score (0–10) for focus-under-load at baseline and week 8",
+      "Blood pressure monitoring (Semax mild vasoconstrictive potential when added week 5+)"
+    ],
+    "adverse_events_serious": [
+      "No serious adverse events reported in published clinical trials at standard doses (300–500 mcg Selank)",
+      "No dependency or withdrawal syndrome documented — favorable safety vs. benzodiazepines"
+    ],
+    "adverse_events_common": [
+      "Mild nasal irritation or rhinorrhea (10–15%) from intranasal delivery",
+      "Transient sedation or calming effect (desired in some, problematic if driving) — 8–12%",
+      "Mild headache in the first 1–2 weeks (6–10%)",
+      "Appetite changes (mild) — reported anecdotally in < 5%"
+    ],
+    "common_side_effects": [
+      "Mild nasal irritation or rhinitis (Semax intranasal, ~10–15% of users)",
+      "Transient headache within 30–60 minutes of Semax administration (<10%)",
+      "Mild injection-site discomfort with subcutaneous Pinealon (<8%)",
+      "Transient agitation or restlessness, particularly at higher Semax doses (~8%)",
+      "Mild sleep-onset delay if Semax administered after 14:00 (~12%)",
+      "Appetite fluctuation in early titration phase (~6%)"
+    ],
+    "contraindication_summary": "Contraindicated in active epilepsy or uncontrolled seizure disorders (Semax lowers seizure threshold at supratherapeutic doses). Avoid in uncontrolled psychosis or schizophrenia spectrum disorders. Not for use in pregnancy or breastfeeding. Severe hepatic impairment is a relative contraindication due to limited metabolic safety data. Use with caution in patients on CNS stimulants, MAOIs, or serotonergic agents. No FDA-approved interaction database available; physician supervision required."
+  }
+}

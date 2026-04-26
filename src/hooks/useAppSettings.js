@@ -14,7 +14,7 @@ const DEFAULT_SETTINGS = {
     us:  { rate: 1, currency: 'USD', name: 'USA' },
     row: { rate: 1, currency: 'USD', name: 'Global' },
   },
-  shippingCosts:  { standard: 0, express: 50, courier: 30 },
+  shippingCosts:  { standard: 40, express: 80, courier: 60 },
   deliveryTimes:  { standard: '5-7 days', express: '2-3 days', courier: 'next day' },
 };
 

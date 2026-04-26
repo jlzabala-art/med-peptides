@@ -1,180 +1,175 @@
-import { ArrowRight, Zap } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 /**
- * RelatedPeptidesRow — Redesigned related peptide cards matching TrendingPeptides visuals.
- * Flexible minmax grid layout that adapts to any number of products without hardcoded breaks.
+ * RelatedPeptidesRow — Compact list format.
+ * Each row: thumbnail | name + category | short description | arrow link.
+ * Preserves all product info while using minimal vertical space.
  */
 export default function RelatedPeptidesRow({ peptides = [], allProducts = [], title = 'Related Peptides' }) {
   const navigate = useNavigate();
   if (!peptides.length) return null;
 
-  const resolveProduct = (entry) => {
-    return allProducts?.find(
+  const resolveProduct = (entry) =>
+    allProducts?.find(
       (p) => p.name?.toLowerCase() === (entry.peptideName || entry.name)?.toLowerCase()
     ) || entry;
+
+  const handleNav = (slug) => {
+    if (slug) {
+      navigate(`/product/${slug}`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
     <div style={{ marginTop: '2.5rem' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.02em' }}>
-          {title}
-        </h3>
-      </div>
-
       <style dangerouslySetInnerHTML={{ __html: `
-        .related-card-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-          gap: 2rem;
-        }
-        .related-card-title {
-          font-size: 1.5rem;
-          color: #0f172a;
-          margin-bottom: 0.5rem;
+        .rp-list-title {
+          font-size: 1.1rem;
           font-weight: 800;
+          color: var(--text-main);
           letter-spacing: -0.02em;
+          margin: 0 0 1rem 0;
+          text-transform: uppercase;
+          font-size: 0.75rem;
+          letter-spacing: 0.1em;
+          color: #94a3b8;
         }
-        .related-vial-img {
-          width: 140px;
-          height: 140px;
+        .rp-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+          border: 1px solid #f1f5f9;
+          border-radius: 16px;
+          overflow: hidden;
+          background: white;
+        }
+        .rp-list-item {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 0.85rem 1rem;
+          cursor: pointer;
+          transition: background 0.15s ease;
+          border-bottom: 1px solid #f8fafc;
+          text-decoration: none;
+          color: inherit;
+        }
+        .rp-list-item:last-child {
+          border-bottom: none;
+        }
+        .rp-list-item:hover {
+          background: #f8fafc;
+        }
+        .rp-list-item:hover .rp-arrow {
+          transform: translateX(3px);
+          color: var(--primary);
+        }
+        .rp-thumb {
+          width: 40px;
+          height: 40px;
           object-fit: contain;
-          margin: 0 auto 1.5rem auto;
-          transition: transform 0.4s ease;
+          flex-shrink: 0;
+          border-radius: 8px;
+          background: #f8fafc;
+          padding: 4px;
         }
-        .related-hero-card:hover .related-vial-img {
-          transform: scale(1.05) translateY(-5px);
+        .rp-info {
+          flex: 1;
+          min-width: 0;
         }
-        @media (max-width: 1200px) {
-          .related-card-grid {
-            gap: 1.5rem;
-          }
+        .rp-name {
+          font-size: 0.9rem;
+          font-weight: 700;
+          color: #0f172a;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          margin: 0;
+          line-height: 1.3;
         }
-        @media (max-width: 768px) {
-          .related-card-grid {
-            grid-template-columns: 1fr !important;
-            gap: 1rem !important;
-          }
-          .related-card-grid::-webkit-scrollbar {
-            display: none;
-          }
-          .related-hero-card {
-            min-width: 260px;
-            scroll-snap-align: start;
-            padding: 1.5rem 1rem !important;
-            gap: 1rem !important;
-          }
-          .related-card-tag, .related-card-desc, .related-card-benefit {
-            display: none !important;
-          }
-          .related-card-title {
-            font-size: 1.25rem !important;
-            margin-bottom: 0.5rem !important;
-            text-align: center;
-          }
-          .related-vial-img {
-            width: 90px !important;
-            height: 90px !important;
-            margin: 0 auto 1rem auto !important;
-          }
-          .mobile-more-info {
-            display: flex !important;
-            align-items: center;
-            justify-content: center;
-            gap: 0.25rem;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin-top: auto;
-            background: rgba(0, 75, 135, 0.05);
-            padding: 0.6rem;
-            border-radius: 8px;
-            width: 100%;
-            transition: all 0.2s ease;
-          }
-          .related-hero-card:hover .mobile-more-info {
-            background: var(--primary);
-            color: white;
-          }
+        .rp-meta {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-top: 0.2rem;
+          flex-wrap: nowrap;
+          overflow: hidden;
+        }
+        .rp-badge {
+          font-size: 0.6rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.07em;
+          color: var(--primary);
+          background: rgba(0, 163, 224, 0.08);
+          padding: 0.15rem 0.5rem;
+          border-radius: 99px;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+        .rp-desc {
+          font-size: 0.78rem;
+          color: #94a3b8;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          margin: 0;
+        }
+        .rp-arrow {
+          flex-shrink: 0;
+          color: #cbd5e1;
+          transition: transform 0.2s ease, color 0.2s ease;
+        }
+        @media (max-width: 600px) {
+          .rp-desc { display: none; }
+          .rp-list-item { gap: 0.75rem; padding: 0.75rem; }
         }
       ` }} />
 
-      <div className="related-card-grid">
+      <h3 className="rp-list-title">{title}</h3>
+
+      <div className="rp-list">
         {peptides.map((entry, i) => {
           const p = resolveProduct(entry);
           const rawName = p.name || entry.peptideName || entry.name || '';
-          const derivedSlug = p.slug || rawName.toLowerCase().replace(/[\\s_]+/g, '-');
-          const imagePath = p.image || `/assets/vials/${rawName.toLowerCase().replace(/[^a-z0-0]/g, '')}.png`;
-          
-          // Use primaryTarget, or category, or first family tag as badge
+          const slug = p.slug || rawName.toLowerCase().replace(/[\s_]+/g, '-');
+          const imagePath = p.image || `/assets/vials/${rawName.toLowerCase().replace(/[^a-z0-9]/g, '')}.png`;
+
           let tagText = p.primaryTarget || p.category;
-          if (!tagText && p.familyTags && p.familyTags.length > 0) {
-            tagText = p.familyTags[0].replace(/_/g, ' ');
-          }
-          if (!tagText) tagText = "Scientific Compound";
+          if (!tagText && p.familyTags?.length > 0) tagText = p.familyTags[0].replace(/_/g, ' ');
+          if (!tagText) tagText = 'Compound';
+
+          const desc = p.shortDescription || (p.desc ? p.desc.substring(0, 80) + '…' : '');
 
           return (
-            <div key={derivedSlug || i} 
-              className="related-hero-card hvr-lift" 
-              onClick={() => {
-                if (derivedSlug) {
-                  navigate(`/product/${derivedSlug}`);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-              }}
-              style={{ 
-                padding: '2.5rem 2rem', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                backgroundColor: 'white',
-                borderRadius: '24px',
-                border: '1px solid #f1f5f9',
-                transition: 'all 0.5s cubic-bezier(0.19, 1, 0.22, 1)',
-                boxShadow: '0 10px 30px -10px rgba(0, 0, 0, 0.05)',
-                cursor: 'pointer',
-                position: 'relative',
-                overflow: 'hidden'
-              }}
+            <div
+              key={slug || i}
+              className="rp-list-item"
+              onClick={() => handleNav(slug)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && handleNav(slug)}
+              aria-label={`View ${rawName}`}
             >
-              <div className="related-card-tag" style={{ 
-                backgroundColor: 'rgba(0, 163, 224, 0.05)', 
-                color: 'var(--primary)', 
-                padding: '0.4rem 0.8rem', 
-                borderRadius: '99px', 
-                fontSize: '0.7rem', 
-                fontWeight: 800, 
-                alignSelf: 'center',
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                marginBottom: '1.5rem',
-                textAlign: 'center'
-              }}>
-                {tagText}
-              </div>
-              
-              <img 
-                src={imagePath} 
-                alt={p.name} 
-                className="related-vial-img" 
-                onError={(e) => { e.target.src = '/assets/vials/generic-vial.png' }}
+              <img
+                src={imagePath}
+                alt={rawName}
+                className="rp-thumb"
+                onError={(e) => { e.target.src = '/assets/vials/generic-vial.png'; }}
                 loading="lazy"
               />
 
-              <div style={{ textAlign: 'center', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                <h3 className="related-card-title">{p.name || entry.peptideName}</h3>
-                <p className="related-card-desc" style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: 1.5, marginBottom: '0', fontWeight: 400 }}>
-                  {p.shortDescription || p.desc?.substring(0, 90) + '...'}
-                </p>
-                
-                <div className="related-card-benefit" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', color: 'var(--primary)', fontWeight: 800, fontSize: '0.85rem', marginTop: 'auto', paddingTop: '1.5rem' }}>
-                  View Peptide <ArrowRight size={14} />
+              <div className="rp-info">
+                <p className="rp-name">{rawName}</p>
+                <div className="rp-meta">
+                  <span className="rp-badge">{tagText}</span>
+                  {desc && <p className="rp-desc">{desc}</p>}
                 </div>
               </div>
 
-              <div className="mobile-more-info" style={{ display: 'none' }}>
-                View Peptide <ArrowRight size={14} />
-              </div>
+              <ArrowRight size={16} className="rp-arrow" />
             </div>
           );
         })}
