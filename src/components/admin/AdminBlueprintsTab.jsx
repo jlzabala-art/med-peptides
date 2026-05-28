@@ -1,11 +1,5 @@
- 
 import { useState, useEffect } from 'react';
-import {
-  collection,
-  getDocs,
-  doc,
-  updateDoc,
-} from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import {
   BookOpen,
@@ -48,7 +42,14 @@ function PhaseRow({ phase }) {
         padding: '0.75rem 1rem',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '0.5rem',
+        }}
+      >
         <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--primary)' }}>
           Phase {phase.phase_number}: {phase.phase_title}
         </span>
@@ -71,9 +72,7 @@ function PhaseRow({ phase }) {
               gap: '0.1rem',
             }}
           >
-            <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>
-              {drug.product_slug}
-            </span>
+            <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{drug.product_slug}</span>
             {drug.selected_strength && (
               <span style={{ color: 'var(--text-muted)' }}>{drug.selected_strength}</span>
             )}
@@ -120,7 +119,14 @@ function BlueprintCard({ blueprint, onToggleActive }) {
       }}
     >
       {/* Header */}
-      <div style={{ padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+      <div
+        style={{
+          padding: '1.25rem 1.5rem',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '1rem',
+        }}
+      >
         {/* Icon */}
         <div
           style={{
@@ -176,7 +182,13 @@ function BlueprintCard({ blueprint, onToggleActive }) {
             >
               {blueprint.confidence_score}
             </div>
-            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.65rem',
+                color: 'var(--text-muted)',
+                textTransform: 'uppercase',
+              }}
+            >
               Conf.
             </div>
           </div>
@@ -201,15 +213,20 @@ function BlueprintCard({ blueprint, onToggleActive }) {
               transition: 'all 0.2s',
             }}
           >
-            {blueprint.active
-              ? <><CheckCircle2 size={14} /> Active</>
-              : <><XCircle size={14} /> Inactive</>
-            }
+            {blueprint.active ? (
+              <>
+                <CheckCircle2 size={14} /> Active
+              </>
+            ) : (
+              <>
+                <XCircle size={14} /> Inactive
+              </>
+            )}
           </button>
 
           {/* Expand toggle */}
           <button
-            onClick={() => setExpanded(v => !v)}
+            onClick={() => setExpanded((v) => !v)}
             style={{
               background: 'transparent',
               border: '1px solid var(--border)',
@@ -247,17 +264,23 @@ function BlueprintCard({ blueprint, onToggleActive }) {
               ? `$${blueprint.economics.total_protocol_cost_estimate.toLocaleString()}`
               : 'N/A cost',
           },
-          { 
-            icon: <Activity size={13} />, 
-            label: blueprint.protocol_last_reviewed_at 
+          {
+            icon: <Activity size={13} />,
+            label: blueprint.protocol_last_reviewed_at
               ? `Reviewed: ${blueprint.protocol_last_reviewed_at}`
-              : 'Unreviewed'
+              : 'Unreviewed',
           },
           { icon: <FlaskConical size={13} />, label: blueprint.protocol_id },
         ].map((item, i) => (
           <div
             key={i}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              fontSize: '0.78rem',
+              color: 'var(--text-muted)',
+            }}
           >
             {item.icon}
             <span>{item.label}</span>
@@ -270,7 +293,14 @@ function BlueprintCard({ blueprint, onToggleActive }) {
         <div style={{ padding: '1.25rem 1.5rem' }}>
           {/* Summary */}
           {blueprint.overview_summary && (
-            <p style={{ margin: '0 0 1.25rem', fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+            <p
+              style={{
+                margin: '0 0 1.25rem',
+                fontSize: '0.875rem',
+                color: 'var(--text-muted)',
+                lineHeight: 1.6,
+              }}
+            >
               {blueprint.overview_summary}
             </p>
           )}
@@ -278,7 +308,16 @@ function BlueprintCard({ blueprint, onToggleActive }) {
           {/* Expected outcomes */}
           {blueprint.expected_outcomes?.length > 0 && (
             <div style={{ marginBottom: '1.25rem' }}>
-              <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)' }}>
+              <h4
+                style={{
+                  margin: '0 0 0.5rem',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  color: 'var(--text-muted)',
+                }}
+              >
                 Expected Outcomes
               </h4>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
@@ -302,7 +341,16 @@ function BlueprintCard({ blueprint, onToggleActive }) {
           )}
 
           {/* Phases */}
-          <h4 style={{ margin: '0 0 0.75rem', fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)' }}>
+          <h4
+            style={{
+              margin: '0 0 0.75rem',
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              color: 'var(--text-muted)',
+            }}
+          >
             Protocol Phases
           </h4>
           {(blueprint.phases || []).map((phase, i) => (
@@ -328,7 +376,7 @@ export default function AdminBlueprintsTab() {
       setError(null);
       try {
         const snap = await getDocs(collection(db, 'blueprints'));
-        const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
         // Sort by confidence score descending
         data.sort((a, b) => (b.confidence_score || 0) - (a.confidence_score || 0));
         setBlueprints(data);
@@ -345,20 +393,16 @@ export default function AdminBlueprintsTab() {
   async function handleToggleActive(docId, newValue) {
     try {
       await updateDoc(doc(db, 'blueprints', docId), { active: newValue });
-      setBlueprints(prev =>
-        prev.map(b => b.id === docId ? { ...b, active: newValue } : b)
-      );
+      setBlueprints((prev) => prev.map((b) => (b.id === docId ? { ...b, active: newValue } : b)));
     } catch (err) {
       console.error('Error toggling blueprint:', err);
       alert('Error updating blueprint status: ' + err.message);
     }
   }
 
-  const filtered = blueprints.filter(b => {
+  const filtered = blueprints.filter((b) => {
     const matchesFilter =
-      filter === 'all' ||
-      (filter === 'active' && b.active) ||
-      (filter === 'inactive' && !b.active);
+      filter === 'all' || (filter === 'active' && b.active) || (filter === 'inactive' && !b.active);
     const matchesSearch =
       !search ||
       b.protocol_title?.toLowerCase().includes(search.toLowerCase()) ||
@@ -367,14 +411,16 @@ export default function AdminBlueprintsTab() {
     return matchesFilter && matchesSearch;
   });
 
-  const activeCount = blueprints.filter(b => b.active).length;
+  const activeCount = blueprints.filter((b) => b.active).length;
   const inactiveCount = blueprints.length - activeCount;
 
   return (
     <div style={{ paddingBottom: '4rem' }}>
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+        <div
+          style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}
+        >
           <BookOpen size={28} color="var(--primary)" />
           <h2 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800 }}>Blueprint Catalog</h2>
         </div>
@@ -386,10 +432,15 @@ export default function AdminBlueprintsTab() {
       {/* Stats */}
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
         {[
-          { label: 'Total', value: blueprints.length, color: 'var(--primary)', bg: 'var(--primary-light)' },
+          {
+            label: 'Total',
+            value: blueprints.length,
+            color: 'var(--primary)',
+            bg: 'var(--primary-light)',
+          },
           { label: 'Active', value: activeCount, color: 'var(--color-success)', bg: '#dcfce7' },
           { label: 'Inactive', value: inactiveCount, color: 'var(--color-danger)', bg: '#fee2e2' },
-        ].map(stat => (
+        ].map((stat) => (
           <div
             key={stat.label}
             style={{
@@ -412,18 +463,32 @@ export default function AdminBlueprintsTab() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: '1rem',
+          marginBottom: '1.5rem',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+        }}
+      >
         {/* Search */}
         <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
           <Activity
             size={16}
-            style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}
+            style={{
+              position: 'absolute',
+              left: '0.75rem',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: 'var(--text-muted)',
+            }}
           />
           <input
             type="text"
             placeholder="Search blueprints…"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             style={{
               width: '100%',
               paddingLeft: '2.25rem',
@@ -437,7 +502,7 @@ export default function AdminBlueprintsTab() {
         </div>
 
         {/* Status filter buttons */}
-        {['all', 'active', 'inactive'].map(f => (
+        {['all', 'active', 'inactive'].map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
@@ -468,7 +533,18 @@ export default function AdminBlueprintsTab() {
       )}
 
       {error && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#fee2e2', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', color: 'var(--color-danger)', marginBottom: '1rem' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            background: '#fee2e2',
+            padding: '1rem 1.25rem',
+            borderRadius: 'var(--radius-md)',
+            color: 'var(--color-danger)',
+            marginBottom: '1rem',
+          }}
+        >
           <AlertTriangle size={18} />
           <span>{error}</span>
         </div>
@@ -478,19 +554,17 @@ export default function AdminBlueprintsTab() {
         <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
           <BookOpen size={40} style={{ marginBottom: '1rem', opacity: 0.3 }} />
           <p style={{ fontWeight: 600 }}>No blueprints found in Firestore.</p>
-          <p style={{ fontSize: '0.85rem' }}>Run the migration script to populate the blueprints collection.</p>
+          <p style={{ fontSize: '0.85rem' }}>
+            Run the migration script to populate the blueprints collection.
+          </p>
         </div>
       )}
 
       {/* Blueprint cards */}
       {!loading && !error && filtered.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {filtered.map(bp => (
-            <BlueprintCard
-              key={bp.id}
-              blueprint={bp}
-              onToggleActive={handleToggleActive}
-            />
+          {filtered.map((bp) => (
+            <BlueprintCard key={bp.id} blueprint={bp} onToggleActive={handleToggleActive} />
           ))}
         </div>
       )}
@@ -500,6 +574,11 @@ export default function AdminBlueprintsTab() {
           No blueprints match your current filters.
         </div>
       )}
-    </div>
+    
+      <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
+        Widget: AdminBlueprintsTab | Props: none
+      </div>
+    
+</div>
   );
 }

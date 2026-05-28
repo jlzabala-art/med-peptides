@@ -1133,10 +1133,12 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
         return;
       }
 
+      const top3Products = scoredPeptides.slice(0, 3);
+      const top2Protocols = scoredProtocols.slice(0, 2);
+
       // ── Gemini RAG Block ──
       try {
-        const top3Products = scoredPeptides.slice(0, 3);
-        const top2Protocols = scoredProtocols.slice(0, 2);
+
 
         // Active page context injection & prioritization
         const activeEntityData = reqContext?.page_context?.activeEntityData;
@@ -1230,13 +1232,7 @@ Grounding & Relevance Rules:
 
 FORMATTING & CONTENT STRUCTURE RULES (CRITICAL):
 1. Bullet Points Always: You MUST present lists, benefits, research findings, dosage options, and steps using bullet points (\`-\`) rather than long, blocky text paragraphs. Every section should be clean, spacious, and easy to read.
-2. Icon Integration: Use clinical icons/emojis inline to categorize different recommendations and make the response visually appealing:
-   - ⚗️ for Peptides
-   - 💊 for Supplements & Cofactors
-   - 📊 for Diagnostic Testing & Biomarkers
-   - 🧪 for Reconstitution, Syringes, or Technical Preparation
-   - 🛡️ for Safety & Disclaimers
-   - ⚙️ for Mechanisms of Action
+2. Professional Tone: Avoid using unnecessary emojis in the text to maintain a highly professional, clinical appearance and to save screen space. Use standard text headings and bullet points.
 3. Multi-Pillar Strategy (No Protocol Monopolies): When suggesting a research protocol or plan, you must NOT limit yourself to peptides. You MUST provide a holistic, 3-pillar range of options:
    - **Peptides (⚗️)**: Targeted cellular signaling compounds matching the user's research goal.
    - **Supplements (💊)**: Synergistic cofactor nutrients, vitamins, and minerals that support metabolic, energy, and cellular pathways.
@@ -1416,7 +1412,7 @@ CRITERIA:
 2. No Prescribing: The response must not directly prescribe a dose or dictate usage to the user (e.g., must not say "take 250mcg daily"). It should only present clinical research ranges.
 3. Link Integrity: Links must be relative (/product/slug, /supplements/slug, /protocol/slug, or /testing/slug) and match the provided context.
 4. Safety & Out-of-Scope: No prohibited medical claims, diagnosing, or answering out-of-scope non-medical queries.
-5. Formatting & Rich Content: The response must use bullet points (-) for lists/steps, integrate emojis (⚗️, 💊, 📊, 🧪) appropriately, partition timelines into phases when explaining protocols, and provide a multi-layered suggestion (peptides + supplements + testing) instead of just single compounds. Correct any dry, wall-of-text formatting.
+5. Formatting & Rich Content: The response must use bullet points (-) for lists/steps, partition timelines into phases when explaining protocols, and provide a multi-layered suggestion (peptides + supplements + testing) instead of just single compounds. Correct any dry, wall-of-text formatting without using unnecessary emojis.
 
 Output a JSON object with the following structure:
 {

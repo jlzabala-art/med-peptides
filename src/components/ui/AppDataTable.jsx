@@ -86,37 +86,7 @@ export default function AppDataTable({
     }
   };
 
-  if (!data || data.length === 0) {
-    return (
-      <div style={{ 
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        padding: '64px 24px', backgroundColor: 'var(--color-bg-surface)', 
-        borderRadius: 'var(--table-radius)', border: '1px solid var(--color-border)',
-        textAlign: 'center'
-      }}>
-        <div style={{ 
-          width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'var(--color-bg-hover)', 
-          display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-tertiary)',
-          marginBottom: '16px'
-        }}>
-          <Inbox size={32} />
-        </div>
-        <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--color-text-primary)' }}>{emptyTitle}</h3>
-        <p style={{ margin: '0 0 24px 0', fontSize: '14px', color: 'var(--color-text-secondary)' }}>{emptyDescription}</p>
-        {emptyActionLabel && onEmptyAction && (
-          <button 
-            onClick={onEmptyAction}
-            style={{
-              padding: '8px 16px', backgroundColor: 'var(--color-primary)', color: 'white',
-              border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 600, cursor: 'pointer'
-            }}
-          >
-            {emptyActionLabel}
-          </button>
-        )}
-      </div>
-    );
-  }
+
 
   const allSelected = sortedData.length > 0 && selectedIds.length === sortedData.length;
   const someSelected = selectedIds.length > 0 && selectedIds.length < sortedData.length;
@@ -139,7 +109,7 @@ export default function AppDataTable({
           }}>
             <tr style={{ backgroundColor: someSelected || allSelected ? 'rgba(var(--color-primary-rgb), 0.05)' : 'transparent' }}>
               {onSelectionChange && (
-                <th style={{ width: '48px', minWidth: '48px', whiteSpace: 'nowrap', padding: '0 8px 0 16px', borderBottom: '1px solid var(--color-border)', textAlign: 'left' }}>
+                <th style={{ width: '48px', minWidth: '48px', whiteSpace: 'nowrap', padding: '0', borderBottom: '1px solid var(--color-border)', textAlign: 'center', verticalAlign: 'middle' }}>
                   <input 
                     type="checkbox" 
                     checked={allSelected} 
@@ -163,7 +133,7 @@ export default function AppDataTable({
                 </th>
               ) : (
                 <React.Fragment>
-                  {expandableRender && <th style={{ width: '40px', minWidth: '40px', whiteSpace: 'nowrap', padding: '0 8px', borderBottom: '1px solid var(--color-border)' }}></th>}
+                  {expandableRender && <th style={{ width: '48px', minWidth: '48px', whiteSpace: 'nowrap', padding: '0', borderBottom: '1px solid var(--color-border)', textAlign: 'center' }}></th>}
                   
                   {columns.map((col, idx) => {
                     const isSortable = col.key && col.sortable !== false;
@@ -175,10 +145,8 @@ export default function AppDataTable({
                         style={{ 
                           height: '36px',
                           padding: '0 16px', 
-                          fontSize: '12px', 
+                          fontSize: '0.75rem', 
                           fontWeight: 600,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
                           color: sortConfig.key === col.key ? 'var(--color-primary)' : 'var(--text-muted)',
                           textAlign: col.align || 'left',
                           width: col.width || 'auto',
@@ -202,7 +170,37 @@ export default function AppDataTable({
             </tr>
           </thead>
           <tbody>
-            {sortedData.map((row) => {
+            {(!data || data.length === 0) ? (
+              <tr>
+                <td colSpan={columns.length + (onSelectionChange ? 1 : 0) + (expandableRender ? 1 : 0)}>
+                  <div style={{ 
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    padding: '64px 24px', textAlign: 'center'
+                  }}>
+                    <div style={{ 
+                      width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'var(--color-bg-hover)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-tertiary)',
+                      marginBottom: '16px'
+                    }}>
+                      <Inbox size={32} />
+                    </div>
+                    <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--color-text-primary)' }}>{emptyTitle}</h3>
+                    <p style={{ margin: '0 0 24px 0', fontSize: '14px', color: 'var(--color-text-secondary)' }}>{emptyDescription}</p>
+                    {emptyActionLabel && onEmptyAction && (
+                      <button 
+                        onClick={onEmptyAction}
+                        style={{
+                          padding: '8px 16px', backgroundColor: 'var(--color-primary)', color: 'white',
+                          border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 600, cursor: 'pointer'
+                        }}
+                      >
+                        {emptyActionLabel}
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ) : sortedData.map((row) => {
               const isExpanded = expandedId === row[keyField];
               const isSelected = selectedIds.includes(row[keyField]);
               
@@ -223,7 +221,7 @@ export default function AppDataTable({
                     }}
                   >
                     {onSelectionChange && (
-                      <td style={{ padding: '8px 8px 8px 16px', width: '48px', minWidth: '48px', whiteSpace: 'nowrap', verticalAlign: 'middle', textAlign: 'left' }}>
+                      <td style={{ padding: '0', width: '48px', minWidth: '48px', whiteSpace: 'nowrap', verticalAlign: 'middle', textAlign: 'center' }}>
                         <input 
                           type="checkbox" 
                           checked={isSelected}
@@ -234,7 +232,7 @@ export default function AppDataTable({
                     )}
                     {expandableRender && (
                       <td 
-                        style={{ padding: '8px', width: '40px', minWidth: '40px', whiteSpace: 'nowrap', cursor: 'pointer', color: 'var(--text-muted)', verticalAlign: 'middle', textAlign: 'center' }}
+                        style={{ padding: '0', width: '48px', minWidth: '48px', whiteSpace: 'nowrap', cursor: 'pointer', color: 'var(--text-muted)', verticalAlign: 'middle', textAlign: 'center' }}
                         onClick={() => setExpandedId(isExpanded ? null : row[keyField])}
                       >
                         {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}

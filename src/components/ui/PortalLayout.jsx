@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, Search, Bell, HelpCircle, User, Bot, X } from 'lucide-react';
 import ClinicalAssistant from '../shared/ClinicalAssistant';
+import SidebarGadget from '../shared/AppSidebar/SidebarGadget';
 
 /**
  * PortalLayout - The universal layout wrapper for all private portals
@@ -40,54 +41,57 @@ export default function PortalLayout({
       
       {/* TOPBAR */}
       <header style={{ 
-        height: '60px', 
-        backgroundColor: 'var(--color-bg-surface)', 
-        borderBottom: '1px solid var(--color-border)',
+        height: '48px', 
+        backgroundColor: '#1a73e8', 
+        borderBottom: 'none',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 1rem',
-        zIndex: 50
+        zIndex: 50,
+        color: 'white'
       }}>
         {/* Left Side */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button 
-            onClick={() => setSidebarOpen(!isSidebarOpen)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            title="Toggle Menu"
-          >
-            <Menu size={20} color="var(--color-text-secondary)" />
-          </button>
-          <div style={{ fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>
+          {isMobile && (
+            <button 
+              onClick={() => setSidebarOpen(!isSidebarOpen)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              title="Toggle Menu"
+            >
+              <Menu size={20} color="white" />
+            </button>
+          )}
+          <div style={{ fontWeight: 500, fontSize: '1.1rem', color: 'white', letterSpacing: '0.2px' }}>
             {portalTitle}
           </div>
         </div>
 
         {/* Center - Global Search (Optional) */}
         {!isMobile && (
-          <div style={{ flex: 1, maxWidth: '600px', margin: '0 2rem' }}>
+          <div style={{ flex: 1, maxWidth: '720px', margin: '0 2rem' }}>
             <div style={{ position: 'relative', width: '100%' }}>
-              <Search size={18} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-secondary)' }} />
+              <Search size={18} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#5f6368' }} />
               <input 
                 type="text" 
                 placeholder="Search resources and services" 
                 style={{
                   width: '100%',
-                  padding: '0.5rem 1rem 0.5rem 2.2rem',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--color-border)',
-                  backgroundColor: 'var(--color-bg-app)',
-                  fontSize: '0.85rem',
+                  padding: '0.5rem 1rem 0.5rem 2.5rem',
+                  borderRadius: '4px',
+                  border: '1px solid transparent',
+                  backgroundColor: 'white',
+                  color: '#3c4043',
+                  fontSize: '0.9rem',
                   outline: 'none',
-                  transition: 'background-color 0.2s, border-color 0.2s'
+                  transition: 'background-color 0.2s, box-shadow 0.2s',
+                  boxShadow: 'none'
                 }}
                 onFocus={(e) => {
-                  e.target.style.backgroundColor = 'var(--color-bg-surface)';
-                  e.target.style.borderColor = 'var(--color-primary)';
+                  e.target.style.boxShadow = '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)';
                 }}
                 onBlur={(e) => {
-                  e.target.style.backgroundColor = 'var(--color-bg-app)';
-                  e.target.style.borderColor = 'var(--color-border)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
@@ -97,12 +101,12 @@ export default function PortalLayout({
         {/* Right Side */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {headerActions}
-          <button onClick={() => setAiOpen(!isAiOpen)} style={iconBtnStyle} title="Toggle Clinical AI">
-            <Bot size={20} color={isAiOpen ? 'var(--color-primary)' : 'var(--color-text-secondary)'} />
+          <button onClick={() => setAiOpen(!isAiOpen)} style={iconBtnStyle} title="Toggle System Assistant">
+            <Bot size={20} color={isAiOpen ? '#8ab4f8' : 'white'} />
           </button>
-          <button style={iconBtnStyle} title="Help"><HelpCircle size={20} color="var(--color-text-secondary)" /></button>
-          <button style={iconBtnStyle} title="Notifications"><Bell size={20} color="var(--color-text-secondary)" /></button>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--color-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '0.5rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem' }}>
+          <button style={iconBtnStyle} title="Help"><HelpCircle size={20} color="white" /></button>
+          <button style={iconBtnStyle} title="Notifications"><Bell size={20} color="white" /></button>
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#0b57d0', border: '1px solid rgba(255,255,255,0.2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '0.5rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem' }}>
             U
           </div>
         </div>
@@ -111,75 +115,16 @@ export default function PortalLayout({
       {/* MAIN LAYOUT WRAPPER */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         
-        {/* LEFT SIDEBAR */}
-        <aside style={{
-          width: isSidebarOpen ? '220px' : '0px',
-          backgroundColor: 'var(--color-bg-surface)',
-          borderRight: isSidebarOpen ? '1px solid var(--color-border)' : 'none',
-          transition: 'width 0.2s ease',
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          zIndex: 40
-        }}>
-          {isSidebarOpen && (
-            <div style={{ padding: '1rem 0' }}>
-              {sidebarNavGroups.map((group, gIdx) => (
-                <div key={group.id || gIdx} style={{ marginBottom: '1.5rem' }}>
-                  {group.label && (
-                    <div style={{ padding: '0 1.5rem', fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '0.05em' }}>
-                      {group.label}
-                    </div>
-                  )}
-                  <ul style={{ listStyle: 'none', margin: 0, padding: '0 0.5rem' }}>
-                    {(group.items || []).map(item => {
-                      const isActive = activeNavId === item.id;
-                      const Icon = item.icon;
-                      return (
-                        <li key={item.id} style={{ margin: '0.15rem 0' }}>
-                          <button
-                            onClick={() => onNavigate && onNavigate(item.id)}
-                            style={{
-                              width: '100%',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.75rem',
-                              padding: '0.5rem 1rem',
-                              borderRadius: 'var(--radius-full)', // pill shape like GCP
-                              border: 'none',
-                              backgroundColor: isActive ? 'var(--color-bg-selected)' : 'transparent',
-                              color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                              fontWeight: isActive ? 600 : 500,
-                              fontSize: '0.85rem',
-                              cursor: 'pointer',
-                              textAlign: 'left',
-                              transition: 'background-color 0.15s, color 0.15s'
-                            }}
-                            onMouseEnter={(e) => {
-                              if (!isActive) e.currentTarget.style.backgroundColor = 'var(--color-bg-hover)';
-                            }}
-                            onMouseLeave={(e) => {
-                              if (!isActive) e.currentTarget.style.backgroundColor = 'transparent';
-                            }}
-                          >
-                            {Icon && <Icon size={18} />}
-                            {item.label}
-                            {item.badge && (
-                              <span style={{ marginLeft: 'auto', background: 'var(--color-primary)', color: 'white', fontSize: '0.65rem', padding: '0.1rem 0.4rem', borderRadius: '10px', fontWeight: 700 }}>
-                                {item.badge}
-                              </span>
-                            )}
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          )}
-        </aside>
+        {/* LEFT SIDEBAR GADGET */}
+        <SidebarGadget 
+          groups={sidebarNavGroups}
+          activeId={activeNavId}
+          onNavigate={onNavigate}
+          isOpen={isSidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          isMobile={isMobile}
+          header={{ title: '', subtitle: '' }} // Let PortalLayout topbar handle branding
+        />
 
         {/* CENTER CONTENT */}
         <main style={{ 
@@ -209,7 +154,7 @@ export default function PortalLayout({
             {isMobile && (
               <div style={{ padding: '1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontWeight: 600, color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Bot size={18} /> Clinical Assistant
+                  <Bot size={18} /> System Assistant
                 </span>
                 <button onClick={() => setAiOpen(false)} style={{ background: 'none', border: 'none' }}><X size={20} /></button>
               </div>

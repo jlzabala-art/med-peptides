@@ -6,21 +6,21 @@ import AppDataTable from '../ui/AppDataTable';
 import AppFilterBar from '../ui/AppFilterBar';
 
 const CATEGORIES = [
-  "Healing & Recovery",
-  "Weight Management & Metabolic",
-  "Anti-Aging & Longevity",
-  "Cognitive & Neuro-Protection",
-  "Muscle Growth & Performance",
-  "Hormonal Support",
-  "Research Supplies",
-  "Other Research Peptides"
+  'Healing & Recovery',
+  'Weight Management & Metabolic',
+  'Anti-Aging & Longevity',
+  'Cognitive & Neuro-Protection',
+  'Muscle Growth & Performance',
+  'Hormonal Support',
+  'Research Supplies',
+  'Other Research Peptides',
 ];
 
 export default function AdminRelationshipsTab({ readOnly = false }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [savingProduct, setSavingProduct] = useState(null);
-  
+
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -29,14 +29,14 @@ export default function AdminRelationshipsTab({ readOnly = false }) {
     fetchProducts();
   }, []);
 
-  const fetchProducts = async () => {
+  async function fetchProducts() {
     try {
       setLoading(true);
       const q = query(collection(db, 'products'));
       const querySnapshot = await getDocs(q);
-      const productsList = querySnapshot.docs.map(doc => ({
+      const productsList = querySnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
       setProducts(productsList);
     } catch (err) {
@@ -46,27 +46,30 @@ export default function AdminRelationshipsTab({ readOnly = false }) {
     }
   };
 
-  const handleUpdateProduct = async (id, updates) => {
+  async function handleUpdateProduct(id, updates) {
     setSavingProduct(id);
     try {
       const productRef = doc(db, 'products', id);
       await updateDoc(productRef, {
         ...updates,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       });
-      setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+      setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
     } catch (err) {
-      console.error("Error updating product:", err);
-      alert("Failed to update product.");
+      console.error('Error updating product:', err);
+      alert('Failed to update product.');
     } finally {
       setSavingProduct(null);
     }
   };
 
   const filteredProducts = useMemo(() => {
-    return products.filter(p => {
+    return products.filter((p) => {
       const matchesSearch = (p.name || '').toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCat = categoryFilter === 'all' || p.category === categoryFilter || (!p.category && categoryFilter === 'uncategorized');
+      const matchesCat =
+        categoryFilter === 'all' ||
+        p.category === categoryFilter ||
+        (!p.category && categoryFilter === 'uncategorized');
       return matchesSearch && matchesCat;
     });
   }, [products, searchTerm, categoryFilter]);
@@ -79,9 +82,11 @@ export default function AdminRelationshipsTab({ readOnly = false }) {
       render: (p) => (
         <div>
           <div style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>{p.name}</div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)' }}>{p.dosage || '—'}</div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)' }}>
+            {p.dosage || '—'}
+          </div>
         </div>
-      )
+      ),
     },
     {
       header: 'Current Category',
@@ -89,28 +94,34 @@ export default function AdminRelationshipsTab({ readOnly = false }) {
       sortable: true,
       render: (p) => {
         if (readOnly) {
-          return <span style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>{p.category || 'Uncategorized'}</span>;
+          return (
+            <span style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
+              {p.category || 'Uncategorized'}
+            </span>
+          );
         }
         return (
-          <select 
+          <select
             value={p.category || ''}
             onChange={(e) => handleUpdateProduct(p.id, { category: e.target.value })}
-            style={{ 
-              width: '100%', 
+            style={{
+              width: '100%',
               maxWidth: '250px',
-              padding: '0.4rem', 
-              borderRadius: 'var(--radius-sm)', 
+              padding: '0.4rem',
+              borderRadius: 'var(--radius-sm)',
               border: '1px solid var(--border)',
-              fontSize: '0.85rem'
+              fontSize: '0.85rem',
             }}
           >
             <option value="">Select Category...</option>
-            {CATEGORIES.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
+            {CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
             ))}
           </select>
         );
-      }
+      },
     },
     {
       header: 'Action',
@@ -119,27 +130,53 @@ export default function AdminRelationshipsTab({ readOnly = false }) {
       render: (p) => (
         <div style={{ display: 'inline-flex', alignItems: 'center' }}>
           {savingProduct === p.id ? (
-            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Updating...</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+              Updating...
+            </span>
           ) : (
-            <span style={{ fontSize: '0.75rem', color: 'var(--color-success)', fontWeight: 600 }}>Synced</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--color-success)', fontWeight: 600 }}>
+              Synced
+            </span>
           )}
         </div>
-      )
-    }
+      ),
+    },
   ];
 
-  if (loading) return <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading catalog...</div>;
+  if (loading)
+    return (
+      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+        Loading catalog...
+      </div>
+    );
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '4rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-primary)' }}>Product-Category Relationships</h2>
-          <p style={{ margin: '0.25rem 0 0', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>Manage how products are organized within the catalog and investigational pathways.</p>
+          <h2
+            style={{
+              margin: 0,
+              fontSize: '1.25rem',
+              fontWeight: 800,
+              color: 'var(--color-primary)',
+            }}
+          >
+            Product-Category Relationships
+          </h2>
+          <p
+            style={{
+              margin: '0.25rem 0 0',
+              color: 'var(--color-text-secondary)',
+              fontSize: '0.9rem',
+            }}
+          >
+            Manage how products are organized within the catalog and investigational pathways.
+          </p>
         </div>
       </div>
 
-      <AppFilterBar 
+      <AppFilterBar
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         searchPlaceholder="Search by product name..."
@@ -151,30 +188,61 @@ export default function AdminRelationshipsTab({ readOnly = false }) {
             options: [
               { value: 'all', label: 'All Categories' },
               { value: 'uncategorized', label: 'Uncategorized' },
-              ...CATEGORIES.map(c => ({ value: c, label: c }))
+              ...CATEGORIES.map((c) => ({ value: c, label: c })),
             ],
-            onChange: setCategoryFilter
-          }
+            onChange: setCategoryFilter,
+          },
         ]}
       />
 
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', backgroundColor: 'var(--color-bg-surface)', padding: '1rem', borderRadius: 'var(--table-radius)', border: '1px solid var(--color-border)', alignItems: 'center' }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: '1rem',
+          flexWrap: 'wrap',
+          backgroundColor: 'var(--color-bg-surface)',
+          padding: '1rem',
+          borderRadius: 'var(--table-radius)',
+          border: '1px solid var(--color-border)',
+          alignItems: 'center',
+        }}
+      >
         <Layers size={18} color="var(--color-primary)" />
         <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>
-          {categoryFilter === 'all' && !searchTerm ? 'Total Catalog Products:' : 'Filtered Results:'}
+          {categoryFilter === 'all' && !searchTerm
+            ? 'Total Catalog Products:'
+            : 'Filtered Results:'}
         </span>
-        <span style={{ backgroundColor: 'var(--color-bg-app)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 700, border: '1px solid var(--color-border)' }}>
+        <span
+          style={{
+            backgroundColor: 'var(--color-bg-app)',
+            padding: '2px 8px',
+            borderRadius: '12px',
+            fontSize: '0.85rem',
+            fontWeight: 700,
+            border: '1px solid var(--color-border)',
+          }}
+        >
           {filteredProducts.length} items
         </span>
         {categoryFilter !== 'all' && (
-           <span style={{ fontSize: '0.85rem', color: 'var(--color-text-tertiary)', marginLeft: 'auto' }}>
-             Active Filter: {categoryFilter}
-           </span>
+          <span
+            style={{ fontSize: '0.85rem', color: 'var(--color-text-tertiary)', marginLeft: 'auto' }}
+          >
+            Active Filter: {categoryFilter}
+          </span>
         )}
       </div>
 
-      <div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--table-radius)', backgroundColor: 'var(--color-bg-surface)', overflow: 'hidden' }}>
-        <AppDataTable 
+      <div
+        style={{
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--table-radius)',
+          backgroundColor: 'var(--color-bg-surface)',
+          overflow: 'hidden',
+        }}
+      >
+        <AppDataTable
           columns={columns}
           data={filteredProducts}
           keyField="id"
@@ -182,6 +250,11 @@ export default function AdminRelationshipsTab({ readOnly = false }) {
           emptyDescription="Try adjusting your filters or search term."
         />
       </div>
-    </div>
+    
+      <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
+        Widget: AdminRelationshipsTab | Props: none
+      </div>
+    
+</div>
   );
 }

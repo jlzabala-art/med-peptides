@@ -154,11 +154,9 @@ export default function GlobalAppLayout({
           {showRightSidebar && (
             <aside style={{
               width: '400px',
-              borderLeft: '1px solid #e2e8f0',
-              background: 'var(--color-bg-surface)',
+              padding: '2rem 2.5rem 2rem 0',
               display: 'flex',
               flexDirection: 'column',
-              boxShadow: '-4px 0 15px rgba(0,0,0,0.02)'
             }}>
               <ClinicalAssistant embedded={true} isOpen={true} setIsOpen={() => {}} />
             </aside>

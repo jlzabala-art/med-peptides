@@ -206,50 +206,7 @@ export default function ChatHeader({
               </span>
             </button>
 
-            {!isMobile && (
-              <>
-                <button
-                  onClick={onEmail}
-                  title="Email research brief"
-                  style={{
-                    width: '32px', height: '32px', borderRadius: '10px',
-                    border: '1px solid #e2e8f0', 
-                    cursor: 'pointer',
-                    backgroundColor: 'var(--color-bg-app)',
-                    color: 'var(--color-text-secondary)', 
-                    display: 'flex',
-                    alignItems: 'center', justifyContent: 'center',
-                    transition: 'background 0.2s'
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--color-bg-app)'}
-                >
-                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Mail size={15} />
-                  </span>
-                </button>
-                <button
-                  onClick={onExport}
-                  title="Export as Text"
-                  style={{
-                    width: '32px', height: '32px', borderRadius: '10px',
-                    border: '1px solid #e2e8f0', 
-                    cursor: 'pointer',
-                    backgroundColor: 'var(--color-bg-app)',
-                    color: 'var(--color-text-secondary)', 
-                    display: 'flex',
-                    alignItems: 'center', justifyContent: 'center',
-                    transition: 'background 0.2s'
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--color-bg-app)'}
-                >
-                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Download size={15} />
-                  </span>
-                </button>
-              </>
-            )}
+
 
             <button
               onClick={onClear}

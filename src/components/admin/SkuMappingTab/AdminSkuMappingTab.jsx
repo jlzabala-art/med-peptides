@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useAuth } from "../../../context/AuthContext";
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../../../context/AuthContext';
 import {
   CheckCircle2,
   XCircle,
@@ -12,8 +12,8 @@ import {
   Check,
   X,
   Database,
-  Info
-} from "lucide-react";
+  Info,
+} from 'lucide-react';
 
 /**
  * AdminSkuMappingTab.jsx
@@ -28,52 +28,52 @@ import {
  *     and trigger manual refetches logged to Firestore.
  */
 
-const AGENT_URL = "https://europe-west1-med-peptides-app.cloudfunctions.net/skuSyncAgent";
+const AGENT_URL = 'https://europe-west1-med-peptides-app.cloudfunctions.net/skuSyncAgent';
 
 // STATUS META mapping to Lucide icons and colors
 const STATUS_META = {
   pending: {
-    label: "Pending Review",
-    color: "#f59e0b",
-    bg: "rgba(245,158,11,0.06)",
+    label: 'Pending Review',
+    color: '#f59e0b',
+    bg: 'rgba(245,158,11,0.06)',
     icon: HelpCircle,
-    border: "#f59e0b"
+    border: '#f59e0b',
   },
   confirmed: {
-    label: "Confirmed",
-    color: "var(--color-success)",
-    bg: "rgba(16,185,129,0.06)",
+    label: 'Confirmed',
+    color: 'var(--color-success)',
+    bg: 'rgba(16,185,129,0.06)',
     icon: CheckCircle2,
-    border: "var(--color-success)"
+    border: 'var(--color-success)',
   },
   rejected: {
-    label: "Rejected",
-    color: "var(--color-danger)",
-    bg: "rgba(239,68,68,0.06)",
+    label: 'Rejected',
+    color: 'var(--color-danger)',
+    bg: 'rgba(239,68,68,0.06)',
     icon: XCircle,
-    border: "var(--color-danger)"
+    border: 'var(--color-danger)',
   },
   synced: {
-    label: "Synced to Zoho",
-    color: "#1a73e8",
-    bg: "rgba(26,115,232,0.06)",
+    label: 'Synced to Zoho',
+    color: '#1a73e8',
+    bg: 'rgba(26,115,232,0.06)',
     icon: RefreshCw,
-    border: "#1a73e8"
+    border: '#1a73e8',
   },
   error: {
-    label: "Sync Error",
-    color: "#f43f5e",
-    bg: "rgba(244,63,94,0.06)",
+    label: 'Sync Error',
+    color: '#f43f5e',
+    bg: 'rgba(244,63,94,0.06)',
     icon: AlertTriangle,
-    border: "#f43f5e"
-  }
+    border: '#f43f5e',
+  },
 };
 
 async function callAgent(mode, extra = {}, token) {
   const resp = await fetch(AGENT_URL, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify({ mode, ...extra }),
@@ -90,12 +90,12 @@ export default function AdminSkuMappingTab() {
   const [actionId, setActionId] = useState(null);
   const [syncingRowId, setSyncingRowId] = useState(null);
   const [log, setLog] = useState([]);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState('all');
   const [selectedIds, setSelectedIds] = useState([]);
   const [expandedRowIds, setExpandedRowIds] = useState([]);
 
-  const addLog = (msg, type = "info") =>
-    setLog(prev => [{ msg, type, ts: new Date().toLocaleTimeString() }, ...prev].slice(0, 30));
+  const addLog = (msg, type = 'info') =>
+    setLog((prev) => [{ msg, type, ts: new Date().toLocaleTimeString() }, ...prev].slice(0, 30));
 
   const getToken = async () => user?.getIdToken?.();
 
@@ -103,8 +103,12 @@ export default function AdminSkuMappingTab() {
   const agentBody = (mode, extra = {}) => ({
     mode,
     userProfile: userProfile
-      ? { role: userProfile.role, uid: userProfile.uid || user?.uid, email: userProfile.email || user?.email }
-      : { role: "admin", uid: user?.uid, email: user?.email },
+      ? {
+          role: userProfile.role,
+          uid: userProfile.uid || user?.uid,
+          email: userProfile.email || user?.email,
+        }
+      : { role: 'admin', uid: user?.uid, email: user?.email },
     ...extra,
   });
 
@@ -113,12 +117,12 @@ export default function AdminSkuMappingTab() {
     setLoading(true);
     try {
       const token = await getToken();
-      const data = await callAgent("status", agentBody("status"), token);
+      const data = await callAgent('status', agentBody('status'), token);
       setMappings(data.records || []);
       setStats(data.statusCounts || null);
-      addLog(`Loaded ${data.total || 0} mappings`, "success");
+      addLog(`Loaded ${data.total || 0} mappings`, 'success');
     } catch (e) {
-      addLog(`Failed to load mappings: ${e.message}`, "error");
+      addLog(`Failed to load mappings: ${e.message}`, 'error');
     } finally {
       setLoading(false);
     }
@@ -129,123 +133,158 @@ export default function AdminSkuMappingTab() {
   }, [loadStatus]);
 
   // ── Run discovery ─────────────────────────────────────────────────────────
-  const runDiscover = async () => {
+  async function runDiscover() {
     setLoading(true);
-    addLog("🔍 Starting AI discovery — fetching both catalogs...", "info");
+    addLog('🔍 Starting AI discovery — fetching both catalogs...', 'info');
     try {
       const token = await getToken();
-      const data = await callAgent("discover", agentBody("discover", { aedRate: 3.67, useAI: false }), token);
-      addLog(`Discovery complete: ${data.matched || 0} matched (${data.auto_confirmed || 0} auto-confirmed, ${data.needs_review || 0} need review)`, "success");
+      const data = await callAgent(
+        'discover',
+        agentBody('discover', { aedRate: 3.67, useAI: false }),
+        token
+      );
+      addLog(
+        `Discovery complete: ${data.matched || 0} matched (${data.auto_confirmed || 0} auto-confirmed, ${data.needs_review || 0} need review)`,
+        'success'
+      );
       await loadStatus();
     } catch (e) {
-      addLog(`Discovery failed: ${e.message}`, "error");
+      addLog(`Discovery failed: ${e.message}`, 'error');
     } finally {
       setLoading(false);
     }
   };
 
   // ── Confirm / Reject mapping ──────────────────────────────────────────────
-  const handleAction = async (mappingId, action) => {
+  async function handleAction(mappingId, action) {
     setActionId(mappingId);
     try {
       const token = await getToken();
-      await callAgent("confirm", agentBody("confirm", { mappingId, action }), token);
-      addLog(`${action === "confirm" ? "✅ Confirmed" : "❌ Rejected"} mapping ${mappingId.slice(-8)}`, action === "confirm" ? "success" : "warn");
+      await callAgent('confirm', agentBody('confirm', { mappingId, action }), token);
+      addLog(
+        `${action === 'confirm' ? '✅ Confirmed' : '❌ Rejected'} mapping ${mappingId.slice(-8)}`,
+        action === 'confirm' ? 'success' : 'warn'
+      );
       await loadStatus();
     } catch (e) {
-      addLog(`Action failed: ${e.message}`, "error");
+      addLog(`Action failed: ${e.message}`, 'error');
     } finally {
       setActionId(null);
     }
   };
 
   // ── Push all confirmed to Zoho ─────────────────────────────────────────────
-  const pushAllConfirmed = async (dryRun = false) => {
+  async function pushAllConfirmed(dryRun = false) {
     setLoading(true);
-    addLog(dryRun ? "🧪 Dry run push for all confirmed mappings..." : "🚀 Pushing all confirmed mappings to Zoho Books...", "info");
+    addLog(
+      dryRun
+        ? '🧪 Dry run push for all confirmed mappings...'
+        : '🚀 Pushing all confirmed mappings to Zoho Books...',
+      'info'
+    );
     try {
       const token = await getToken();
-      const data = await callAgent("push", agentBody("push", { dryRun }), token);
-      addLog(`${dryRun ? "[DRY RUN] " : ""}Pushed: ${data.pushed ?? 0}, Failed: ${data.failed ?? 0}`, "success");
+      const data = await callAgent('push', agentBody('push', { dryRun }), token);
+      addLog(
+        `${dryRun ? '[DRY RUN] ' : ''}Pushed: ${data.pushed ?? 0}, Failed: ${data.failed ?? 0}`,
+        'success'
+      );
       if (!dryRun) await loadStatus();
     } catch (e) {
-      addLog(`Push failed: ${e.message}`, "error");
+      addLog(`Push failed: ${e.message}`, 'error');
     } finally {
       setLoading(false);
     }
   };
 
   // ── Bulk Actions Handler ──────────────────────────────────────────────────
-  const handleBulkAction = async (action) => {
+  async function handleBulkAction(action) {
     setLoading(true);
-    addLog(`Starting bulk action '${action}' for ${selectedIds.length} items...`, "info");
+    addLog(`Starting bulk action '${action}' for ${selectedIds.length} items...`, 'info');
     try {
       const token = await getToken();
-      if (action === "confirm" || action === "reject") {
-        await callAgent("confirm_bulk", agentBody("confirm_bulk", { mappingIds: selectedIds, action }), token);
-        addLog(`Bulk ${action === "confirm" ? "Confirm" : "Reject"} completed for ${selectedIds.length} mappings`, "success");
-      } else if (action === "push" || action === "push_dry") {
-        const dryRun = action === "push_dry";
-        const data = await callAgent("push_bulk", agentBody("push_bulk", { mappingIds: selectedIds, dryRun }), token);
-        addLog(`${dryRun ? "[DRY RUN] " : ""}Bulk Pushed: ${data.pushed ?? 0}, Failed: ${data.failed ?? 0}`, "success");
+      if (action === 'confirm' || action === 'reject') {
+        await callAgent(
+          'confirm_bulk',
+          agentBody('confirm_bulk', { mappingIds: selectedIds, action }),
+          token
+        );
+        addLog(
+          `Bulk ${action === 'confirm' ? 'Confirm' : 'Reject'} completed for ${selectedIds.length} mappings`,
+          'success'
+        );
+      } else if (action === 'push' || action === 'push_dry') {
+        const dryRun = action === 'push_dry';
+        const data = await callAgent(
+          'push_bulk',
+          agentBody('push_bulk', { mappingIds: selectedIds, dryRun }),
+          token
+        );
+        addLog(
+          `${dryRun ? '[DRY RUN] ' : ''}Bulk Pushed: ${data.pushed ?? 0}, Failed: ${data.failed ?? 0}`,
+          'success'
+        );
       }
       setSelectedIds([]);
       await loadStatus();
     } catch (e) {
-      addLog(`Bulk action failed: ${e.message}`, "error");
+      addLog(`Bulk action failed: ${e.message}`, 'error');
     } finally {
       setLoading(false);
     }
   };
 
   // ── Manual Refetch single Zoho item ──────────────────────────────────────
-  const handleRefetch = async (mappingId, zohoItemId) => {
+  async function handleRefetch(mappingId, zohoItemId) {
     setSyncingRowId(mappingId);
-    addLog(`Syncing Zoho item ${zohoItemId} directly from Zoho Books API...`, "info");
+    addLog(`Syncing Zoho item ${zohoItemId} directly from Zoho Books API...`, 'info');
     try {
       const token = await getToken();
-      const data = await callAgent("refetch", agentBody("refetch", { mappingId, zoho_item_id: zohoItemId }), token);
-      addLog(data.reply || `Refetched Zoho item ${zohoItemId} successfully`, data.updated ? "success" : "info");
+      const data = await callAgent(
+        'refetch',
+        agentBody('refetch', { mappingId, zoho_item_id: zohoItemId }),
+        token
+      );
+      addLog(
+        data.reply || `Refetched Zoho item ${zohoItemId} successfully`,
+        data.updated ? 'success' : 'info'
+      );
       await loadStatus();
     } catch (e) {
-      addLog(`Sync failed: ${e.message}`, "error");
+      addLog(`Sync failed: ${e.message}`, 'error');
     } finally {
       setSyncingRowId(null);
     }
   };
 
   // ── Row selection helpers ──────────────────────────────────────────────────
-  const filtered = filter === "all" ? mappings : mappings.filter(m => m.status === filter);
-  const confirmedCount = mappings.filter(m => m.status === "confirmed").length;
+  const filtered = filter === 'all' ? mappings : mappings.filter((m) => m.status === filter);
+  const confirmedCount = mappings.filter((m) => m.status === 'confirmed').length;
 
   const handleSelectRow = (id) => {
-    setSelectedIds(prev =>
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-    );
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
   const handleSelectAll = () => {
-    const visibleIds = filtered.map(m => m.id);
-    const allSelected = visibleIds.every(id => selectedIds.includes(id));
+    const visibleIds = filtered.map((m) => m.id);
+    const allSelected = visibleIds.every((id) => selectedIds.includes(id));
     if (allSelected) {
-      setSelectedIds(prev => prev.filter(id => !visibleIds.includes(id)));
+      setSelectedIds((prev) => prev.filter((id) => !visibleIds.includes(id)));
     } else {
-      setSelectedIds(prev => Array.from(new Set([...prev, ...visibleIds])));
+      setSelectedIds((prev) => Array.from(new Set([...prev, ...visibleIds])));
     }
   };
 
   const toggleRowExpanded = (id) => {
-    setExpandedRowIds(prev =>
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-    );
+    setExpandedRowIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
   const formatDate = (ts) => {
-    if (!ts) return "Never";
-    if (typeof ts === "string") return new Date(ts).toLocaleString();
+    if (!ts) return 'Never';
+    if (typeof ts === 'string') return new Date(ts).toLocaleString();
     if (ts.seconds) return new Date(ts.seconds * 1000).toLocaleString();
     if (ts._seconds) return new Date(ts._seconds * 1000).toLocaleString();
-    return "Never";
+    return 'Never';
   };
 
   return (
@@ -260,14 +299,22 @@ export default function AdminSkuMappingTab() {
           <button style={styles.btnGcpSecondary} onClick={loadStatus} disabled={loading}>
             ↻ Refresh
           </button>
-          <button style={styles.btnGcpSecondary} onClick={() => pushAllConfirmed(true)} disabled={loading || confirmedCount === 0}>
+          <button
+            style={styles.btnGcpSecondary}
+            onClick={() => pushAllConfirmed(true)}
+            disabled={loading || confirmedCount === 0}
+          >
             🧪 Dry Run Push All
           </button>
-          <button style={styles.btnGcpSecondary} onClick={() => pushAllConfirmed(false)} disabled={loading || confirmedCount === 0}>
-            🚀 Push All Confirmed {confirmedCount > 0 ? `(${confirmedCount})` : ""}
+          <button
+            style={styles.btnGcpSecondary}
+            onClick={() => pushAllConfirmed(false)}
+            disabled={loading || confirmedCount === 0}
+          >
+            🚀 Push All Confirmed {confirmedCount > 0 ? `(${confirmedCount})` : ''}
           </button>
           <button style={styles.btnGcpPrimary} onClick={runDiscover} disabled={loading}>
-            {loading ? "⏳ Running..." : "🔍 Run Discovery"}
+            {loading ? '⏳ Running...' : '🔍 Run Discovery'}
           </button>
         </div>
       </div>
@@ -280,8 +327,12 @@ export default function AdminSkuMappingTab() {
             return (
               <div
                 key={key}
-                style={{ ...styles.statCard, borderTop: `3px solid ${meta.color}`, cursor: "pointer" }}
-                onClick={() => setFilter(filter === key ? "all" : key)}
+                style={{
+                  ...styles.statCard,
+                  borderTop: `3px solid ${meta.color}`,
+                  cursor: 'pointer',
+                }}
+                onClick={() => setFilter(filter === key ? 'all' : key)}
               >
                 <div style={styles.statCardHeader}>
                   <span style={styles.statCardLabel}>{meta.label}</span>
@@ -291,10 +342,10 @@ export default function AdminSkuMappingTab() {
               </div>
             );
           })}
-          <div style={{ ...styles.statCard, borderTop: "3px solid #5f6368" }}>
+          <div style={{ ...styles.statCard, borderTop: '3px solid #5f6368' }}>
             <div style={styles.statCardHeader}>
               <span style={styles.statCardLabel}>Total Records</span>
-              <Database size={14} style={{ color: "#5f6368" }} />
+              <Database size={14} style={{ color: '#5f6368' }} />
             </div>
             <span style={styles.statCardValue}>{mappings.length}</span>
           </div>
@@ -304,8 +355,10 @@ export default function AdminSkuMappingTab() {
       {/* GCP Horizontal Tabs for filtering */}
       <div style={styles.tabsRow}>
         <button
-          onClick={() => setFilter("all")}
-          style={filter === "all" ? { ...styles.tabButton, ...styles.tabButtonActive } : styles.tabButton}
+          onClick={() => setFilter('all')}
+          style={
+            filter === 'all' ? { ...styles.tabButton, ...styles.tabButtonActive } : styles.tabButton
+          }
         >
           All Mappings ({mappings.length})
         </button>
@@ -313,9 +366,11 @@ export default function AdminSkuMappingTab() {
           <button
             key={key}
             onClick={() => setFilter(key)}
-            style={filter === key ? { ...styles.tabButton, ...styles.tabButtonActive } : styles.tabButton}
+            style={
+              filter === key ? { ...styles.tabButton, ...styles.tabButtonActive } : styles.tabButton
+            }
           >
-            {meta.label} ({mappings.filter(m => m.status === key).length})
+            {meta.label} ({mappings.filter((m) => m.status === key).length})
           </button>
         ))}
       </div>
@@ -324,43 +379,39 @@ export default function AdminSkuMappingTab() {
       {selectedIds.length > 0 && (
         <div style={styles.bulkBar}>
           <div style={styles.bulkText}>
-            <Info size={16} style={{ marginRight: 8, verticalAlign: "middle" }} />
-            {selectedIds.length} mapping{selectedIds.length > 1 ? "s" : ""} selected
+            <Info size={16} style={{ marginRight: 8, verticalAlign: 'middle' }} />
+            {selectedIds.length} mapping{selectedIds.length > 1 ? 's' : ''} selected
           </div>
           <div style={styles.bulkActions}>
             <button
               style={styles.btnGcpSuccessBorder}
-              onClick={() => handleBulkAction("confirm")}
+              onClick={() => handleBulkAction('confirm')}
               disabled={loading}
             >
               Bulk Confirm
             </button>
             <button
               style={styles.btnGcpDangerBorder}
-              onClick={() => handleBulkAction("reject")}
+              onClick={() => handleBulkAction('reject')}
               disabled={loading}
             >
               Bulk Reject
             </button>
             <button
               style={styles.btnGcpSecondary}
-              onClick={() => handleBulkAction("push_dry")}
+              onClick={() => handleBulkAction('push_dry')}
               disabled={loading}
             >
               Dry Run Push
             </button>
             <button
               style={styles.btnGcpPrimary}
-              onClick={() => handleBulkAction("push")}
+              onClick={() => handleBulkAction('push')}
               disabled={loading}
             >
               Push Selected
             </button>
-            <button
-              style={styles.btnGcpGray}
-              onClick={() => setSelectedIds([])}
-              disabled={loading}
-            >
+            <button style={styles.btnGcpGray} onClick={() => setSelectedIds([])} disabled={loading}>
               Cancel
             </button>
           </div>
@@ -372,20 +423,22 @@ export default function AdminSkuMappingTab() {
         {filtered.length === 0 ? (
           <div style={styles.empty}>
             {mappings.length === 0
-              ? "No mappings discovered yet. Click \"Run Discovery\" to scan catalogs."
+              ? 'No mappings discovered yet. Click "Run Discovery" to scan catalogs.'
               : `No mappings match the active filter: ${filter}`}
           </div>
         ) : (
           <table className="gcp-table" style={styles.table}>
             <thead>
-              <tr style={{ borderBottom: "1px solid #dadce0" }}>
-                <th style={{ width: "30px", padding: "8px 10px" }}></th>
-                <th style={{ width: "40px", padding: "8px 10px", textAlign: "center" }}>
+              <tr style={{ borderBottom: '1px solid #dadce0' }}>
+                <th style={{ width: '30px', padding: '8px 10px' }}></th>
+                <th style={{ width: '40px', padding: '8px 10px', textAlign: 'center' }}>
                   <input
                     type="checkbox"
-                    checked={filtered.length > 0 && filtered.every(m => selectedIds.includes(m.id))}
+                    checked={
+                      filtered.length > 0 && filtered.every((m) => selectedIds.includes(m.id))
+                    }
                     onChange={handleSelectAll}
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: 'pointer' }}
                   />
                 </th>
                 <th style={styles.th}>Firebase Product</th>
@@ -393,12 +446,12 @@ export default function AdminSkuMappingTab() {
                 <th style={styles.th}>Zoho Item</th>
                 <th style={styles.th}>SKU (Zoho)</th>
                 <th style={styles.th}>Confidence</th>
-                <th style={{ ...styles.th, textAlign: "center" }}>Status</th>
+                <th style={{ ...styles.th, textAlign: 'center' }}>Status</th>
                 <th style={styles.th}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map(m => {
+              {filtered.map((m) => {
                 const meta = STATUS_META[m.status] || STATUS_META.pending;
                 const IconComponent = meta.icon;
                 const isActing = actionId === m.id;
@@ -411,14 +464,20 @@ export default function AdminSkuMappingTab() {
                       style={{
                         ...styles.tr,
                         backgroundColor: isSelected
-                          ? "#f4f8fe"
+                          ? '#f4f8fe'
                           : isExpanded
-                          ? "var(--color-bg-app)"
-                          : "transparent"
+                            ? 'var(--color-bg-app)'
+                            : 'transparent',
                       }}
                     >
                       {/* Toggle Chevron */}
-                      <td style={{ padding: "8px 10px", verticalAlign: "middle", textAlign: "center" }}>
+                      <td
+                        style={{
+                          padding: '8px 10px',
+                          verticalAlign: 'middle',
+                          textAlign: 'center',
+                        }}
+                      >
                         <button
                           type="button"
                           style={styles.chevronBtn}
@@ -429,18 +488,24 @@ export default function AdminSkuMappingTab() {
                       </td>
 
                       {/* Checkbox */}
-                      <td style={{ padding: "8px 10px", verticalAlign: "middle", textAlign: "center" }}>
+                      <td
+                        style={{
+                          padding: '8px 10px',
+                          verticalAlign: 'middle',
+                          textAlign: 'center',
+                        }}
+                      >
                         <input
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => handleSelectRow(m.id)}
-                          style={{ cursor: "pointer" }}
+                          style={{ cursor: 'pointer' }}
                         />
                       </td>
 
                       {/* Firebase Name */}
                       <td
-                        style={{ ...styles.td, cursor: "pointer" }}
+                        style={{ ...styles.td, cursor: 'pointer' }}
                         onClick={() => toggleRowExpanded(m.id)}
                       >
                         <div style={styles.productName}>{m.firebase_name}</div>
@@ -448,12 +513,12 @@ export default function AdminSkuMappingTab() {
 
                       {/* Firebase SKU */}
                       <td style={styles.td}>
-                        <code style={styles.sku}>{m.firebase_sku || "—"}</code>
+                        <code style={styles.sku}>{m.firebase_sku || '—'}</code>
                       </td>
 
                       {/* Zoho Name */}
                       <td
-                        style={{ ...styles.td, cursor: "pointer" }}
+                        style={{ ...styles.td, cursor: 'pointer' }}
                         onClick={() => toggleRowExpanded(m.id)}
                       >
                         <div style={styles.productName}>{m.zoho_name}</div>
@@ -461,7 +526,7 @@ export default function AdminSkuMappingTab() {
 
                       {/* Zoho SKU */}
                       <td style={styles.td}>
-                        <code style={styles.sku}>{m.zoho_sku || "—"}</code>
+                        <code style={styles.sku}>{m.zoho_sku || '—'}</code>
                       </td>
 
                       {/* Match Confidence */}
@@ -474,22 +539,28 @@ export default function AdminSkuMappingTab() {
                                 width: `${m.match_confidence || 0}%`,
                                 background:
                                   m.match_confidence >= 85
-                                    ? "var(--color-success)"
+                                    ? 'var(--color-success)'
                                     : m.match_confidence >= 60
-                                    ? "#f59e0b"
-                                    : "var(--color-danger)"
+                                      ? '#f59e0b'
+                                      : 'var(--color-danger)',
                               }}
                             />
                           </div>
-                          <span style={{ color: "#5f6368", fontSize: 12 }}>{m.match_confidence || 0}%</span>
+                          <span style={{ color: '#5f6368', fontSize: 12 }}>
+                            {m.match_confidence || 0}%
+                          </span>
                         </div>
                       </td>
 
                       {/* Status Icon with Tooltip */}
-                      <td style={{ ...styles.td, textAlign: "center" }}>
+                      <td style={{ ...styles.td, textAlign: 'center' }}>
                         <span
                           title={`${meta.label} - Click row details for options`}
-                          style={{ display: "inline-flex", verticalAlign: "middle", color: meta.color }}
+                          style={{
+                            display: 'inline-flex',
+                            verticalAlign: 'middle',
+                            color: meta.color,
+                          }}
                         >
                           <IconComponent size={18} />
                         </span>
@@ -497,11 +568,11 @@ export default function AdminSkuMappingTab() {
 
                       {/* Quick Actions */}
                       <td style={styles.td}>
-                        {m.status === "pending" ? (
+                        {m.status === 'pending' ? (
                           <div style={styles.actionBtns}>
                             <button
                               style={styles.quickConfirmBtn}
-                              onClick={() => handleAction(m.id, "confirm")}
+                              onClick={() => handleAction(m.id, 'confirm')}
                               disabled={isActing}
                               title="Confirm Match"
                             >
@@ -509,19 +580,29 @@ export default function AdminSkuMappingTab() {
                             </button>
                             <button
                               style={styles.quickRejectBtn}
-                              onClick={() => handleAction(m.id, "reject")}
+                              onClick={() => handleAction(m.id, 'reject')}
                               disabled={isActing}
                               title="Reject Match"
                             >
                               <X size={14} />
                             </button>
                           </div>
-                        ) : m.status === "confirmed" ? (
-                          <span style={{ color: "#1a73e8", fontSize: 11, fontWeight: 500 }}>Ready</span>
-                        ) : m.status === "synced" ? (
-                          <span style={{ color: "var(--color-success)", fontSize: 11, fontWeight: 500 }}>Synced</span>
+                        ) : m.status === 'confirmed' ? (
+                          <span style={{ color: '#1a73e8', fontSize: 11, fontWeight: 500 }}>
+                            Ready
+                          </span>
+                        ) : m.status === 'synced' ? (
+                          <span
+                            style={{ color: 'var(--color-success)', fontSize: 11, fontWeight: 500 }}
+                          >
+                            Synced
+                          </span>
                         ) : (
-                          <span style={{ color: "var(--color-danger)", fontSize: 11, fontWeight: 500 }}>Error</span>
+                          <span
+                            style={{ color: 'var(--color-danger)', fontSize: 11, fontWeight: 500 }}
+                          >
+                            Error
+                          </span>
                         )}
                       </td>
                     </tr>
@@ -541,7 +622,7 @@ export default function AdminSkuMappingTab() {
                               <div style={styles.detailField}>
                                 <span style={styles.detailLabel}>Firebase SKU</span>
                                 <div>
-                                  <code style={styles.sku}>{m.firebase_sku || "—"}</code>
+                                  <code style={styles.sku}>{m.firebase_sku || '—'}</code>
                                 </div>
                               </div>
                               <div style={styles.detailField}>
@@ -556,7 +637,9 @@ export default function AdminSkuMappingTab() {
                               )}
                               <div style={styles.detailField}>
                                 <span style={styles.detailLabel}>Guest Catalog Price</span>
-                                <span style={styles.detailValue}>${(m.guest_usd || 0).toFixed(2)} USD</span>
+                                <span style={styles.detailValue}>
+                                  ${(m.guest_usd || 0).toFixed(2)} USD
+                                </span>
                               </div>
                             </div>
 
@@ -570,7 +653,7 @@ export default function AdminSkuMappingTab() {
                               <div style={styles.detailField}>
                                 <span style={styles.detailLabel}>Zoho SKU</span>
                                 <div>
-                                  <code style={styles.sku}>{m.zoho_sku || "—"}</code>
+                                  <code style={styles.sku}>{m.zoho_sku || '—'}</code>
                                 </div>
                               </div>
                               <div style={styles.detailField}>
@@ -579,9 +662,11 @@ export default function AdminSkuMappingTab() {
                               </div>
                               <div style={styles.detailField}>
                                 <span style={styles.detailLabel}>Zoho Books Rate</span>
-                                <span style={styles.detailValue}>{(m.guest_aed || 0).toFixed(2)} AED</span>
+                                <span style={styles.detailValue}>
+                                  {(m.guest_aed || 0).toFixed(2)} AED
+                                </span>
                               </div>
-                              <div style={{ marginTop: "auto", paddingTop: 8 }}>
+                              <div style={{ marginTop: 'auto', paddingTop: 8 }}>
                                 <a
                                   href={`https://books.zoho.me/app#/items/${m.zoho_item_id}`}
                                   target="_blank"
@@ -599,15 +684,21 @@ export default function AdminSkuMappingTab() {
                               <span style={styles.detailCardTitle}>Engine Metadata & Actions</span>
                               <div style={styles.detailField}>
                                 <span style={styles.detailLabel}>AI Match Confidence</span>
-                                <span style={styles.detailValueBold}>{m.match_confidence || 0}%</span>
+                                <span style={styles.detailValueBold}>
+                                  {m.match_confidence || 0}%
+                                </span>
                               </div>
                               <div style={styles.detailField}>
                                 <span style={styles.detailLabel}>Match Method</span>
-                                <span style={styles.detailValue}><code style={{ fontSize: 11 }}>{m.match_method}</code></span>
+                                <span style={styles.detailValue}>
+                                  <code style={{ fontSize: 11 }}>{m.match_method}</code>
+                                </span>
                               </div>
                               <div style={styles.detailField}>
                                 <span style={styles.detailLabel}>Last Synchronized</span>
-                                <span style={styles.detailValue}>{formatDate(m.last_synced_at)}</span>
+                                <span style={styles.detailValue}>
+                                  {formatDate(m.last_synced_at)}
+                                </span>
                               </div>
                               {m.match_reasoning && (
                                 <div style={styles.detailField}>
@@ -615,7 +706,14 @@ export default function AdminSkuMappingTab() {
                                   <p style={styles.detailReasoning}>{m.match_reasoning}</p>
                                 </div>
                               )}
-                              <div style={{ display: "flex", gap: 8, marginTop: "auto", paddingTop: 8 }}>
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  gap: 8,
+                                  marginTop: 'auto',
+                                  paddingTop: 8,
+                                }}
+                              >
                                 <button
                                   style={styles.btnGcpSecondary}
                                   onClick={() => handleRefetch(m.id, m.zoho_item_id)}
@@ -625,23 +723,24 @@ export default function AdminSkuMappingTab() {
                                     size={13}
                                     style={{
                                       marginRight: 4,
-                                      animation: syncingRowId === m.id ? "spin 1s linear infinite" : "none"
+                                      animation:
+                                        syncingRowId === m.id ? 'spin 1s linear infinite' : 'none',
                                     }}
                                   />
-                                  {syncingRowId === m.id ? "Syncing..." : "Sync from Zoho"}
+                                  {syncingRowId === m.id ? 'Syncing...' : 'Sync from Zoho'}
                                 </button>
-                                {m.status === "pending" && (
+                                {m.status === 'pending' && (
                                   <>
                                     <button
                                       style={styles.btnGcpSuccessBorder}
-                                      onClick={() => handleAction(m.id, "confirm")}
+                                      onClick={() => handleAction(m.id, 'confirm')}
                                       disabled={isActing}
                                     >
                                       Confirm Match
                                     </button>
                                     <button
                                       style={styles.btnGcpDangerBorder}
-                                      onClick={() => handleAction(m.id, "reject")}
+                                      onClick={() => handleAction(m.id, 'reject')}
                                       disabled={isActing}
                                     >
                                       Reject Match
@@ -673,13 +772,13 @@ export default function AdminSkuMappingTab() {
                 style={{
                   ...styles.logEntry,
                   color:
-                    entry.type === "error"
-                      ? "#dc3545"
-                      : entry.type === "success"
-                      ? "#1e7e34"
-                      : entry.type === "warn"
-                      ? "var(--color-warning)"
-                      : "#5f6368"
+                    entry.type === 'error'
+                      ? '#dc3545'
+                      : entry.type === 'success'
+                        ? '#1e7e34'
+                        : entry.type === 'warn'
+                          ? 'var(--color-warning)'
+                          : '#5f6368',
                 }}
               >
                 <span style={styles.logTs}>[{entry.ts}]</span> {entry.msg}
@@ -695,379 +794,379 @@ export default function AdminSkuMappingTab() {
 // ── Styles (Google Cloud Console Light Design Tokens) ────────────────────────
 const styles = {
   container: {
-    padding: "24px",
-    display: "flex",
-    flexDirection: "column",
+    padding: '24px',
+    display: 'flex',
+    flexDirection: 'column',
     gap: 20,
-    background: "var(--color-bg-surface)",
-    fontFamily: "Inter, -apple-system, sans-serif"
+    background: 'var(--color-bg-surface)',
+    fontFamily: 'Inter, -apple-system, sans-serif',
   },
   header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    flexWrap: "wrap",
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
     gap: 12,
     paddingBottom: 16,
-    borderBottom: "1px solid #dadce0"
+    borderBottom: '1px solid #dadce0',
   },
   title: {
     margin: 0,
     fontSize: 20,
     fontWeight: 700,
-    color: "#202124"
+    color: '#202124',
   },
   subtitle: {
-    margin: "4px 0 0",
+    margin: '4px 0 0',
     fontSize: 13,
-    color: "#5f6368"
+    color: '#5f6368',
   },
   headerActions: {
-    display: "flex",
+    display: 'flex',
     gap: 8,
-    flexWrap: "wrap"
+    flexWrap: 'wrap',
   },
   statsRow: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: 12
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+    gap: 12,
   },
   statCard: {
-    background: "var(--color-bg-surface)",
-    border: "1px solid #dadce0",
+    background: 'var(--color-bg-surface)',
+    border: '1px solid #dadce0',
     borderRadius: 4,
-    padding: "12px 16px",
-    display: "flex",
-    flexDirection: "column",
+    padding: '12px 16px',
+    display: 'flex',
+    flexDirection: 'column',
     gap: 6,
-    boxShadow: "0 1px 2px 0 rgba(60,64,67,0.15)"
+    boxShadow: '0 1px 2px 0 rgba(60,64,67,0.15)',
   },
   statCardHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center"
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   statCardLabel: {
     fontSize: 11,
     fontWeight: 500,
-    color: "#5f6368"
+    color: '#5f6368',
   },
   statCardValue: {
     fontSize: 22,
     fontWeight: 700,
-    color: "#202124"
+    color: '#202124',
   },
   tabsRow: {
-    display: "flex",
-    borderBottom: "1px solid #dadce0",
-    gap: 4
+    display: 'flex',
+    borderBottom: '1px solid #dadce0',
+    gap: 4,
   },
   tabButton: {
-    border: "none",
-    background: "none",
-    padding: "10px 16px",
-    cursor: "pointer",
+    border: 'none',
+    background: 'none',
+    padding: '10px 16px',
+    cursor: 'pointer',
     fontSize: 13,
     fontWeight: 500,
-    color: "#5f6368",
-    bottomBorder: "2px solid transparent",
-    marginBottom: "-1px"
+    color: '#5f6368',
+    bottomBorder: '2px solid transparent',
+    marginBottom: '-1px',
   },
   tabButtonActive: {
-    color: "#1a73e8",
-    borderBottom: "2px solid #1a73e8",
-    fontWeight: 600
+    color: '#1a73e8',
+    borderBottom: '2px solid #1a73e8',
+    fontWeight: 600,
   },
   bulkBar: {
-    background: "#e8f0fe",
-    border: "1px solid #1a73e8",
+    background: '#e8f0fe',
+    border: '1px solid #1a73e8',
     borderRadius: 4,
-    padding: "10px 16px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    position: "sticky",
+    padding: '10px 16px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    position: 'sticky',
     top: 0,
     zIndex: 10,
-    boxShadow: "0 2px 4px rgba(60,64,67,0.1)"
+    boxShadow: '0 2px 4px rgba(60,64,67,0.1)',
   },
   bulkText: {
-    color: "#1a73e8",
+    color: '#1a73e8',
     fontWeight: 600,
     fontSize: 13,
-    display: "flex",
-    alignItems: "center"
+    display: 'flex',
+    alignItems: 'center',
   },
   bulkActions: {
-    display: "flex",
-    gap: 8
+    display: 'flex',
+    gap: 8,
   },
   tableWrapper: {
-    border: "1px solid #dadce0",
+    border: '1px solid #dadce0',
     borderRadius: 4,
-    background: "var(--color-bg-surface)",
-    overflow: "hidden"
+    background: 'var(--color-bg-surface)',
+    overflow: 'hidden',
   },
   table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    fontSize: 13
+    width: '100%',
+    borderCollapse: 'collapse',
+    fontSize: 13,
   },
   th: {
-    padding: "10px 14px",
-    textAlign: "left",
-    color: "#5f6368",
+    padding: '10px 14px',
+    textAlign: 'left',
+    color: '#5f6368',
     fontWeight: 700,
     fontSize: 11,
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-    borderBottom: "2px solid #dadce0",
-    background: "var(--color-bg-app)"
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    borderBottom: '2px solid #dadce0',
+    background: 'var(--color-bg-app)',
   },
   tr: {
-    borderBottom: "1px solid #dadce0",
-    transition: "background-color 0.15s"
+    borderBottom: '1px solid #dadce0',
+    transition: 'background-color 0.15s',
   },
   trExpanded: {
-    background: "var(--color-bg-app)",
-    borderBottom: "1px solid #dadce0"
+    background: 'var(--color-bg-app)',
+    borderBottom: '1px solid #dadce0',
   },
   td: {
-    padding: "10px 14px",
-    color: "#3c4043",
-    verticalAlign: "middle"
+    padding: '10px 14px',
+    color: '#3c4043',
+    verticalAlign: 'middle',
   },
   chevronBtn: {
-    background: "none",
-    border: "none",
+    background: 'none',
+    border: 'none',
     padding: 4,
-    cursor: "pointer",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "#5f6368",
+    cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#5f6368',
     borderRadius: 4,
     hover: {
-      background: "#e8eaed"
-    }
+      background: '#e8eaed',
+    },
   },
   productName: {
     fontWeight: 600,
-    color: "#202124",
+    color: '#202124',
     maxWidth: 240,
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap"
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
   sku: {
-    background: "#f1f3f4",
-    padding: "2px 6px",
+    background: '#f1f3f4',
+    padding: '2px 6px',
     borderRadius: 2,
     fontSize: 11,
-    fontFamily: "monospace",
-    color: "#3c4043"
+    fontFamily: 'monospace',
+    color: '#3c4043',
   },
   confidence: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
   },
   confidenceBarWrapper: {
     width: 50,
     height: 4,
-    background: "#e8eaed",
+    background: '#e8eaed',
     borderRadius: 2,
-    overflow: "hidden"
+    overflow: 'hidden',
   },
   confidenceBar: {
-    height: "100%",
+    height: '100%',
     borderRadius: 2,
-    transition: "width 0.3s"
+    transition: 'width 0.3s',
   },
   badge: {
-    padding: "3px 8px",
+    padding: '3px 8px',
     borderRadius: 4,
     fontSize: 11,
-    fontWeight: 600
+    fontWeight: 600,
   },
   actionBtns: {
-    display: "flex",
-    gap: 4
+    display: 'flex',
+    gap: 4,
   },
   quickConfirmBtn: {
-    padding: "4px 8px",
+    padding: '4px 8px',
     borderRadius: 4,
-    border: "1px solid #10b981",
-    background: "rgba(16,185,129,0.04)",
-    color: "var(--color-success)",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
+    border: '1px solid #10b981',
+    background: 'rgba(16,185,129,0.04)',
+    color: 'var(--color-success)',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   quickRejectBtn: {
-    padding: "4px 8px",
+    padding: '4px 8px',
     borderRadius: 4,
-    border: "1px solid #ef4444",
-    background: "rgba(239,68,68,0.04)",
-    color: "var(--color-danger)",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
+    border: '1px solid #ef4444',
+    background: 'rgba(239,68,68,0.04)',
+    color: 'var(--color-danger)',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   detailPanel: {
-    padding: "16px 24px",
-    background: "var(--color-bg-app)",
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    padding: '16px 24px',
+    background: 'var(--color-bg-app)',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
     gap: 20,
-    borderBottom: "1px solid #dadce0"
+    borderBottom: '1px solid #dadce0',
   },
   detailCard: {
-    background: "var(--color-bg-surface)",
-    border: "1px solid #dadce0",
+    background: 'var(--color-bg-surface)',
+    border: '1px solid #dadce0',
     borderRadius: 4,
-    padding: "14px",
-    display: "flex",
-    flexDirection: "column",
+    padding: '14px',
+    display: 'flex',
+    flexDirection: 'column',
     gap: 10,
-    boxShadow: "0 1px 2px 0 rgba(60,64,67,0.1)"
+    boxShadow: '0 1px 2px 0 rgba(60,64,67,0.1)',
   },
   detailCardTitle: {
     fontSize: 11,
     fontWeight: 700,
-    textTransform: "uppercase",
-    color: "#5f6368",
-    letterSpacing: "0.05em",
+    textTransform: 'uppercase',
+    color: '#5f6368',
+    letterSpacing: '0.05em',
     paddingBottom: 6,
-    borderBottom: "1px solid #f1f3f4"
+    borderBottom: '1px solid #f1f3f4',
   },
   detailField: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 2
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 2,
   },
   detailLabel: {
     fontSize: 11,
-    color: "#80868b"
+    color: '#80868b',
   },
   detailValue: {
     fontSize: 13,
-    color: "#202124"
+    color: '#202124',
   },
   detailValueBold: {
     fontSize: 13,
     fontWeight: 600,
-    color: "#202124"
+    color: '#202124',
   },
   detailReasoning: {
     margin: 0,
     fontSize: 12,
     lineHeight: 1.5,
-    color: "#3c4043",
-    fontStyle: "italic"
+    color: '#3c4043',
+    fontStyle: 'italic',
   },
   monoId: {
-    fontFamily: "monospace",
+    fontFamily: 'monospace',
     fontSize: 11,
-    color: "#5f6368",
-    background: "#f1f3f4",
-    padding: "1px 4px",
+    color: '#5f6368',
+    background: '#f1f3f4',
+    padding: '1px 4px',
     borderRadius: 2,
-    wordBreak: "break-all"
+    wordBreak: 'break-all',
   },
   detailLink: {
-    color: "#1a73e8",
-    textDecoration: "none",
+    color: '#1a73e8',
+    textDecoration: 'none',
     fontWeight: 650,
     fontSize: 12,
-    display: "inline-flex",
-    alignItems: "center"
+    display: 'inline-flex',
+    alignItems: 'center',
   },
   btnGcpPrimary: {
-    padding: "8px 16px",
+    padding: '8px 16px',
     borderRadius: 4,
-    border: "none",
-    background: "#1a73e8",
-    color: "var(--color-bg-surface)",
-    cursor: "pointer",
+    border: 'none',
+    background: '#1a73e8',
+    color: 'var(--color-bg-surface)',
+    cursor: 'pointer',
     fontWeight: 500,
     fontSize: 13,
-    boxShadow: "0 1px 2px 0 rgba(60,64,67,0.3)"
+    boxShadow: '0 1px 2px 0 rgba(60,64,67,0.3)',
   },
   btnGcpSecondary: {
-    padding: "8px 16px",
+    padding: '8px 16px',
     borderRadius: 4,
-    border: "1px solid #dadce0",
-    background: "var(--color-bg-surface)",
-    color: "#1a73e8",
-    cursor: "pointer",
+    border: '1px solid #dadce0',
+    background: 'var(--color-bg-surface)',
+    color: '#1a73e8',
+    cursor: 'pointer',
     fontWeight: 500,
-    fontSize: 13
+    fontSize: 13,
   },
   btnGcpGray: {
-    padding: "8px 16px",
+    padding: '8px 16px',
     borderRadius: 4,
-    border: "1px solid #dadce0",
-    background: "var(--color-bg-surface)",
-    color: "#3c4043",
-    cursor: "pointer",
+    border: '1px solid #dadce0',
+    background: 'var(--color-bg-surface)',
+    color: '#3c4043',
+    cursor: 'pointer',
     fontWeight: 500,
-    fontSize: 13
+    fontSize: 13,
   },
   btnGcpSuccessBorder: {
-    padding: "6px 12px",
+    padding: '6px 12px',
     borderRadius: 4,
-    border: "1px solid #10b981",
-    background: "var(--color-bg-surface)",
-    color: "var(--color-success)",
-    cursor: "pointer",
+    border: '1px solid #10b981',
+    background: 'var(--color-bg-surface)',
+    color: 'var(--color-success)',
+    cursor: 'pointer',
     fontWeight: 500,
-    fontSize: 12
+    fontSize: 12,
   },
   btnGcpDangerBorder: {
-    padding: "6px 12px",
+    padding: '6px 12px',
     borderRadius: 4,
-    border: "1px solid #ef4444",
-    background: "var(--color-bg-surface)",
-    color: "var(--color-danger)",
-    cursor: "pointer",
+    border: '1px solid #ef4444',
+    background: 'var(--color-bg-surface)',
+    color: 'var(--color-danger)',
+    cursor: 'pointer',
     fontWeight: 500,
-    fontSize: 12
+    fontSize: 12,
   },
   empty: {
-    padding: "48px 24px",
-    textAlign: "center",
-    color: "#5f6368",
-    fontSize: 14
+    padding: '48px 24px',
+    textAlign: 'center',
+    color: '#5f6368',
+    fontSize: 14,
   },
   logPanel: {
-    background: "var(--color-bg-app)",
+    background: 'var(--color-bg-app)',
     borderRadius: 4,
-    padding: "14px 18px",
-    border: "1px solid #dadce0"
+    padding: '14px 18px',
+    border: '1px solid #dadce0',
   },
   logTitle: {
-    color: "#5f6368",
+    color: '#5f6368',
     fontSize: 11,
     fontWeight: 700,
-    textTransform: "uppercase",
-    letterSpacing: "0.08em",
-    marginBottom: 8
+    textTransform: 'uppercase',
+    letterSpacing: '0.08em',
+    marginBottom: 8,
   },
   logList: {
     maxHeight: 180,
-    overflowY: "auto"
+    overflowY: 'auto',
   },
   logEntry: {
     fontSize: 12,
-    fontFamily: "monospace",
-    padding: "2px 0",
-    lineHeight: 1.6
+    fontFamily: 'monospace',
+    padding: '2px 0',
+    lineHeight: 1.6,
   },
   logTs: {
-    color: "#80868b",
-    marginRight: 8
-  }
+    color: '#80868b',
+    marginRight: 8,
+  },
 };

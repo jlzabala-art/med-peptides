@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AppSidebar from './AppSidebar/index';
+import SidebarGadget from './AppSidebar/SidebarGadget';
 import AppHeader from './AppHeader/index';
 import RefillReminderBanner from './RefillReminderBanner';
 import ClinicalAssistant from './ClinicalAssistant';
@@ -32,8 +32,8 @@ export default function DashboardLayout({
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--background, #F4F8FB)' }}>
       
-      {/* Universal App Sidebar */}
-      <AppSidebar 
+      {/* Universal App Sidebar Gadget */}
+      <SidebarGadget 
         {...sidebarProps} 
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
@@ -83,13 +83,12 @@ export default function DashboardLayout({
           {/* Right Sidebar Column (ClinicalAI) */}
           {showRightSidebar && (
             <aside style={{
-              flex: '0 0 33.333%',
-              minWidth: 0,
-              borderLeft: '1px solid var(--border, #D8E6F0)',
-              background: 'var(--surface, #ffffff)',
+              flex: '0 0 30%',
+              minWidth: '320px',
+              maxWidth: '400px',
+              padding: '2rem 2.5rem 2rem 0',
               display: 'flex',
               flexDirection: 'column',
-              boxShadow: '-4px 0 15px rgba(0,0,0,0.02)'
             }}>
               <ClinicalAssistant embedded={true} isOpen={true} setIsOpen={() => setIsDesktopAIOpen(false)} pageContext={pageContext} contextMode={roleContext === 'admin' ? 'admin' : roleContext === 'doctor' ? 'doctor' : 'patient'} />
             </aside>

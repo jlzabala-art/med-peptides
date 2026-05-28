@@ -78,23 +78,22 @@ export default function ChatMessageItem({ msg, idx, onProductClick, InstantResul
   }, []);
 
   const wrapperStyle = isSpecialMode ? {
-    display: 'flex', gap: '1.25rem',
+    display: 'flex', gap: '0.75rem',
     flexDirection: 'row',
     alignItems: 'flex-start',
     width: '100%',
-    padding: '1.25rem',
+    padding: '0.85rem 1rem',
     backgroundColor: isAssistant ? 'var(--color-bg-surface)' : '#f1f5f9',
     borderRadius: '8px',
     border: `1px solid ${isAssistant ? 'rgba(0,0,0,0.06)' : 'rgba(0,0,0,0.04)'}`,
-    borderLeft: `4px solid ${isAssistant ? themeAccent : 'var(--color-text-secondary)'}`,
     boxShadow: isAssistant ? '0 2px 8px rgba(0, 0, 0, 0.02)' : 'none',
     marginBottom: '0.85rem'
   } : {
-    display: 'flex', gap: '1.25rem',
+    display: 'flex', gap: '0.75rem',
     flexDirection: 'row',
     alignItems: 'flex-start',
     width: '100%',
-    padding: '1.5rem 0',
+    padding: '1rem 0',
     borderBottom: '1px solid #f1f3f4',
   };
 
@@ -117,10 +116,6 @@ export default function ChatMessageItem({ msg, idx, onProductClick, InstantResul
         }}>
           {msg.role === 'user' ? <User size={18} /> : <Bot size={18} />}
         </div>
-        {/* Agent identity badge — shown below bot avatar */}
-        {isAssistant && msg.agentName && (
-          <AgentBadge agentName={msg.agentName} animated={true} size="sm" />
-        )}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', alignItems: 'flex-start', flex: 1, minWidth: 0 }}>

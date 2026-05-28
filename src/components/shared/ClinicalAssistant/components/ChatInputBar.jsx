@@ -5,30 +5,30 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../../../context/AuthContext';
 
 const CLINICAL_QUICK_PROMPTS = [
-  { label: '💉 Reconstitute Peptides', text: 'How do I reconstitute a research peptide vial?' },
-  { label: '🧮 Calculate Dosage', text: 'Explain how to calculate peptide research dosages.' },
-  { label: '🔬 Compare Peptides', text: 'Compare BPC-157 and TB-500.' },
-  { label: '⚠️ Side Effects & Safety', text: 'What are the potential side effects of research peptides?' },
-  { label: '📋 Research Protocols', text: 'Show me popular research protocols.' },
-  { label: '🧬 Purity & Quality', text: 'How is peptide purity tested?' }
+  { label: 'Reconstitute Peptides', text: 'How do I reconstitute a research peptide vial?' },
+  { label: 'Calculate Dosage', text: 'Explain how to calculate peptide research dosages.' },
+  { label: 'Compare Peptides', text: 'Compare BPC-157 and TB-500.' },
+  { label: 'Side Effects & Safety', text: 'What are the potential side effects of research peptides?' },
+  { label: 'Research Protocols', text: 'Show me popular research protocols.' },
+  { label: 'Purity & Quality', text: 'How is peptide purity tested?' }
 ];
 
 const ADMIN_QUICK_PROMPTS = [
-  { label: '👥 Inactive Users', text: 'Show me users who have been inactive for more than 30 days.' },
-  { label: '💰 Today\'s Orders', text: 'Summarize today\'s order volume and revenue.' },
-  { label: '🔒 Audit Permissions', text: 'Audit admin and wholesaler permissions.' },
-  { label: '📉 Inventory Alerts', text: 'Which products are low in stock?' },
-  { label: '📊 Monthly Report', text: 'Generate a summary of this month\'s platform activity.' },
-  { label: '📨 Pending Invites', text: 'Show me pending invitations older than 7 days.' }
+  { label: 'Inactive Users', text: 'Show me users who have been inactive for more than 30 days.' },
+  { label: 'Today\'s Orders', text: 'Summarize today\'s order volume and revenue.' },
+  { label: 'Audit Permissions', text: 'Audit admin and wholesaler permissions.' },
+  { label: 'Inventory Alerts', text: 'Which products are low in stock?' },
+  { label: 'Monthly Report', text: 'Generate a summary of this month\'s platform activity.' },
+  { label: 'Pending Invites', text: 'Show me pending invitations older than 7 days.' }
 ];
 
 const RESEARCH_QUICK_PROMPTS = [
-  { label: '🎯 Optimization Goals', text: 'How do I set up my research goals?' },
-  { label: '📊 Track Biomarkers', text: 'What biomarkers should I track for cellular health?' },
-  { label: '🔬 Peptide Functions', text: 'Explain the difference between growth hormone secretagogues and bioregulators.' },
-  { label: '💪 Longevity Studies', text: 'Summarize the latest research on longevity peptides.' },
-  { label: '📋 Research Log', text: 'Show me how to log my optimization progress.' },
-  { label: '🧬 Anti-Aging Research', text: 'What peptides are currently being researched for anti-aging?' }
+  { label: 'Optimization Goals', text: 'How do I set up my research goals?' },
+  { label: 'Track Biomarkers', text: 'What biomarkers should I track for cellular health?' },
+  { label: 'Peptide Functions', text: 'Explain the difference between growth hormone secretagogues and bioregulators.' },
+  { label: 'Longevity Studies', text: 'Summarize the latest research on longevity peptides.' },
+  { label: 'Research Log', text: 'Show me how to log my optimization progress.' },
+  { label: 'Anti-Aging Research', text: 'What peptides are currently being researched for anti-aging?' }
 ];
 
 // PDF.js dynamic CDN loader
@@ -830,12 +830,9 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
             className="quick-prompts-scroll"
             style={{ 
               display: 'flex', 
-              overflowX: 'auto', 
+              flexWrap: 'wrap',
               gap: '0.5rem', 
-              paddingBottom: '0.75rem',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch'
+              paddingBottom: '0.75rem'
             }}
           >
             {suggestions && suggestions.length > 0 ? (
@@ -1070,8 +1067,8 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
           </button>
         </div>
       </div>
-      <div style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-        {contextMode === 'admin' ? 'FOR SYSTEM ADMINISTRATION USE ONLY. DO NOT ENTER PII.' : 'For research purposes only. Not clinical advice.'}
+      <div style={{ marginTop: '0.75rem', fontSize: '0.65rem', color: 'var(--color-text-tertiary)', textAlign: 'center' }}>
+        AI may make mistakes. Verify important information.
       </div>
     </div>
   );

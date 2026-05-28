@@ -33,7 +33,11 @@ export default class AdminTabErrorBoundary extends Component {
 
   componentDidCatch(error, errorInfo) {
     const { tabId = 'unknown', tabLabel = 'Tab' } = this.props;
-    console.error(`[AdminTabErrorBoundary] Tab "${tabLabel}" (${tabId}) crashed:`, error, errorInfo);
+    console.error(
+      `[AdminTabErrorBoundary] Tab "${tabLabel}" (${tabId}) crashed:`,
+      error,
+      errorInfo
+    );
     this.setState({ errorInfo });
 
     // Call parent onError if provided (for analytics, Sentry, etc.)
@@ -47,7 +51,7 @@ export default class AdminTabErrorBoundary extends Component {
   }
 
   toggleDetail() {
-    this.setState(s => ({ showDetail: !s.showDetail }));
+    this.setState((s) => ({ showDetail: !s.showDetail }));
   }
 
   render() {
@@ -59,23 +63,35 @@ export default class AdminTabErrorBoundary extends Component {
     const isDev = import.meta.env?.DEV;
 
     return (
-      <div style={{
-        margin: '2rem auto',
-        maxWidth: '560px',
-        padding: '2rem',
-        background: 'rgba(239,68,68,0.06)',
-        border: '1px solid rgba(239,68,68,0.25)',
-        borderRadius: 'var(--radius-md)',
-        fontFamily: 'var(--font-body, system-ui, sans-serif)',
-      }}>
+      <div
+        style={{
+          margin: '2rem auto',
+          maxWidth: '560px',
+          padding: '2rem',
+          background: 'rgba(239,68,68,0.06)',
+          border: '1px solid rgba(239,68,68,0.25)',
+          borderRadius: 'var(--radius-md)',
+          fontFamily: 'var(--font-body, system-ui, sans-serif)',
+        }}
+      >
         {/* Icon + Title */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+        <div
+          style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}
+        >
           <span style={{ fontSize: '1.5rem' }}>⚠️</span>
           <div>
-            <div style={{ fontWeight: 700, color: 'var(--color-error, #ef4444)', fontSize: '1rem' }}>
+            <div
+              style={{ fontWeight: 700, color: 'var(--color-error, #ef4444)', fontSize: '1rem' }}
+            >
               {tabLabel} failed to load
             </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--color-muted, #64748b)', marginTop: '0.2rem' }}>
+            <div
+              style={{
+                fontSize: '0.8rem',
+                color: 'var(--color-muted, #64748b)',
+                marginTop: '0.2rem',
+              }}
+            >
               An unexpected error occurred in this section.
             </div>
           </div>
@@ -96,8 +112,8 @@ export default class AdminTabErrorBoundary extends Component {
             fontSize: '0.85rem',
             transition: 'background 0.15s',
           }}
-          onMouseEnter={e => e.target.style.background = 'rgba(239,68,68,0.2)'}
-          onMouseLeave={e => e.target.style.background = 'rgba(239,68,68,0.12)'}
+          onMouseEnter={(e) => (e.target.style.background = 'rgba(239,68,68,0.2)')}
+          onMouseLeave={(e) => (e.target.style.background = 'rgba(239,68,68,0.12)')}
         >
           ↺ Retry
         </button>
@@ -119,17 +135,19 @@ export default class AdminTabErrorBoundary extends Component {
               {showDetail ? '▲ Hide' : '▼ Show'} error details
             </button>
             {showDetail && (
-              <pre style={{
-                marginTop: '0.5rem',
-                padding: '0.75rem',
-                background: 'rgba(0,0,0,0.08)',
-                borderRadius: 'var(--radius-sm)',
-                fontSize: '0.72rem',
-                color: 'var(--color-muted, #475569)',
-                overflowX: 'auto',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-              }}>
+              <pre
+                style={{
+                  marginTop: '0.5rem',
+                  padding: '0.75rem',
+                  background: 'rgba(0,0,0,0.08)',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.72rem',
+                  color: 'var(--color-muted, #475569)',
+                  overflowX: 'auto',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                }}
+              >
                 {error.toString()}
                 {errorInfo?.componentStack && '\n\nComponent Stack:' + errorInfo.componentStack}
               </pre>

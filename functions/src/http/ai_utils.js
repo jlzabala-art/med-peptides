@@ -265,6 +265,7 @@ async function callGemini(contents, systemInstruction, modelName = "gemini-2.5-f
     } catch (proxyErr) {
       structuredLogger.error(`[callGemini] Both direct and proxy failed: ${proxyErr.message}`);
       throw directErr;
+    }
   }
 }
 

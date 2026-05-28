@@ -22,8 +22,18 @@ export default function PriceTable({ products, onRefresh }) {
       const productRef = doc(db, 'products', productId);
       await updateDoc(productRef, { [`pricing.${field}.perUnit`]: parseFloat(value) });
       // optimistic UI update
-      setLocalProducts(prev =>
-        prev.map(p => (p.id === productId ? { ...p, pricing: { ...p.pricing, [field]: { ...p.pricing[field], perUnit: parseFloat(value) } } } : p))
+      setLocalProducts((prev) =>
+        prev.map((p) =>
+          p.id === productId
+            ? {
+                ...p,
+                pricing: {
+                  ...p.pricing,
+                  [field]: { ...p.pricing[field], perUnit: parseFloat(value) },
+                },
+              }
+            : p
+        )
       );
       onRefresh && onRefresh();
     } catch (err) {
@@ -47,14 +57,29 @@ export default function PriceTable({ products, onRefresh }) {
           </tr>
         </thead>
         <tbody>
-          {localProducts.map(p => (
+          {localProducts.map((p) => (
             <tr key={p.id}>
               <td className="mono-data">{p.sku}</td>
               <td style={{ fontWeight: 600 }}>{p.name}</td>
               <td style={{ color: 'var(--text-muted)' }}>{p.category}</td>
-              <EditablePriceCell productId={p.id} field="retail" value={p.pricing?.retail?.perUnit} onSave={handleCellUpdate} />
-              <EditablePriceCell productId={p.id} field="wholesale" value={p.pricing?.wholesale?.perUnit} onSave={handleCellUpdate} />
-              <EditablePriceCell productId={p.id} field="clinic" value={p.pricing?.clinic?.perUnit} onSave={handleCellUpdate} />
+              <EditablePriceCell
+                productId={p.id}
+                field="retail"
+                value={p.pricing?.retail?.perUnit}
+                onSave={handleCellUpdate}
+              />
+              <EditablePriceCell
+                productId={p.id}
+                field="wholesale"
+                value={p.pricing?.wholesale?.perUnit}
+                onSave={handleCellUpdate}
+              />
+              <EditablePriceCell
+                productId={p.id}
+                field="clinic"
+                value={p.pricing?.clinic?.perUnit}
+                onSave={handleCellUpdate}
+              />
             </tr>
           ))}
         </tbody>

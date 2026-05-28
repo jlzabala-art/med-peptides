@@ -11,27 +11,41 @@ vi.mock('firebase/firestore', () => {
     let data = [];
     if (colName === 'users') {
       data = [
-        { id: 'u1', fullName: 'Patient One', role: 'patient', approved: true, createdAt: '2026-05-26T13:00:00Z' },
-        { id: 'u2', fullName: 'Patient Two', role: 'guest', approved: false, createdAt: '2026-05-26T13:00:00Z' },
-        { id: 'u3', fullName: 'Dr. House', role: 'doctor', approved: true, createdAt: '2026-05-26T13:00:00Z' }
+        {
+          id: 'u1',
+          fullName: 'Patient One',
+          role: 'patient',
+          approved: true,
+          createdAt: '2026-05-26T13:00:00Z',
+        },
+        {
+          id: 'u2',
+          fullName: 'Patient Two',
+          role: 'guest',
+          approved: false,
+          createdAt: '2026-05-26T13:00:00Z',
+        },
+        {
+          id: 'u3',
+          fullName: 'Dr. House',
+          role: 'doctor',
+          approved: true,
+          createdAt: '2026-05-26T13:00:00Z',
+        },
       ];
     } else if (colName === 'doctor_patient_relationships') {
-      data = [
-        { id: 'r1', patientId: 'u1', doctorId: 'u3', status: 'active' }
-      ];
+      data = [{ id: 'r1', patientId: 'u1', doctorId: 'u3', status: 'active' }];
     } else if (colName === 'orders') {
-      data = [
-        { id: 'o1', userId: 'u1', total: 100, status: 'completed' }
-      ];
+      data = [{ id: 'o1', userId: 'u1', total: 100, status: 'completed' }];
     }
     return Promise.resolve({
-      docs: data.map(item => ({
+      docs: data.map((item) => ({
         id: item.id,
         data: () => {
           const { id, ...rest } = item;
           return rest;
-        }
-      }))
+        },
+      })),
     });
   };
 
@@ -54,7 +68,7 @@ vi.mock('firebase/firestore', () => {
 // Mock db and auth context
 vi.mock('../../../firebase', () => ({ db: {} }));
 vi.mock('../../../context/AuthContext', () => ({
-  useAuth: () => ({ user: { uid: 'test-admin' } })
+  useAuth: () => ({ user: { uid: 'test-admin' } }),
 }));
 
 describe('AdminUsersTab', () => {

@@ -26,7 +26,11 @@ vi.mock('../../../firebase', () => ({ db: {} }));
 describe('AdminProtocolsTab', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getPaginatedProtocols).mockResolvedValue({ protocols: [], lastDoc: null, hasMore: false });
+    vi.mocked(getPaginatedProtocols).mockResolvedValue({
+      protocols: [],
+      lastDoc: null,
+      hasMore: false,
+    });
   });
 
   test('renders loading state and then shows empty list message', async () => {
@@ -34,7 +38,9 @@ describe('AdminProtocolsTab', () => {
     // Loading indicator should appear first
     expect(screen.getByText(/Loading all protocols…/i)).toBeInTheDocument();
     // Wait for the async fetch to finish
-    await waitFor(() => expect(screen.queryByText(/Loading all protocols…/i)).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.queryByText(/Loading all protocols…/i)).not.toBeInTheDocument()
+    );
     // With no protocols we should see the placeholder message
     expect(screen.getByText(/No protocols saved yet./i)).toBeInTheDocument();
   });
@@ -58,7 +64,11 @@ describe('AdminProtocolsTab', () => {
       version_number: 1,
       phases: [],
     };
-    vi.mocked(getPaginatedProtocols).mockResolvedValue({ protocols: [mockProtocol], lastDoc: null, hasMore: false });
+    vi.mocked(getPaginatedProtocols).mockResolvedValue({
+      protocols: [mockProtocol],
+      lastDoc: null,
+      hasMore: false,
+    });
     render(<AdminProtocolsTab />);
     await waitFor(() => expect(screen.getByText('Test Protocol')).toBeInTheDocument());
 

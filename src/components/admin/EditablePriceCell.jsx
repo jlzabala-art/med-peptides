@@ -1,4 +1,3 @@
- 
 import React, { useState } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
@@ -36,15 +35,23 @@ export default function EditablePriceCell({ value, productId, fieldPath }) {
       type="number"
       value={temp}
       autoFocus
-      onChange={e => setTemp(e.target.value)}
+      onChange={(e) => setTemp(e.target.value)}
       onBlur={handleSave}
-      onKeyDown={e => {
+      onKeyDown={(e) => {
         if (e.key === 'Enter') handleSave();
-        if (e.key === 'Escape') { setTemp(value); setEditing(false); }
+        if (e.key === 'Escape') {
+          setTemp(value);
+          setEditing(false);
+        }
+      }}
       className="editable-price-input mono-data"
     />
   ) : (
-    <span onClick={() => setEditing(true)} className="editable-price-display mono-data" style={{ cursor: 'pointer' }}>
+    <span
+      onClick={() => setEditing(true)}
+      className="editable-price-display mono-data"
+      style={{ cursor: 'pointer' }}
+    >
       {value}
     </span>
   );

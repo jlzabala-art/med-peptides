@@ -11,6 +11,7 @@ export default function AppFilterBar({
   onSecondaryFilterChange,
   dateRange = null, // { start: 'YYYY-MM-DD', end: 'YYYY-MM-DD' }
   onDateRangeChange, // (dateRange) => void
+  secondaryActions
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
@@ -124,6 +125,12 @@ export default function AppFilterBar({
               {filter.label}
             </button>
           ))}
+        </div>
+      )}
+
+      {secondaryActions && (
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginLeft: 'auto' }}>
+          {secondaryActions}
         </div>
       )}
 
