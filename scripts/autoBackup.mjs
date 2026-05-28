@@ -27,14 +27,14 @@ try {
   
   const jsonArray = '[' + logOut.split('\n').filter(l => l.trim()).join(',') + ']';
   
-  // 4. Save to src/data/backups.json
-  const dataDir = path.join(rootDir, 'src', 'data');
+  // 4. Save to public/backups.json
+  const dataDir = path.join(rootDir, 'public');
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
   }
   fs.writeFileSync(path.join(dataDir, 'backups.json'), jsonArray);
   
-  console.log('Backup registry updated at src/data/backups.json');
+  console.log('Backup registry updated at public/backups.json');
 
 } catch (err) {
   console.error('Backup process failed:', err.message);
