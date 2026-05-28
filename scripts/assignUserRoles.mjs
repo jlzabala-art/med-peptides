@@ -19,21 +19,7 @@
  *   guest (no login) → retailPrice   (highest price)
  */
 
-import { readFileSync } from 'fs';
-import { initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-
-// ── Firebase Admin Init ────────────────────────────────────────────────────────
-const serviceAccount = JSON.parse(
-  readFileSync(new URL('../serviceAccountKey.json', import.meta.url))
-);
-
-initializeApp({
-  credential: cert(serviceAccount),
-  projectId: 'med-peptides-app',
-});
-
-const db = getFirestore();
+import { db } from './lib/firebase-admin.mjs';
 
 // ── Role Definitions ──────────────────────────────────────────────────────────
 // Add entries below to assign or update roles.
@@ -111,7 +97,7 @@ async function main() {
   }
 
   await batch.commit();
-  console.log(`\n🎉 Successfully wrote ${count} role assignment(s) to Firestore (med-peptides-app).\n`);
+  console.log(`\n🎉 Successfully wrote ${count} role assignment(s) to Firestore (Med-Peptides-app).\n`);
 }
 
 main().catch((err) => {

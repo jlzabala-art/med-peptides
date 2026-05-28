@@ -1,7 +1,14 @@
+ 
 import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { TenantProvider } from './context/TenantContext';
+import { ShopProvider } from './context/ShopProvider';
+import { ModalProvider } from './context/ModalProvider';
+import { CartProvider } from './context/CartProvider';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 import App from './App.jsx';
 import { trackEvent } from './hooks/useAnalytics';
@@ -70,7 +77,7 @@ class ErrorBoundary extends React.Component {
         <div style={{
           padding: '2rem',
           textAlign: 'center',
-          backgroundColor: '#f8fafc',
+          backgroundColor: 'var(--color-bg-app)',
           minHeight: '100dvh',
           display: 'flex',
           flexDirection: 'column',
@@ -81,7 +88,7 @@ class ErrorBoundary extends React.Component {
           <h1 style={{ color: '#0f172a', fontSize: '1.5rem', marginBottom: '1rem' }}>
             {this.state.isChunkError ? 'Updating Application…' : 'System Refresh Required'}
           </h1>
-          <p style={{ color: '#64748b', marginBottom: '2rem', maxWidth: '400px' }}>
+          <p style={{ color: 'var(--color-text-secondary)', marginBottom: '2rem', maxWidth: '400px' }}>
             {this.state.isChunkError
               ? 'A new version was detected. Reloading automatically…'
               : 'The clinical interface encountered a rendering synchronization issue.'}
@@ -93,7 +100,7 @@ class ErrorBoundary extends React.Component {
             }}
             style={{
               padding: '0.75rem 1.5rem',
-              backgroundColor: '#00A3E0',
+              backgroundColor: 'var(--color-primary)',
               color: 'white',
               border: 'none',
               borderRadius: '12px',
@@ -112,18 +119,41 @@ class ErrorBoundary extends React.Component {
 
 const rootElement = document.getElementById('root');
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 15, // 15 minutes
+      cacheTime: 1000 * 60 * 30, // 30 minutes
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
 if (rootElement) {
   const root = createRoot(rootElement);
 
   root.render(
     <StrictMode>
       <ErrorBoundary>
-        <BrowserRouter>
-          {/* Es mejor envolver el AuthProvider aquí para que App tenga acceso a todo */}
-          <AuthProvider>
-            <App />
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            {/* Es mejor envolver el AuthProvider aquí para que App tenga acceso a todo */}
+            <AuthProvider>
+            <TenantProvider>
+            <ShopProvider>
+              <ModalProvider>
+                <CartProvider>
+                  <HelmetProvider>
+                    <App />
+                  </HelmetProvider>
+                </CartProvider>
+              </ModalProvider>
+            </ShopProvider>
+            </TenantProvider>
           </AuthProvider>
-        </BrowserRouter>
+          </BrowserRouter>
+        </QueryClientProvider>
       </ErrorBoundary>
     </StrictMode>
   );

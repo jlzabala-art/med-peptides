@@ -1,140 +1,186 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { FlaskConical, ArrowRight, Star, Sparkles } from 'lucide-react';
+/* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { FlaskConical, ArrowRight, Star, Sparkles, Brain, Activity, Flame, Shield, Zap, Beaker, Layers, ChevronDown, Moon, Droplets, ShieldCheck, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { getActiveProducts } from '../repositories/productRepository';
 import priorityMap from '../config/peptide_priority_map.json';
+import {
+  trackPeptideView,
+  trackPeptideSearch,
+  trackPeptideLoadMore,
+  trackPeptideFilterChange,
+  trackKeyPeptideMostUsedView,
+  trackKeyPeptideMostUsedClick,
+  trackKeyPeptideCategoryFilter,
+  trackKeyPeptideCardClick,
+} from '../utils/analytics';
+import '../styles/key_peptides.css';
 
-/* ─── Category → accent color ───────────────────────────────────────────── */
+/* ─── Category → accent color (kept for card accent bar & tags) ─────────── */
 const CATEGORY_COLOR = {
-  'Weight Management & Metabolic': '#10B981',
-  'Healing & Recovery':            '#00A3E0',
-  'Anti-Aging & Longevity':        '#A78BFA',
-  'Cognitive & Neuro-Protection':  '#22D3EE',
-  'Muscle Growth & Performance':   '#F59E0B',
-  'Hormonal Support':              '#F97316',
-  'Research Supplies':             '#EC4899',
-  'Other Research Peptides':       '#06B6D4',
+  'Recovery & Repair':       '#f43f5e',
+  'Metabolic & Weight':      '#8b5cf6',
+  'Longevity & Anti-Aging':  'var(--color-success)',
+  'Cognitive & Mood':        '#0ea5e9',
+  'Sleep & Circadian':       '#818cf8',
+  'Hormonal Optimization':   '#f59e0b',
+  'Immune Support':          '#14b8a6',
+  'Research Supplies':       '#DB2777',
+  'Other Research Peptides': '#0096CC',
 };
-const DEFAULT_COLOR = '#00A3E0';
+
+const FILTER_ICONS = {
+  'Recovery & Repair':       <Activity size={14} />,
+  'Metabolic & Weight':      <Zap size={14} />,
+  'Longevity & Anti-Aging':  <Sparkles size={14} />,
+  'Cognitive & Mood':        <Brain size={14} />,
+  'Sleep & Circadian':       <Moon size={14} />,
+  'Hormonal Optimization':   <Droplets size={14} />,
+  'Immune Support':          <ShieldCheck size={14} />,
+  'Research Supplies':       <Beaker size={14} />,
+  'Other Research Peptides': <FlaskConical size={14} />,
+  'All':                     <Layers size={14} />,
+  'New':                     <Sparkles size={14} />
+};
+const DEFAULT_COLOR = '#0096CC';
+
+/* ALL_CATEGORIES removed — categories are now derived dynamically from Firestore */
+
+/* ─── Dynamic usage ranking ────────────────────────────────────────────── */
+function rankByUsage(list) {
+  return [...list].sort((a, b) => {
+    const score = (p) =>
+      (p.analytics_usage_score ?? 0) * 1e9 +
+      (p.usage_score            ?? 0) * 1e6 +
+      (p.view_count             ?? 0) * 1e3 +
+      (p.search_count           ?? 0);
+    const diff = score(b) - score(a);
+    return diff !== 0 ? diff : a.name.localeCompare(b.name);
+  });
+}
 
 /* ─── Map Firestore product doc → PeptideCard shape ────────────────────── */
 function normalizeProduct(doc) {
   const cat   = doc.category || 'Other Research Peptides';
   const color = CATEGORY_COLOR[cat] ?? DEFAULT_COLOR;
 
-  // Build tags: prefer explicit tags array, fall back to category label
   const rawTags = Array.isArray(doc.tags) && doc.tags.length ? doc.tags : [];
   const tags    = rawTags.length ? rawTags : [cat.split('&')[0].trim()];
 
   return {
+    id:          doc.id,
     name:        doc.displayName || doc.name || doc.id,
     slug:        doc.slug        || doc.id,
     role:        doc.shortDescription || doc.subtitle || cat,
     description: doc.description || doc.shortDescription || '',
-    dosage:      doc.dosage || doc.dose || doc.dosageRange
-                 || doc.strength
-                 || (Array.isArray(doc.variants) && doc.variants.length
-                       ? (doc.variants[0].strength || doc.variants[0].dosage || null)
-                       : null)
-                 || null,
+    dosage:      (() => {
+                   const rawDosage = doc.dosage || doc.dose || doc.dosageRange || doc.strength
+                     || (Array.isArray(doc.variants) && doc.variants.length
+                           ? (doc.variants[0].strength || doc.variants[0].dosage || null)
+                           : null);
+                   return typeof rawDosage === 'object' && rawDosage !== null
+                     ? `${rawDosage.min ?? ''}${rawDosage.max ? `–${rawDosage.max}` : ''} ${rawDosage.unit ?? ''} ${rawDosage.frequency ? `(${rawDosage.frequency.replace(/_/g, ' ')})` : ''}`.trim()
+                     : rawDosage;
+                 })(),
     tags,
     color,
     isNew:       doc.isNew     ?? false,
     isPopular:   doc.isPopular ?? false,
     category:    cat,
+    category_main: doc.category_main || cat,
+    /* usage-ranking fields (default 0 when absent) */
+    analytics_usage_score: doc.analytics_usage_score ?? 0,
+    usage_score:           doc.usage_score           ?? 0,
+    view_count:            doc.view_count            ?? 0,
+    search_count:          doc.search_count          ?? 0,
   };
 }
 
 /* ─── Badge helper ──────────────────────────────────────────────────────── */
 function getPeptideBadge(peptide) {
-  if (peptide.isPopular) return { label: 'Popular', icon: <Star size={10} />, bg: '#F59E0B20', color: '#F59E0B', border: '#F59E0B40' };
-  if (peptide.isNew)     return { label: 'New',     icon: <Sparkles size={10} />, bg: '#A78BFA20', color: '#A78BFA', border: '#A78BFA40' };
+  if (peptide.isPopular) return {
+    label: 'Popular',
+    icon:  <Star size={10} />,
+    bg:    'rgba(217, 119, 6, 0.10)',
+    color: '#D97706',
+    border:'rgba(217, 119, 6, 0.25)',
+  };
+  if (peptide.isNew) return {
+    label: 'New',
+    icon:  <Sparkles size={10} />,
+    bg:    'rgba(124, 58, 237, 0.10)',
+    color: '#7C3AED',
+    border:'rgba(124, 58, 237, 0.25)',
+  };
   return null;
 }
 
 /* ─── Filter match ──────────────────────────────────────────────────────── */
 function peptideMatchesFilter(peptide, filter) {
+  if (!filter) return false;
   if (filter === 'All') return true;
   if (filter === 'New') return peptide.isNew;
-  const haystack = [peptide.name, peptide.role, peptide.description, peptide.category, ...peptide.tags]
-    .join(' ').toLowerCase();
-  return haystack.includes(filter.toLowerCase());
+  const catField = (peptide.category_main || peptide.category || 'Other').split('&')[0].trim();
+  return catField.toLowerCase() === filter.toLowerCase();
 }
 
 /* ─── Skeleton card shown while loading ─────────────────────────────────── */
 function SkeletonCard() {
   return (
-    <div style={{
-      background: 'rgba(255,255,255,0.04)', border: '1.5px solid rgba(255,255,255,0.08)',
-      borderRadius: '14px', padding: '1.35rem', minHeight: '220px',
-      display: 'flex', flexDirection: 'column', gap: '0.75rem',
-    }}>
-      {[36, 18, 12, 10].map((h, i) => (
-        <div key={i} style={{
-          height: `${h}px`, width: i === 0 ? '60%' : i === 1 ? '80%' : i === 2 ? '90%' : '40%',
-          borderRadius: '6px', background: 'rgba(255,255,255,0.07)',
-          animation: 'pulse 1.6s ease-in-out infinite',
-        }} />
+    <div className="kp-skeleton-card">
+      {[{ w: '60%', h: 36 }, { w: '80%', h: 18 }, { w: '90%', h: 12 }, { w: '40%', h: 10 }].map(({ w, h }, i) => (
+        <div
+          key={i}
+          className="kp-skeleton-line"
+          style={{ height: `${h}px`, width: w }}
+        />
       ))}
     </div>
   );
 }
 
 /* ─── Peptide Card ──────────────────────────────────────────────────────── */
-function PeptideCard({ peptide, onClick, highlighted }) {
-  const [hovered, setHovered] = useState(false);
+function PeptideCard({ peptide, onClick, onViewCategory, highlighted }) {
   const badge = getPeptideBadge(peptide);
 
   return (
-    <div
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: hovered ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.04)',
-        border: `1.5px solid ${
-          highlighted ? `${peptide.color}70`
-          : hovered   ? `${peptide.color}55`
-                      : 'rgba(255,255,255,0.10)'
-        }`,
-        borderRadius: '14px',
-        padding: '1.35rem',
-        cursor: 'pointer',
-        transition: 'all 0.22s ease',
-        transform: hovered ? 'translateY(-3px)' : 'translateY(0)',
-        boxShadow: hovered
-          ? `0 10px 30px rgba(0,0,0,0.35)`
-          : highlighted
-          ? `0 0 0 2px ${peptide.color}35`
-          : '0 2px 8px rgba(0,0,0,0.15)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.75rem',
-        minHeight: '220px',
+    <motion.div
+      className={`kp-card${highlighted ? ' kp-card--highlighted' : ''}`}
+      style={{ '--kp-accent': peptide.color }}
+      onClick={() => {
+        trackPeptideView(peptide.name, peptide.slug, peptide.category);
+        onClick();
       }}
+      whileHover={{ y: -8, transition: { duration: 0.3, ease: 'easeOut' } }}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && onClick()}
     >
-      {/* Name + Role + Badge */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
-        <div style={{
-          width: '36px', height: '36px', borderRadius: '10px', flexShrink: 0,
-          background: `${peptide.color}18`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <FlaskConical size={18} color={peptide.color} strokeWidth={1.8} />
+      {/* Name + Icon + Badge row */}
+      <div className="kp-card-top">
+        <div
+          className="kp-card-icon"
+          style={{
+            background: `${peptide.color}12`,
+            border:     `1px solid ${peptide.color}25`,
+          }}
+        >
+          <FlaskConical size={20} color={peptide.color} strokeWidth={2} />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 800, fontSize: '1rem', color: '#fff', letterSpacing: '-0.01em' }}>
-              {peptide.name}
-            </span>
+
+        <div className="kp-card-name-stack">
+          <div className="kp-card-name-row">
+            <span className="kp-card-name">{peptide.name}</span>
             {badge && (
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: '0.22rem',
-                fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.06em',
-                textTransform: 'uppercase', color: badge.color,
-                background: badge.bg, border: `1px solid ${badge.border}`,
-                borderRadius: '999px', padding: '0.15rem 0.45rem',
-              }}>
+              <span
+                className="kp-inline-badge"
+                style={{
+                  background:  badge.bg,
+                  color:       badge.color,
+                  borderColor: badge.border,
+                }}
+              >
                 {badge.icon} {badge.label}
               </span>
             )}
@@ -142,53 +188,77 @@ function PeptideCard({ peptide, onClick, highlighted }) {
         </div>
       </div>
 
-      {/* 1-line clinical role */}
-      <p style={{
-        margin: 0, fontSize: '0.79rem',
-        color: 'rgba(255,255,255,0.50)', lineHeight: 1.4,
-        fontStyle: 'italic',
-      }}>
-        {peptide.role}
-      </p>
+      {/* Clinical role */}
+      <p className="kp-card-role">{peptide.role}</p>
 
-      {/* Dosage badge */}
-      {peptide.dosage && (
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-          background: 'rgba(0,163,224,0.08)', border: '1px solid rgba(0,163,224,0.25)',
-          borderRadius: '6px', padding: '0.28rem 0.65rem',
-          fontSize: '0.70rem', fontWeight: 700, letterSpacing: '0.04em',
-          color: 'rgba(0,163,224,0.90)', fontFamily: 'monospace',
-          alignSelf: 'flex-start',
-        }}>
-          <span style={{ color: 'rgba(255,255,255,0.35)', fontFamily: 'inherit', fontWeight: 600 }}>DOSAGE</span>
-          {peptide.dosage}
-        </div>
-      )}
+      {/* Dosage */}
+      {(() => {
+        const raw = (peptide.allDosages && peptide.allDosages.length > 0)
+          ? peptide.allDosages
+          : peptide.dosage ? [peptide.dosage] : [];
+        if (raw.length === 0) return null;
 
-      {/* Clinical tags */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-        {peptide.tags.map(tag => (
-          <span key={tag} style={{
-            fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.06em',
-            textTransform: 'uppercase', color: peptide.color,
-            background: `${peptide.color}14`, border: `1px solid ${peptide.color}28`,
-            borderRadius: '999px', padding: '0.18rem 0.55rem',
-          }}>
+        const parsed = raw.map(d => {
+          const m = String(d).match(/^([\d.]+)\s*([a-zA-Z/]+)/);
+          return m ? { val: parseFloat(m[1]), unit: m[2].toLowerCase() } : null;
+        }).filter(Boolean);
+
+        let label;
+        if (parsed.length === 0) {
+          label = raw.length === 1 ? raw[0] : `${raw[0]}–${raw[raw.length - 1]}`;
+        } else if (parsed.length === 1) {
+          label = `${parsed[0].val}${parsed[0].unit}`;
+        } else {
+          const nums = parsed.map(p => p.val);
+          const unit = parsed[0].unit;
+          const min  = Math.min(...nums);
+          const max  = Math.max(...nums);
+          label = `${min}–${max}${unit}/vial`;
+        }
+
+        return (
+          <div className="kp-dosage-info">
+            <span className="kp-dosage-info-label">Potency:</span>
+            <span className="kp-dosage-info-value">{label}</span>
+          </div>
+        );
+      })()}
+
+      {/* Tags */}
+      <div className="kp-card-tags">
+        {peptide.tags.slice(0, 2).map((tag) => (
+          <span
+            key={tag}
+            className="kp-tag"
+            style={{
+              color:           peptide.color,
+              background:      `${peptide.color}10`,
+              borderColor:     `${peptide.color}20`,
+            }}
+          >
             {tag}
           </span>
         ))}
       </div>
 
-      {/* CTA */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: 'auto',
-        color: hovered ? peptide.color : 'rgba(255,255,255,0.28)',
-        fontSize: '0.76rem', fontWeight: 600, transition: 'color 0.2s',
-      }}>
-        View Peptide <ArrowRight size={12} strokeWidth={2.5} />
+      {/* CTA row */}
+      <div className="kp-card-cta-row">
+        <div className="kp-card-cta">
+          Details <ArrowRight size={14} strokeWidth={2.5} />
+        </div>
+        {onViewCategory && (
+          <button
+            className="kp-card-cta-secondary"
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewCategory(peptide.category);
+            }}
+          >
+            Collection <Layers size={14} strokeWidth={2} />
+          </button>
+        )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -196,199 +266,603 @@ function PeptideCard({ peptide, onClick, highlighted }) {
 export default function KeyPeptides({ onSelectProduct, searchQuery = '' }) {
   const navigate = useNavigate();
 
-  // ── Firestore fetch ──────────────────────────────────────────────────────
-  const [peptides, setPeptides]   = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [activeFilter, setFilter] = useState('Anti-Aging');
-  const [visibleCount, setVisibleCount] = useState(6);
+  /* Firestore fetch */
+  const [peptides, setPeptides]         = useState([]);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState(null);
+  const [activeFilter, setFilter]       = useState(null); // closed by default on mobile/catalog
+  const [currentPage, setPage]          = useState(0);
+  const [retryKey, setRetryKey]         = useState(0);
+  const [isMobile, setIsMobile]         = useState(window.innerWidth < 768);
+  const [gridVisible, setGridVisible]   = useState(true);
+  const sectionRef                       = useRef(null);
+  const gridRef                          = useRef(null);
+  const accordionRefs                    = useRef({});
+  // Ref mirror of `loading` — avoids stale closure inside setTimeout callbacks
+  const loadingRef                       = useRef(true);
+
+  /* Scroll to grid with 80px header offset */
+  const scrollToGrid = useCallback(() => {
+    if (!gridRef.current) return;
+    const top = gridRef.current.getBoundingClientRect().top + window.scrollY - 80;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }, []);
+
+  /* Track window resize for mobile layout */
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    loadingRef.current = true;
+    setError(null);
+
+    // Timeout safety: if Firestore hangs for > 20s, show error.
+    // Uses loadingRef (not `loading` state) to avoid stale closure.
+    const timeoutId = setTimeout(() => {
+      if (!cancelled && loadingRef.current) {
+        console.warn('[KeyPeptides] Fetch timeout reached');
+        setError('Loading is taking longer than expected. Please check your connection.');
+        setLoading(false);
+        loadingRef.current = false;
+      }
+    }, 20000);
+
     getActiveProducts()
       .then((docs) => {
         if (cancelled) return;
-        // Deduplicate by normalised name (same peptide, different dosage docs)
-        const seen = new Set();
-        const unique = [];
+        clearTimeout(timeoutId);
+
+        if (!docs || docs.length === 0) {
+          console.warn('[KeyPeptides] No products found in catalog');
+          setPeptides([]);
+          setLoading(false);
+          return;
+        }
+
+        /* Deduplicate by normalised name */
+        const groups = {};
         for (const doc of docs) {
           if (doc.category === 'Research Supplies') continue;
-          const key = (doc.displayName || doc.name || doc.id).trim().toLowerCase();
-          if (!seen.has(key)) { seen.add(key); unique.push(normalizeProduct(doc)); }
+          const name = doc.displayName || doc.name || doc.id || '';
+          const key  = name.trim().toLowerCase() || doc.id || `_unknown_${Math.random()}`;
+
+          if (!groups[key]) {
+            groups[key] = { ...normalizeProduct(doc), allDosages: [] };
+          }
+
+          const d = doc.dosage || doc.dose || doc.strength;
+          if (d && !groups[key].allDosages.includes(d)) {
+            groups[key].allDosages.push(d);
+          }
         }
-        // Sort: Priority from map first, then popular, then alphabetical
+
+        const unique = Object.values(groups);
+
+        /* Sort: Popular (Most Used) → priority map → alphabetical */
         const flatPriorityList = Array.from(new Set(Object.values(priorityMap).flat()));
         const getPriority = (name) => {
-          const lowerName = name.toLowerCase();
+          const lower = name.toLowerCase();
           for (let i = 0; i < flatPriorityList.length; i++) {
-            if (lowerName.includes(flatPriorityList[i].toLowerCase())) {
-              return i;
-            }
+            if (lower.includes(flatPriorityList[i].toLowerCase())) return i;
           }
           return Infinity;
         };
 
         unique.sort((a, b) => {
+          if (a.isPopular && !b.isPopular) return -1;
+          if (!a.isPopular && b.isPopular) return 1;
           const prioA = getPriority(a.name);
           const prioB = getPriority(b.name);
-
           if (prioA !== prioB) return prioA - prioB;
-          if (a.isPopular !== b.isPopular) return a.isPopular ? -1 : 1;
           return a.name.localeCompare(b.name);
         });
-        setPeptides(unique);
-      })
-      .catch((err) => console.error('[KeyPeptides] fetch error:', err))
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, []);
 
-  // ── Dynamic filter chips derived from loaded categories ───────────────────
+        setPeptides(unique);
+
+        // Auto-select first category if none active and not searching
+        if (!activeFilter && !searchQuery && unique.length > 0) {
+          const firstCat = (unique[0].category_main || unique[0].category || 'Other').split('&')[0].trim();
+          if (firstCat) setFilter(firstCat);
+        }
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        clearTimeout(timeoutId);
+        console.error('[KeyPeptides] fetch error:', err);
+        setError('Could not load peptides. Please try again later.');
+      })
+      .finally(() => { 
+        if (!cancelled) {
+          clearTimeout(timeoutId);
+          setLoading(false);
+          loadingRef.current = false;
+        }
+      });
+
+    return () => { 
+      cancelled = true;
+      loadingRef.current = false;
+      clearTimeout(timeoutId);
+    };
+  }, [retryKey, searchQuery]); // Added searchQuery to dependencies to ensure sync if needed
+
+  /* Dynamic filter chips derived from live peptides list */
   const filterChips = useMemo(() => {
-    const cats = new Set(peptides.map(p => p.category.split('&')[0].trim()));
-    return [...Array.from(cats).sort(), 'New'];
+    if (peptides.length === 0) return [];
+    const seen = new Set();
+    const cats = [];
+    for (const p of peptides) {
+      const cat = (p.category_main || p.category || 'Other').split('&')[0].trim();
+      if (!seen.has(cat)) { seen.add(cat); cats.push(cat); }
+    }
+    cats.sort();
+    return cats; // 'All' removed — not useful
   }, [peptides]);
 
-  // Reset to 6 when filter or search changes
-  useEffect(() => { setVisibleCount(6); }, [activeFilter, searchQuery]);
+  /* Reset page when filter/search changes */
+  useEffect(() => { setPage(0); }, [activeFilter, searchQuery]);
 
-  // ── Filtered + search list ────────────────────────────────────────────────
-  const visible = useMemo(() => {
+  /* ── Analytics: track search (debounced 600 ms) ─────────── */
+  useEffect(() => {
+    if (!searchQuery) return;
+    const timer = setTimeout(() => trackPeptideSearch(searchQuery), 600);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  /* ── Analytics: Most Used view — fires once after load ───── */
+  useEffect(() => {
+    if (!loading && mostUsed.length > 0) {
+      trackKeyPeptideMostUsedView(mostUsed.length);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
+
+  /* Most Used Peptides — fully dynamic ranking */
+  const mostUsed = useMemo(() => {
+    if (peptides.length === 0) return [];
+    return rankByUsage(peptides).slice(0, 4);
+  }, [peptides]);
+
+  /* Slugs of the top-4 most-used — excluded from the category grid */
+  const mostUsedSlugs = useMemo(() => new Set(mostUsed.map(p => p.slug)), [mostUsed]);
+
+  /* Category results grid — excludes top-4, applies filter/search */
+  const categoryVisible = useMemo(() => {
+    let filtered = [];
     if (searchQuery) {
       const needle = searchQuery.toLowerCase();
-      return peptides.filter(p =>
-        [p.name, p.role, p.description, p.category, ...p.tags].join(' ').toLowerCase().includes(needle)
+      filtered = peptides.filter((p) =>
+        [p.name, p.role, p.description, p.category, ...(Array.isArray(p.tags) ? p.tags : [])]
+          .map(s => s ?? '').join(' ').toLowerCase().includes(needle)
       );
+    } else {
+      filtered = peptides
+        .filter((p) => !mostUsedSlugs.has(p.slug))
+        .filter((p) => peptideMatchesFilter(p, activeFilter));
     }
-    return peptides.filter(p => peptideMatchesFilter(p, activeFilter));
-  }, [peptides, activeFilter, searchQuery]);
+    return filtered;
+  }, [peptides, mostUsedSlugs, activeFilter, searchQuery]);
 
-  const visibleSlice = visible.slice(0, visibleCount);
-  const matchedSlugs = searchQuery ? new Set(visible.map(p => p.slug)) : null;
+  /* Max 6 items per category page, 4 for search/all */
+  const PAGE_SIZE = searchQuery ? 4 : 6;
+  const hasMultiplePages = categoryVisible.length > PAGE_SIZE;
+  const categorySlice = categoryVisible.slice(0, (currentPage + 1) * PAGE_SIZE);
+
+  /* Remaining count for dynamic Load More label */
+  const remaining = Math.max(0, categoryVisible.length - categorySlice.length);
+  const loadMoreLabel = remaining === 1
+    ? 'Load 1 More Peptide'
+    : `Load ${remaining} More Peptides`;
+  const matchedSlugs = searchQuery ? new Set(categoryVisible.map((p) => p.slug)) : null;
+
+  const handleNext = () => {
+    if (remaining > 0) {
+      const nextPage = currentPage + 1;
+      setPage(nextPage);
+      scrollToGrid();
+      trackPeptideLoadMore(nextPage, activeFilter, isMobile ? 'mobile_accordion' : 'desktop');
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentPage > 0) {
+      setPage(currentPage - 1);
+      scrollToGrid();
+    }
+  };
+
+  const getCategoryCount = (category) => {
+    if (category === 'All') return peptides.length;
+    if (category === 'New') return peptides.filter(p => p.isNew).length;
+    return peptides.filter(p => {
+      const cat = (p.category_main || p.category || 'Other').split('&')[0].trim();
+      return cat.toLowerCase() === category.toLowerCase();
+    }).length;
+  };
+
+  const handleFilterClick = (f) => {
+    const prev = activeFilter;
+    if (isMobile) {
+      const isOpening = prev !== f;
+      setFilter(isOpening ? f : null);
+      if (isOpening) {
+        trackPeptideFilterChange(f);
+        trackKeyPeptideCategoryFilter(f, prev);
+        setPage(0);
+        // Phase C3 — scroll to start (sticky header offset via CSS scroll-margin-top)
+        setTimeout(() => {
+          const el = accordionRefs.current[f];
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 150);
+      }
+    } else {
+      /* Desktop Fade Logic */
+      setGridVisible(false);
+      setTimeout(() => {
+        setFilter(f);
+        trackPeptideFilterChange(f);
+        trackKeyPeptideCategoryFilter(f, prev);
+        setPage(0);
+        setGridVisible(true);
+        scrollToGrid();
+      }, 175);
+    }
+  };
 
   return (
-    <section style={{ padding: 'clamp(3rem, 6vw, 5rem) 1.25rem', background: '#080E1B' }}>
-      {/* Pulse animation for skeletons */}
-      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}`}</style>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+    <div className="kp-section" ref={sectionRef}>
+      <div className="kp-container">
 
-        {/* Header */}
-        <div style={{
-          display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
-          flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem',
-        }}>
-          <div>
-            <p style={{
-              fontSize: '0.72rem', fontWeight: 700, color: '#00A3E0',
-              letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 0.45rem',
-            }}>
-              Peptide Catalog
+        {/* ── Header ── */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="kp-header"
+        >
+          <span className="kp-eyebrow">Peptide Catalog</span>
+          <h2 className="kp-title">Key Peptides Available</h2>
+          <p className="kp-subtitle">
+            Core research peptides currently available in the catalog.
+          </p>
+        </motion.div>
+
+        {/* ── Search Results or Category Content ── */}
+        {loading ? (
+          <div className="kp-grid">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="skeleton" style={{ height: '320px', borderRadius: '16px' }} />
+            ))}
+          </div>
+        ) : searchQuery ? (
+          <div className="kp-grid">
+            {categorySlice.map((p, idx) => (
+              <motion.div
+                key={p.slug}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.05 }}
+              >
+                <PeptideCard
+                  peptide={p}
+                  onClick={() => {
+                    trackKeyPeptideCardClick(p.name, p.slug, p.category, 'filtered');
+                    onSelectProduct ? onSelectProduct(p) : navigate(`/product/${p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug}`);
+                  }}
+                  onViewCategory={(cat) => navigate(`/collection/peptides?category=${encodeURIComponent(cat)}`)}
+                  highlighted={matchedSlugs ? matchedSlugs.has(p.slug) : false}
+                />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          /* Normal View (Not Searching) */
+          <>
+            {isMobile ? (
+              /* ── Mobile Accordion Layout ── */
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+              >
+                {!loading && (
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
+                    <button
+                      className="kp-cta-pill"
+                      onClick={() => navigate('/collection/peptides')}
+                      aria-label={`View all ${peptides.length} peptides in the collection`}
+                    >
+                      <span className="kp-cta-pill-count">
+                        <FlaskConical size={13} strokeWidth={2} />
+                        {peptides.length} peptides
+                      </span>
+                      <span className="kp-cta-pill-action">
+                        View Full Catalog <ArrowRight size={13} strokeWidth={2.5} />
+                      </span>
+                    </button>
+                  </div>
+                )}
+                <div className="kp-accordion-list">
+                  {!loading && mostUsed.length > 0 && (
+                    <div 
+                      ref={el => accordionRefs.current['Most Used'] = el}
+                      className={`kp-accordion-item${activeFilter === 'Most Used' ? ' kp-accordion-item--expanded' : ''}`}
+                    >
+                      <button className="kp-accordion-header" onClick={() => handleFilterClick('Most Used')}>
+                        <div className="kp-accordion-title">
+                          <Star size={16} color="#D97706" fill="#D9770622" />
+                          Most Used Peptides
+                          <span className="kp-accordion-count">({mostUsed.length})</span>
+                        </div>
+                        <ChevronDown size={18} className="kp-accordion-chevron" />
+                      </button>
+                      {activeFilter === 'Most Used' && (
+                        <div className="kp-accordion-content">
+                          <div className="kp-grid">
+                            {mostUsed.map((p, idx) => (
+                              <PeptideCard
+                                key={`featured-mob-${p.slug}`}
+                                peptide={p}
+                                onClick={() => {
+                                  trackKeyPeptideMostUsedClick(p.name, p.slug, idx);
+                                  onSelectProduct ? onSelectProduct(p) : navigate(`/product/${p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug}`);
+                                }}
+                                onViewCategory={(cat) => navigate(`/collection/peptides?category=${encodeURIComponent(cat)}`)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 2. Category Accordions */}
+                  {!loading && filterChips.map((f) => {
+                    const count = getCategoryCount(f);
+                    if (count === 0) return null;
+                    return (
+                      <div 
+                        key={f} 
+                        ref={el => accordionRefs.current[f] = el}
+                        className={`kp-accordion-item${activeFilter === f ? ' kp-accordion-item--expanded' : ''}`}
+                      >
+                        <button className="kp-accordion-header" onClick={() => handleFilterClick(f)}>
+                          <div className="kp-accordion-title">
+                            {FILTER_ICONS[f] || <FlaskConical size={16} />}
+                            {f}
+                            <span className="kp-accordion-count">({count})</span>
+                          </div>
+                          <ChevronDown size={18} className="kp-accordion-chevron" />
+                        </button>
+                        {activeFilter === f && (
+                          <div className="kp-accordion-content">
+                            <div className="kp-grid">
+                              {categorySlice.map((p) => (
+                                <PeptideCard
+                                  key={p.slug}
+                                  peptide={p}
+                                  onClick={() => {
+                                    trackKeyPeptideCardClick(p.name, p.slug, p.category, 'filtered');
+                                    onSelectProduct ? onSelectProduct(p) : navigate(`/product/${p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug}`);
+                                  }}
+                                  onViewCategory={(cat) => navigate(`/collection/peptides?category=${encodeURIComponent(cat)}`)}
+                                />
+                              ))}
+                            </div>
+                            {remaining > 0 && (
+                              <div className="kp-accordion-pagination">
+                                <p className="progress-indicator">
+                                  Showing {categorySlice.length} of {categoryVisible.length} peptides
+                                </p>
+                                <button className="kp-load-btn" onClick={handleNext}>{loadMoreLabel}</button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            ) : (
+              /* ── Desktop Grid Layout ── */
+              <>
+                {/* Most Used Peptides */}
+                {!loading && mostUsed.length > 0 && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="kp-featured-section"
+                  >
+                    <h3 className="kp-featured-title">Most Used Peptides</h3>
+                    <div className="kp-grid">
+                      {mostUsed.map((p, idx) => (
+                        <motion.div
+                          key={`featured-${p.slug}`}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          whileInView={{ opacity: 1, scale: 1 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: idx * 0.1 }}
+                        >
+                          <PeptideCard
+                            peptide={p}
+                            onClick={() => {
+                              trackKeyPeptideMostUsedClick(p.name, p.slug, idx);
+                              onSelectProduct ? onSelectProduct(p) : navigate(`/product/${p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug}`);
+                            }}
+                            onViewCategory={(cat) => navigate(`/collection/peptides?category=${encodeURIComponent(cat)}`)}
+                          />
+                        </motion.div>
+                      ))}
+                    </div>
+                    <div className="kp-featured-divider" />
+                  </motion.div>
+                )}
+
+                {/* Category Filters */}
+                {!loading && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    className="kp-filters"
+                  >
+                    <div className="flex flex-wrap gap-3 items-center w-full">
+                      {filterChips.map((f) => (
+                        <button
+                          key={f}
+                          className={`kp-chip${activeFilter === f ? ' kp-chip--active' : ''}`}
+                          onClick={() => handleFilterClick(f)}
+                        >
+                          {FILTER_ICONS[f] || <FlaskConical size={14} />}
+                          {f} ({getCategoryCount(f)})
+                        </button>
+                      ))}
+                      {/* Catalog CTA for Desktop filters row */}
+                      <button
+                        className="kp-cta-pill ml-auto"
+                        onClick={() => navigate('/collection/peptides')}
+                      >
+                        <span className="kp-cta-pill-count">
+                          {peptides.length} peptides
+                        </span>
+                        <span className="kp-cta-pill-action">
+                          Full Catalog <ArrowRight size={13} strokeWidth={2.5} />
+                        </span>
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+                <div
+                  ref={gridRef}
+                  className="kp-grid"
+                  style={{
+                    opacity: gridVisible ? 1 : 0,
+                    transition: 'opacity 175ms ease',
+                  }}
+                >
+                  {loading
+                    ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+                    : categorySlice.map((p, idx) => (
+                        <motion.div
+                          key={p.slug}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: idx * 0.05 }}
+                        >
+                          <PeptideCard
+                            peptide={p}
+                            onClick={() => {
+                              trackKeyPeptideCardClick(p.name, p.slug, p.category, 'filtered');
+                              onSelectProduct ? onSelectProduct(p) : navigate(`/product/${p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug}`);
+                            }}
+                            onViewCategory={(cat) => navigate(`/collection/peptides?category=${encodeURIComponent(cat)}`)}
+                            highlighted={matchedSlugs ? matchedSlugs.has(p.slug) : false}
+                          />
+                        </motion.div>
+                      ))
+                  }
+                </div>
+
+                {/* Explore full category catalog CTA */}
+                {!loading && activeFilter !== 'All' && hasMultiplePages && (
+                  <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+                    <button
+                      className="kp-explore-link"
+                      onClick={() => navigate(`/collection/peptides?category=${encodeURIComponent(activeFilter)}`)}
+                    >
+                      Explore full {activeFilter} catalog <ArrowRight size={13} strokeWidth={2.5} />
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        )}
+
+        {/* ── Global Pagination (Desktop or Search only) ── */}
+        {!loading && categoryVisible.length > 0 && (!isMobile || searchQuery) && hasMultiplePages && (
+          <div className="pagination-container">
+            <p className="progress-indicator">
+              Showing {categorySlice.length} of {categoryVisible.length} peptides
             </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <h2 style={{
-                fontSize: 'clamp(1.45rem, 3vw, 2.1rem)', fontWeight: 800,
-                color: '#fff', letterSpacing: '-0.02em', margin: '0 0 0.35rem',
-                lineHeight: 1.15,
-              }}>
-                Key Peptides Available
-              </h2>
-              {!loading && (
-                <span style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
-                  background: 'rgba(0,163,224,0.12)',
-                  border: '1px solid rgba(0,163,224,0.30)',
-                  borderRadius: '999px', padding: '0.2rem 0.75rem',
-                  fontSize: '0.78rem', fontWeight: 700,
-                  color: '#00A3E0', letterSpacing: '0.04em',
-                  marginBottom: '0.35rem', whiteSpace: 'nowrap',
-                }}>
-                  <FlaskConical size={12} strokeWidth={2} />
-                  {peptides.length} Available
-                </span>
+            <div className="kp-pagination-btns">
+              {currentPage > 0 && (
+                <button className="kp-load-btn kp-prev-btn" onClick={handlePrev}>
+                  ← Previous
+                </button>
+              )}
+              {remaining > 0 && (
+                <button className="kp-load-btn" onClick={handleNext}>
+                  {loadMoreLabel}
+                </button>
               )}
             </div>
-            <p style={{
-              margin: 0, fontSize: '0.85rem',
-              color: 'rgba(255,255,255,0.42)', lineHeight: 1.5,
-            }}>
-              Core compounds currently in the catalog
-            </p>
-          </div>
-        </div>
-
-        {/* Dynamic filter chips */}
-        {!loading && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '2rem' }}>
-            {filterChips.map(f => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                style={{
-                  background: activeFilter === f ? '#00A3E0' : 'rgba(255,255,255,0.05)',
-                  border: `1px solid ${activeFilter === f ? '#00A3E0' : 'rgba(255,255,255,0.12)'}`,
-                  borderRadius: '999px', padding: '0.35rem 0.9rem',
-                  color: activeFilter === f ? '#fff' : 'rgba(255,255,255,0.55)',
-                  fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer',
-                  transition: 'all 0.18s ease',
-                }}
-              >
-                {f}
-              </button>
-            ))}
           </div>
         )}
 
-        {/* Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-          gap: '1.25rem', alignItems: 'stretch',
-        }}>
-          {loading
-            ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-            : visibleSlice.map(p => (
-                <PeptideCard
-                  key={p.slug}
-                  peptide={p}
-                  onClick={() => onSelectProduct ? onSelectProduct(p.slug) : navigate(`/peptide/${p.slug}`)}
-                  highlighted={matchedSlugs ? matchedSlugs.has(p.slug) : false}
-                />
-              ))
-          }
-        </div>
-
-        {/* Load more */}
-        {!loading && visibleCount < visible.length && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
+        {/* ── View All pill — bottom of grid ── */}
+        {!loading && !isMobile && (
+          <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '1rem' }}>
             <button
-              onClick={() => setVisibleCount(c => c + 6)}
-              style={{
-                background: 'rgba(0,163,224,0.10)',
-                border: '1.5px solid rgba(0,163,224,0.35)',
-                borderRadius: '999px',
-                color: '#00A3E0',
-                fontSize: '0.83rem',
-                fontWeight: 700,
-                letterSpacing: '0.04em',
-                padding: '0.55rem 1.8rem',
-                cursor: 'pointer',
-                transition: 'all 0.18s ease',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,163,224,0.20)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,163,224,0.10)'; }}
+              className="kp-cta-pill"
+              onClick={() => navigate('/collection/peptides')}
+              aria-label={`View all ${peptides.length} peptides in the collection`}
             >
-              Load more ({visible.length - visibleCount} remaining)
+              <span className="kp-cta-pill-count">
+                <FlaskConical size={13} strokeWidth={2} />
+                {peptides.length} peptides
+              </span>
+              <span className="kp-cta-pill-action">
+                View Full Catalog <ArrowRight size={13} strokeWidth={2.5} />
+              </span>
             </button>
           </div>
         )}
 
-        {/* Empty state */}
-        {!loading && visible.length === 0 && (
-          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.35)', marginTop: '2rem', fontSize: '0.9rem' }}>
-            No peptides match this filter.
-          </p>
+        {/* ── Error state ── */}
+        {!loading && error && (
+          <div style={{
+            textAlign: 'center', padding: '3rem 1rem',
+            color: 'var(--text-muted)', display: 'flex',
+            flexDirection: 'column', alignItems: 'center', gap: '1rem'
+          }}>
+            <p style={{ margin: 0 }}>{error}</p>
+            <button
+              onClick={() => setRetryKey(k => k + 1)}
+              style={{
+                padding: '0.5rem 1.25rem', borderRadius: '8px',
+                background: 'var(--primary)', color: 'var(--color-bg-surface)',
+                border: 'none', cursor: 'pointer', fontSize: '0.875rem'
+              }}
+            >
+              Retry
+            </button>
+          </div>
         )}
+
+        {/* ── Empty state — only when filter/search is active and returns nothing ── */}
+        {!loading && !error && categoryVisible.length === 0 && (activeFilter || searchQuery) && (
+          <div className="kp-empty-container">
+            <FlaskConical size={48} className="kp-empty-icon" />
+            <p className="kp-empty-text">No peptides found matching your criteria.</p>
+            <button className="kp-reset-btn" onClick={() => { setFilter(null); }}>
+              Reset Filters
+            </button>
+          </div>
+        )}
+
       </div>
-    </section>
+    </div>
   );
 }

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { ChevronRight, PlayCircle, BookOpen, Award, Clock, ChevronDown, CheckCircle2, Circle, GraduationCap, HelpCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -6,28 +7,28 @@ import { usePageMeta } from '../hooks/usePageMeta';
 // ── FAQ Data ──────────────────────────────────────────────────────────────────
 const FAQ_ITEMS = [
   {
-    q: '¿Qué es la terapia con péptidos en medicina clínica?',
-    a: 'Los péptidos son cadenas cortas de aminoácidos que actúan como señalizadores biológicos. En medicina clínica se utilizan para optimizar la recuperación, el metabolismo, la neurobiología y la longevidad con alta especificidad y mínimos efectos secundarios.',
+    q: 'What is peptide therapy in clinical medicine?',
+    a: 'Peptides are short chains of amino acids that act as biological signalers. In clinical medicine, they are used to optimize recovery, metabolism, neurobiology, and longevity with high specificity and minimal side effects.',
   },
   {
-    q: '¿Cómo accedo a los materiales de los cursos?',
-    a: 'Una vez matriculado, recibirás acceso a la plataforma educativa online con todos los módulos, grabaciones y materiales descargables. El acceso se mantiene activo durante 12 meses desde la fecha de inicio.',
+    q: 'How do I access course materials?',
+    a: 'Once enrolled, you will receive access to the online educational platform with all modules, recordings, and downloadable materials. Access remains active for 12 months from the start date.',
   },
   {
-    q: '¿Los cursos ofrecen certificación oficial?',
-    a: 'Sí. Todos los cursos completados otorgan un Certificado Oficial de ReGen PEPT / Renewal EU, reconocido en múltiples jurisdicciones médicas europeas y latinoamericanas.',
+    q: 'Do the courses offer official certification?',
+    a: 'Yes. All completed courses award an Official Certificate from Med-Peptides / Renewal EU, recognized in multiple European and Latin American medical jurisdictions.',
   },
   {
-    q: '¿Puedo acceder a los protocolos clínicos directamente desde la Academy?',
-    a: 'Sí. La sección de Protocolos Clínicos está disponible para todos los profesionales verificados. Puedes acceder a los blueprints completos desde la sección de Protocolos en el menú principal.',
+    q: 'Can I access clinical protocols directly from the Academy?',
+    a: 'Yes. The Clinical Protocols section is available to all verified professionals. You can access complete blueprints from the Protocols section in the main menu.',
   },
   {
-    q: '¿Con qué frecuencia se actualizan los contenidos?',
-    a: 'Los contenidos se actualizan trimestralmente con las últimas evidencias científicas, nuevos protocolos aprobados y lecciones magistrales de expertos internacionales.',
+    q: 'How often is content updated?',
+    a: 'Content is updated quarterly with the latest scientific evidence, new approved protocols, and masterclasses from international experts.',
   },
   {
-    q: '¿Hay requisitos previos para inscribirse?',
-    a: 'Es necesario contar con título profesional en ciencias de la salud (medicina, farmacia, enfermería avanzada u otras) y completar el proceso de verificación profesional de ReGen PEPT.',
+    q: 'Are there prerequisites for enrollment?',
+    a: 'A professional degree in health sciences (medicine, pharmacy, advanced nursing, or others) is required, along with completing the Med-Peptides professional verification process.',
   },
 ];
 
@@ -38,10 +39,10 @@ const COURSES = [
     title: 'Renewal Master Protocols',
     subtitle: 'Peptide Therapy for Human Optimization',
     category: 'Global Lecture Series',
-    duration: '8 semanas',
+    duration: '8 weeks',
     modules: 8,
     status: 'available', // available | enrolled | completed
-    startDate: '24 Mar 2026',
+    startDate: 'Mar 24, 2026',
     certification: true,
   },
   {
@@ -49,10 +50,10 @@ const COURSES = [
     title: 'Metabolic Optimization Masterclass',
     subtitle: 'GLP-1, GIP & metabolic pathways in precision medicine',
     category: 'Clinical Workshop',
-    duration: '4 semanas',
+    duration: '4 weeks',
     modules: 6,
     status: 'upcoming',
-    startDate: 'Mayo 2026',
+    startDate: 'May 2026',
     certification: true,
   },
   {
@@ -60,10 +61,10 @@ const COURSES = [
     title: 'Longevity & Neuroprotection Series',
     subtitle: 'Anti-aging peptides and cognitive enhancement protocols',
     category: 'Advanced Track',
-    duration: '6 semanas',
+    duration: '6 weeks',
     modules: 10,
     status: 'upcoming',
-    startDate: 'Julio 2026',
+    startDate: 'July 2026',
     certification: true,
   },
 ];
@@ -123,10 +124,10 @@ function FAQItem({ item, isOpen, onToggle }) {
 
 // ── Course Card ───────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
-  available:  { label: 'Disponible',  color: '#16a34a', bg: 'rgba(22,163,74,0.1)',  icon: Circle },
-  enrolled:   { label: 'Matriculado', color: '#2563eb', bg: 'rgba(37,99,235,0.1)',  icon: PlayCircle },
-  completed:  { label: 'Completado',  color: '#7c3aed', bg: 'rgba(124,58,237,0.1)', icon: CheckCircle2 },
-  upcoming:   { label: 'Próximamente',color: '#d97706', bg: 'rgba(217,119,6,0.1)',  icon: Clock },
+  available:  { label: 'Available',  color: 'var(--color-success)', bg: 'rgba(22,163,74,0.1)',  icon: Circle },
+  enrolled:   { label: 'Enrolled',   color: 'var(--color-primary)', bg: 'rgba(37,99,235,0.1)',  icon: PlayCircle },
+  completed:  { label: 'Completed',  color: '#7c3aed', bg: 'rgba(124,58,237,0.1)', icon: CheckCircle2 },
+  upcoming:   { label: 'Upcoming',   color: 'var(--color-warning)', bg: 'rgba(217,119,6,0.1)',  icon: Clock },
 };
 
 function CourseCard({ course, onSelect }) {
@@ -189,15 +190,15 @@ function CourseCard({ course, onSelect }) {
 
       {/* Meta */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', color: '#64748b', background: '#f1f5f9', padding: '0.2rem 0.6rem', borderRadius: '6px' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', color: 'var(--color-text-secondary)', background: '#f1f5f9', padding: '0.2rem 0.6rem', borderRadius: '6px' }}>
           <Clock size={11} /> {course.duration}
         </span>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', color: '#64748b', background: '#f1f5f9', padding: '0.2rem 0.6rem', borderRadius: '6px' }}>
-          <BookOpen size={11} /> {course.modules} módulos
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', color: 'var(--color-text-secondary)', background: '#f1f5f9', padding: '0.2rem 0.6rem', borderRadius: '6px' }}>
+          <BookOpen size={11} /> {course.modules} modules
         </span>
         {course.certification && (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', color: '#64748b', background: '#f1f5f9', padding: '0.2rem 0.6rem', borderRadius: '6px' }}>
-            <Award size={11} /> Certificado
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', color: 'var(--color-text-secondary)', background: '#f1f5f9', padding: '0.2rem 0.6rem', borderRadius: '6px' }}>
+            <Award size={11} /> Certification
           </span>
         )}
       </div>
@@ -205,11 +206,11 @@ function CourseCard({ course, onSelect }) {
       {/* Footer */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid #f1f5f9' }}>
         <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-          Inicio: <strong>{course.startDate}</strong>
+          Starts: <strong>{course.startDate}</strong>
         </span>
         {course.status !== 'upcoming' && (
           <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', fontWeight: 600, color: 'var(--secondary)' }}>
-            Ver detalles <ChevronRight size={14} />
+            View details <ChevronRight size={14} />
           </span>
         )}
       </div>
@@ -231,8 +232,8 @@ export default function AcademyView({ onSelectCourse }) {
   if (!isProfessional) {
     return (
       <div className="container" style={{ paddingTop: '120px', minHeight: '60vh', textAlign: 'center' }}>
-        <h2>Acceso Restringido</h2>
-        <p>Esta sección está disponible exclusivamente para profesionales médicos verificados.</p>
+        <h2>Restricted Access</h2>
+        <p>This section is available exclusively for verified medical professionals.</p>
       </div>
     );
   }
@@ -250,14 +251,14 @@ export default function AcademyView({ onSelectCourse }) {
           Knowledge & Academy
         </h1>
         <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', maxWidth: '700px', lineHeight: 1.65 }}>
-          Recursos educativos exclusivos, protocolos clínicos avanzados y masterclasses diseñadas para profesionales de la medicina de precisión y terapia peptídica.
+          Exclusive educational resources, advanced clinical protocols, and masterclasses designed for precision medicine and peptide therapy professionals.
         </p>
       </div>
 
       {/* ── Featured Course ── */}
       <div className="container" style={{ marginBottom: '4rem' }}>
         <div style={{ width: '100%', borderBottom: '2px solid var(--border)', paddingBottom: '0.5rem', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)', margin: 0 }}>Curso Destacado</h2>
+          <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)', margin: 0 }}>Featured Course</h2>
         </div>
 
         <div
@@ -281,13 +282,13 @@ export default function AcademyView({ onSelectCourse }) {
             </div>
             <div style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <p style={{ fontSize: '0.98rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.65 }}>
-                Aprende todos los protocolos clínicos relevantes para inmunidad, metabolismo, neurobiología y longevidad de la mano de expertos internacionales líderes.
+                Learn all relevant clinical protocols for immunity, metabolism, neurobiology, and longevity from leading international experts.
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', marginBottom: '2rem' }}>
                 {[
-                  [PlayCircle, 'Acceso Online: 24 Mar 2026'],
-                  [Clock, 'Duración: 8 semanas (1 clase/sem)'],
-                  [Award, 'Certificación: Renewal EU oficial'],
+                  [PlayCircle, 'Online Access: Mar 24, 2026'],
+                  [Clock, 'Duration: 8 weeks (1 class/week)'],
+                  [Award, 'Certification: Official Renewal EU'],
                 ].map(([Icon, text], i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', fontSize: '0.9rem', color: 'var(--text-main)' }}>
                     <Icon size={16} color="var(--primary)" />
@@ -296,7 +297,7 @@ export default function AcademyView({ onSelectCourse }) {
                 ))}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', color: 'var(--secondary)', fontWeight: 600, fontSize: '0.95rem', gap: '0.4rem' }}>
-                Ver detalles del Masterclass <ChevronRight size={16} />
+                View Masterclass details <ChevronRight size={16} />
               </div>
             </div>
           </div>
@@ -306,8 +307,8 @@ export default function AcademyView({ onSelectCourse }) {
       {/* ── Course Catalog ── */}
       <div className="container" style={{ marginBottom: '4rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid var(--border)', paddingBottom: '0.5rem', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)', margin: 0 }}>Catálogo de Cursos</h2>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{COURSES.length} cursos disponibles</span>
+          <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)', margin: 0 }}>Course Catalog</h2>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{COURSES.length} courses available</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
           {COURSES.map(course => (
@@ -324,7 +325,7 @@ export default function AcademyView({ onSelectCourse }) {
       <div className="container">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', borderBottom: '2px solid var(--border)', paddingBottom: '0.5rem', marginBottom: '1.5rem' }}>
           <HelpCircle size={18} color="var(--secondary)" />
-          <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)', margin: 0 }}>Preguntas Frecuentes</h2>
+          <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)', margin: 0 }}>Frequently Asked Questions</h2>
         </div>
         <div style={{ maxWidth: '780px' }}>
           {FAQ_ITEMS.map((item, i) => (

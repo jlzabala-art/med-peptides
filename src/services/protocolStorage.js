@@ -1,4 +1,5 @@
-import { db } from '../firebase';
+/* eslint-disable no-unused-vars */
+import { db } from '../firebase.js';
 import { 
   collection, 
   addDoc, 
@@ -11,8 +12,11 @@ import {
   orderBy, 
   limit, 
   serverTimestamp,
-  deleteDoc
+  deleteDoc,
+  writeBatch,
+  startAfter
 } from 'firebase/firestore';
+import { logAction } from './auditLogger.js';
 
 /**
  * NEW PROTOCOL VERSIONING STORAGE (v5.0)
@@ -68,6 +72,9 @@ export const saveProtocol = async (protocolData, formData, options = {}) => {
             cost_summary: protocolData.costData || {}
           };
           await updateDoc(docRef, updatePayload);
+          await logAction(userId, role, 'PROTOCOL_UPDATE', existingId, {
+            protocolName: current.protocol_name || current.name
+          });
           return existingId;
         }
       }
@@ -111,12 +118,7 @@ export const saveProtocol = async (protocolData, formData, options = {}) => {
       is_latest: true
     };
 
-    // If this is a new version, mark previous versions as not latest
-    if (prevId) {
-        // This is a simplified approach; in production we might want to update all previous versions
-        const prevRef = doc(db, COLLECTION_NAME, prevId);
-        await updateDoc(prevRef, { is_latest: false });
-    }
+
 
     // Sanitize payload with clinical strictness (remove undefined, preserve null/empty)
     const sanitize = (obj, depth = 0) => {
@@ -150,10 +152,31 @@ export const saveProtocol = async (protocolData, formData, options = {}) => {
     console.log("Payload:", sanitizedPayload);
     
     try {
-        const docRef = await addDoc(collection(db, COLLECTION_NAME), sanitizedPayload);
-        console.log("Success! Document ID:", docRef.id);
-        console.groupEnd();
-        return docRef.id;
+        if (prevId) {
+            const batch = writeBatch(db);
+            const prevRef = doc(db, COLLECTION_NAME, prevId);
+            batch.update(prevRef, { is_latest: false });
+
+            const newDocRef = doc(collection(db, COLLECTION_NAME));
+            batch.set(newDocRef, sanitizedPayload);
+
+            await batch.commit();
+            console.log("Success (Batch)! Document ID:", newDocRef.id);
+            console.groupEnd();
+            await logAction(userId, role, 'PROTOCOL_VERSION_CREATE', newDocRef.id, {
+              protocolName: sanitizedPayload.protocol_name,
+              previousVersionId: prevId
+            });
+            return newDocRef.id;
+        } else {
+            const docRef = await addDoc(collection(db, COLLECTION_NAME), sanitizedPayload);
+            console.log("Success! Document ID:", docRef.id);
+            console.groupEnd();
+            await logAction(userId, role, 'PROTOCOL_CREATE', docRef.id, {
+              protocolName: sanitizedPayload.protocol_name
+            });
+            return docRef.id;
+        }
     } catch (fireError) {
         console.error("Firestore specific error:", fireError);
         console.groupEnd();
@@ -391,21 +414,6 @@ function toProtocolCardDTO(raw) {
     };
 }
 
-// ── Session cache (Phase 8) — 5-minute TTL ────────────────────────────────────
-const _cache = new Map(); // key → { data, ts }
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 min
-
-function _getCached(key) {
-    const entry = _cache.get(key);
-    if (!entry) return null;
-    if (Date.now() - entry.ts > CACHE_TTL_MS) { _cache.delete(key); return null; }
-    return entry.data;
-}
-
-function _setCache(key, data) {
-    _cache.set(key, { data, ts: Date.now() });
-}
-
 // ── Admin-only functions ───────────────────────────────────────────────────────
 
 /**
@@ -413,22 +421,25 @@ function _setCache(key, data) {
  * Queries the `protocols` collection where active == true.
  * Used by homepage FeaturedProtocols section.
  *
- * Results are cached in-memory for 5 min per session.
  * No local fallback — if Firebase returns 0 docs, returns []; if it throws, re-throws.
  */
 export const getPublicProtocols = async () => {
-    const CACHE_KEY = 'public_protocols_home_all';
-    const cached = _getCached(CACHE_KEY);
-    if (cached) return cached;
-
-    const q = query(
-        collection(db, 'protocols'),
-        where('active', '==', true)
+    const TIMEOUT_MS = 10_000;
+    const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Firestore timeout: protocols')), TIMEOUT_MS)
     );
-    const snap = await getDocs(q);
-    const result = snap.docs.map(d => toProtocolCardDTO({ id: d.id, ...d.data() }));
-    _setCache(CACHE_KEY, result);
-    return result;
+
+    try {
+        const q = query(
+            collection(db, 'protocols'),
+            where('active', '==', true)
+        );
+        const snap = await Promise.race([getDocs(q), timeout]);
+        return snap.docs.map(d => toProtocolCardDTO({ id: d.id, ...d.data() }));
+    } catch (err) {
+        console.error('[protocolStorage] getPublicProtocols failed:', err);
+        throw err;   // Re-throw so FeaturedProtocols can show error state
+    }
 };
 
 /**
@@ -437,14 +448,40 @@ export const getPublicProtocols = async () => {
  */
 export const getAllProtocols = async () => {
     try {
-        const q = query(
-            collection(db, COLLECTION_NAME),
-            orderBy('created_at', 'desc')
-        );
+        const q = query(collection(db, COLLECTION_NAME));
         const snap = await getDocs(q);
-        return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        return snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => {
+            const dateA = a.created_at?.toDate ? a.created_at.toDate() : new Date(a.created_at || 0);
+            const dateB = b.created_at?.toDate ? b.created_at.toDate() : new Date(b.created_at || 0);
+            return dateB - dateA;
+        });
     } catch (error) {
         console.error('[protocolStorage] getAllProtocols:', error);
+        throw error;
+    }
+};
+
+/**
+ * Fetch protocols with pagination
+ */
+export const getPaginatedProtocols = async (lastDocSnap = null, pageSize = 20) => {
+    try {
+        let q = query(
+            collection(db, COLLECTION_NAME),
+            orderBy('created_at', 'desc'),
+            limit(pageSize)
+        );
+        if (lastDocSnap) {
+            q = query(q, startAfter(lastDocSnap));
+        }
+        const snap = await getDocs(q);
+        return {
+            protocols: snap.docs.map(d => ({ id: d.id, ...d.data() })),
+            lastDoc: snap.docs[snap.docs.length - 1] || null,
+            hasMore: snap.docs.length === pageSize
+        };
+    } catch (error) {
+        console.error('[protocolStorage] getPaginatedProtocols:', error);
         throw error;
     }
 };

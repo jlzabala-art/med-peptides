@@ -1,0 +1,226 @@
+/* ═══════════════════════════════════════════════════════════════
+   PELLET CARD — Premium glassmorphism component
+   ═══════════════════════════════════════════════════════════════ */
+
+.pellet-card {
+  position: relative;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border-light, #EBF2F8);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition:
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.25s ease,
+    border-color 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 54, 102, 0.05);
+}
+
+.pellet-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--secondary, #0096CC);
+  box-shadow:
+    0 12px 32px rgba(0, 54, 102, 0.1),
+    0 2px 8px rgba(0, 150, 204, 0.08);
+}
+
+.pellet-card:focus-visible {
+  outline: 2px solid var(--secondary, #0096CC);
+  outline-offset: 3px;
+}
+
+/* ── Top accent bar ─────────────────────────────────────────── */
+.pellet-card-accent {
+  height: 3px;
+  background: var(--pellet-accent, var(--primary, #003666));
+  flex-shrink: 0;
+  transition: background 0.3s ease;
+}
+
+.pellet-card:hover .pellet-card-accent {
+  background: var(--secondary, #0096CC);
+}
+
+/* ── Body ───────────────────────────────────────────────────── */
+.pellet-card-body {
+  padding: 1.35rem 1.35rem 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* ── Header row ─────────────────────────────────────────────── */
+.pellet-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.pellet-card-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background: var(--accent-soft, rgba(0,150,204,0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--secondary, #0096CC);
+  transition: background 0.2s ease;
+}
+
+.pellet-card:hover .pellet-card-icon {
+  background: var(--accent-medium, rgba(0,150,204,0.14));
+}
+
+.pellet-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.64rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(5, 150, 105, 0.1);
+  color: #059669;
+  border: 1px solid rgba(5, 150, 105, 0.2);
+  flex-shrink: 0;
+}
+
+/* ── Name ───────────────────────────────────────────────────── */
+.pellet-name {
+  font-family: var(--font-heading, 'Outfit', sans-serif);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--primary, #003666);
+  line-height: 1.25;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+/* ── Dosage pill ────────────────────────────────────────────── */
+.pellet-dosage-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.pellet-dosage-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-light, #7A93B0);
+}
+
+.pellet-dosage-value {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted, #4A6080);
+  background: var(--section-alt, #EEF4FA);
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+}
+
+/* ── Objective text ─────────────────────────────────────────── */
+.pellet-objective {
+  font-size: 0.83rem;
+  color: var(--text-muted, #4A6080);
+  line-height: 1.55;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+/* ── Goal tags ──────────────────────────────────────────────── */
+.pellet-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+}
+
+.pellet-tag {
+  font-size: 0.67rem;
+  font-weight: 700;
+  color: var(--secondary, #0096CC);
+  background: var(--accent-soft, rgba(0,150,204,0.06));
+  border: 1px solid rgba(0,150,204,0.15);
+  border-radius: 999px;
+  padding: 0.18rem 0.6rem;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+}
+
+.pellet-tag:hover {
+  background: var(--secondary, #0096CC);
+  color: #fff;
+}
+
+/* ── Footer ─────────────────────────────────────────────────── */
+.pellet-card-footer {
+  border-top: 1px solid var(--border-light, #EBF2F8);
+  padding: 0.75rem 1.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.pellet-duration {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--text-light, #7A93B0);
+  font-weight: 500;
+}
+
+.pellet-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.45rem 1rem;
+  background: var(--primary, #003666);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.pellet-view-btn:hover {
+  background: var(--primary-light, #1A5EA8);
+}
+
+.pellet-card:hover .pellet-view-btn {
+  background: var(--secondary, #0096CC);
+}
+
+/* Dark mode */
+[data-theme="dark"] .pellet-card {
+  background: var(--surface, #1e293b);
+  border-color: var(--border, #334155);
+}
+
+[data-theme="dark"] .pellet-name {
+  color: var(--primary, #818cf8);
+}
+
+[data-theme="dark"] .pellet-dosage-value {
+  background: var(--section-alt, #161e35);
+  color: var(--text-muted, #94a3b8);
+}

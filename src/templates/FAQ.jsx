@@ -1,8 +1,18 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { HelpCircle, ChevronDown, Search, X } from 'lucide-react';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { useHeaderHeight } from '../hooks/useHeaderHeight';
 
 const faqData = [
+  {
+    question: "Where is Med-Peptides based?",
+    answer: "Med-Peptides is proudly based in the USA. All of our operations, including fulfillment and customer support, are conducted domestically to ensure the highest standards of service and reliability."
+  },
+  {
+    question: "Do you provide third-party testing for your products?",
+    answer: "Absolutely. Quality and transparency are our core values. Every single batch of our peptides undergoes rigorous third-party testing for identity, purity, and concentration. High-performance liquid chromatography (HPLC) and Mass Spectrometry (MS) reports are available for all products to verify their quality."
+  },
   {
     question: "What are peptides?",
     answer: "Peptides are short chains of amino acids linked by peptide bonds. They act as biological signaling molecules and are involved in numerous physiological processes including cellular communication, metabolic regulation, tissue repair, immune modulation, and hormonal signaling.\n\nDue to their specificity and biological activity, peptides are widely used in biomedical research and are increasingly studied for potential therapeutic applications."
@@ -49,7 +59,7 @@ const faqData = [
   }
 ];
 
-// ── FASE 4a: Estilos estáticos de HighlightText ────────────────────────────────────
+// ── PHASE 4a: Static styles for HighlightText ────────────────────────────────────
 const HIGHLIGHT_MARK_STYLE = {
   backgroundColor: 'rgba(0, 163, 224, 0.18)',
   color: 'var(--primary)',
@@ -59,9 +69,9 @@ const HIGHLIGHT_MARK_STYLE = {
   background: 'linear-gradient(120deg, rgba(0,163,224,0.25) 0%, rgba(0,163,224,0.12) 100%)',
 };
 
-// ── FASE 3: HighlightText — resalta la palabra buscada en el texto ──────────────────
-// Divide el string por el término buscado y envuelve las coincidencias en <mark>.
-// Usa expresión regular case-insensitive para preservar el casing original.
+// ── PHASE 3: HighlightText — highlights the search term in text ──────────────────
+// Splits the string by the search term and wraps matches in <mark>.
+// Uses case-insensitive regex to preserve original casing.
 const HighlightText = React.memo(function HighlightText({ text, highlight }) {
   if (!highlight?.trim()) return <>{text}</>;
 
@@ -82,7 +92,7 @@ const HighlightText = React.memo(function HighlightText({ text, highlight }) {
     </>
   );
 });
-// ── FASE 4b: Constantes base de FAQItem — nivel de módulo (singleton) ─────────────────
+// ── PHASE 4b: FAQItem base constants — module level (singleton) ─────────────────
 const ITEM_BTN_STYLE_BASE = {
   width: '100%',
   minHeight: '44px',
@@ -128,7 +138,7 @@ const ITEM_ANSWER_STYLE_BASE = {
   transition: 'opacity 0.25s ease',
 };
 
-// ── FASE 4b: Getters dinámicos — funciones puras que derivan el estilo del estado ──────
+// ── PHASE 4b: Dynamic getters — pure functions that derive style from state ──────
 const getItemWrapperStyle = (isOpen) => ({
   borderBottom: '1px solid var(--border)',
   backgroundColor: isOpen ? 'rgba(0, 43, 77, 0.02)' : 'transparent',
@@ -161,20 +171,20 @@ const getItemAnswerStyle = (isOpen) => ({
   opacity: isOpen ? 1 : 0,
 });
 
-// ── FASE 2+3: FAQItem ──────────────────────────────────────────────────────────────────
+// ── PHASE 2+3: FAQItem ──────────────────────────────────────────────────────────────────
 const FAQItem = React.memo(function FAQItem({ question, answer, isOpen, onToggle, searchTerm }) {
   const itemRef = useRef(null);
-  // FASE 3: Estado de pressed para feedback táctil
+  // PHASE 3: Pressed state for tactile feedback
   const [isPressed, setIsPressed] = useState(false);
+  const headerHeight = useHeaderHeight();
 
-  // ── FASE 2: Scroll inteligente — solo dispara si el item está FUERA del viewport ──
+  // ── PHASE 2: Intelligent scroll — only fires if item is OUTSIDE viewport ──
   useEffect(() => {
     if (!isOpen || !itemRef.current) return;
 
     const checkAndScroll = () => {
       const rect = itemRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-      const headerHeight = 110;
       const itemTopVisible = rect.top >= headerHeight;
       const itemBottomVisible = rect.bottom <= viewportHeight;
 
@@ -189,7 +199,7 @@ const FAQItem = React.memo(function FAQItem({ question, answer, isOpen, onToggle
 
     const timer = setTimeout(checkAndScroll, 120);
     return () => clearTimeout(timer);
-  }, [isOpen]);
+  }, [isOpen, headerHeight]);
 
 
   return (
@@ -202,7 +212,7 @@ const FAQItem = React.memo(function FAQItem({ question, answer, isOpen, onToggle
         style={getItemBtnStyle(isPressed)}
       >
         <span style={getItemQuestionStyle(isOpen)}>
-          {/* FASE 3: Resaltado de búsqueda en la pregunta */}
+          {/* PHASE 3: Search highlighting in the question */}
           <HighlightText text={question} highlight={searchTerm} />
         </span>
         <span style={getItemIconStyle(isOpen)}>
@@ -210,7 +220,7 @@ const FAQItem = React.memo(function FAQItem({ question, answer, isOpen, onToggle
         </span>
       </button>
 
-      {/* FASE 2: Animación CSS Grid — altura desconocida sin JS */}
+      {/* PHASE 2: CSS Grid Animation — unknown height without JS */}
       <div style={getItemGridStyle(isOpen)}>
         <div style={ITEM_OVERFLOW_STYLE}>
           <div style={getItemAnswerStyle(isOpen)}>
@@ -222,7 +232,7 @@ const FAQItem = React.memo(function FAQItem({ question, answer, isOpen, onToggle
   );
 });
 
-// ── FASE 4c: Constantes de estilo del componente raíz FAQ ────────────────────────────
+// ── PHASE 4c: Root FAQ component style constants ────────────────────────────
 const FAQ_SECTION_STYLE  = { minHeight: '80vh', paddingTop: 'clamp(2rem, 8vw, 6rem)' };
 const FAQ_INNER_STYLE    = { maxWidth: '900px', margin: '0 auto' };
 const FAQ_HEADER_STYLE   = { textAlign: 'center', marginBottom: '3rem' };
@@ -235,11 +245,12 @@ const FAQ_ICON_BADGE_STYLE = {
   marginBottom: '1rem',
 };
 const FAQ_H1_STYLE = {
+  fontFamily: 'var(--font-heading)',
   fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
   color: 'var(--primary)',
   marginBottom: '1.5rem',
-  letterSpacing: '-0.02em',
-  fontWeight: 800,
+  letterSpacing: '-0.03em',
+  fontWeight: 850,
 };
 const FAQ_SUBTITLE_STYLE = { color: 'var(--text-muted)', fontSize: '1.1rem' };
 
@@ -319,14 +330,14 @@ export default function FAQ({ onBack }) {
   });
 
   const [openIndex, setOpenIndex] = useState(0);
-  // ── FASE 1: Estado de búsqueda ──
+  // ── PHASE 1: Search state ──
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // ── FASE 1: Lista filtrada — useMemo evita recalcular en cada render ──
+  // PHASE 1: Filtered list — useMemo avoids recalculating on every render
   const filteredFAQs = useMemo(() => {
     if (!searchTerm.trim()) return faqData.map((item, idx) => ({ ...item, originalIndex: idx }));
     const lower = searchTerm.toLowerCase();
@@ -366,7 +377,7 @@ export default function FAQ({ onBack }) {
             </p>
           </div>
 
-          {/* ── FASE 1: Search Input ── */}
+          {/* ── PHASE 1: Search Input ── */}
           <div style={FAQ_SEARCH_WRAPPER_STYLE}>
             <Search size={18} style={FAQ_SEARCH_ICON_STYLE} />
             <input

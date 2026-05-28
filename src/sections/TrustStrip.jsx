@@ -1,135 +1,178 @@
-import { Beaker, Search, ShieldCheck, Globe } from 'lucide-react';
+ 
+import { ShieldCheck, FileCheck, Globe, MessageCircle, FlaskConical, Truck, Lock, Activity } from 'lucide-react';
+import homeData from '../data/homeData.json';
 
-const ITEMS = [
-  { label: 'Protocol Builder', icon: <Beaker size={18} /> },
-  { label: 'Clinical Search', icon: <Search size={18} /> },
-  { label: 'Safety Validation', icon: <ShieldCheck size={18} /> },
-  { label: 'Global Logistics', icon: <Globe size={18} /> },
+const iconMap = {
+  FlaskConical: FlaskConical,
+  Truck: Truck,
+  Lock: Lock,
+  ShieldCheck: ShieldCheck,
+  Globe: Globe,
+  MessageCircle: MessageCircle,
+  FileCheck: FileCheck,
+  Activity: Activity,
+};
+
+/* Accent colours per item (cycles if more items added) */
+const ACCENTS = [
+  { color: '#14b8a6', bg: 'rgba(20,184,166,0.10)', border: 'rgba(20,184,166,0.18)' },
+  { color: '#38bdf8', bg: 'rgba(56,189,248,0.10)', border: 'rgba(56,189,248,0.18)' },
+  { color: '#34d399', bg: 'rgba(52,211,153,0.10)', border: 'rgba(52,211,153,0.18)' },
+  { color: '#818cf8', bg: 'rgba(129,140,248,0.10)', border: 'rgba(129,140,248,0.18)' },
 ];
 
 export default function TrustStrip() {
-  // Duplicamos los items para que el loop infinito sea perfecto
-  const doubleItems = [...ITEMS, ...ITEMS];
+  const { items } = homeData.trustStrip;
 
   return (
-    <div style={{
-      backgroundColor: '#020e1c',
-      borderTop: '1px solid rgba(255,255,255,0.06)',
-      borderBottom: '1px solid rgba(255,255,255,0.06)',
-      padding: '0.85rem 0',
-      overflow: 'hidden',
-      position: 'relative'
-    }}>
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        @keyframes ticker {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
+    <section className="ts-wrap" aria-label="Why Med-Peptides">
+      <div className="ts-inner">
+        {items.map((item, idx) => {
+          const IconComponent = iconMap[item.icon] || ShieldCheck;
+          const accent = ACCENTS[idx % ACCENTS.length];
+          return (
+            <div key={idx} className="ts-item">
+              {/* Icon bubble */}
+              <div
+                className="ts-icon"
+                style={{
+                  background: accent.bg,
+                  border: `1px solid ${accent.border}`,
+                  color: accent.color,
+                }}
+              >
+                <IconComponent size={18} strokeWidth={2} />
+              </div>
 
-        .trust-strip-container {
-          position: relative;
-          width: 100%;
-          display: flex;
-          align-items: center;
-        }
-        
-        /* Edge Fades: Más pronunciados para el efecto ticker */
-        .trust-strip-container::before,
-        .trust-strip-container::after {
-          content: "";
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          width: 60px;
-          z-index: 2;
-          pointer-events: none;
-        }
-        
-        .trust-strip-container::before {
-          left: 0;
-          background: linear-gradient(to right, #020e1c 20%, transparent);
-        }
-        
-        .trust-strip-container::after {
-          right: 0;
-          background: linear-gradient(to left, #020e1c 20%, transparent);
-        }
+              {/* Text */}
+              <div className="ts-text">
+                <span className="ts-label" style={{ color: accent.color }}>
+                  {item.label}
+                </span>
+                <span className="ts-desc">{item.desc}</span>
+              </div>
 
-        .trust-strip-inner {
-          display: flex;
-          align-items: center;
-          gap: 3rem; /* Espaciado constante */
-          padding: 0;
-          width: max-content;
-          animation: ticker 25s linear infinite; /* Animación suave */
-        }
-        
-        .trust-strip-item {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          color: #64748b;
-          font-size: 0.75rem;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          white-space: nowrap;
-          flex-shrink: 0;
-        }
-
-        .trust-icon-box {
-          color: #00A3E0;
-          display: flex;
-          align-items: center;
-          filter: drop-shadow(0 0 10px rgba(0, 163, 224, 0.4));
-        }
-
-        /* DESKTOP: Desactivamos animación y centramos */
-        @media (min-width: 1024px) {
-          .trust-strip-inner {
-            animation: none;
-            width: 100%;
-            justify-content: center;
-            gap: 0;
-          }
-          .trust-strip-container::before,
-          .trust-strip-container::after {
-            display: none;
-          }
-          .trust-strip-item {
-            font-size: 0.82rem;
-            padding: 0 2.5rem;
-            color: #94a3b8;
-          }
-          /* Reintroducimos el separador solo en desktop */
-          .trust-strip-item:not(:last-child) {
-            border-right: 1px solid rgba(255,255,255,0.08);
-          }
-          .trust-strip-item:hover {
-            color: white;
-          }
-        }
-
-        /* Reducimos velocidad en móviles si el usuario prefiere menos movimiento */
-        @media (prefers-reduced-motion: reduce) {
-          .trust-strip-inner { animation: none; overflow-x: auto; width: 100%; padding: 0 2rem; }
-        }
-      `}} />
-
-      <div className="trust-strip-container">
-        {/* Renderizamos doubleItems para el scroll infinito en móvil */}
-        <div className="trust-strip-inner">
-          {doubleItems.map((item, i) => (
-            <div key={`${item.label}-${i}`} className="trust-strip-item">
-              <span className="trust-icon-box">
-                {item.icon}
-              </span>
-              {item.label}
+              {/* Separator (hidden on last item) */}
+              {idx < items.length - 1 && (
+                <div className="ts-sep" aria-hidden="true" />
+              )}
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
-    </div>
+
+      <style>{`
+        .ts-wrap {
+          background: linear-gradient(
+            to bottom,
+            rgba(5, 15, 26, 0.98) 0%,
+            rgba(10, 22, 40, 0.96) 100%
+          );
+          border-top: 1px solid rgba(20, 184, 166, 0.12);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+          padding: 1.5rem 1.5rem;
+        }
+
+        .ts-inner {
+          max-width: 1100px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 0;
+        }
+
+        .ts-item {
+          display: flex;
+          align-items: center;
+          gap: 0.85rem;
+          padding: 0.85rem 2rem;
+          position: relative;
+          flex: 1 1 220px;
+          min-width: 0;
+          transition: background 0.2s ease;
+          border-radius: 12px;
+        }
+
+        .ts-item:hover {
+          background: rgba(255, 255, 255, 0.02);
+        }
+
+        .ts-icon {
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          transition: transform 0.2s ease;
+        }
+
+        .ts-item:hover .ts-icon {
+          transform: scale(1.08);
+        }
+
+        .ts-text {
+          display: flex;
+          flex-direction: column;
+          gap: 0.2rem;
+          min-width: 0;
+        }
+
+        .ts-label {
+          font-weight: 700;
+          font-size: 0.875rem;
+          line-height: 1.2;
+          letter-spacing: -0.01em;
+        }
+
+        .ts-desc {
+          font-size: 0.75rem;
+          color: #64748b;
+          line-height: 1.4;
+          white-space: normal;
+        }
+
+        .ts-sep {
+          position: absolute;
+          right: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 1px;
+          height: 36px;
+          background: linear-gradient(
+            to bottom,
+            transparent,
+            rgba(255, 255, 255, 0.07) 50%,
+            transparent
+          );
+        }
+
+        @media (max-width: 768px) {
+          .ts-wrap {
+            padding: 1.25rem 1rem;
+          }
+          .ts-inner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+          }
+          .ts-item {
+            padding: 0.75rem 1rem;
+            flex: unset;
+          }
+          .ts-sep { display: none; }
+          .ts-desc { font-size: 0.72rem; }
+        }
+
+        @media (max-width: 400px) {
+          .ts-inner {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
+    </section>
   );
 }

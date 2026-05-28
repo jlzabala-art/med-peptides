@@ -1,6 +1,6 @@
 {
   "protocol_duration_weeks": 8,
-  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "protocol_author_name": "Med-Peptides Clinical Team",
   "bundleVersion": "2.0",
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -76,7 +76,7 @@
     "resolved_monitoring": []
   },
   "protocol_author_notes": "Official curated protocol for general clinical use.",
-  "protocol_author_organization": "ReGen PEPT",
+  "protocol_author_organization": "Med-Peptides",
   "protocol_last_reviewed_at": "2026-03-29",
   "protocol_source_reference": "internal_guide",
   "expected_outcomes": {
@@ -123,16 +123,17 @@
               "Sunday"
             ],
             "administration_frequency": "daily",
-            "dose_unit": "protocol_defined",
-            "starting_intensity": "standard",
-            "timing_hint": "evening_or_split_use"
+            "dose_unit": "mcg",
+            "timing_hint": "Administer in the morning or split AM/PM to sustain anxiolytic effect",
+            "starting_weekly_dose": 500,
+            "dose_per_administration": 71
           },
           "product_id": "prd_selank",
           "product_title": "Selank",
-          "route": "intranasal_or_protocol_defined",
+          "route": "intranasal",
           "variantRef": {
             "productId": "prd_selank",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         },
@@ -144,21 +145,27 @@
               "Thursday"
             ],
             "administration_frequency": "2x_week",
-            "dose_unit": "protocol_defined",
-            "starting_intensity": "optional_low"
+            "dose_unit": "mcg",
+            "intensity_label": "optional_low",
+            "starting_weekly_dose": 500,
+            "dose_per_administration": 250,
+            "timing_hint": "Administer in the morning for BDNF and cognitive activation"
           },
           "product_id": "prd_semax",
           "product_title": "Semax",
-          "route": "intranasal_or_protocol_defined",
+          "route": "intranasal",
           "variantRef": {
             "productId": "prd_semax",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         }
       ],
       "phase_key": "stabilization",
-      "phase_title": "Stabilization"
+      "phase_title": "Stabilization",
+      "phase_id": "cog_002_ph1",
+      "phase_name": "Neurological Priming",
+      "duration_weeks": 3
     },
     {
       "clinical_events": [
@@ -186,15 +193,17 @@
               "Friday"
             ],
             "administration_frequency": "5x_week",
-            "dose_unit": "protocol_defined",
-            "intensity": "standard_plus"
+            "dose_unit": "mcg",
+            "starting_weekly_dose": 1,
+            "dose_per_administration": 200,
+            "timing_hint": "Administer on weekdays; supports sustained cognitive load and anxiolysis"
           },
           "product_id": "prd_selank",
           "product_title": "Selank",
-          "route": "intranasal_or_protocol_defined",
+          "route": "intranasal",
           "variantRef": {
             "productId": "prd_selank",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         },
@@ -207,21 +216,27 @@
               "Friday"
             ],
             "administration_frequency": "3x_week",
-            "dose_unit": "protocol_defined",
-            "intensity": "conditional"
+            "dose_unit": "mcg",
+            "intensity_label": "conditional",
+            "starting_weekly_dose": 900,
+            "dose_per_administration": 300,
+            "timing_hint": "Administer in the morning on training/work days for peak BDNF effect"
           },
           "product_id": "prd_semax",
           "product_title": "Semax",
-          "route": "intranasal_or_protocol_defined",
+          "route": "intranasal",
           "variantRef": {
             "productId": "prd_semax",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         }
       ],
       "phase_key": "adaptive_focus",
-      "phase_title": "Adaptive Focus"
+      "phase_title": "Adaptive Focus",
+      "phase_id": "cog_002_ph2",
+      "phase_name": "Active Cognitive Enhancement",
+      "duration_weeks": 3
     },
     {
       "clinical_events": [
@@ -246,21 +261,26 @@
               "Friday"
             ],
             "administration_frequency": "3x_week",
-            "dose_unit": "protocol_defined",
-            "intensity": "maintenance"
+            "dose_unit": "mcg",
+            "starting_weekly_dose": 1,
+            "dose_per_administration": 333,
+            "timing_hint": "Step-down maintenance; continue 3x/week indefinitely or cycle 4 weeks off"
           },
           "product_id": "prd_selank",
           "product_title": "Selank",
-          "route": "intranasal_or_protocol_defined",
+          "route": "intranasal",
           "variantRef": {
             "productId": "prd_selank",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         }
       ],
       "phase_key": "maintenance",
-      "phase_title": "Maintenance"
+      "phase_title": "Maintenance",
+      "phase_id": "cog_002_ph3",
+      "phase_name": "Maintenance",
+      "duration_weeks": 2
     }
   ],
   "protocol_slug": "focus-resilience-8w",
@@ -414,7 +434,9 @@
   },
   "physician_supervision_required": false,
   "status": "approved",
-  "_patchedAt": {},
+  "_patchedAt": {
+    "phase3a_fix": "2026-05-17T08:56:29.759546+00:00"
+  },
   "_patchSchema": "antigravity_v2",
   "id": "cog_002",
   "category": "Cognitive Support",
@@ -499,7 +521,7 @@
     ]
   },
   "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
-  "_importBundle": "ReGen PEPT Clinical Protocol Library · Updated 2026-04-26",
+  "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
   "_schemaGapFixed": {
     "_nanoseconds": 978000000,
     "_seconds": 1777190715
@@ -575,8 +597,8 @@
     "primary_goal": "Cognitive Support",
     "visibility": "public",
     "author": {
-      "organization": "ReGen PEPT",
-      "name": "ReGen PEPT Clinical Team",
+      "organization": "Med-Peptides",
+      "name": "Med-Peptides Clinical Team",
       "title": "Peptide Specialists"
     },
     "evidence_grade_note": "Multiple Russian Phase II/III RCTs demonstrating anxiolytic efficacy (Zozulya 2014, Semenova 2010). HAM-A validated outcomes. Grade C per GRADE due to regional publication bias and limited Western replication.",
@@ -620,9 +642,10 @@
       "last_reviewed_at": "2026-04-23",
       "review_status": "approved"
     },
-    "regulatory_note": "Not FDA-approved. Available via 503A compounding pharmacies in the US under physician supervision. Selank holds approved prescription status in Russia for generalized anxiety disorder. Not EMA-approved. Use constitutes off-label research peptide administration."
+    "regulatory_note": "Not FDA-approved. Available via 503A compounding pharmacies in the US under physician supervision. Selank holds approved prescription status in Russia for generalized anxiety disorder. Not EMA-approved. Use constitutes off-label research peptide administration.",
+    "duration_weeks": 8
   },
-  "_patchBundle": "ReGen PEPT Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
   "canonical_enrichment": {
     "compatibleWith": "antigravity_v2_firebase_import",
     "auditFieldsCompleted": [
@@ -722,5 +745,8 @@
       "Appetite fluctuation in early titration phase (~6%)"
     ],
     "contraindication_summary": "Contraindicated in active epilepsy or uncontrolled seizure disorders (Semax lowers seizure threshold at supratherapeutic doses). Avoid in uncontrolled psychosis or schizophrenia spectrum disorders. Not for use in pregnancy or breastfeeding. Severe hepatic impairment is a relative contraindication due to limited metabolic safety data. Use with caution in patients on CNS stimulants, MAOIs, or serotonergic agents. No FDA-approved interaction database available; physician supervision required."
-  }
+  },
+  "recommended_tests": [
+    "cortisol-blood-test"
+  ]
 }

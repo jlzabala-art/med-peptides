@@ -1,17 +1,17 @@
-# 🔥 Configuración Firebase — med-peptides.com
+# 🔥 Configuración Firebase — Med-Peptides.com
 
 ## Proyecto oficial
 
 | Campo | Valor |
 |---|---|
-| **Project ID** | `med-peptides-app` |
-| **Dominio custom** | https://med-peptides.com |
-| **Hosting URL** | https://med-peptides-app-27a3a.web.app |
-| **Firebase Console** | https://console.firebase.google.com/project/med-peptides-app |
+| **Project ID** | `Med-Peptides-app` |
+| **Dominio custom** | https://Med-Peptides.com |
+| **Hosting URL** | https://Med-Peptides-app-27a3a.web.app |
+| **Firebase Console** | https://console.firebase.google.com/project/Med-Peptides-app |
 
 > ⚠️ **REGLA FUNDAMENTAL**: Todos los datos de este proyecto (productos,
 > ajustes, FAQs, usuarios, protocolos, etc.) **siempre** se guardan en
-> `med-peptides-app`. Nunca usar `regenpept-web-app` ni ningún otro proyecto.
+> `Med-Peptides-app`. Nunca usar `Med-Peptides-web-app` ni ningún otro proyecto.
 
 ---
 
@@ -36,7 +36,7 @@
 
 | Archivo | Propósito |
 |---|---|
-| `src/firebase.js` | Config Firebase del cliente (apunta a `med-peptides-app`) |
+| `src/firebase.js` | Config Firebase del cliente (apunta a `Med-Peptides-app`) |
 | `.firebaserc` | Proyecto y targets de hosting |
 | `firebase.json` | Config de hosting, reglas, etc. |
 
@@ -47,14 +47,14 @@
 ```bash
 # Build + deploy completo
 npm run build
-npx firebase-tools deploy --only hosting --project med-peptides-app
+npx firebase-tools deploy --only hosting --project Med-Peptides-app
 ```
 
 ---
 
 ## Migración (histórico — solo referencia)
 
-El catálogo se migró desde `regenpept-web-app` → `med-peptides-app` el 19 abril 2026
+El catálogo se migró desde `Med-Peptides-web-app` → `Med-Peptides-app` el 19 abril 2026
 usando `scripts/migrateFirestoreProjects.mjs`. **No es necesario volver a ejecutarlo.**
 
 Los service account files (`serviceAccount-source.json`, `serviceAccount-target.json`)

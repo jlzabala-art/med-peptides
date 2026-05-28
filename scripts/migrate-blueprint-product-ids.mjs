@@ -34,7 +34,7 @@ try {
   }
 } catch {
   // Fall back to Application Default Credentials (works with `firebase login --reauth`)
-  appConfig = { credential: applicationDefault(), projectId: 'med-peptides-app' };
+  appConfig = { credential: applicationDefault(), projectId: 'Med-Peptides-app' };
   console.log('✅ Using Application Default Credentials (ADC)');
 }
 

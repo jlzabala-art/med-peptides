@@ -219,7 +219,7 @@ async function main() {
         ...baseData,
         dosage: item.dosage,
         name: item.nameOverride || baseData.name,
-        supplier: 'RegenPept',
+        supplier: 'Med-Peptides',
         supplierUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
         // Clear legacy price fields - use variant subcollection
         perVialPriceUSD: item.master.perUnit,

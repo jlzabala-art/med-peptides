@@ -1,3 +1,4 @@
+ 
 import React, { useEffect } from 'react';
 import { HelpCircle, X, Loader2 } from 'lucide-react';
 import FAQAccordion from './FAQAccordion';
@@ -46,7 +47,7 @@ export default function FAQModal({ isOpen, onClose, faqItems, loading = false, p
             </div>
             <div>
               <h2 style={{ fontSize: '1.15rem', margin: 0, color: 'var(--text-main)', fontWeight: 800 }}>Scientific FAQ</h2>
-              <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>{product?.name} Investigational Reference</p>
+              <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>{product?.name} Research Reference</p>
             </div>
           </div>
           <button 
@@ -76,9 +77,9 @@ export default function FAQModal({ isOpen, onClose, faqItems, loading = false, p
           )}
         </div>
 
-        <div style={{ padding: '1rem 1.75rem', borderTop: '1px solid var(--border)', backgroundColor: '#f8fafc', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5 }}>
+        <div style={{ padding: '1rem 1.75rem', borderTop: '1px solid var(--border)', backgroundColor: 'var(--color-bg-app)', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5 }}>
           This information is for research purposes only and based on curated clinical literature profiles. 
-          Consult relevant peer-reviewed studies for specific investigational designs.
+          Consult relevant peer-reviewed studies for specific research designs.
         </div>
       </div>
       <style>{`

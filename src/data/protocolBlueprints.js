@@ -1,3 +1,4 @@
+ 
 export const PROTOCOL_BLUEPRINTS = {
   metabolicWeightLoss: {
     title: "Personalized Metabolic Weight Loss Protocol",

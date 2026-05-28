@@ -2,8 +2,8 @@
   "active": true,
   "bundleVersion": "2.0",
   "physician_supervision_required": true,
-  "protocol_author_name": "ReGen PEPT Clinical Team",
-  "protocol_author_organization": "ReGen PEPT",
+  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_organization": "Med-Peptides",
   "protocol_author_title": "MD, Anti-Aging & Metabolic Medicine",
   "protocol_duration_weeks": 24,
   "protocol_id": "wm_005",
@@ -640,5 +640,10 @@
     "enabled": true
   },
   "number_of_phases": 3,
-  "_syncedAt": "2026-04-26T12:46:40.505Z"
+  "_syncedAt": "2026-04-26T12:46:40.505Z",
+  "recommended_tests": [
+    "fagron-nutrigen",
+    "24-genomics-nutrigen",
+    "nad-blood-test"
+  ]
 }

@@ -1,3 +1,4 @@
+ 
 /**
  * productConstants.js
  *
@@ -6,12 +7,13 @@
  */
 
 export const productCategories = [
-  "Healing & Recovery",
-  "Weight Management & Metabolic",
-  "Anti-Aging & Longevity",
-  "Cognitive & Neuro-Protection",
-  "Muscle Growth & Performance",
-  "Hormonal Support",
+  "Recovery & Repair",
+  "Cognitive & Mood",
+  "Sleep & Circadian",
+  "Metabolic & Weight",
+  "Longevity & Anti-Aging",
+  "Hormonal Optimization",
+  "Immune Support",
   "Research Supplies",
   "Other Research Peptides"
 ];

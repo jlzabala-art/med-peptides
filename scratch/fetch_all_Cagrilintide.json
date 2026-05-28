@@ -1,0 +1,45 @@
+[
+  {
+    "pmid": "40544433",
+    "title": "Coadministered Cagrilintide and Semaglutide in Adults with Overweight or Obesity.",
+    "authors": [
+      "Garvey WT",
+      "Bl\u00fcher M",
+      "Osorto Contreras CK",
+      "Davies MJ",
+      "Winning Lehmann E",
+      "Pietil\u00e4inen KH",
+      "Rubino D",
+      "Sbraccia P",
+      "Wadden T",
+      "Zeuthen N",
+      "Wilding JPH",
+      "REDEFINE 1 Study Group"
+    ],
+    "journal": "The New England journal of medicine",
+    "pubdate": "2025 Aug 14",
+    "doi": "10.1056/NEJMoa2502081",
+    "abstract": "BACKGROUND: Semaglutide at a dose of 2.4 mg has established weight-loss and cardiovascular benefits, and cagrilintide at a dose of 2.4 mg has shown promising results in early-phase trials; the efficacy of the combination (known as CagriSema) on weight loss in persons with either overweight and coexisting conditions or obesity is unknown.\nMETHODS: In a phase 3a, 68-week, multicenter, double-blind, placebo-controlled and active-controlled trial, we enrolled adults without diabetes who had a body-mass index (BMI; the weight in kilograms divided by the square of the height in meters) of 30 or higher or a BMI of 27 or higher with at least one obesity-related complication. Participants were randomly assigned in a ratio of 21:3:3:7 to receive the combination of semaglutide at a dose of 2.4 mg and cagrilintide at a dose of 2.4 mg, semaglutide alone at a dose of 2.4 mg, cagrilintide alone at a dose of 2.4 mg, or placebo, plus lifestyle interventions for all groups. The coprimary end points were the relative change in body weight and a reduction of 5% or more in body weight from baseline to week 68 with cagrilintide-semaglutide as compared with placebo. Body-weight reductions of 20% or more, 25% or more, and 30% or more were assessed as confirmatory secondary end points. Effect estimates were assessed with the treatment-policy estimand (consistent with the intention-to-treat principle). Safety was assessed.\nRESULTS: A total of 3417 participants underwent randomization, with 2108 assigned to receive cagrilintide-semaglutide, 302 to receive semaglutide, 302 to receive cagrilintide, and 705 to receive placebo. The estimated mean percent change in body weight from baseline to week 68 was -20.4% with cagrilintide-semaglutide as compared with -3.0% with placebo (estimated difference, -17.3 percentage points; 95% confidence interval, -18.1 to -16.6; P<0.001). Participants receiving cagrilintide-semaglutide were more likely than those receiving placebo to reach weight-loss targets of 5% or more, 20% or more, 25% or more, and 30% or more (P<0.001 for all comparisons). Gastrointestinal adverse events (affecting 79.6%\u00a0in the cagrilintide-semaglutide group and 39.9% in the placebo group), including nausea, vomiting, diarrhea, constipation, or abdominal pain, were mainly transient and mild-to-moderate in severity.\nCONCLUSIONS: Cagrilintide-semaglutide provided significant and clinically relevant body-weight reductions in adults with overweight or obesity, as compared with placebo. (Funded by Novo Nordisk; REDEFINE 1 ClinicalTrials.gov number, NCT05567796.)."
+  },
+  {
+    "pmid": "40544432",
+    "title": "Cagrilintide-Semaglutide in Adults with Overweight or Obesity and Type 2 Diabetes.",
+    "authors": [
+      "Davies MJ",
+      "Bajaj HS",
+      "Broholm C",
+      "Eliasen A",
+      "Garvey WT",
+      "le Roux CW",
+      "Lingvay I",
+      "Lyndgaard CB",
+      "Rosenstock J",
+      "Pedersen SD",
+      "REDEFINE 2 Study Group"
+    ],
+    "journal": "The New England journal of medicine",
+    "pubdate": "2025 Aug 14",
+    "doi": "10.1056/NEJMoa2502082",
+    "abstract": "BACKGROUND: Cagrilintide and semaglutide have each been shown to induce weight loss as monotherapies. Data are needed on the coadministration of cagrilintide and semaglutide (called CagriSema) for weight management in adults with type 2 diabetes, including those in a subgroup who are undergoing continuous glucose monitoring.\nMETHODS: In this phase 3a, double-blind, randomized, placebo-controlled trial conducted in 12 countries, we assigned adults with a body-mass index of 27 or more, a glycated hemoglobin level of 7 to 10%, and type 2 diabetes in a 3:1 ratio to receive once-weekly cagrilintide-semaglutide (2.4 mg each) or placebo, along with lifestyle intervention, for 68 weeks. The two primary end points were the percent change in body weight and the percentage of patients with a weight reduction of at least 5%. Additional end points were changes in glycemic measures and safety assessments. Effect estimates were calculated with the use of the treatment-policy estimand (consistent with the intention-to-treat principle).\nRESULTS: A total of 1206 patients underwent randomization to either the cagrilintide-semaglutide group (904 patients) or the placebo group (302 patients). The estimated mean change in body weight from baseline to week 68 was -13.7% in the cagrilintide-semaglutide group and -3.4% in the placebo group (estimated difference, -10.4 percentage points; 95% confidence interval, -11.2 to -9.5; P<0.001). More patients in the cagrilintide-semaglutide group than in the placebo group had a weight reduction of 5% or more (P<0.001); the same was true of reductions of at least 10%, 15%, and 20% (P<0.001 for the last comparison). The percentage of patients who had a glycated hemoglobin level of 6.5% or less was 73.5% in the cagrilintide-semaglutide group and 15.9% in the placebo group. Gastrointestinal adverse events were reported by 72.5% of the patients in the cagrilintide-semaglutide group and 34.4% in the placebo group, most of which were transient and mild or moderate in severity.\nCONCLUSIONS: Once-weekly cagrilintide-semaglutide (at a dose of 2.4 mg each) resulted in a significantly lower body weight than placebo in adults with obesity and type 2 diabetes. (Funded by Novo Nordisk; REDEFINE 2 ClinicalTrials.gov number, NCT05394519.)."
+  }
+]

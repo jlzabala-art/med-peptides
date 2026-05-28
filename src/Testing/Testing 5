@@ -1,16 +1,16 @@
-Project: ReGen PEPT
-Module: Home Page + Protocol Builder Deep Linking
+Project: Med-Peptides
+Module: Home Page + Protocol Finder Deep Linking
 Priority: High
 Platform: Desktop first
 
 Objective:
-Add a new section on the home page to showcase a small set of high-scientific-evidence protocols. When the user clicks one of them, they must be redirected into the Protocol Builder with prefilled input data that makes that protocol clinically coherent and likely to be recommended.
+Add a new section on the home page to showcase a small set of high-scientific-evidence protocols. When the user clicks one of them, they must be redirected into the Protocol Finder with prefilled input data that makes that protocol clinically coherent and likely to be recommended.
 
 Section name:
 Evidence-Based Clinical Protocols
 
 Primary business goal:
-Use the homepage to surface clinically strong protocol examples and drive users directly into the Protocol Builder with realistic starting conditions.
+Use the homepage to surface clinically strong protocol examples and drive users directly into the Protocol Finder with realistic starting conditions.
 
 Functional requirements:
 
@@ -26,9 +26,9 @@ Functional requirements:
    - main compounds
    - short scientific rationale
    - evidence badge
-   - CTA button: “Open in Protocol Builder”
+   - CTA button: “Open in Protocol Finder”
 
-Protocol cards should be based on real protocol families already supported by Protocol Builder 2.0.
+Protocol cards should be based on real protocol families already supported by Protocol Finder 2.0.
 
 Initial recommended cards:
 1. Structured Weight Management Protocol
@@ -87,12 +87,12 @@ Evidence: Exploratory / Preventive
 
 Deep linking behavior:
 
-When user clicks “Open in Protocol Builder”, redirect to Protocol Builder with a prefilled query state or session payload.
+When user clicks “Open in Protocol Finder”, redirect to Protocol Finder with a prefilled query state or session payload.
 
-The builder must open with input data that make the protocol clinically coherent.
+The finder must open with input data that make the protocol clinically coherent.
 
 Implement route:
- /protocol-builder?template=<template_id>&prefill=<encoded_payload>
+ /protocol-finder?template=<template_id>&prefill=<encoded_payload>
 
 Or equivalent state-based navigation if needed.
 
@@ -172,14 +172,14 @@ prefill:
 - tempo: conservative
 - duration: 12_weeks
 
-Builder behavior after landing:
+Finder behavior after landing:
 
 1. Inputs must appear already filled.
 2. Homepage source must be tracked.
 3. The selected evidence protocol must be stored as source_template.
 4. User must still be allowed to edit all inputs.
 5. If user changes inputs, protocols can be regenerated normally.
-6. Show a subtle banner at the top of Protocol Builder:
+6. Show a subtle banner at the top of Protocol Finder:
    “Prefilled from Evidence-Based Clinical Protocols”
 
 Analytics requirements:
@@ -187,8 +187,8 @@ Analytics requirements:
 Track:
 - homepage_protocol_card_view
 - homepage_protocol_click
-- builder_prefill_loaded
-- builder_prefill_converted_to_selection
+- finder_prefill_loaded
+- finder_prefill_converted_to_selection
 
 Track fields:
 - protocol_template_id
@@ -201,7 +201,7 @@ UX requirements:
 Desktop:
 - 3 cards per row or 2 cards per row depending on width
 - strong visual hierarchy
-- elegant scientific look aligned with ReGen PEPT
+- elegant scientific look aligned with Med-Peptides
 - cards must feel premium and clinical, not retail
 
 Card design:
@@ -209,7 +209,7 @@ Card design:
 - compact metadata row
 - scientific rationale in 2 lines max
 - badge on top right for evidence strength
-- button at bottom: Open in Protocol Builder
+- button at bottom: Open in Protocol Finder
 
 Use evidence badge styles:
 - High Clinical Relevance
@@ -222,16 +222,16 @@ Keep wording conservative and professional.
 
 Validation rules:
 
-1. Clicking a card must always open Protocol Builder with valid prefilled values.
+1. Clicking a card must always open Protocol Finder with valid prefilled values.
 2. The prefill must correspond to the selected protocol objective.
 3. The selected protocol should be likely to appear among top recommendations.
-4. If the exact protocol is not returned due to ranking changes, the builder must still load coherent data and display relevant protocol family options.
+4. If the exact protocol is not returned due to ranking changes, the finder must still load coherent data and display relevant protocol family options.
 5. Invalid template IDs must fail gracefully.
 
 Fallback behavior:
 
 If deep-link protocol template is unavailable:
-- Load builder with the prefilled data
+- Load finder with the prefilled data
 - Show:
   “This evidence profile has been loaded. Available protocols have been recalculated.”
 
@@ -256,7 +256,7 @@ This must be editable and reusable.
 Success criteria:
 
 - Home page displays evidence-based protocols section
-- Clicking any protocol opens Protocol Builder with coherent prefilled patient data
-- Builder recognizes the source and loads values correctly
+- Clicking any protocol opens Protocol Finder with coherent prefilled patient data
+- Finder recognizes the source and loads values correctly
 - User can continue editing and generating protocols normally
-- Section improves conversion from homepage to protocol builder
+- Section improves conversion from homepage to protocol finder

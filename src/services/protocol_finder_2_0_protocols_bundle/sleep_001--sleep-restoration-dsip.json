@@ -1,0 +1,423 @@
+{
+  "id": "sleep_001",
+  "protocol_id": "sleep_001",
+  "active": true,
+  "confidence_score": 88,
+  "number_of_phases": 2,
+  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_organization": "Med-Peptides",
+  "protocol_author_title": "Peptide Specialists",
+  "protocol_duration_weeks": 8,
+  "protocol_is_curated": true,
+  "protocol_is_physician_authored": false,
+  "protocol_last_reviewed_at": "2026-03-29",
+  "protocol_review_status": "approved",
+  "protocol_slug": "sleep-restoration-8w",
+  "protocol_source_type": "curated_library",
+  "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
+  "overview_summary": "Protocol designed to improve sleep architecture, reduce stress activation, and support circadian recovery.",
+  "protocol_source_version": "v5.0",
+  "economics": {
+    "total_protocol_cost_estimate": 450,
+    "total_vials_required": 8
+  },
+  "complexity_level": "moderate",
+  "protocol_author_notes": "Official curated protocol for general clinical use.",
+  "protocol_source_reference": "internal_guide",
+  "protocol_title": "DSIP & Selank Sleep Restoration Protocol",
+  "status": "approved",
+  "seeded_at": "2026-04-25T06:10:36.132Z",
+  "phases": [
+    {
+      "phase_number": 1,
+      "phase_title": "Sleep Initiation Phase",
+      "start_week": 1,
+      "end_week": 4,
+      "drugs_used": [
+        {
+          "product_slug": "dsip",
+          "selected_strength": "5mg",
+          "route": "subcutaneous",
+          "dosing_frequency": "daily_evening",
+          "vials_required_for_phase": 4,
+          "faq_ref": "dsip_faq",
+          "pubmed_ref": "dsip_pubmed",
+          "productId": "DSIP-2mg-vial",
+          "weekly_dose": "TODO: specify"
+        },
+        {
+          "product_slug": "selank",
+          "selected_strength": "nasal",
+          "dosing_frequency": "daily",
+          "vials_required_for_phase": 2,
+          "productId": "Selank-30mg-vial",
+          "weekly_dose": "TODO: specify"
+        }
+      ]
+    },
+    {
+      "phase_number": 2,
+      "phase_title": "Sleep Stabilization",
+      "start_week": 5,
+      "end_week": 8,
+      "drugs_used": [
+        {
+          "product_slug": "dsip",
+          "selected_strength": "5mg",
+          "dosing_frequency": "3x_week",
+          "vials_required_for_phase": 2,
+          "productId": "DSIP-2mg-vial",
+          "weekly_dose": "TODO: specify"
+        }
+      ]
+    }
+  ],
+  "bundleVersion": "2.0",
+  "protocol_version": "v6.1",
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "tempo_preference": "standard",
+      "age_group": null,
+      "patient_demographic": null,
+      "duration_weeks": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "legacy_compatibility": {
+    "enabled": true,
+    "notes": "Legacy simplified fields are preserved for backward compatibility while canonical phase_blueprints are used for generation.",
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ]
+  },
+  "risk_class": "low_to_moderate",
+  "physician_supervision_required": false,
+  "dosing_enrichment": {
+    "cycling_recommendation": "8-week sleep restoration cycle followed by reassessment. Avoid continuous DSIP use beyond 8-10 weeks without sleep-quality review.",
+    "maintenance_dose": "DSIP 3x/week evening during stabilization. Selank may be tapered or reserved for stress-driven sleep onset issues.",
+    "timing_optimization": "DSIP should be administered in the evening, ideally 30-60 minutes before intended sleep time. Selank is best used earlier in the evening or late afternoon if anxiety-driven sleep onset is present.",
+    "titration_note": "Weeks 1-2: introduce DSIP evening dosing and assess morning grogginess. Weeks 3-4: continue if sleep latency improves. Weeks 5-8: reduce DSIP to 3x/week stabilization."
+  },
+  "monitoring_plan": {
+    "baseline_required": [
+      "sleep_latency",
+      "total_sleep_time",
+      "sleep_fragmentation",
+      "daytime_sleepiness_score",
+      "GAD-7_or_stress_score"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "week": 4,
+        "type": "sleep_initiation_review",
+        "measures": [
+          "sleep_latency",
+          "sleep_quality",
+          "daytime_sleepiness"
+        ],
+        "purpose": "Assess early sleep initiation and tolerance."
+      },
+      {
+        "week": 8,
+        "type": "sleep_stabilization_review",
+        "measures": [
+          "sleep_fragmentation",
+          "total_sleep_time",
+          "daytime_energy"
+        ],
+        "purpose": "Evaluate sustained sleep architecture and stabilization response."
+      }
+    ]
+  },
+  "eligibility_rules": {
+    "supported_goals": [
+      "sleep_support",
+      "sleep_architecture",
+      "stress_related_sleep_disruption",
+      "sleep_onset_support"
+    ],
+    "contraindications": [
+      "untreated_sleep_apnea",
+      "severe_respiratory_insufficiency",
+      "pregnancy_or_breastfeeding",
+      "active_substance_use_disorder",
+      "known_hypersensitivity_to_protocol_compounds"
+    ],
+    "relative_cautions": [
+      "sedative_hypnotic_use",
+      "shift_work_schedule",
+      "severe_depression",
+      "bipolar_disorder",
+      "morning_sedation_sensitivity"
+    ],
+    "required_patient_inputs": [
+      "sleep_problem_type",
+      "sleep_schedule",
+      "current_sleep_medications",
+      "stress_load",
+      "start_date"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "phase_blueprints": [
+    {
+      "phase_key": "sleep_initiation_phase",
+      "phase_title": "Sleep Initiation Phase",
+      "default_start_week": 1,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [],
+      "drugs": [
+        {
+          "product_id": "prd_dsip",
+          "product_title": "Dsip",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "daily_evening",
+            "selected_strength": "5mg"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_dsip",
+            "route": "subcutaneous"
+          }
+        },
+        {
+          "product_id": "prd_selank",
+          "product_title": "Selank",
+          "route": "protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "daily",
+            "selected_strength": "nasal"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_selank",
+            "route": "protocol_defined"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 1,
+          "event_type": "phase_start",
+          "title": "Sleep Initiation Phase"
+        }
+      ]
+    },
+    {
+      "phase_key": "sleep_stabilization",
+      "phase_title": "Sleep Stabilization",
+      "default_start_week": 5,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [],
+      "drugs": [
+        {
+          "product_id": "prd_dsip",
+          "product_title": "Dsip",
+          "route": "protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "3x_week",
+            "selected_strength": "5mg"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_dsip",
+            "route": "protocol_defined"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 5,
+          "event_type": "phase_start",
+          "title": "Sleep Stabilization"
+        }
+      ]
+    }
+  ],
+  "expected_outcomes": {
+    "qualitative": [
+      "Improved sleep onset and depth",
+      "Reduced nocturnal awakenings",
+      "Enhanced morning energy and alertness",
+      "Improved circadian rhythm regulation"
+    ],
+    "quantitative_ranges": [
+      "Improvement in PSQI sleep quality score",
+      "Reduction in sleep latency"
+    ]
+  },
+  "safety_profile": {
+    "adverse_events_common": [],
+    "adverse_events_serious": [],
+    "drug_interactions": [],
+    "monitoring_required": []
+  },
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 4,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "Fasting glucose",
+        "Insulin",
+        "HOMA-IR",
+        "Lipid panel"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 8,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "HbA1c",
+        "Full lipid panel",
+        "Body composition (DEXA or impedance)"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "riskManagement": {
+    "contraindications": [
+      "Type 1 diabetes (insulin-dependent, use with caution)",
+      "Severe renal impairment",
+      "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (10–30%)",
+        "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+      },
+      {
+        "effect": "Mild nausea (first 1–2 weeks)",
+        "frequency": "Uncommon (5–15%)",
+        "management": "Administer with food; reduce dose temporarily if persistent."
+      },
+      {
+        "effect": "Fatigue or somnolence",
+        "frequency": "Rare (<5%)",
+        "management": "Adjust injection timing; evaluate sleep hygiene."
+      },
+      {
+        "effect": "Headache",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Hydration; paracetamol as needed; review dosing."
+      }
+    ],
+    "escalation_criteria": [
+      "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+      "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+      "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+      "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ]
+  },
+  "primary_goal": "Sleep & Recovery",
+  "metadata": {
+    "visibility": "public",
+    "primary_condition": "insomnia_sleep_disruption",
+    "abbreviatedName": "SLP-001 · Pineal Peptide Fixed – 8wk",
+    "version": "1.0",
+    "longDescription": "DSIP (Delta Sleep-Inducing Peptide; Trp-Ala-Gly-Gly-Asp-Ala-Ser-Gly-Glu) is a nonapeptide first isolated from rabbit cerebral venous blood in 1977. It promotes delta (slow-wave) sleep by modulating hypothalamic-pituitary signaling, inhibiting somatostatin release, and modulating the GABA/glutamate balance in thalamic and cortical circuits (Schoenenberger GA & Monnier M, PNAS 1977; Seifritz E et al., Neuropsychopharmacology 1995). DSIP also exhibits anti-stress, antioxidant, and adaptogenic properties, normalising circadian ACTH and cortisol rhythms disrupted in chronic insomnia. Selank (tuftsin analogue) potentiates GABAergic inhibition and reduces CRF-mediated HPA hyperactivation — the dominant driver of sleep-onset insomnia and cortisol-mediated early waking (Semenova TP et al., Bull Exp Biol Med 2010). The 8-week protocol delivers dual-compound induction (weeks 1–4) followed by DSIP-only stabilisation (weeks 5–8), targeting sleep architecture normalisation rather than pharmacological sedation.",
+    "keywords": [
+      "DSIP sleep peptide protocol",
+      "Selank anxiolytic sleep",
+      "delta wave sleep peptide",
+      "cortisol insomnia protocol",
+      "sleep architecture restoration",
+      "peptide insomnia treatment"
+    ],
+    "references": [
+      {
+        "pmid": "267943",
+        "citation": "Schoenenberger GA, Monnier M. Characterization of DSIP. PNAS 1977;74:1282-1286."
+      },
+      {
+        "pmid": "8529972",
+        "citation": "Seifritz E et al. DSIP effects on nocturnal cortisol. Neuropsychopharmacology 1995;13:327-335."
+      },
+      {
+        "pmid": "20737030",
+        "citation": "Semenova TP et al. Selank anxiolytic effects. Bull Exp Biol Med 2010;150:65-67."
+      }
+    ],
+    "scientificName": "DSIP & Selank Delta-Sleep-Inducing & GABAergic Anxiolytic Sleep Restoration Protocol",
+    "description": "8-week sleep restoration protocol combining DSIP delta-wave sleep induction with Selank GABAergic anxiolysis to rebuild healthy sleep architecture and reduce cortisol-driven insomnia.",
+    "author": {
+      "name": "Med-Peptides Clinical Team",
+      "organization": "Med-Peptides",
+      "title": "Peptide Specialists"
+    },
+    "review": {
+      "last_reviewed_at": "2026-03-29",
+      "review_status": "approved"
+    },
+    "source_type": "curated_library",
+    "source_reference": "internal_guide",
+    "schema_version": "antigravity_v2",
+    "complexity_level": "moderate",
+    "shortCode": "SLP-001",
+    "primary_goal": "Sleep & Recovery"
+  },
+  "category": "Sleep & Recovery",
+  "_enrichment_notes": [
+    "phases.drugs.weekly_dose: CALCULATED where possible",
+    "expected_outcomes: INJECTED for category \"Sleep & Recovery\""
+  ],
+  "mechanism_of_action": [
+    "Targeted receptor modulation and cellular signaling optimization.",
+    "Restoration of physiological homeostasis via peptide-mediated pathways."
+  ]
+}

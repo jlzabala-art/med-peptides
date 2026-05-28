@@ -1,0 +1,37 @@
+[
+  {
+    "pmid": "17468232",
+    "title": "beta-Thymosins.",
+    "authors": [
+      "Hannappel E"
+    ],
+    "journal": "Annals of the New York Academy of Sciences",
+    "pubdate": "2007 Sep",
+    "doi": null,
+    "abstract": "The development of thymosin beta(4) from a thymic hormone to an actin-sequestering peptide and back to a cytokine supporting wound healing will be outlined. Thymosin fraction 5 consists of a mixture of polypeptides and improves immune response. Starting with fraction 5, several main peptides (thymosin alpha(1), polypeptide beta(1), and thymosin beta(4)) were isolated and tested for biological activity. However, none of the isolated peptides were really thymic hormones. They are all biological important peptides with diverse functions. Polypeptide beta(1) is identical to ubiquitin truncated by two C-terminal glycine residues. Several peptides related to thymosin beta(4) were isolated and sequenced from various species. Large amounts of thymosin beta(4) were found in many cells. It was postulated that the beta-thymosins might have a general function. The identification of a biological function of thymosin beta(4) was tedious. In 1990, Dan Safer and his colleagues recognized that thymosin beta(4) sequesters G-actin. The dissociation constant of the complex in the micromolar range allows for fast binding and release of G-actin. beta-Thymosins are the main intracellular G-actin-sequestering peptides in most vertebrate cells. Thymosin beta(4) is unstructured but folds into a stable conformation on binding to G-actin. It is present in the nucleus as well as the cytoplasm and might be responsible for sequestering nuclear actin. Several biological effects are attributed to thymosin beta(4), oxidized thymosin beta(4), or to ac-SDKP possibly generated from thymosin beta(4). However, very little is known about molecular mechanisms mediating the effects attributed to extracellular beta-thymosins."
+  },
+  {
+    "pmid": "17495248",
+    "title": "The beta-thymosin enigma.",
+    "authors": [
+      "Sun HQ",
+      "Yin HL"
+    ],
+    "journal": "Annals of the New York Academy of Sciences",
+    "pubdate": "2007 Sep",
+    "doi": null,
+    "abstract": "Actin dynamics in nonmuscle cells is controlled by the availability of actin nucleating sites and actin monomers. Thymosin beta-4 (Tbeta-4) has been implicated in modulating the availability of actin monomers in a large variety of cells. It together with actin nucleating, severing, and uncapping proteins, harnesses the intrinsic dynamic properties of actin to regulate the actin polymerization response in cells. Overexpression or addition of exogenous Tbeta-4 or its homolog, Tbeta-10, alters the actin cytoskeleton, and has multiple effects on cellular functions related to motility. Some of these effects are consistent with beta-thymosins functioning exclusively as monomer-binding proteins, while others are not. Therefore, the complex pleiotropic effects of beta-thymosin in cells may be due to direct and indirect effects on the actin cytoskeleton, as well as modulation of signaling pathways that will impact the cytoskeleton and a variety of cell functions."
+  },
+  {
+    "pmid": "27450728",
+    "title": "Structures of Thymosin Proteins.",
+    "authors": [
+      "Hoch K",
+      "Volk DE"
+    ],
+    "journal": "Vitamins and hormones",
+    "pubdate": "2016",
+    "doi": "10.1016/bs.vh.2016.04.009",
+    "abstract": "The thymosin proteins are all short, highly charged, intrinsically unstructured proteins under natural conditions. However, structure can be induced in many of the thymosin proteins by providing charge neutralization at low pH or by the addition of Zn(2+) ions, organic reagents such as trifluoroethanol, hexafluoropropanol, or n-dodecyltrimethylammonium bromide, or interactions with their natural binding partner proteins. The differing structures of thymosin alpha and thymosin beta proteins have been studied by circular dichroism, nuclear magnetic resonance, and crystallographic methods in order to better understand the role of these proteins. In this structural biology review the structures of prothymosin, parathymosin, thymosin alpha-1, and several beta thymosin proteins, in both native states and under secondary structure-inducing conditions are discussed."
+  }
+]

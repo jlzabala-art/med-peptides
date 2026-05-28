@@ -13,10 +13,11 @@
   font-weight: 600;
   font-family: var(--font-sans);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   border: none;
   font-size: 1rem;
   letter-spacing: 0.01em;
+  min-height: 48px; /* Proper mobile touch target */
 }
 
 .btn-primary {
@@ -27,8 +28,8 @@
 
 .btn-primary:hover {
   background-color: var(--primary-light);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 54, 102, 0.25);
+  transform: scale(1.02) translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 54, 102, 0.25), 0 0 16px rgba(0, 163, 224, 0.2);
 }
 
 .btn-secondary {
@@ -40,8 +41,9 @@
 
 .btn-secondary:hover {
   border-color: var(--primary-light);
-  color: var(--primary-light);
-  box-shadow: var(--shadow-sm);
+  color: var(--primary);
+  background-color: rgba(0, 163, 224, 0.03);
+  box-shadow: 0 4px 16px rgba(0, 54, 102, 0.08);
   transform: translateY(-1px);
 }
 
@@ -97,47 +99,11 @@
   color: #94a3b8;
 }
 
-/* Cards */
-.card {
-  background-color: var(--surface);
-  border-radius: var(--radius-xl);
-  padding: 2.5rem;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-  height: 100%;
-  position: relative;
-  overflow: hidden;
-}
+/* Cards — canonical .card definition is in master.css
+   Extended card variants specific to quality/transparency sections: */
 
-.card::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  border-radius: var(--radius-xl);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-  pointer-events: none;
-}
-
-.card:hover {
-  box-shadow: var(--shadow-premium);
-  transform: translateY(-6px) scale(1.01);
-  border-color: rgba(0, 163, 224, 0.3);
-}
-
-/* Grid Layouts */
-.grid-2 { 
-  display: grid; 
-  grid-template-columns: repeat(2, 1fr); 
-  gap: 2rem; 
-}
-
-.grid-4 { 
-  display: grid; 
-  grid-template-columns: repeat(4, 1fr); 
-  gap: 2rem; 
-}
-
+/* Grid Layouts — canonical definitions in master.css (.grid-2, .grid-3, .grid-4, .grid-auto)
+   Extended layout variants specific to sections: */
 .quality-grid { 
   display: grid; 
   grid-template-columns: repeat(2, 1fr); 
@@ -145,16 +111,11 @@
 }
 
 @media (max-width: 1024px) {
-  .grid-4 {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .quality-grid { grid-template-columns: repeat(2, 1fr); gap: 2rem; }
 }
 
 @media (max-width: 768px) {
-  .grid-2, .grid-4, .quality-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
+  .quality-grid { grid-template-columns: 1fr; gap: 1.5rem; }
 }
 
 .quality-card-premium {
@@ -267,15 +228,41 @@
   }
 }
 
+/* ── Close-button SVG fix ─────────────────────────────────────────────────
+   Lucide icons inside close buttons must always show their stroke color.
+   iOS/WebKit can paint SVG paths black or invisible when fill/stroke are
+   unset.  We set safe defaults here WITHOUT !important on stroke so that
+   per-component inline stroke hex values always take precedence.
+──────────────────────────────────────────────────────────────────────── */
+.smCloseBtn svg,
+.cartCloseBtn svg {
+  display: block !important;
+  fill: none !important;
+  stroke: currentColor;
+  stroke-width: 2.5px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Mobile drawer close button — now CSS-only (::before/::after), no SVG needed */
+/* .mobile-drawer-close svg rules removed — see header.css */
+
+.smCloseBtn svg path,
+.cartCloseBtn svg path,
+.mobile-drawer-close svg path {
+  /* Inherit stroke from the explicit hex set on the SVG element itself */
+  stroke: inherit;
+  fill: none !important;
+  vector-effect: non-scaling-stroke;
+}
+
 /* Updated Breakpoint for Desktop/Mobile utility classes */
 @media (max-width: 1024px) {
   .desktop-only { display: none !important; }
-  .mobile-only { display: block !important; }
 }
 
 @media (min-width: 1025px) {
   .mobile-only { display: none !important; }
-  .desktop-only { display: block !important; }
   /* Ensure hamburger is never visible on desktop */
   .mobile-menu-btn { display: none !important; }
 }
@@ -320,17 +307,31 @@
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 .animate-fade-in { animation: fadeIn 0.8s ease forwards; }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
+/* Spinner — canonical .spinner and @keyframes spin defined in master.css
+   This variant mirrors master.css using the design token for border: */
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid rgba(255, 255, 255, 0.1);
+  border: 3px solid var(--border);
   border-radius: 50%;
   border-top-color: var(--primary);
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Skeleton — canonical .skeleton and @keyframes shimmer/shimmer defined in master.css */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f1f5f9 25%,
+    #e9eff6 50%,
+    #f1f5f9 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: var(--radius-sm);
+  display: block;
+  position: relative;
+  overflow: hidden;
 }
 .delay-1 { animation-delay: 0.2s; opacity: 0; }
 .delay-2 { animation-delay: 0.4s; opacity: 0; }
@@ -351,13 +352,37 @@
 }
 
 .with-header-padding {
-  /* Disclaimer bar (~28px) + nav bar (~68px) = ~96px total desktop header height */
-  padding-top: 96px !important;
+  /* Minimal offset for sticky header (~70-80px is often enough to feel tight but safe) */
+  padding-top: 76px !important;
 }
+
 @media (max-width: 768px) {
   .with-header-padding {
-    /* Mobile header: disclaimer bar (~28px) + compact nav (~72px) + safety buffer = ~120px */
-    padding-top: 120px !important;
+    padding-top: 68px !important;
+  }
+  
+  .with-header-padding > section:first-of-type,
+  .with-header-padding > div:first-of-type > section:first-of-type,
+  .with-header-padding .hero-section,
+  .with-header-padding .hero-search,
+  .with-header-padding .page-hero,
+  .with-header-padding .section:first-of-type,
+  .with-header-padding .template-root,
+  .with-header-padding .proto-detail__hero {
+    padding-top: 0 !important;
+  }
+}
+
+/* Global tightening for first sections on desktop too */
+@media (min-width: 769px) {
+  .with-header-padding > section:first-of-type,
+  .with-header-padding > div:first-of-type > section:first-of-type,
+  .with-header-padding .hero-section,
+  .with-header-padding .hero-search,
+  .with-header-padding .page-hero,
+  .with-header-padding .section:first-of-type,
+  .with-header-padding .template-root {
+    padding-top: 0.5rem !important;
   }
 }
 
@@ -506,4 +531,392 @@ button:focus-visible, a:focus-visible {
 
 .best-match-gradient {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+}
+
+/* ── Protocol Preview Modal — enter / exit keyframes ──────────────────────── */
+@keyframes protoModalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes protoModalOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(-10px);
+  }
+}
+
+/* ── Print styles: render only the modal scroll body ─────────────────────── */
+@media print {
+  /* Hide everything on the page */
+  body > * { display: none !important; }
+
+  /* Reveal the modal overlay so it is the print root */
+  body > * [data-print-modal="true"],
+  [data-print-modal="true"] { display: block !important; }
+
+  /* The scrollable modal body gets full height */
+  [data-print-body="true"] {
+    display: block !important;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+    padding: 0 !important;
+  }
+
+  /* Hide chrome that has no value on paper */
+  [data-print-hide="true"] { display: none !important; }
+
+  /* Ensure content fills the page */
+  [data-print-modal="true"] {
+    position: static !important;
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  /* Page margins */
+  @page { margin: 15mm 15mm 20mm 15mm; }
+}
+
+/* ── WebKit/Safari Lucide icon inheritance & rendering fix inside Clinical Assistant ── */
+.clinical-assistant-container button svg,
+.clinical-assistant-container button svg * {
+  stroke: currentColor !important;
+  fill: none !important;
+}
+
+/* ── Clinical Assistant Typography & Premium Layout Tightening ── */
+.clinical-assistant-container {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.clinical-assistant-container h1 {
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+  color: var(--primary) !important;
+  margin: 1rem 0 0.5rem 0 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.3 !important;
+  border-bottom: 1px solid rgba(0, 75, 135, 0.08) !important;
+  padding-bottom: 0.25rem !important;
+}
+
+.clinical-assistant-container h2 {
+  font-size: 0.92rem !important;
+  font-weight: 750 !important;
+  color: #0f172a !important;
+  margin: 0.8rem 0 0.4rem 0 !important;
+  letter-spacing: -0.015em !important;
+  line-height: 1.3 !important;
+}
+
+.clinical-assistant-container h3 {
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  color: #475569 !important;
+  margin: 0.65rem 0 0.35rem 0 !important;
+  letter-spacing: 0.01em !important;
+  line-height: 1.3 !important;
+}
+
+.clinical-assistant-container p {
+  font-size: 0.8rem !important;
+  line-height: 1.55 !important;
+  color: #334155 !important;
+  font-weight: 500 !important;
+  margin: 0 0 0.75rem 0 !important;
+}
+
+.clinical-assistant-container ul,
+.clinical-assistant-container ol {
+  margin: 0.3rem 0 0.75rem 0 !important;
+  padding-left: 1.15rem !important;
+  gap: 0.35rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.clinical-assistant-container li {
+  font-size: 0.78rem !important;
+  line-height: 1.5 !important;
+  color: #334155 !important;
+  font-weight: 500 !important;
+  padding-left: 0.1rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.clinical-assistant-container li strong {
+  color: #0f172a !important;
+  font-weight: 650 !important;
+}
+
+/* Bullet list custom indicators to look highly structured */
+.clinical-assistant-container ul li {
+  list-style-type: none !important;
+  position: relative !important;
+  padding-left: 1rem !important;
+}
+
+.clinical-assistant-container ul li::before {
+  content: "•" !important;
+  color: var(--primary) !important;
+  font-weight: bold !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  font-size: 0.9rem !important;
+}
+
+/* Custom Warning / Disclaimer Block */
+.clinical-assistant-container .ca-disclaimer {
+  padding: 0.75rem 1rem !important;
+  border-radius: 10px !important;
+  margin: 0.75rem 0 !important;
+  font-size: 0.75rem !important;
+}
+
+/* Custom AI section cards */
+.clinical-assistant-container .ca-section-card {
+  padding: 0.8rem 1rem !important;
+  border-radius: 10px !important;
+  margin: 0.8rem 0 !important;
+}
+
+.clinical-assistant-container .ca-section-card-title {
+  font-size: 0.76rem !important;
+  margin-bottom: 0.35rem !important;
+}
+
+.clinical-assistant-container .ca-section-card-body {
+  font-size: 0.78rem !important;
+  line-height: 1.5 !important;
+}
+
+/* Blockquote Custom Styling */
+.clinical-assistant-container blockquote {
+  border-left: 4px solid var(--primary) !important;
+  background-color: rgba(0, 75, 135, 0.03) !important;
+  padding: 0.65rem 1rem !important;
+  margin: 0.85rem 0 !important;
+  border-radius: 0 8px 8px 0 !important;
+  font-size: 0.78rem !important;
+  color: #475569 !important;
+  font-style: italic !important;
+  line-height: 1.5 !important;
+}
+
+/* Fenced Code Block Custom Styling */
+.clinical-assistant-container pre {
+  margin: 0 !important;
+  padding: 0.85rem 1rem !important;
+  overflow-x: auto !important;
+  font-size: 0.74rem !important;
+  color: #f8fafc !important;
+  background-color: #0f172a !important;
+  font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace !important;
+  line-height: 1.5 !important;
+}
+
+.clinical-assistant-container code {
+  font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace !important;
+  font-size: inherit !important;
+  color: inherit !important;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.clinical-assistant-container :not(pre) > code {
+  background: rgba(0,75,135,0.05) !important;
+  border: 1px solid rgba(0,75,135,0.08) !important;
+  color: var(--primary) !important;
+  border-radius: 6px !important;
+  padding: 0.15em 0.35em !important;
+  font-size: 0.8em !important;
+}
+
+/* Step Card Premium Transitions */
+.clinical-assistant-container .ca-step-card {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.clinical-assistant-container .ca-step-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(0, 75, 135, 0.15) !important;
+  background-color: rgba(248, 250, 252, 0.95) !important;
+  box-shadow: 0 4px 12px rgba(0, 75, 135, 0.04) !important;
+}
+
+/* ── Chat Messages Layout & Spacing Tightening ── */
+.ca-message-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background-color: #f8fafc;
+  scroll-behavior: smooth;
+}
+
+.ca-message-item-wrapper {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  max-width: 90%;
+}
+
+.ca-message-bubble {
+  padding: 0.95rem 1.15rem;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  border: 1px solid rgba(0,0,0,0.05);
+  position: relative;
+}
+
+/* ── Input Bar & Quick Prompts Refinements ── */
+.clinical-assistant-container .ca-input-bar-container {
+  padding: 1.25rem;
+}
+
+/* Fading Gradients for Horizontal Scroll */
+.clinical-assistant-container .quick-prompts-fade-left {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 28px;
+  background: linear-gradient(to right, #ffffff, transparent);
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.95;
+}
+
+.clinical-assistant-container .quick-prompts-fade-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 28px;
+  background: linear-gradient(to left, #ffffff, transparent);
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.95;
+}
+
+/* ── Mobile Compact Spacing & Grid Reductions ── */
+@media (max-width: 768px) {
+  .ca-message-list {
+    padding: 1rem 0.85rem 1.5rem !important;
+    gap: 0.85rem !important;
+  }
+  
+  .ca-message-item-wrapper {
+    gap: 0.5rem !important;
+    max-width: 95% !important;
+  }
+  
+  .ca-message-bubble {
+    padding: 0.65rem 0.85rem !important;
+    border-radius: 16px !important;
+  }
+
+  /* Compact Input Bar Container on Mobile to preserve height */
+  .clinical-assistant-container .ca-input-bar-container {
+    padding: 0.65rem 0.85rem !important;
+    padding-bottom: calc(0.65rem + env(safe-area-inset-bottom, 12px)) !important;
+  }
+  
+  .clinical-assistant-container .ca-input-bar-row {
+    gap: 0.45rem !important;
+    padding: 0.3rem 0.45rem 0.3rem 0.75rem !important;
+    border-radius: 20px !important;
+    min-height: 40px !important;
+  }
+  
+  .clinical-assistant-container .quick-prompts-scroll {
+    padding-bottom: 0.45rem !important;
+    gap: 0.35rem !important;
+  }
+  
+  .clinical-assistant-container .quick-prompts-scroll button {
+    padding: 0.35rem 0.65rem !important;
+    font-size: 0.68rem !important;
+  }
+  
+  .clinical-assistant-container .ca-scan-btn {
+    width: 30px !important;
+    height: 30px !important;
+    box-shadow: 0 2px 6px rgba(16,185,129,0.2) !important;
+  }
+  .clinical-assistant-container .ca-scan-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+  
+  .clinical-assistant-container .ca-voice-btn,
+  .clinical-assistant-container .ca-send-btn {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 10px !important;
+  }
+  .clinical-assistant-container .ca-voice-btn svg,
+  .clinical-assistant-container .ca-send-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+  
+  .clinical-assistant-container .ca-input-bar-disclaimer {
+    margin: 0.4rem 0 0 !important;
+  }
+  
+  .clinical-assistant-container h1 {
+    font-size: 0.96rem !important;
+    margin: 0.75rem 0 0.4rem 0 !important;
+  }
+  
+  .clinical-assistant-container h2 {
+    font-size: 0.86rem !important;
+    margin: 0.6rem 0 0.3rem 0 !important;
+  }
+  
+  .clinical-assistant-container h3 {
+    font-size: 0.76rem !important;
+    margin: 0.5rem 0 0.25rem 0 !important;
+  }
+  
+  .clinical-assistant-container p {
+    font-size: 0.76rem !important;
+    margin: 0 0 0.55rem 0 !important;
+    line-height: 1.45 !important;
+  }
+  
+  .clinical-assistant-container li {
+    font-size: 0.74rem !important;
+    margin-bottom: 0.15rem !important;
+    line-height: 1.4 !important;
+  }
+
+  .clinical-assistant-container ul,
+  .clinical-assistant-container ol {
+    margin: 0.2rem 0 0.55rem 0 !important;
+    gap: 0.2rem !important;
+    padding-left: 0.85rem !important;
+  }
 }

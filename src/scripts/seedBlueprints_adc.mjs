@@ -26,7 +26,7 @@ const dataPath   = join(__dirname, '../data/protocolBlueprintsV2.json');
 // ─── Init Admin SDK with ADC ──────────────────────────────────────────────────
 initializeApp({
   credential: applicationDefault(),
-  projectId: 'med-peptides-app',
+  projectId: 'Med-Peptides-app',
 });
 
 const db = getFirestore();

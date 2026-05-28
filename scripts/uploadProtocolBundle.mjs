@@ -20,9 +20,8 @@
 
 import { readFileSync, readdirSync } from 'fs';
 import { fileURLToPath } from 'url';
-import { dirname, join, extname, basename } from 'path';
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { dirname, join, extname } from 'path';
+import { db } from './lib/firebase-admin.mjs';
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
@@ -30,35 +29,8 @@ const __dirname  = dirname(__filename);
 const PROJECT_ROOT = join(__dirname, '..');
 const BUNDLE_DIR   = join(
   PROJECT_ROOT,
-  'src/services/protocol_builder_2_0_protocols_bundle'
+  'src/services/protocol_finder_2_0_protocols_bundle'
 );
-
-// ─── Firebase Admin init ──────────────────────────────────────────────────────
-function initAdmin() {
-  if (getApps().length) return; // already initialised (e.g. in tests)
-
-  let credential;
-  const keyPath = join(PROJECT_ROOT, 'serviceAccountKey.json');
-
-  if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-    credential = cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON));
-    console.log('🔑  Using FIREBASE_SERVICE_ACCOUNT_JSON env var');
-  } else {
-    try {
-      const raw = readFileSync(keyPath, 'utf-8');
-      credential = cert(JSON.parse(raw));
-      console.log('🔑  Using serviceAccountKey.json');
-    } catch {
-      throw new Error(
-        '❌  No Firebase credentials found.\n' +
-        '    Place serviceAccountKey.json in the project root, or set\n' +
-        '    FIREBASE_SERVICE_ACCOUNT_JSON env var.'
-      );
-    }
-  }
-
-  initializeApp({ credential, projectId: 'med-peptides-app' });
-}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -80,9 +52,6 @@ function loadBundleFiles() {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 async function uploadProtocolBundle() {
-  initAdmin();
-  const db = getFirestore();
-
   const bundles = loadBundleFiles();
   if (bundles.length === 0) {
     console.error('❌  No JSON files found in bundle dir:', BUNDLE_DIR);

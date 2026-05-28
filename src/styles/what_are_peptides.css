@@ -1,0 +1,594 @@
+/* ============================================================
+   WHAT ARE PEPTIDES — Page Styles
+   Uses existing design tokens. No new design system.
+   ============================================================ */
+
+/* ── Page layout with optional sidebar ─────────────────────── */
+.wap-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  position: relative;
+}
+
+@media (min-width: 1080px) {
+  .wap-layout {
+    grid-template-columns: 220px 1fr;
+    gap: 3rem;
+    align-items: start;
+    padding: 0 2rem;
+  }
+}
+
+/* ── Sticky sidebar nav ─────────────────────────────────────── */
+.wap-sidebar {
+  display: none;
+}
+
+@media (min-width: 1080px) {
+  .wap-sidebar {
+    display: block;
+    position: sticky;
+    top: calc(var(--header-height, 80px) + 2rem);
+    padding-top: 0.5rem;
+    align-self: start;
+  }
+}
+
+.wap-sidebar__label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin-bottom: 1rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--border);
+}
+
+.wap-nav-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.wap-nav-link {
+  display: block;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  border-left: 2px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+  background: none;
+  border-right: none;
+  border-top: none;
+  border-bottom: none;
+  text-align: left;
+  font-family: var(--font-sans);
+  line-height: 1.4;
+}
+
+.wap-nav-link:hover {
+  color: var(--secondary);
+  border-left-color: var(--border);
+}
+
+.wap-nav-link.active {
+  color: var(--primary);
+  font-weight: 600;
+  border-left-color: var(--secondary);
+}
+
+/* ── Hero ───────────────────────────────────────────────────── */
+.wap-hero {
+  background: var(--gradient-clinical);
+  color: white;
+  padding: 5rem 0 4rem;
+  margin-bottom: 0;
+}
+
+.wap-hero__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.wap-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.wap-hero__title {
+  font-family: var(--font-heading);
+  font-size: clamp(2.2rem, 6vw, 3.75rem);
+  font-weight: 850;
+  color: white;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  max-width: 800px;
+}
+
+.wap-hero__subtitle {
+  font-size: clamp(0.95rem, 2vw, 1.125rem);
+  color: rgba(255,255,255,0.8);
+  max-width: 580px;
+  line-height: 1.75;
+  margin-bottom: 2rem;
+}
+
+.wap-hero__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: white;
+  color: var(--primary);
+  padding: 0.875rem 1.75rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-sans);
+}
+
+.wap-hero__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+}
+
+/* ── Main content area ──────────────────────────────────────── */
+.wap-content {
+  padding: 4rem 0;
+}
+
+/* ── Content section ────────────────────────────────────────── */
+.wap-section {
+  padding: 3.5rem 0;
+  border-bottom: 1px solid var(--border-light);
+  scroll-margin-top: calc(var(--header-height, 80px) + 1.5rem);
+}
+
+.wap-section:last-child {
+  border-bottom: none;
+}
+
+.wap-section__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: rgba(0,150,204,0.08);
+  color: var(--secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(0,150,204,0.15);
+}
+
+.wap-section__title {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+  font-weight: 850;
+  color: var(--primary);
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.wap-section__body {
+  font-size: 0.975rem;
+  color: var(--text-muted);
+  line-height: 1.75;
+  max-width: 680px;
+}
+
+.wap-section__body + .wap-section__body {
+  margin-top: 0.875rem;
+}
+
+/* ── Amino diagram (simple visual) ─────────────────────────── */
+.wap-chain {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+  margin: 2rem 0;
+}
+
+.wap-chain__node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.wap-chain__dot {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--gradient-clinical);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  box-shadow: var(--shadow-sm);
+}
+
+.wap-chain__label {
+  font-size: 0.65rem;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.wap-chain__arrow {
+  width: 28px;
+  height: 2px;
+  background: var(--border);
+  position: relative;
+  margin: 0 2px;
+  align-self: center;
+  margin-bottom: 20px;
+}
+
+.wap-chain__arrow::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid var(--border);
+  border-right: 2px solid var(--border);
+  transform: rotate(45deg);
+}
+
+/* ── Signal flow diagram (Section 2) ───────────────────────── */
+.wap-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  margin: 2rem 0;
+  max-width: 320px;
+}
+
+.wap-flow__step {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.wap-flow__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.wap-flow__icon--blue   { background: rgba(0,150,204,0.1); color: var(--secondary); }
+.wap-flow__icon--navy   { background: rgba(0,54,102,0.08); color: var(--primary); }
+.wap-flow__icon--green  { background: rgba(5,150,105,0.1); color: var(--success); }
+
+.wap-flow__text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.wap-flow__connector {
+  width: 2px;
+  height: 28px;
+  background: var(--border);
+  margin-left: 25px;
+}
+
+/* ── Research area pills (Section 3) ───────────────────────── */
+.wap-areas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.wap-area-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wap-area-pill:hover {
+  border-color: var(--secondary);
+  box-shadow: 0 2px 8px rgba(0,150,204,0.1);
+}
+
+.wap-area-pill__icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* ── Choose steps (Section 4) ───────────────────────────────── */
+.wap-steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 640px) {
+  .wap-steps {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.wap-step-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  position: relative;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wap-step-card:hover {
+  border-color: rgba(0,150,204,0.35);
+  box-shadow: var(--shadow-sm);
+}
+
+.wap-step-card__num {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--border);
+  line-height: 1;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.04em;
+}
+
+.wap-step-card__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.wap-step-card__body {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+.wap-step-card__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.875rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(0,150,204,0.08);
+  color: var(--secondary);
+  border: 1px solid rgba(0,150,204,0.15);
+}
+
+/* ── Docs list (Section 5) ──────────────────────────────────── */
+.wap-docs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+  max-width: 500px;
+}
+
+.wap-doc-item {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: border-color 0.2s ease;
+}
+
+.wap-doc-item:hover {
+  border-color: var(--secondary);
+}
+
+.wap-doc-item__icon {
+  width: 36px;
+  height: 36px;
+  background: rgba(0,54,102,0.06);
+  color: var(--primary);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.wap-doc-item__text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.wap-doc-item__sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 0.1rem;
+}
+
+/* ── FAQ accordion (Section 6) ──────────────────────────────── */
+.wap-faq {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1.75rem;
+  max-width: 680px;
+}
+
+.wap-faq-item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface);
+  transition: border-color 0.2s ease;
+}
+
+.wap-faq-item--open {
+  border-color: rgba(0,150,204,0.3);
+}
+
+.wap-faq-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: 0.925rem;
+  font-weight: 600;
+  color: var(--text-main);
+  transition: color 0.2s ease;
+}
+
+.wap-faq-btn:hover {
+  color: var(--primary);
+}
+
+.wap-faq-chevron {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--text-light);
+  transition: transform 0.25s ease, color 0.2s ease;
+}
+
+.wap-faq-item--open .wap-faq-chevron {
+  transform: rotate(180deg);
+  color: var(--secondary);
+}
+
+.wap-faq-answer {
+  display: none;
+  padding: 0 1.25rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.wap-faq-item--open .wap-faq-answer {
+  display: block;
+}
+
+/* ── Final CTA ──────────────────────────────────────────────── */
+.wap-cta-section {
+  background: var(--gradient-clinical);
+  border-radius: var(--radius-xl);
+  padding: 3.5rem 2.5rem;
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.wap-cta-section__title {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+  font-weight: 850;
+  color: white;
+  margin-bottom: 1rem;
+  letter-spacing: -0.03em;
+}
+
+.wap-cta-section__sub {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 2rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+.wap-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: white;
+  color: var(--primary);
+  padding: 0.9rem 2rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.975rem;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-sans);
+}
+
+.wap-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+}
+
+/* ── Mobile overrides ───────────────────────────────────────── */
+@media (max-width: 640px) {
+  .wap-hero {
+    padding: 3.5rem 0 3rem;
+  }
+
+  .wap-hero__inner,
+  .wap-layout {
+    padding: 0 1.25rem;
+  }
+
+  .wap-cta-section {
+    padding: 2.5rem 1.5rem;
+  }
+}

@@ -1,6 +1,7 @@
-import { protocolRepository } from '../repositories/protocolRepository';
-import { ProtocolEngine2 } from './protocolEngine2';
-import { productRepository } from '../repositories/productRepository';
+ 
+import { protocolRepository } from '../repositories/protocolRepository.js';
+import { ProtocolEngine2 } from './protocolEngine2.js';
+import { productRepository } from '../repositories/productRepository.js';
 import { ROUTE, VARIANT_REF_TYPE } from '../constants/productEnums';
 
 

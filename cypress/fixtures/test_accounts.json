@@ -1,0 +1,7 @@
+{
+  "admin":      { "email": "admin@regenpept.test",      "password": "TestAdmin1234!" },
+  "doctor":     { "email": "doctor@regenpept.test",     "password": "Test1234!" },
+  "wholesaler": { "email": "wholesaler@regenpept.test", "password": "Test1234!" },
+  "patient":    { "email": "patient@regenpept.test",    "password": "Test1234!" },
+  "guest":      { "email": "guest@regenpept.test",      "password": "Test1234!" }
+}

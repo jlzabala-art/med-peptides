@@ -24,7 +24,7 @@ try {
   console.error(
     "❌  serviceAccountKey.json not found at project root.\n" +
       "    Download it from: Firebase Console → Project Settings → Service Accounts → Generate new private key\n" +
-      "    Save it as: regenpept-web/serviceAccountKey.json"
+      "    Save it as: Med-Peptides-web/serviceAccountKey.json"
   );
   process.exit(1);
 }

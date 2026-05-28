@@ -1,6 +1,6 @@
 {
   "_schemaVersion": 2,
-  "_description": "Estructura canónica de productos RegenPept: Producto → Variantes",
+  "_description": "Estructura canónica de productos Med-Peptides: Producto → Variantes",
   "_conventions": {
     "id": "slug derivado del nombre: lowercase, guiones, máx 80 chars",
     "variantId": "{dosageMg}mg-{kitSize}{kitUnit}  ej: 10mg-10vial",

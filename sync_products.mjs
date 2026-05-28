@@ -2,57 +2,43 @@
  * Firestore Sync Script: Products Enriched Semantic Data
  * 
  * Usage:
- *   cd /Users/joseluiszabala/Documents/Antigravity/regenpept-web
+ *   cd /Users/joseluiszabala/Documents/Antigravity/Med-Peptides-web
  *   node /tmp/sync_products_to_firestore.mjs
  * 
  * This script reads products from src/data/products.js and writes each to
  * the 'products' collection in Firestore, using the product name as doc ID.
  */
 
-import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, setDoc, collection } from 'firebase/firestore';
-import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { readFileSync } from 'fs';
-
-// ── Firebase Config ──────────────────────────────────────────────────────────
-// ⚠️ CANONICAL PROJECT: med-peptides-app — NEVER change to regenpept-web-app
-const firebaseConfig = {
-  apiKey: "AIzaSyDOV2zFeLGtPsE_O2b-gR3NHZygPspiSws",
-  authDomain: "med-peptides-app-27a3a.firebaseapp.com",
-  projectId: "med-peptides-app",
-  storageBucket: "med-peptides-app.firebasestorage.app",
-  messagingSenderId: "514143707883",
-  appId: "1:514143707883:web:6c12470433ef6c992714ae"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+import { db } from './scripts/lib/firebase-admin.mjs';
 
 // ── Load products array from the source file ─────────────────────────────────
-// We use a dynamic workaround since the file uses `export const products`
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const productsFilePath = '/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/data/products.js';
-const rawSource = readFileSync(productsFilePath, 'utf-8');
 
-// Strip ES module export keywords for eval
-const evalSource = rawSource
-  .replace(/export const productCategories[\s\S]*?];/, '')
-  .replace(/export const products = /, 'const products = ')
-  .replace(/export default/, '// export default');
+const loadSource = (path, varName) => {
+  const raw = readFileSync(path, 'utf-8');
+  const evalSource = raw
+    .replace(/export const productCategories[\s\S]*?];/, '')
+    .replace(new RegExp(`export const ${varName} = `), `const ${varName} = `)
+    .replace(/export default/, '// export default');
+  
+  try {
+    const fn = new Function(`${evalSource}; return ${varName};`);
+    return fn();
+  } catch (err) {
+    console.error(`❌ Failed to parse ${path}:`, err.message);
+    return [];
+  }
+};
 
-// Use Function constructor to safely evaluate
-let products = [];
-try {
-  const fn = new Function(`${evalSource}; return products;`);
-  products = fn();
-  console.log(`✅ Loaded ${products.length} products from products.js`);
-} catch (err) {
-  console.error('❌ Failed to parse products.js:', err.message);
-  process.exit(1);
-}
+const peptideProducts = loadSource(join(__dirname, 'src/data/products.js'), 'products');
+const supplementProducts = loadSource(join(__dirname, 'src/data/supplements.js'), 'supplements');
+
+const products = [...peptideProducts, ...supplementProducts];
+console.log(`✅ Loaded ${peptideProducts.length} peptides and ${supplementProducts.length} supplements. Total: ${products.length}`);
 
 // ── Sanitize: remove undefined fields and make docId-safe ───────────────────
 const sanitize = (obj) => {
@@ -76,7 +62,7 @@ let failures = 0;
 
 for (const product of products) {
   const docId = makeDocId(product.name);
-  const docRef = doc(collection(db, 'products'), docId);
+  const docRef = db.collection('products').doc(docId);
 
   const payload = sanitize({
     ...product,
@@ -85,7 +71,7 @@ for (const product of products) {
   });
 
   try {
-    await setDoc(docRef, payload, { merge: true });
+    await docRef.set(payload, { merge: true });
     console.log(`  ✅ Synced: ${product.name} → products/${docId}`);
     success++;
   } catch (err) {

@@ -1,3 +1,4 @@
+ 
 /**
  * Static mapping from normalised category / pathway slugs to their
  * canonical collection route slug.  Used in App.jsx handleCategorySelect.

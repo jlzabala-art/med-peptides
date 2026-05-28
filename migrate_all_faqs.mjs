@@ -1,21 +1,7 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, writeBatch, doc } from 'firebase/firestore';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-
-// ⚠️ CANONICAL PROJECT: med-peptides-app — NEVER change to regenpept-web-app
-const firebaseConfig = {
-  apiKey: "AIzaSyDOV2zFeLGtPsE_O2b-gR3NHZygPspiSws",
-  authDomain: "med-peptides-app-27a3a.firebaseapp.com",
-  projectId: "med-peptides-app",
-  storageBucket: "med-peptides-app.firebasestorage.app",
-  messagingSenderId: "514143707883",
-  appId: "1:514143707883:web:6c12470433ef6c992714ae",
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+import { db } from './scripts/lib/firebase-admin.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -27,15 +13,15 @@ async function migrate() {
   const faqDataRaw = readFileSync(join(__dirname, 'faq_migration.json'), 'utf8');
   const extractedFaqs = JSON.parse(faqDataRaw);
   
-  const faqCollection = collection(db, 'peptide_faq');
-  const mappingCollection = collection(db, 'faq_peptide_mapping');
+  const faqCollection = db.collection('peptide_faq');
+  const mappingCollection = db.collection('faq_peptide_mapping');
   
   let faqCount = 0;
   let mappingCount = 0;
   
   // Use batches of 400 (Firebase limit is 500)
   const batches = [];
-  let currentBatch = writeBatch(db);
+  let currentBatch = db.batch();
   let batchOps = 0;
   
   extractedFaqs.forEach((faq) => {
@@ -68,7 +54,7 @@ async function migrate() {
     };
     
     // Set FAQ document
-    const faqRef = doc(faqCollection, faq.id);
+    const faqRef = faqCollection.doc(faq.id);
     currentBatch.set(faqRef, firestoreFaq);
     faqCount++;
     batchOps++;
@@ -76,7 +62,7 @@ async function migrate() {
     // Create mapping entry for each product_id
     (faq.product_ids || []).forEach((pName) => {
       const mappingId = `mapping_${pName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${faq.id}`.slice(0, 150);
-      const mappingRef = doc(mappingCollection, mappingId);
+      const mappingRef = mappingCollection.doc(mappingId);
       
       currentBatch.set(mappingRef, {
         familySlug: 'none',
@@ -92,7 +78,7 @@ async function migrate() {
     
     if (batchOps >= 400) {
       batches.push(currentBatch);
-      currentBatch = writeBatch(db);
+      currentBatch = db.batch();
       batchOps = 0;
     }
   });
@@ -116,3 +102,4 @@ migrate().catch(err => {
   console.error("Migration failed:", err);
   process.exit(1);
 });
+

@@ -1,6 +1,7 @@
+/* eslint-disable no-undef, no-unused-vars */
 import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react';
 import {
-  buildChartData,
+  buildChartDataV2,
   computeTotals,
   getCompoundColor,
   getPhaseShadeColor,
@@ -10,6 +11,8 @@ import {
   buildWeeklyCsv,
   computeCostBreakdown,
 } from './ProtocolComputationEngine';
+import { getPeptidePK } from '../../data/peptidePharmacokinetics';
+import { toPng } from 'html-to-image';
 
 // Phase-colors fallback (for phase band stripes — not in engine)
 const PHASE_COLORS = ['#38bdf8', '#34d399', '#a78bfa', '#fb923c', '#f87171'];
@@ -106,7 +109,7 @@ function DoseEscalationChart({ compounds, totalWeeks, maxDose, phaseBlocks, dose
           <g key={w}>
             <line x1={toX(w)} y1={pad.top + iH} x2={toX(w)} y2={pad.top + iH + 4}
               stroke="rgba(255,255,255,0.2)" strokeWidth={0.75} />
-            <text x={toX(w)} y={pad.top + iH + 13} fontSize={7.5} fill="#64748b" textAnchor="middle"
+            <text x={toX(w)} y={pad.top + iH + 13} fontSize={7.5} fill="var(--color-text-secondary)" textAnchor="middle"
               fontFamily='"JetBrains Mono",monospace' letterSpacing="0.03em">
               {w === 0 ? '' : 'W' + w}
             </text>
@@ -114,7 +117,7 @@ function DoseEscalationChart({ compounds, totalWeeks, maxDose, phaseBlocks, dose
         ))}
         {/* Y axis labels */}
         {yTicks.map(t => (
-          <text key={t} x={pad.left - 5} y={toY(t) + 3} fontSize={7} fill="#64748b" textAnchor="end"
+          <text key={t} x={pad.left - 5} y={toY(t) + 3} fontSize={7} fill="var(--color-text-secondary)" textAnchor="end"
             fontFamily='"JetBrains Mono",monospace'>
             {t >= 0 ? `${t}` : ''}
           </text>
@@ -213,26 +216,72 @@ function DoseEscalationChart({ compounds, totalWeeks, maxDose, phaseBlocks, dose
         {compounds.map(c => {
           if (!c.visible) return null;
           if (!c.points.length) return null;
-          const pts = [...c.points].sort((a, b) => a.week - b.week);
-          const pathD = pts.map((pt, i) => (i === 0 ? 'M' : 'L') + toX(pt.week).toFixed(1) + ',' + toY(pt.dose).toFixed(1)).join(' ');
-          const areaD = pathD + ' L' + toX(pts[pts.length - 1].week) + ',' + toY(0) + ' L' + toX(pts[0].week) + ',' + toY(0) + ' Z';
+
+          // ── 1. Generate weekly stepped points ──
+          const xStartLocal = Math.floor(xStart);
+          const xEndLocal   = Math.ceil(xEnd);
+          const pathPts = [];
+          for (let w = xStartLocal; w <= xEndLocal; w++) {
+            pathPts.push({ week: w, dose: interpolateDose(c.points, w, 'step') });
+          }
+
+          let pathD = '';
+          pathPts.forEach((pt, i) => {
+            if (i === 0) {
+              pathD = `M ${toX(pt.week).toFixed(1)},${toY(pt.dose).toFixed(1)}`;
+            } else {
+              const prev = pathPts[i - 1];
+              // Horizontal step first, then vertical jump
+              pathD += ` L ${toX(pt.week).toFixed(1)},${toY(prev.dose).toFixed(1)} L ${toX(pt.week).toFixed(1)},${toY(pt.dose).toFixed(1)}`;
+            }
+          });
+
+          const areaD = pathD + ` L ${toX(pathPts[pathPts.length - 1].week).toFixed(1)},${toY(0).toFixed(1)} L ${toX(pathPts[0].week).toFixed(1)},${toY(0).toFixed(1)} Z`;
+
+          // ── 2. Generate administration dots (Frequency / Rest Days) ──
+          const adminDots = [];
+          for (let w = xStartLocal; w < xEndLocal; w++) {
+            const dose = interpolateDose(c.points, w, 'step');
+            if (dose <= 0) continue;
+            
+            // Find injections per week for this week
+            const phaseFreq = (c.frequencies || []).find(f => w >= f.week && w < f.week + f.duration);
+            const n = phaseFreq?.injectionsPerWeek || 1;
+            
+            for (let i = 0; i < n; i++) {
+              const offset = (i + 0.5) / n;
+              adminDots.push({ week: w + offset, dose });
+            }
+          }
+
           // Phase 10: focus mode — dim non-focused compounds
           const isFocused = !focusedCompound || c.name === focusedCompound;
           const lineOpacity = isFocused ? 1 : 0.12;
           const areaOpacity = isFocused ? 0.12 : 0.02;
+
           return (
             <g key={c.name} style={{ transition: 'opacity 0.25s', opacity: lineOpacity }} clipPath="url(#phc-plot-clip)">
               <path d={areaD} fill={c.color} opacity={areaOpacity} />
               <path d={pathD} fill="none" stroke={c.color} strokeWidth={isFocused ? 2.5 : 1.5} strokeLinecap="round" strokeLinejoin="round" />
-              {pts
-                .filter(pt => pt.week >= xStart && pt.week <= xEnd)
-                .map((pt, i) => (
+              
+              {/* Weekly step markers */}
+              {pathPts.map((pt, i) => (
                 <circle
-                  key={i}
-                  cx={toX(pt.week)} cy={toY(pt.dose)} r={isFocused ? 5 : 3}
+                  key={'step-' + i}
+                  cx={toX(pt.week)} cy={toY(pt.dose)} r={isFocused ? 3 : 2}
                   fill={c.color}
                   style={{ cursor: 'crosshair', transition: 'r 0.2s' }}
                   onMouseEnter={(e) => handleEnter(e, c, pt.week, pt.dose)}
+                />
+              ))}
+
+              {/* Administration frequency dots (Rest Day visualization) */}
+              {isFocused && adminDots.map((dot, i) => (
+                <circle
+                  key={'admin-' + i}
+                  cx={toX(dot.week)} cy={toY(dot.dose)} r={1.5}
+                  fill="white" opacity={0.8}
+                  style={{ pointerEvents: 'none' }}
                 />
               ))}
             </g>
@@ -251,8 +300,8 @@ function DoseEscalationChart({ compounds, totalWeeks, maxDose, phaseBlocks, dose
           />
         )}
 
-        <text x={pad.left + iW / 2} y={H - 2} fontSize={7.5} fill="#94a3b8" textAnchor="middle">Weeks</text>
-        <text x={7} y={pad.top + iH / 2} fontSize={7.5} fill="#94a3b8" textAnchor="middle"
+        <text x={pad.left + iW / 2} y={H - 2} fontSize={7.5} fill="var(--color-text-tertiary)" textAnchor="middle">Weeks</text>
+        <text x={7} y={pad.top + iH / 2} fontSize={7.5} fill="var(--color-text-tertiary)" textAnchor="middle"
           transform={'rotate(-90, 7, ' + (pad.top + iH / 2) + ')'}>{isIntensityMode ? 'Intensity (1-5)' : `Dose (${doseUnit})`}</text>
       </svg>
 
@@ -442,7 +491,7 @@ function CompoundLegend({ compounds, onToggle, onIsolate, onResetAll }) {
             >
               <span style={{
                 display: 'inline-block', width: 9, height: 9, borderRadius: 2, flexShrink: 0,
-                background: c.visible ? c.color : '#334155',
+                background: c.visible ? c.color : 'var(--color-text-primary)',
                 boxShadow: isIsolated ? `0 0 5px ${c.color}` : 'none',
                 transition: 'background 0.18s',
               }} />
@@ -644,6 +693,423 @@ function CostBreakdownPanel({ protocol, phaseBlocks, open, onClose }) {
   );
 }
 
+
+// ── Pharmacokinetics Simulator Engine & Component ─────────────────────────────
+function runPKSimulation(compounds, totalWeeks) {
+  const hoursPerWeek = 168;
+  const totalHours = totalWeeks * hoursPerWeek;
+  const dt = 4; // 4h step
+  const steps = Math.ceil(totalHours / dt);
+
+  const compoundsData = compounds.map(c => {
+    let pk = getPeptidePK(c.name);
+    if (!pk) {
+      const nameLower = c.name.toLowerCase();
+      if (nameLower.includes('bpc')) pk = getPeptidePK('bpc-157');
+      else if (nameLower.includes('tb')) pk = getPeptidePK('tb-500');
+      else if (nameLower.includes('tirz')) pk = getPeptidePK('tirzepatide');
+      else if (nameLower.includes('sema')) pk = getPeptidePK('semaglutide');
+      else if (nameLower.includes('reta')) pk = getPeptidePK('retatrutide');
+      else if (nameLower.includes('ipam')) pk = getPeptidePK('ipamorelin');
+      else if (nameLower.includes('cjc') && nameLower.includes('dac')) pk = getPeptidePK('cjc-1295-dac');
+      else if (nameLower.includes('cjc')) pk = getPeptidePK('cjc-1295-no-dac');
+      else if (nameLower.includes('ghk')) pk = getPeptidePK('ghk-cu');
+      else if (nameLower.includes('serm')) pk = getPeptidePK('sermorelin');
+      else if (nameLower.includes('epith')) pk = getPeptidePK('epithalon');
+      else if (nameLower.includes('sela')) pk = getPeptidePK('selank');
+      else if (nameLower.includes('semax')) pk = getPeptidePK('semax');
+      else if (nameLower.includes('aod')) pk = getPeptidePK('aod-9604');
+      else if (nameLower.includes('hgh')) pk = getPeptidePK('hgh');
+    }
+    const halfLifeHours = pk ? pk.halfLifeHours : 24;
+
+    const injections = [];
+    for (let week = 1; week <= totalWeeks; week++) {
+      const weeklyDose = interpolateDose(c.points, week);
+      if (weeklyDose <= 0) continue;
+
+      let injPerWeek = 1;
+      if (c.frequencies) {
+        const f = c.frequencies.find(fr => week >= fr.week && week < fr.week + fr.duration);
+        if (f) injPerWeek = f.injectionsPerWeek;
+      }
+
+      const dosePerInj = weeklyDose / injPerWeek;
+      for (let i = 0; i < injPerWeek; i++) {
+        const dayOffset = (i / injPerWeek) * 7;
+        const hourOfInjection = (week - 1) * hoursPerWeek + dayOffset * 24;
+        injections.push({
+          t: hourOfInjection,
+          dose: dosePerInj
+        });
+      }
+    }
+
+    return {
+      name: c.name,
+      color: c.color,
+      unit: c.unit,
+      halfLifeHours,
+      notes: pk ? pk.notes : 'Biological clearance rate modeled on standard compartments.',
+      steadyState: pk ? pk.steadyState : 'N/A',
+      injections,
+      visible: c.visible !== false
+    };
+  });
+
+  const points = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = i * dt;
+    const week = 1 + t / hoursPerWeek; // start from week 1 to match DoseEscalationChart
+    const item = { t, week };
+
+    compoundsData.forEach(cd => {
+      if (!cd.visible) {
+        item[cd.name] = 0;
+        return;
+      }
+      let concentration = 0;
+      const absorptionHalfLife = Math.min(2, cd.halfLifeHours * 0.1);
+      const ka = Math.log(2) / absorptionHalfLife;
+      const ke = Math.log(2) / cd.halfLifeHours;
+
+      cd.injections.forEach(inj => {
+        const th = t - inj.t;
+        if (th >= 0 && th < cd.halfLifeHours * 8) {
+          let val = 0;
+          if (Math.abs(ka - ke) < 0.0001) {
+            val = inj.dose * ka * th * Math.exp(-ka * th);
+          } else {
+            val = inj.dose * (ka / (ka - ke)) * (Math.exp(-ke * th) - Math.exp(-ka * th));
+          }
+          concentration += val;
+        }
+      });
+      item[cd.name] = concentration;
+    });
+    points.push(item);
+  }
+
+  return { compoundsData, points };
+}
+
+function PharmacokineticsChart({ compounds, totalWeeks, phaseBlocks, hoveredPhase, onPhaseHover, zoomedPhase }) {
+  const W = 400, H = 160;
+  const pad = { top: 22, right: 16, bottom: 32, left: 38 };
+  const iW  = W - pad.left - pad.right;
+  const iH  = H - pad.top  - pad.bottom;
+  const wrapRef = useRef(null);
+
+  const [tooltip, setTooltip] = useState(null);
+  const TOOLTIP_W = 230;
+
+  const { compoundsData, points } = useMemo(() => runPKSimulation(compounds, totalWeeks), [compounds, totalWeeks]);
+
+  const maxConc = useMemo(() => {
+    let maxVal = 0.01;
+    points.forEach(pt => {
+      compoundsData.forEach(cd => {
+        if (pt[cd.name] > maxVal) maxVal = pt[cd.name];
+      });
+    });
+    return maxVal * 1.05; // 5% padding at top
+  }, [points, compoundsData]);
+
+  const xStart = zoomedPhase ? zoomedPhase.startWeek : 1;
+  const xEnd   = zoomedPhase ? zoomedPhase.endWeek   : totalWeeks;
+  const xRange = Math.max(1, xEnd - xStart);
+
+  const toX = w => pad.left + ((w - xStart) / xRange) * iW;
+  const toY = conc => pad.top + iH - (conc / maxConc) * iH;
+
+  const step   = xRange <= 8 ? 1 : xRange <= 16 ? 2 : 4;
+  const xTicks = [];
+  for (let w = xStart; w <= xEnd; w += step) xTicks.push(w);
+
+  // Generate Y axis ticks (0, 50%, 100% of max)
+  const yTicks = [0, maxConc / 2, maxConc];
+
+  const handleMouseMove = useCallback((e) => {
+    const rect = wrapRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const rawX = e.clientX - rect.left;
+    if (rawX < pad.left || rawX > pad.left + iW) {
+      setTooltip(null);
+      if (onPhaseHover) onPhaseHover(null);
+      return;
+    }
+
+    const xPct = (rawX - pad.left) / iW;
+    const targetWeek = xStart + xPct * xRange;
+
+    let bestPt = points[0];
+    let bestDist = Infinity;
+    points.forEach(pt => {
+      const dist = Math.abs(pt.week - targetWeek);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestPt = pt;
+      }
+    });
+
+    const phase = getPhaseAtWeek(phaseBlocks || [], Math.floor(bestPt.week));
+    if (onPhaseHover) onPhaseHover(phase?.name || null);
+
+    const values = compoundsData
+      .filter(cd => cd.visible)
+      .map(cd => ({
+        name: cd.name,
+        color: cd.color,
+        concentration: bestPt[cd.name] || 0,
+        unit: cd.unit
+      }));
+
+    const clampedX = Math.min(rawX, rect.width - TOOLTIP_W - 8);
+    setTooltip({
+      x: Math.max(4, clampedX),
+      y: e.clientY - rect.top,
+      week: bestPt.week.toFixed(1),
+      day: Math.floor(((bestPt.t) % 168) / 24) + 1,
+      hour: Math.floor(bestPt.t % 24),
+      values
+    });
+  }, [points, compoundsData, xStart, xRange, phaseBlocks, TOOLTIP_W, onPhaseHover]);
+
+  const handleMouseLeave = useCallback(() => {
+    setTooltip(null);
+    if (onPhaseHover) onPhaseHover(null);
+  }, [onPhaseHover]);
+
+  return (
+    <div ref={wrapRef} style={{
+      position: 'relative',
+      background: '#060b14',
+      borderRadius: 10,
+      border: '1px solid rgba(255,255,255,0.1)',
+      padding: '4px 0 2px',
+    }} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
+      <svg viewBox={'0 0 ' + W + ' ' + H} style={{ width: '100%', height: 'auto', display: 'block', fontFamily: '"JetBrains Mono", "Fira Mono", monospace' }}>
+        <defs>
+          <clipPath id="pk-plot-clip">
+            <rect x={pad.left} y={pad.top} width={iW} height={iH} />
+          </clipPath>
+        </defs>
+        {/* Chart background */}
+        <rect x={0} y={0} width={W} height={H} fill="#060b14" />
+        {/* Inner plot background */}
+        <rect x={pad.left} y={pad.top} width={iW} height={iH} fill="#0d1526" rx={2} />
+
+        {/* Horizontal gridlines */}
+        {yTicks.map((t, idx) => (
+          <line key={idx} x1={pad.left} y1={toY(t)} x2={pad.left + iW} y2={toY(t)}
+            stroke={t === 0 ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.08)'}
+            strokeWidth={t === 0 ? 1 : 0.75} />
+        ))}
+
+        {/* X tick marks */}
+        {xTicks.map(w => (
+          <g key={w}>
+            <line x1={toX(w)} y1={pad.top + iH} x2={toX(w)} y2={pad.top + iH + 4}
+              stroke="rgba(255,255,255,0.2)" strokeWidth={0.75} />
+            <text x={toX(w)} y={pad.top + iH + 13} fontSize={7.5} fill="var(--color-text-secondary)" textAnchor="middle"
+              fontFamily='"JetBrains Mono",monospace' letterSpacing="0.03em">
+              {'W' + Math.floor(w)}
+            </text>
+          </g>
+        ))}
+
+        {/* Y axis label - dynamic concentration */}
+        <text x={pad.left - 5} y={pad.top - 6} fontSize={6.5} fill="var(--color-text-secondary)" textAnchor="start" fontWeight={700}>
+          CONC (A.U.)
+        </text>
+
+        {/* Axes */}
+        <line x1={pad.left} y1={pad.top} x2={pad.left} y2={pad.top + iH} stroke="rgba(255,255,255,0.2)" strokeWidth={1} />
+        <line x1={pad.left} y1={pad.top + iH} x2={pad.left + iW} y2={pad.top + iH} stroke="rgba(255,255,255,0.2)" strokeWidth={1} />
+
+        {/* Phase background bands */}
+        {(phaseBlocks || []).map((ph, i) => {
+          const bandStart = Math.max(ph.startWeek, xStart);
+          const bandEnd   = Math.min(ph.startWeek + ph.durationWeeks, xEnd);
+          if (bandStart >= bandEnd) return null;
+
+          const bx = toX(bandStart);
+          const bw = toX(bandEnd) - bx;
+          const isHovered = hoveredPhase === ph.name;
+
+          return (
+            <rect key={ph.name + i} x={bx} y={pad.top} width={Math.max(0, bw)} height={iH}
+              fill={getPhaseShadeColor(ph.name)}
+              opacity={isHovered ? 0.08 : 0.02}
+              style={{ transition: 'opacity 0.15s ease' }}
+              clipPath="url(#pk-plot-clip)" />
+          );
+        })}
+
+        {/* PK Curves (Area & Stroke) */}
+        {compoundsData.map((cd, ci) => {
+          if (!cd.visible) return null;
+
+          const visiblePts = points.filter(pt => pt.week >= xStart && pt.week <= xEnd);
+          if (visiblePts.length === 0) return null;
+
+          let linePath = '';
+          let areaPath = '';
+
+          visiblePts.forEach((pt, idx) => {
+            const x = toX(pt.week);
+            const y = toY(pt[cd.name]);
+
+            if (idx === 0) {
+              linePath += `M ${x} ${y}`;
+              areaPath += `M ${x} ${toY(0)} L ${x} ${y}`;
+            } else {
+              linePath += ` L ${x} ${y}`;
+              areaPath += ` L ${x} ${y}`;
+            }
+          });
+
+          areaPath += ` L ${toX(visiblePts[visiblePts.length - 1].week)} ${toY(0)} Z`;
+
+          return (
+            <g key={cd.name} clipPath="url(#pk-plot-clip)">
+              {/* Gradient Fill under curve */}
+              <path d={areaPath} fill={cd.color} opacity={0.06} />
+              {/* Stroke */}
+              <path d={linePath} fill="none" stroke={cd.color} strokeWidth={1.25} strokeLinecap="round" strokeLinejoin="round" />
+            </g>
+          );
+        })}
+
+        {/* Hover vertical timeline cursor */}
+        {tooltip && (
+          <line x1={tooltip.x} y1={pad.top} x2={tooltip.x} y2={pad.top + iH}
+            stroke="rgba(255,255,255,0.25)" strokeWidth={0.75} strokeDasharray="3 3"
+            clipPath="url(#pk-plot-clip)" />
+        )}
+      </svg>
+
+      {/* High-fidelity custom tooltip */}
+      {tooltip && (
+        <div style={{
+          position: 'absolute',
+          left: tooltip.x,
+          top: tooltip.y - 10,
+          transform: 'translate(-50%, -100%)',
+          background: 'rgba(10, 17, 32, 0.95)',
+          backdropFilter: 'blur(6px)',
+          border: '1px solid rgba(255,255,255,0.18)',
+          borderRadius: 8,
+          padding: '0.5rem 0.65rem',
+          pointerEvents: 'none',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+          minWidth: TOOLTIP_W,
+          zIndex: 10,
+        }}>
+          <div style={{
+            display: 'flex', justifyContent: 'space-between',
+            fontSize: '0.62rem', fontWeight: 800, color: 'rgba(255,255,255,0.4)',
+            fontFamily: '"JetBrains Mono",monospace', borderBottom: '1px solid rgba(255,255,255,0.08)',
+            paddingBottom: '0.25rem', marginBottom: '0.35rem'
+          }}>
+            <span>WEEK {tooltip.week}</span>
+            <span>DAY {tooltip.day} · {tooltip.hour.toString().padStart(2, '0')}:00</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            {tooltip.values.map(val => (
+              <div key={val.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem', color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: val.color, display: 'inline-block' }} />
+                  {val.name}
+                </span>
+                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: val.color, fontFamily: '"JetBrains Mono",monospace' }}>
+                  {val.concentration.toFixed(3)} <span style={{ fontSize: '0.5rem', opacity: 0.6 }}>A.U.</span>
+                </span>
+              </div>
+            ))}
+          </div>
+          <div style={{
+            marginTop: '0.4rem', paddingTop: '0.3rem', borderTop: '1px solid rgba(255,255,255,0.06)',
+            fontSize: '0.52rem', color: 'rgba(255,255,255,0.3)', fontStyle: 'italic', textAlign: 'center'
+          }}>
+            Bateman Pharmacokinetic Simulation (1-Compartment)
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PKLegendPanel({ compounds }) {
+  return (
+    <div style={{ marginTop: '0.85rem' }}>
+      <div style={{
+        fontSize: '0.55rem', fontWeight: 800, letterSpacing: '0.1em',
+        textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)',
+        fontFamily: '"JetBrains Mono",monospace', marginBottom: '0.5rem',
+      }}>PHARMACOKINETICS PARAMETERS</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        {compounds.map((c, i) => {
+          let pk = getPeptidePK(c.name);
+          if (!pk) {
+            const nameLower = c.name.toLowerCase();
+            if (nameLower.includes('bpc')) pk = getPeptidePK('bpc-157');
+            else if (nameLower.includes('tb')) pk = getPeptidePK('tb-500');
+            else if (nameLower.includes('tirz')) pk = getPeptidePK('tirzepatide');
+            else if (nameLower.includes('sema')) pk = getPeptidePK('semaglutide');
+            else if (nameLower.includes('reta')) pk = getPeptidePK('retatrutide');
+            else if (nameLower.includes('ipam')) pk = getPeptidePK('ipamorelin');
+            else if (nameLower.includes('cjc') && nameLower.includes('dac')) pk = getPeptidePK('cjc-1295-dac');
+            else if (nameLower.includes('cjc')) pk = getPeptidePK('cjc-1295-no-dac');
+            else if (nameLower.includes('ghk')) pk = getPeptidePK('ghk-cu');
+            else if (nameLower.includes('serm')) pk = getPeptidePK('sermorelin');
+            else if (nameLower.includes('epith')) pk = getPeptidePK('epithalon');
+            else if (nameLower.includes('sela')) pk = getPeptidePK('selank');
+            else if (nameLower.includes('semax')) pk = getPeptidePK('semax');
+            else if (nameLower.includes('aod')) pk = getPeptidePK('aod-9604');
+            else if (nameLower.includes('hgh')) pk = getPeptidePK('hgh');
+          }
+
+          const halfLife = pk ? pk.halfLife : 'N/A';
+          const steadyState = pk ? pk.steadyState : 'N/A';
+          const notes = pk ? pk.notes : 'Biological clearance rate modeled standard 24h compartments.';
+
+          return (
+            <div key={c.name + i} style={{
+              padding: '0.6rem 0.85rem',
+              borderRadius: 8,
+              background: `${c.color}0d`,
+              border: `1px solid ${c.color}25`,
+              borderLeft: `3px solid ${c.color}`,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: c.color }}>
+                  {c.name}
+                </span>
+                <span style={{
+                  fontSize: '0.58rem', fontWeight: 700, padding: '0.1rem 0.45rem',
+                  borderRadius: 12, background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)',
+                  fontFamily: '"JetBrains Mono",monospace'
+                }}>
+                  t½: {halfLife}
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                <div style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
+                  <span style={{ color: 'rgba(255,255,255,0.6)' }}>Steady State:</span> {steadyState}
+                </div>
+                <div style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.68)', lineHeight: 1.45, marginTop: '0.15rem' }}>
+                  {notes}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── Phase 7: Export Bar ───────────────────────────────────────────────────────
 function ExportBar({ protocol, compounds, phaseBlocks, chartRef }) {
   const [exporting, setExporting] = useState(null); // 'csv'|'pdf'|'png'|null
@@ -731,34 +1197,21 @@ function ExportBar({ protocol, compounds, phaseBlocks, chartRef }) {
     if (!chartRef?.current) return;
     setExporting('png');
     try {
-      const svgEl = chartRef.current.querySelector('svg');
-      if (!svgEl) throw new Error('No SVG found');
-      const svgData = new XMLSerializer().serializeToString(svgEl);
-      const blob    = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-      const url     = URL.createObjectURL(blob);
-      const img     = new Image();
-      img.onload = () => {
-        const canvas  = document.createElement('canvas');
-        const scale   = 2; // retina
-        canvas.width  = img.width  * scale;
-        canvas.height = img.height * scale;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#080d18';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        canvas.toBlob(pngBlob => {
-          const a    = document.createElement('a');
-          a.href     = URL.createObjectURL(pngBlob);
-          a.download = `${protocol?.name || 'protocol'}_chart.png`;
-          a.click();
-          URL.revokeObjectURL(url);
-          setExporting(null);
-        }, 'image/png');
-      };
-      img.onerror = () => { URL.revokeObjectURL(url); setExporting(null); };
-      img.src = url;
+      const dataUrl = await toPng(chartRef.current, {
+        backgroundColor: '#060b14', // Match the sleek dark theme background
+        style: {
+          borderRadius: '10px',
+        },
+        pixelRatio: 2, // retina quality
+      });
+      
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `${protocol?.name || 'protocol'}_chart.png`;
+      a.click();
     } catch (e) {
       console.error('PNG export failed', e);
+    } finally {
       setExporting(null);
     }
   }, [chartRef, protocol]);
@@ -849,13 +1302,10 @@ function ExportBar({ protocol, compounds, phaseBlocks, chartRef }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function ProtocolHeaderCharts({ protocol, onChartRef }) {
-  // Phase 6 — memoize chart data; key on id + blueprint count to handle anonymous protocols
+  // Phase 6 — memoize chart data; key on protocol to handle updates correctly
   const data = useMemo(() => {
-    return buildChartData(protocol?.phase_blueprints || [], protocol?.phases || []);
-  }, [
-    protocol?.id,
-    (protocol?.phase_blueprints || protocol?.phases || []).length,
-  ]);
+    return buildChartDataV2(protocol);
+  }, [protocol]);
 
   const [visibility,     setVisibility]     = useState({});
   const [hoveredPhase,   setHoveredPhase]   = useState(null);
@@ -908,9 +1358,14 @@ export default function ProtocolHeaderCharts({ protocol, onChartRef }) {
       padding: '1.1rem 1.35rem',
       border: '1px solid rgba(255,255,255,0.12)',
       boxShadow: '0 0 0 1px rgba(56,189,248,0.06), 0 8px 32px rgba(0,0,0,0.55)',
+      animation: 'phc-chart-reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards'
     }}>
       {/* Phase 9 — Responsive styles */}
       <style>{`
+        @keyframes phc-chart-reveal {
+          0% { opacity: 0; transform: translateY(20px) scale(0.98); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
         .phc-snap-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
@@ -940,7 +1395,6 @@ export default function ProtocolHeaderCharts({ protocol, onChartRef }) {
         // Note: Est. Cost is intentionally excluded — the rough cost_per_vial heuristic
         // conflicts with real per-compound catalog pricing in ProtocolSupplyEngine below.
         const secItems = [
-          totalMg   > 0 ? { value: totalMg.toFixed(1), unit: 'mg',    label: 'Total Dose',  accent: '#22d3ee' } : null,
           totalVials > 0 ? { value: `${totalVials}`,    unit: 'vials', label: 'Total Vials', accent: '#4ade80' } : null,
         ].filter(Boolean);
 
@@ -1084,6 +1538,7 @@ export default function ProtocolHeaderCharts({ protocol, onChartRef }) {
         <div style={{ display: 'flex', gap: '0.35rem', flex: 1 }}>
           {[
             { id: 'peptide', label: '💊 By Peptide', hint: "See each compound's dose curve individually", accent: '#38bdf8' },
+            { id: 'pk',      label: '📈 PK Simulator', hint: 'See simulated hourly blood concentration curves', accent: '#ec4899' },
             { id: 'phase',   label: '📋 By Phase',   hint: 'See how compounds are grouped per protocol phase', accent: '#34d399' },
           ].map(opt => {
             const active = viewMode === opt.id;
@@ -1161,37 +1616,50 @@ export default function ProtocolHeaderCharts({ protocol, onChartRef }) {
         </span>
       </div>
 
-      {/* Dose escalation chart */}
+      {/* Dose escalation / PK chart */}
       {hasDoseData && (
         <div className="proto-header-chart__dose-section" ref={chartRef}>
           <div style={{
             display: 'flex', alignItems: 'center', gap: '0.5rem',
             fontSize: '0.58rem', fontWeight: 800, letterSpacing: '0.1em',
             textTransform: 'uppercase',
-            color: viewMode === 'phase' ? '#34d399' : '#38bdf8',
+            color: viewMode === 'phase' ? '#34d399' : viewMode === 'pk' ? '#ec4899' : '#38bdf8',
             fontFamily: '"JetBrains Mono",monospace',
             marginBottom: '0.5rem',
           }}>
-            <span style={{ width: 14, height: 1.5, background: viewMode === 'phase' ? '#34d399' : '#38bdf8', display: 'inline-block', borderRadius: 2 }} />
-            {viewMode === 'phase' ? 'PROTOCOL PHASES — DOSE OVERVIEW' : 'DOSE ESCALATION SCHEDULE'}
+            <span style={{ width: 14, height: 1.5, background: viewMode === 'phase' ? '#34d399' : viewMode === 'pk' ? '#ec4899' : '#38bdf8', display: 'inline-block', borderRadius: 2 }} />
+            {viewMode === 'phase' ? 'PROTOCOL PHASES — DOSE OVERVIEW' : viewMode === 'pk' ? 'BLOOD CONCENTRATION SIMULATOR' : 'DOSE ESCALATION SCHEDULE'}
             <span style={{ marginLeft: 'auto', color: 'rgba(255,255,255,0.25)', fontSize: '0.55rem', fontWeight: 600 }}>
               {viewMode === 'phase'
                 ? `${phaseBlocks.length} phases · ${totalWeeks}wk`
-                : (isIntensityMode ? 'INTENSITY SCALE 1-5' : dominantUnit)}
+                : viewMode === 'pk'
+                  ? 'Bateman 1-Compartment Model'
+                  : (isIntensityMode ? 'INTENSITY SCALE 1-5' : dominantUnit)}
             </span>
           </div>
-          <DoseEscalationChart
-            compounds={compounds}
-            totalWeeks={totalWeeks}
-            maxDose={maxDose}
-            phaseBlocks={phaseBlocks}
-            doseUnit={dominantUnit}
-            isIntensityMode={isIntensityMode}
-            hoveredPhase={hoveredPhase}
-            onPhaseHover={setHoveredPhase}
-            focusedCompound={viewMode === 'phase' ? null : focusedCompound}
-            zoomedPhase={zoomedPhase}
-          />
+          {viewMode === 'pk' ? (
+            <PharmacokineticsChart
+              compounds={compounds}
+              totalWeeks={totalWeeks}
+              phaseBlocks={phaseBlocks}
+              hoveredPhase={hoveredPhase}
+              onPhaseHover={setHoveredPhase}
+              zoomedPhase={zoomedPhase}
+            />
+          ) : (
+            <DoseEscalationChart
+              compounds={compounds}
+              totalWeeks={totalWeeks}
+              maxDose={maxDose}
+              phaseBlocks={phaseBlocks}
+              doseUnit={dominantUnit}
+              isIntensityMode={isIntensityMode}
+              hoveredPhase={hoveredPhase}
+              onPhaseHover={setHoveredPhase}
+              focusedCompound={viewMode === 'phase' ? null : focusedCompound}
+              zoomedPhase={zoomedPhase}
+            />
+          )}
 
           {/* By Phase: phase breakdown table */}
           {viewMode === 'phase' && (
@@ -1256,6 +1724,11 @@ export default function ProtocolHeaderCharts({ protocol, onChartRef }) {
           {/* By Peptide: compound legend */}
           {viewMode === 'peptide' && (
             <CompoundLegend compounds={compounds} onToggle={toggleCompound} onIsolate={isolateCompound} onResetAll={resetAllCompounds} />
+          )}
+
+          {/* PK Legend Panel */}
+          {viewMode === 'pk' && (
+            <PKLegendPanel compounds={compounds} />
           )}
         </div>
       )}

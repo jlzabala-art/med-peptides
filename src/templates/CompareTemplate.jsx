@@ -1,3 +1,4 @@
+ 
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ComparePeptidesModal from '../components/discovery/ComparePeptidesModal';
@@ -19,12 +20,12 @@ export default function CompareTemplate({ products }) {
   if (p2) toCompare.push(p2);
 
   return (
-    <div style={{ paddingTop: '80px', minHeight: '80vh', backgroundColor: '#020e1c' }}>
+    <div style={{ minHeight: '80vh', backgroundColor: 'var(--background)' }}>
       <div className="container">
         <button 
           className="btn-text" 
           onClick={() => navigate(-1)}
-          style={{ margin: '2rem 0', color: 'rgba(255,255,255,0.6)' }}
+          style={{ margin: '2rem 0', color: 'var(--text-muted)' }}
         >
           ← Back
         </button>
@@ -39,7 +40,7 @@ export default function CompareTemplate({ products }) {
         />
       ) : (
         <div className="container">
-          <h2 style={{ color: 'white' }}>Product not found for comparison.</h2>
+          <h2 style={{ color: 'var(--primary)' }}>Product not found for comparison.</h2>
         </div>
       )}
     </div>

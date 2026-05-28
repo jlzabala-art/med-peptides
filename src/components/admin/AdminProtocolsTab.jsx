@@ -1,11 +1,14 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react-hooks/set-state-in-effect */
 /**
  * AdminProtocolsTab.jsx
  * Full admin view: list all protocols, edit metadata + phases.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { collection, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../../firebase';
-import { getAllProtocols, updateProtocolFull } from '../../services/protocolStorage';
+import { getPaginatedProtocols, updateProtocolFull } from '../../services/protocolStorage';
 import {
   RefreshCw, ChevronDown, ChevronRight, Trash2, Save, Check,
   Plus, X, AlertTriangle, FlaskConical, Package, Clock, User,
@@ -16,9 +19,9 @@ import {
 const STATUS_OPTIONS = ['draft', 'active', 'archived'];
 
 const STATUS_STYLE = {
-  draft:    { bg: 'rgba(251,191,36,0.15)', color: '#b45309' },
-  active:   { bg: 'rgba(16,185,129,0.12)', color: '#065f46' },
-  archived: { bg: 'rgba(100,116,139,0.12)', color: '#475569' },
+  draft:    { bg: 'var(--status-draft-bg)', color: 'var(--status-draft-color)' },
+  active:   { bg: 'var(--status-active-bg)', color: 'var(--status-active-color)' },
+  archived: { bg: 'var(--status-archived-bg)', color: 'var(--status-archived-color)' },
 };
 
 // ── PhaseEditor ───────────────────────────────────────────────────────────────
@@ -54,121 +57,204 @@ function PhaseEditor({ phases, products: catalogProducts, onChange }) {
     updatePhase(pi, { items: phases[pi].items.filter((_, i) => i !== ii) });
 
   const filteredProducts = (catalogProducts ?? []).filter(p =>
-    !productSearch || (p.displayName ?? p.name ?? '').toLowerCase().includes(productSearch.toLowerCase())
+    p && (!productSearch || (p.displayName ?? p.name ?? '').toLowerCase().includes(productSearch.toLowerCase()))
   ).slice(0, 8);
 
-  const inputSm = {
-    padding: '0.35rem 0.5rem', borderRadius: '5px',
-    border: '1px solid var(--border)', fontSize: '0.82rem', fontFamily: 'inherit',
-  };
-
   return (
-    <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--border)', background: '#fafbfc' }}>
-      {phases.map((phase, pi) => (
-        <div key={pi} style={{ marginBottom: '1.25rem', background: 'white',
-          borderRadius: '10px', border: '1px solid var(--border)', overflow: 'hidden' }}>
-
-          {/* Phase header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem',
-            padding: '0.75rem 1rem', background: 'rgba(0,54,102,0.04)',
-            borderBottom: '1px solid var(--border)' }}>
-            <GripVertical size={15} color="var(--text-muted)" />
-            <input value={phase.label ?? ''} placeholder="Phase label"
-              onChange={e => updatePhase(pi, { label: e.target.value })}
-              style={{ ...inputSm, fontWeight: 700, flex: 1 }} />
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Duration:</span>
-            <input type="number" min="1" value={phase.durationWeeks ?? 4} style={{ ...inputSm, width: '60px' }}
-              onChange={e => updatePhase(pi, { durationWeeks: parseInt(e.target.value) || 1 })} />
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>wks</span>
-            <button onClick={() => removePhase(pi)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', padding: '0.25rem' }}>
-              <Trash2 size={15} />
-            </button>
-          </div>
-
-          {/* Items table */}
-          <div style={{ padding: '0.75rem 1rem' }}>
-            {(phase.items ?? []).length === 0 && (
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', margin: '0.5rem 0' }}>
-                No products in this phase yet.
-              </p>
-            )}
-            {(phase.items ?? []).map((item, ii) => (
-              <div key={ii} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center',
-                marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-                <span style={{ fontWeight: 600, fontSize: '0.82rem', minWidth: '150px', flex: 1 }}>
-                  {item.productName ?? item.productId}
-                </span>
-                <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-                  <input type="number" min="0" step="0.1" value={item.dosageMg ?? 0}
-                    onChange={e => updateItem(pi, ii, { dosageMg: parseFloat(e.target.value) || 0 })}
-                    style={{ ...inputSm, width: '70px' }} placeholder="mg" />
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>mg</span>
-                </div>
-                <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-                  <select value={item.frequency ?? 'Weekly'}
-                    onChange={e => updateItem(pi, ii, { frequency: e.target.value })}
-                    style={{ ...inputSm }}>
-                    {['Daily','Weekly','Bi-Weekly','Monthly','Custom'].map(f => (
-                      <option key={f} value={f}>{f}</option>
-                    ))}
-                  </select>
-                </div>
-                <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-                  <input type="number" min="1" value={item.vialsNeeded ?? 1}
-                    onChange={e => updateItem(pi, ii, { vialsNeeded: parseInt(e.target.value) || 1 })}
-                    style={{ ...inputSm, width: '55px' }} />
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>vials</span>
-                </div>
-                <button onClick={() => removeItem(pi, ii)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer',
-                    color: 'var(--error)', padding: '0.2rem' }}>
-                  <X size={13} />
-                </button>
-              </div>
-            ))}
-
-            {/* Add product */}
-            <div style={{ marginTop: '0.75rem', position: 'relative' }}>
-              <input placeholder="🔍 Add product to phase…"
-                value={productSearch}
-                onChange={e => setProductSearch(e.target.value)}
-                style={{ ...inputSm, width: '100%', boxSizing: 'border-box' }} />
-              {productSearch && filteredProducts.length > 0 && (
-                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0,
-                  background: 'white', border: '1px solid var(--border)', borderRadius: '8px',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.1)', zIndex: 100, maxHeight: '200px', overflowY: 'auto' }}>
-                  {filteredProducts.map(p => (
-                    <button key={p.id} onClick={() => addItem(pi, p)}
-                      style={{ display: 'block', width: '100%', textAlign: 'left',
-                        padding: '0.5rem 0.85rem', border: 'none', background: 'transparent',
-                        cursor: 'pointer', fontSize: '0.83rem', borderBottom: '1px solid var(--border)' }}>
-                      {p.displayName ?? p.name}
-                      <span style={{ color: 'var(--text-muted)', marginLeft: '0.4rem' }}>({p.category})</span>
-                    </button>
-                  ))}
-                </div>
-              )}
+    <div className="phase-editor-root">
+      <AnimatePresence initial={false}>
+        {phases.map((phase, pi) => (
+          <motion.div 
+            key={pi} 
+            className="phase-card"
+            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+            animate={{ opacity: 1, height: 'auto', marginBottom: '1.25rem' }}
+            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            style={{ overflow: 'hidden' }}
+          >
+            {/* Phase header */}
+            <div className="phase-card-header">
+              <GripVertical size={15} color="var(--text-muted)" style={{ cursor: 'grab' }} />
+              <input 
+                value={phase.label ?? ''} 
+                placeholder="Phase label"
+                aria-label="Edit phase label"
+                onChange={e => updatePhase(pi, { label: e.target.value })}
+                className="admin-premium-input"
+                style={{ fontWeight: 700, flex: 1 }} 
+              />
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Duration:</span>
+              <input 
+                type="number" 
+                min="1" 
+                value={phase.durationWeeks ?? 4} 
+                className="admin-premium-input"
+                style={{ width: '65px', textAlign: 'center' }}
+                aria-label="Edit phase duration in weeks"
+                onChange={e => updatePhase(pi, { durationWeeks: parseInt(e.target.value) || 1 })} 
+              />
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>wks</span>
+              <button 
+                onClick={() => removePhase(pi)}
+                aria-label="Remove phase"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', padding: '0.25rem', display: 'flex', alignItems: 'center', transition: 'transform 0.15s ease' }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.15)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                <Trash2 size={15} />
+              </button>
             </div>
-          </div>
-        </div>
-      ))}
 
-      <button onClick={addPhase}
-        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem',
-          border: '1px dashed var(--primary)', borderRadius: '8px', background: 'rgba(0,54,102,0.04)',
+            {/* Items list */}
+            <div style={{ padding: '0.5rem 0' }}>
+              {(phase.items ?? []).length === 0 && (
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: '1rem 0' }}>
+                  No products in this phase yet.
+                </p>
+              )}
+              <AnimatePresence initial={false}>
+                {(phase.items ?? []).map((item, ii) => (
+                  <motion.div 
+                    key={ii} 
+                    className="phase-product-row"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <span style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-main)', display: 'block', wordBreak: 'break-word' }}>
+                      {item.productName ?? item.productId}
+                    </span>
+                    
+                    <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                      <input 
+                        type="number" 
+                        min="0" 
+                        step="0.1" 
+                        value={item.dosageMg ?? 0}
+                        aria-label="Edit dosage in milligrams"
+                        onChange={e => updateItem(pi, ii, { dosageMg: parseFloat(e.target.value) || 0 })}
+                        className="admin-premium-input" 
+                        style={{ width: '75px', textAlign: 'center' }} 
+                        placeholder="mg" 
+                      />
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>mg</span>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                      <select 
+                        value={item.frequency ?? 'Weekly'}
+                        aria-label="Select dosage frequency"
+                        onChange={e => updateItem(pi, ii, { frequency: e.target.value })}
+                        className="admin-premium-select"
+                        style={{ width: '100%', cursor: 'pointer' }}
+                      >
+                        {['Daily','Weekly','Bi-Weekly','Monthly','Custom'].map(f => (
+                          <option key={f} value={f}>{f}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                      <input 
+                        type="number" 
+                        min="1" 
+                        value={item.vialsNeeded ?? 1}
+                        aria-label="Edit vials needed quantity"
+                        onChange={e => updateItem(pi, ii, { vialsNeeded: parseInt(e.target.value) || 1 })}
+                        className="admin-premium-input" 
+                        style={{ width: '60px', textAlign: 'center' }} 
+                      />
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>vials</span>
+                    </div>
+
+                    <button 
+                      onClick={() => removeItem(pi, ii)}
+                      aria-label="Remove product"
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.25rem', display: 'flex', alignItems: 'center', transition: 'all 0.15s ease' }}
+                      onMouseEnter={e => { e.currentTarget.style.color = 'var(--error)'; e.currentTarget.style.transform = 'scale(1.15)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.transform = 'scale(1)'; }}
+                    >
+                      <X size={14} />
+                    </button>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+
+              {/* Add product */}
+              <div style={{ padding: '0.75rem 1rem 0.5rem', position: 'relative' }}>
+                <input 
+                  placeholder="🔍 Add product to phase…"
+                  aria-label="Search and add product to phase"
+                  value={productSearch}
+                  onChange={e => setProductSearch(e.target.value)}
+                  className="admin-premium-input"
+                  style={{ width: '100%', boxSizing: 'border-box' }} 
+                />
+                <AnimatePresence>
+                  {productSearch && filteredProducts.length > 0 && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      style={{ 
+                        position: 'absolute', top: '100%', left: '1rem', right: '1rem',
+                        background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+                        boxShadow: 'var(--shadow-sm)', zIndex: 100, maxHeight: '200px', overflowY: 'auto' 
+                      }}
+                    >
+                      {filteredProducts.map(p => (
+                        <button 
+                          key={p.id} 
+                          onClick={() => addItem(pi, p)}
+                          style={{ 
+                            display: 'block', width: '100%', textAlign: 'left',
+                            padding: '0.65rem 0.85rem', border: 'none', background: 'transparent',
+                            cursor: 'pointer', fontSize: '0.83rem', borderBottom: '1px solid var(--border-light)',
+                            color: 'var(--text-main)', transition: 'background 0.2s ease'
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--accent-soft)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          {p.displayName ?? p.name}
+                          <span style={{ color: 'var(--text-muted)', marginLeft: '0.4rem' }}>({p.category})</span>
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+
+      <button 
+        onClick={addPhase}
+        style={{ 
+          display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1rem',
+          border: '1px dashed var(--primary)', borderRadius: 'var(--radius-sm)', background: 'var(--accent-soft)',
           color: 'var(--primary)', cursor: 'pointer', fontWeight: 700, fontSize: '0.83rem',
-          width: '100%', justifyContent: 'center' }}>
+          width: '100%', justifyContent: 'center', transition: 'all 0.2s ease' 
+        }}
+        onMouseEnter={e => e.currentTarget.style.background = 'var(--accent-medium)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'var(--accent-soft)'}
+      >
         <Plus size={15} /> Add Phase
       </button>
     </div>
   );
 }
 
+
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function AdminProtocolsTab() {
   const [protocols, setProtocols]     = useState([]);
   const [loading, setLoading]         = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore]         = useState(false);
+  const [lastDoc, setLastDoc]         = useState(null);
   const [error, setError]             = useState(null);
   const [expanded, setExpanded]       = useState({});
   const [edits, setEdits]             = useState({});     // id → { protocol_name, status, therapeutic_category, phases }
@@ -177,12 +263,14 @@ export default function AdminProtocolsTab() {
   const [deleting, setDeleting]       = useState(null);
   const [catalogProducts, setCatalog] = useState([]);
 
-  // Fetch all protocols
+  // Fetch initial protocols
   const fetchProtocols = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const data = await getAllProtocols();
+      const { protocols: data, lastDoc: last, hasMore: more } = await getPaginatedProtocols(null, 20);
       setProtocols(data);
+      setLastDoc(last);
+      setHasMore(more);
     } catch (err) {
       setError('Failed to load protocols: ' + err.message);
     } finally {
@@ -190,20 +278,53 @@ export default function AdminProtocolsTab() {
     }
   }, []);
 
-  // Fetch product catalog for phase editor
+  const loadMore = async () => {
+    if (!hasMore || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const { protocols: data, lastDoc: last, hasMore: more } = await getPaginatedProtocols(lastDoc, 20);
+      setProtocols(prev => [...prev, ...data]);
+      setLastDoc(last);
+      setHasMore(more);
+    } catch (err) {
+      setError('Failed to load more protocols: ' + err.message);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  // Fetch all protocols
   useEffect(() => {
     fetchProtocols();
+  }, [fetchProtocols]);
+
+  // Fetch product catalog for phase editor
+  useEffect(() => {
     getDocs(collection(db, 'products'))
       .then(snap => setCatalog(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
       .catch(() => {});
-  }, [fetchProtocols]);
+  }, []);
+
 
   // Edit helpers
-  const getEdit = (p) => edits[p.id] ?? {
-    protocol_name: p.protocol_name ?? '',
-    therapeutic_category: p.therapeutic_category ?? '',
-    status: p.status ?? 'draft',
-    phases: JSON.parse(JSON.stringify(p.phases ?? [])),
+  const getEdit = (p) => {
+    if (!p) return {
+      protocol_name: '',
+      therapeutic_category: '',
+      status: 'draft',
+      complexity_level: 'moderate',
+      phases: [],
+    };
+    let comp = (p.complexity_level ?? p.metadata?.complexity_level ?? 'moderate').toLowerCase();
+    if (comp === 'simple' || comp === 'minimal') comp = 'moderate';
+    
+    return edits[p.id] ?? {
+      protocol_name: p.protocol_name ?? '',
+      therapeutic_category: p.therapeutic_category ?? '',
+      status: p.status ?? 'draft',
+      complexity_level: comp,
+      phases: JSON.parse(JSON.stringify(p.phases ?? [])),
+    };
   };
 
   const setEditField = (id, field, value) =>
@@ -258,23 +379,27 @@ export default function AdminProtocolsTab() {
 
   // Styles
   const inputStyle = {
-    padding: '0.4rem 0.65rem', borderRadius: '6px',
+    padding: '0.4rem 0.65rem', borderRadius: 'var(--radius-sm)',
     border: '1px solid var(--border)', fontSize: '0.85rem', fontFamily: 'inherit', width: '100%'
   };
 
   if (loading) return (
-    <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
-      <RefreshCw size={28} style={{ marginBottom: '1rem' }} /><p>Loading all protocols…</p>
+    <div style={{ textAlign: 'center', padding: '6rem', color: 'var(--text-muted)' }}>
+      <RefreshCw size={28} className="admin-pill-status-dot admin-pill-status-dot--pulse" style={{ marginBottom: '1rem', color: 'var(--primary)' }} />
+      <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>Loading all protocols…</p>
     </div>
   );
 
   if (error) return (
-    <div style={{ padding: '2rem', backgroundColor: 'rgba(239,68,68,0.05)', borderRadius: '12px',
-      border: '1px solid rgba(239,68,68,0.2)', color: 'var(--error)', display: 'flex', gap: '0.75rem' }}>
-      <AlertTriangle size={20} /><span>{error}</span>
+    <div style={{ padding: '2rem', backgroundColor: 'rgba(239,68,68,0.05)', borderRadius: 'var(--radius-md)',
+      border: '1px solid rgba(239,68,68,0.2)', color: 'var(--error)', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+      <AlertTriangle size={20} />
+      <span style={{ fontWeight: 600 }}>{error}</span>
       <button onClick={fetchProtocols}
-        style={{ marginLeft: 'auto', padding: '0.35rem 0.85rem', border: '1px solid var(--error)',
-          borderRadius: '6px', background: 'transparent', color: 'var(--error)', cursor: 'pointer' }}>
+        className="admin-premium-input"
+        style={{ marginLeft: 'auto', border: '1px solid var(--error)',
+          background: 'transparent', color: 'var(--error)', cursor: 'pointer', fontWeight: 700 }}
+      >
         Retry
       </button>
     </div>
@@ -285,126 +410,213 @@ export default function AdminProtocolsTab() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>All Protocols</h2>
+          <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary)' }}>All Protocols</h2>
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
             {protocols.length} total across all users
           </p>
         </div>
         <button onClick={fetchProtocols}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem',
-            border: '1px solid var(--border)', borderRadius: '8px', background: 'white',
-            cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>
+          className="admin-premium-input"
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600, background: 'var(--surface)' }}
+        >
           <RefreshCw size={15} /> Refresh
         </button>
       </div>
 
       {protocols.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)', background: 'white',
-          borderRadius: '12px', border: '1px solid var(--border)' }}>
+        <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)', background: 'var(--surface)',
+          borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
           No protocols saved yet.
         </div>
       )}
 
       {/* Protocol rows */}
-      {protocols.map(p => {
-        const isOpen   = !!expanded[p.id];
-        const e        = getEdit(p);
-        const isDirty  = !!edits[p.id];
-        const isSaving = !!saving[p.id];
-        const isSaved  = !!saved[p.id];
-        const st       = STATUS_STYLE[e.status] ?? STATUS_STYLE.draft;
+      {/* Protocol Table */}
+      <div style={{ background: 'var(--color-bg-surface)', borderRadius: '4px', border: '1px solid var(--border)', overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
+            <thead>
+              <tr style={{ background: '#f8f9fa', borderBottom: '1px solid var(--border)' }}>
+                <th style={{ padding: '0.75rem 1rem', width: '32px' }}></th>
+                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368', whiteSpace: 'nowrap' }}>Protocol Name</th>
+                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>Category</th>
+                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>Status</th>
+                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>Phases</th>
+                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368', textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {protocols.map((p, i) => {
+                const isOpen   = !!expanded[p.id];
+                const e        = getEdit(p);
+                const isDirty  = !!edits[p.id];
+                const isSaving = !!saving[p.id];
+                const isSaved  = !!saved[p.id];
+                const isLast   = i === protocols.length - 1;
 
-        return (
-          <div key={p.id} className="card"
-            style={{ marginBottom: '0.75rem', padding: 0, overflow: 'hidden',
-              border: isOpen ? '1px solid var(--primary-light)' : '1px solid var(--border)',
-              transition: 'border-color 0.2s' }}>
+                const toggleActive = () => {
+                  const newStatus = e.status === 'active' ? 'draft' : 'active';
+                  setEditField(p.id, 'status', newStatus);
+                  handleSave(p.id); // auto-save status toggle
+                };
 
-            {/* Row header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem',
-              padding: '0.85rem 1.25rem', flexWrap: 'wrap' }}>
+                const archiveProtocol = () => {
+                  setEditField(p.id, 'status', 'archived');
+                  handleSave(p.id);
+                };
 
-              <button onClick={() => setExpanded(prev => ({ ...prev, [p.id]: !isOpen }))}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem',
-                  display: 'flex', alignItems: 'center', color: 'var(--primary)' }}>
-                {isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-              </button>
+                return (
+                  <React.Fragment key={p.id}>
+                    <tr style={{ borderBottom: isLast && !isOpen ? 'none' : '1px solid var(--border)', background: isOpen ? '#f8f9fa' : 'transparent', transition: 'background 0.2s' }}>
+                      <td style={{ padding: '0.75rem 1rem' }}>
+                        <button onClick={() => setExpanded(prev => ({ ...prev, [p.id]: !isOpen }))}
+                          aria-label="Expand protocol details"
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: '#5f6368' }}
+                        >
+                          <motion.div animate={{ rotate: isOpen ? 90 : 0 }} transition={{ duration: 0.2 }}>
+                            <ChevronRight size={16} />
+                          </motion.div>
+                        </button>
+                      </td>
+                      <td style={{ padding: '0.75rem 1rem' }}>
+                        {isDirty ? (
+                          <input value={e.protocol_name}
+                            onChange={ev => setEditField(p.id, 'protocol_name', ev.target.value)}
+                            style={{ 
+                              padding: '4px 8px', border: '1px solid #1a73e8', borderRadius: '4px',
+                              fontSize: '0.85rem', width: '100%', minWidth: '180px'
+                            }} 
+                          />
+                        ) : (
+                          <div style={{ fontWeight: 600, color: '#202124' }}>
+                            {e.protocol_name || 'Unnamed Protocol'}
+                            <div style={{ fontSize: '0.7rem', color: '#5f6368', marginTop: '2px', fontWeight: 400 }}>
+                              v{p.version_number ?? 1} • {formatDate(p.created_at)}
+                            </div>
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ padding: '0.75rem 1rem', color: '#5f6368' }}>
+                        {isDirty ? (
+                          <input value={e.therapeutic_category}
+                            onChange={ev => setEditField(p.id, 'therapeutic_category', ev.target.value)}
+                            style={{ padding: '4px 8px', border: '1px solid #1a73e8', borderRadius: '4px', fontSize: '0.85rem', width: '100%' }} 
+                          />
+                        ) : (
+                          e.therapeutic_category || '—'
+                        )}
+                      </td>
+                      <td style={{ padding: '0.75rem 1rem' }}>
+                        <div style={{ 
+                          display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem', fontWeight: 600, 
+                          padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase',
+                          background: e.status === 'active' ? '#e6f4ea' : e.status === 'archived' ? '#f1f3f4' : '#fef7e0',
+                          color: e.status === 'active' ? '#137333' : e.status === 'archived' ? '#5f6368' : '#b06000'
+                        }}>
+                          {e.status}
+                        </div>
+                      </td>
+                      <td style={{ padding: '0.75rem 1rem', color: '#5f6368' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <FlaskConical size={14} /> {(e.phases ?? []).length}
+                        </div>
+                      </td>
+                      <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
+                        <div style={{ display: 'inline-flex', gap: '0.5rem', alignItems: 'center' }}>
+                          {isDirty ? (
+                            <button onClick={() => handleSave(p.id)} disabled={isSaving}
+                              style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#1a73e8', color: 'white', border: 'none', padding: '4px 12px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', opacity: isSaving ? 0.6 : 1 }}
+                            >
+                              <Save size={12} /> {isSaving ? 'Saving' : 'Save'}
+                            </button>
+                          ) : (
+                            <button onClick={() => setEditField(p.id, 'protocol_name', e.protocol_name)} title="Edit Protocol"
+                              style={{ background: 'transparent', border: 'none', color: '#1a73e8', cursor: 'pointer', padding: '4px' }}
+                            >
+                              <Edit3 size={16} />
+                            </button>
+                          )}
+                          
+                          <button onClick={toggleActive} title={e.status === 'active' ? 'Deactivate' : 'Activate'}
+                            style={{ background: 'transparent', border: 'none', color: e.status === 'active' ? '#137333' : '#b06000', cursor: 'pointer', padding: '4px' }}
+                          >
+                            {e.status === 'active' ? <Check size={16} /> : <AlertTriangle size={16} />}
+                          </button>
 
-              {/* Name (editable inline) */}
-              <input value={e.protocol_name}
-                onChange={ev => setEditField(p.id, 'protocol_name', ev.target.value)}
-                style={{ ...inputStyle, fontWeight: 700, flex: 1, minWidth: '180px', border: isDirty ? '1px solid var(--primary-light)' : '1px solid transparent',
-                  background: isDirty ? 'white' : 'transparent' }} />
-
-              {/* Category */}
-              <input value={e.therapeutic_category} placeholder="Category"
-                onChange={ev => setEditField(p.id, 'therapeutic_category', ev.target.value)}
-                style={{ ...inputStyle, width: '140px', fontSize: '0.8rem', color: 'var(--text-muted)' }} />
-
-              {/* Status */}
-              <select value={e.status}
-                onChange={ev => setEditField(p.id, 'status', ev.target.value)}
-                style={{ padding: '0.3rem 0.65rem', borderRadius: '6px', fontWeight: 700,
-                  fontSize: '0.8rem', border: '1px solid var(--border)',
-                  backgroundColor: st.bg, color: st.color, cursor: 'pointer' }}>
-                {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-
-              {/* Meta badges */}
-              <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem',
-                fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                <User size={12} /> {p.created_by?.user_name ?? 'Unknown'}
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem',
-                fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                <Clock size={12} /> {formatDate(p.created_at)}
-              </span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                v{p.version_number ?? 1}
-              </span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                <FlaskConical size={12} style={{ verticalAlign: 'middle' }} /> {(e.phases ?? []).length} phases
-              </span>
-
-              {/* Actions */}
-              <div style={{ display: 'flex', gap: '0.5rem', marginLeft: 'auto' }}>
-                {isSaved ? (
-                  <span style={{ color: 'var(--success)', fontWeight: 700, fontSize: '0.8rem',
-                    display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                    <Check size={14} /> Saved
-                  </span>
-                ) : (
-                  <button disabled={!isDirty || isSaving} onClick={() => handleSave(p.id)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.35rem',
-                      padding: '0.4rem 0.85rem', borderRadius: '6px', border: 'none',
-                      backgroundColor: isDirty ? 'var(--primary)' : '#e2e8f0',
-                      color: isDirty ? 'white' : 'var(--text-muted)',
-                      fontWeight: 700, fontSize: '0.8rem',
-                      cursor: isDirty ? 'pointer' : 'not-allowed', opacity: isSaving ? 0.6 : 1 }}>
-                    <Save size={13} /> {isSaving ? 'Saving…' : 'Save'}
-                  </button>
-                )}
-                <button onClick={() => handleDelete(p.id)} disabled={deleting === p.id}
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.35rem',
-                    padding: '0.4rem 0.75rem', borderRadius: '6px',
-                    border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.05)',
-                    color: 'var(--error)', cursor: 'pointer', fontWeight: 700, fontSize: '0.8rem' }}>
-                  <Trash2 size={13} /> {deleting === p.id ? '…' : 'Delete'}
-                </button>
-              </div>
-            </div>
-
-            {/* Phase editor (expanded) */}
-            {isOpen && (
-              <PhaseEditor
-                phases={e.phases ?? []}
-                products={catalogProducts}
-                onChange={(phases) => setEditPhases(p.id, phases)}
-              />
-            )}
+                          <button onClick={archiveProtocol} title="Archive Protocol"
+                            style={{ background: 'transparent', border: 'none', color: '#5f6368', cursor: 'pointer', padding: '4px' }}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    
+                    {/* Expandable Phase Editor Row */}
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <tr style={{ borderBottom: isLast ? 'none' : '1px solid var(--border)', background: '#fafafa' }}>
+                          <td colSpan={6} style={{ padding: 0 }}>
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                              style={{ overflow: 'hidden' }}
+                            >
+                              <div style={{ padding: '1.5rem', borderTop: '1px solid #f1f3f4' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                  <h4 style={{ margin: 0, fontSize: '0.9rem', color: '#202124' }}>Protocol Phases</h4>
+                                  {isDirty && (
+                                    <span style={{ fontSize: '0.75rem', color: '#e53e3e', fontWeight: 600 }}>Unsaved changes</span>
+                                  )}
+                                </div>
+                                <PhaseEditor
+                                  phases={e.phases ?? []}
+                                  products={catalogProducts}
+                                  onChange={(phases) => setEditPhases(p.id, phases)}
+                                />
+                                {isDirty && (
+                                  <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
+                                    <button onClick={() => handleSave(p.id)} disabled={isSaving}
+                                      style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#1a73e8', color: 'white', border: 'none', padding: '6px 16px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+                                    >
+                                      <Save size={14} /> {isSaving ? 'Saving...' : 'Save Protocol Changes'}
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </motion.div>
+                          </td>
+                        </tr>
+                      )}
+                    </AnimatePresence>
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Pagination Load More */}
+        {hasMore && (
+          <div style={{ padding: '1rem', borderTop: '1px solid var(--border)', textAlign: 'center', background: '#f8f9fa' }}>
+            <button 
+              onClick={loadMore} 
+              disabled={loadingMore}
+              style={{
+                padding: '0.65rem 1.5rem', borderRadius: '4px', border: '1px solid #dadce0', background: 'var(--color-bg-surface)',
+                color: '#1a73e8', fontWeight: 600, fontSize: '0.85rem', cursor: loadingMore ? 'not-allowed' : 'pointer',
+                display: 'inline-flex', alignItems: 'center', gap: '0.5rem', opacity: loadingMore ? 0.7 : 1
+              }}
+            >
+              {loadingMore ? <RefreshCw size={14} className="admin-pill-status-dot--pulse" /> : <ChevronDown size={14} />}
+              {loadingMore ? 'Loading...' : 'Load More Protocols'}
+            </button>
           </div>
-        );
-      })}
+        )}
+      </div>
     </div>
   );
 }
+

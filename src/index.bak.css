@@ -698,7 +698,7 @@ button:focus-visible, a:focus-visible {
 }
 
 /* =========================================
-   CLINICAL UI SYSTEM (PROTOCOL BUILDER V4)
+   CLINICAL UI SYSTEM (PROTOCOL FINDER V4)
    ========================================= */
 
 /* Typography & Spacing */
@@ -837,7 +837,7 @@ button:focus-visible, a:focus-visible {
     box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.03);
   }
   
-  .protocol-builder-container {
+  .protocol-finder-container {
     padding-bottom: 80px; /* Space for sticky footer */
   }
 }
@@ -1192,7 +1192,7 @@ button:focus-visible, a:focus-visible {
 }
 
 /* =========================================
-   CLINICAL PROTOCOL BUILDER V5 (MOBILE-FIRST)
+   CLINICAL PROTOCOL FINDER V5 (MOBILE-FIRST)
    ========================================= */
 
 /* Sticky Bottom Bar */
@@ -1272,7 +1272,7 @@ button:focus-visible, a:focus-visible {
   border-color: var(--primary-light);
 }
 
-/* Hide public footer when in builder workflow */
+/* Hide public footer when in finder workflow */
 body:has(.workflow-main) footer {
   display: none !important;
 }
@@ -2524,7 +2524,7 @@ body:has(.workflow-main) footer {
 }
 
 /* ============================================================
-   COMPREHENSIVE MOBILE UX SYSTEM — RegEnPept v5
+   COMPREHENSIVE MOBILE UX SYSTEM — Med-Peptides v5
    Applied globally across all pages for consistent mobile UX
    ============================================================ */
 
@@ -2638,7 +2638,7 @@ body:has(.workflow-main) footer {
   }
 }
 
-/* ---- PROTOCOL BUILDER: Mobile-specific fixes ---- */
+/* ---- PROTOCOL FINDER: Mobile-specific fixes ---- */
 @media (max-width: 768px) {
   .workflow-stepper {
     top: 100px; /* matches mobile header height: disclaimer(28px) + nav(72px) */
@@ -2713,7 +2713,7 @@ body:has(.workflow-main) footer {
     margin-bottom: 0; /* no offset needed — container handles alignment */
   }
 
-  /* Override global h3 !important for builder cards — prevent oversized headings */
+  /* Override global h3 !important for finder cards — prevent oversized headings */
   .variant-card-v5 h3,
   .variant-title-row h3 {
     font-size: 1rem !important;
@@ -2721,7 +2721,7 @@ body:has(.workflow-main) footer {
     letter-spacing: -0.01em !important;
   }
 
-  /* Builder step headings — scale down from global h1 override */
+  /* Finder step headings — scale down from global h1 override */
   .workflow-content h1.clinical-title {
     font-size: clamp(1.5rem, 6vw, 2rem) !important;
   }
@@ -2896,7 +2896,7 @@ body:has(.workflow-main) footer {
   /* Typography Refinement for Premium Feel */
   h1 { font-size: clamp(1.75rem, 7vw, 2.5rem) !important; letter-spacing: -0.02em !important; font-weight: 800 !important; }
   h2 { font-size: clamp(1.35rem, 5.5vw, 2rem) !important; font-weight: 700 !important; }
-  /* h3 global scale — builder card h3s are overridden below with higher specificity */
+  /* h3 global scale — finder card h3s are overridden below with higher specificity */
   h3 { font-size: clamp(1.1rem, 4.5vw, 1.5rem) !important; font-weight: 700 !important; }
   
   .container {
@@ -2984,7 +2984,7 @@ body:has(.workflow-main) footer {
    ============================================================ */
 
 /* ============================================================
-   PROTOCOL BUILDER — COMPREHENSIVE MOBILE POLISH
+   PROTOCOL FINDER — COMPREHENSIVE MOBILE POLISH
    All 6 steps optimised for ≤768px viewports
    ============================================================ */
 @media (max-width: 768px) {
@@ -3250,7 +3250,7 @@ body:has(.workflow-main) footer {
 
   /* ── Nav subtitle: prevent overflowing header bar ── */
   .nav-step-subtitle,
-  .builder-nav-subtitle {
+  .finder-nav-subtitle {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

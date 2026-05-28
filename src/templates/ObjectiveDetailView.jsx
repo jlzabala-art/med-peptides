@@ -1,8 +1,11 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo } from 'react';
-import { Info, HelpCircle, BookOpen, ChevronRight, Beaker, Zap, Activity, FlaskConical } from 'lucide-react';
+import { Info, HelpCircle, BookOpen, ChevronRight, Beaker, Zap, Activity, FlaskConical, Bot } from 'lucide-react';
 import MobileProductCard from '../snippets/MobileProductCard';
 import FAQModal from '../components/discovery/FAQModal';
 import PubMedPreviewPanel from '../components/discovery/PubMedPreviewPanel';
+import Breadcrumbs from '../components/common/Breadcrumbs';
+import { usePageMeta } from '../hooks/usePageMeta';
 import { getFAQForProduct } from '../utils/discoveryEngine';
 
 /**
@@ -72,8 +75,21 @@ export default function ObjectiveDetailView({
   };
   const researchBackground = backgrounds[objectiveId] || "Investigate specific biological mechanisms and signaling pathways using our high-purity research compounds.";
 
+  // Dynamic SEO & OG Tags
+  usePageMeta({
+    title: objectiveId,
+    description: researchBackground.substring(0, 160),
+    path: `/protocol/${objectiveId.toLowerCase().replace(/ /g, '-')}`
+  });
+
   return (
-    <div className="template-root" style={{ padding: 'clamp(2rem, 8vw, 6rem) 1.5rem 4rem 1.5rem', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}>
+    <div className="template-root" style={{ padding: '0 1.5rem 4rem 1.5rem', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}>
+      <Breadcrumbs 
+        items={[
+          { label: 'Peptides', path: '/catalog' },
+          { label: objectiveId }
+        ]} 
+      />
 
       <div style={{ marginBottom: '4rem', textAlign: 'center' }}>
         <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', color: 'var(--text-main)', marginBottom: '1rem' }}>
@@ -138,10 +154,45 @@ export default function ObjectiveDetailView({
                   <td style={{ padding: '1.5rem', textAlign: 'center' }}>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '0.6rem' }}>
                       <button 
-                        onClick={() => handleOpenFAQ(product)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 0.9rem', fontSize: '0.8rem', borderRadius: '10px', border: '1px solid var(--border)', background: 'white', color: 'var(--text-main)', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}
+                        onClick={() => {
+                          try {
+                            localStorage.removeItem('clinical_ai_messages_v2');
+                            sessionStorage.removeItem('clinical_ai_messages');
+                          } catch {}
+                          window.dispatchEvent(new CustomEvent('open-clinical-ai', {
+                            detail: {
+                              action: 'ask_about_entity',
+                              entityName: product.name || '',
+                              section: 'ObjectiveDetailView.Row',
+                              autoSend: true
+                            }
+                          }));
+                        }}
+                        title="Ask ClinicAI"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                          padding: '0.6rem 0.9rem',
+                          fontSize: '0.8rem',
+                          borderRadius: '10px',
+                          border: '1px solid rgba(0, 163, 224, 0.2)',
+                          background: 'rgba(0, 163, 224, 0.05)',
+                          color: 'var(--primary)',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.background = 'rgba(0, 163, 224, 0.12)';
+                          e.currentTarget.style.borderColor = 'rgba(0, 163, 224, 0.4)';
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.background = 'rgba(0, 163, 224, 0.05)';
+                          e.currentTarget.style.borderColor = 'rgba(0, 163, 224, 0.2)';
+                        }}
                       >
-                        <HelpCircle size={14} /> FAQ
+                        <Bot size={14} /> ClinicAI
                       </button>
                       <button 
                         onClick={() => handleOpenPubMed(product)}
@@ -181,7 +232,7 @@ export default function ObjectiveDetailView({
       <div style={{ 
         marginTop: '4rem', 
         padding: '2.5rem', 
-        backgroundColor: '#f8fafc', 
+        backgroundColor: 'var(--color-bg-app)', 
         borderRadius: '24px', 
         border: '1px solid var(--border)',
         display: 'flex',
@@ -207,17 +258,7 @@ export default function ObjectiveDetailView({
         </div>
       </div>
 
-      <FAQModal 
-          isOpen={showFAQModal}
-          onClose={() => setShowFAQModal(false)}
-          faqItems={faqItems}
-          product={activeFAQProduct}
-          relatedProducts={products}
-          onProductClick={(p) => {
-            setShowFAQModal(false);
-            setTimeout(() => onSelectProduct(p.name), 50); // Small timeout to let scroll unlock run
-          }}
-      />
+      {/* FAQModal removed per user request (ClinicAI handles FAQs) */}
 
       <PubMedPreviewPanel 
         isOpen={showPubMedPanel}

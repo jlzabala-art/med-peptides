@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useRef, useEffect, useState, memo } from 'react';
 import { ArrowRight } from 'lucide-react';
 
@@ -12,10 +13,10 @@ import { ArrowRight } from 'lucide-react';
  *   dosageElement {ReactNode} — override: render this instead of the plain dosage string (for multi-variant pills)
  *   footerIcon    {ReactNode} — icono del footer (Zap, Sparkles, etc.)
  *   footerText    {string}    — texto junto al icono footer
- *   mobileCTA     {string}    — texto del botón mobile (ej: "Ver Detalles")
- *   onClick       {Function}  — handler de click
+ *   mobileCTA     {string}    — mobile button text (e.g. "View Details")
+ *   onClick       {Function}  — click handler
  */
-function PeptideCard({ name, slug, tag, desc, dosage, dosageElement, footerIcon, footerText, mobileCTA = 'Ver Detalles', onClick }) {
+function PeptideCard({ name, slug, tag, desc, dosage, dosageElement, footerIcon, footerText, mobileCTA = 'View Details', onClick }) {
   const [visible, setVisible] = useState(false);
   const cardRef = useRef(null);
 
@@ -40,7 +41,7 @@ function PeptideCard({ name, slug, tag, desc, dosage, dosageElement, footerIcon,
       onClick={onClick}
       role="button"
       tabIndex={0}
-      aria-label={`Ver detalles de ${name}`}
+      aria-label={`View details of ${name}`}
       onKeyDown={(e) => e.key === 'Enter' && onClick?.()}
     >
       {/* Tag badge */}

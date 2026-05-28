@@ -1,4 +1,6 @@
+ 
 import { CheckCircle, MinusCircle } from 'lucide-react';
+import { trackPeptideView } from '../../hooks/useAnalytics';
 
 /**
  * ComparePeptidesBlock — renders a comparison grid between a base peptide
@@ -53,7 +55,7 @@ export default function ComparePeptidesBlock({ block, allProducts = [], onProduc
           display: 'grid',
           gridTemplateColumns: `180px repeat(${candidates.length}, 1fr)`,
           borderBottom: '1px solid var(--border)',
-          background: '#f8fafc',
+          background: 'var(--color-bg-app)',
         }}
       >
         <div style={{ padding: '0.85rem 1rem', fontWeight: 700, fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
@@ -64,7 +66,10 @@ export default function ComparePeptidesBlock({ block, allProducts = [], onProduc
             key={i}
             onClick={() => {
               const p = findProduct(name);
-              if (p) onProductClick?.(p);
+              if (p) {
+                trackPeptideView({ peptide_name: p.name });
+                onProductClick?.(p);
+              }
             }}
             style={{
               padding: '0.85rem 1rem',
@@ -147,11 +152,14 @@ export default function ComparePeptidesBlock({ block, allProducts = [], onProduc
 
       {/* Footer CTA */}
       {cta && (
-        <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border)', background: '#f8fafc' }}>
+        <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border)', background: 'var(--color-bg-app)' }}>
           <button
             onClick={() => {
               const p = findProduct(basePeptide);
-              if (p) onProductClick?.(p);
+              if (p) {
+                trackPeptideView({ peptide_name: p.name });
+                onProductClick?.(p);
+              }
             }}
             style={{
               display: 'inline-flex',

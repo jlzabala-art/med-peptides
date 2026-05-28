@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useMemo } from 'react';
 
 /**
@@ -16,7 +17,7 @@ const PHASE_META = {
   priming:    { label: 'Priming',    color: '#a8d8ea', text: '#1a5f7a', desc: 'Sensitization phase. Low-dose introduction to assess individual response.' },
   titration:  { label: 'Titration', color: '#7ec8e3', text: '#145374', desc: 'Gradual dose escalation to reach therapeutic window.' },
   therapeutic:{ label: 'Therapeutic',color: '#4a9fc9', text: '#003366', desc: 'Maintenance at effective dose. Primary outcome window.' },
-  peak:       { label: 'Peak',      color: '#2176ae', text: '#ffffff', desc: 'Maximum protocol dose. Monitor closely for individual tolerance.' },
+  peak:       { label: 'Peak',      color: '#2176ae', text: 'var(--color-bg-surface)', desc: 'Maximum protocol dose. Monitor closely for individual tolerance.' },
   taper:      { label: 'Taper',     color: '#6ea4ce', text: '#1d3557', desc: 'Controlled dose reduction to preserve gains and support recovery.' },
   washout:    { label: 'Washout',   color: '#b8cce4', text: '#3d5a80', desc: 'Off-cycle recovery. Allow system clearance before next cycle.' },
 };

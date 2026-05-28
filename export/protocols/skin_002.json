@@ -9,8 +9,8 @@
   },
   "number_of_phases": 2,
   "overview_summary": "10-week skin repair and cellular-aging protocol combining GHK-Cu dermal remodeling with a pulsed Epithalon support layer for advanced anti-aging skin objectives.",
-  "protocol_author_name": "ReGen PEPT Clinical Team",
-  "protocol_author_organization": "ReGen PEPT",
+  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_organization": "Med-Peptides",
   "protocol_author_title": "Peptide Specialists",
   "protocol_duration_weeks": 10,
   "protocol_is_curated": true,
@@ -193,9 +193,9 @@
           "product_title": "Ghk Cu",
           "route": "topical_or_subcutaneous",
           "dose_logic": {
-            "dose_unit": "protocol_defined",
+            "dose_unit": "mg",
             "administration_frequency": "daily",
-            "selected_strength": "50mg"
+            "starting_weekly_dose": 50
           },
           "variantRef": {
             "type": "resolved",
@@ -206,16 +206,16 @@
         {
           "product_id": "prd_epithalon",
           "product_title": "Epithalon",
-          "route": "protocol_defined",
+          "route": "subcutaneous",
           "dose_logic": {
-            "dose_unit": "protocol_defined",
+            "dose_unit": "mg",
             "administration_frequency": "daily_evening",
-            "selected_strength": "10mg"
+            "starting_weekly_dose": 10
           },
           "variantRef": {
             "type": "resolved",
             "productId": "prd_epithalon",
-            "route": "protocol_defined"
+            "route": "subcutaneous"
           }
         }
       ],
@@ -237,16 +237,16 @@
         {
           "product_id": "prd_ghk_cu",
           "product_title": "Ghk Cu",
-          "route": "protocol_defined",
+          "route": "subcutaneous",
           "dose_logic": {
-            "dose_unit": "protocol_defined",
+            "dose_unit": "mg",
             "administration_frequency": "3x_week",
-            "selected_strength": "50mg"
+            "starting_weekly_dose": 50
           },
           "variantRef": {
             "type": "resolved",
             "productId": "prd_ghk_cu",
-            "route": "protocol_defined"
+            "route": "subcutaneous"
           }
         }
       ],
@@ -395,8 +395,8 @@
     "scientificName": "GHK-Cu & Epithalon Collagen–Epigenetic Cellular Skin Repair Protocol",
     "description": "12-week advanced skin repair protocol combining GHK-Cu collagen induction and antioxidant gene activation with Epithalon telomere protection and pineal anti-aging epigenetic bioregulation.",
     "author": {
-      "name": "ReGen PEPT Clinical Team",
-      "organization": "ReGen PEPT",
+      "name": "Med-Peptides Clinical Team",
+      "organization": "Med-Peptides",
       "title": "Peptide Specialists"
     },
     "review": {
@@ -431,5 +431,8 @@
       }
     }
   },
-  "_syncedAt": "2026-04-26T12:46:35.268Z"
+  "_syncedAt": "2026-04-26T12:46:35.268Z",
+  "recommended_tests": [
+    "fagron-acnetest"
+  ]
 }

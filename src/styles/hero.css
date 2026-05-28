@@ -1,0 +1,409 @@
+/* ── Master Hero Layout Styles ── */
+
+.hero-section {
+  /* Reduced blue intensity: -20% brightness and saturation compared to old gradient */
+  background: var(--gradient-clinical, linear-gradient(160deg, #00152a 0%, #00274c 45%, #073a6a 100%));
+  color: white;
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  padding: 6.5rem 1.5rem 2.5rem;
+}
+
+.hero-section__bg-glow {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 5% 15%,  rgba(0, 150, 204, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 35% at 80% 75%, rgba(0, 150, 204, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 30% 30% at 50% 50%, rgba(26, 94, 168, 0.08) 0%, transparent 50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero-container {
+  position: relative;
+  zIndex: 1;
+  max-width: 1400px; /* Desktop max content width */
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── HEADER ── */
+.hero-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-tagline {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--secondary, #0096CC);
+}
+
+.hero-headline {
+  color: white;
+  font-weight: 900;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  margin: 0 0 0.25rem 0;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.hero-subheadline {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  font-weight: 500;
+  margin: 0 0 0.5rem 0;
+  max-width: 800px;
+}
+
+.hero-supporting {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: clamp(0.85rem, 1.5vw, 1rem);
+  margin: 0 0 0.75rem 0;
+  max-width: 700px;
+  line-height: 1.5;
+}
+
+.hero-helper-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── GRID SYSTEM (2+1 Desktop Layout) ── */
+.hero-grid {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+/* ── HERO CARDS COMMON ── */
+.hero-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.hero-card:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(0, 150, 204, 0.3);
+  box-shadow: 0 30px 60px rgba(0, 150, 204, 0.08);
+}
+
+.hero-card .icon-box {
+  background: rgba(0, 150, 204, 0.08);
+  color: var(--secondary, #0096CC);
+  border: 1px solid rgba(0, 150, 204, 0.15);
+  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.hero-card:hover .icon-box {
+  background: var(--secondary, #0096CC);
+  color: white;
+}
+
+.card-header-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.card-title {
+  font-family: var(--font-heading, inherit);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: white;
+  margin: 0;
+}
+
+.card-desc {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.45;
+  margin: 0 0 1.25rem 0;
+  flex-grow: 1;
+}
+
+.card-form {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.card-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: white;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.card-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.card-input:focus {
+  border-color: var(--secondary, #0096CC);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.card-cta {
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+  border: none;
+  background: var(--secondary, #0096CC);
+  color: white;
+  white-space: nowrap;
+}
+
+.card-cta:hover {
+  background: #00b0f0;
+}
+
+.card-cta.secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.card-cta.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.card-helper {
+  display: block;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+/* Chip list for Search Card */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+
+.chip {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.6);
+  padding: 0.3rem 0.75rem;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chip:hover {
+  background: rgba(0, 150, 204, 0.12);
+  border-color: rgba(0, 150, 204, 0.3);
+  color: white;
+}
+
+/* Suggested prompts list for Ask Card */
+.suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.suggestion-item {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  width: 100%;
+  font-weight: 500;
+}
+
+.suggestion-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--secondary, #0096CC);
+  color: white;
+}
+
+/* ── ROW 2: PROFESSIONAL TOOLS ── */
+.card-prescription {
+  /* Occupies full width in 2+1 layout */
+  grid-column: 1 / -1;
+  padding: 1.25rem 1.75rem;
+}
+
+.prescription-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 2rem;
+}
+
+.presc-left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.presc-right {
+  display: flex;
+  align-items: center;
+}
+
+.guest-action, .logged-action {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.helper-label, .flow-indicator {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 500;
+}
+
+/* ── TRUST BAR ── */
+.trust-bar {
+  margin-top: 2rem;
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 1.25rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 4rem);
+  flex-wrap: wrap;
+}
+
+.trust-item {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.02em;
+}
+
+/* ── RESPONSIVE COMPACT HEIGHTS & BEHAVIOR ── */
+
+/* Desktop view heights */
+@media (min-width: 769px) {
+  .hero-section {
+    min-height: 750px;
+    max-height: 850px;
+  }
+  .hero-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile Stack layout (max-width: 768px) */
+@media (max-width: 768px) {
+  .hero-section {
+    padding-top: 5rem;
+    padding-bottom: 2rem;
+    min-height: 900px;
+  }
+  
+  .hero-container {
+    gap: 1.5rem;
+  }
+  
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  
+  .hero-card {
+    padding: 1.25rem;
+    width: 100%;
+  }
+
+  .card-cta {
+    padding: 0.7rem 1.25rem;
+  }
+
+  /* Upload prescription card collapses */
+  .card-prescription {
+    grid-column: auto;
+  }
+
+  .prescription-layout {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .presc-left {
+    gap: 0.75rem;
+  }
+
+  .presc-right {
+    width: 100%;
+  }
+
+  .guest-action, .logged-action {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .trust-bar {
+    margin-top: 1rem;
+    gap: 1rem;
+    flex-direction: column;
+    align-items: center;
+  }
+}

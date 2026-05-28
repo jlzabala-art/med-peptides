@@ -1,9 +1,10 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
- * REGEN PEPT — Automated Clinical Protocol Selection Test Suite (Testing 2)
+ * Med-Peptides — Automated Clinical Protocol Selection Test Suite (Testing 2)
  * Runs the full ProtocolEngine2 internal pipeline with local bundle, bypassing Firebase.
  */
 import { ProtocolEngine2 } from './protocolEngine2.js';
-import { protocolBundle } from './protocol_builder_2_0_protocols_bundle/index.js';
+import { protocolBundle } from './protocol_finder_2_0_protocols_bundle/index.js';
 import { createWriteStream } from 'fs';
 import { writeFileSync } from 'fs';
 
@@ -190,7 +191,7 @@ function validateTimeline(timeline) {
 // ─────────────────────────────────────────────
 async function runAudit() {
   console.log("\n╔══════════════════════════════════════════════════════╗");
-  console.log("║  REGEN PEPT — Clinical Protocol Audit Suite v2.0    ║");
+  console.log("║  Med-Peptides — Clinical Protocol Audit Suite v2.0    ║");
   console.log("╚══════════════════════════════════════════════════════╝\n");
 
   const log = {

@@ -1,8 +1,12 @@
+ 
 /**
  * productEnums.js
  *
  * Shared constants for the canonical product model.
  * Import from here — never use raw strings in product/variant logic.
+ *
+ * PRICING_TIER values match the SHORT Firestore document keys
+ * (e.g. variant.pricing.retail, NOT variant.pricing.retailPrice).
  */
 
 // ── Administration Routes ─────────────────────────────────────────────────────
@@ -33,12 +37,13 @@ export const ROUTE_LABELS = Object.freeze({
 export const VALID_ROUTES = Object.values(ROUTE);
 
 // ── Pricing Tiers ─────────────────────────────────────────────────────────────
+// Values are the SHORT Firestore canonical keys (variant.pricing.retail, etc.)
 
 export const PRICING_TIER = Object.freeze({
-  MASTER:    'masterPrice',    // Cost to us from supplier (admin only — never expose to client)
-  RETAIL:    'retailPrice',    // Public web price (guests / unregistered users)
-  CLINIC:    'clinicPrice',    // Price for associated clinics
-  WHOLESALE: 'wholesalePrice', // Wholesale price (pro members / resellers)
+  MASTER:    'master',    // Cost to us from supplier (admin only — never expose to client)
+  RETAIL:    'retail',    // Public web price (guests / unregistered users)
+  CLINIC:    'clinic',    // Price for associated clinics
+  WHOLESALE: 'wholesale', // Wholesale price (pro members / resellers)
 });
 
 export const PRICING_TIER_LABELS = Object.freeze({
@@ -50,6 +55,52 @@ export const PRICING_TIER_LABELS = Object.freeze({
 
 /** All valid tier keys — use for validation */
 export const VALID_PRICING_TIERS = Object.values(PRICING_TIER);
+
+// ── Billing Units ─────────────────────────────────────────────────────────────
+// Describes what a single "unit" in pricing.{tier}.unit represents.
+
+export const BILLING_UNIT = Object.freeze({
+  VIAL:         'vial',         // Injectable peptide vial
+  BOTTLE:       'bottle',       // Supplement bottle / capsule pack
+  CAPSULE_PACK: 'capsule_pack', // Loose capsule pack
+  KIT:          'kit',          // Multi-product kit
+  PROTOCOL:     'protocol',     // Full protocol pricing
+  TEST:         'test',         // Genetic / lab test
+  BOX:          'box',          // Packaged box
+  DEVICE:       'device',       // Medical device
+  AMPOULE:      'ampoule',      // Single-use ampoule
+  PATCH:        'patch',        // Transdermal patch
+});
+
+export const BILLING_UNIT_LABELS = Object.freeze({
+  [BILLING_UNIT.VIAL]:         'Vial',
+  [BILLING_UNIT.BOTTLE]:       'Bottle',
+  [BILLING_UNIT.CAPSULE_PACK]: 'Capsule Pack',
+  [BILLING_UNIT.KIT]:          'Kit',
+  [BILLING_UNIT.PROTOCOL]:     'Protocol',
+  [BILLING_UNIT.TEST]:         'Test',
+  [BILLING_UNIT.BOX]:          'Box',
+  [BILLING_UNIT.DEVICE]:       'Device',
+  [BILLING_UNIT.AMPOULE]:      'Ampoule',
+  [BILLING_UNIT.PATCH]:        'Patch',
+});
+
+// ── Product Types ─────────────────────────────────────────────────────────────
+
+export const PRODUCT_TYPE = Object.freeze({
+  PEPTIDE:              'peptide',
+  SUPPLEMENT:           'supplement',
+  GENETIC_TEST:         'genetic_test',
+  PROTOCOL:             'protocol',
+  PROFESSIONAL_MATERIAL:'professional_material',
+  HORMONE:              'hormone',
+  SMALL_MOLECULE:       'small_molecule',
+  INJECTABLE_NUTRIENT:  'injectable_nutrient',
+  IV_PROTOCOL:          'iv_protocol',
+  TOPICAL_COSMETIC:     'topical_cosmetic',
+});
+
+export const VALID_PRODUCT_TYPES = Object.values(PRODUCT_TYPE);
 
 // ── Supplier Tiers ────────────────────────────────────────────────────────────
 

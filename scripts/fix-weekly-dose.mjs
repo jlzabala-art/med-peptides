@@ -20,7 +20,7 @@ const serviceAccount = JSON.parse(
 
 initializeApp({
   credential: cert(serviceAccount),
-  projectId: 'med-peptides-app',
+  projectId: 'Med-Peptides-app',
 });
 
 const db = getFirestore();

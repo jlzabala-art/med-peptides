@@ -1,0 +1,46 @@
+/* DoctorSettings.module.css */
+
+:root {
+  --bg-primary: hsl(210, 30%, 12%);
+  --bg-surface: rgba(255, 255, 255, 0.08);
+  --text-primary: hsl(0, 0%, 95%);
+  --accent: hsl(190, 80%, 60%);
+}
+
+.container {
+  min-height: 100vh;
+  padding: 2rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.content {
+  background: var(--bg-surface);
+  border-radius: 1rem;
+  padding: 2rem;
+  max-width: 800px;
+  width: 100%;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.content:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+h2 {
+  margin-bottom: 1rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.75rem;
+  color: var(--accent);
+}
+
+p {
+  opacity: 0.85;
+}

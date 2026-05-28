@@ -1,3 +1,4 @@
+ 
 import React from 'react';
 import { Beaker, ShieldCheck, Microscope, ArrowLeft, Send } from 'lucide-react';
 
@@ -26,16 +27,16 @@ export default function CustomSynthesis({ onBack }) {
                 <Microscope size={28} />
               </div>
               <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 800, color: '#0f172a' }}>Purity Precision</h3>
-              <p style={{ color: '#64748b', fontSize: '1.1rem', lineHeight: 1.7 }}>
+              <p style={{ color: 'var(--color-text-secondary)', fontSize: '1.1rem', lineHeight: 1.7 }}>
                 Standard catalog items often reach 98%+. Our custom synthesis service can provide analytical markers verified to 99.5% and beyond, essential for longitudinal sensitivity.
               </p>
             </div>
             <div style={{ padding: '3rem', backgroundColor: 'white', borderRadius: '32px', border: '1px solid #f1f5f9', boxShadow: '0 10px 30px rgba(0,0,0,0.03)' }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '16px', backgroundColor: 'rgba(16, 185, 129, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981', marginBottom: '2rem' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '16px', backgroundColor: 'rgba(16, 185, 129, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-success)', marginBottom: '2rem' }}>
                 <ShieldCheck size={28} />
               </div>
               <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 800, color: '#0f172a' }}>Structural Mod</h3>
-              <p style={{ color: '#64748b', fontSize: '1.1rem', lineHeight: 1.7 }}>
+              <p style={{ color: 'var(--color-text-secondary)', fontSize: '1.1rem', lineHeight: 1.7 }}>
                 Acetylation, amidation, phosphorylation, or isotopic labeling. We implement specific molecular modifications to optimize stability, bioavailability, or tracking.
               </p>
             </div>

@@ -1,3 +1,4 @@
+ 
 import React from 'react';
 import { 
   Activity, TrendingUp, Zap, Brain, Moon, Flame, Waves, Shield, Dna
@@ -89,7 +90,7 @@ export const CONSTRAINT_GROUPS = {
     label: "Workflow Complexity", 
     type: "single", 
     options: [
-      { id: "minimal", label: "Minimal" },
+      { id: "moderate", label: "Moderate" },
       { id: "standard", label: "Standard" },
       { id: "advanced", label: "Advanced" }
     ] 

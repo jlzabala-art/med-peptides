@@ -4,7 +4,7 @@
  *  Clinical Data Architect · Batch Update · Safe Mode Enabled
  * ============================================================
  *
- * Firebase Project  : med-peptides-app
+ * Firebase Project  : Med-Peptides-app
  * Target Collection : protocols
  * Schema Standard   : antigravity_v2
  * Timestamp         : 2026-04-21
@@ -24,7 +24,7 @@ const admin = require("firebase-admin");
 const { FieldValue } = require("firebase-admin/firestore");
 
 // ─── CONFIG ────────────────────────────────────────────────
-const PROJECT_ID = "med-peptides-app";
+const PROJECT_ID = "Med-Peptides-app";
 const COLLECTION  = "protocols";
 const DRY_RUN     = process.env.DRY_RUN !== "false"; // safe by default
 

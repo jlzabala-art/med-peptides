@@ -1,6 +1,6 @@
 {
   "protocol_duration_weeks": 12,
-  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "protocol_author_name": "Med-Peptides Clinical Team",
   "bundleVersion": "2.0",
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -82,7 +82,7 @@
   },
   "protocol_author_notes": "Official curated protocol for general clinical use.",
   "_schemaVersion": "antigravity_v2",
-  "protocol_author_organization": "ReGen PEPT",
+  "protocol_author_organization": "Med-Peptides",
   "protocol_last_reviewed_at": "2026-03-29",
   "protocol_source_reference": "internal_guide",
   "expected_outcomes": {
@@ -127,16 +127,16 @@
               "Friday"
             ],
             "administration_frequency": "5x_week",
-            "dose_unit": "protocol_defined",
-            "starting_intensity": "standard",
-            "timing_hint": "evening"
+            "dose_unit": "mcg",
+            "timing_hint": "evening",
+            "starting_weekly_dose": 0.5
           },
           "product_id": "prd_sermorelin",
           "product_title": "Sermorelin",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_sermorelin",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         },
@@ -149,15 +149,15 @@
               "Friday"
             ],
             "administration_frequency": "3x_week",
-            "dose_unit": "protocol_defined",
-            "starting_intensity": "optional_low"
+            "dose_unit": "mcg",
+            "intensity_label": "optional_low"
           },
           "product_id": "prd_ipamorelin",
           "product_title": "Ipamorelin",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_ipamorelin",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         }
@@ -191,16 +191,16 @@
               "Friday"
             ],
             "administration_frequency": "5x_week",
-            "dose_unit": "protocol_defined",
-            "intensity": "standard_plus",
-            "timing_hint": "evening"
+            "dose_unit": "mcg",
+            "timing_hint": "evening",
+            "starting_weekly_dose": 1
           },
           "product_id": "prd_sermorelin",
           "product_title": "Sermorelin",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_sermorelin",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         },
@@ -215,15 +215,15 @@
               "Friday"
             ],
             "administration_frequency": "5x_week",
-            "dose_unit": "protocol_defined",
-            "intensity": "conditional"
+            "dose_unit": "mcg",
+            "intensity_label": "conditional"
           },
           "product_id": "prd_ipamorelin",
           "product_title": "Ipamorelin",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_ipamorelin",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         }
@@ -254,16 +254,16 @@
               "Friday"
             ],
             "administration_frequency": "3x_week",
-            "dose_unit": "protocol_defined",
-            "intensity": "maintenance",
-            "timing_hint": "evening"
+            "dose_unit": "mcg",
+            "timing_hint": "evening",
+            "starting_weekly_dose": 1
           },
           "product_id": "prd_sermorelin",
           "product_title": "Sermorelin",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_sermorelin",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         }
@@ -569,7 +569,7 @@
     ],
     "generatedAt": "2026-04-26T09:05:00+02:00"
   },
-  "_importBundle": "ReGen PEPT Core Clinical Protocol Library",
+  "_importBundle": "Med-Peptides Core Clinical Protocol Library",
   "_syncSource": "export/protocols/horm_002.json",
   "metadata": {
     "longDescription": "Tesamorelin (TransCon hGH; Egrifta) is an FDA-approved synthetic GHRH analogue (GHRH 1-44 with trans-3-hexenoic acid modification) validated in Phase 3 RCTs for reducing visceral adipose tissue (VAT) in HIV-associated lipodystrophy and studied for metabolic benefits in non-HIV populations (Falutz J et al., NEJM 2007; Stanley TL et al., J Clin Endocrinol Metab 2012). Tesamorelin acts on pituitary GHRH receptors to amplify endogenous GH pulse amplitude while preserving the physiological feedback regulation of the GH axis — unlike exogenous GH administration, which suppresses endogenous production. Ipamorelin (selective GHSR agonist; see horm_001) is combined to add discrete pulsatile GH peaks beyond the tonic effect of tesamorelin, enhancing total GH bioavailability while maintaining physiological rhythmicity. This protocol is particularly suited for adults with abdominal adiposity, low IGF-1, age-related GH decline (somatopause), or metabolic syndrome with a visceral fat component.",
@@ -601,8 +601,8 @@
     "visibility": "public",
     "scientificName": "Tesamorelin + Ipamorelin GHRH-Axis Visceral Adiposity & GH Restoration Protocol",
     "author": {
-      "organization": "ReGen PEPT",
-      "name": "ReGen PEPT Clinical Team",
+      "organization": "Med-Peptides",
+      "name": "Med-Peptides Clinical Team",
       "title": "Peptide Specialists"
     },
     "evidence_grade_note": "GRADE A- due to FDA approval of Tesamorelin (Egrifta) for HIV-lipodystrophy visceral fat reduction (Falutz J, NEJM 2010). Ipamorelin/CJC-1295 component remains GRADE B (Phase II data). Combined protocol is clinical extrapolation.",
@@ -651,7 +651,7 @@
     "_nanoseconds": 447000000,
     "_seconds": 1777190719
   },
-  "_patchBundle": "ReGen PEPT Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
   "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
   "safety_profile": {
     "drug_interactions": [
@@ -719,5 +719,9 @@
       }
     ]
   },
-  "_syncedAt": "2026-04-26T12:46:28.640Z"
+  "_syncedAt": "2026-04-26T12:46:28.640Z",
+  "recommended_tests": [
+    "testosterone-blood-test",
+    "fagron-trichotest"
+  ]
 }

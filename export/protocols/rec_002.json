@@ -3,8 +3,8 @@
   "complexity_level": "advanced",
   "confidence_score": 90,
   "number_of_phases": 2,
-  "protocol_author_name": "ReGen PEPT Clinical Team",
-  "protocol_author_organization": "ReGen PEPT",
+  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_organization": "Med-Peptides",
   "protocol_author_title": "Peptide Specialists",
   "protocol_duration_weeks": 8,
   "protocol_id": "rec_002",
@@ -345,10 +345,12 @@
       "review_status": "approved"
     },
     "shortCode": "REC-002",
-    "primary_goal": "Recovery / Injury"
+    "primary_goal": "Recovery / Injury",
+    "duration_weeks": 8
   },
   "_patchedAt": {
-    "schema_gap_fix": "2026-04-26T12:37:11Z"
+    "schema_gap_fix": "2026-04-26T12:37:11Z",
+    "phase1_fix": "2026-05-17T08:28:52.937542+00:00"
   },
   "_schemaVersion": "antigravity_v2",
   "_patchSchema": "antigravity_v2",
@@ -377,7 +379,108 @@
       }
     }
   },
-  "phase_blueprints": [],
+  "phase_blueprints": [
+    {
+      "phase_id": "rec_002_ph1",
+      "phase_name": "Acute Repair",
+      "duration_weeks": 4,
+      "drugs": [
+        {
+          "product_id": "BPC-157-5mg-vial",
+          "product_title": "BPC-157",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mcg",
+            "administration_frequency": "daily",
+            "starting_daily_dose": 500,
+            "dose_per_administration": 500,
+            "administration_days_default": [
+              "monday",
+              "tuesday",
+              "wednesday",
+              "thursday",
+              "friday",
+              "saturday",
+              "sunday"
+            ],
+            "timing_hint": "Administer daily in early repair phase"
+          }
+        },
+        {
+          "product_id": "TB-500-5mg-vial",
+          "product_title": "TB-500",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "administration_frequency": "weekly",
+            "starting_weekly_dose": 5,
+            "dose_per_administration": 5,
+            "administration_days_default": [
+              "monday"
+            ],
+            "timing_hint": "Remain weekly during acute repair phase"
+          }
+        },
+        {
+          "product_id": "ARA-290-16mg-vial",
+          "product_title": "ARA-290",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "administration_frequency": "3x_week",
+            "starting_weekly_dose": 4.8,
+            "dose_per_administration": 1.6,
+            "administration_days_default": [
+              "monday",
+              "wednesday",
+              "friday"
+            ],
+            "timing_hint": "Administer on non-consecutive days for neural support"
+          }
+        }
+      ]
+    },
+    {
+      "phase_id": "rec_002_ph2",
+      "phase_name": "Consolidation",
+      "duration_weeks": 4,
+      "drugs": [
+        {
+          "product_id": "BPC-157-5mg-vial",
+          "product_title": "BPC-157",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mcg",
+            "administration_frequency": "3x_week",
+            "starting_weekly_dose": 1500,
+            "dose_per_administration": 500,
+            "administration_days_default": [
+              "monday",
+              "wednesday",
+              "friday"
+            ],
+            "timing_hint": "Continue if nerve or functional deficits persist"
+          }
+        },
+        {
+          "product_id": "ARA-290-16mg-vial",
+          "product_title": "ARA-290",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "administration_frequency": "2x_week",
+            "starting_weekly_dose": 3.2,
+            "dose_per_administration": 1.6,
+            "administration_days_default": [
+              "tuesday",
+              "friday"
+            ],
+            "timing_hint": "Reduce if neuropathic symptoms improve"
+          }
+        }
+      ]
+    }
+  ],
   "safety_profile": {
     "risk_level": "moderate",
     "common_side_effects": [],
@@ -385,5 +488,10 @@
     "serious_adverse_events": [],
     "contraindication_summary": "See eligibility_rules.contraindications."
   },
-  "_syncedAt": "2026-04-26T12:46:33.076Z"
+  "_syncedAt": "2026-04-26T12:46:33.076Z",
+  "title": "BPC-157, TB-500 & ARA-290 Neuro-Musculoskeletal Protocol",
+  "recommended_tests": [
+    "fagron-trichotest",
+    "fagron-acnetest"
+  ]
 }

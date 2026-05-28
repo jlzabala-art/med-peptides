@@ -1,0 +1,69 @@
+.bottom-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 27, 46, 0.45);
+  backdrop-filter: blur(8px);
+  z-index: var(--z-modal, 1300);
+}
+
+.bottom-sheet-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--surface, #FFFFFF);
+  border-radius: 24px 24px 0 0;
+  z-index: calc(var(--z-modal, 1300) + 1);
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -10px 40px rgba(0, 54, 102, 0.15);
+  overflow: hidden;
+}
+
+.bottom-sheet-handle-wrapper {
+  padding: 12px 0 8px;
+  display: flex;
+  justify-content: center;
+  cursor: grab;
+}
+
+.bottom-sheet-handle-wrapper:active {
+  cursor: grabbing;
+}
+
+.bottom-sheet-handle {
+  width: 36px;
+  height: 5px;
+  background: var(--border, #D8E6F0);
+  border-radius: 99px;
+}
+
+.bottom-sheet-header {
+  padding: 0 1.5rem 1rem;
+  border-bottom: 1px solid var(--border-light, #EBF2F8);
+  text-align: center;
+}
+
+.bottom-sheet-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--primary, #003666);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.bottom-sheet-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Ensure the AI assistant inside the sheet fits perfectly */
+.bottom-sheet-content .ai-chat-inner {
+  height: auto !important;
+  max-height: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}

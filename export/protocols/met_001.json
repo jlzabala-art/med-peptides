@@ -1,6 +1,6 @@
 {
   "protocol_duration_weeks": 10,
-  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "protocol_author_name": "Med-Peptides Clinical Team",
   "bundleVersion": "2.0",
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -99,7 +99,7 @@
   },
   "protocol_author_notes": "Official curated protocol for general clinical use.",
   "_schemaVersion": "antigravity_v2",
-  "protocol_author_organization": "ReGen PEPT",
+  "protocol_author_organization": "Med-Peptides",
   "protocol_last_reviewed_at": "2026-03-29",
   "protocol_source_reference": "internal_guide",
   "expected_outcomes": {
@@ -148,7 +148,7 @@
           "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_tirzepatide",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         },
@@ -162,17 +162,15 @@
             "administration_frequency": "2x_week",
             "dose_per_administration": 5,
             "dose_unit": "mg",
-            "starting_intensity": "optional_low",
             "starting_weekly_dose": 10,
-            "weekly_dose": 10,
-            "weekly_dose_unit": "mg"
+            "intensity_label": "optional_low"
           },
           "product_id": "prd_motsc",
           "product_title": "MOTS-c",
           "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_motsc",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         }
@@ -202,16 +200,16 @@
               "Monday"
             ],
             "administration_frequency": "weekly",
-            "default_weekly_dose": 5,
             "dose_unit": "mg",
-            "possible_next_step_dose": 7.5
+            "possible_next_step_dose": 7.5,
+            "starting_weekly_dose": 5
           },
           "product_id": "prd_tirzepatide",
           "product_title": "Tirzepatide",
           "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_tirzepatide",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         },
@@ -226,17 +224,15 @@
             "administration_frequency": "3x_week",
             "dose_per_administration": 5,
             "dose_unit": "mg",
-            "intensity": "conditional",
             "starting_weekly_dose": 15,
-            "weekly_dose": 15,
-            "weekly_dose_unit": "mg"
+            "intensity_label": "conditional"
           },
           "product_id": "prd_motsc",
           "product_title": "MOTS-c",
           "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_motsc",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         }
@@ -265,16 +261,16 @@
               "Monday"
             ],
             "administration_frequency": "weekly",
-            "default_weekly_dose": 7.5,
             "dose_unit": "mg",
-            "max_weekly_dose": 10
+            "max_weekly_dose": 10,
+            "starting_weekly_dose": 7.5
           },
           "product_id": "prd_tirzepatide",
           "product_title": "Tirzepatide",
           "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_tirzepatide",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         }
@@ -544,7 +540,7 @@
     ],
     "generatedAt": "2026-04-26T09:05:00+02:00"
   },
-  "_importBundle": "ReGen PEPT Core Clinical Protocol Library",
+  "_importBundle": "Med-Peptides Core Clinical Protocol Library",
   "_syncSource": "export/protocols/met_001.json",
   "metadata": {
     "longDescription": "MOTS-c (mitochondrial open reading frame of the 12S rRNA-c) is an endogenous mitochondria-derived peptide that translocates to the nucleus under metabolic stress, activating AMPK and the AICAR pathway to improve insulin sensitivity and glucose homeostasis (Lee C et al., Cell Metab 2015; Reynolds JC et al., Nat Aging 2021). AOD-9604, the C-terminal fragment of human growth hormone (hGH 176–191), promotes lipolysis via β-adrenergic receptor pathways without inducing IGF-1 or insulin resistance (Ng FM et al., Biochem Mol Biol Int 1997). Combined, this 10-week protocol targets adipose reduction and metabolic flexibility in individuals with metabolic syndrome, pre-diabetes, or dyslipidaemia. The two-phase structure begins with full dual-compound activation then transitions to MOTS-c maintenance for sustained mitochondrial benefit.",
@@ -576,8 +572,8 @@
     "visibility": "public",
     "scientificName": "MOTS-c & AOD-9604 AMPK-Driven Metabolic Activation Protocol",
     "author": {
-      "organization": "ReGen PEPT",
-      "name": "ReGen PEPT Clinical Team",
+      "organization": "Med-Peptides",
+      "name": "Med-Peptides Clinical Team",
       "title": "Peptide Specialists"
     },
     "evidence_grade_note": "GRADE B: AOD-9604 Phase II trials (Metabolic Pharmaceuticals 2004); MOTS-c preclinical and early Phase I data (Lee C et al., Cell Metab 2015). Robust mechanistic evidence; limited large RCT data for peptide components.",
@@ -626,7 +622,7 @@
     "_nanoseconds": 792000000,
     "_seconds": 1777190725
   },
-  "_patchBundle": "ReGen PEPT Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
   "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
   "safety_profile": {
     "drug_interactions": [
@@ -699,5 +695,10 @@
       }
     ]
   },
-  "_syncedAt": "2026-04-26T12:46:30.857Z"
+  "_syncedAt": "2026-04-26T12:46:30.857Z",
+  "recommended_tests": [
+    "fagron-nutrigen",
+    "24-genomics-nutrigen",
+    "nad-blood-test"
+  ]
 }

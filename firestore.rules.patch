@@ -1,0 +1,19 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Recommended Clinical Audit Logs Security Rules
+    match /audit_logs/{logId} {
+      // Allow authenticated users to write/append log entries
+      allow create: if request.auth != null;
+      
+      // Allow only administrative users to read log records
+      allow read: if request.auth != null && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+        
+      // Ensure logs are immutable and cannot be updated or deleted by anyone
+      allow update, delete: if false;
+    }
+    
+  }
+}

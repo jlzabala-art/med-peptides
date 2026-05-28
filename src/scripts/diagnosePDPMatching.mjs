@@ -10,9 +10,9 @@ import { getFirestore, collection, getDocs } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDOV2zFeLGtPsE_O2b-gR3NHZygPspiSws",
-  authDomain: "med-peptides-app-27a3a.firebaseapp.com",
-  projectId: "med-peptides-app",
-  storageBucket: "med-peptides-app.firebasestorage.app",
+  authDomain: "Med-Peptides-app-27a3a.firebaseapp.com",
+  projectId: "Med-Peptides-app",
+  storageBucket: "Med-Peptides-app.firebasestorage.app",
   messagingSenderId: "514143707883",
   appId: "1:514143707883:web:6c12470433ef6c992714ae"
 };

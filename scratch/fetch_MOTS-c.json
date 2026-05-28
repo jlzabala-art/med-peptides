@@ -1,0 +1,54 @@
+[
+  {
+    "pmid": "25738459",
+    "title": "The mitochondrial-derived peptide MOTS-c promotes metabolic homeostasis and reduces obesity and insulin resistance.",
+    "authors": [
+      "Lee C",
+      "Zeng J",
+      "Drew BG",
+      "Sallam T",
+      "Martin-Montalvo A",
+      "Wan J",
+      "Kim SJ",
+      "Mehta H",
+      "Hevener AL",
+      "de Cabo R",
+      "Cohen P"
+    ],
+    "journal": "Cell metabolism",
+    "pubdate": "2015 Mar 03",
+    "doi": "10.1016/j.cmet.2015.02.009",
+    "abstract": "Mitochondria are known to be functional organelles, but their role as a signaling unit is increasingly being appreciated. The identification of a short open reading frame (sORF) in the mitochondrial DNA (mtDNA) that encodes a signaling peptide, humanin, suggests the possible existence of additional sORFs in the mtDNA. Here we report a sORF within the mitochondrial 12S rRNA encoding a 16-amino-acid peptide named MOTS-c (mitochondrial open reading frame of the 12S rRNA-c) that regulates insulin sensitivity and metabolic homeostasis. Its primary target organ appears to be the skeletal muscle, and its cellular actions inhibit the folate cycle and its tethered de novo purine biosynthesis, leading to AMPK activation. MOTS-c treatment in mice prevented age-dependent and high-fat-diet-induced insulin resistance, as well as diet-induced obesity. These results suggest that mitochondria may actively regulate metabolic homeostasis at the cellular and organismal level via peptides encoded within their genome."
+  },
+  {
+    "pmid": "37440408",
+    "title": "Mitochondria-derived cell-to-cell communication.",
+    "authors": [
+      "Al Amir Dache Z",
+      "Thierry AR"
+    ],
+    "journal": "Cell reports",
+    "pubdate": "2023 Jul 25",
+    "doi": "10.1016/j.celrep.2023.112728",
+    "abstract": "In addition to their intracellular mobility, mitochondria and their components can exist outside the cells from which they originate. As a result, they are capable of acting on non-parental distant cells and mediate intercellular communication in physiological conditions and in a variety of pathologies. It has recently been demonstrated that this horizontal transfer governs a wide range of biological processes, such as tissue homeostasis, the rescue of injured recipient cells, and tumorigenesis. In addition, due to mitochondria's bacterial ancestry, they and their components can be recognized as damage-associated molecular patterns (DAMPs) by the immune cells, leading to inflammation. Here, we provide an overview of the most current and significant findings concerning the different structures of extracellular mitochondria and their by-products and their functions in the physiological and pathological context. This account illustrates the ongoing expansion of our understanding of mitochondria's biological role and functions in mammalian organisms."
+  },
+  {
+    "pmid": "39321430",
+    "title": "Mitochondrial-Derived Peptide MOTS-c Suppresses Ovarian Cancer Progression by Attenuating USP7-Mediated LARS1 Deubiquitination.",
+    "authors": [
+      "Yin Y",
+      "Li Y",
+      "Ma B",
+      "Ren C",
+      "Zhao S",
+      "Li J",
+      "Gong Y",
+      "Yang H",
+      "Li J"
+    ],
+    "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+    "pubdate": "2024 Nov",
+    "doi": "10.1002/advs.202405620",
+    "abstract": "Mitochondrial-nuclear communication plays a vital role in maintaining cellular homeostasis. MOTS-c, a short peptide derived from the 12S rRNA of mitochondrial DNA, has been suggested as a retrograde mitochondrial signal. Although recent clinical studies have suggested a possible link between MOTS-c and human cancer, the role of MOTS-c in tumorigenesis has yet to be investigated. Here, MOTS-c levels are found to be reduced in both serum and tumor tissues from ovarian cancer (OC) patients, which are associated with poor patients' prognosis. Exogenous MOTS-c inhibits the proliferation, migration and invasion of OC cells, and induces cell cycle arrest and apoptosis. Mechanistically, MOTS-c interacts with LARS1 and promotes its ubiquitination and proteasomal degradation. In addition, USP7 was identified as a deubiquitinase of LARS1, and MOTS-c can attenuates USP7-mediated LARS1 deubiquitination by competing with USP7 for binding to LARS1. Besides, LARS1 was found to be increased and play an important oncogenic function in OC. More importantly, MOTS-c displays a marked anti-tumor effect on OC growth without systemic toxicity in vivo. In conclusion, this study reveals a crucial role of MOTS-c in OC and provides a possibility for MOTS-c as a therapeutic target for the treatment of this manlignacy."
+  }
+]

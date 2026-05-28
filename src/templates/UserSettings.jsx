@@ -1,3 +1,5 @@
+ 
+/* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
@@ -234,6 +236,8 @@ export default function UserSettings({ onBack }) {
     email: '',
     institution: '',
     phone: '',
+    specialty: '',
+    licenseId: '',
     // Shipping Address
     shippingStreet: '',
     shippingCity: '',
@@ -263,6 +267,8 @@ export default function UserSettings({ onBack }) {
         email: userProfile.email || user?.email || '',
         institution: userProfile.institution || '',
         phone: userProfile.phone || '',
+        specialty: userProfile.specialty || '',
+        licenseId: userProfile.licenseId || '',
         shippingStreet: userProfile.shippingStreet || '',
         shippingCity: userProfile.shippingCity || '',
         shippingZip: userProfile.shippingZip || '',
@@ -404,7 +410,19 @@ export default function UserSettings({ onBack }) {
               <label className="form-label">INSTITUTION / CLINIC NAME</label>
               <input type="text" name="institution" value={formData.institution} onChange={handleChange} className="premium-input" placeholder="Medical Research Center" />
             </div>
-            <div style={{ padding: '1rem', background: 'var(--background)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+            {isProfessional && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">SPECIALTY / AREA OF EXPERTISE</label>
+                  <input type="text" name="specialty" value={formData.specialty} onChange={handleChange} className="premium-input" placeholder="Endocrinology, Sports Medicine, etc." />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">MEDICAL LICENSE ID</label>
+                  <input type="text" name="licenseId" value={formData.licenseId} onChange={handleChange} className="premium-input" placeholder="LIC-1234567890" />
+                </div>
+              </div>
+            )}
+            <div style={{ padding: '1rem', background: 'var(--background)', borderRadius: '12px', border: '1px solid var(--border)', marginTop: '1rem' }}>
               <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
                 Verification status is tied to your institution details. Changing this may trigger a re-validation process for Professional pricing.
               </p>

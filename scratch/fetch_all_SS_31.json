@@ -1,0 +1,34 @@
+[
+  {
+    "pmid": "39848110",
+    "title": "SS-31@Fer-1 Alleviates ferroptosis in hypoxia/reoxygenation cardiomyocytes via mitochondrial targeting.",
+    "authors": [
+      "Zheng H",
+      "Ou J",
+      "Han H",
+      "Lu Q",
+      "Shen Y"
+    ],
+    "journal": "Biomedicine & pharmacotherapy = Biomedecine & pharmacotherapie",
+    "pubdate": "2025 Feb",
+    "doi": "10.1016/j.biopha.2025.117832",
+    "abstract": "PURPOSE: Targeting mitochondrial ferroptosis presents a promising strategy for mitigating myocardial ischemia-reperfusion (I/R) injury. This study aims to evaluate the efficacy of the mitochondrial-targeted ferroptosis inhibitor SS-31@Fer-1 (elamipretide@ferrostatin1) in reducing myocardial I/R injury.\nMETHODS: SS-31@Fer-1 was synthesized and applied to H9C2 cells subjected to hypoxia/reoxygenation (H/R) to assess its protective effects. Cytotoxicity was evaluated using a cell counting kit-8 (CCK-8) assay, with lactate dehydrogenase (LDH) and creatine kinase isoenzyme (CK-MB) levels measured. Mitochondrial reactive oxygen species (ROS) and mitochondrial membrane potential (MMP) were assessed using Mito-SOX and JC-1 fluorescent dyes, respectively. Lipid peroxidation products, malondialdehyde (MDA) and glutathione (GSH), were quantified. Mitochondrial structure, mt-cytochrome b (mt-Cytb), and mt-ATP synthase membrane subunit 6 (mt-ATP6) were analyzed. Additionally, iron homeostasis and ferroptosis markers were evaluated.\nRESULTS: SS-31@Fer-1 significantly improved H/R-induced cardiomyocyte viability and reduced LDH and CK-MB levels. Compared to the Fer-1 group, SS-31@Fer-1 reduced GSH and increased MDA levels, enhancing mitochondrial integrity and function. Notably, it increased mitochondrial ROS and decreased MMP, indicating a mitigation of H/R-induced cardiomyocyte cytotoxicity. Furthermore, SS-31@Fer-1 maintained cellular iron homeostasis, as evidenced by increased expression of FTH, FTMT, FPN, and ABCB8. Elevated levels of GPX4 and Nrf2 were observed, while ACSL4 and PTGS2 levels were reduced in the SS-31@Fer-1 group.\nCONCLUSIONS: SS-31@Fer-1 effectively suppressed ferroptosis in H/R-induced cardiomyocytes by maintaining cellular iron homeostasis, improving mitochondrial function, and inhibiting oxidative stress. These findings provide novel insights and opportunities for alleviating myocardial I/R injury."
+  },
+  {
+    "pmid": "35707274",
+    "title": "SS-31, a Mitochondria-Targeting Peptide, Ameliorates Kidney Disease.",
+    "authors": [
+      "Zhu Y",
+      "Luo M",
+      "Bai X",
+      "Li J",
+      "Nie P",
+      "Li B",
+      "Luo P"
+    ],
+    "journal": "Oxidative medicine and cellular longevity",
+    "pubdate": "2022",
+    "doi": "10.1155/2022/1295509",
+    "abstract": "Mitochondria are essential for eukaryotic cell activity and function, and their dysfunction is associated with the development and progression of renal diseases. In recent years, there has been a rapid development in mitochondria-targeting pharmacological strategies as mitochondrial biogenesis, morphology, and function, as well as dynamic changes in mitochondria, have been studied in disease states. Mitochondria-targeting drugs include nicotinamide mononucleotide, which supplements the NAD+ pool; mitochondria-targeted protective compounds, such as MitoQ; the antioxidant coenzyme, Q10; and cyclosporin A, an inhibitor of the mitochondrial permeability transition pore. However, traditional drugs targeting mitochondria have limited clinical applications due to their inability to be effectively absorbed by mitochondria in vivo and their high toxicity. Recently, SS-31, a mitochondria-targeting antioxidant, has received significant research attention as it decreases mitochondrial reactive oxygen species production and prevents mitochondrial depolarization, mitochondrial permeability transition pore formation, and Ca2+-induced mitochondrial swelling, and has no effects on normal mitochondria. At present, few studies have evaluated the effects of SS-31 against renal diseases, and the mechanism underlying its action is unclear. In this review, we first discuss the pharmacokinetics of SS-31 and the possible mechanisms underlying its protective effects against renal diseases. Then, we analyze its renal disease-improving effects in various experimental models, including animal and cell models, and summarize the clinical evidence of its benefits in renal disease treatment. Finally, the potential mechanism underlying the action of SS-31 against renal diseases is explored to lay a foundation for future preclinical studies and for the evaluation of its clinical applications."
+  }
+]

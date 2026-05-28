@@ -1,0 +1,9 @@
+.container {
+  position: relative;
+  background: var(--background);
+}
+
+.homeSeq {
+  position: relative;
+  z-index: 1;
+}

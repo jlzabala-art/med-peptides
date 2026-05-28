@@ -1,0 +1,8262 @@
+ 
+export const productCategories = [
+  "Recovery & Repair",
+  "Metabolic & Weight",
+  "Longevity & Anti-Aging",
+  "Cognitive & Mood",
+  "Hormonal Optimization",
+  "Sleep & Circadian",
+  "Immune Support",
+  "Research Supplies",
+  "Other Research Peptides"
+];
+
+export const products = [
+  {
+    "category": "Recovery & Repair",
+    "name": "BPC-157",
+    "cas": "137525-51-0",
+    "desc": "A pentadecapeptide with potent cytoprotective, angiogenic, and wound-healing properties under experimental conditions.",
+    "dosage": "5mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Healing, Recovery, Inflammation, Repair",
+    "image": "/assets/vials/bpc157.png",
+    "goals": [
+      "healing",
+      "recovery",
+      "inflammation",
+      "repair"
+    ],
+    "secondaryFactors": [
+      "gut_health",
+      "joint_support",
+      "tendon_repair"
+    ],
+    "tags": [
+      "Healing",
+      "Recovery",
+      "Anti-inflammatory"
+    ],
+    "mechanisms": [
+      "Upregulation of growth hormone receptor expression in tendon fibroblasts",
+      "Nitric oxide (NO) pathway modulation promoting angiogenesis",
+      "FAK-paxillin pathway activation for wound healing",
+      "Cytoprotective gastric mucosa stabilization via PGE2 synthesis"
+    ],
+    "semanticKeywords": [
+      "injury",
+      "wound healing",
+      "gut",
+      "stomach",
+      "joints",
+      "tendons",
+      "ligaments",
+      "soft tissue",
+      "repair peptide",
+      "recovery",
+      "tissue support",
+      "healing research",
+      "integrity support"
+    ],
+    "synonyms": [
+      "body protection compound 157",
+      "pentadecapeptide",
+      "bpc157"
+    ],
+    "safetyNote": "Ensure strictly for research purposes.",
+    "mechanismOfAction": {
+      "summary": "Repair-oriented research peptide commonly surfaced in tissue-response, recovery, and integrity-related contexts.",
+      "researchFocus": [
+        "recovery",
+        "tissue support",
+        "repair-related research"
+      ],
+      "semanticAdditions": [
+        "repair peptide",
+        "recovery",
+        "tissue support",
+        "healing research",
+        "integrity support"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "What is the main research positioning for BPC-157?",
+        "a": "BPC-157 is commonly positioned around repair, recovery, and tissue-support themes in research catalogs."
+      },
+      {
+        "q": "Why should BPC-157 variants be grouped?",
+        "a": "Because multiple strengths exist and the family should be browsed as one peptide with selectable presentations."
+      },
+      {
+        "q": "What should BPC-157 match semantically?",
+        "a": "Recovery, tissue support, repair, tendon-related, and integrity-focused searches."
+      },
+      {
+        "q": "Should BPC-157 be highlighted in protocol contexts?",
+        "a": "Yes, especially in repair and recovery-oriented protocol suggestions."
+      },
+      {
+        "q": "What should be visible in the FAQ modal?",
+        "a": "Mechanism summary, strengths, recovery-oriented protocol cues, and evidence access."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "bpc-157",
+    "variants": [
+      {
+        "variantId": "bpc-157-sc-default",
+        "label": "5mg/vial – SC",
+        "attributes": {
+          "dosageMg": 5,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 40,
+            "kit": 250,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Body Protection Compound-157; PL 14736",
+    "clinical_benefits": [
+      "Promotes tissue repair and accelerated wound healing",
+      "Supports rapid metabolic and physical recovery",
+      "Modulates inflammatory cytokines and systemic response",
+      "Stimulates connective tissue and joint reconstruction"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~4h (estimated)",
+      "contraindications": [
+        "Active malignancy or high cancer risk",
+        "Pregnancy",
+        "Concurrent anticoagulant therapy (relative)"
+      ],
+      "dosageRange": {
+        "min": 250,
+        "max": 500,
+        "unit": "mcg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "TB-500",
+        "GHK-Cu",
+        "KPV"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via SC/IM preferred; oral active in GI.",
+      "mechanismOfAction": {
+        "summary": "A pentadecapeptide with potent cytoprotective, angiogenic, and wound-healing properties under experimental conditions.",
+        "researchFocus": [
+          "healing",
+          "recovery",
+          "inflammation",
+          "repair"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Recovery & Repair",
+    "name": "TB-500 (Thymosin β4)",
+    "cas": "77591-33-4",
+    "desc": "A synthetic version of the naturally occurring peptide present in all cellular components promoting endothelial cell differentiation and angiogenesis.",
+    "dosage": "2mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Healing, Recovery, Performance, Injury",
+    "image": "/assets/vials/tb500.png",
+    "goals": [
+      "healing",
+      "recovery",
+      "injury_repair"
+    ],
+    "secondaryFactors": [
+      "flexibility",
+      "inflammation_reduction",
+      "muscle_repair"
+    ],
+    "tags": [
+      "Healing",
+      "Recovery",
+      "Performance"
+    ],
+    "mechanisms": [
+      "G-actin sequestration regulating actin cytoskeleton dynamics and cell migration",
+      "Angiogenesis promotion via endothelial VEGF-A and FGF upregulation",
+      "Anti-inflammatory modulation via NFκB and cyclooxygenase-2 suppression",
+      "Cardiomyocyte regeneration and cardiac stem cell activation"
+    ],
+    "semanticKeywords": [
+      "injury",
+      "wound healing",
+      "flexibility",
+      "inflammation",
+      "muscle tear",
+      "tendonitis",
+      "joint pain",
+      "TB-500",
+      "repair peptide",
+      "recovery support",
+      "tissue support",
+      "performance recovery"
+    ],
+    "synonyms": [
+      "thymosin beta 4",
+      "tb500",
+      "tb-500"
+    ],
+    "safetyNote": "Research-grade peptide.",
+    "mechanismOfAction": {
+      "summary": "Recovery-oriented research peptide family commonly surfaced in repair, tissue-response, and performance-support exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "TB-500",
+        "repair peptide",
+        "recovery support",
+        "tissue support",
+        "performance recovery"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Thymosin B4 (TB-500) be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "tb-500-thymosin-4",
+    "variants": [
+      {
+        "variantId": "tb-500-thymosin-4-sc-default",
+        "label": "2mg/vial – SC",
+        "attributes": {
+          "dosageMg": 2,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 25,
+            "kit": 150,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Thymosin Beta-4; Tβ4",
+    "clinical_benefits": [
+      "Promotes tissue repair and accelerated wound healing",
+      "Supports rapid metabolic and physical recovery"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~6–8h (estimated)",
+      "contraindications": [
+        "Active malignancy",
+        "Pregnancy",
+        "Severe coagulopathy"
+      ],
+      "dosageRange": {
+        "min": 2,
+        "max": 5,
+        "unit": "mg",
+        "frequency": "twice_weekly"
+      },
+      "synergies": [
+        "BPC-157",
+        "GHK-Cu"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC/IM preferred.",
+      "mechanismOfAction": {
+        "summary": "A synthetic version of the naturally occurring peptide present in all cellular components promoting endothelial cell differentiation and angiogenesis.",
+        "researchFocus": [
+          "healing",
+          "recovery",
+          "injury_repair"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Recovery & Repair",
+    "name": "GLOW (BPC-157/TB-500/GHK-Cu)",
+    "cas": "Mixed",
+    "desc": "A proprietary experimental blend combining cytoprotective properties, angiogenic stimulation, and tissue remodeling mechanisms.",
+    "dosage": "10/10/75mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Healing, Recovery, Skin, Anti-Aging",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "skin_health",
+      "healing",
+      "anti_aging"
+    ],
+    "secondaryFactors": [
+      "collagen_production",
+      "wound_healing",
+      "rejuvenation"
+    ],
+    "tags": [
+      "Skin",
+      "Healing",
+      "Premium Blend"
+    ],
+    "mechanisms": [
+      "Dermal collagen and elastin synthesis stimulation via TGF-β1",
+      "Copper-dependent SOD activation reducing oxidative skin damage",
+      "Epidermal stem cell chemoattraction for wound healing",
+      "NFκB anti-inflammatory signaling reduction in dermal fibroblasts"
+    ],
+    "semanticKeywords": [
+      "glow",
+      "beauty",
+      "skin",
+      "repair",
+      "complexion",
+      "shining",
+      "radiance",
+      "repair peptide",
+      "recovery",
+      "tissue support",
+      "healing research",
+      "integrity support",
+      "copper peptide",
+      "skin support",
+      "regeneration research",
+      "aesthetic research",
+      "blend",
+      "recovery formula",
+      "repair combination",
+      "regenerative support",
+      "TB-500",
+      "recovery support",
+      "performance recovery"
+    ],
+    "synonyms": [
+      "glow blend",
+      "healing stack"
+    ],
+    "safetyNote": "Synergistic research compound.",
+    "mechanismOfAction": {
+      "summary": "Recovery-oriented research peptide family commonly surfaced in repair, tissue-response, and performance-support exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "TB-500",
+        "repair peptide",
+        "recovery support",
+        "tissue support",
+        "performance recovery"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Thymosin B4 (TB-500) be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "glow-bpc-157-tb-500-ghk-cu",
+    "variants": [
+      {
+        "variantId": "glow-bpc-157-tb-500-ghk-cu-sc-default",
+        "label": "10/10/75mg/vial – SC",
+        "attributes": {
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 70,
+            "kit": 380,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "GHK-Cu peptide topical blend (proprietary)",
+    "clinical_benefits": [
+      "Promotes dermal collagen synthesis and skin elasticity",
+      "Promotes tissue repair and accelerated wound healing",
+      "Slows cellular senescence and promotes longevity pathways"
+    ],
+    "route": "topical",
+    "typeData": {
+      "halfLife": "N/A (topical)",
+      "contraindications": [],
+      "dosageRange": {
+        "min": 250,
+        "max": 500,
+        "unit": "mcg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "TB-500",
+        "GHK-Cu",
+        "KPV"
+      ],
+      "evidenceLevel": "anecdotal",
+      "typicalResearchUse": "Investigated in research models via Topical transdermal.",
+      "mechanismOfAction": {
+        "summary": "A proprietary experimental blend combining cytoprotective properties, angiogenic stimulation, and tissue remodeling mechanisms.",
+        "researchFocus": [
+          "skin_health",
+          "healing",
+          "anti_aging"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at 15–25°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 12 months in dry storage."
+  },
+  {
+    "category": "Recovery & Repair",
+    "name": "KLOW (BPC-157/TB-500/GHK-Cu/KPV)",
+    "cas": "Mixed",
+    "desc": "A multifaceted blend incorporating anti-inflammatory KPV with tissue repair agents for comprehensive cellular research.",
+    "dosage": "10/10/75/10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Healing, Recovery, Inflammation, Repair",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "heavy_repair",
+      "inflammation_control",
+      "skin_health"
+    ],
+    "secondaryFactors": [
+      "antimicrobial",
+      "gut_healing",
+      "deep_tissue_repair"
+    ],
+    "tags": [
+      "Repair",
+      "Inflammation",
+      "Full Stack"
+    ],
+    "mechanisms": [
+      "MC1R-independent anti-inflammatory NFκB suppression in skin",
+      "IL-1β and TNF-α downregulation in dermal keratinocytes",
+      "Skin barrier integrity restoration",
+      "Low-dose anti-inflammatory modulation for sensitive skin applications"
+    ],
+    "semanticKeywords": [
+      "klow",
+      "mega repair",
+      "inflammation",
+      "acne repair",
+      "gut repair",
+      "repair peptide",
+      "recovery",
+      "tissue support",
+      "healing research",
+      "integrity support",
+      "copper peptide",
+      "skin support",
+      "regeneration research",
+      "aesthetic research",
+      "blend",
+      "repair formula",
+      "recovery combination",
+      "regenerative support",
+      "KPV blend",
+      "inflammation peptide",
+      "barrier support",
+      "regulatory peptide",
+      "immune-context research",
+      "TB-500",
+      "recovery support",
+      "performance recovery"
+    ],
+    "synonyms": [
+      "klow blend",
+      "total healing stack"
+    ],
+    "safetyNote": "Advanced research formulation.",
+    "mechanismOfAction": {
+      "summary": "Recovery-oriented research peptide family commonly surfaced in repair, tissue-response, and performance-support exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "TB-500",
+        "repair peptide",
+        "recovery support",
+        "tissue support",
+        "performance recovery"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Thymosin B4 (TB-500) be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "klow-bpc-157-tb-500-ghk-cu-kpv",
+    "variants": [
+      {
+        "variantId": "klow-bpc-157-tb-500-ghk-cu-kpv-sc-default",
+        "label": "10/10/75/10mg/vial – SC",
+        "attributes": {
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 70,
+            "kit": 380,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "KPV topical analogue (proprietary low-dose formulation)",
+    "clinical_benefits": [
+      "Promotes dermal collagen synthesis and skin elasticity"
+    ],
+    "route": "topical",
+    "typeData": {
+      "halfLife": "N/A (topical)",
+      "contraindications": [],
+      "dosageRange": {
+        "min": 250,
+        "max": 500,
+        "unit": "mcg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "TB-500",
+        "GHK-Cu",
+        "KPV"
+      ],
+      "evidenceLevel": "anecdotal",
+      "typicalResearchUse": "Investigated in research models via Transdermal.",
+      "mechanismOfAction": {
+        "summary": "A multifaceted blend incorporating anti-inflammatory KPV with tissue repair agents for comprehensive cellular research.",
+        "researchFocus": [
+          "heavy_repair",
+          "inflammation_control",
+          "skin_health"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at 15–25°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 12 months in dry storage."
+  },
+  {
+    "category": "Recovery & Repair",
+    "name": "KPV",
+    "cas": "852642-49-4",
+    "desc": "A tripeptide (Lys-Pro-Val) featuring strong antimicrobial and anti-inflammatory properties.",
+    "dosage": "5mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Inflammation, Immune, Repair",
+    "image": "/assets/vials/kpv.png",
+    "goals": [
+      "acne_reduction",
+      "inflammation",
+      "gut_health",
+      "immunity"
+    ],
+    "secondaryFactors": [
+      "antimicrobial",
+      "skin_repair",
+      "digestive_health"
+    ],
+    "tags": [
+      "Acne",
+      "Inflammation",
+      "Antimicrobial"
+    ],
+    "mechanisms": [
+      "MC1R-independent anti-inflammatory signaling via NFκB suppression",
+      "IL-1β, TNF-α and IL-6 cytokine downregulation",
+      "Intestinal epithelial barrier integrity restoration",
+      "Melanocortin receptor partial agonism"
+    ],
+    "semanticKeywords": [
+      "acne",
+      "granos",
+      "pimples",
+      "skin inflammation",
+      "microbial",
+      "gut lining",
+      "leakygut",
+      "inflammation peptide",
+      "barrier support",
+      "regulatory peptide",
+      "immune-context research"
+    ],
+    "synonyms": [
+      "lys-pro-val",
+      "kpv peptide"
+    ],
+    "safetyNote": "Strongly antimicrobial research agent.",
+    "mechanismOfAction": {
+      "summary": "Short peptide research entry often surfaced in inflammation-context and barrier-support exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "inflammation peptide",
+        "barrier support",
+        "regulatory peptide",
+        "immune-context research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should KPV be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "kpv",
+    "variants": [
+      {
+        "variantId": "kpv-sc-default",
+        "label": "5mg/vial – SC",
+        "attributes": {
+          "dosageMg": 5,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 20,
+            "kit": 100,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Lys-Pro-Val; alpha-MSH C-terminal tripeptide",
+    "clinical_benefits": [
+      "Modulates inflammatory cytokines and systemic response",
+      "Restores intestinal barrier function and mucosal health"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~1h",
+      "contraindications": [
+        "Concurrent immunosuppressant therapy (relative)",
+        "Pregnancy",
+        "Known melanocortin hypersensitivity"
+      ],
+      "dosageRange": {
+        "min": 2.5,
+        "max": 10,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via SC/oral (partial).",
+      "mechanismOfAction": {
+        "summary": "A tripeptide (Lys-Pro-Val) featuring strong antimicrobial and anti-inflammatory properties.",
+        "researchFocus": [
+          "acne_reduction",
+          "inflammation",
+          "gut_health",
+          "immunity"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Recovery & Repair",
+    "name": "ARA-290",
+    "cas": "1208243-50-8",
+    "desc": "A non-erythropoietic peptide engineered to interact with the innate repair receptor, reducing inflammation and neurodegeneration.",
+    "dosage": "16mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Nerve, Pain, Inflammation, Repair",
+    "image": "/assets/vials/ara290.png",
+    "goals": [
+      "nerve_repair",
+      "pain_management",
+      "inflammation"
+    ],
+    "secondaryFactors": [
+      "neuropathy",
+      "cellular_protection",
+      "immunity"
+    ],
+    "tags": [
+      "Nerve",
+      "Pain",
+      "Inflammation"
+    ],
+    "mechanisms": [
+      "Non-hematopoietic erythropoietin receptor (EPOR/βcR) agonism",
+      "Peripheral neuroprotection via JAK2/STAT3 signaling",
+      "Anti-inflammatory cytokine modulation (TNF-α, IL-6 suppression)",
+      "Promotion of small fiber nerve regeneration"
+    ],
+    "semanticKeywords": [
+      "nerve pain",
+      "neuropathy",
+      "spine",
+      "burning pain",
+      "repair",
+      "neural",
+      "tissue support",
+      "nerve research",
+      "repair peptide",
+      "inflammation pathway"
+    ],
+    "synonyms": [
+      "cibinetide",
+      "ara290"
+    ],
+    "safetyNote": "Focused on neuropathic research.",
+    "mechanismOfAction": {
+      "summary": "Innate repair and tissue-response research peptide often associated with nerve and inflammation-related exploration.",
+      "researchFocus": [
+        "tissue response",
+        "nerve-support research",
+        "inflammation-related studies"
+      ],
+      "semanticAdditions": [
+        "tissue support",
+        "nerve research",
+        "repair peptide",
+        "inflammation pathway"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "What type of searches should surface ARA-290?",
+        "a": "Recovery, repair, tissue-support, nerve-related, and inflammation-context research searches."
+      },
+      {
+        "q": "What should the product row show?",
+        "a": "One family entry, strengths if multiple exist, and links to product detail, FAQ, and evidence."
+      },
+      {
+        "q": "Should ARA-290 emphasize scientific positioning over sales?",
+        "a": "Yes. This catalog mode should present it primarily as a research reference item."
+      },
+      {
+        "q": "What should the FAQ modal contain?",
+        "a": "A concise mechanism note, protocol relevance, evidence access, and handling-related notes where available."
+      },
+      {
+        "q": "How should this connect to protocol finder outputs?",
+        "a": "Through related-goal tags such as recovery, repair, tissue support, and nerve-context matching."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "ara-290",
+    "variants": [
+      {
+        "variantId": "ara-290-sc-default",
+        "label": "16mg/vial – SC",
+        "attributes": {
+          "dosageMg": 16,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 90,
+            "kit": 480,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Cibinetide; ARA-290",
+    "clinical_benefits": [
+      "Modulates inflammatory cytokines and systemic response"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~2–3h",
+      "contraindications": [
+        "Polycythemia vera",
+        "Uncontrolled hypertension",
+        "Pregnancy",
+        "Active thromboembolic disease"
+      ],
+      "dosageRange": {
+        "min": 8,
+        "max": 32,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A non-erythropoietic peptide engineered to interact with the innate repair receptor, reducing inflammation and neurodegeneration.",
+        "researchFocus": [
+          "nerve_repair",
+          "pain_management",
+          "inflammation"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Metabolic & Weight",
+    "name": "Tirzepatide",
+    "cas": "2023788-19-2",
+    "desc": "A dual GIP and GLP-1 receptor agonist fundamentally altering energy metabolism and insulin secretion profiles.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Weight Loss, Metabolic, Obesity, Insulin",
+    "image": "/assets/vials/tirzepatide.png",
+    "goals": [
+      "weight_loss",
+      "metabolism",
+      "obesity",
+      "insulin_sensitivity"
+    ],
+    "secondaryFactors": [
+      "appetite_suppression",
+      "blood_sugar",
+      "cardiovascular_health"
+    ],
+    "tags": [
+      "Metabolism",
+      "Weight Loss",
+      "GLP-1",
+      "GIP"
+    ],
+    "mechanisms": [
+      "Selective dual GIP and GLP-1 receptor agonist (twincretin)",
+      "GIP receptor agonism potentiating insulin sensitivity in adipose and muscle tissue",
+      "GLP-1 receptor agonism providing incretin effect and central satiety signaling",
+      "Superior glycemic control and weight reduction vs. GLP-1 monotherapy (SURPASS trials)"
+    ],
+    "semanticKeywords": [
+      "fat loss",
+      "diabetes",
+      "blood sugar",
+      "appetite",
+      "obesity",
+      "metabolic syndrome",
+      "dual agonist",
+      "GLP-1",
+      "GIP",
+      "incretin",
+      "metabolic peptide",
+      "weight-management research"
+    ],
+    "synonyms": [
+      "mounjaro",
+      "zepbound"
+    ],
+    "safetyNote": "Peptide should be handles with extreme precision.",
+    "mechanismOfAction": {
+      "summary": "Dual incretin-pathway peptide acting on GIP and GLP-1 signaling in metabolic research contexts.",
+      "researchFocus": [
+        "metabolism",
+        "glucose-regulation research",
+        "body composition"
+      ],
+      "semanticAdditions": [
+        "dual agonist",
+        "GLP-1",
+        "GIP",
+        "incretin",
+        "metabolic peptide",
+        "weight-management research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "Why is Tirzepatide often shown in multiple strengths?",
+        "a": "Because the family is commonly represented in several vial strengths, the UI should treat it as one peptide family with variant selection."
+      },
+      {
+        "q": "What search themes should trigger Tirzepatide?",
+        "a": "Metabolic health, incretin signaling, body composition, appetite-related research, and insulin-response related terms."
+      },
+      {
+        "q": "Should Tirzepatide appear in protocol-related results?",
+        "a": "Yes, especially when the protocol context is weight-management, metabolic support, or incretin-pathway exploration."
+      },
+      {
+        "q": "What is the best FAQ modal structure for Tirzepatide?",
+        "a": "Use concise answers covering mechanism, strengths, protocol relevance, and literature access rather than commercial copy."
+      },
+      {
+        "q": "Should price be emphasized in scientific list views?",
+        "a": "No. Scientific list views should emphasize evidence, mechanism, and strengths first, leaving pricing to the PDP if needed."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "tirzepatide",
+    "variants": [
+      {
+        "variantId": "tirzepatide-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 40,
+            "kit": 250,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Tirzepatide; LY3298176; Mounjaro; Zepbound",
+    "clinical_benefits": [
+      "Promotes lipolysis and fat oxidation",
+      "Enhances metabolic rate and cellular energy efficiency",
+      "Suppresses appetite and reduces fat accumulation",
+      "Upregulates insulin receptor responsiveness"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~5 days",
+      "contraindications": [
+        "Personal or family history of medullary thyroid carcinoma",
+        "MEN2 syndrome",
+        "Active pancreatitis",
+        "Pregnancy",
+        "Severe gastroparesis",
+        "Type 1 diabetes (monotherapy)"
+      ],
+      "dosageRange": {
+        "min": 2.5,
+        "max": 15,
+        "unit": "mg",
+        "frequency": "weekly"
+      },
+      "synergies": [
+        "MOTS-c",
+        "AOD-9604"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC ~>80%.",
+      "mechanismOfAction": {
+        "summary": "A dual GIP and GLP-1 receptor agonist fundamentally altering energy metabolism and insulin secretion profiles.",
+        "researchFocus": [
+          "weight_loss",
+          "metabolism",
+          "obesity",
+          "insulin_sensitivity"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at 2–8°C (unused); room temp up to 21 days after first use",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Metabolic & Weight",
+    "name": "Tirzepatide",
+    "cas": "2023788-19-2",
+    "desc": "A dual GIP and GLP-1 receptor agonist fundamentally altering energy metabolism and insulin secretion profiles.",
+    "dosage": "15mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Weight Loss, Metabolic, Obesity, Insulin",
+    "image": "/assets/vials/tirzepatide.png",
+    "goals": [
+      "weight_loss",
+      "metabolism",
+      "obesity",
+      "insulin_sensitivity"
+    ],
+    "secondaryFactors": [
+      "appetite_suppression",
+      "blood_sugar",
+      "cardiovascular_health"
+    ],
+    "tags": [
+      "Metabolism",
+      "Weight Loss",
+      "GLP-1",
+      "GIP"
+    ],
+    "mechanisms": [
+      "Selective dual GIP and GLP-1 receptor agonist (twincretin)",
+      "GIP receptor agonism potentiating insulin sensitivity in adipose and muscle tissue",
+      "GLP-1 receptor agonism providing incretin effect and central satiety signaling",
+      "Superior glycemic control and weight reduction vs. GLP-1 monotherapy (SURPASS trials)"
+    ],
+    "semanticKeywords": [
+      "fat loss",
+      "diabetes",
+      "blood sugar",
+      "appetite",
+      "obesity",
+      "metabolic syndrome",
+      "high dose",
+      "dual agonist",
+      "GLP-1",
+      "GIP",
+      "incretin",
+      "metabolic peptide",
+      "weight-management research"
+    ],
+    "synonyms": [
+      "mounjaro",
+      "zepbound"
+    ],
+    "safetyNote": "Concentrated research variant.",
+    "mechanismOfAction": {
+      "summary": "Dual incretin-pathway peptide acting on GIP and GLP-1 signaling in metabolic research contexts.",
+      "researchFocus": [
+        "metabolism",
+        "glucose-regulation research",
+        "body composition"
+      ],
+      "semanticAdditions": [
+        "dual agonist",
+        "GLP-1",
+        "GIP",
+        "incretin",
+        "metabolic peptide",
+        "weight-management research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "Why is Tirzepatide often shown in multiple strengths?",
+        "a": "Because the family is commonly represented in several vial strengths, the UI should treat it as one peptide family with variant selection."
+      },
+      {
+        "q": "What search themes should trigger Tirzepatide?",
+        "a": "Metabolic health, incretin signaling, body composition, appetite-related research, and insulin-response related terms."
+      },
+      {
+        "q": "Should Tirzepatide appear in protocol-related results?",
+        "a": "Yes, especially when the protocol context is weight-management, metabolic support, or incretin-pathway exploration."
+      },
+      {
+        "q": "What is the best FAQ modal structure for Tirzepatide?",
+        "a": "Use concise answers covering mechanism, strengths, protocol relevance, and literature access rather than commercial copy."
+      },
+      {
+        "q": "Should price be emphasized in scientific list views?",
+        "a": "No. Scientific list views should emphasize evidence, mechanism, and strengths first, leaving pricing to the PDP if needed."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "tirzepatide",
+    "variants": [
+      {
+        "variantId": "tirzepatide-sc-default",
+        "label": "15mg/vial – SC",
+        "attributes": {
+          "dosageMg": 15,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 60,
+            "kit": 390,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Tirzepatide; LY3298176; Mounjaro; Zepbound",
+    "clinical_benefits": [
+      "Promotes lipolysis and fat oxidation",
+      "Enhances metabolic rate and cellular energy efficiency",
+      "Suppresses appetite and reduces fat accumulation",
+      "Upregulates insulin receptor responsiveness"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~5 days",
+      "contraindications": [
+        "Personal or family history of medullary thyroid carcinoma",
+        "MEN2 syndrome",
+        "Active pancreatitis",
+        "Pregnancy",
+        "Severe gastroparesis",
+        "Type 1 diabetes (monotherapy)"
+      ],
+      "dosageRange": {
+        "min": 2.5,
+        "max": 15,
+        "unit": "mg",
+        "frequency": "weekly"
+      },
+      "synergies": [
+        "MOTS-c",
+        "AOD-9604"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC ~>80%.",
+      "mechanismOfAction": {
+        "summary": "A dual GIP and GLP-1 receptor agonist fundamentally altering energy metabolism and insulin secretion profiles.",
+        "researchFocus": [
+          "weight_loss",
+          "metabolism",
+          "obesity",
+          "insulin_sensitivity"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at 2–8°C (unused); room temp up to 21 days after first use",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Metabolic & Weight",
+    "name": "Tirzepatide",
+    "cas": "2023788-19-2",
+    "desc": "A dual GIP and GLP-1 receptor agonist fundamentally altering energy metabolism and insulin secretion profiles.",
+    "dosage": "30mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Weight Loss, Metabolic, Obesity, Insulin",
+    "image": "/assets/vials/tirzepatide.png",
+    "goals": [
+      "weight_loss",
+      "metabolism",
+      "obesity",
+      "insulin_sensitivity"
+    ],
+    "secondaryFactors": [
+      "appetite_suppression",
+      "blood_sugar",
+      "cardiovascular_health"
+    ],
+    "tags": [
+      "Metabolism",
+      "Weight Loss",
+      "GLP-1",
+      "GIP"
+    ],
+    "mechanisms": [
+      "Selective dual GIP and GLP-1 receptor agonist (twincretin)",
+      "GIP receptor agonism potentiating insulin sensitivity in adipose and muscle tissue",
+      "GLP-1 receptor agonism providing incretin effect and central satiety signaling",
+      "Superior glycemic control and weight reduction vs. GLP-1 monotherapy (SURPASS trials)"
+    ],
+    "semanticKeywords": [
+      "fat loss",
+      "diabetes",
+      "blood sugar",
+      "appetite",
+      "obesity",
+      "metabolic syndrome",
+      "extreme dose",
+      "dual agonist",
+      "GLP-1",
+      "GIP",
+      "incretin",
+      "metabolic peptide",
+      "weight-management research"
+    ],
+    "synonyms": [
+      "mounjaro",
+      "zepbound"
+    ],
+    "safetyNote": "Ultra-concentrated research variant.",
+    "mechanismOfAction": {
+      "summary": "Dual incretin-pathway peptide acting on GIP and GLP-1 signaling in metabolic research contexts.",
+      "researchFocus": [
+        "metabolism",
+        "glucose-regulation research",
+        "body composition"
+      ],
+      "semanticAdditions": [
+        "dual agonist",
+        "GLP-1",
+        "GIP",
+        "incretin",
+        "metabolic peptide",
+        "weight-management research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "Why is Tirzepatide often shown in multiple strengths?",
+        "a": "Because the family is commonly represented in several vial strengths, the UI should treat it as one peptide family with variant selection."
+      },
+      {
+        "q": "What search themes should trigger Tirzepatide?",
+        "a": "Metabolic health, incretin signaling, body composition, appetite-related research, and insulin-response related terms."
+      },
+      {
+        "q": "Should Tirzepatide appear in protocol-related results?",
+        "a": "Yes, especially when the protocol context is weight-management, metabolic support, or incretin-pathway exploration."
+      },
+      {
+        "q": "What is the best FAQ modal structure for Tirzepatide?",
+        "a": "Use concise answers covering mechanism, strengths, protocol relevance, and literature access rather than commercial copy."
+      },
+      {
+        "q": "Should price be emphasized in scientific list views?",
+        "a": "No. Scientific list views should emphasize evidence, mechanism, and strengths first, leaving pricing to the PDP if needed."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "tirzepatide",
+    "variants": [
+      {
+        "variantId": "tirzepatide-sc-default",
+        "label": "30mg/vial – SC",
+        "attributes": {
+          "dosageMg": 30,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 90,
+            "kit": 500,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Tirzepatide; LY3298176; Mounjaro; Zepbound",
+    "clinical_benefits": [
+      "Promotes lipolysis and fat oxidation",
+      "Enhances metabolic rate and cellular energy efficiency",
+      "Suppresses appetite and reduces fat accumulation",
+      "Upregulates insulin receptor responsiveness"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~5 days",
+      "contraindications": [
+        "Personal or family history of medullary thyroid carcinoma",
+        "MEN2 syndrome",
+        "Active pancreatitis",
+        "Pregnancy",
+        "Severe gastroparesis",
+        "Type 1 diabetes (monotherapy)"
+      ],
+      "dosageRange": {
+        "min": 2.5,
+        "max": 15,
+        "unit": "mg",
+        "frequency": "weekly"
+      },
+      "synergies": [
+        "MOTS-c",
+        "AOD-9604"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC ~>80%.",
+      "mechanismOfAction": {
+        "summary": "A dual GIP and GLP-1 receptor agonist fundamentally altering energy metabolism and insulin secretion profiles.",
+        "researchFocus": [
+          "weight_loss",
+          "metabolism",
+          "obesity",
+          "insulin_sensitivity"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at 2–8°C (unused); room temp up to 21 days after first use",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Metabolic & Weight",
+    "name": "Retatrutide",
+    "cas": "2381089-83-2",
+    "desc": "A novel triple hormone receptor agonist (GIP, GLP-1, and Glucagon) exhibiting pronounced metabolic regulatory effects.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Weight Loss, Metabolic, Triple Agonist",
+    "image": "/assets/vials/retatrutide.png",
+    "goals": [
+      "weight_loss",
+      "metabolism",
+      "fat_oxidation"
+    ],
+    "secondaryFactors": [
+      "appetite_suppression",
+      "liver_health",
+      "blood_sugar_regulation"
+    ],
+    "tags": [
+      "Metabolism",
+      "Weight Loss",
+      "Triple Agonist",
+      "GLP-1",
+      "GIP",
+      "Glucagon"
+    ],
+    "mechanisms": [
+      "Selective triple agonism of GIP, GLP-1, and glucagon receptors (triagonist)",
+      "Superior weight reduction vs. dual agonists via complementary metabolic pathways",
+      "Hepatic glucagon receptor activation reducing liver fat",
+      "GLP-1 mediated incretin effect improving insulin secretion and satiety"
+    ],
+    "semanticKeywords": [
+      "fat loss",
+      "metabolism",
+      "obesity",
+      "triple agonist",
+      "weight control",
+      "cellular energy",
+      "GLP-1",
+      "GIP",
+      "glucagon receptor",
+      "metabolic research",
+      "incretin pathway"
+    ],
+    "synonyms": [
+      "triple g",
+      "retatrutide"
+    ],
+    "safetyNote": "Highly potent metabolic experimental agent.",
+    "mechanismOfAction": {
+      "summary": "Triple incretin-pathway peptide acting across GLP-1, GIP, and glucagon signaling in metabolic research models.",
+      "researchFocus": [
+        "metabolic regulation",
+        "energy expenditure",
+        "body composition"
+      ],
+      "semanticAdditions": [
+        "triple agonist",
+        "GLP-1",
+        "GIP",
+        "glucagon receptor",
+        "metabolic research",
+        "incretin pathway"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "What is the primary research interest for Retatrutide?",
+        "a": "Retatrutide is typically explored in metabolic and body-composition research because it engages multiple incretin-related pathways at once."
+      },
+      {
+        "q": "How should strengths be presented in the catalog?",
+        "a": "Retatrutide should be shown as one family with selectable strengths so researchers can compare available presentations without duplicating the product family row."
+      },
+      {
+        "q": "Should Retatrutide be surfaced in metabolic protocol searches?",
+        "a": "Yes. It should rank for metabolic, body-composition, incretin, appetite, and energy-expenditure related searches."
+      },
+      {
+        "q": "What should clinicians see first in the FAQ modal?",
+        "a": "A short mechanism summary, available strengths, storage or handling notes if present, and links to scientific literature are the most useful first items."
+      },
+      {
+        "q": "How should Retatrutide connect to product detail pages?",
+        "a": "The family row should link to the PDP, where strength selection, scientific literature, and protocol relevance can be handled in more detail."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "retatrutide",
+    "variants": [
+      {
+        "variantId": "retatrutide-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 80,
+            "kit": 450,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "LY3437943; Triple agonist GIP/GLP-1/Glucagon",
+    "clinical_benefits": [
+      "Promotes lipolysis and fat oxidation",
+      "Enhances metabolic rate and cellular energy efficiency"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~6 days",
+      "contraindications": [
+        "Personal or family history of medullary thyroid carcinoma",
+        "MEN2 syndrome",
+        "Pregnancy",
+        "Active pancreatitis",
+        "Severe gastroparesis"
+      ],
+      "dosageRange": {
+        "min": 2.5,
+        "max": 15,
+        "unit": "mg",
+        "frequency": "weekly"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC.",
+      "mechanismOfAction": {
+        "summary": "A novel triple hormone receptor agonist (GIP, GLP-1, and Glucagon) exhibiting pronounced metabolic regulatory effects.",
+        "researchFocus": [
+          "weight_loss",
+          "metabolism",
+          "fat_oxidation"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at 2–8°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Metabolic & Weight",
+    "name": "Semaglutide",
+    "cas": "910463-68-2",
+    "desc": "A selective GLP-1 receptor agonist with structural modifications to extend plasma half-life via albumin binding.",
+    "dosage": "5mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Weight Loss, Metabolic, Obesity",
+    "image": "/assets/vials/semaglutide.png",
+    "goals": [
+      "weight_loss",
+      "metabolism",
+      "obesity"
+    ],
+    "secondaryFactors": [
+      "appetite_control",
+      "cardiovascular_protection",
+      "glycemic_control"
+    ],
+    "tags": [
+      "Weight Loss",
+      "Metabolism",
+      "GLP-1"
+    ],
+    "mechanisms": [
+      "Selective long-acting GLP-1 receptor agonism (94% sequence homology to native GLP-1)",
+      "Glucose-dependent insulin secretion enhancement from pancreatic beta cells",
+      "Glucagon suppression during hyperglycemia",
+      "Central appetite suppression via hypothalamic GLP-1 receptors and vagal afferents"
+    ],
+    "semanticKeywords": [
+      "fat loss",
+      "weight control",
+      "ozempic",
+      "wegovy",
+      "appetite suppression",
+      "metabolic health",
+      "GLP-1 agonist",
+      "appetite research",
+      "metabolic peptide",
+      "body composition",
+      "incretin research"
+    ],
+    "synonyms": [
+      "semaglutide",
+      "ozempic-like"
+    ],
+    "safetyNote": "Highly effective for metabolic research.",
+    "mechanismOfAction": {
+      "summary": "GLP-1 pathway peptide studied for metabolic regulation and appetite-related signaling in research settings.",
+      "researchFocus": [
+        "GLP-1 signaling",
+        "metabolic regulation",
+        "body composition"
+      ],
+      "semanticAdditions": [
+        "GLP-1 agonist",
+        "appetite research",
+        "metabolic peptide",
+        "body composition",
+        "incretin research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "What is the main scientific theme for Semaglutide?",
+        "a": "Semaglutide is usually surfaced around GLP-1, metabolic regulation, appetite signaling, and body-composition research themes."
+      },
+      {
+        "q": "How should Semaglutide be organized in the catalog?",
+        "a": "As one family with multiple selectable strengths, not as repeated product rows."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, variant strengths, protocol relevance, and evidence links rather than quick-buy controls."
+      },
+      {
+        "q": "Should Semaglutide be visible in protocol finder cross-links?",
+        "a": "Yes, especially for metabolic and weight-management protocol contexts."
+      },
+      {
+        "q": "How should scientific literature be accessed?",
+        "a": "Through a modal or side panel with concise article previews and a path to the full product detail page for deeper review."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "semaglutide",
+    "variants": [
+      {
+        "variantId": "semaglutide-sc-default",
+        "label": "5mg/vial – SC",
+        "attributes": {
+          "dosageMg": 5,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 30,
+            "kit": 150,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Semaglutide; Ozempic; Wegovy",
+    "clinical_benefits": [
+      "Promotes lipolysis and fat oxidation",
+      "Enhances metabolic rate and cellular energy efficiency",
+      "Suppresses appetite and reduces fat accumulation"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~7 days",
+      "contraindications": [
+        "Personal or family history of medullary thyroid carcinoma",
+        "MEN2 syndrome",
+        "Pregnancy",
+        "Active pancreatitis",
+        "Severe gastroparesis"
+      ],
+      "dosageRange": {
+        "min": 2.5,
+        "max": 15,
+        "unit": "mg",
+        "frequency": "weekly"
+      },
+      "synergies": [
+        "MOTS-c",
+        "AOD-9604"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC ~89%; oral ~1%.",
+      "mechanismOfAction": {
+        "summary": "A selective GLP-1 receptor agonist with structural modifications to extend plasma half-life via albumin binding.",
+        "researchFocus": [
+          "weight_loss",
+          "metabolism",
+          "obesity"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at 2–8°C (unused); room temp up to 28 days after first use",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Metabolic & Weight",
+    "name": "Cagrilintide",
+    "cas": "1415456-99-3",
+    "desc": "A long-acting amylin analog investigated for its synergistic action in energy balance and satiation mechanisms.",
+    "dosage": "5mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Weight Loss, Appetite, Synergistic",
+    "image": "/assets/vials/cagrilintide.png",
+    "goals": [
+      "appetite_suppression",
+      "weight_loss",
+      "metabolic_health"
+    ],
+    "secondaryFactors": [
+      "blood_sugar",
+      "glucagon_suppression",
+      "early_satiety"
+    ],
+    "tags": [
+      "Metabolism",
+      "Weight Loss",
+      "Amylin Analog"
+    ],
+    "mechanisms": [
+      "Long-acting amylin receptor agonism (AMY1, AMY2, AMY3)",
+      "Central satiety signaling via area postrema and NTS",
+      "Synergistic GLP-1 pathway potentiation for weight reduction",
+      "Delayed gastric emptying and reduced caloric intake"
+    ],
+    "semanticKeywords": [
+      "appetite",
+      "hunger",
+      "fullness",
+      "satiety",
+      "diet",
+      "weight control",
+      "amylin analog",
+      "appetite research",
+      "metabolic support",
+      "weight-management research"
+    ],
+    "synonyms": [
+      "cagrilintide"
+    ],
+    "safetyNote": "Often studied with GLP-1 agonists.",
+    "mechanismOfAction": {
+      "summary": "Amylin-pathway research peptide generally surfaced in appetite and metabolic regulation contexts.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "amylin analog",
+        "appetite research",
+        "metabolic support",
+        "weight-management research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Cagrilintide be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "cagrilintide",
+    "variants": [
+      {
+        "variantId": "cagrilintide-sc-default",
+        "label": "5mg/vial – SC",
+        "attributes": {
+          "dosageMg": 5,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 30,
+            "kit": 150,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "IcoSema; Amylin analog",
+    "clinical_benefits": [
+      "Regulates satiety signals and food intake",
+      "Promotes lipolysis and fat oxidation"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~7 days",
+      "contraindications": [
+        "Personal or family history of medullary thyroid carcinoma",
+        "MEN2 syndrome",
+        "Pregnancy",
+        "Severe gastroparesis"
+      ],
+      "dosageRange": {
+        "min": 2.5,
+        "max": 15,
+        "unit": "mg",
+        "frequency": "weekly"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC.",
+      "mechanismOfAction": {
+        "summary": "A long-acting amylin analog investigated for its synergistic action in energy balance and satiation mechanisms.",
+        "researchFocus": [
+          "appetite_suppression",
+          "weight_loss",
+          "metabolic_health"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at 2–8°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Metabolic & Weight",
+    "name": "AOD-9604",
+    "cas": "221231-10-3",
+    "desc": "A modified fragment of the C-terminal region of Human Growth Hormone noted for lipolytic stimulation.",
+    "dosage": "2mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Weight Loss, Fat Loss, Lipolysis",
+    "image": "/assets/vials/aod9604.png",
+    "goals": [
+      "fat_burning",
+      "lipolysis",
+      "metabolism"
+    ],
+    "secondaryFactors": [
+      "no_insulin_impact",
+      "targeted_fat_loss",
+      "bone_health"
+    ],
+    "tags": [
+      "Fat Loss",
+      "Metabolism",
+      "HGH Fragment"
+    ],
+    "mechanisms": [
+      "Selective beta-3 adrenergic receptor stimulation in adipocytes",
+      "Lipolytic activity without IGF-1 axis activation",
+      "Prevention of diet-induced insulin resistance",
+      "Stimulation of fat oxidation via fatty acid mobilization"
+    ],
+    "semanticKeywords": [
+      "fat burning",
+      "belly fat",
+      "lipolysis",
+      "weight loss",
+      "hgh",
+      "metabolic",
+      "growth hormone fragment",
+      "fat metabolism",
+      "body composition peptide",
+      "growth hormone",
+      "GH research",
+      "endocrine support",
+      "performance"
+    ],
+    "synonyms": [
+      "aod9604",
+      "hgh fragment 177-191"
+    ],
+    "safetyNote": "Does not affect blood sugar.",
+    "mechanismOfAction": {
+      "summary": "Growth-hormone pathway research compound used in endocrine and performance-related exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "growth hormone",
+        "GH research",
+        "endocrine support",
+        "performance"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should HGH 10iu be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "aod-9604",
+    "variants": [
+      {
+        "variantId": "aod-9604-sc-default",
+        "label": "2mg/vial – SC",
+        "attributes": {
+          "dosageMg": 2,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 15,
+            "kit": 90,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "AOD9604; HGH Fragment 177-191",
+    "clinical_benefits": [
+      "Enhances metabolic rate and cellular energy efficiency"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~30 min IV",
+      "contraindications": [
+        "Active malignancy",
+        "Pregnancy",
+        "Hypersensitivity to HGH-derived peptides"
+      ],
+      "dosageRange": {
+        "min": 1,
+        "max": 4,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via Low oral; SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A modified fragment of the C-terminal region of Human Growth Hormone noted for lipolytic stimulation.",
+        "researchFocus": [
+          "fat_burning",
+          "lipolysis",
+          "metabolism"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Metabolic & Weight",
+    "name": "5-AMINO 1 MQ",
+    "cas": "2250005-77-3",
+    "desc": "An inhibitor of the enzyme nicotinamide N-methyltransferase (NNMT), implicated in cellular energy expenditure.",
+    "dosage": "50mg/tablet",
+    "quantity": "90 tabs/bottle",
+    "objective": "Metabolic, Energy, Fat Loss",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "cellular_energy",
+      "metabolism",
+      "fat_loss"
+    ],
+    "secondaryFactors": [
+      "muscle_maintenance",
+      "longevity",
+      "insulin_sensitivity"
+    ],
+    "tags": [
+      "Metabolism",
+      "Form: Tablets",
+      "NNMT Inhibitor"
+    ],
+    "mechanisms": [
+      "Selective competitive inhibition of nicotinamide N-methyltransferase (NNMT)",
+      "NAD+ pool restoration via methyl cycle redirection",
+      "SIRT1/SIRT3 deacetylase activation",
+      "Downregulation of adipogenesis transcription factors"
+    ],
+    "semanticKeywords": [
+      "energy",
+      "metabolism",
+      "fat loss",
+      "cellular",
+      "weight",
+      "performance",
+      "NNMT",
+      "metabolic research",
+      "body composition",
+      "energy regulation"
+    ],
+    "synonyms": [
+      "5-amino-1-methylquinolinium",
+      "5-amino 1mq"
+    ],
+    "safetyNote": "Orally active metabolic researcher.",
+    "mechanismOfAction": {
+      "summary": "Metabolic-pathway research compound commonly associated with NNMT-related exploration in body-composition contexts.",
+      "researchFocus": [
+        "NNMT-related research",
+        "metabolic support",
+        "body-composition studies"
+      ],
+      "semanticAdditions": [
+        "NNMT",
+        "metabolic research",
+        "body composition",
+        "energy regulation"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "What research theme best describes 5-AMINO 1 MQ?",
+        "a": "It is commonly associated with NNMT-related metabolic and body-composition research themes."
+      },
+      {
+        "q": "Should this appear in metabolic protocol discovery?",
+        "a": "Yes, especially where metabolic optimization or body-composition research themes are active."
+      },
+      {
+        "q": "What should the FAQ modal contain?",
+        "a": "NNMT-related mechanism summary, research-use context, and semantic links to protocol or literature views."
+      },
+      {
+        "q": "Should price be visible in scientific category views?",
+        "a": "No. Use PDP for that and keep this list focused on research discovery."
+      },
+      {
+        "q": "How should this product connect to search?",
+        "a": "Index it for NNMT, metabolic support, energy regulation, and body-composition language."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "5-amino-1-mq",
+    "variants": [
+      {
+        "variantId": "5-amino-1-mq-sc-default",
+        "label": "50mg/tablet – SC",
+        "attributes": {
+          "dosageMg": 50,
+          "unitsPerPack": 90,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 69,
+            "kit": 69,
+            "currency": "USD",
+            "billingUnit": "capsule",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "5-amino-1-methylquinolinium",
+    "clinical_benefits": [
+      "Enhances metabolic rate and cellular energy efficiency"
+    ],
+    "route": "oral_capsule",
+    "typeData": {
+      "halfLife": "4–6h",
+      "contraindications": [
+        "Pregnancy",
+        "Lactation",
+        "Severe hepatic impairment",
+        "Concurrent high-dose methionine supplementation"
+      ],
+      "dosageRange": {
+        "min": 25,
+        "max": 100,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via ~35% oral.",
+      "mechanismOfAction": {
+        "summary": "An inhibitor of the enzyme nicotinamide N-methyltransferase (NNMT), implicated in cellular energy expenditure.",
+        "researchFocus": [
+          "cellular_energy",
+          "metabolism",
+          "fat_loss"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Metabolic & Weight",
+    "name": "MOTS-C",
+    "cas": "1627580-64-6",
+    "desc": "A mitochondrial-derived peptide regulating metabolic homeostasis and preventing diet-induced obesity in models.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Longevity, Metabolic, Obesity",
+    "image": "/assets/vials/motsc.png",
+    "goals": [
+      "fat_loss",
+      "metabolism",
+      "longevity"
+    ],
+    "secondaryFactors": [
+      "low_energy",
+      "weight_control"
+    ],
+    "tags": [
+      "metabolism",
+      "energy",
+      "longevity"
+    ],
+    "mechanisms": [
+      "AMPK pathway activation improving glucose utilization",
+      "Mitochondrial biogenesis enhancement via PGC-1α upregulation",
+      "Retrograde mitochondria-to-nucleus signaling modulation",
+      "Folate cycle and de novo purine synthesis regulation"
+    ],
+    "semanticKeywords": [
+      "metabolism",
+      "fat loss",
+      "body composition",
+      "energy",
+      "mitochondria",
+      "optimization",
+      "longevity",
+      "mitochondrial peptide",
+      "energy support",
+      "longevity research",
+      "metabolic adaptation"
+    ],
+    "synonyms": [
+      "metabolic peptide",
+      "longevity metabolism support"
+    ],
+    "safetyNote": "Targeting mitochondrial research.",
+    "mechanismOfAction": {
+      "summary": "Mitochondrial-context research peptide commonly surfaced in energy, metabolic, and longevity-related exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "mitochondrial peptide",
+        "energy support",
+        "longevity research",
+        "metabolic adaptation"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should MOTS-C be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "mots-c",
+    "variants": [
+      {
+        "variantId": "mots-c-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 30,
+            "kit": 150,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Mitochondrial Open Reading Frame of 12S rRNA-c",
+    "clinical_benefits": [
+      "Enhances metabolic rate and cellular energy efficiency",
+      "Upregulates longevity genes and mitochondrial efficiency"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~4–8h (estimated)",
+      "contraindications": [
+        "Insulin-dependent diabetes without monitoring",
+        "Pregnancy",
+        "Mitochondrial disease (theoretical)"
+      ],
+      "dosageRange": {
+        "min": 5,
+        "max": 5,
+        "unit": "mg",
+        "frequency": "thrice_weekly"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A mitochondrial-derived peptide regulating metabolic homeostasis and preventing diet-induced obesity in models.",
+        "researchFocus": [
+          "fat_loss",
+          "metabolism",
+          "longevity"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Metabolic & Weight",
+    "name": "SLU PP-332",
+    "cas": "Unassigned",
+    "desc": "An estrogen-related receptor (ERR) agonist simulating structural metabolic adaptations similar to endurance training.",
+    "dosage": "50mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Metabolic, Exercise Mimetic, Endurance",
+    "image": "/assets/vials/slupp332.png",
+    "goals": [
+      "metabolic_mimetic",
+      "endurance",
+      "fat_oxidation"
+    ],
+    "secondaryFactors": [
+      "muscle_stamina",
+      "energy_expenditure",
+      "mitochondrial_biogenesis"
+    ],
+    "tags": [
+      "Metabolism",
+      "Endurance",
+      "ERR Agonist"
+    ],
+    "mechanisms": [
+      "Pan-ERR (estrogen-related receptor α/β/γ) selective agonism",
+      "Mitochondrial biogenesis and fatty acid oxidation gene transcription upregulation",
+      "Exercise-mimetic metabolic effects improving endurance capacity",
+      "PGC-1α co-activation driving oxidative phosphorylation gene expression"
+    ],
+    "semanticKeywords": [
+      "exercise in a pill",
+      "endurance",
+      "stamina",
+      "metabolism",
+      "fat burning",
+      "training mimetic",
+      "metabolic adaptation",
+      "endurance research",
+      "energy regulation",
+      "ERR-related research"
+    ],
+    "synonyms": [
+      "slu-pp-332",
+      "err agonist"
+    ],
+    "safetyNote": "Highly experimental exercise mimetic.",
+    "mechanismOfAction": {
+      "summary": "Metabolic adaptation research compound typically explored in endurance-like and energy-regulation contexts.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "metabolic adaptation",
+        "endurance research",
+        "energy regulation",
+        "ERR-related research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should SLU PP-332 be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "slu-pp-332",
+    "variants": [
+      {
+        "variantId": "slu-pp-332-sc-default",
+        "label": "50mg/vial – SC",
+        "attributes": {
+          "dosageMg": 50,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 70,
+            "kit": 380,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "SLU-PP-332; ERR agonist",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of SLU PP-332",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "oral_capsule",
+    "typeData": {
+      "halfLife": "~4–8h (estimated)",
+      "contraindications": [
+        "Pregnancy",
+        "Active hormonal malignancy",
+        "Pediatric patients",
+        "Concurrent hormonal therapy (relative)"
+      ],
+      "dosageRange": {
+        "min": 25,
+        "max": 100,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via ~40–60% oral (estimated).",
+      "mechanismOfAction": {
+        "summary": "An estrogen-related receptor (ERR) agonist simulating structural metabolic adaptations similar to endurance training.",
+        "researchFocus": [
+          "metabolic_mimetic",
+          "endurance",
+          "fat_oxidation"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Metabolic & Weight",
+    "name": "GW-501516",
+    "cas": "317318-70-0",
+    "desc": "A PPARδ receptor agonist evaluating alterations in fatty acid oxidation and exercise endurance mechanisms.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Metabolic, Fat Loss, Endurance",
+    "image": "/assets/vials/gw501516.png",
+    "goals": [
+      "fat_oxidation",
+      "endurance",
+      "cardiovascular_performance"
+    ],
+    "secondaryFactors": [
+      "cholesterol_management",
+      "insulin_sensitivity",
+      "stamina"
+    ],
+    "tags": [
+      "Metabolism",
+      "Fat Loss",
+      "Endurance"
+    ],
+    "mechanisms": [
+      "PPARδ (peroxisome proliferator-activated receptor delta) selective agonism",
+      "Fatty acid oxidation gene upregulation (CPT1, ABCA1) in skeletal muscle",
+      "Mitochondrial biogenesis enhancement increasing slow-twitch fiber endurance",
+      "HDL cholesterol elevation and triglyceride reduction via ABCA1 induction"
+    ],
+    "semanticKeywords": [
+      "cardarine",
+      "endurance",
+      "fat loss",
+      "metabolism",
+      "running",
+      "performance",
+      "PPAR delta",
+      "endurance research",
+      "fatty acid oxidation",
+      "metabolic adaptation"
+    ],
+    "synonyms": [
+      "cardarine",
+      "gw501516"
+    ],
+    "safetyNote": "Research-grade PPAR modulator.",
+    "mechanismOfAction": {
+      "summary": "PPARδ-related research compound generally surfaced in endurance and fatty-acid-oxidation contexts.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "PPAR delta",
+        "endurance research",
+        "fatty acid oxidation",
+        "metabolic adaptation"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should GW-501516 be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "gw-501516",
+    "variants": [
+      {
+        "variantId": "gw-501516-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 30,
+            "kit": 150,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "GW501516; Cardarine; GW-516",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of GW-501516",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "oral_capsule",
+    "typeData": {
+      "halfLife": "~16–24h",
+      "contraindications": [
+        "Active malignancy",
+        "Pregnancy",
+        "Lactation",
+        "Pediatric patients",
+        "Pre-cancerous conditions"
+      ],
+      "dosageRange": {
+        "min": 5,
+        "max": 20,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via ~80% oral.",
+      "mechanismOfAction": {
+        "summary": "A PPARδ receptor agonist evaluating alterations in fatty acid oxidation and exercise endurance mechanisms.",
+        "researchFocus": [
+          "fat_oxidation",
+          "endurance",
+          "cardiovascular_performance"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Longevity & Anti-Aging",
+    "name": "Epithalon",
+    "cas": "307297-39-8",
+    "desc": "A synthetic tetrapeptide proven to upregulate telomerase activity and extend cellular lifespan in in-vitro models.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Anti-Aging, Longevity, Telomerase, Rejuvenation",
+    "image": "/assets/vials/epithalon.png",
+    "goals": [
+      "anti_aging",
+      "longevity",
+      "telomere_lengthening"
+    ],
+    "secondaryFactors": [
+      "sleep_quality",
+      "immune_support",
+      "circadian_rhythm"
+    ],
+    "tags": [
+      "Anti-Aging",
+      "Longevity",
+      "Telomerase"
+    ],
+    "mechanisms": [
+      "Telomerase (hTERT) gene expression upregulation in somatic cells",
+      "Pineal gland melatonin secretion restoration",
+      "Anti-oxidant gene expression enhancement (SOD, catalase)",
+      "Cell cycle regulation via p53 pathway modulation"
+    ],
+    "semanticKeywords": [
+      "aging",
+      "rejuvenation",
+      "telomeres",
+      "cellular lifespan",
+      "pineal gland",
+      "life extension",
+      "longevity peptide",
+      "circadian research",
+      "aging support",
+      "cellular longevity"
+    ],
+    "synonyms": [
+      "epitalon",
+      "epithalamin"
+    ],
+    "safetyNote": "Cornerstone of longevity research.",
+    "mechanismOfAction": {
+      "summary": "Peptide often surfaced in longevity and circadian-related research conversations.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "longevity peptide",
+        "circadian research",
+        "aging support",
+        "cellular longevity"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Epithalon be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "epithalon",
+    "variants": [
+      {
+        "variantId": "epithalon-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 25,
+            "kit": 130,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Epitalon; Ala-Glu-Asp-Gly (tetrapeptide)",
+    "clinical_benefits": [
+      "Slows cellular senescence and promotes longevity pathways",
+      "Upregulates longevity genes and mitochondrial efficiency"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~1–2h",
+      "contraindications": [
+        "Active malignancy or high oncological risk",
+        "Pregnancy",
+        "Lactation"
+      ],
+      "dosageRange": {
+        "min": 1,
+        "max": 10,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via SC/IV preferred.",
+      "mechanismOfAction": {
+        "summary": "A synthetic tetrapeptide proven to upregulate telomerase activity and extend cellular lifespan in in-vitro models.",
+        "researchFocus": [
+          "anti_aging",
+          "longevity",
+          "telomere_lengthening"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Longevity & Anti-Aging",
+    "name": "GHK-Cu (Copper Peptide)",
+    "cas": "49557-75-7",
+    "desc": "A naturally occurring copper complex involved in widespread remodeling, collagen stimulation, and anti-oxidant activity.",
+    "dosage": "50mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Skin, Regeneration, Collagen, Anti-Aging",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "skin_health",
+      "hair_growth",
+      "collagen_production",
+      "anti_aging"
+    ],
+    "secondaryFactors": [
+      "wound_healing",
+      "scalp_health",
+      "fine_lines",
+      "tissue_repair"
+    ],
+    "tags": [
+      "Skin",
+      "Hair",
+      "Collagen",
+      "Anti-Aging"
+    ],
+    "mechanisms": [
+      "Copper-mediated superoxide dismutase (SOD) and ceruloplasmin activation",
+      "TGF-β1 upregulation promoting collagen and elastin synthesis",
+      "Anti-inflammatory NFκB pathway downregulation",
+      "Stem cell chemoattraction and wound healing acceleration"
+    ],
+    "semanticKeywords": [
+      "pelo",
+      "piel",
+      "hair",
+      "skin",
+      "wrinkles",
+      "scarring",
+      "elasticity",
+      "scalp",
+      "alopecia",
+      "beauty",
+      "copper peptide",
+      "skin support",
+      "regeneration research",
+      "repair peptide",
+      "aesthetic research"
+    ],
+    "synonyms": [
+      "copper peptide",
+      "ghk",
+      "prezatide copper"
+    ],
+    "safetyNote": "Widely used in cosmetic and dermatological research.",
+    "mechanismOfAction": {
+      "summary": "Copper-binding peptide commonly surfaced in skin, repair, and regenerative-support research contexts.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "copper peptide",
+        "skin support",
+        "regeneration research",
+        "repair peptide",
+        "aesthetic research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should GHK-Cu (Copper Peptide) be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "ghk-cu-copper-peptide",
+    "variants": [
+      {
+        "variantId": "ghk-cu-copper-peptide-sc-default",
+        "label": "50mg/vial – SC",
+        "attributes": {
+          "dosageMg": 50,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 120,
+            "kit": 750,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Glycyl-L-histidyl-L-lysine copper(II)",
+    "clinical_benefits": [
+      "Promotes dermal collagen synthesis and skin elasticity",
+      "Stimulates hair follicle activity and hair density",
+      "Stimulates fibroblasts to produce new collagen",
+      "Slows cellular senescence and promotes longevity pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~1h",
+      "contraindications": [
+        "Wilson's disease",
+        "Copper hypersensitivity",
+        "Pregnancy (systemic use)",
+        "Severe hepatic disease"
+      ],
+      "dosageRange": {
+        "min": 1,
+        "max": 2,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via Topical and SC.",
+      "mechanismOfAction": {
+        "summary": "A naturally occurring copper complex involved in widespread remodeling, collagen stimulation, and anti-oxidant activity.",
+        "researchFocus": [
+          "skin_health",
+          "hair_growth",
+          "collagen_production",
+          "anti_aging"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Longevity & Anti-Aging",
+    "name": "NAD+",
+    "cas": "53-84-9",
+    "desc": "A crucial cellular coenzyme found in all living cells, essential in metabolic red-ox reactions and sirtuin function.",
+    "dosage": "500mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Longevity, Metabolic, Energy",
+    "image": "/assets/vials/nadplus.png",
+    "goals": [
+      "energy",
+      "longevity",
+      "metabolic_health"
+    ],
+    "secondaryFactors": [
+      "cognitive_function",
+      "dna_repair",
+      "mitochondrial_health"
+    ],
+    "tags": [
+      "Longevity",
+      "Energy",
+      "Metabolism"
+    ],
+    "mechanisms": [
+      "Sirtuin (SIRT1–7) deacetylase cosubstrate supporting epigenetic regulation",
+      "PARP-1 DNA repair pathway cosubstrate",
+      "Mitochondrial electron transport chain Complex I substrate",
+      "CD38/CD157 ectonucleotidase substrate for calcium signaling"
+    ],
+    "semanticKeywords": [
+      "energy",
+      "mitochondria",
+      "fatigue",
+      "aging",
+      "cellular health",
+      "repair",
+      "metabolism",
+      "NAD+",
+      "redox support",
+      "mitochondrial research",
+      "cellular energy",
+      "longevity"
+    ],
+    "synonyms": [
+      "nicotinamide adenine dinucleotide"
+    ],
+    "safetyNote": "Essential for cellular energetics.",
+    "mechanismOfAction": {
+      "summary": "Cellular-energy research compound commonly associated with redox, mitochondrial, and longevity-related exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "NAD+",
+        "redox support",
+        "mitochondrial research",
+        "cellular energy",
+        "longevity"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should NAD+ be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "nad",
+    "variants": [
+      {
+        "variantId": "nad-sc-default",
+        "label": "500mg/vial – SC",
+        "attributes": {
+          "dosageMg": 500,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 30,
+            "kit": 150,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Nicotinamide adenine dinucleotide",
+    "clinical_benefits": [
+      "Supports mitochondrial function and daily vitality",
+      "Upregulates longevity genes and mitochondrial efficiency"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~1–2h IV",
+      "contraindications": [
+        "Active malignancy with high energy demand (theoretical)",
+        "Rapid IV push (administration contraindication)",
+        "Pregnancy (insufficient data)"
+      ],
+      "dosageRange": {
+        "min": 250,
+        "max": 500,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via IV preferred; oral limited.",
+      "mechanismOfAction": {
+        "summary": "A crucial cellular coenzyme found in all living cells, essential in metabolic red-ox reactions and sirtuin function.",
+        "researchFocus": [
+          "energy",
+          "longevity",
+          "metabolic_health"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 12 months in dry storage."
+  },
+  {
+    "category": "Longevity & Anti-Aging",
+    "name": "NAD+",
+    "cas": "53-84-9",
+    "desc": "A crucial cellular coenzyme found in all living cells.",
+    "dosage": "1000mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Longevity, Metabolic, Energy",
+    "image": "/assets/vials/nadplus.png",
+    "goals": [
+      "energy",
+      "longevity",
+      "metabolic_health"
+    ],
+    "secondaryFactors": [
+      "cognitive_function",
+      "dna_repair",
+      "mitochondrial_health"
+    ],
+    "tags": [
+      "Longevity",
+      "Energy",
+      "Metabolism",
+      "High Dosage"
+    ],
+    "mechanisms": [
+      "Sirtuin (SIRT1–7) deacetylase cosubstrate supporting epigenetic regulation",
+      "PARP-1 DNA repair pathway cosubstrate",
+      "Mitochondrial electron transport chain Complex I substrate",
+      "CD38/CD157 ectonucleotidase substrate for calcium signaling"
+    ],
+    "semanticKeywords": [
+      "energy",
+      "mitochondria",
+      "fatigue",
+      "aging",
+      "cellular health",
+      "repair",
+      "metabolism",
+      "1g",
+      "high dose",
+      "NAD+",
+      "redox support",
+      "mitochondrial research",
+      "cellular energy",
+      "longevity"
+    ],
+    "synonyms": [
+      "nicotinamide adenine dinucleotide"
+    ],
+    "safetyNote": "Essential for cellular energetics.",
+    "mechanismOfAction": {
+      "summary": "Cellular-energy research compound commonly associated with redox, mitochondrial, and longevity-related exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "NAD+",
+        "redox support",
+        "mitochondrial research",
+        "cellular energy",
+        "longevity"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should NAD+ be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "nad",
+    "variants": [
+      {
+        "variantId": "nad-sc-default",
+        "label": "1000mg/vial – SC",
+        "attributes": {
+          "dosageMg": 1000,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 50,
+            "kit": 270,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Nicotinamide adenine dinucleotide",
+    "clinical_benefits": [
+      "Supports mitochondrial function and daily vitality",
+      "Upregulates longevity genes and mitochondrial efficiency"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~1–2h IV",
+      "contraindications": [
+        "Active malignancy with high energy demand (theoretical)",
+        "Rapid IV push (administration contraindication)",
+        "Pregnancy (insufficient data)"
+      ],
+      "dosageRange": {
+        "min": 250,
+        "max": 500,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via IV preferred; oral limited.",
+      "mechanismOfAction": {
+        "summary": "A crucial cellular coenzyme found in all living cells, essential in metabolic red-ox reactions and sirtuin function.",
+        "researchFocus": [
+          "energy",
+          "longevity",
+          "metabolic_health"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 12 months in dry storage."
+  },
+  {
+    "category": "Longevity & Anti-Aging",
+    "name": "NMN",
+    "cas": "1094-61-7",
+    "desc": "A direct precursor to NAD+, actively investigated for its capability to mitigate age-associated physiological decline.",
+    "dosage": "50mg/tablet",
+    "quantity": "90 tabs/bottle",
+    "objective": "Longevity, Precursor, Energy",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "nad_precursor",
+      "anti_aging",
+      "metabolism"
+    ],
+    "secondaryFactors": [
+      "vascular_health",
+      "skin_rejuvenation",
+      "dna_repair"
+    ],
+    "tags": [
+      "Longevity",
+      "Form: Tablets",
+      "NAD+ Support"
+    ],
+    "mechanisms": [
+      "NAD+ biosynthesis precursor via Preiss-Handler salvage pathway",
+      "Sirtuin (SIRT1/SIRT3) deacetylase activation supporting epigenetic anti-aging",
+      "PARP-1 DNA repair system cofactor replenishment",
+      "Mitochondrial Complex I substrate restoration improving cellular energy metabolism"
+    ],
+    "semanticKeywords": [
+      "aging",
+      "nad boost",
+      "precursor",
+      "energy",
+      "vitality",
+      "rejuvenation",
+      "skin aging",
+      "NMN",
+      "NAD pathway",
+      "cellular energy",
+      "longevity research"
+    ],
+    "synonyms": [
+      "nicotinamide mononucleotide",
+      "nmn"
+    ],
+    "safetyNote": "Orally stable longevity agent.",
+    "mechanismOfAction": {
+      "summary": "Cellular-energy and NAD-pathway research compound often surfaced in metabolic and longevity-related exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "NMN",
+        "NAD pathway",
+        "cellular energy",
+        "longevity research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should NMN be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "nmn",
+    "variants": [
+      {
+        "variantId": "nmn-sc-default",
+        "label": "50mg/tablet – SC",
+        "attributes": {
+          "dosageMg": 50,
+          "unitsPerPack": 90,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 92,
+            "kit": 92,
+            "currency": "USD",
+            "billingUnit": "capsule",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Nicotinamide Mononucleotide; β-NMN",
+    "clinical_benefits": [
+      "Slows cellular senescence and promotes longevity pathways",
+      "Enhances metabolic rate and cellular energy efficiency"
+    ],
+    "route": "oral_capsule",
+    "typeData": {
+      "halfLife": "~3–5h",
+      "contraindications": [
+        "Active malignancy (theoretical concern)",
+        "Pregnancy",
+        "Hypersensitivity to niacin derivatives"
+      ],
+      "dosageRange": {
+        "min": 250,
+        "max": 500,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via ~60–75% oral; SC preferred for higher NAD+.",
+      "mechanismOfAction": {
+        "summary": "A direct precursor to NAD+, actively investigated for its capability to mitigate age-associated physiological decline.",
+        "researchFocus": [
+          "nad_precursor",
+          "anti_aging",
+          "metabolism"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Longevity & Anti-Aging",
+    "name": "SS-31",
+    "cas": "736992-21-5",
+    "desc": "A mitochondria-targeted peptide (Elamipretide) that binds cardiolipin to restore mitochondrial bioenergetics.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Mitochondria, Energy, Anti-Aging",
+    "image": "/assets/vials/ss31.png",
+    "goals": [
+      "mitochondrial_repair",
+      "cellular_energy",
+      "organ_health"
+    ],
+    "secondaryFactors": [
+      "oxidative_stress",
+      "heart_health",
+      "kidney_support"
+    ],
+    "tags": [
+      "Mitochondria",
+      "Energy",
+      "Anti-Aging"
+    ],
+    "mechanisms": [
+      "Cardiolipin-selective binding stabilizing inner mitochondrial membrane cristae architecture",
+      "Electron transport chain Complex I/III efficiency restoration reducing ROS",
+      "Mitochondrial permeability transition pore (mPTP) inhibition preventing apoptosis",
+      "ATP synthesis enhancement in aged and failing mitochondria"
+    ],
+    "semanticKeywords": [
+      "mitochondria",
+      "energy",
+      "cellular fatigue",
+      "organ health",
+      "bioenergetics",
+      "repair",
+      "mitochondrial peptide",
+      "energy support",
+      "SS-31",
+      "cellular resilience"
+    ],
+    "synonyms": [
+      "elamipretide",
+      "ss31"
+    ],
+    "safetyNote": "Highly specific mitochondrial researcher.",
+    "mechanismOfAction": {
+      "summary": "Mitochondrial-targeted research peptide generally surfaced in energy, membrane, and resilience-related exploration contexts.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "mitochondrial peptide",
+        "energy support",
+        "SS-31",
+        "cellular resilience"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should SS-31 be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "ss-31",
+    "variants": [
+      {
+        "variantId": "ss-31-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 40,
+            "kit": 200,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Elamipretide; SS-31; D-Arg-dimethylTyr-Lys-Phe-NH2",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of SS-31",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~2–3h SC",
+      "contraindications": [
+        "Pregnancy",
+        "Severe hepatic impairment",
+        "Known hypersensitivity to aromatic amino acid derivatives"
+      ],
+      "dosageRange": {
+        "min": 5,
+        "max": 20,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A mitochondria-targeted peptide (Elamipretide) that binds cardiolipin to restore mitochondrial bioenergetics.",
+        "researchFocus": [
+          "mitochondrial_repair",
+          "cellular_energy",
+          "organ_health"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Cognitive & Mood",
+    "name": "Selank",
+    "cas": "129954-34-3",
+    "desc": "A synthetic heptapeptide derived from human tuftsin showcasing marked anxiolytic and nootropic potentials.",
+    "dosage": "5mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Anxiety, Nootropic, Stress, Brain",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "anxiety_relief",
+      "nootropic",
+      "stress_management"
+    ],
+    "secondaryFactors": [
+      "focus",
+      "memory",
+      "immune_modulation"
+    ],
+    "tags": [
+      "Brain",
+      "Cognitive",
+      "Anti-Anxiety"
+    ],
+    "mechanisms": [
+      "Tuftsin receptor modulation enhancing innate immune surveillance",
+      "GABAergic neurotransmission potentiation reducing anxiety",
+      "BDNF and NGF neurotrophin upregulation",
+      "Enkephalinase inhibition extending endogenous enkephalin activity"
+    ],
+    "semanticKeywords": [
+      "anxiety",
+      "stress",
+      "focus",
+      "brain health",
+      "calm",
+      "cognitive enhancement",
+      "mood",
+      "Selank",
+      "neuroactive peptide",
+      "stress research",
+      "cognitive support"
+    ],
+    "synonyms": [
+      "selank"
+    ],
+    "safetyNote": "Prominent neuropeptide for cognitive research.",
+    "mechanismOfAction": {
+      "summary": "Neuroactive research peptide generally associated with anxiolytic and cognitive-support exploration contexts.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "Selank",
+        "neuroactive peptide",
+        "stress research",
+        "cognitive support"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Selank be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "selank",
+    "variants": [
+      {
+        "variantId": "selank-sc-default",
+        "label": "5mg/vial – SC",
+        "attributes": {
+          "dosageMg": 5,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 30,
+            "kit": 150,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Selank; TP-7; Tuftsin analog",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of Selank",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "nasal",
+    "typeData": {
+      "halfLife": "~2–3h",
+      "contraindications": [
+        "Concurrent benzodiazepine therapy (additive sedation)",
+        "Pregnancy",
+        "Severe psychiatric illness without supervision"
+      ],
+      "dosageRange": {
+        "min": 100,
+        "max": 300,
+        "unit": "mcg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via Intranasal preferred.",
+      "mechanismOfAction": {
+        "summary": "A synthetic heptapeptide derived from human tuftsin showcasing marked anxiolytic and nootropic potentials.",
+        "researchFocus": [
+          "anxiety_relief",
+          "nootropic",
+          "stress_management"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Cognitive & Mood",
+    "name": "Semax",
+    "cas": "80714-61-0",
+    "desc": "An ACTH analog known for its neuroprotective, neuromodulatory and potent cognitive enhancement effects.",
+    "dosage": "5mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Nootropic, Cognitive, Brain, Focus",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "cognitive_enhancement",
+      "neuroprotection",
+      "focus"
+    ],
+    "secondaryFactors": [
+      "memory_retention",
+      "mental_clarity",
+      "nerve_regeneration"
+    ],
+    "tags": [
+      "Brain",
+      "Cognitive",
+      "Nootropic"
+    ],
+    "mechanisms": [
+      "BDNF and NGF neurotrophin upregulation in prefrontal cortex and hippocampus",
+      "Dopaminergic and serotonergic neurotransmitter system modulation",
+      "Cholinergic pathway enhancement improving memory consolidation",
+      "Neuroprotective anti-inflammatory signaling via NFκB suppression"
+    ],
+    "semanticKeywords": [
+      "brain",
+      "focus",
+      "memory",
+      "intelligence",
+      "neuroprotection",
+      "mental energy",
+      "cognitive",
+      "Semax",
+      "cognitive support",
+      "neuro peptide",
+      "brain research"
+    ],
+    "synonyms": [
+      "semax"
+    ],
+    "safetyNote": "Highly effective for neurological research.",
+    "mechanismOfAction": {
+      "summary": "Neuroactive peptide typically surfaced in cognitive and neuro-support research contexts.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "Semax",
+        "cognitive support",
+        "neuro peptide",
+        "brain research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Semax be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "semax",
+    "variants": [
+      {
+        "variantId": "semax-sc-default",
+        "label": "5mg/vial – SC",
+        "attributes": {
+          "dosageMg": 5,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 35,
+            "kit": 180,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Semax; Met-Glu-His-Phe-Pro-Gly-Pro; ACTH(4-7)PGP analog",
+    "clinical_benefits": [
+      "Improves mental clarity and attentiveness"
+    ],
+    "route": "nasal",
+    "typeData": {
+      "halfLife": "~20 min IV; longer intranasal depot",
+      "contraindications": [
+        "Pregnancy",
+        "Seizure disorder (relative)",
+        "Concurrent corticosteroid therapy (ACTH-like activity)"
+      ],
+      "dosageRange": {
+        "min": 100,
+        "max": 300,
+        "unit": "mcg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via Intranasal preferred (CNS delivery).",
+      "mechanismOfAction": {
+        "summary": "An ACTH analog known for its neuroprotective, neuromodulatory and potent cognitive enhancement effects.",
+        "researchFocus": [
+          "cognitive_enhancement",
+          "neuroprotection",
+          "focus"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Cognitive & Mood",
+    "name": "Pinealon",
+    "cas": "847426-80-6",
+    "desc": "A short synthetic peptide influencing cerebral cortex functions and enhancing cellular resistance to hypoxia.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Brain, Hypoxia, Protection",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "neuroprotection",
+      "hypoxia_resistance",
+      "circadian_rhythm"
+    ],
+    "secondaryFactors": [
+      "sleep_quality",
+      "cognitive_performance",
+      "aging_brain"
+    ],
+    "tags": [
+      "Brain",
+      "Cognitive",
+      "Neuroprotection"
+    ],
+    "mechanisms": [
+      "Pineal gland peptide bioregulator restoring melatonin synthesis rhythmicity",
+      "Neuroprotective epigenetic chromatin remodeling in cortical neurons",
+      "Antioxidant gene expression upregulation (catalase, GPx) in neural tissue",
+      "Circadian rhythm and sleep architecture normalization"
+    ],
+    "semanticKeywords": [
+      "brain repair",
+      "intelligence",
+      "sleep",
+      "hypoxia",
+      "altitude",
+      "neural health",
+      "neuro peptide",
+      "cognitive support",
+      "neuroregulation",
+      "brain research"
+    ],
+    "synonyms": [
+      "pinealon"
+    ],
+    "safetyNote": "Targets cerebral cortex research.",
+    "mechanismOfAction": {
+      "summary": "Neuroregulatory peptide commonly surfaced in cognitive and neuro-support research contexts.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "neuro peptide",
+        "cognitive support",
+        "neuroregulation",
+        "brain research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Pinealon be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "pinealon",
+    "variants": [
+      {
+        "variantId": "pinealon-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 25,
+            "kit": 150,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Glu-Asp-Arg (tripeptide; epitalamine-related)",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of Pinealon",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~1–2h",
+      "contraindications": [
+        "Pregnancy",
+        "Active CNS malignancy",
+        "Concurrent melatonin receptor therapy (relative)"
+      ],
+      "dosageRange": {
+        "min": 5,
+        "max": 20,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via SC/intranasal.",
+      "mechanismOfAction": {
+        "summary": "A short synthetic peptide influencing cerebral cortex functions and enhancing cellular resistance to hypoxia.",
+        "researchFocus": [
+          "neuroprotection",
+          "hypoxia_resistance",
+          "circadian_rhythm"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Sleep & Circadian",
+    "name": "DSIP",
+    "cas": "62568-57-4",
+    "desc": "Delta Sleep-Inducing Peptide, a neuropeptide affecting central neuroendocrine regulations and circadian rhythms.",
+    "dosage": "2mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Sleep, Brain, Circadian",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "sleep_optimization",
+      "stress_reduction",
+      "hormonal_balance"
+    ],
+    "secondaryFactors": [
+      "deep_sleep",
+      "anxiety_relief",
+      "cortisol_regulation"
+    ],
+    "tags": [
+      "Brain",
+      "Sleep",
+      "Stress"
+    ],
+    "mechanisms": [
+      "Hypothalamic sleep-wake cycle modulation via delta wave induction",
+      "Cortisol and ACTH release normalization under stress",
+      "Analgesic activity via endogenous opioid system modulation",
+      "Antioxidant and neuroprotective gene expression upregulation"
+    ],
+    "semanticKeywords": [
+      "sleep",
+      "insomnia",
+      "rest",
+      "deep sleep",
+      "delta waves",
+      "circadian",
+      "stress",
+      "sleep peptide",
+      "restorative support",
+      "neuroregulation research"
+    ],
+    "synonyms": [
+      "delta sleep inducing peptide",
+      "dsip"
+    ],
+    "safetyNote": "Highly potent sleep-modulating peptide.",
+    "mechanismOfAction": {
+      "summary": "Sleep-related research peptide commonly surfaced around circadian and restorative-support contexts.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "sleep peptide",
+        "circadian",
+        "restorative support",
+        "neuroregulation research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should DSIP be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "dsip",
+    "variants": [
+      {
+        "variantId": "dsip-sc-default",
+        "label": "2mg/vial – SC",
+        "attributes": {
+          "dosageMg": 2,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 20,
+            "kit": 100,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Delta Sleep-Inducing Peptide; Trp-Ala-Gly-Gly-Asp-Ala-Ser-Gly-Glu",
+    "clinical_benefits": [
+      "Reduces cortisol production and stress markers"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~30 min–2h",
+      "contraindications": [
+        "Concurrent CNS depressant therapy",
+        "Severe sleep apnea (uncontrolled)",
+        "Pregnancy"
+      ],
+      "dosageRange": {
+        "min": 1,
+        "max": 4,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via SC/IV.",
+      "mechanismOfAction": {
+        "summary": "Delta Sleep-Inducing Peptide, a neuropeptide affecting central neuroendocrine regulations and circadian rhythms.",
+        "researchFocus": [
+          "sleep_optimization",
+          "stress_reduction",
+          "hormonal_balance"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Cognitive & Mood",
+    "name": "PE-22 28",
+    "cas": "Unassigned",
+    "desc": "A TREK-1 potassium channel antagonist under study for robust antidepressant-like mechanisms.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Mood, Brain, Antidepressant",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "mood_enhancement",
+      "antidepressant_research",
+      "neuroplasticity"
+    ],
+    "secondaryFactors": [
+      "focus",
+      "emotional_regulation",
+      "resilience"
+    ],
+    "tags": [
+      "Brain",
+      "Mood",
+      "TREK-1"
+    ],
+    "mechanisms": [
+      "TREK-1 (K2P potassium channel) selective inhibition modulating neuronal excitability",
+      "Rapid-onset antidepressant effect via serotonin pathway enhancement",
+      "Hippocampal neurogenesis promotion",
+      "Anxiolytic signaling via HPA axis normalization"
+    ],
+    "semanticKeywords": [
+      "mood",
+      "depression",
+      "happiness",
+      "brain health",
+      "plasticity",
+      "motivation",
+      "neuroactive peptide",
+      "mood research",
+      "neuro support",
+      "brain-context studies"
+    ],
+    "synonyms": [
+      "pe22-28",
+      "spadin derivative"
+    ],
+    "safetyNote": "Investigative mood-regulator.",
+    "mechanismOfAction": {
+      "summary": "Neuroactive research peptide often grouped with mood and neuro-support exploration contexts.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "neuroactive peptide",
+        "mood research",
+        "neuro support",
+        "brain-context studies"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should PE-22 28 be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "pe-22-28",
+    "variants": [
+      {
+        "variantId": "pe-22-28-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 40,
+            "kit": 200,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "PE-22-28; Spadin analogue",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of PE-22 28",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~2–4h (estimated)",
+      "contraindications": [],
+      "dosageRange": {
+        "min": 5,
+        "max": 20,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "anecdotal",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A TREK-1 potassium channel antagonist under study for robust antidepressant-like mechanisms.",
+        "researchFocus": [
+          "mood_enhancement",
+          "antidepressant_research",
+          "neuroplasticity"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Hormonal Optimization",
+    "name": "CJC-1295 without DAC (Modified GRF 1-29)",
+    "cas": "863288-34-0",
+    "desc": "A synthetic GHRH analog that increases pulsatile growth hormone and IGF-1 secretions without altering cortisol levels.",
+    "dosage": "2mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "GH, Muscle, Recovery, Performance",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "muscle_growth",
+      "fat_loss",
+      "performance"
+    ],
+    "secondaryFactors": [
+      "sleep_improvement",
+      "skin_elasticity",
+      "recovery"
+    ],
+    "tags": [
+      "Muscle",
+      "GH",
+      "Performance"
+    ],
+    "mechanisms": [
+      "GHRH receptor agonism without DAC modification",
+      "Short-burst GH secretion mimicking physiological pulses",
+      "IGF-1 axis stimulation for tissue repair and fat metabolism"
+    ],
+    "semanticKeywords": [
+      "muscle",
+      "growth hormone",
+      "gh",
+      "igf-1",
+      "fat loss",
+      "recovery",
+      "strength",
+      "GHRH analog",
+      "non-DAC peptide",
+      "secretagogue",
+      "growth hormone pathway",
+      "pulsatile signaling"
+    ],
+    "synonyms": [
+      "mod grf 1-29",
+      "cjc1295"
+    ],
+    "safetyNote": "Promotes endogenous GH release.",
+    "mechanismOfAction": {
+      "summary": "Shorter-acting growth-hormone-axis research peptide usually grouped with secretagogue and pulsatile signaling contexts.",
+      "researchFocus": [
+        "GH-axis signaling",
+        "secretagogue research",
+        "performance/body-composition"
+      ],
+      "semanticAdditions": [
+        "GHRH analog",
+        "non-DAC peptide",
+        "secretagogue",
+        "growth hormone pathway",
+        "pulsatile signaling"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "Why should the non-DAC version have its own family row?",
+        "a": "Because the non-DAC family is distinct from the DAC version and should keep its own semantic and FAQ identity."
+      },
+      {
+        "q": "Which searches should surface this product?",
+        "a": "Growth-hormone-axis, GHRH analog, secretagogue, and performance-oriented research terms."
+      },
+      {
+        "q": "How should strengths be shown?",
+        "a": "As variants under a single family entry rather than duplicated rows."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Version distinction, mechanism summary, strengths, and research-context guidance."
+      },
+      {
+        "q": "Should there be inline purchasing in the scientific list view?",
+        "a": "No. Keep discovery and scientific reference separate from purchase flow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "cjc-1295-without-dac-modified-grf-1-29",
+    "variants": [
+      {
+        "variantId": "cjc-1295-without-dac-modified-grf-1-29-sc-default",
+        "label": "2mg/vial – SC",
+        "attributes": {
+          "dosageMg": 2,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 25,
+            "kit": 150,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Modified GRF(1-29); Sermorelin analog",
+    "clinical_benefits": [
+      "Promotes protein synthesis and myofibrillar hypertrophy"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~30 min",
+      "contraindications": [
+        "Active acromegaly",
+        "Active malignancy",
+        "Pregnancy",
+        "Pediatric patients with open growth plates"
+      ],
+      "dosageRange": {
+        "min": 100,
+        "max": 200,
+        "unit": "mcg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "Ipamorelin",
+        "GHRP-2"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A synthetic GHRH analog that increases pulsatile growth hormone and IGF-1 secretions without altering cortisol levels.",
+        "researchFocus": [
+          "muscle_growth",
+          "fat_loss",
+          "performance"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Hormonal Optimization",
+    "name": "CJC-1295 with DAC",
+    "cas": "863288-34-0",
+    "desc": "A long-acting GHRH analog paired with a Drug Affinity Complex to maximize half-life and stimulate continuous GH release.",
+    "dosage": "2mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "GH, Muscle, Recovery, Strength",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "muscle_growth",
+      "fat_loss",
+      "performance"
+    ],
+    "secondaryFactors": [
+      "sleep_improvement",
+      "skin_elasticity",
+      "long_acting_recovery"
+    ],
+    "tags": [
+      "Muscle",
+      "GH",
+      "Performance",
+      "Long-Acting"
+    ],
+    "mechanisms": [
+      "GHRH receptor agonism with drug affinity complex (DAC) albumin binding",
+      "Sustained pulsatile GH secretion from anterior pituitary somatotrophs",
+      "IGF-1 axis upregulation for anabolic and lipolytic effects"
+    ],
+    "semanticKeywords": [
+      "muscle",
+      "growth hormone",
+      "gh",
+      "igf-1",
+      "fat loss",
+      "recovery",
+      "strength",
+      "dac",
+      "long acting",
+      "GH axis",
+      "GHRH analog",
+      "secretagogue",
+      "DAC peptide",
+      "growth hormone research"
+    ],
+    "synonyms": [
+      "cjc1295 with dac",
+      "cjc-1295-dac"
+    ],
+    "safetyNote": "Provides sustained GH elevation.",
+    "mechanismOfAction": {
+      "summary": "Longer-acting growth-hormone-axis research peptide typically associated with GH-secretory signaling exploration.",
+      "researchFocus": [
+        "growth hormone axis",
+        "secretagogue research",
+        "performance-related studies"
+      ],
+      "semanticAdditions": [
+        "GH axis",
+        "GHRH analog",
+        "secretagogue",
+        "DAC peptide",
+        "growth hormone research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should CJC-1295 with DAC be categorized semantically?",
+        "a": "Around growth-hormone-axis research, secretagogue exploration, and performance or body-composition related contexts."
+      },
+      {
+        "q": "Why distinguish DAC and non-DAC versions?",
+        "a": "Because they are different product families in practice and should not be merged in semantic or FAQ handling."
+      },
+      {
+        "q": "What should the FAQ modal clarify?",
+        "a": "That this is the DAC version and should be differentiated clearly from the non-DAC family."
+      },
+      {
+        "q": "Should it link to scientific literature from the list?",
+        "a": "Yes, preferably through a modal to keep the list uncluttered."
+      },
+      {
+        "q": "Should PDP remain the main place for ordering?",
+        "a": "Yes. The list view should stay scientific-first and route to PDP for deeper actions."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "cjc-1295-with-dac",
+    "variants": [
+      {
+        "variantId": "cjc-1295-with-dac-sc-default",
+        "label": "2mg/vial – SC",
+        "attributes": {
+          "dosageMg": 2,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 30,
+            "kit": 150,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "CJC-1295 DAC; Drug Affinity Complex-modified GRF(1-29)",
+    "clinical_benefits": [
+      "Promotes protein synthesis and myofibrillar hypertrophy"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~6–8 days (DAC extends half-life)",
+      "contraindications": [
+        "Active acromegaly",
+        "Active malignancy",
+        "Diabetic retinopathy",
+        "Pregnancy",
+        "Pediatric patients with open growth plates"
+      ],
+      "dosageRange": {
+        "min": 1,
+        "max": 2,
+        "unit": "mg",
+        "frequency": "weekly"
+      },
+      "synergies": [
+        "Ipamorelin",
+        "GHRP-2"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A long-acting GHRH analog paired with a Drug Affinity Complex to maximize half-life and stimulate continuous GH release.",
+        "researchFocus": [
+          "muscle_growth",
+          "fat_loss",
+          "performance"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Hormonal Optimization",
+    "name": "FST-344 (Follistatin)",
+    "cas": "117628-82-7",
+    "desc": "A potent autocrine glycoprotein that acts as an antagonist to myostatin, substantially accelerating muscle hypertrophy.",
+    "dosage": "1mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Muscle, Growth, Myostatin",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "strength_gain"
+    ],
+    "secondaryFactors": [
+      "muscle_mass_retention",
+      "performance_enhancement"
+    ],
+    "tags": [
+      "Muscle",
+      "Growth",
+      "Myostatin Inhibitor"
+    ],
+    "mechanisms": [
+      "High-affinity activin and myostatin (GDF-8) binding and neutralization",
+      "Skeletal muscle hypertrophy via Smad2/3 signaling suppression",
+      "Follicle-stimulating hormone (FSH) bioavailability regulation"
+    ],
+    "semanticKeywords": [
+      "muscle growth",
+      "myostatin",
+      "huge",
+      "mass",
+      "follistatin",
+      "fst344",
+      "muscle growth research",
+      "performance peptide",
+      "muscle regulation"
+    ],
+    "synonyms": [
+      "follistatin 344",
+      "fst-344"
+    ],
+    "safetyNote": "Powerful myostatin researcher.",
+    "mechanismOfAction": {
+      "summary": "Myostatin-axis research peptide often associated with muscle-regulation and growth signaling exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "myostatin",
+        "muscle growth research",
+        "performance peptide",
+        "muscle regulation"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should FST-344 be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "fst-344-follistatin",
+    "variants": [
+      {
+        "variantId": "fst-344-follistatin-sc-default",
+        "label": "1mg/vial – SC",
+        "attributes": {
+          "dosageMg": 1,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 90,
+            "kit": 480,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Follistatin-344; FST-344",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of FST-344 (Follistatin)",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~30 min (active) to 2h",
+      "contraindications": [
+        "Active malignancy (especially muscle-associated tumors)",
+        "Pregnancy",
+        "Cardiomyopathy (relative)",
+        "Pediatric patients"
+      ],
+      "dosageRange": {
+        "min": 0.5,
+        "max": 2,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via IM/SC.",
+      "mechanismOfAction": {
+        "summary": "A potent autocrine glycoprotein that acts as an antagonist to myostatin, substantially accelerating muscle hypertrophy.",
+        "researchFocus": [
+          "muscle_hypertrophy",
+          "myostatin_inhibition",
+          "strength_gain"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Hormonal Optimization",
+    "name": "IGF-1 LR3",
+    "cas": "143045-27-6",
+    "desc": "A highly engineered variant of Insulin-like Growth Factor-1 with an extended half-life dictating profound cellular hyperplasia.",
+    "dosage": "0.1mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Muscle, Growth, Performance",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "muscle_hyperplasia",
+      "growth",
+      "performance"
+    ],
+    "secondaryFactors": [
+      "nutrient_partitioning",
+      "insulin_sensitivity",
+      "muscle_fullness"
+    ],
+    "tags": [
+      "Muscle",
+      "Growth",
+      "Performance"
+    ],
+    "mechanisms": [
+      "Insulin-like growth factor receptor 1 (IGF-1R) agonism driving PI3K/AKT/mTOR anabolic cascade",
+      "Skeletal muscle satellite cell proliferation and differentiation",
+      "Anti-apoptotic signaling via Bcl-2/Bcl-xL upregulation",
+      "Reduced IGFBP binding compared to native IGF-1 extending bioactivity"
+    ],
+    "semanticKeywords": [
+      "muscle",
+      "growth",
+      "hyperplasia",
+      "strength",
+      "performance",
+      "anabolic",
+      "igf-1"
+    ],
+    "synonyms": [
+      "igf-1 lr3",
+      "long r3 igf-1"
+    ],
+    "safetyNote": "Highly anabolic experimental variant.",
+    "productType": "peptide",
+    "slug": "igf-1-lr3",
+    "variants": [
+      {
+        "variantId": "igf-1-lr3-sc-default",
+        "label": "0.1mg/vial – SC",
+        "attributes": {
+          "dosageMg": 0.1,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 30,
+            "kit": 180,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Insulin-like Growth Factor-1 Long Arg3; Long R3 IGF-1",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of IGF-1 LR3",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~20–30h (vs 12–15 min for native IGF-1)",
+      "contraindications": [
+        "Active malignancy",
+        "Hypoglycemia susceptibility",
+        "Diabetic retinopathy",
+        "Pregnancy",
+        "Acromegaly"
+      ],
+      "dosageRange": {
+        "min": 0.05,
+        "max": 0.2,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via SC/IM preferred.",
+      "mechanismOfAction": {
+        "summary": "A highly engineered variant of Insulin-like Growth Factor-1 with an extended half-life dictating profound cellular hyperplasia.",
+        "researchFocus": [
+          "muscle_hyperplasia",
+          "growth",
+          "performance"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Hormonal Optimization",
+    "name": "PEG MGF",
+    "cas": "Unassigned",
+    "desc": "Pegylated Mechano Growth Factor, a slice variant of IGF-1 promoting localized stem cell proliferation strictly in muscle tissue.",
+    "dosage": "2mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Muscle, Repair, Growth",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "muscle_recovery",
+      "localized_growth",
+      "tissue_repair"
+    ],
+    "secondaryFactors": [
+      "stem_cell_proliferation",
+      "muscle_fullness",
+      "soreness_reduction"
+    ],
+    "tags": [
+      "Muscle",
+      "Repair",
+      "IGF-1 Variant"
+    ],
+    "mechanisms": [
+      "IGF-1 receptor (IGF-1R) independent signaling via MGF E-peptide domain",
+      "Satellite cell (muscle stem cell) activation and proliferation",
+      "PEGylation extends circulatory half-life ~144x vs native MGF",
+      "Post-exercise muscle repair and hypertrophic signaling"
+    ],
+    "semanticKeywords": [
+      "localized muscle growth",
+      "recovery",
+      "muscle repair",
+      "mgf",
+      "pegylated",
+      "growth factor",
+      "muscle recovery",
+      "performance support",
+      "repair research"
+    ],
+    "synonyms": [
+      "peg-mgf",
+      "mechano growth factor"
+    ],
+    "safetyNote": "Highly specific to skeletal muscle.",
+    "mechanismOfAction": {
+      "summary": "Growth-factor-related research peptide usually surfaced in muscle and recovery-related exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "growth factor",
+        "muscle recovery",
+        "performance support",
+        "repair research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should PEG MGF be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "peg-mgf",
+    "variants": [
+      {
+        "variantId": "peg-mgf-sc-default",
+        "label": "2mg/vial – SC",
+        "attributes": {
+          "dosageMg": 2,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 30,
+            "kit": 150,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "PEGylated Mechano Growth Factor; IGF-1Ec C-terminal peptide",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of PEG MGF",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~72h (PEGylation extends vs ~30 min native MGF)",
+      "contraindications": [
+        "Active malignancy",
+        "Pregnancy",
+        "PEG hypersensitivity (anti-PEG antibodies)",
+        "Severe renal impairment"
+      ],
+      "dosageRange": {
+        "min": 1,
+        "max": 4,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via SC/IM preferred.",
+      "mechanismOfAction": {
+        "summary": "Pegylated Mechano Growth Factor, a slice variant of IGF-1 promoting localized stem cell proliferation strictly in muscle tissue.",
+        "researchFocus": [
+          "muscle_recovery",
+          "localized_growth",
+          "tissue_repair"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Hormonal Optimization",
+    "name": "MK-677 (Ibutamoren)",
+    "cas": "159752-10-0",
+    "desc": "An orally active, non-peptide secretagogue of the ghrelin receptor elevating GH and IGF-1 secretion.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "GH, Muscle, Strength, Oral",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "growth_hormone_secretion",
+      "muscle_growth",
+      "appetite_stimulation"
+    ],
+    "secondaryFactors": [
+      "bone_density",
+      "sleep_quality",
+      "skin_health"
+    ],
+    "tags": [
+      "Muscle",
+      "GH Secretagogue",
+      "Oral"
+    ],
+    "mechanisms": [
+      "Non-peptide GHS-R1a agonist mimicking ghrelin action",
+      "Sustained 24h GH and IGF-1 elevation via oral dosing",
+      "REM sleep architecture enhancement via GH pulse amplification",
+      "Appetite stimulation via hypothalamic NPY/AgRP pathway activation"
+    ],
+    "semanticKeywords": [
+      "hunger",
+      "appetite",
+      "gh",
+      "muscle",
+      "sleep",
+      "oral",
+      "ibutamoren",
+      "mk677",
+      "oral compound",
+      "GH axis",
+      "secretagogue research",
+      "appetite-related",
+      "body composition"
+    ],
+    "synonyms": [
+      "ibutamoren",
+      "mk-677"
+    ],
+    "safetyNote": "Potent oral secretagogue.",
+    "mechanismOfAction": {
+      "summary": "Oral research compound associated with growth-hormone-axis and appetite-related exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "oral compound",
+        "GH axis",
+        "secretagogue research",
+        "appetite-related",
+        "body composition"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should MK-677 be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "mk-677-ibutamoren",
+    "variants": [
+      {
+        "variantId": "mk-677-ibutamoren-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 30,
+            "kit": 180,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Ibutamoren; MK-677; L-163,191",
+    "clinical_benefits": [
+      "Promotes protein synthesis and myofibrillar hypertrophy"
+    ],
+    "route": "oral_capsule",
+    "typeData": {
+      "halfLife": "~24h (oral)",
+      "contraindications": [],
+      "dosageRange": {
+        "min": 5,
+        "max": 20,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "anecdotal",
+      "typicalResearchUse": "Investigated in research models via ~60–70% oral.",
+      "mechanismOfAction": {
+        "summary": "An orally active, non-peptide secretagogue of the ghrelin receptor elevating GH and IGF-1 secretion.",
+        "researchFocus": [
+          "growth_hormone_secretion",
+          "muscle_growth",
+          "appetite_stimulation"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at Room temperature (15–25°C)",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Hormonal Optimization",
+    "name": "HGH",
+    "cas": "12629-01-5",
+    "desc": "Recombinant Human Growth Hormone essential for systemic cellular regeneration, growth, and metabolic regulation.",
+    "dosage": "10iu/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Hormonal, GH, Anti-Aging",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "cellular_regeneration",
+      "anti_aging",
+      "growth"
+    ],
+    "secondaryFactors": [
+      "skin_elasticity",
+      "fat_loss",
+      "bone_strength"
+    ],
+    "tags": [
+      "Hormonal",
+      "GH",
+      "Anti-Aging"
+    ],
+    "mechanisms": [
+      "Direct GH receptor (GHR) activation triggering JAK2/STAT5b signaling",
+      "Hepatic IGF-1 synthesis induction for systemic anabolic effects",
+      "Lipolysis via hormone-sensitive lipase (HSL) upregulation",
+      "Protein synthesis enhancement via mTOR pathway activation"
+    ],
+    "semanticKeywords": [
+      "growth hormone",
+      "hgh",
+      "regeneration",
+      "vitality",
+      "body composition",
+      "aging",
+      "GH research",
+      "endocrine support",
+      "performance"
+    ],
+    "synonyms": [
+      "human growth hormone",
+      "somatropin"
+    ],
+    "safetyNote": "Gold standard for regeneration research.",
+    "mechanismOfAction": {
+      "summary": "Growth-hormone pathway research compound used in endocrine and performance-related exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "growth hormone",
+        "GH research",
+        "endocrine support",
+        "performance"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should HGH 10iu be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "hgh",
+    "variants": [
+      {
+        "variantId": "hgh-sc-default",
+        "label": "10iu/vial – SC",
+        "attributes": {
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 40,
+            "kit": 250,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Somatropin; Recombinant Human Growth Hormone",
+    "clinical_benefits": [
+      "Slows cellular senescence and promotes longevity pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~3–4h SC",
+      "contraindications": [
+        "Active malignancy",
+        "Acute critical illness",
+        "Diabetic retinopathy",
+        "Active Prader-Willi syndrome with severe obesity",
+        "Epiphyseal closure not completed (inappropriate GH deficiency diagnosis)"
+      ],
+      "dosageRange": {
+        "min": 100,
+        "max": 500,
+        "unit": "mcg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via ~80% SC.",
+      "mechanismOfAction": {
+        "summary": "Recombinant Human Growth Hormone essential for systemic cellular regeneration, growth, and metabolic regulation.",
+        "researchFocus": [
+          "cellular_regeneration",
+          "anti_aging",
+          "growth"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at 2–8°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 28 days after reconstitution in dry storage."
+  },
+  {
+    "category": "Hormonal Optimization",
+    "name": "HCG",
+    "cas": "9002-61-3",
+    "desc": "Human Chorionic Gonadotropin; extensively utilized to stimulate the Leydig cells in the synthesis of endogenous testosterone.",
+    "dosage": "5000iu/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Hormonal, Testosterone, Fertility",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "testosterone_support",
+      "fertility",
+      "hormonal_balance"
+    ],
+    "secondaryFactors": [
+      "libido",
+      "spermatogenesis",
+      "hpta_reset"
+    ],
+    "tags": [
+      "Hormonal",
+      "Fertility",
+      "Testosterone"
+    ],
+    "mechanisms": [
+      "LH receptor (LHCGR) agonism in Leydig cells stimulating testosterone synthesis",
+      "FSH receptor cross-reactivity at high doses",
+      "Corpus luteum maintenance via progesterone induction",
+      "Spermatogenesis support via intratesticular testosterone elevation"
+    ],
+    "semanticKeywords": [
+      "testosterone",
+      "fertility",
+      "pct",
+      "hormone health",
+      "hcg",
+      "libido",
+      "hormonal support",
+      "fertility research",
+      "endocrine peptide",
+      "gonadotropic research"
+    ],
+    "synonyms": [
+      "human chorionic gonadotropin",
+      "hcg"
+    ],
+    "safetyNote": "Essential for hormonal restoration research.",
+    "mechanismOfAction": {
+      "summary": "Hormonal-axis research compound usually surfaced in endocrine and fertility-related contexts.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "hormonal support",
+        "fertility research",
+        "endocrine peptide",
+        "gonadotropic research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should HCG be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "hcg",
+    "variants": [
+      {
+        "variantId": "hcg-sc-default",
+        "label": "5000iu/vial – SC",
+        "attributes": {
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 18,
+            "kit": 130,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Human Chorionic Gonadotropin",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of HCG",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~24–36h (beta subunit)",
+      "contraindications": [
+        "Hormone-sensitive malignancy (prostate, breast)",
+        "OHSS history",
+        "Uncontrolled thyroid or adrenal dysfunction",
+        "Pregnancy (except specific obstetric use)",
+        "Precocious puberty"
+      ],
+      "dosageRange": {
+        "min": 100,
+        "max": 500,
+        "unit": "mcg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via IM/SC.",
+      "mechanismOfAction": {
+        "summary": "Human Chorionic Gonadotropin; extensively utilized to stimulate the Leydig cells in the synthesis of endogenous testosterone.",
+        "researchFocus": [
+          "testosterone_support",
+          "fertility",
+          "hormonal_balance"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at 2–8°C after reconstitution",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 30 days after reconstitution in dry storage."
+  },
+  {
+    "category": "Hormonal Optimization",
+    "name": "HMG",
+    "cas": "61489-71-2",
+    "desc": "Human Menopausal Gonadotropin used in advanced fertility research to stimulate follicular growth and spermatogenesis.",
+    "dosage": "75iu/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Fertility, Hormonal",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "fertility_enhancement",
+      "spermatogenesis",
+      "follicular_growth"
+    ],
+    "secondaryFactors": [
+      "hormonal_health",
+      "reproductive_research"
+    ],
+    "tags": [
+      "Hormonal",
+      "Fertility"
+    ],
+    "mechanisms": [
+      "FSH receptor (FSHR) agonism stimulating follicular development and spermatogenesis",
+      "LH receptor (LHCGR) agonism triggering ovulation and testosterone synthesis",
+      "Synergistic gonadal stimulation for fertility protocols",
+      "Hypothalamic-pituitary-gonadal (HPG) axis downstream activation"
+    ],
+    "semanticKeywords": [
+      "fertility",
+      "pregnancy research",
+      "sperm count",
+      "follicle",
+      "hmg",
+      "endocrine peptide",
+      "fertility research",
+      "gonadotropic research",
+      "hormonal support"
+    ],
+    "synonyms": [
+      "human menopausal gonadotropin",
+      "hmg"
+    ],
+    "safetyNote": "Advanced fertility research agent.",
+    "mechanismOfAction": {
+      "summary": "Hormonal-axis research compound often associated with endocrine and fertility-context exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "endocrine peptide",
+        "fertility research",
+        "gonadotropic research",
+        "hormonal support"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should HMG be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "hmg",
+    "variants": [
+      {
+        "variantId": "hmg-sc-default",
+        "label": "75iu/vial – SC",
+        "attributes": {
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 30,
+            "kit": 180,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Human Menopausal Gonadotropin; urofollitropin/lutropin mixture",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of HMG",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "FSH ~50h; LH ~20h",
+      "contraindications": [
+        "Ovarian failure",
+        "Hormone-sensitive malignancy",
+        "Uncontrolled thyroid/adrenal disease",
+        "Pregnancy",
+        "Ovarian cysts not due to PCOS"
+      ],
+      "dosageRange": {
+        "min": 100,
+        "max": 500,
+        "unit": "mcg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via IM/SC.",
+      "mechanismOfAction": {
+        "summary": "Human Menopausal Gonadotropin used in advanced fertility research to stimulate follicular growth and spermatogenesis.",
+        "researchFocus": [
+          "fertility_enhancement",
+          "spermatogenesis",
+          "follicular_growth"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at 2–8°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Hormonal Optimization",
+    "name": "Ipamorelin",
+    "cas": "170851-70-4",
+    "desc": "A highly selective and potent GHRP that stimulates massive growth hormone release safely without spiking cortisol or prolactin.",
+    "dosage": "2mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "GH, Muscle, Hormonal",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "growth_hormone_release",
+      "anti_aging",
+      "muscle_growth"
+    ],
+    "secondaryFactors": [
+      "fat_loss",
+      "sleep_improvement",
+      "skin_rejuvenation"
+    ],
+    "tags": [
+      "GHRP",
+      "Hormonal",
+      "Anti-Aging"
+    ],
+    "mechanisms": [
+      "Highly selective GHS-R1a agonism without cortisol or prolactin co-secretion",
+      "Pulsatile GH release from anterior pituitary somatotrophs",
+      "IGF-1 axis stimulation for muscle anabolism and fat metabolism",
+      "No desensitization of GH axis at therapeutic doses"
+    ],
+    "semanticKeywords": [
+      "gh",
+      "growth hormone",
+      "safe gh",
+      "no hunger",
+      "sleep",
+      "recovery",
+      "skin",
+      "secretagogue",
+      "GH pathway",
+      "growth hormone research",
+      "body composition"
+    ],
+    "synonyms": [
+      "ipamorelin"
+    ],
+    "safetyNote": "Selective secretagogue with minimal side effects.",
+    "mechanismOfAction": {
+      "summary": "GH-axis secretagogue research peptide generally associated with growth-hormone signaling exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "secretagogue",
+        "GH pathway",
+        "growth hormone research",
+        "body composition"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Ipamorelin be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "ipamorelin",
+    "variants": [
+      {
+        "variantId": "ipamorelin-sc-default",
+        "label": "2mg/vial – SC",
+        "attributes": {
+          "dosageMg": 2,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 20,
+            "kit": 100,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Ipamorelin; NNC 26-0161",
+    "clinical_benefits": [
+      "Slows cellular senescence and promotes longevity pathways",
+      "Promotes protein synthesis and myofibrillar hypertrophy"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~2h",
+      "contraindications": [
+        "Active malignancy",
+        "Pregnancy",
+        "Active acromegaly"
+      ],
+      "dosageRange": {
+        "min": 100,
+        "max": 300,
+        "unit": "mcg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "CJC-1295 without DAC",
+        "CJC-1295 with DAC"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A highly selective and potent GHRP that stimulates massive growth hormone release safely without spiking cortisol or prolactin.",
+        "researchFocus": [
+          "growth_hormone_release",
+          "anti_aging",
+          "muscle_growth"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Hormonal Optimization",
+    "name": "GHRP-2",
+    "cas": "158861-67-7",
+    "desc": "A hexapeptide acting as a strong growth hormone secretagogue and ghrelin receptor agonist.",
+    "dosage": "5mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "GH, Hormonal",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "growth_hormone_elevation",
+      "appetite_increase",
+      "healing"
+    ],
+    "secondaryFactors": [
+      "muscle_mass",
+      "metabolism_boost"
+    ],
+    "tags": [
+      "GHRP",
+      "Hormonal",
+      "Metabolism"
+    ],
+    "mechanisms": [
+      "Ghrelin receptor (GHS-R1a) agonism in pituitary somatotrophs",
+      "Stimulation of endogenous GH pulse amplitude",
+      "Weak ghrelin-like appetite stimulation via hypothalamic NPY/AgRP neurons",
+      "Mild cortisol and prolactin co-secretion (GHS-R1a off-target)"
+    ],
+    "semanticKeywords": [
+      "gh",
+      "growth hormone",
+      "appetite",
+      "bulking",
+      "hunger",
+      "ghrp2",
+      "secretagogue",
+      "growth hormone peptide",
+      "GH axis",
+      "performance research"
+    ],
+    "synonyms": [
+      "pralmorelin",
+      "ghrp-2"
+    ],
+    "safetyNote": "Potent GH secretagogue.",
+    "mechanismOfAction": {
+      "summary": "Growth-hormone secretagogue research peptide associated with GH-axis signaling and performance-oriented exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "secretagogue",
+        "growth hormone peptide",
+        "GH axis",
+        "performance research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should GHRP-2 be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "ghrp-2",
+    "variants": [
+      {
+        "variantId": "ghrp-2-sc-default",
+        "label": "5mg/vial – SC",
+        "attributes": {
+          "dosageMg": 5,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 20,
+            "kit": 100,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Growth Hormone Releasing Peptide-2; Pralmorelin",
+    "clinical_benefits": [
+      "Promotes tissue repair and accelerated wound healing"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~15–60 min",
+      "contraindications": [
+        "Active malignancy",
+        "Uncontrolled diabetes mellitus",
+        "Hyperprolactinemia",
+        "Active Cushing's syndrome",
+        "Pregnancy"
+      ],
+      "dosageRange": {
+        "min": 100,
+        "max": 300,
+        "unit": "mcg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC/IV.",
+      "mechanismOfAction": {
+        "summary": "A hexapeptide acting as a strong growth hormone secretagogue and ghrelin receptor agonist.",
+        "researchFocus": [
+          "growth_hormone_elevation",
+          "appetite_increase",
+          "healing"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Hormonal Optimization",
+    "name": "Hexarelin",
+    "cas": "140703-51-1",
+    "desc": "One of the most potent fast-acting GH secretagogues.",
+    "dosage": "2mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "GH, Hormonal, Muscle",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "maximal_gh_pulse",
+      "strength",
+      "cardiovascular_protection"
+    ],
+    "secondaryFactors": [
+      "heart_health",
+      "muscle_density"
+    ],
+    "tags": [
+      "GHRP",
+      "Hormonal",
+      "Potent"
+    ],
+    "mechanisms": [
+      "Potent GHS-R1a agonism producing strong GH pulse amplification",
+      "Cardioprotective action via CD36/ghrelin receptor in cardiomyocytes",
+      "Modest cortisol and prolactin co-secretion at high doses",
+      "IGF-1 axis activation for muscle hypertrophy and fat loss"
+    ],
+    "semanticKeywords": [
+      "gh pulse",
+      "strength",
+      "power",
+      "heart",
+      "strong gh",
+      "hexarelin",
+      "secretagogue",
+      "GH axis",
+      "growth hormone peptide",
+      "performance research"
+    ],
+    "synonyms": [
+      "hexarelin"
+    ],
+    "safetyNote": "Highly potent fast-acting peptide.",
+    "mechanismOfAction": {
+      "summary": "Growth-hormone secretagogue research peptide commonly explored in GH-axis and performance contexts.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "secretagogue",
+        "GH axis",
+        "growth hormone peptide",
+        "performance research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Hexarelin be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "hexarelin",
+    "variants": [
+      {
+        "variantId": "hexarelin-sc-default",
+        "label": "2mg/vial – SC",
+        "attributes": {
+          "dosageMg": 2,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 25,
+            "kit": 130,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Hexarelin; Examorelin; His-D-2-MeTrp-Ala-Trp-D-Phe-Lys-NH2",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of Hexarelin",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~1–2h",
+      "contraindications": [
+        "Active malignancy",
+        "Hyperprolactinemia",
+        "Active Cushing's syndrome",
+        "Uncontrolled diabetes",
+        "Pregnancy"
+      ],
+      "dosageRange": {
+        "min": 100,
+        "max": 300,
+        "unit": "mcg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC/IV preferred.",
+      "mechanismOfAction": {
+        "summary": "One of the most potent fast-acting GH secretagogues.",
+        "researchFocus": [
+          "maximal_gh_pulse",
+          "strength",
+          "cardiovascular_protection"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Hormonal Optimization",
+    "name": "Sermorelin",
+    "cas": "86168-78-7",
+    "desc": "A 29-amino acid polypeptide representing the shortest functional fragment of endogenous GHRH.",
+    "dosage": "2mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "GH, Anti-Aging, Hormonal",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "natural_gh_support",
+      "anti_aging",
+      "sleep_improvement"
+    ],
+    "secondaryFactors": [
+      "well_being",
+      "metabolism",
+      "skin_health"
+    ],
+    "tags": [
+      "GHRH",
+      "Hormonal",
+      "Anti-Aging"
+    ],
+    "mechanisms": [
+      "GHRH receptor (GHRHR) agonism stimulating pulsatile somatotroph GH release",
+      "Physiological GH axis stimulation without receptor downregulation at therapeutic doses",
+      "IGF-1 hepatic synthesis induction",
+      "Hypothalamic-pituitary feedback loop preservation"
+    ],
+    "semanticKeywords": [
+      "gh support",
+      "anti-aging",
+      "vitality",
+      "natural gh",
+      "sermorelin",
+      "Sermorelin",
+      "GHRH",
+      "GH axis",
+      "growth hormone research"
+    ],
+    "synonyms": [
+      "grf 1-29",
+      "sermorelin"
+    ],
+    "safetyNote": "Physiological GH support.",
+    "mechanismOfAction": {
+      "summary": "Growth-hormone-axis research peptide generally surfaced in GHRH-pathway and performance-related exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "Sermorelin",
+        "GHRH",
+        "GH axis",
+        "growth hormone research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Sermorelin be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "sermorelin",
+    "variants": [
+      {
+        "variantId": "sermorelin-sc-default",
+        "label": "2mg/vial – SC",
+        "attributes": {
+          "dosageMg": 2,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 18,
+            "kit": 130,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Sermorelin; GRF(1-29)NH2",
+    "clinical_benefits": [
+      "Slows cellular senescence and promotes longevity pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~10–20 min",
+      "contraindications": [
+        "Active malignancy",
+        "Pregnancy",
+        "Hypothyroidism (treat before initiating)",
+        "Pediatric patients with open growth plates (relative)"
+      ],
+      "dosageRange": {
+        "min": 100,
+        "max": 300,
+        "unit": "mcg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A 29-amino acid polypeptide representing the shortest functional fragment of endogenous GHRH.",
+        "researchFocus": [
+          "natural_gh_support",
+          "anti_aging",
+          "sleep_improvement"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Hormonal Optimization",
+    "name": "Tesamorelin",
+    "cas": "218949-48-5",
+    "desc": "A synthetically stabilized GHRH analog verified to reduce severe visceral adipose tissue accumulation.",
+    "dosage": "2mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "GH, Fat Loss, Hormonal",
+    "image": "/assets/vials/semaglutide.png",
+    "goals": [
+      "visceral_fat_loss",
+      "metabolism",
+      "growth_hormone"
+    ],
+    "secondaryFactors": [
+      "cognitive_function",
+      "lipid_profile_improvement"
+    ],
+    "tags": [
+      "GHRH",
+      "Hormonal",
+      "Fat Loss"
+    ],
+    "mechanisms": [
+      "GHRH receptor (GHRHR) agonism with trans-3-hexenoic acid N-terminal modification conferring DPP-IV resistance",
+      "Pulsatile GH secretion from anterior pituitary somatotrophs",
+      "FDA-approved reduction of HIV-associated visceral adiposity (lipodystrophy)",
+      "IGF-1 axis stimulation for lean mass preservation and lipolysis"
+    ],
+    "semanticKeywords": [
+      "belly fat",
+      "visceral fat",
+      "abs",
+      "metabolism",
+      "fat loss",
+      "tesamorelin",
+      "Tesamorelin",
+      "GHRH",
+      "GH axis",
+      "body composition research"
+    ],
+    "synonyms": [
+      "egrifta",
+      "tesamorelin"
+    ],
+    "safetyNote": "Targeted fat loss research agent.",
+    "mechanismOfAction": {
+      "summary": "GHRH-pathway research peptide generally positioned in GH-axis and body-composition related exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "Tesamorelin",
+        "GHRH",
+        "GH axis",
+        "body composition research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Tesamorelin be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "tesamorelin",
+    "variants": [
+      {
+        "variantId": "tesamorelin-sc-default",
+        "label": "2mg/vial – SC",
+        "attributes": {
+          "dosageMg": 2,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 80,
+            "kit": 380,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Tesamorelin; TH9507; Egrifta; trans-3-hexenoic acid-GRF(1-44)",
+    "clinical_benefits": [
+      "Enhances metabolic rate and cellular energy efficiency"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~26–38 min SC",
+      "contraindications": [
+        "Active malignancy",
+        "Pituitary tumor or radiation history",
+        "Pregnancy",
+        "Diabetic retinopathy",
+        "Pediatric patients"
+      ],
+      "dosageRange": {
+        "min": 1,
+        "max": 4,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A synthetically stabilized GHRH analog verified to reduce severe visceral adipose tissue accumulation.",
+        "researchFocus": [
+          "visceral_fat_loss",
+          "metabolism",
+          "growth_hormone"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at 2–8°C (unreconstituted); use immediately after reconstitution",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Hormonal Optimization",
+    "name": "Kisspeptin-10",
+    "cas": "374675-21-5",
+    "desc": "The active fragment of kisspeptin crucially stimulating the secretion of GnRH to reset the HPTA axis.",
+    "dosage": "5mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Hormonal, Fertility, HPTA",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "testosterone_stimulation",
+      "fertility",
+      "hpta_restart"
+    ],
+    "secondaryFactors": [
+      "libido",
+      "emotional_health",
+      "arousal"
+    ],
+    "tags": [
+      "Hormonal",
+      "Fertility",
+      "Libido"
+    ],
+    "mechanisms": [
+      "GPR54 (KISS1R) agonism stimulating GnRH pulsatile release from hypothalamus",
+      "LH and FSH downstream secretion triggering gonadal steroid production",
+      "Reproductive axis gating: puberty onset and fertility maintenance",
+      "Tumor metastasis suppression via KISS1 gene pathway (metastin activity)"
+    ],
+    "semanticKeywords": [
+      "testosterone",
+      "libido",
+      "pct",
+      "sex drive",
+      "fertility",
+      "kisspeptin",
+      "neuroendocrine",
+      "fertility research",
+      "hormonal support"
+    ],
+    "synonyms": [
+      "kp-10",
+      "kisspeptin 10"
+    ],
+    "safetyNote": "Upstream hormonal regulator.",
+    "mechanismOfAction": {
+      "summary": "Neuroendocrine-pathway research peptide often explored in hormonal and fertility-context signaling studies.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "kisspeptin",
+        "neuroendocrine",
+        "fertility research",
+        "hormonal support"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Kisspeptin-10 be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "kisspeptin-10",
+    "variants": [
+      {
+        "variantId": "kisspeptin-10-sc-default",
+        "label": "5mg/vial – SC",
+        "attributes": {
+          "dosageMg": 5,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 30,
+            "kit": 180,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Kisspeptin-10; KP-10; metastin 45-54",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of Kisspeptin-10",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~3–4 min IV; longer SC",
+      "contraindications": [
+        "Hormone-sensitive malignancy",
+        "Pediatric patients",
+        "Pregnancy",
+        "Precocious puberty history"
+      ],
+      "dosageRange": {
+        "min": 2.5,
+        "max": 10,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "The active fragment of kisspeptin crucially stimulating the secretion of GnRH to reset the HPTA axis.",
+        "researchFocus": [
+          "testosterone_stimulation",
+          "fertility",
+          "hpta_restart"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Hormonal Optimization",
+    "name": "Oxytocin Acetate",
+    "cas": "50-56-6",
+    "desc": "A neurohypophysial hormone mediating complex social, reproductive, and stress-regulating behaviors.",
+    "dosage": "2mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Social, Hormonal, Stress",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "social_bonding",
+      "stress_reduction",
+      "emotional_regulation"
+    ],
+    "secondaryFactors": [
+      "libido",
+      "trust",
+      "anxiety_management"
+    ],
+    "tags": [
+      "Hormonal",
+      "Social",
+      "Stress"
+    ],
+    "mechanisms": [
+      "Oxytocin receptor (OXTR) agonism in limbic system modulating social bonding and trust",
+      "HPA axis cortisol blunting reducing anxiety and fear response",
+      "Uterine smooth muscle contraction stimulation (parturition/lactation)",
+      "Central dopaminergic reward pathway modulation enhancing prosocial behavior"
+    ],
+    "semanticKeywords": [
+      "love hormone",
+      "bonding",
+      "trust",
+      "social",
+      "stress",
+      "anxiety",
+      "orgasm",
+      "oxytocin",
+      "neuropeptide",
+      "neuroendocrine",
+      "signaling research"
+    ],
+    "synonyms": [
+      "oxytocin",
+      "pitocin-like"
+    ],
+    "safetyNote": "The 'love hormone' for social research.",
+    "mechanismOfAction": {
+      "summary": "Neuropeptide research compound generally surfaced in social, neuroendocrine, and signaling-context exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "oxytocin",
+        "neuropeptide",
+        "neuroendocrine",
+        "signaling research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Oxytocin Acetate be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "oxytocin-acetate",
+    "variants": [
+      {
+        "variantId": "oxytocin-acetate-sc-default",
+        "label": "2mg/vial – SC",
+        "attributes": {
+          "dosageMg": 2,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 25,
+            "kit": 150,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Oxytocin; Cys-Tyr-Ile-Gln-Asn-Cys-Pro-Leu-Gly-NH2",
+    "clinical_benefits": [
+      "Reduces cortisol production and stress markers"
+    ],
+    "route": "nasal",
+    "typeData": {
+      "halfLife": "~3–5 min IV; ~30 min IN",
+      "contraindications": [
+        "Pregnancy (except obstetric indication under supervision)",
+        "Severe cardiovascular disease",
+        "Hyponatremia",
+        "Uterine scars (relative)"
+      ],
+      "dosageRange": {
+        "min": 1,
+        "max": 4,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via Intranasal/IV preferred.",
+      "mechanismOfAction": {
+        "summary": "A neurohypophysial hormone mediating complex social, reproductive, and stress-regulating behaviors.",
+        "researchFocus": [
+          "social_bonding",
+          "stress_reduction",
+          "emotional_regulation"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at 2–8°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Other Research Peptides",
+    "name": "MT2 (Melanotan II)",
+    "cas": "121062-08-6",
+    "desc": "A synthetic analog of alpha-MSH inducing remarkable melanogenesis and demonstrating robust aphrodisiac properties.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Tanning, Skin, Aphrodisiac",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "tanning",
+      "skin_pigmentation",
+      "libido_increase"
+    ],
+    "secondaryFactors": [
+      "sun_protection",
+      "fat_loss",
+      "appetite_suppression"
+    ],
+    "tags": [
+      "Skin",
+      "Tanning",
+      "Aphrodisiac"
+    ],
+    "mechanisms": [
+      "Non-selective melanocortin receptor (MC1R–MC5R) agonism",
+      "MC1R activation increasing eumelanin synthesis for UV-independent skin pigmentation",
+      "MC4R hypothalamic activation inducing sexual arousal and penile erection",
+      "Appetite suppression and lipolysis via MC3R/MC4R signaling"
+    ],
+    "semanticKeywords": [
+      "tan",
+      "skin color",
+      "melanotan",
+      "bronze",
+      "sunless tanning",
+      "aphrodisiac",
+      "sex drive",
+      "melanocortin",
+      "pigmentation research",
+      "signaling peptide"
+    ],
+    "synonyms": [
+      "melanotan 2",
+      "mt-ii"
+    ],
+    "safetyNote": "Highly potent melanogenic agent.",
+    "mechanismOfAction": {
+      "summary": "Melanocortin-related research peptide commonly surfaced in pigmentation and signaling-context exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "melanocortin",
+        "pigmentation research",
+        "signaling peptide"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should MT2 be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "mt2-melanotan-ii",
+    "variants": [
+      {
+        "variantId": "mt2-melanotan-ii-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 30,
+            "kit": 150,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Melanotan II; MT-II; cyclo[Nle4,D-Phe7]-α-MSH",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of MT2 (Melanotan II)",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~1.5–2h",
+      "contraindications": [
+        "Personal or family history of melanoma",
+        "Active cardiovascular disease",
+        "Pregnancy",
+        "Erectile dysfunction medications (interaction risk)"
+      ],
+      "dosageRange": {
+        "min": 5,
+        "max": 20,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A synthetic analog of alpha-MSH inducing remarkable melanogenesis and demonstrating robust aphrodisiac properties.",
+        "researchFocus": [
+          "tanning",
+          "skin_pigmentation",
+          "libido_increase"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Other Research Peptides",
+    "name": "PT-141 (Bremelanotide)",
+    "cas": "189691-06-3",
+    "desc": "A cyclic heptapeptide functioning as an agonist at melanocortin receptors heavily researched for sexual dysfunction.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Sexual Health, Melanocortin",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "sexual_health",
+      "arousal",
+      "libido_enhancement"
+    ],
+    "secondaryFactors": [
+      "mood",
+      "confidence",
+      "stress_reduction"
+    ],
+    "tags": [
+      "Sexual Health",
+      "Melanocortin",
+      "Research"
+    ],
+    "mechanisms": [
+      "Melanocortin MC4R agonism in hypothalamic nuclei mediating sexual arousal",
+      "Dopaminergic pathway modulation in mesolimbic reward system",
+      "Peripheral vasodilatation via MC3R activation",
+      "FDA-approved (Vyleesi) for hypoactive sexual desire disorder in premenopausal women"
+    ],
+    "semanticKeywords": [
+      "sex drive",
+      "erection",
+      "arousal",
+      "female sexual dysfunction",
+      "libido",
+      "pt141",
+      "PT-141",
+      "melanocortin",
+      "neuroendocrine",
+      "behavioral signaling"
+    ],
+    "synonyms": [
+      "bremelanotide",
+      "vyleesi-like"
+    ],
+    "safetyNote": "CNS-mediated sexual research peptide.",
+    "mechanismOfAction": {
+      "summary": "Melanocortin-related research peptide often surfaced in neuroendocrine and behavioral signaling contexts.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "PT-141",
+        "melanocortin",
+        "neuroendocrine",
+        "behavioral signaling"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should PT-141 be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "pt-141-bremelanotide",
+    "variants": [
+      {
+        "variantId": "pt-141-bremelanotide-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 30,
+            "kit": 180,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Bremelanotide; PT-141",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of PT-141 (Bremelanotide)",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~2.7h",
+      "contraindications": [],
+      "dosageRange": {
+        "min": 5,
+        "max": 20,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A cyclic heptapeptide functioning as an agonist at melanocortin receptors heavily researched for sexual dysfunction.",
+        "researchFocus": [
+          "sexual_health",
+          "arousal",
+          "libido_enhancement"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Other Research Peptides",
+    "name": "PNC-27",
+    "cas": "116569-74-3",
+    "desc": "An investigative anti-cancer peptide binding strongly to MDM2 in cellular membranes orchestrating rapid tumor cell necrosis.",
+    "dosage": "5mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Cancer, Research",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "cancer_research",
+      "tumor_necrosis",
+      "cellular_health"
+    ],
+    "secondaryFactors": [
+      "antitumor",
+      "selective_cytotoxicity"
+    ],
+    "tags": [
+      "Cancer",
+      "Research",
+      "Selective"
+    ],
+    "mechanisms": [
+      "Selective cancer cell membrane disruption via HDM-2 transmembrane receptor binding",
+      "p53-independent tumor cell apoptosis induction",
+      "Non-toxic to normal cells lacking transmembrane HDM-2 expression",
+      "Pore-forming necrotic mechanism in MDM2-overexpressing tumor cells"
+    ],
+    "semanticKeywords": [
+      "cancer",
+      "tumor",
+      "p53",
+      "oncology",
+      "necrosis",
+      "anti-cancer",
+      "oncology peptide",
+      "cell targeting",
+      "tumor biology",
+      "research peptide"
+    ],
+    "synonyms": [
+      "pnc27"
+    ],
+    "safetyNote": "Purely for oncological research.",
+    "mechanismOfAction": {
+      "summary": "Oncology-related research peptide family often surfaced in cell-targeting and tumor-biology exploration contexts.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "oncology peptide",
+        "cell targeting",
+        "tumor biology",
+        "research peptide"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should PNC-27 be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "pnc-27",
+    "variants": [
+      {
+        "variantId": "pnc-27-sc-default",
+        "label": "5mg/vial – SC",
+        "attributes": {
+          "dosageMg": 5,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 35,
+            "kit": 200,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "PNC-27; p53 C-terminal domain analog",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of PNC-27",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~2–4h (estimated)",
+      "contraindications": [
+        "Pregnancy",
+        "Severe renal/hepatic impairment",
+        "Non-research clinical use without oncological supervision"
+      ],
+      "dosageRange": {
+        "min": 2.5,
+        "max": 10,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via SC/IV.",
+      "mechanismOfAction": {
+        "summary": "An investigative anti-cancer peptide binding strongly to MDM2 in cellular membranes orchestrating rapid tumor cell necrosis.",
+        "researchFocus": [
+          "cancer_research",
+          "tumor_necrosis",
+          "cellular_health"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Other Research Peptides",
+    "name": "Snap-8",
+    "cas": "616204-22-9",
+    "desc": "An octapeptide acting as an elongation of Argireline, interfering with the SNARE complex to minimize topical wrinkle formation.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Skin, Anti-Aging, Wrinkles",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "anti_wrinkle",
+      "skin_texture",
+      "anti_aging"
+    ],
+    "secondaryFactors": [
+      "facial_tension",
+      "smoothness",
+      "dermal_repair"
+    ],
+    "tags": [
+      "Skin",
+      "Wrinkles",
+      "Anti-Aging"
+    ],
+    "mechanisms": [
+      "SNAP-25 protein competitive inhibition attenuating neuromuscular junction signaling",
+      "Reduction of acetylcholine vesicle release at facial neuromuscular synapses",
+      "Muscle contraction-induced wrinkle depth reduction (Botox-like topical effect)",
+      "Collagen type I synthesis stimulation in dermal fibroblasts"
+    ],
+    "semanticKeywords": [
+      "wrinkles",
+      "arrugas",
+      "botox-like",
+      "fine lines",
+      "expression lines",
+      "forehead",
+      "smooth skin",
+      "cosmetic peptide",
+      "expression line research",
+      "topical science",
+      "aesthetic support"
+    ],
+    "synonyms": [
+      "acetyl octapeptide-3",
+      "snap8"
+    ],
+    "safetyNote": "Research-grade peptide for dermal evaluation.",
+    "mechanismOfAction": {
+      "summary": "Cosmetic-science peptide generally associated with expression-line and topical-formulation related research contexts.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "cosmetic peptide",
+        "expression line research",
+        "topical science",
+        "aesthetic support"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Snap-8 be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "snap-8",
+    "variants": [
+      {
+        "variantId": "snap-8-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 50,
+            "kit": 270,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "SNAP-8; Acetyl Glutamyl Heptapeptide-3; acetyl-Glu-Glu-Met-Gln-Arg-Arg-Ala-Asp-NH2",
+    "clinical_benefits": [
+      "Slows cellular senescence and promotes longevity pathways"
+    ],
+    "route": "topical",
+    "typeData": {
+      "halfLife": "N/A (topical)",
+      "contraindications": [
+        "Systemic injection use",
+        "Known peptide hypersensitivity",
+        "Active skin infections at application site"
+      ],
+      "dosageRange": {
+        "min": 5,
+        "max": 20,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via Topical transdermal.",
+      "mechanismOfAction": {
+        "summary": "An octapeptide acting as an elongation of Argireline, interfering with the SNARE complex to minimize topical wrinkle formation.",
+        "researchFocus": [
+          "anti_wrinkle",
+          "skin_texture",
+          "anti_aging"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at 2–8°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Other Research Peptides",
+    "name": "Thymulin",
+    "cas": "63958-90-7",
+    "desc": "A nonapeptide requiring zinc for biological activity, involved fundamentally in T-cell differentiation and maturation.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Immune, T-cell",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "immune_support",
+      "t_cell_maturation",
+      "inflammation_control"
+    ],
+    "secondaryFactors": [
+      "longevity",
+      "neuroendocrine_balance"
+    ],
+    "tags": [
+      "Immune",
+      "Thymus",
+      "Bioregulator"
+    ],
+    "mechanisms": [
+      "Zinc-dependent thymic hormone active only when complexed with Zn2+",
+      "T-lymphocyte maturation and differentiation from bone marrow precursors",
+      "Suppressor and cytotoxic T-cell phenotype induction",
+      "Immunosenescence reversal via thymic function restoration in aged subjects"
+    ],
+    "semanticKeywords": [
+      "immunity",
+      "thymus",
+      "t-cells",
+      "defense",
+      "aging immune",
+      "bioregulator",
+      "thymic peptide",
+      "immune support",
+      "regulatory peptide",
+      "thymulin"
+    ],
+    "synonyms": [
+      "thymic factor"
+    ],
+    "safetyNote": "Zinc-dependent biological activity.",
+    "mechanismOfAction": {
+      "summary": "Immune-context research peptide often associated with thymic and regulatory signaling exploration.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "thymic peptide",
+        "immune support",
+        "regulatory peptide",
+        "thymulin"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Thymulin be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "thymulin",
+    "variants": [
+      {
+        "variantId": "thymulin-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 45,
+            "kit": 270,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Thymulin; FTS; Facteur Thymique Sérique; pGlu-Ala-Lys-Ser-Gln-Gly-Gly-Ser-Asn-OH + Zn2+",
+    "clinical_benefits": [
+      "Modulates immune cell activity and host defense"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~30 min–1h",
+      "contraindications": [
+        "Active autoimmune disease on immunosuppressants (relative)",
+        "Zinc metabolism disorders",
+        "Pregnancy"
+      ],
+      "dosageRange": {
+        "min": 5,
+        "max": 20,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A nonapeptide requiring zinc for biological activity, involved fundamentally in T-cell differentiation and maturation.",
+        "researchFocus": [
+          "immune_support",
+          "t_cell_maturation",
+          "inflammation_control"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Immune Support",
+    "name": "Thymosin Alpha 1",
+    "cas": "62304-98-7",
+    "desc": "An endogenous modifier of immune response directly augmenting the operational efficiency of T-cell-mediated responses.",
+    "dosage": "5mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Immune, T-cell, Health",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "immune_enhancement",
+      "antiviral_research",
+      "t_cell_activation"
+    ],
+    "secondaryFactors": [
+      "longevity",
+      "organ_protection",
+      "stress_resilience"
+    ],
+    "tags": [
+      "Immune",
+      "Thymosin",
+      "Defense"
+    ],
+    "mechanisms": [
+      "TLR-2 and TLR-9 agonism activating innate antiviral and antifungal immunity",
+      "Dendritic cell maturation and antigen presentation enhancement",
+      "NK cell cytotoxic activity upregulation for tumor immunosurveillance",
+      "Th1 cytokine (IFN-γ, IL-2) polarization and regulatory T-cell balance modulation"
+    ],
+    "semanticKeywords": [
+      "immunity",
+      "virus",
+      "infection",
+      "defense",
+      "ta1",
+      "thymosin alpha",
+      "immune boost",
+      "immune peptide",
+      "thymosin alpha 1",
+      "regulatory support",
+      "thymic research"
+    ],
+    "synonyms": [
+      "ta1",
+      "zadaxin-like"
+    ],
+    "safetyNote": "Powerful immune-modulating researcher.",
+    "mechanismOfAction": {
+      "summary": "Immune-context research peptide generally surfaced around regulatory and thymic signaling studies.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "immune peptide",
+        "thymosin alpha 1",
+        "regulatory support",
+        "thymic research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Thymosin Alpha 1 be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "thymosin-alpha-1",
+    "variants": [
+      {
+        "variantId": "thymosin-alpha-1-sc-default",
+        "label": "5mg/vial – SC",
+        "attributes": {
+          "dosageMg": 5,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 40,
+            "kit": 200,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Thymalfasin; Tα1; acetyl-SDAAVDTSSEITTKDLKEKK-VVR-NH2",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of Thymosin Alpha 1",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~2h SC",
+      "contraindications": [
+        "Active autoimmune conditions (relative)",
+        "Post-transplant immunosuppression",
+        "Pregnancy"
+      ],
+      "dosageRange": {
+        "min": 2.5,
+        "max": 10,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "An endogenous modifier of immune response directly augmenting the operational efficiency of T-cell-mediated responses.",
+        "researchFocus": [
+          "immune_enhancement",
+          "antiviral_research",
+          "t_cell_activation"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Other Research Peptides",
+    "name": "Cartalax",
+    "cas": "Unassigned",
+    "desc": "A synthetic dipeptide targeting the normalization of metabolic processes in bone and cartilaginous tissues.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Bone, Cartilage, Tissue",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "cartilage_repair",
+      "bone_health",
+      "joint_integrity"
+    ],
+    "secondaryFactors": [
+      "recovery",
+      "aging_joints"
+    ],
+    "tags": [
+      "Bone",
+      "Joints",
+      "Bioregulator"
+    ],
+    "mechanisms": [
+      "Chondrocyte proliferation and cartilage matrix synthesis promotion",
+      "TGF-β mediated collagen II and aggrecan expression upregulation",
+      "Anti-inflammatory modulation in synovial tissue",
+      "Epigenetic regulation of cartilage-specific gene expression"
+    ],
+    "semanticKeywords": [
+      "joints",
+      "cartilage",
+      "knees",
+      "back",
+      "bones",
+      "bioregulator",
+      "connective tissue",
+      "cartilage research",
+      "structural support"
+    ],
+    "synonyms": [
+      "cartalax"
+    ],
+    "safetyNote": "Specific to cartilaginous research.",
+    "mechanismOfAction": {
+      "summary": "Peptide bioregulator family entry typically positioned in structural and connective-tissue research contexts.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "bioregulator",
+        "connective tissue",
+        "cartilage research",
+        "structural support"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Cartalax be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "cartalax",
+    "variants": [
+      {
+        "variantId": "cartalax-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 70,
+            "kit": 380,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Ala-Glu-Asp-Gly (tetrapeptide; cartilage-specific variant)",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of Cartalax",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~1–2h",
+      "contraindications": [
+        "Pregnancy",
+        "Active autoimmune joint disease (relative)",
+        "Severe renal impairment"
+      ],
+      "dosageRange": {
+        "min": 5,
+        "max": 20,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A synthetic dipeptide targeting the normalization of metabolic processes in bone and cartilaginous tissues.",
+        "researchFocus": [
+          "cartilage_repair",
+          "bone_health",
+          "joint_integrity"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Other Research Peptides",
+    "name": "Cardiogen",
+    "cas": "Unassigned",
+    "desc": "A tetrapeptide clinically proven to stimulate cellular proliferation and reduce apoptosis within cardiovascular tissues.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Heart, Cardiovascular",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "heart_health",
+      "cardiovascular_repair",
+      "longevity"
+    ],
+    "secondaryFactors": [
+      "blood_flow",
+      "cardiac_resilience"
+    ],
+    "tags": [
+      "Heart",
+      "Cardiovascular",
+      "Bioregulator"
+    ],
+    "mechanisms": [
+      "Cardioprotective gene expression regulation via epigenetic chromatin remodeling",
+      "Cardiomyocyte differentiation and repair signaling",
+      "Anti-apoptotic Bcl-2 pathway upregulation in cardiac tissue",
+      "Reduction of oxidative stress markers in myocardial cells"
+    ],
+    "semanticKeywords": [
+      "heart",
+      "cardio",
+      "circulation",
+      "cardiovascular",
+      "repair",
+      "bioregulator",
+      "cardiovascular peptide",
+      "heart research",
+      "cardio support"
+    ],
+    "synonyms": [
+      "cardiogen"
+    ],
+    "safetyNote": "Cardiovascular-specific researcher.",
+    "mechanismOfAction": {
+      "summary": "Peptide bioregulator entry generally associated with cardiovascular-focused research themes.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "cardiovascular peptide",
+        "bioregulator",
+        "heart research",
+        "cardio support"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Cardiogen be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "cardiogen",
+    "variants": [
+      {
+        "variantId": "cardiogen-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 70,
+            "kit": 380,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Ala-Glu-Asp-Arg (tetrapeptide)",
+    "clinical_benefits": [
+      "Upregulates longevity genes and mitochondrial efficiency"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~1–2h",
+      "contraindications": [
+        "Active cardiac arrhythmia (relative)",
+        "Pregnancy",
+        "Severe renal impairment"
+      ],
+      "dosageRange": {
+        "min": 5,
+        "max": 20,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A tetrapeptide clinically proven to stimulate cellular proliferation and reduce apoptosis within cardiovascular tissues.",
+        "researchFocus": [
+          "heart_health",
+          "cardiovascular_repair",
+          "longevity"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Other Research Peptides",
+    "name": "Thymagen",
+    "cas": "122606-25-3",
+    "desc": "A dipeptide immuno-modulator aimed at restoring optimal physiological ratios among T-lymphocyte sub-populations.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Immune, T-cell",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "immune_restoration",
+      "t_cell_balance",
+      "recovery"
+    ],
+    "secondaryFactors": [
+      "longevity",
+      "inflammation_control"
+    ],
+    "tags": [
+      "Immune",
+      "Bioregulator"
+    ],
+    "mechanisms": [
+      "Thymic peptide bioregulator enhancing T-lymphocyte differentiation",
+      "IL-2 and interferon-γ immunomodulatory cytokine upregulation",
+      "CD4+/CD8+ T-cell ratio normalization in immunocompromised states",
+      "Chromatin remodeling in thymocyte gene expression for immune maturation"
+    ],
+    "semanticKeywords": [
+      "immunity",
+      "balance",
+      "t-cells",
+      "lymphocytes",
+      "bioregulator"
+    ],
+    "synonyms": [
+      "thymagen"
+    ],
+    "safetyNote": "Restorative immune researcher.",
+    "productType": "peptide",
+    "slug": "thymagen",
+    "variants": [
+      {
+        "variantId": "thymagen-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 70,
+            "kit": 380,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Glu-Trp (dipeptide; thymus bioregulator)",
+    "clinical_benefits": [
+      "Supports rapid metabolic and physical recovery"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~0.5–1h",
+      "contraindications": [
+        "Active autoimmune disease on immunosuppressants (relative)",
+        "Pregnancy",
+        "Active organ transplant with immunosuppression"
+      ],
+      "dosageRange": {
+        "min": 5,
+        "max": 20,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A dipeptide immuno-modulator aimed at restoring optimal physiological ratios among T-lymphocyte sub-populations.",
+        "researchFocus": [
+          "immune_restoration",
+          "t_cell_balance",
+          "recovery"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Other Research Peptides",
+    "name": "Prostamax",
+    "cas": "Unassigned",
+    "desc": "A specialized bioregulator peptide targeting cellular regeneration precisely within prostate gland tissues.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Prostate, Regeneration",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "prostate_health",
+      "tissue_regeneration",
+      "male_health"
+    ],
+    "secondaryFactors": [
+      "urinary_function",
+      "inflammation_reduction"
+    ],
+    "tags": [
+      "Prostate",
+      "Male Health",
+      "Bioregulator"
+    ],
+    "mechanisms": [
+      "Prostate epithelial cell gene expression bioregulation via chromatin remodeling",
+      "Anti-inflammatory modulation in prostate stromal tissue",
+      "Cytoprotective signaling reducing oxidative stress in glandular cells",
+      "Hormonal balance support in androgen-sensitive prostate tissue"
+    ],
+    "semanticKeywords": [
+      "prostate",
+      "men's health",
+      "urinary",
+      "regeneration",
+      "bioregulator",
+      "prostate peptide",
+      "glandular support",
+      "prostate research"
+    ],
+    "synonyms": [
+      "prostamax"
+    ],
+    "safetyNote": "Prostate-specific research agent.",
+    "mechanismOfAction": {
+      "summary": "Bioregulator family entry generally aligned with prostate-focused and glandular research contexts.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "prostate peptide",
+        "glandular support",
+        "bioregulator",
+        "prostate research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Prostamax be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "prostamax",
+    "variants": [
+      {
+        "variantId": "prostamax-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 70,
+            "kit": 380,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Ala-Glu-Asp-Gln (tetrapeptide; prostate bioregulator)",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of Prostamax",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~1–2h",
+      "contraindications": [
+        "Active prostate malignancy (relative)",
+        "Pregnancy",
+        "Severe renal impairment"
+      ],
+      "dosageRange": {
+        "min": 5,
+        "max": 20,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A specialized bioregulator peptide targeting cellular regeneration precisely within prostate gland tissues.",
+        "researchFocus": [
+          "prostate_health",
+          "tissue_regeneration",
+          "male_health"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Other Research Peptides",
+    "name": "Testagen",
+    "cas": "Unassigned",
+    "desc": "A synthesized targeted peptide designed to correct morphological and functional parameters of the male reproductive system.",
+    "dosage": "10mg/vial",
+    "quantity": "10 vial/kit",
+    "objective": "Reproductive, Male, Health",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "testicular_health",
+      "spermatogenesis",
+      "male_fertility"
+    ],
+    "secondaryFactors": [
+      "hormonal_balance",
+      "vitality"
+    ],
+    "tags": [
+      "Testicular",
+      "Male Health",
+      "Bioregulator"
+    ],
+    "mechanisms": [
+      "Leydig cell gene expression bioregulation supporting testosterone biosynthesis",
+      "Sertoli cell function modulation supporting spermatogenesis",
+      "Testicular tissue-specific chromatin remodeling via epigenetic peptide bioregulator mechanism",
+      "HPG axis support at peripheral gonadal level"
+    ],
+    "semanticKeywords": [
+      "testicles",
+      "fertility",
+      "men's health",
+      "reproduction",
+      "bioregulator",
+      "testicular peptide",
+      "glandular support",
+      "endocrine-context research"
+    ],
+    "synonyms": [
+      "testagen"
+    ],
+    "safetyNote": "Male reproductive system specific.",
+    "mechanismOfAction": {
+      "summary": "Bioregulator peptide often associated with testicular and glandular research themes.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "testicular peptide",
+        "glandular support",
+        "bioregulator",
+        "endocrine-context research"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Testagen be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "testagen",
+    "variants": [
+      {
+        "variantId": "testagen-sc-default",
+        "label": "10mg/vial – SC",
+        "attributes": {
+          "dosageMg": 10,
+          "unitsPerPack": 10,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 70,
+            "kit": 380,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Lys-Glu (dipeptide; testicular bioregulator)",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of Testagen",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "~0.5–1h",
+      "contraindications": [
+        "Active testicular malignancy (relative)",
+        "Pregnancy",
+        "Pediatric patients"
+      ],
+      "dosageRange": {
+        "min": 5,
+        "max": 20,
+        "unit": "mg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "animal-model",
+      "typicalResearchUse": "Investigated in research models via SC preferred.",
+      "mechanismOfAction": {
+        "summary": "A synthesized targeted peptide designed to correct morphological and functional parameters of the male reproductive system.",
+        "researchFocus": [
+          "testicular_health",
+          "spermatogenesis",
+          "male_fertility"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at -20°C",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 24 months in dry storage."
+  },
+  {
+    "category": "Research Supplies",
+    "name": "Bacteriostatic Water",
+    "cas": "N/A",
+    "desc": "Sterile water containing 0.9% benzyl alcohol. Essential for correctly reconstituting lyophilized peptides for long-term stability.",
+    "dosage": "30ml/vial",
+    "quantity": "1 vial",
+    "objective": "Supplies, Reconstitution",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "reconstitution",
+      "stability"
+    ],
+    "secondaryFactors": [
+      "sterility",
+      "longevity"
+    ],
+    "tags": [
+      "Supplies",
+      "Essential"
+    ],
+    "mechanisms": [
+      "Bacteriostatic preservation via benzyl alcohol (0.9% w/v)",
+      "Isotonic reconstitution medium for lyophilized peptides"
+    ],
+    "semanticKeywords": [
+      "water",
+      "mixing",
+      "reconstitution",
+      "solvent",
+      "bac water",
+      "supplies",
+      "bacteriostatic water",
+      "ancillary",
+      "reconstitution support",
+      "research supply"
+    ],
+    "synonyms": [
+      "bac water",
+      "bacteriostatic water"
+    ],
+    "safetyNote": "For laboratory reconstitution only.",
+    "mechanismOfAction": {
+      "summary": "Ancillary support item used in preparation and handling workflows where applicable.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "bacteriostatic water",
+        "ancillary",
+        "reconstitution support",
+        "research supply"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Bacteriostatic Water be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "bacteriostatic-water",
+    "variants": [
+      {
+        "variantId": "bacteriostatic-water-sc-default",
+        "label": "30ml/vial – SC",
+        "attributes": {
+          "unitsPerPack": 1,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 11,
+            "kit": 11,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "Water for injection with 0.9% benzyl alcohol",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of Bacteriostatic Water",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "N/A",
+      "contraindications": [
+        "Neonates and premature infants",
+        "Benzyl alcohol hypersensitivity",
+        "Intravenous use without dilution"
+      ],
+      "dosageRange": {
+        "min": 100,
+        "max": 500,
+        "unit": "mcg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via N/A.",
+      "mechanismOfAction": {
+        "summary": "Sterile water containing 0.9% benzyl alcohol. Essential for correctly reconstituting lyophilized peptides for long-term stability.",
+        "researchFocus": [
+          "reconstitution",
+          "stability"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at Room temperature (15–30°C)",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to 28 days after first puncture in dry storage."
+  },
+  {
+    "category": "Research Supplies",
+    "name": "Precision Insulin Syringes",
+    "cas": "N/A",
+    "desc": "31G x 8mm sterile U-100 syringes tailored for painless, extremely precise subcutaneous dosing under research conditions.",
+    "dosage": "Box of 100",
+    "quantity": "1 box",
+    "objective": "Supplies, Dosing",
+    "image": "/assets/vials/generic-vial.png",
+    "goals": [
+      "precise_dosing",
+      "administration"
+    ],
+    "secondaryFactors": [
+      "sterility",
+      "pain_reduction"
+    ],
+    "tags": [
+      "Supplies",
+      "Dosing"
+    ],
+    "mechanisms": [
+      "Precision subcutaneous peptide delivery device",
+      "31G ultra-fine needle minimizing injection site discomfort",
+      "0.3 mL volume suitable for research peptide reconstitution doses"
+    ],
+    "semanticKeywords": [
+      "syringes",
+      "needles",
+      "dosing",
+      "injection",
+      "supplies",
+      "u100",
+      "ancillary",
+      "syringe",
+      "administration support",
+      "research supply"
+    ],
+    "synonyms": [
+      "insulin syringes",
+      "needles"
+    ],
+    "safetyNote": "Sterile single-use research instruments.",
+    "mechanismOfAction": {
+      "summary": "Ancillary consumable used to support handling and administration workflows where relevant.",
+      "researchFocus": [],
+      "semanticAdditions": [
+        "ancillary",
+        "syringe",
+        "administration support",
+        "research supply"
+      ]
+    },
+    "faqModalItems": [
+      {
+        "q": "How should Insulin Syringes be positioned in scientific discovery?",
+        "a": "As a scientific-first family entry with modal access to FAQ and evidence, not as a quick-buy row."
+      },
+      {
+        "q": "What should the FAQ modal emphasize?",
+        "a": "Mechanism summary, research-use context, and navigation to the product detail page and scientific evidence."
+      },
+      {
+        "q": "Should inline price and purchase buttons be visible in the scientific list?",
+        "a": "No. Keep this list documentary and research-oriented, and reserve purchasing actions for the PDP."
+      },
+      {
+        "q": "How should semantic search use this family?",
+        "a": "Use the mechanism summary, semantic additions, existing tags, and FAQ language to improve discovery relevance."
+      },
+      {
+        "q": "How should users continue if this family is relevant?",
+        "a": "They should open the product detail page for deeper scientific review, literature access, and any later request workflow."
+      }
+    ],
+    "scientificModalEnabled": true,
+    "faqModalEnabled": true,
+    "productType": "peptide",
+    "slug": "precision-insulin-syringes",
+    "variants": [
+      {
+        "variantId": "precision-insulin-syringes-sc-default",
+        "label": "Box of 100 – SC",
+        "attributes": {
+          "unitsPerPack": 1,
+          "administration": "SC",
+          "format": "lyophilized"
+        },
+        "pricing": {
+          "retail": {
+            "perUnit": 22,
+            "kit": 22,
+            "currency": "USD",
+            "billingUnit": "vial",
+            "kitBillingUnit": "kit"
+          }
+        }
+      }
+    ],
+    "scientificName": "N/A (medical device — insulin syringe 0.3 mL / 31G)",
+    "clinical_benefits": [
+      "Supports scientific research into the pharmacology of Precision Insulin Syringes",
+      "Investigated for cellular safety and metabolic pathways"
+    ],
+    "route": "injectable_vial",
+    "typeData": {
+      "halfLife": "N/A",
+      "contraindications": [
+        "Reuse of single-use devices",
+        "Use with incompatible insulin concentrations without dose adjustment"
+      ],
+      "dosageRange": {
+        "min": 100,
+        "max": 500,
+        "unit": "mcg",
+        "frequency": "daily"
+      },
+      "synergies": [
+        "BPC-157",
+        "Bacteriostatic Water"
+      ],
+      "evidenceLevel": "human-clinical-trial",
+      "typicalResearchUse": "Investigated in research models via N/A.",
+      "mechanismOfAction": {
+        "summary": "31G x 8mm sterile U-100 syringes tailored for painless, extremely precise subcutaneous dosing under research conditions.",
+        "researchFocus": [
+          "precise_dosing",
+          "administration"
+        ]
+      }
+    },
+    "storage_conditions": {
+      "dry": "Store at Room temperature (15–30°C)",
+      "reconstituted": "Store at 2-8°C, do not freeze, use within 30 days"
+    },
+    "stabilityNote": "Lyophilized powder remains stable for up to As per manufacturer expiry in dry storage."
+  }
+];

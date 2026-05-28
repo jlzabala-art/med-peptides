@@ -148,9 +148,9 @@
           "route": "subcutaneous",
           "dose_logic": {
             "dose_unit": "mg",
-            "default_weekly_dose": 5,
             "possible_next_step_dose": 7.5,
-            "administration_frequency": "weekly"
+            "administration_frequency": "weekly",
+            "starting_weekly_dose": 5
           }
         },
         {
@@ -183,9 +183,9 @@
           "route": "subcutaneous",
           "dose_logic": {
             "dose_unit": "mg",
-            "default_weekly_dose": 7.5,
             "max_weekly_dose": 10,
-            "administration_frequency": "weekly"
+            "administration_frequency": "weekly",
+            "starting_weekly_dose": 7.5
           }
         },
         {
@@ -217,5 +217,10 @@
     },
     "version": "1.0"
   },
-  "clinical_disclaimer": "For use by qualified healthcare professionals only. Requires clinical evaluation, monitoring, and adherence to local regulatory standards."
+  "clinical_disclaimer": "For use by qualified healthcare professionals only. Requires clinical evaluation, monitoring, and adherence to local regulatory standards.",
+  "recommended_tests": [
+    "fagron-nutrigen",
+    "24-genomics-nutrigen",
+    "nad-blood-test"
+  ]
 }

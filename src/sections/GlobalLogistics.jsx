@@ -1,7 +1,8 @@
-import { ThermometerSnowflake, FileCheck, Globe, PackageCheck } from 'lucide-react';
+ 
+import { Shield, FileCheck, Globe, PackageCheck } from 'lucide-react';
 
 const pillars = [
-  { title: 'Cold-Chain Labs', icon: <ThermometerSnowflake size={22} />, desc: 'Verified temperature integrity.' }, // Descripciones un poco más cortas para mobile
+  { title: 'Secure Packaging', icon: <Shield size={22} />, desc: 'Pharmaceutical-grade shielded packaging.' }, // Descripciones un poco más cortas para mobile
   { title: 'Compliance', icon: <FileCheck size={22} />, desc: 'Frictionless global documentation.' },
   { title: 'Express Transit', icon: <Globe size={22} />, desc: 'Reliable 3-5 day global network.' },
   { title: 'Secure Handling', icon: <PackageCheck size={22} />, desc: 'Shatter-proof scientific packaging.' }

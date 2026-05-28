@@ -12,7 +12,7 @@ const fs = require("fs");
 const path = require("path");
 
 // ── Config ─────────────────────────────────────────────────────────────────
-const PROJECT_ID = "med-peptides-app";
+const PROJECT_ID = "Med-Peptides-app";
 const COLLECTION = "protocols";
 const EXPORT_DIR = path.join(__dirname, "../export/protocols");
 const SKIP = new Set([

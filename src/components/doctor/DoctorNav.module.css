@@ -1,0 +1,38 @@
+.doctor-nav {
+  position: sticky;
+  top: 0;
+  background: rgba(10, 15, 30, 0.85);
+  backdrop-filter: blur(12px);
+  display: flex;
+  justify-content: space-around;
+  padding: 0.6rem 0;
+  z-index: 1000;
+}
+
+.nav-item {
+  color: var(--text-muted);
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.nav-item:hover {
+  color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.nav-item.active {
+  color: var(--accent);
+}
+
+.nav-icon {
+  stroke: currentColor;
+}
+
+.nav-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+}

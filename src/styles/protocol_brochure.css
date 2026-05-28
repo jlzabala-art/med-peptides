@@ -1,0 +1,1121 @@
+/* ============================================================
+   PROTOCOL BROCHURE — DESIGN TOKENS & COMPONENT STYLES
+   Used exclusively by ProtocolTemplate.jsx brochure sections.
+   Imports into master.css after sections.css.
+   ============================================================ */
+
+/* ─── Peptide Compound Color Map ──────────────────────────── */
+/* 10 canonical accent colors — one per major compound class  */
+:root {
+  --pep-semaglutide:   #0070C0;   /* GLP-1 / metabolic — clinical blue      */
+  --pep-tirzepatide:   #2563EB;   /* Dual GIP/GLP-1 — deeper blue            */
+  --pep-bpc157:        #059669;   /* Healing / repair — clinical green        */
+  --pep-tb4:           #0891B2;   /* Regenerative — teal                      */
+  --pep-ipamorelin:    #7C3AED;   /* GH secretagogue — indigo                 */
+  --pep-cjc1295:       #6D28D9;   /* GHRH analog — violet                     */
+  --pep-hgh:           #B45309;   /* Growth hormone — amber-gold              */
+  --pep-testosterone:  #92400E;   /* Androgens — dark amber                   */
+  --pep-nad:           #0F766E;   /* NAD+ / longevity — dark teal             */
+  --pep-generic:       #475569;   /* Fallback — slate grey                    */
+
+  /* Soft tint versions (for backgrounds / chips) */
+  --pep-semaglutide-tint:  rgba(0, 112, 192, 0.10);
+  --pep-bpc157-tint:       rgba(5, 150, 105, 0.10);
+  --pep-tb4-tint:          rgba(8, 145, 178, 0.10);
+  --pep-ipamorelin-tint:   rgba(124, 58, 237, 0.10);
+  --pep-nad-tint:          rgba(15, 118, 110, 0.10);
+  --pep-generic-tint:      rgba(71, 85, 105, 0.08);
+
+  /* ─── Supplement Color Map ─────────────────────────────── */
+  --supp-vitamin-d:    #D97706;   /* Vitamins — warm amber */
+  --supp-omega3:       #0369A1;   /* Omega-3 — ocean blue  */
+  --supp-zinc:         #4B5563;   /* Minerals — grey       */
+  --supp-magnesium:    #6B7280;   /* Magnesium — cool grey */
+  --supp-creatine:     #1D4ED8;   /* Creatine — bold blue  */
+  --supp-generic:      #64748B;   /* Fallback — slate      */
+
+  /* ─── Brochure Spacing System ──────────────────────────── */
+  --bro-pad-hero:      5rem 0 2.5rem;      /* Hero section padding    */
+  --bro-pad-section:   2.5rem;             /* Standard inner section  */
+  --bro-gap-stat:      1rem;               /* Gap between stat blocks */
+  --bro-gap-chip:      0.5rem;             /* Peptide chip gap        */
+
+  /* ─── Infographic Block Tokens ─────────────────────────── */
+  --bro-stat-bg:       rgba(255, 255, 255, 0.10);
+  --bro-stat-border:   rgba(255, 255, 255, 0.18);
+  --bro-stat-radius:   14px;
+  --bro-stat-pad:      1rem 1.25rem;
+
+  /* Bright accent for stat values */
+  --bro-stat-value-color:  #FFFFFF;
+  --bro-stat-label-color:  rgba(255, 255, 255, 0.55);
+
+  /* ─── Clinical Table Base Tokens ────────────────────────── */
+  --bro-table-head-bg:     rgba(0, 54, 102, 0.06);
+  --bro-table-head-color:  var(--primary);
+  --bro-table-row-alt:     rgba(0, 54, 102, 0.02);
+  --bro-table-border:      var(--border-light);
+  --bro-table-radius:      10px;
+
+  /* ─── Phase Progression Colors ──────────────────────────── */
+  --phase-1-color:   #0096CC;   /* Start — clinical blue    */
+  --phase-2-color:   #0070C0;   /* Build — deeper blue      */
+  --phase-3-color:   #1A5EA8;   /* Peak — navy blue         */
+  --phase-4-color:   #059669;   /* Maintain / taper — green */
+  --phase-5-color:   #7C3AED;   /* Advanced — indigo        */
+
+  /* ─── Print-safe overrides ──────────────────────────────── */
+  --bro-print-margin: 0.75in;
+  --bro-print-font-size: 10pt;
+}
+
+/* ─── Peptide compound chip ─────────────────────────────────── */
+/* Used in the hero peptide stack row                            */
+.bro-pep-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  white-space: nowrap;
+  backdrop-filter: blur(6px);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.bro-pep-chip:hover {
+  background: rgba(255, 255, 255, 0.20);
+  border-color: rgba(255, 255, 255, 0.38);
+}
+
+.bro-pep-chip__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ─── Stat infographic block ────────────────────────────────── */
+/* Duration, intensity, phase count etc.                          */
+.bro-stat-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: var(--bro-stat-pad);
+  background: var(--bro-stat-bg);
+  border: 1px solid var(--bro-stat-border);
+  border-radius: var(--bro-stat-radius);
+  backdrop-filter: blur(8px);
+  min-width: 90px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.bro-stat-block__value {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(1.4rem, 3vw, 2.1rem);
+  font-weight: 850;
+  color: var(--bro-stat-value-color);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.bro-stat-block__unit {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--bro-stat-label-color);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.bro-stat-block__label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--bro-stat-label-color);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 0.15rem;
+}
+
+/* ─── Objective summary block ───────────────────────────────── */
+/* Clinical objective / target patient summary below hero title  */
+.bro-objective-block {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-left: 3px solid rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  padding: 0.9rem 1.2rem;
+  margin-top: 1.25rem;
+  font-size: clamp(0.82rem, 1.4vw, 0.92rem);
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.65;
+  max-width: 680px;
+}
+
+.bro-objective-block__label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 0.35rem;
+}
+
+/* ─── Key biological goals row ──────────────────────────────── */
+.bro-goals-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 1rem;
+}
+
+.bro-goal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.72);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Hero layout structure ─────────────────────────────────── */
+.brochure-hero-top {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.brochure-hero-stats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bro-gap-stat);
+  flex-shrink: 0;
+}
+
+.brochure-hero-pep-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bro-gap-chip);
+  margin-top: 1rem;
+}
+
+/* ─── Clinical table (shared) ───────────────────────────────── */
+.bro-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: var(--bro-table-radius);
+  overflow: hidden;
+  font-size: 0.85rem;
+}
+
+.bro-table thead th {
+  background: var(--bro-table-head-bg);
+  color: var(--bro-table-head-color);
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.6rem 1rem;
+  text-align: left;
+  border-bottom: 2px solid var(--bro-table-border);
+}
+
+.bro-table tbody tr:nth-child(even) {
+  background: var(--bro-table-row-alt);
+}
+
+.bro-table tbody td {
+  padding: 0.6rem 1rem;
+  color: var(--text-main);
+  border-bottom: 1px solid var(--bro-table-border);
+  vertical-align: top;
+}
+
+/* ─── Phase progression badge ───────────────────────────────── */
+.bro-phase-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ─── Print media overrides ─────────────────────────────────── */
+@media print {
+  .proto-detail__hero {
+    padding: 1.5rem 0 1rem !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .brochure-hero-stats {
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+
+  .bro-stat-block {
+    padding: 0.5rem 0.75rem;
+    min-width: 70px;
+  }
+
+  .bro-stat-block__value {
+    font-size: 1.25rem;
+  }
+}
+
+/* ─── Responsive adjustments ────────────────────────────────── */
+@media (max-width: 768px) {
+  .brochure-hero-top {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .brochure-hero-stats {
+    flex-direction: row;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .bro-stat-block {
+    min-width: 76px;
+    padding: 0.65rem 0.85rem;
+  }
+
+  .bro-stat-block__value {
+    font-size: 1.35rem;
+  }
+
+  .bro-objective-block {
+    font-size: 0.82rem;
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .brochure-hero-stats {
+    gap: 0.5rem;
+  }
+
+  .bro-stat-block {
+    min-width: 68px;
+    padding: 0.55rem 0.7rem;
+  }
+
+  .brochure-hero-pep-row {
+    gap: 0.35rem;
+  }
+}
+
+/* ─── Brochure Hero Identity (new layout — v2) ──────────────────
+   Column-stacked: icon+title row → stat chips → objective block
+   ─────────────────────────────────────────────────────────────── */
+.brochure-hero-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Top row: icon left, title+chips right */
+.brochure-hero-top-v2 {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.brochure-hero-text-v2 {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Category label */
+.brochure-hero-category {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.38);
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  margin-bottom: 0.45rem;
+}
+
+/* Primary H1 */
+.brochure-hero-h1 {
+  margin: 0 0 0.75rem;
+  font-weight: 850;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+}
+
+/* ─── Stat chip mini-cards row ─────────────────────────────────── */
+.brochure-hero-stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.brochure-stat-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 0.45rem 0.9rem;
+  min-width: 72px;
+}
+
+.brochure-stat-chip__label {
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+.brochure-stat-chip__value {
+  font-size: 0.95rem;
+  font-weight: 850;
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  font-family: 'Outfit', sans-serif;
+}
+
+/* ─── Clinical objective block ─────────────────────────────────── */
+.brochure-hero-objective {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-left: 3px solid rgba(255, 255, 255, 0.30);
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  font-size: 0.83rem;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.55;
+}
+
+/* ─── Key biological goals row ─────────────────────────────────── */
+.brochure-biogoals-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.25rem;
+}
+
+.brochure-biogoal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
+  letter-spacing: 0.03em;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.brochure-biogoal-chip:hover {
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+/* ─── Responsive — brochure hero v2 ───────────────────────────── */
+@media (max-width: 768px) {
+  .brochure-hero-top-v2 {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .brochure-hero-h1 {
+    font-size: clamp(1.65rem, 6vw, 2.2rem);
+  }
+
+  .brochure-hero-stat-row {
+    justify-content: center;
+  }
+
+  .brochure-hero-objective {
+    text-align: left;
+  }
+
+  .brochure-biogoals-row {
+    justify-content: center;
+  }
+}
+
+
+/* ============================================================
+   PHASE 6 — BROCHURE PHASE CARD SYSTEM
+   Clinical infographic cards for protocol phase visualization.
+   Inspired by PDF "PHASE 1 ACTIVATION" / "PHASE 2 STABILIZATION"
+   ============================================================ */
+
+/* ─── Phase color palette (by phase index, 0-based) ────────── */
+:root {
+  --phase-color-0: #003666;   /* Phase 1 — Deep Clinical Blue   */
+  --phase-color-1: #1d4ed8;   /* Phase 2 — Royal Blue           */
+  --phase-color-2: #0369a1;   /* Phase 3 — Ocean Blue           */
+  --phase-color-3: #047857;   /* Phase 4 — Clinical Green       */
+  --phase-color-4: #6d28d9;   /* Phase 5 — Indigo               */
+  --phase-color-5: #b45309;   /* Phase 6 — Amber                */
+  --phase-color-6: #0f766e;   /* Phase 7 — Teal                 */
+  --phase-color-7: #be185d;   /* Phase 8 — Rose                 */
+
+  --phase-tint-0: rgba(0,  54, 102, 0.08);
+  --phase-tint-1: rgba(29, 78, 216, 0.08);
+  --phase-tint-2: rgba(3, 105, 161, 0.08);
+  --phase-tint-3: rgba(4, 120,  87, 0.08);
+  --phase-tint-4: rgba(109, 40, 217, 0.08);
+  --phase-tint-5: rgba(180, 83,  9, 0.08);
+  --phase-tint-6: rgba(15, 118, 110, 0.08);
+  --phase-tint-7: rgba(190, 24,  93, 0.08);
+}
+
+/* ─── Phase card wrapper ────────────────────────────────────── */
+.brochure-phase-card {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 54, 102, 0.12);
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 30, 60, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.brochure-phase-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 30, 60, 0.10);
+  transform: translateY(-1px);
+}
+
+/* ─── Colored header band ───────────────────────────────────── */
+.brochure-phase-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem 0.9rem;
+  background: var(--phase-hdr-color, #003666);
+  color: #ffffff;
+  gap: 1rem;
+}
+
+.brochure-phase-card__header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 1;
+}
+
+/* Phase number badge */
+.brochure-phase-card__num {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 0.22rem 0.6rem;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Phase title group */
+.brochure-phase-card__title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.brochure-phase-card__name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+}
+
+.brochure-phase-card__type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+  align-self: flex-start;
+}
+
+/* Week pill — right side */
+.brochure-phase-card__week-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+  padding: 0.28rem 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ffffff;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Duration chip */
+.brochure-phase-card__dur {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  flex-shrink: 0;
+}
+
+/* ─── Card body ─────────────────────────────────────────────── */
+.brochure-phase-card__body {
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ─── Clinical objective block ──────────────────────────────── */
+.brochure-phase-card__objective {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  padding: 0.85rem 1rem;
+  background: var(--phase-tint-color, rgba(0, 54, 102, 0.06));
+  border-left: 3px solid var(--phase-hdr-color, #003666);
+  border-radius: 0 8px 8px 0;
+}
+
+.brochure-phase-card__objective-icon {
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.brochure-phase-card__objective-text {
+  font-size: 0.88rem;
+  color: #1e293b;
+  line-height: 1.6;
+  margin: 0;
+  font-style: normal;
+  font-weight: 400;
+}
+
+/* ─── Simplified explanation ────────────────────────────────── */
+.brochure-phase-card__explanation {
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0 0.25rem;
+  font-style: italic;
+}
+
+/* ─── Compound stack header ─────────────────────────────────── */
+.brochure-phase-card__compounds-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.brochure-phase-card__compounds-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: var(--phase-hdr-color, #003666);
+  color: #ffffff;
+  border-radius: 50%;
+  font-size: 0.6rem;
+  font-weight: 700;
+  margin-left: auto;
+}
+
+/* ─── Compound table ────────────────────────────────────────── */
+.brochure-phase-compound-table {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.brochure-phase-compound-table__head {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr 1.6fr 1fr;
+  padding: 0.45rem 0.85rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  gap: 0.5rem;
+}
+
+.brochure-phase-compound-table__head span {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.brochure-phase-compound-row {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr 1.6fr 1fr;
+  padding: 0.65rem 0.85rem;
+  gap: 0.5rem;
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.12s ease;
+}
+
+.brochure-phase-compound-row:last-child {
+  border-bottom: none;
+}
+
+.brochure-phase-compound-row:hover {
+  background: #f8fafc;
+}
+
+/* Compound name — accent color dot */
+.brochure-phase-compound-row__name {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.79rem;
+  font-weight: 600;
+  color: #0f172a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brochure-phase-compound-row__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--phase-hdr-color, #003666);
+}
+
+/* Dose — prominent monospace blue */
+.brochure-phase-compound-row__dose {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1d4ed8;
+  letter-spacing: -0.01em;
+}
+
+/* Frequency */
+.brochure-phase-compound-row__freq {
+  font-size: 0.75rem;
+  color: #475569;
+}
+
+/* Route */
+.brochure-phase-compound-row__route {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+/* ─── Details toggle + panel ────────────────────────────────── */
+.brochure-phase-card__details-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.71rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  align-self: flex-start;
+  font-family: var(--font-sans, sans-serif);
+}
+
+.brochure-phase-card__details-toggle:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.brochure-phase-card__details-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.brochure-phase-card__detail-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.brochure-phase-card__detail-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.brochure-phase-card__detail-text {
+  font-size: 0.84rem;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ─── No-compounds fallback ─────────────────────────────────── */
+.brochure-phase-card__no-compounds {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  font-style: italic;
+  padding: 0.5rem 0;
+}
+
+/* ─── Responsive ────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .brochure-phase-card__header {
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .brochure-phase-card__name {
+    font-size: 0.88rem;
+  }
+
+  .brochure-phase-card__week-pill {
+    font-size: 0.65rem;
+    padding: 0.22rem 0.6rem;
+  }
+
+  .brochure-phase-compound-table__head,
+  .brochure-phase-compound-row {
+    grid-template-columns: 2fr 1fr;
+  }
+
+  .brochure-phase-compound-row__freq,
+  .brochure-phase-compound-row__route {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .brochure-phase-card__body {
+    padding: 0.85rem 1rem;
+  }
+}
+
+/* ============================================================
+   PHASE 7 — CLINICAL DOSING TABLE ENGINE
+   .brochure-dosing-*  classes
+   ============================================================ */
+
+.brochure-dosing-wrap {
+  border: 1px solid rgba(0, 54, 102, 0.12);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 54, 102, 0.06);
+}
+
+/* ── Table header row ── */
+.brochure-dosing-thead {
+  display: grid;
+  grid-template-columns: 2.2fr 1.1fr 1fr 1.1fr 0.9fr 1.1fr;
+  background: #003666;
+  padding: 0.6rem 1.1rem;
+  gap: 0.5rem;
+}
+
+.brochure-dosing-thead span {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* ── Phase group header ── */
+.brochure-dosing-phase-group {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  background: rgba(0, 54, 102, 0.05);
+  border-top: 1px solid rgba(0, 54, 102, 0.1);
+  border-bottom: 1px solid rgba(0, 54, 102, 0.08);
+  padding: 0.45rem 1.1rem;
+  gap: 0.4rem;
+}
+
+.brochure-dosing-phase-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: #003666;
+}
+
+.brochure-dosing-phase-label .phase-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: #003666;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.62rem;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.brochure-dosing-phase-label .phase-wks {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #64748b;
+  background: rgba(0, 54, 102, 0.08);
+  border-radius: 4px;
+  padding: 0.1rem 0.45rem;
+  margin-left: auto;
+}
+
+/* ── Compound row ── */
+.brochure-dosing-row {
+  display: grid;
+  grid-template-columns: 2.2fr 1.1fr 1fr 1.1fr 0.9fr 1.1fr;
+  padding: 0.55rem 1.1rem;
+  gap: 0.5rem;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 54, 102, 0.05);
+  transition: background 0.15s;
+}
+
+.brochure-dosing-row:hover {
+  background: rgba(0, 54, 102, 0.03);
+}
+
+.brochure-dosing-row:last-child {
+  border-bottom: none;
+}
+
+/* Compound name cell */
+.brochure-dosing-compound {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brochure-dosing-compound-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--phase-color, #003666);
+}
+
+.brochure-dosing-compound-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Cell text styles */
+.brochure-dosing-cell {
+  font-size: 0.78rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+.brochure-dosing-cell--mono {
+  font-family: 'JetBrains Mono', 'Fira Mono', monospace;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #003666;
+}
+
+/* Route badge */
+.brochure-dosing-route {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border-radius: 5px;
+  padding: 0.22rem 0.5rem;
+  text-transform: capitalize;
+}
+
+.brochure-dosing-route--sc {
+  background: rgba(99, 102, 241, 0.1);
+  color: #4f46e5;
+}
+
+.brochure-dosing-route--in {
+  background: rgba(8, 145, 178, 0.1);
+  color: #0369a1;
+}
+
+.brochure-dosing-route--oral {
+  background: rgba(5, 150, 105, 0.1);
+  color: #047857;
+}
+
+.brochure-dosing-route--im {
+  background: rgba(124, 58, 237, 0.1);
+  color: #7c3aed;
+}
+
+.brochure-dosing-route--topical {
+  background: rgba(180, 83, 9, 0.08);
+  color: #b45309;
+}
+
+.brochure-dosing-route--other {
+  background: rgba(71, 85, 105, 0.08);
+  color: #475569;
+}
+
+/* ── Totals footer ── */
+.brochure-dosing-totals {
+  display: grid;
+  grid-template-columns: 2.2fr 1.1fr 1fr 1.1fr 0.9fr 1.1fr;
+  padding: 0.6rem 1.1rem;
+  gap: 0.5rem;
+  background: rgba(0, 54, 102, 0.04);
+  border-top: 2px solid rgba(0, 54, 102, 0.15);
+  align-items: center;
+}
+
+.brochure-dosing-totals__label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: #003666;
+}
+
+.brochure-dosing-totals__val {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #003666;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Empty state ── */
+.brochure-dosing-empty {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* ── Responsive reflow ── */
+@media (max-width: 768px) {
+  .brochure-dosing-thead {
+    display: none;
+  }
+
+  .brochure-dosing-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    padding: 0.7rem 0.9rem;
+    gap: 0.3rem 0.5rem;
+  }
+
+  .brochure-dosing-compound {
+    grid-column: 1 / -1;
+  }
+
+  .brochure-dosing-totals {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.3rem 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .brochure-dosing-row {
+    grid-template-columns: 1fr;
+  }
+
+  .brochure-dosing-totals {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

@@ -1,5 +1,8 @@
+/* eslint-disable no-unused-vars */
 import { ROUTE_LABELS, ROUTE } from '../constants/productEnums.js';
-
+import { normalizeProtocol, frequencyToInjectionsPerWeek, doseToObject } from '../utils/protocolSchemaAdapter.js';
+import { resolveVariantPrice } from '../utils/resolvePrice.js';
+import { storage, ref, uploadBytes, getDownloadURL } from '../firebase.js';
 
 const formatDate = (dateString) => {
   if (!dateString) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -26,8 +29,6 @@ const normalizeDosing = (d) => {
   if (freq.toLowerCase() === '2x_week' || freq.toLowerCase() === '2x week') freq = '2x/week';
   if (freq.toLowerCase() === '5x_week' || freq.toLowerCase() === '5x/week') freq = '5x/week';
 
-  // Resolve canonical code (e.g. 'SC') → human label (e.g. 'Subcutaneous (SC)').
-  // Falls back gracefully for legacy raw strings that are already readable.
   const rawRoute = d.variantRef?.route ?? d.route ?? ROUTE.SC;
   const route = ROUTE_LABELS[rawRoute] ?? (rawRoute.charAt(0).toUpperCase() + rawRoute.slice(1).toLowerCase());
   
@@ -44,7 +45,7 @@ const getDaysForFrequency = (freq) => {
   if (f === '2x_week' || f.includes('2x week')) return ['Tue', 'Thu'];
   if (f === '5x_week' || f.includes('5x/week') || f.includes('5 days')) return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
   if (f === 'weekly' || f.includes('once weekly') || f === 'once_weekly') return ['Mon'];
-  return ['Mon']; // Default to Monday
+  return ['Mon'];
 };
 
 /**
@@ -85,37 +86,34 @@ const validateAndEnrichProtocol = (p) => {
     || p.blueprint?.title
     || "Custom Clinical Protocol";
 
-  // ── Resolve phases: v2 uses phase_blueprints, legacy uses phases ──────────
   const rawPhases = p.phases || p.blueprint?.phases || p.phase_blueprints || [];
-
-  // Normalise each phase to the canonical shape the rest of pdfService expects.
-  // v2 phase_blueprints use:
-  //   • .drugs | .compounds | .drugs_used   (compound list)
-  //   • .duration_weeks | .default_duration_weeks  (no start_week/end_week)
-  //   • .name | .phase_name | .title → phase_title
   let cumulativeWeek = 0;
   const phases = rawPhases.map((ph) => {
-    // Normalise compound list → drugs_used
     const rawDrugs = ph.drugs_used || ph.drugs || ph.compounds || [];
-    const drugs_used = rawDrugs.map((d) => ({
-      // Canonical name fields
-      product_title: d.product_title || d.name || d.product_slug?.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ') || 'Compound',
-      name:          d.name || d.product_title || d.product_slug || '',
-      product_slug:  d.product_slug || d.slug || d.name || '',
-      // Dosing
-      strength:      d.strength || d.selected_strength || d.vial_strength_used || '',
-      weekly_dose:   d.weekly_dose || d.dose || d.per_administration_dose || '',
-      per_administration_dose: d.per_administration_dose || d.dose || d.weekly_dose || '',
-      dosing_frequency: d.dosing_frequency || d.frequency || 'daily',
-      route:         d.route || 'SC',
-      variantRef:    d.variantRef || null,
-      vial_strength_used: d.vial_strength_used || d.selected_strength || d.strength || '5mg',
-      selected_strength:  d.selected_strength || d.strength || '5mg',
-      // Passthrough everything else
-      ...d,
-    }));
+    const drugs_used = rawDrugs.map((d) => {
+      // Use doseToObject for canonical parsing of dose values
+      const weeklyDoseObj = doseToObject(d.weekly_dose || d.dose || d.per_administration_dose || 0);
+      const perAdminDoseObj = doseToObject(d.per_administration_dose || d.dose || d.weekly_dose || 0);
 
-    // Resolve timing
+      return {
+        product_title: d.product_title || d.name || d.product_slug?.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ') || 'Compound',
+        name:          d.name || d.product_title || d.product_slug || '',
+        product_slug:  d.product_slug || d.slug || d.name || '',
+        strength:      d.strength || d.selected_strength || d.vial_strength_used || '',
+        weekly_dose:   weeklyDoseObj.value > 0 ? `${weeklyDoseObj.value}${weeklyDoseObj.unit}` : (d.weekly_dose || d.dose || d.per_administration_dose || ''),
+        per_administration_dose: perAdminDoseObj.value > 0 ? `${perAdminDoseObj.value}${perAdminDoseObj.unit}` : (d.per_administration_dose || d.dose || d.weekly_dose || ''),
+        dosing_frequency: d.dosing_frequency || d.frequency || 'daily',
+        route:         d.route || 'SC',
+        variantRef:    d.variantRef || null,
+        vial_strength_used: d.vial_strength_used || d.selected_strength || d.strength || '5mg',
+        selected_strength:  d.selected_strength || d.strength || '5mg',
+        // Preserve raw numeric values for reconstitution calculations (syringe/mL)
+        _weekly_dose_parsed: weeklyDoseObj,
+        _per_admin_dose_parsed: perAdminDoseObj,
+        ...d,
+      };
+    });
+
     const durationWks = ph.duration_weeks || ph.default_duration_weeks || 0;
     const startWeek = ph.start_week ?? (cumulativeWeek + 1);
     const endWeek   = ph.end_week   ?? (cumulativeWeek + durationWks);
@@ -128,9 +126,7 @@ const validateAndEnrichProtocol = (p) => {
       start_week: startWeek,
       end_week:   endWeek,
       drugs_used,
-      // Passthrough
       ...ph,
-      // Override with normalised versions (prevent spread from overwriting)
       drugs_used,
       phase_title: ph.phase_title || ph.phase_name || ph.name || ph.title || `Phase ${rawPhases.indexOf(ph) + 1}`,
       start_week: startWeek,
@@ -157,24 +153,32 @@ const validateAndEnrichProtocol = (p) => {
   };
 };
 
-
-const setupBrandingHeader = (doc) => {
+const setupBrandingHeader = (doc, protocol = {}, user = null) => {
   doc.setFontSize(22);
-  doc.setTextColor(0, 54, 102); // Deep premium blue
+  doc.setTextColor(0, 54, 102);
   doc.setFont('helvetica', 'bold');
-  doc.text("REGEN PEPT", 14, 22);
+  doc.text("Med-Peptides", 14, 22);
   
   doc.setFontSize(9);
   doc.setTextColor(100, 116, 139);
   doc.setFont('helvetica', 'normal');
   doc.text("Precision Bioregulator Engineering", 14, 28);
-  doc.text("Clinical Protocol System v5.2", 14, 32);
+  
+  // Traceability block
+  const version = protocol.version || '1.0.0';
+  const genDate = protocol.generation_date ? new Date(protocol.generation_date).toLocaleDateString() : new Date().toLocaleDateString();
+  doc.text(`Protocol Version: ${version} | Generated: ${genDate}`, 14, 32);
+  
+  if (user) {
+    const userText = `Patient/Researcher: ${user.name || user.email || 'Internal'}`;
+    doc.text(userText, 14, 36);
+  }
 
   doc.setDrawColor(0, 54, 102);
   doc.setLineWidth(0.5);
-  doc.line(14, 38, 196, 38);
+  doc.line(14, 40, 196, 40);
 
-  return 48; // Starting Y for content
+  return 50;
 };
 
 const addRunningFooter = (doc) => {
@@ -183,23 +187,14 @@ const addRunningFooter = (doc) => {
     doc.setPage(i);
     const pageWidth = doc.internal.pageSize.width;
     const pageHeight = doc.internal.pageSize.height;
-    
-    // Solid footer background: #F7F9FC
     doc.setFillColor(247, 249, 252);
     doc.rect(0, pageHeight - 30, pageWidth, 30, 'F');
-
-    // Top border of footer: #E2E8F0
     doc.setDrawColor(226, 232, 240);
     doc.setLineWidth(0.5);
     doc.line(0, pageHeight - 30, pageWidth, pageHeight - 30);
-    
     doc.setFontSize(8);
-    // Dark Primary Footer Text: #1F2937
     doc.setTextColor(31, 41, 55);
-    const disclaimer = "CONFIDENTIAL CLINICAL RECORD - Generated by ReGen PEPT Engine. Intended for professional clinical use.";
-    doc.text(disclaimer, 14, pageHeight - 15);
-    
-    // Page count in Secondary Text: #64748B
+    doc.text("CONFIDENTIAL CLINICAL RECORD - Generated by Med-Peptides Engine. Intended for research use.", 14, pageHeight - 15);
     doc.setTextColor(100, 116, 139);
     doc.text(`Page ${i} of ${pageCount}`, pageWidth - 14, pageHeight - 15, { align: 'right' });
   }
@@ -208,7 +203,7 @@ const addRunningFooter = (doc) => {
 const checkPageBreak = (doc, yPos, neededHeight = 50) => {
   if (yPos + neededHeight > doc.internal.pageSize.height - 35) {
     doc.addPage();
-    return 20; // New page top
+    return 20;
   }
   return yPos;
 };
@@ -221,67 +216,227 @@ const renderStructuredReferences = (doc, yPos, evidence) => {
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 23, 42);
-  doc.text("XI. SCIENTIFIC EVIDENCE & LITERATURE", 14, yPos);
+  doc.text("SCIENTIFIC EVIDENCE & LITERATURE", 14, yPos);
   yPos += 8;
 
-  const categories = {
-    "Efficacy & Clinical Outcomes": [],
-    "Safety & Adverse Response": [],
-    "Mechanism of Action": [],
-    "Monitoring & Biomarkers": []
-  };
-
-  slugs.forEach(slug => {
-    evidence[slug].forEach(item => {
-      const title = (item.title || "").toLowerCase();
-      let cat = "Efficacy & Clinical Outcomes";
-      if (title.includes("mechanism") || title.includes("receptor") || title.includes("molecular")) cat = "Mechanism of Action";
-      if (title.includes("safety") || title.includes("adverse") || title.includes("side effect") || title.includes("toxicity")) cat = "Safety & Adverse Response";
-      if (title.includes("monitor") || title.includes("plasma") || title.includes("levels") || title.includes("biomarker")) cat = "Monitoring & Biomarkers";
-      
-      categories[cat].push({ slug, item });
-    });
-  });
-
-  Object.entries(categories).forEach(([name, items]) => {
+  Object.entries(evidence).forEach(([slug, items]) => {
     if (items.length === 0) return;
     
-    yPos = checkPageBreak(doc, yPos, 20);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(0, 54, 102);
-    doc.text(name.toUpperCase(), 14, yPos);
-    yPos += 6;
-
-    items.slice(0, 5).forEach(({ slug, item }) => {
+    items.slice(0, 3).forEach(item => {
       yPos = checkPageBreak(doc, yPos, 15);
       doc.setFontSize(8);
       doc.setTextColor(51, 65, 85);
       doc.setFont('helvetica', 'bold');
       doc.text(`[${slug.toUpperCase()}]`, 14, yPos);
-      
       doc.setFont('helvetica', 'normal');
       const titleLines = doc.splitTextToSize(item.title, 160);
       doc.text(titleLines, 35, yPos);
-      
-      const linkY = yPos + (titleLines.length * 4);
-      doc.setTextColor(0, 54, 102);
-      const url = item.pubmedUrl || `https://pubmed.ncbi.nlm.nih.gov/${item.pmid}/`;
-      doc.text(url, 35, linkY);
-      doc.link(35, linkY - 3, 100, 4, { url });
-      
-      yPos = linkY + 6;
+      yPos += (titleLines.length * 4) + 2;
     });
-    yPos += 5;
   });
 
   return yPos;
 };
 
 /**
- * CLINICAL PROTOCOL: Structured & Grouped
+ * Helper to split text into bullet points
  */
-export const generateClinicalProtocol = async (rawProtocol, formData, chartDataUrl = null) => {
+const summarizeToBullets = (text, max = 5) => {
+  if (!text) return [];
+  const lines = text.split(/\n|•|(?<=\.)\s+/)
+    .map(line => line.trim())
+    .filter(line => line.length > 5);
+  return lines.slice(0, max);
+};
+
+/**
+ * Helper to draw a card-like block
+ */
+const drawCard = (doc, x, y, w, h, title, value) => {
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(x, y, w, h, 2, 2, 'F');
+  doc.setFontSize(7);
+  doc.setTextColor(100, 116, 139);
+  doc.setFont('helvetica', 'bold');
+  doc.text(title.toUpperCase(), x + 4, y + 6);
+  doc.setFontSize(9);
+  doc.setTextColor(15, 23, 42);
+  doc.setFont('helvetica', 'bold');
+  const splitValue = doc.splitTextToSize(String(value), w - 8);
+  doc.text(splitValue, x + 4, y + 12);
+};
+
+/**
+ * Role inference for compounds
+ */
+const inferClassification = (d) => {
+  const slug = (d.product_slug || d.slug || d.name || d.product_title || '').toLowerCase();
+  if (slug.includes('semaglutide') || slug.includes('tirzepatide') || slug.includes('glp')) return 'GLP-1 Receptor Agonist';
+  if (slug.includes('bpc') || slug.includes('tb') || slug.includes('thymosin')) return 'Tissue Repair Catalyst';
+  if (slug.includes('ipam') || slug.includes('ghrp') || slug.includes('sermorelin') || slug.includes('cjc') || slug.includes('tesa')) return 'Secretagogue / GH Axis';
+  if (slug.includes('nad')) return 'NAD+ Precursor';
+  if (slug.includes('testosterone') || slug.includes('enanthate') || slug.includes('cypionate')) return 'Androgenic Agent';
+  if (slug.includes('kisspeptin') || slug.includes('gonado')) return 'Gonadotropin Modulator';
+  if (slug.includes('selank') || slug.includes('semax') || slug.includes('dsip')) return 'Neuro-Modulator / Nootropic';
+  if (slug.includes('epitalon') || slug.includes('epithalon') || slug.includes('pineal')) return 'Telomere Regulatory Peptide';
+  if (slug.includes('kpv') || slug.includes('ll37')) return 'Immune Response Modulator';
+  if (slug.includes('ta1') || slug.includes('thym')) return 'Immuno-Potentiator';
+  return 'Clinical Research Compound';
+};
+
+/**
+ * Build a week-by-week dose progression array from ANY protocol variant.
+ * Uses normalizeProtocol() so it works with v1/v2/v3 Firestore formats.
+ * Returns: [{ week, dose, doseUnit, label, phaseIdx, phaseName }]
+ */
+const buildDoseProgressionData = (protocol) => {
+  // Normalize to canonical schema first
+  const canonical = normalizeProtocol(protocol);
+  const weeks = [];
+
+  canonical.phases.forEach((phase, phaseIdx) => {
+    const phaseName = phase.phase_name || `Phase ${phaseIdx + 1}`;
+
+    // Take the primary compound for the dose chart
+    const compound = (phase.compounds || [])[0];
+    if (!compound) return;
+
+    const allEntries = compound.schedule || [];
+    if (allEntries.length === 0) return;
+
+    // Collect all unique week numbers in this phase
+    const phaseWeeks = [];
+    for (let w = phase.start_week; w <= phase.end_week; w++) phaseWeeks.push(w);
+
+    // Resolve first & last schedule entries for ramp calculation
+    const firstEntry = allEntries[0];
+    const lastEntry  = allEntries[allEntries.length - 1];
+    const rawStart   = firstEntry.dose?.amount || 0;
+    const rawEnd     = lastEntry.dose?.amount  || rawStart;
+    const doseUnit   = firstEntry.dose?.unit   || 'mg';
+    const dur        = phaseWeeks.length;
+
+    phaseWeeks.forEach((weekNo, wi) => {
+      const progress  = dur > 1 ? wi / (dur - 1) : 0;
+      const dose      = rawStart + (rawEnd - rawStart) * progress;
+      const doseRound = Math.round(dose * 10) / 10;
+      weeks.push({
+        week:      weekNo,
+        dose:      doseRound,
+        doseUnit,
+        label:     `W${weekNo}`,
+        phaseIdx,
+        phaseName,
+      });
+    });
+  });
+
+  return weeks;
+};
+
+/** Phase accent colours matching InjectionDoseChart CSS tokens */
+const PHASE_COLORS = [
+  [0,   163, 224],   // phase-1 cyan
+  [124,  58, 237],   // phase-2 violet
+  [34,  197,  94],   // phase-3 green
+  [251, 146,  60],   // phase-4 orange
+  [239,  68,  68],   // phase-5 red
+  [20,  184, 166],   // phase-6 teal
+];
+
+/**
+ * Draw a native jsPDF bar-chart for dose escalation.
+ * @param {jsPDF} doc
+ * @param {number} startY  – top Y of the chart area
+ * @param {Array}  weeks   – output of buildDoseProgressionData
+ * @returns {number}       – new Y position after chart
+ */
+const drawNativeDoseChart = (doc, startY, weeks) => {
+  if (!weeks || weeks.length === 0) return startY;
+
+  const chartH   = 38;
+  const chartX   = 14;
+  const chartW   = 182;
+  const barAreaH = 28; // px space for bars
+  const barAreaY = startY + 6; // top of bar area
+  const baseY    = barAreaY + barAreaH; // bottom baseline
+
+  const maxDose = Math.max(...weeks.map(w => w.dose), 1);
+  const barW    = Math.max(2, (chartW / weeks.length) - 1);
+
+  // Background
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(chartX - 1, startY - 1, chartW + 2, chartH + 6, 2, 2, 'F');
+  doc.setDrawColor(226, 232, 240);
+  doc.roundedRect(chartX - 1, startY - 1, chartW + 2, chartH + 6, 2, 2, 'D');
+
+  // Grid lines (3 horizontal)
+  doc.setDrawColor(226, 232, 240);
+  doc.setLineWidth(0.2);
+  for (let g = 1; g <= 3; g++) {
+    const gy = barAreaY + barAreaH - (barAreaH * g / 3);
+    doc.line(chartX, gy, chartX + chartW, gy);
+  }
+
+  // Bars
+  weeks.forEach((w, i) => {
+    const barH  = maxDose > 0 ? (w.dose / maxDose) * barAreaH : 2;
+    const bx    = chartX + i * (barW + 1);
+    const by    = baseY - barH;
+    const color = PHASE_COLORS[w.phaseIdx % PHASE_COLORS.length];
+
+    doc.setFillColor(color[0], color[1], color[2]);
+    // Slight gradient feel: draw a lighter top strip
+    doc.rect(bx, by, barW, barH, 'F');
+    // Overlay lighter alpha top
+    doc.setFillColor(Math.min(255, color[0] + 60), Math.min(255, color[1] + 60), Math.min(255, color[2] + 60));
+    doc.rect(bx, by, barW, Math.min(3, barH), 'F');
+  });
+
+  // Baseline
+  doc.setDrawColor(148, 163, 184);
+  doc.setLineWidth(0.4);
+  doc.line(chartX, baseY, chartX + chartW, baseY);
+
+  // Week labels (every 2nd to avoid crowding)
+  doc.setFontSize(5.5);
+  doc.setTextColor(100, 116, 139);
+  doc.setFont('helvetica', 'normal');
+  weeks.forEach((w, i) => {
+    if (i % 2 === 0) {
+      const lx = chartX + i * (barW + 1) + barW / 2;
+      doc.text(w.label, lx, baseY + 4, { align: 'center' });
+    }
+  });
+
+  // Dose max label — use the unit from the data
+  const doseUnit = weeks[weeks.length - 1]?.doseUnit || 'mcg';
+  doc.setFontSize(6);
+  doc.setTextColor(100, 116, 139);
+  doc.text(`${maxDose} ${doseUnit}`, chartX + chartW - 1, barAreaY + 3, { align: 'right' });
+
+  // Phase legend
+  const uniquePhases = [...new Map(weeks.map(w => [w.phaseIdx, w])).values()];
+  let lx = chartX;
+  const legendY = startY + chartH + 5;
+  doc.setFontSize(6);
+  uniquePhases.forEach(w => {
+    const color = PHASE_COLORS[w.phaseIdx % PHASE_COLORS.length];
+    doc.setFillColor(color[0], color[1], color[2]);
+    doc.rect(lx, legendY - 2, 4, 3, 'F');
+    doc.setTextColor(51, 65, 85);
+    doc.text(w.phaseName, lx + 5.5, legendY);
+    lx += Math.max(30, w.phaseName.length * 2.2 + 8);
+  });
+
+  return legendY + 6;
+};
+
+/**
+ * CLINICAL PROTOCOL: Structured, Visual & Professional
+ */
+export const generateClinicalProtocol = async (rawProtocol, options = {}) => {
+  const { formData = {}, chartPng = null, timelinePng = null, localTier = 'retail', user = null } = options;
   const [jsPdfModule, autoTableModule] = await Promise.all([
     import('jspdf'),
     import('jspdf-autotable')
@@ -289,378 +444,389 @@ export const generateClinicalProtocol = async (rawProtocol, formData, chartDataU
   const jsPDF = jsPdfModule.default || jsPdfModule.jsPDF || jsPdfModule;
   const autoTable = autoTableModule.default || autoTableModule;
 
-  const protocol = validateAndEnrichProtocol(rawProtocol);
+  const protocol = validateAndEnrichProtocol(normalizeProtocol(rawProtocol));
   const doc = new jsPDF();
-  const dateStr = formatDate(null);
-  const contentWidth = 182; // mm  (A4 210 – 14*2 margins)
+  const contentWidth = 182;
+  const pageWidth = doc.internal.pageSize.width;
   
-  let yPos = setupBrandingHeader(doc);
+  // 1. HEADER & BRANDING
+  let yPos = setupBrandingHeader(doc, protocol, user);
   
-  // Title
-  doc.setFontSize(16);
+  doc.setFontSize(22);
   doc.setTextColor(15, 23, 42);
   doc.setFont('helvetica', 'bold');
-  doc.text(`${protocol.protocol_title.toUpperCase()}`, 14, yPos);
-  yPos += 6;
-  doc.setFontSize(10);
-  doc.setTextColor(100, 116, 139);
-  doc.text(`Clinical Report Generated: ${dateStr}`, 14, yPos);
+  const title = (protocol.protocol_title || 'Clinical Protocol').toUpperCase();
+  doc.text(title, 14, yPos);
   yPos += 10;
 
-  // ── DOSE ESCALATION CHART (from header) ──────────────────────────────────
-  if (chartDataUrl) {
-    try {
-      yPos = checkPageBreak(doc, yPos, 80);
-
-      // Section label above chart
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(56, 189, 248); // #38bdf8 – matches the chart's cyan accent
-      doc.text('DOSE ESCALATION SCHEDULE', 14, yPos);
-      yPos += 4;
-
-      // Dark background rectangle for visual contrast
-      const chartH = 58; // mm — approx 4:3-ish crop of the SVG
-      doc.setFillColor(8, 13, 24); // #080d18 — same as chart bg
-      doc.roundedRect(14, yPos, contentWidth, chartH, 3, 3, 'F');
-
-      // Embed the rasterized chart PNG
-      doc.addImage(chartDataUrl, 'PNG', 14, yPos, contentWidth, chartH);
-      yPos += chartH + 8;
-    } catch (imgErr) {
-      console.warn('[pdfService] Chart image could not be embedded:', imgErr);
-      yPos += 4;
-    }
-  }
-
-  yPos += 2;
-
-  // I — Patient Clinical Profile
-  doc.setFontSize(11);
-  doc.setTextColor(15, 23, 42);
-  doc.text("I. PATIENT CLINICAL PROFILE", 14, yPos);
-  yPos += 4;
-
-  autoTable(doc, {
-    startY: yPos,
-    theme: 'plain',
-    styles: { fontSize: 9, cellPadding: 2 },
-    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 45 }, 1: { cellWidth: 135 } },
-    body: [
-      ['Primary Clinical Focus:', protocol.primary_goal || formData?.primaryCondition || 'General Support'],
-      ['Phase Architecture:', `${protocol.number_of_phases} phases — ${protocol.protocol_duration_weeks} weeks total`],
-      ['Protocol Start Date:', formData?.startDate ? (new Date(formData.startDate)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'As directed'],
-      ['Patient Demographic:', formData?.patientType || 'Not specified'],
-      ['Guidelines Applied:', (formData?.guidelines?.complexity || 'STANDARD').toUpperCase()],
-      ['Confidence Breakdown:', [
-          `Completeness: ${protocol.confidenceData?.breakdown?.completeness || 90}%`,
-          `Dosing Logic: ${protocol.confidenceData?.breakdown?.dosingLogic || 95}%`,
-          `Monitoring: ${protocol.confidenceData?.breakdown?.monitoring || 90}%`,
-          `Evidence Base: ${protocol.confidenceData?.breakdown?.evidenceStrength || 85}%`
-      ].join(' | ')],
-      ['Clinical Author:', `${protocol.protocol_author_name || 'ReGen Clinical Team'} | ${protocol.protocol_author_organization || 'ReGen PEPT'}`]
-    ]
-  });
-  yPos = doc.lastAutoTable.finalY + 12;
-
-  // II — Protocol Summary & Outcomes
-  if (protocol.overview_summary) {
-    yPos = checkPageBreak(doc, yPos, 40);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text("II. CLINICAL SUMMARY", 14, yPos);
-    yPos += 6;
-    doc.setFontSize(9);
-    doc.setTextColor(51, 65, 85);
-    doc.setFont('helvetica', 'normal');
-    const splitSummary = doc.splitTextToSize(protocol.overview_summary, 180);
-    doc.text(splitSummary, 14, yPos);
-    yPos += (splitSummary.length * 5) + 6;
-
-    // Support both legacy array format and new enriched object format
-    const eoData = protocol.expected_outcomes;
-    const eoList = Array.isArray(eoData)
-      ? eoData
-      : eoData?.qualitative || [];
-    if (eoList.length > 0) {
-      doc.setFont('helvetica', 'bold');
-      doc.text("Expected Clinical Outcomes:", 14, yPos);
-      yPos += 5;
-      doc.setFont('helvetica', 'normal');
-      eoList.forEach(o => {
-        doc.text(`• ${o}`, 18, yPos);
-        yPos += 5;
-      });
-      // Also render quantitative milestones if present
-      const qr = eoData?.quantitative_ranges;
-      if (qr && !Array.isArray(eoData)) {
-        yPos += 2;
-        doc.setFont('helvetica', 'bold');
-        doc.text("Quantitative Benchmarks:", 14, yPos);
-        yPos += 5;
-        doc.setFont('helvetica', 'normal');
-        Object.entries(qr).forEach(([k, v]) => {
-          doc.text(`• ${k.replace(/_/g,' ')}: ${v}`, 18, yPos);
-          yPos += 5;
-        });
-      }
-      yPos += 6;
-    }
-  }
-
-  // III — Phase Architecture Detail (Grouped Stages)
-  yPos = checkPageBreak(doc, yPos, 60);
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(15, 23, 42);
-  doc.text("III. CLINICAL STAGES & TITRATION", 14, yPos);
-  yPos += 8;
-
-  protocol.phases.forEach((phase, idx) => {
-    yPos = checkPageBreak(doc, yPos, 80);
+  // Metadata Summary Cards
+  const meta = protocol.metadata || {};
+  const primaryGoal = protocol.primary_goal?.replace(/_/g, ' ') || 'Clinical Research';
+  const durationText = `${protocol.protocol_duration_weeks || 12} Weeks`;
+  const complexity = (meta.complexity_level || 'Standard').toUpperCase();
+  
+  const cardW = (contentWidth / 3) - 2;
+  // Use a softer, more premium card design
+  const drawPremiumCard = (x, y, w, h, label, val, color = [0, 163, 224]) => {
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(x, y, w, h, 3, 3, 'F');
     doc.setDrawColor(226, 232, 240);
-    doc.line(14, yPos, 196, yPos);
-    yPos += 8;
-
-    doc.setFontSize(10);
-    doc.setTextColor(0, 54, 102);
-    doc.text(`STAGE ${idx + 1}: ${(phase.phase_title || phase.phase_name || `Phase ${idx + 1}`).toUpperCase()}`, 14, yPos);
-    doc.setFontSize(9);
+    doc.roundedRect(x, y, w, h, 3, 3, 'D');
+    
+    doc.setFontSize(7);
     doc.setTextColor(100, 116, 139);
-    const phaseTiming = phase.computed_date_label || `Weeks ${phase.start_week} to ${phase.end_week}`;
-    doc.text(phaseTiming, 140, yPos);
-    yPos += 8;
+    doc.setFont('helvetica', 'bold');
+    doc.text(label.toUpperCase(), x + 4, y + 6);
+    
+    doc.setFontSize(9);
+    doc.setTextColor(color[0], color[1], color[2]);
+    doc.setFont('helvetica', 'bold');
+    const splitValue = doc.splitTextToSize(String(val), w - 8);
+    doc.text(splitValue, x + 4, y + 12);
+  };
 
-    // Normalise objectives: support both legacy array and enriched object
-    const rawEo = protocol.expected_outcomes;
-    const fallbackEo = Array.isArray(rawEo) ? rawEo : rawEo?.qualitative || [];
-    const objectives = phase.phase_objectives || fallbackEo;
-    if (objectives.length > 0) {
-      doc.setFontSize(9);
-      doc.setTextColor(15, 23, 42);
-      doc.setFont('helvetica', 'bold');
-      doc.text("Objectives:", 14, yPos);
-      yPos += 5;
-      doc.setFont('helvetica', 'normal');
-      const objList = Array.isArray(objectives) ? objectives : [objectives];
-      objList.slice(0, 3).forEach(obj => {
-        doc.text(`• ${obj}`, 18, yPos);
-        yPos += 4.5;
-      });
-      yPos += 4;
+  drawPremiumCard(14, yPos, cardW, 20, "Primary Objective", primaryGoal);
+  drawPremiumCard(14 + cardW + 3, yPos, cardW, 20, "Total Duration", durationText);
+  drawPremiumCard(14 + (cardW + 3) * 2, yPos, cardW, 20, "Complexity", complexity);
+  yPos += 28;
+
+  // 1.5 VISUAL DATA INTEGRATION (Charts)
+  {
+    yPos = checkPageBreak(doc, yPos, 88);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(100, 116, 139);
+    doc.text("DOSAGE DYNAMICS & ESCALATION CURVE", 14, yPos);
+    yPos += 4;
+
+    let chartRendered = false;
+    if (chartPng) {
+      try {
+        doc.setDrawColor(241, 245, 249);
+        doc.roundedRect(13, yPos - 1, contentWidth + 2, 74, 2, 2, 'D');
+        doc.addImage(chartPng, 'PNG', 14, yPos, contentWidth, 72);
+        yPos += 80;
+        chartRendered = true;
+      } catch (e) {
+        console.warn('PDF ChartPng failed — falling back to native chart', e);
+      }
     }
 
-    // Phase Medication Table
-    autoTable(doc, {
-      startY: yPos,
-      head: [['Compound', 'Strength', 'Titration / Weekly Dose', 'Frequency', 'Route']],
-      body: phase.drugs_used.map(data => {
-        const d = normalizeDosing(data);
-        return [
-          d.compound,
-          d.strength,
-          d.dose,
-          d.freq,
-          d.route
-        ];
-      }),
-      theme: 'grid',
-      headStyles: { fillColor: [0, 54, 102], fontSize: 8 },
-      styles: { fontSize: 8, cellPadding: 2 },
-      margin: { bottom: 50 }
-    });
-    yPos = doc.lastAutoTable.finalY + 12;
-  });
-
-  // IV — Dose-to-Vial Alignment Table (NEW)
-  yPos = checkPageBreak(doc, yPos, 50);
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-  doc.text("IV. DOSE-TO-VIAL ALIGNMENT MATRIX", 14, yPos);
-  yPos += 6;
-  
-  const alignData = [];
-  protocol.phases.forEach(p => {
-    p.drugs_used.forEach(d => {
-      const norm = normalizeDosing(d);
-      const mgPerVial = d.vial_strength_used || d.selected_strength || '5mg';
-      const parsedMg = parseFloat(mgPerVial) || 5;
-      const parsedDose = parseFloat(d.weekly_dose) || 0;
-      const uses = (parsedMg / (parsedDose || 1)).toFixed(1);
-
-      alignData.push([
-        norm.compound,
-        norm.dose,
-        mgPerVial,
-        parsedDose > 0 ? `${uses} uses` : 'Varied'
-      ]);
-    });
-  });
-
-  autoTable(doc, {
-    startY: yPos,
-    head: [['Product', 'Required Dose', 'Vial Spec', 'Est. Uses / Vial']],
-    body: alignData.filter((v, i, a) => a.findIndex(t => t[0] === v[0] && t[1] === v[1]) === i), // Unique rows
-    theme: 'grid',
-    headStyles: { fillColor: [51, 65, 85], fontSize: 8 },
-    styles: { fontSize: 8 },
-  });
-  yPos = doc.lastAutoTable.finalY + 12;
-
-  // V — Resource Inventory
-  yPos = checkPageBreak(doc, yPos, 50);
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-  doc.text("V. FULL PROGRAM RESOURCE REQUIREMENTS", 14, yPos);
-  yPos += 6;
-
-  const costData = protocol.computedCost || protocol.costData || {};
-  autoTable(doc, {
-    startY: yPos,
-    head: [['Product', 'Vial Specification', 'Quantity Required', 'Est. Unit Price', 'Est. Cost']],
-    body: (costData.aggregate || costData.aggregateVials || []).map(i => [
-      i.name, `${i.mgPerVial} mg`, `${i.totalVials} Vial(s)`, `$${formatPrice(i.pricePerVial || 50)}`, `$${formatPrice(i.totalVials * (i.pricePerVial || 50))}`
-    ]),
-    theme: 'grid',
-    headStyles: { fillColor: [15, 23, 42], fontSize: 8 },
-    styles: { fontSize: 8 },
-    foot: [['', '', '', 'TOTAL PROGRAM COST:', `$${formatPrice(costData.total || costData.totalEstimatedCost || 0)}`]],
-    footStyles: { fillColor: [241, 245, 249], textColor: [15, 23, 42], fontStyle: 'bold' },
-    margin: { bottom: 50 }
-  });
-  yPos = doc.lastAutoTable.finalY + 12;
-
-  // VI — Clinical Application Workflow (NEW)
-  yPos = checkPageBreak(doc, yPos, 80);
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-  doc.text("VI. CLINICAL APPLICATION WORKFLOW", 14, yPos);
-  yPos += 8;
-
-  const workflow = [
-    ['1. Weekly Instructions:', 'Administrations should occur at consistent times. Subcutaneous injections are typically best in distal adipose tissue.'],
-    ['2. Reconstitution:', 'Use Bacteriostatic Water (0.9%). Typical volume 1.0ml-2.0ml. Swirl gently; do not shake.'],
-    ['3. Escalation Rules:', 'Observe for full 7 days at each dosage level before proceeding to the next stage.'],
-    ['4. Storage Conditions:', 'Lyophilized: Store in cool, dark place (-20°C for long term). Reconstituted: Refrigerate (2-8°C).'],
-    ['5. Syringe Safety:', 'Use insulin-grade U-100 syringes (31g) for maximum comfort and precision.']
-  ];
-
-  autoTable(doc, {
-    startY: yPos,
-    theme: 'striped',
-    styles: { fontSize: 8, cellPadding: 3 },
-    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 45 } },
-    body: workflow
-  });
-  yPos = doc.lastAutoTable.finalY + 12;
-
-  // VII — Economic Analysis (NEW)
-  yPos = checkPageBreak(doc, yPos, 60);
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-  doc.text("VII. ECONOMIC ANALYSIS", 14, yPos);
-  yPos += 6;
-
-  const phaseData = costData.phaseBreakdown || [];
-  autoTable(doc, {
-    startY: yPos,
-    head: [['Clinical Phase', 'Duration', 'Phase Total', 'Weekly Cost Avg.']],
-    body: phaseData.map(p => [
-      p.title,
-      `${p.weeks} Weeks`,
-      `$${formatPrice(p.cost)}`,
-      `$${formatPrice(Math.round(p.cost / p.weeks))}`
-    ]),
-    theme: 'grid',
-    headStyles: { fillColor: [100, 116, 139], fontSize: 8 },
-    styles: { fontSize: 8 },
-  });
-  yPos = doc.lastAutoTable.finalY + 6;
-  
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(51, 65, 85);
-  doc.text(`ESTIMATED MONTHLY COST (AVG): $${formatPrice(costData.costPerMonth || 0)}`, 140, yPos + 4);
-  yPos += 14;
-
-  // VIII — Clinical Monitoring Schedule (EXPANDED)
-  const monitoring = protocol.monitoringSchedule || [];
-  if (monitoring.length > 0) {
-    yPos = checkPageBreak(doc, yPos, 40);
-    doc.setFontSize(11);
-    doc.text("VIII. CLINICAL MONITORING SCHEDULE", 14, yPos);
-    yPos += 6;
-    autoTable(doc, {
-      startY: yPos,
-      head: [['Week', 'Metric / Required Labs', 'Clinical Rationale']],
-      body: monitoring.map(m => [
-        m.week === 0 ? "Week 0 (Baseline)" : `Week ${m.week}`, 
-        (m.labs || []).join(', '), 
-        m.note || 'Safety monitoring'
-      ]),
-      theme: 'striped',
-      styles: { fontSize: 8 },
-      margin: { bottom: 50 }
-    });
-    yPos = doc.lastAutoTable.finalY + 12;
+    if (!chartRendered) {
+      // Native jsPDF bar chart — uses normalizeProtocol for reliable data.
+      const doseWeeks = buildDoseProgressionData(rawProtocol || protocol);
+      if (doseWeeks.length > 0) {
+        yPos = drawNativeDoseChart(doc, yPos, doseWeeks);
+      } else {
+        yPos += 5;
+      }
+    }
   }
 
-  // IX — Risk & Tolerance Management (NEW)
-  yPos = checkPageBreak(doc, yPos, 60);
+  // 2. CLINICAL OUTCOMES & MECHANISMS
+  yPos = checkPageBreak(doc, yPos, 45);
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
-  doc.text("IX. RISK & TOLERANCE MANAGEMENT", 14, yPos);
+  doc.setTextColor(15, 23, 42);
+  doc.text("EXPECTED CLINICAL OUTCOMES", 14, yPos);
   yPos += 8;
-  
-  const rm = protocol.riskManagement || {};
-  const rmBody = [
-    ['Common Side Effects:', (rm.commonSideEffects || []).join(', ')],
-    ['Escalation Pause Rules:', rm.escalationPauseRules || 'Standard pause rules apply if Grade 2 adverse events occur.'],
-    ['Safety Warnings:', rm.safetyWarnings || 'Monitor for systemic response. Maintain hydration and electrolyte balance.']
+
+  const outcomes = meta.expected_outcomes || [
+    "Normalization of bioregulatory signaling pathways",
+    "Enhanced cellular homeostasis and repair mechanisms",
+    "Optimization of systemic physiological coordination"
   ];
-
-  autoTable(doc, {
-    startY: yPos,
-    theme: 'plain',
-    styles: { fontSize: 8, cellPadding: 3 },
-    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 45 }, 1: { cellWidth: 140 } },
-    body: rmBody
+  
+  outcomes.forEach(out => {
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(51, 65, 85);
+    doc.text("•", 16, yPos);
+    const splitOut = doc.splitTextToSize(out, contentWidth - 10);
+    doc.text(splitOut, 20, yPos);
+    yPos += (splitOut.length * 5);
   });
-  yPos = doc.lastAutoTable.finalY + 12;
+  yPos += 6;
 
-  // X — Provenance & Verification
+  // 3. COMPOUND REGISTRY (Technical Data Sheet)
   yPos = checkPageBreak(doc, yPos, 40);
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 23, 42);
-  doc.text("X. PROVENANCE & CLINICAL VERIFICATION", 14, yPos);
+  doc.text("COMPOUND ARCHITECTURE & CLASSIFICATION", 14, yPos);
   yPos += 6;
-  
-  const provenance = protocol.provenance || {};
+
+  const uniqueCompounds = Array.from(new Map(protocol.phases.flatMap(p => p.drugs_used.map(d => [d.product_slug, d]))).values());
+
+  const registryData = uniqueCompounds.map(d => {
+    const classification = inferClassification(d);
+    const mechanism = d.description ? summarizeToBullets(d.description, 2).join(". ") : "Bioregulatory signaling support.";
+    return [
+      d.product_title || d.name || 'Compound',
+      classification,
+      mechanism
+    ];
+  });
+
   autoTable(doc, {
     startY: yPos,
-    theme: 'striped',
-    styles: { fontSize: 8 },
-    body: [
-      ['Source Type:', provenance.source_type || 'Clinical Blueprint'],
-      ['Authoring Team:', provenance.author || 'ReGen PEPT Clinical Intelligence'],
-      ['Review Status:', (provenance.review_status || 'Automated Synthesis').toUpperCase()],
-      ['Verification:', 'Validated against ReGen PEPT wholesale peptide standards. Reference: v5.2-Core.']
-    ]
+    head: [['Research Compound', 'Clinical Classification', 'Primary Mechanism of Action']],
+    body: registryData,
+    theme: 'grid',
+    styles: { fontSize: 8, cellPadding: 3, textColor: [51, 65, 85] },
+    headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold' },
+    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 40 }, 1: { cellWidth: 45 }, 2: { cellWidth: 97 } }
   });
   yPos = doc.lastAutoTable.finalY + 12;
 
-  // XI — Scientific Evidence (Clickable & Grouped)
-  yPos = renderStructuredReferences(doc, yPos, protocol.evidenceCache || {});
+  // 4. TREATMENT PHASES (The Core Protocol)
+  yPos = checkPageBreak(doc, yPos, 40);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 23, 42);
+  doc.text("PHASE ARCHITECTURE & ADMINISTRATION", 14, yPos);
+  yPos += 8;
+
+  protocol.phases.forEach((phase, idx) => {
+    yPos = checkPageBreak(doc, yPos, 60);
+    
+    // Phase header with accent color
+    doc.setFillColor(idx % 2 === 0 ? 241 : 248, 245, 249);
+    doc.roundedRect(14, yPos, contentWidth, 10, 1, 1, 'F');
+    doc.setFontSize(9);
+    doc.setTextColor(15, 23, 42);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`PHASE ${idx + 1}: ${phase.phase_title.toUpperCase()}`, 18, yPos + 7);
+    doc.text(`WEEKS ${phase.start_week}–${phase.end_week}`, 162, yPos + 7);
+    yPos += 15;
+
+    // Compound Details in a clean grid/list
+    phase.drugs_used.forEach((d, dIdx) => {
+      const norm = normalizeDosing(d);
+      const classification = inferClassification(d);
+      
+      yPos = checkPageBreak(doc, yPos, 30);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 163, 224);
+      doc.text(norm.compound, 18, yPos);
+      
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 116, 139);
+      doc.text(`[${classification}]`, 18 + doc.getTextWidth(norm.compound) + 4, yPos);
+      yPos += 5;
+      
+      doc.setTextColor(51, 65, 85);
+      const freqLabel = norm.freq.replace('x/week', ' administrations per week');
+      doc.text(`Dosage: ${norm.dose} | Frequency: ${freqLabel} | Route: ${norm.route}`, 22, yPos);
+      yPos += 5;
+
+      // RECONSTITUTION MATH (Vial Explainer)
+      const proc = d.procurement || {};
+      if (proc.units_to_inject) {
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(20, 184, 166);
+        doc.text(`Reconstitution: Inject ${proc.units_to_inject} Units (U-100 syringe).`, 22, yPos);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.text(`Based on ${proc.vialCapacity}mg vial reconstituted with ${proc.reconstitutionVolume}ml diluent.`, 22, yPos + 4);
+        yPos += 10;
+      } else {
+        yPos += 3;
+      }
+    });
+    yPos += 4;
+  });
+
+  // 5. GUIDELINES & COMPLIANCE
+  yPos = checkPageBreak(doc, yPos, 60);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 23, 42);
+  doc.text("INSTITUTIONAL ADMINISTRATION STANDARDS", 14, yPos);
+  yPos += 8;
+
+  const instructions = [
+    ["Compounding:", "Ensure aseptic environment. Reconstitute with 0.9% Benzyl Alcohol Bacteriostatic Water. Direct diluent stream to vial wall; do not vortex."],
+    ["Storage:", "Lyophilized: -20°C for long-term integrity. Reconstituted: Maintain at 2-8°C. Do not exceed 28 days post-reconstitution."],
+    ["Safety:", "Monitor for localized sensitivity at injection site. Maintain consistent administration timing (±4h for daily, ±12h for weekly)."],
+    ["Traceability:", "Verify Batch IDs before administration. Log all dosage events in the research verification checklist."]
+  ];
+
+  autoTable(doc, {
+    startY: yPos,
+    theme: 'plain',
+    styles: { fontSize: 8.5, cellPadding: 2.5, textColor: [51, 65, 85] },
+    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 35, textColor: [15, 23, 42] }, 1: { cellWidth: 145 } },
+    body: instructions
+  });
+  yPos = doc.lastAutoTable.finalY + 12;
+
+  // 5.5 CLINICAL MONITORING (Labs)
+  if (protocol.monitoring && protocol.monitoring.labs.length > 0) {
+    yPos = checkPageBreak(doc, yPos, 40);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.text("CLINICAL MONITORING & FOLLOW-UP", 14, yPos);
+    yPos += 6;
+
+    const labData = protocol.monitoring.labs.map((lab, i) => [
+      lab,
+      protocol.monitoring.rationales[i] || "Baseline safety monitoring."
+    ]);
+
+    autoTable(doc, {
+      startY: yPos,
+      head: [['Required Biomarker', 'Clinical Rationale']],
+      body: labData,
+      theme: 'striped',
+      styles: { fontSize: 8, cellPadding: 2.5 },
+      headStyles: { fillColor: [100, 116, 139] }
+    });
+    yPos = doc.lastAutoTable.finalY + 12;
+  }
+
+  // 6. PROCUREMENT SUMMARY — phase-grouped vial requirements
+  {
+    yPos = checkPageBreak(doc, yPos, 50);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.text("PROCUREMENT SUMMARY", 14, yPos);
+    yPos += 4;
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Vial requirements per phase`, 14, yPos);
+    yPos += 6;
+
+    // Build procurement rows — one row per compound per phase
+    const procRows = [];
+    protocol.phases.forEach((phase, phIdx) => {
+      const phLabel = `Phase ${phIdx + 1}: ${phase.phase_title || ''}`.trim();
+      const dur = phase.duration_weeks || phase.default_duration_weeks ||
+        ((phase.end_week || 0) - (phase.start_week || 1) + 1) || 4;
+
+      phase.drugs_used.forEach(d => {
+        const logic = d.dose_logic || {};
+        const canonicalVials = logic.vials_required != null ? Number(logic.vials_required)
+          : d.vials_required != null ? Number(d.vials_required)
+          : null;
+
+        let vialsNeeded;
+        if (canonicalVials !== null && !isNaN(canonicalVials)) {
+          vialsNeeded = canonicalVials;
+        } else {
+          // Fallback estimation — weekly dose × weeks ÷ vial size
+          const freqNum = (f => {
+            const fl = (f || '').toLowerCase();
+            if (fl.includes('daily') || fl.includes('nightly')) return 7;
+            if (fl.includes('3x') || fl.includes('3 x')) return 3;
+            if (fl.includes('2x') || fl.includes('2 x')) return 2;
+            if (fl.includes('5x') || fl.includes('5 x')) return 5;
+            return 1;
+          })(d.dosing_frequency || logic.administration_frequency);
+          const doseAmt = parseFloat(logic.starting_weekly_dose || logic.dose_per_administration || d.weekly_dose || 0);
+          const vialSz  = parseFloat(d.vial_size_mg || logic.vial_strength || 5) || 5;
+          const total   = doseAmt * freqNum * dur;
+          vialsNeeded   = total > 0 ? Math.ceil(total / vialSz) : 1;
+        }
+
+        const compoundName = d.product_title || d.name ||
+          (d.product_slug || '').split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Compound';
+        const strength = d.strength || d.vial_strength_used || d.selected_strength || '';
+
+        procRows.push([
+          phLabel,
+          strength ? `${compoundName} (${strength})` : compoundName,
+          String(dur),
+          String(vialsNeeded),
+        ]);
+      });
+    });
+
+    const procHead = [['Phase', 'Compound', 'Weeks', 'Vials Needed']];
+    autoTable(doc, {
+      startY: yPos,
+      head: procHead,
+      body: procRows,
+      theme: 'grid',
+      styles: { fontSize: 7.5, cellPadding: 2.5, textColor: [51, 65, 85] },
+      headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold' },
+      columnStyles: {
+        0: { cellWidth: 50, fontStyle: 'bold' },
+        1: { cellWidth: 70 },
+        2: { cellWidth: 31, halign: 'center' },
+        3: { cellWidth: 31, halign: 'center' },
+      },
+    });
+    yPos = doc.lastAutoTable.finalY + 8;
+  }
 
   addRunningFooter(doc);
-  doc.save(`REGEN-PROTOCOL-${(protocol.protocol_slug || 'CLINICAL').toUpperCase()}.pdf`);
+  
+  const filename = getProtocolFilename(protocol);
+
+  if (options?.returnBlob) {
+    return doc.output('blob');
+  }
+
+  doc.save(filename);
 };
+
+/**
+ * Returns the standardized filename for a protocol PDF
+ */
+export const getProtocolFilename = (protocol) => {
+  const safeTitle = (protocol.protocol_title || 'protocol').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  return `med-peptides-protocol-${safeTitle}.pdf`;
+};
+
+/**
+ * Caching layer for Protocols. 
+ * Checks if a PDF already exists in Storage for this protocol version.
+ */
+export const getCachedProtocolPDF = async (protocol) => {
+  if (!protocol || !protocol.id) return null;
+  const version = protocol.metadata?.version || '1.0.0';
+  const path = `protocols/${protocol.id}/${version}/protocol.pdf`;
+  const storageRef = ref(storage, path);
+
+  try {
+    const url = await getDownloadURL(storageRef);
+    return url;
+  } catch (e) {
+    // 404 is expected if not cached
+    return null;
+  }
+};
+
+/**
+ * Uploads a protocol PDF blob to Storage
+ */
+export const cacheProtocolPDF = async (protocol, blob) => {
+  if (!protocol || !protocol.id || !blob) return null;
+  const version = protocol.metadata?.version || '1.0.0';
+  const path = `protocols/${protocol.id}/${version}/protocol.pdf`;
+  const storageRef = ref(storage, path);
+
+  try {
+    await uploadBytes(storageRef, blob, { contentType: 'application/pdf' });
+    const url = await getDownloadURL(storageRef);
+    return url;
+  } catch (e) {
+    console.error('[pdfService] Cache upload failed', e);
+    return null;
+  }
+};
+
 
 /**
  * PATIENT GUIDE: Simplified & Grouped
  */
-export const generatePatientGuide = async (rawProtocol, formData) => {
+export const generatePatientGuide = async (rawProtocol, formData, options = {}) => {
   const [jsPdfModule, autoTableModule] = await Promise.all([
     import('jspdf'),
     import('jspdf-autotable')
@@ -696,11 +862,28 @@ export const generatePatientGuide = async (rawProtocol, formData) => {
 
   const splitSummary = doc.splitTextToSize(protocol.overview_summary || "", 180);
   doc.text(splitSummary, 14, yPos);
-  yPos += (splitSummary.length * 5) + 10;
+  yPos += (splitSummary.length * 5) + 8;
+
+  // 1.5 — Dosage escalation timeline / progress chart
+  yPos = checkPageBreak(doc, yPos, 50);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(0, 54, 102);
+  doc.text("PROGRAM TIMELINE & DOSING PROGRESSION", 14, yPos);
+  yPos += 4;
+
+  const doseWeeks = buildDoseProgressionData(rawProtocol || protocol);
+  if (doseWeeks.length > 0) {
+    yPos = drawNativeDoseChart(doc, yPos, doseWeeks);
+  } else {
+    yPos += 2;
+  }
+  yPos += 8;
 
   // 2 — Administration Schedule
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 23, 42);
   doc.text("2. HOW TO TAKE YOUR BIOMODULATORS", 14, yPos);
   yPos += 8;
 
@@ -716,6 +899,30 @@ export const generatePatientGuide = async (rawProtocol, formData) => {
        `(${phase.computed_date_label} / Wks ${phase.start_week}-${phase.end_week})` : 
        `(Weeks ${phase.start_week}-${phase.end_week})`;
     doc.text(`STAGE ${idx + 1}: ${phase.phase_title || phase.phase_name || `Phase ${idx + 1}`} ${splitPhaseStr}`, 18, yPos + 7);
+    
+    // ── STAGE TIMELINE PROGRESS BAR ──
+    const totalW = protocol.protocol_duration_weeks || 12;
+    const startW = phase.start_week || 1;
+    const endW = phase.end_week || totalW;
+    const progressX = 138;
+    const progressY = yPos + 3.8;
+    const progressW = 50;
+    const progressH = 2.4;
+
+    // Draw background track
+    doc.setFillColor(226, 232, 240);
+    doc.roundedRect(progressX, progressY, progressW, progressH, 0.8, 0.8, 'F');
+
+    // Draw filled active segment
+    const startPct = Math.max(0, (startW - 1) / totalW);
+    const endPct = Math.min(1, endW / totalW);
+    const activeX = progressX + (startPct * progressW);
+    const activeW = (endPct - startPct) * progressW;
+
+    const color = PHASE_COLORS[idx % PHASE_COLORS.length] || [0, 54, 102];
+    doc.setFillColor(color[0], color[1], color[2]);
+    doc.roundedRect(activeX, progressY, Math.max(1.5, activeW), progressH, 0.8, 0.8, 'F');
+
     yPos += 15;
 
     // Instructions as sentences
@@ -730,8 +937,8 @@ export const generatePatientGuide = async (rawProtocol, formData) => {
       const rawRoute = d.variantRef?.route ?? d.route ?? ROUTE.SC;
       const route = ROUTE_LABELS[rawRoute] ?? (rawRoute.charAt(0).toUpperCase() + rawRoute.slice(1).toLowerCase());
       
-      let instruction = `Take ${compound}${strength} at ${dose} once per week via ${route} injection.`;
-      if (freq.includes('daily')) instruction = `Inject ${compound}${strength} (${dose}) daily via ${route} administration.`;
+      let instruction = `Administer ${compound}${strength} at ${dose} once per week via ${route}.`;
+      if (freq.includes('daily')) instruction = `Administer ${compound}${strength} (${dose}) daily via ${route} administration.`;
       if (freq.includes('3x')) instruction = `Administer ${compound}${strength} (${dose}) three times per week (Mon/Wed/Fri) via ${route}.`;
       if (freq.includes('2x')) instruction = `Administer ${compound}${strength} (${dose}) twice per week (Tue/Thu) via ${route}.`;
       if (freq.includes('nasal')) instruction = `Administer ${compound}${strength} daily via nasal spray as directed.`;
@@ -781,33 +988,92 @@ export const generatePatientGuide = async (rawProtocol, formData) => {
   });
 
   addRunningFooter(doc);
+  if (options.returnBlob) {
+    return doc.output('blob');
+  }
   doc.save(`REGEN-PATIENT-GUIDE-${dateStr.replace(/ /g, '-')}.pdf`);
 };
 
-export const generateClinicalPDF = async (protocol, formData) => {
-  await generateClinicalProtocol(protocol, formData);
+/**
+ * generateClinicalPDF — canonical public API for clinical protocol PDFs.
+ *
+ * Signatures supported (all equivalent):
+ *   generateClinicalPDF(protocol)
+ *   generateClinicalPDF(protocol, formData)
+ *   generateClinicalPDF(protocol, formData, localTier)
+ *   generateClinicalPDF(protocol, formData, { localTier, returnBlob })
+ *
+ * Returns a Blob when options.returnBlob === true, otherwise downloads the PDF.
+ */
+export const generateClinicalPDF = async (protocol, formData = {}, optionsOrTier = {}) => {
+  // Support legacy positional tier string: generateClinicalPDF(p, fd, 'retail')
+  const opts = typeof optionsOrTier === 'string'
+    ? { localTier: optionsOrTier }
+    : optionsOrTier;
+
+  const cacheKey = protocol.generated_protocol_id || protocol.protocol_id || protocol.id;
+
+  if (cacheKey) {
+    try {
+      const cachedUrl = await getCachedProtocolPDF(protocol);
+      if (cachedUrl) {
+        console.log('[pdfService] Cache hit! Downloading cached PDF from Storage...', cachedUrl);
+        if (opts.returnBlob) {
+          const res = await fetch(cachedUrl);
+          return await res.blob();
+        } else {
+          if (typeof window !== 'undefined') {
+            const link = document.createElement('a');
+            link.href = cachedUrl;
+            link.target = '_blank';
+            link.download = getProtocolFilename(protocol);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('[pdfService] Cache hit failed/skipped, falling back to client generation', e);
+    }
+  }
+
+  console.log('[pdfService] Cache miss. Generating PDF on the client...');
+
+  if (opts.returnBlob) {
+    const blob = await generateClinicalProtocol(protocol, { formData, ...opts });
+    if (blob && cacheKey) {
+      cacheProtocolPDF(protocol, blob).catch(e => console.error('[pdfService] Caching failed', e));
+    }
+    return blob;
+  } else {
+    const blob = await generateClinicalProtocol(protocol, { formData, ...opts, returnBlob: true });
+    if (blob) {
+      if (cacheKey) {
+        cacheProtocolPDF(protocol, blob).catch(e => console.error('[pdfService] Caching failed', e));
+      }
+      if (typeof window !== 'undefined') {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = getProtocolFilename(protocol);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    }
+  }
 };
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CLINICAL DOSAGE & ADMINISTRATION SCHEDULE
 // Pharma-grade document for patient/clinician use
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Infers the pharmacological classification from a compound slug or name.
- */
-const inferClassification = (d) => {
-  const slug = (d.product_slug || d.name || d.product_title || '').toLowerCase();
-  if (slug.includes('semaglutide') || slug.includes('tirzepatide') || slug.includes('glp')) return 'GLP-1 Receptor Agonist';
-  if (slug.includes('bpc') || slug.includes('tb4') || slug.includes('thymosin')) return 'Tissue-Repair Peptide';
-  if (slug.includes('ipamorelin') || slug.includes('ghrp') || slug.includes('sermorelin') || slug.includes('cjc')) return 'GH Secretagogue';
-  if (slug.includes('nad')) return 'NAD+ Precursor';
-  if (slug.includes('testosterone') || slug.includes('enanthate') || slug.includes('cypionate')) return 'Androgenic Agent';
-  if (slug.includes('kisspeptin') || slug.includes('gonado')) return 'Gonadotropin Modulator';
-  if (slug.includes('selank') || slug.includes('semax') || slug.includes('dsip')) return 'Nootropic Peptide';
-  if (slug.includes('epitalon') || slug.includes('epithalon')) return 'Telomere Regulatory Peptide';
-  return 'Bioregulatory Peptide';
-};
+
 
 /**
  * Returns the recommended reconstitution volume (mL) based on vial strength.
@@ -845,7 +1111,7 @@ const setupDosageGuideHeader = (doc, protocol, formData) => {
   doc.setFontSize(22);
   doc.setTextColor(0, 54, 102);
   doc.setFont('helvetica', 'bold');
-  doc.text('REGEN PEPT', 14, 22);
+  doc.text('Med-Peptides', 14, 22);
 
   doc.setFontSize(9);
   doc.setTextColor(100, 116, 139);
@@ -858,7 +1124,7 @@ const setupDosageGuideHeader = (doc, protocol, formData) => {
   doc.setTextColor(100, 116, 139);
   doc.text(`Rev. 1.0 | Classification: CONFIDENTIAL`, pageWidth - 14, 22, { align: 'right' });
   doc.text(`Print Date: ${printDate}`, pageWidth - 14, 27, { align: 'right' });
-  doc.text(`Issuing Authority: ReGen PEPT Clinical Pharmacist Office`, pageWidth - 14, 32, { align: 'right' });
+  doc.text(`Issuing Authority: Med-Peptides Clinical Pharmacist Office`, pageWidth - 14, 32, { align: 'right' });
 
   // Divider
   doc.setDrawColor(0, 54, 102);
@@ -877,7 +1143,7 @@ const setupDosageGuideHeader = (doc, protocol, formData) => {
   // ── Compliance Meta Block ──────────────────────────────────────────────────
   const protocolId = protocol.protocol_id || protocol.protocol_slug?.toUpperCase() || 'N/A';
   const subjectId  = formData?.subjectId || formData?.patientId || `SUBJ-${Date.now().toString().slice(-6)}`;
-  const clinician  = protocol.protocol_author_name || formData?.clinician || 'ReGen PEPT Clinical Team';
+  const clinician  = protocol.protocol_author_name || formData?.clinician || 'Med-Peptides Clinical Team';
 
   doc.setFontSize(8.5);
   doc.setTextColor(51, 65, 85);
@@ -958,7 +1224,11 @@ export const generateDosageGuide = async (rawProtocol, formData) => {
   const jsPDF     = jsPdfModule.default || jsPdfModule.jsPDF || jsPdfModule;
   const autoTable = autoTableModule.default || autoTableModule;
 
-  const protocol = validateAndEnrichProtocol(rawProtocol);
+  // Use normalizeProtocol for the canonical data structure,
+  // then bridge into the legacy validateAndEnrichProtocol shape for the
+  // existing template rendering below (drugs_used, start_week, end_week etc.).
+  const canonical = normalizeProtocol(rawProtocol);
+  const protocol  = validateAndEnrichProtocol(rawProtocol);
   const doc      = new jsPDF();
 
   // ── PHASE 1: Compliance Header ─────────────────────────────────────────────
@@ -1210,7 +1480,7 @@ export const generateDosageGuide = async (rawProtocol, formData) => {
 
   // Generate week-by-week checklist rows from phases
   const checklistRows = [];
-  protocol.phases.forEach(phase => {
+  protocol.phases.forEach((phase, phaseIdx) => {
     const weeksInPhase = (phase.end_week - phase.start_week) + 1;
     for (let w = phase.start_week; w <= phase.end_week; w++) {
       const compounds = phase.drugs_used
@@ -1218,7 +1488,7 @@ export const generateDosageGuide = async (rawProtocol, formData) => {
         .join(', ');
       checklistRows.push([
         `Week ${w}`,
-        phase.phase_title || phase.phase_name || `Phase ${idx + 1}`,
+        phase.phase_title || phase.phase_name || `Phase ${phaseIdx + 1}`,
         compounds,
         '☐ Dose Administered',
         '☐ Dose Withheld',
@@ -1261,6 +1531,287 @@ export const generateDosageGuide = async (rawProtocol, formData) => {
   doc.text('Supervising Clinician Signature', 14, yPos + 5);
   doc.text('Date of Review', 110, yPos + 5);
   yPos += 14;
+
+  // ── SECTION VI: EXPECTED CLINICAL OUTCOMES ─────────────────────────────────
+  const eo = rawProtocol?.expected_outcomes;
+  if (eo) {
+    const qualList   = Array.isArray(eo) ? eo : (eo.qualitative || []);
+    const qRanges    = !Array.isArray(eo) ? (eo.quantitative_ranges || {}) : {};
+    const responder  = !Array.isArray(eo) ? eo.responder_rate_pct   : null;
+    const onsetWks   = !Array.isArray(eo) ? eo.time_to_onset_weeks  : null;
+
+    if (qualList.length || Object.keys(qRanges).length) {
+      yPos = checkPageBreak(doc, yPos, 60);
+
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(15, 23, 42);
+      doc.text('VI. EXPECTED CLINICAL OUTCOMES', 14, yPos);
+      yPos += 5;
+
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 116, 139);
+      doc.text('Outcomes are projections based on published evidence and clinical observations. Individual results may vary.', 14, yPos);
+      yPos += 8;
+
+      // Qualitative outcomes list
+      if (qualList.length) {
+        autoTable(doc, {
+          startY: yPos,
+          head: [['#', 'Qualitative Outcome']],
+          body: qualList.map((o, i) => [i + 1, o]),
+          theme: 'striped',
+          headStyles: { fillColor: [5, 150, 105], fontSize: 7.5, fontStyle: 'bold', textColor: [255, 255, 255] },
+          styles: { fontSize: 8, cellPadding: 2.5, textColor: [51, 65, 85] },
+          alternateRowStyles: { fillColor: [240, 253, 250] },
+          columnStyles: { 0: { cellWidth: 10, halign: 'center', fontStyle: 'bold' }, 1: { cellWidth: 162 } },
+          margin: { left: 14, right: 14, bottom: 35 }
+        });
+        yPos = doc.lastAutoTable.finalY + 8;
+      }
+
+      // Quantitative ranges
+      if (Object.keys(qRanges).length) {
+        yPos = checkPageBreak(doc, yPos, 40);
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Milestone', 'Quantitative Range / Target']],
+          body: Object.entries(qRanges).map(([wk, val]) => [
+            wk.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+            val
+          ]),
+          theme: 'grid',
+          headStyles: { fillColor: [4, 120, 87], fontSize: 7.5, fontStyle: 'bold', textColor: [255, 255, 255] },
+          styles: { fontSize: 7.5, cellPadding: 2.5, textColor: [51, 65, 85] },
+          alternateRowStyles: { fillColor: [240, 253, 250] },
+          columnStyles: { 0: { cellWidth: 55, fontStyle: 'bold' }, 1: { cellWidth: 117 } },
+          margin: { left: 14, right: 14, bottom: 35 }
+        });
+        yPos = doc.lastAutoTable.finalY + 8;
+      }
+
+      // Responder rate + onset footer
+      if (responder || onsetWks) {
+        yPos = checkPageBreak(doc, yPos, 14);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(71, 85, 105);
+        const parts = [];
+        if (responder) parts.push(`Responder rate: ${responder}`);
+        if (onsetWks)  parts.push(`Time to onset: ~${onsetWks} weeks`);
+        doc.text(parts.join('    |    '), 14, yPos);
+        yPos += 10;
+      }
+    }
+  }
+
+  // ── SECTION VII: CLINICAL MONITORING SCHEDULE ──────────────────────────────
+  const mp = rawProtocol?.monitoring_plan || {};
+  const ms = rawProtocol?.monitoringSchedule || [];
+  const baselineLabs  = mp.baseline_required || [];
+  const checkpoints   = mp.scheduled_checkpoints || ms;
+
+  if (baselineLabs.length || checkpoints.length) {
+    yPos = checkPageBreak(doc, yPos, 60);
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.text('VII. CLINICAL MONITORING SCHEDULE', 14, yPos);
+    yPos += 5;
+
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 116, 139);
+    doc.text('Scheduled laboratory evaluations and clinical checkpoints required for safe protocol execution.', 14, yPos);
+    yPos += 8;
+
+    // Baseline labs
+    if (baselineLabs.length) {
+      yPos = checkPageBreak(doc, yPos, 25);
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(14, 116, 144);
+      doc.text('Baseline Requirements (Week 0)', 14, yPos);
+      yPos += 5;
+
+      autoTable(doc, {
+        startY: yPos,
+        body: [baselineLabs.map(l => l.replace(/_/g, ' '))],
+        theme: 'plain',
+        styles: { fontSize: 7.5, cellPadding: 2, textColor: [51, 65, 85], fillColor: [240, 249, 255] },
+        margin: { left: 14, right: 14, bottom: 35 }
+      });
+      yPos = doc.lastAutoTable.finalY + 8;
+    }
+
+    // Checkpoint table
+    if (checkpoints.length) {
+      yPos = checkPageBreak(doc, yPos, 40);
+      const cpRows = checkpoints.map(cp => {
+        const week  = cp.week ?? cp.week_number ?? '—';
+        const label = cp.label || cp.type?.replace(/_/g, ' ') || `Week ${week} check-in`;
+        const labs  = (cp.labs || cp.tests || []).join(', ') || '—';
+        const note  = cp.purpose || cp.notes || cp.note || '—';
+        return [`Wk ${week}`, label, labs, note];
+      });
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Week', 'Checkpoint', 'Laboratory Tests', 'Clinical Purpose']],
+        body: cpRows,
+        theme: 'grid',
+        headStyles: { fillColor: [8, 145, 178], fontSize: 7.5, fontStyle: 'bold', textColor: [255, 255, 255] },
+        styles: { fontSize: 7.5, cellPadding: 2.5, textColor: [51, 65, 85] },
+        alternateRowStyles: { fillColor: [240, 249, 255] },
+        columnStyles: {
+          0: { cellWidth: 14, halign: 'center', fontStyle: 'bold' },
+          1: { cellWidth: 42 },
+          2: { cellWidth: 70 },
+          3: { cellWidth: 46 }
+        },
+        margin: { left: 14, right: 14, bottom: 35 }
+      });
+      yPos = doc.lastAutoTable.finalY + 12;
+    }
+  }
+
+  // ── SECTION VIII: SAFETY PROFILE & RISK MANAGEMENT ─────────────────────────
+  const rm           = rawProtocol?.riskManagement || rawProtocol?.risk_management || {};
+  const sp           = rawProtocol?.safety_profile || {};
+  const contraList   = rm.contraindications || sp.contraindications || rawProtocol?.eligibility_rules?.contraindications || [];
+  const sideEffects  = rm.side_effects || rm.sideEffects || [];
+  const escalation   = rm.escalation_criteria || rm.escalationCriteria || sp.adverse_events_serious || [];
+  const drugInt      = sp.drug_interactions || [];
+
+  if (contraList.length || sideEffects.length || escalation.length || drugInt.length) {
+    yPos = checkPageBreak(doc, yPos, 60);
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.text('VIII. SAFETY PROFILE & RISK MANAGEMENT', 14, yPos);
+    yPos += 5;
+
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 116, 139);
+    doc.text('Contraindications, known adverse effects, drug interactions, and clinical escalation criteria.', 14, yPos);
+    yPos += 8;
+
+    // Contraindications
+    if (contraList.length) {
+      yPos = checkPageBreak(doc, yPos, 30);
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(220, 38, 38);
+      doc.text('CONTRAINDICATIONS', 14, yPos);
+      yPos += 5;
+
+      autoTable(doc, {
+        startY: yPos,
+        body: [contraList.map(c => String(c).replace(/_/g, ' '))],
+        theme: 'plain',
+        styles: { fontSize: 7.5, cellPadding: 2, textColor: [127, 29, 29], fillColor: [254, 242, 242] },
+        margin: { left: 14, right: 14, bottom: 35 }
+      });
+      yPos = doc.lastAutoTable.finalY + 8;
+    }
+
+    // Side effects table
+    if (sideEffects.length) {
+      yPos = checkPageBreak(doc, yPos, 40);
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(180, 83, 9);
+      doc.text('KNOWN ADVERSE EFFECTS', 14, yPos);
+      yPos += 5;
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Adverse Effect', 'Frequency', 'Management / Mitigation']],
+        body: sideEffects.map(se => [se.effect || '—', se.frequency || '—', se.management || '—']),
+        theme: 'striped',
+        headStyles: { fillColor: [180, 83, 9], fontSize: 7.5, fontStyle: 'bold', textColor: [255, 255, 255] },
+        styles: { fontSize: 7.5, cellPadding: 2.5, textColor: [51, 65, 85] },
+        alternateRowStyles: { fillColor: [255, 251, 235] },
+        columnStyles: {
+          0: { cellWidth: 55, fontStyle: 'bold' },
+          1: { cellWidth: 30, halign: 'center' },
+          2: { cellWidth: 87 }
+        },
+        margin: { left: 14, right: 14, bottom: 35 }
+      });
+      yPos = doc.lastAutoTable.finalY + 8;
+    }
+
+    // Drug interactions
+    if (drugInt.length) {
+      yPos = checkPageBreak(doc, yPos, 30);
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(124, 58, 237);
+      doc.text('DRUG INTERACTIONS', 14, yPos);
+      yPos += 5;
+
+      autoTable(doc, {
+        startY: yPos,
+        body: drugInt.map(d => ['⚠', d]),
+        theme: 'plain',
+        styles: { fontSize: 7.5, cellPadding: 2, textColor: [51, 65, 85], fillColor: [250, 245, 255] },
+        columnStyles: { 0: { cellWidth: 8, halign: 'center', textColor: [124, 58, 237] } },
+        margin: { left: 14, right: 14, bottom: 35 }
+      });
+      yPos = doc.lastAutoTable.finalY + 8;
+    }
+
+    // Escalation / stop criteria
+    if (escalation.length) {
+      yPos = checkPageBreak(doc, yPos, 40);
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(220, 38, 38);
+      doc.text('ESCALATION & STOP CRITERIA', 14, yPos);
+      yPos += 5;
+
+      autoTable(doc, {
+        startY: yPos,
+        body: escalation.map(e => ['⛔', e]),
+        theme: 'plain',
+        styles: { fontSize: 7.5, cellPadding: 2.5, textColor: [127, 29, 29], fillColor: [254, 242, 242] },
+        columnStyles: { 0: { cellWidth: 8, halign: 'center' } },
+        margin: { left: 14, right: 14, bottom: 35 }
+      });
+      yPos = doc.lastAutoTable.finalY + 12;
+    }
+  }
+
+  // ── SECTION IX: SCIENTIFIC REFERENCES ──────────────────────────────────────
+  const refs = rawProtocol?.metadata?.references || [];
+  if (refs.length) {
+    yPos = checkPageBreak(doc, yPos, 50);
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.text('IX. SCIENTIFIC REFERENCES', 14, yPos);
+    yPos += 8;
+
+    refs.forEach((r, i) => {
+      yPos = checkPageBreak(doc, yPos, 16);
+      const citation = `[${i + 1}] ${r.citation || ''}`;
+      const pmidTag  = r.pmid ? `  PMID: ${r.pmid}` : '';
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(71, 85, 105);
+      const pageWidth = doc.internal.pageSize.width;
+      const wrapped   = doc.splitTextToSize(citation + pmidTag, pageWidth - 28);
+      doc.text(wrapped, 14, yPos);
+      yPos += wrapped.length * 4.5 + 3;
+    });
+    yPos += 4;
+  }
 
   // ── Footer ─────────────────────────────────────────────────────────────────
   addRunningFooter(doc);

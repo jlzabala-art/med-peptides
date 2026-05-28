@@ -2,48 +2,71 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- Helpers ---
+    function isAuthenticated() { return request.auth != null; }
 
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    // Helper: Determine if user is an administrator (via email or role)
     function isAdmin() {
       return isAuthenticated() && (
-        request.auth.token.email == 'jose@mediluxeme.com' ||
-        request.auth.token.email == 'kasia@mediluxeme.com' ||
+        (request.auth.token.email_verified == true && (
+          request.auth.token.email == 'jose@mediluxeme.com' ||
+          request.auth.token.email == 'kasia@mediluxeme.com'
+        )) ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
       );
     }
 
-    // Helper: Check if user is the owner of the document.
+    // ── B2B Portal Role Helpers ──────────────────────────────────────────────
+    function isDoctor() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'doctor';
+    }
+
+    function isPatient() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'patient';
+    }
+
+    function isWholesaler() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'wholesaler';
+    }
+
     function isOwner(data) {
       return isAuthenticated() && (
         data.userId == request.auth.uid ||
         data.user_id == request.auth.uid ||
         data.ownerId == request.auth.uid ||
         data.created_by == request.auth.uid ||
+        ('created_by' in data && 'user_id' in data.created_by && data.created_by.user_id == request.auth.uid) ||
         data.doctorId == request.auth.uid ||
         data.uid == request.auth.uid
       );
     }
 
-    // --- Collection Rules ---
-
-    // ── 1. PUBLIC DATA — Anyone can read, Admins can write ─────────────────
     match /products/{productId}               { allow read: if true; allow write: if isAdmin(); }
     match /products/{productId}/variants/{variantId} { allow read: if true; allow write: if isAdmin(); }
     match /catalogProducts/{id}        { allow read: if true; allow write: if isAdmin(); }
+
+    // SUPPLEMENTS — fully public read (get + list + query); Admins can write
+    match /supplements/{supplementId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+    match /supplements/{supplementId}/variants/{variantId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
     match /categories/{id}             { allow read: if true; allow write: if isAdmin(); }
     match /subcategories/{id}          { allow read: if true; allow write: if isAdmin(); }
     match /settings/{id}               { allow read: if true; allow write: if isAdmin(); }
+    match /config/{id}                 { allow read: if true; allow write: if isAdmin(); }
     match /product_variants/{id}       { allow read: if true; allow write: if isAdmin(); }
-    match /blueprints/{id}              { allow read: if true; allow write: if isAdmin(); }
+    match /blueprints/{id}             { allow read: if true; allow write: if isAdmin(); }
     match /monitoring_profiles/{id}    { allow read: if true; allow write: if isAdmin(); }
 
-    // ── 2. FAQ & CONTENT DATA — Public read ────────────────────────────────
     match /peptide_faq/{id}            { allow read: if true; allow write: if isAdmin(); }
     match /faq_peptide_mapping/{id}    { allow read: if true; allow write: if isAdmin(); }
     match /faq_categories/{id}         { allow read: if true; allow write: if isAdmin(); }
@@ -52,73 +75,371 @@ service cloud.firestore {
     match /peptide_related_engine/{id} { allow read: if true; allow write: if isAdmin(); }
     match /discovery_config/{id}       { allow read: if true; allow write: if isAdmin(); }
     match /pubmed_cache/{id}           { allow read: if true; allow write: if isAdmin(); }
+    match /clinicalai_config/{id}      { allow read: if true; allow write: if isAdmin(); }
+    match /ai_config/{id}              { allow read, write: if isAdmin(); }
+    match /clinical_logs/{id}          { allow read, write: if isAdmin(); }
+    match /ai_response_cache/{id}      { allow read, write: if isAdmin(); }
 
-    // ── 3. PROTOCOLS — Public protocols readable by anyone ─────────────────
+    // PROTOCOLS — fully public read (get + list + query)
     match /protocols/{protocolId} {
-      // list queries: allow unconditionally (client query filters by visibility=="public")
-      // get (single doc): allow if public or authenticated
-      allow list: if true;
-      allow get: if resource.data.visibility == "public" || isAuthenticated();
-      allow create, update, delete: if isAdmin();
+      allow read: if true;
+      allow create: if isAuthenticated() 
+        && request.resource.data.created_by.user_id == request.auth.uid
+        && request.resource.data.protocol_name is string
+        && request.resource.data.protocol_name.size() < 120
+        && request.resource.data.status is string;
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        (isOwner(resource.data) 
+         && request.resource.data.created_by.user_id == resource.data.created_by.user_id
+         && (!('protocol_name' in request.resource.data) || (request.resource.data.protocol_name is string && request.resource.data.protocol_name.size() < 120))
+         && (!('status' in request.resource.data) || request.resource.data.status is string)
+        )
+      );
+      allow delete: if isAdmin();
     }
 
-    // ── 4. AUTHENTICATED DATA — Login required ─────────────────────────────
     match /saved_protocols/{id} {
       allow read: if isAuthenticated() && (isOwner(resource.data) || isAdmin());
-      allow create: if isAuthenticated();
-      allow update, delete: if isOwner(resource.data) || isAdmin();
+      allow create: if isAuthenticated() && isOwner(request.resource.data)
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.protocol_name is string
+        && request.resource.data.protocol_name.size() < 120;
+      allow update: if (isOwner(resource.data) 
+        && request.resource.data.userId == resource.data.userId) || isAdmin();
+      allow delete: if isOwner(resource.data) || isAdmin();
     }
 
     match /protocol_builder_sessions/{id} {
       allow read: if isAuthenticated() && (isOwner(resource.data) || isAdmin());
-      allow create: if isAuthenticated();
-      allow update, delete: if isOwner(resource.data) || isAdmin();
+      allow create: if isAuthenticated() && isOwner(request.resource.data)
+        && request.resource.data.userId == request.auth.uid;
+      allow update: if (isOwner(resource.data) 
+        && request.resource.data.userId == resource.data.userId) || isAdmin();
+      allow delete: if isOwner(resource.data) || isAdmin();
     }
 
-    // ── 4. USER PROFILES ────────────────────────────────────────────────────
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow write: if request.auth.uid == userId || isAdmin();
+      allow read: if isAuthenticated() && (
+        request.auth.uid == userId || 
+        isAdmin() ||
+        (resource.data.role != null && resource.data.role == 'wholesaler') ||
+        (resource.data.assignedPhysicianIds != null && request.auth.uid in resource.data.assignedPhysicianIds)
+      );
 
+      // Create: users can only create their own doc, cannot self-assign privileged roles
+      allow create: if isAuthenticated() && request.auth.uid == userId &&
+        !(request.resource.data.role in ['admin', 'doctor']) &&
+        !('professionalStatus' in request.resource.data) &&
+        !('approved' in request.resource.data) &&
+        !('permissions' in request.resource.data);
+
+      // Update: admins have full access; users can update own non-privileged fields only
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        (request.auth.uid == userId &&
+         !request.resource.data.diff(resource.data).affectedKeys()
+           .hasAny(['role', 'professionalStatus', 'approved', 'permissions']))
+      );
+
+      allow delete: if isAdmin();
+
+      // Subcollections: users can read/write their own; admins have full access
       match /{allSubcollections=**} {
         allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
         allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
       }
     }
 
-    // ── 5. ORDERS — Explicit rule (uid field, not userId) ───────────────────
-    match /orders/{orderId} {
-      // Any logged-in user can place an order for themselves
-      allow create: if isAuthenticated() &&
-        request.resource.data.uid == request.auth.uid;
-      // Only owner or admin can read / update their order
-      allow read: if isAuthenticated() &&
-        (resource.data.uid == request.auth.uid || isAdmin());
-      allow update, delete: if isOwner(resource.data) || isAdmin();
+    // ── refill_reminders — generated by CF when order status → 'delivered' ──
+    // Each reminder carries patientId, doctorId, wholesalerId/wholesalerIds.
+    // Every role can read reminders relevant to them and dismiss (notified.*) independently.
+    // Only Admin SDK (Cloud Function) can create/delete.
+    match /refill_reminders/{reminderId} {
+
+      // READ access: each role sees reminders where they appear
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        resource.data.patientId    == request.auth.uid ||
+        resource.data.doctorId     == request.auth.uid ||
+        resource.data.wholesalerId == request.auth.uid ||
+        (resource.data.wholesalerIds != null &&
+         request.auth.uid in resource.data.wholesalerIds)
+      );
+
+      // UPDATE: each viewer may only flip their own notified flag
+      allow update: if isAuthenticated() && (
+        // Admin — can touch admin flag
+        (isAdmin() &&
+         request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['notified', 'notifiedAt'])) ||
+
+        // Patient — own notified.patient field only
+        (resource.data.patientId == request.auth.uid &&
+         request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['notified', 'notifiedAt'])) ||
+
+        // Doctor — supervising doctor dismisses
+        (resource.data.doctorId == request.auth.uid &&
+         request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['notified', 'notifiedAt'])) ||
+
+        // Wholesaler — any assigned wholesaler dismisses
+        ((resource.data.wholesalerId == request.auth.uid ||
+          (resource.data.wholesalerIds != null &&
+           request.auth.uid in resource.data.wholesalerIds)) &&
+         request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['notified', 'notifiedAt']))
+      );
+
+      // CREATE/DELETE: only Cloud Function via Admin SDK
+      allow create, delete: if false;
     }
 
-    // ── 6. GENERIC AUTHENTICATED RULE (fallback for remaining collections) ──
-    match /{collection}/{docId} {
-      allow read: if isAuthenticated();
 
-      allow create: if isAuthenticated() && (
-        request.resource.data.userId == request.auth.uid ||
-        request.resource.data.user_id == request.auth.uid ||
-        request.resource.data.ownerId == request.auth.uid ||
-        request.resource.data.created_by == request.auth.uid ||
+    match /orders/{orderId} {
+      // Patients and authenticated users can create their own orders
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+
+      // Read: owner | their supervising doctor | wholesalers (need full view to build bulk) | admin
+      allow read: if isAuthenticated() && (
+        resource.data.uid == request.auth.uid ||
+        resource.data.patientId == request.auth.uid ||
+        resource.data.supervisingDoctorId == request.auth.uid ||
+        isWholesaler() ||  // wholesalers see all orders to aggregate into bulk orders
         isAdmin()
       );
 
-      allow update, delete: if isOwner(resource.data) || isAdmin();
+      // Patients can update their own orders (e.g. cancel before processing)
+      // Wholesalers can set bulkOrderId on orders they are aggregating
+      // Admins have full update/delete
+      allow update: if isAdmin()
+                    || (isAuthenticated() && resource.data.uid == request.auth.uid
+                        && resource.data.status == 'pending')  // owner can cancel pending
+                    || (isWholesaler()
+                        && request.resource.data.diff(resource.data).affectedKeys()
+                           .hasOnly(['bulkOrderId', 'updatedAt'])); // WS can only set bulkOrderId
+      allow delete: if isAdmin();
     }
 
-    // ── 7. EMAIL LOGS ───────────────────────────────────────────────────────
     match /mail/{mailId} {
       allow create: if isAuthenticated();
       allow read, update, delete: if isAdmin();
     }
 
-    // ── 8. GLOBAL CATCH-ALL FOR ADMINS ─────────────────────────────────────
+    // ── INVITATIONS ──────────────────────────────────────────────────────────
+    match /invitations/{inviteId} {
+      // Anyone can fetch a specific invite to register
+      allow get: if true;
+      // Creator can read their list
+      allow list: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      // Only authenticated users can create
+      allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
+      // Updates are done by Cloud Function (acceptInvitation), or by the creator (e.g. revoke)
+      allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    // ── NOTIFICATIONS ────────────────────────────────────────────────────────
+    match /notifications/{notifId} {
+      allow create: if isAuthenticated();
+      allow read, update, delete: if isAuthenticated() && resource.data.recipientId == request.auth.uid;
+    }
+
+    // ── B2B PORTAL COLLECTIONS ───────────────────────────────────────────
+
+    // Doctor-Patient Relationships
+    // - Patients can read their own relationships
+    // - Doctors can read/create relationships where they are the doctor
+    // - Admins have full control
+    match /doctor_patient_relationships/{relId} {
+      allow read: if isAuthenticated() && (
+        resource.data.patientId == request.auth.uid ||
+        resource.data.doctorId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isAuthenticated() && (
+        request.resource.data.doctorId == request.auth.uid ||
+        request.resource.data.patientId == request.auth.uid ||
+        isAdmin()
+      );
+      allow update: if isAuthenticated() && (
+        resource.data.doctorId == request.auth.uid ||
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Recommendations
+    // - Doctors can create/update recommendations for their patients
+    // - Patients can read recommendations directed to them
+    // - Admins have full control
+    match /recommendations/{recId} {
+      allow read: if isAuthenticated() && (
+        resource.data.patientId == request.auth.uid ||
+        resource.data.doctorId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isAuthenticated() && (
+        (isDoctor() && request.resource.data.doctorId == request.auth.uid) ||
+        isAdmin()
+      );
+      allow update: if isAuthenticated() && (
+        resource.data.doctorId == request.auth.uid ||
+        // patients can update status field only (accept/reject)
+        (resource.data.patientId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])) ||
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+
+    // ── AI AGENT PERSISTENCE ─────────────────────────────────────────────────
+
+    // ai_sessions — inter-agent shared memory (TTL 24h, cleaned by scheduled function)
+    match /ai_sessions/{sessionId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // doctor_protocols — clinical protocols generated by AgentDoctor
+    // doctors can CRUD their own; patients can read if they are the patient; admins full access
+    match /doctor_protocols/{protocolId} {
+      allow read: if isAuthenticated() && (
+        resource.data.doctor_id == request.auth.uid ||
+        resource.data.patient_id == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isAuthenticated() && (
+        (isDoctor() && request.resource.data.doctor_id == request.auth.uid) ||
+        isAdmin()
+      );
+      allow update: if isAuthenticated() && (
+        resource.data.doctor_id == request.auth.uid || isAdmin()
+      );
+      allow delete: if isAuthenticated() && (
+        resource.data.doctor_id == request.auth.uid || isAdmin()
+      );
+      match /reviews/{reviewId} {
+        allow read: if isAuthenticated() && (
+          get(/databases/$(database)/documents/doctor_protocols/$(protocolId)).data.doctor_id == request.auth.uid ||
+          get(/databases/$(database)/documents/doctor_protocols/$(protocolId)).data.patient_id == request.auth.uid ||
+          isAdmin()
+        );
+        allow create: if isAuthenticated() && (
+          get(/databases/$(database)/documents/doctor_protocols/$(protocolId)).data.doctor_id == request.auth.uid ||
+          isAdmin()
+        );
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    // ai_safety_logs — compliance audit (written only by Cloud Functions via Admin SDK)
+    match /ai_safety_logs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // ── newsletter_subscribers ──────────────────────────────────────────────
+    // Anyone can subscribe (write once). Admins can read/manage the list.
+    // No update/delete from client side to prevent abuse.
+    match /newsletter_subscribers/{docId} {
+      // Public subscribe: one new doc per request, email must be present
+      allow create: if
+        request.resource.data.keys().hasAll(['email']) &&
+        request.resource.data.email is string &&
+        request.resource.data.email.size() > 5 &&
+        request.resource.data.email.matches('.*@.*\\..*') &&
+        // Prevent giant payloads
+        request.resource.data.keys().size() <= 6;
+
+      // Admins can read, update (e.g. unsubscribe flag), delete
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ── users/{uid}/ai_profile — patient AI interest profile ───────────────
+    // Each patient can read/write only their own sub-collection.
+    // Written incrementally by client after each ClinicalAI exchange.
+    match /users/{uid}/ai_profile/{docId} {
+      allow read, write: if
+        isAuthenticated() &&
+        request.auth.uid == uid &&
+        // Prevent oversized writes
+        request.resource.data.interests is list &&
+        request.resource.data.interests.size() <= 50;
+
+      // Admin can read all profiles (for analytics)
+      allow read: if isAdmin();
+    }
+
+    // ── ai_config — agent configuration (admin-only writes) ────────────────
+    match /ai_config/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // ── zoho_crm_cache — CRM intelligence cache (written by Cloud Functions) ─
+    // The Cloud Function uses Admin SDK which bypasses rules entirely.
+    // Client-side: only admins can read. Nobody can write from client.
+    match /zoho_crm_cache/{docId} {
+      allow read: if isAdmin();
+      allow write: if false; // only Admin SDK (Cloud Function)
+    }
+
+    // ── pending_zoho_assignments — Zoho Books onboarding assignment queue ─────
+    match /pending_zoho_assignments/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ── prescriptions — Doctor prescription system ──────────────────────────────────────
+    // Doctors create and manage their own prescriptions.
+    // Patients can read prescriptions where they are the named recipient (patient.uid or shareWithPatient).
+    // Wholesalers can read/update prescriptions shared with them:
+    //   - legacy field:  delivery.wholesalerId == uid
+    //   - multi-share:   wholesalerIds array contains uid
+    // Admin always has full access.
+    match /prescriptions/{rxId} {
+      allow create: if (isDoctor() || isAdmin()) &&
+                       request.resource.data.doctorId == request.auth.uid;
+      allow read:   if isAdmin()
+                    || (isDoctor() && resource.data.doctorId == request.auth.uid)
+                    || (isPatient() && (
+                          resource.data.patient.uid == request.auth.uid ||
+                          resource.data.shareWithPatient == true
+                       ))
+                    || (isWholesaler() && (
+                          resource.data.delivery.wholesalerId == request.auth.uid ||
+                          (resource.data.wholesalerIds != null &&
+                           request.auth.uid in resource.data.wholesalerIds)
+                       ));
+      allow update: if isAdmin()
+                    || (isDoctor() && resource.data.doctorId == request.auth.uid)
+                    || (isWholesaler() && (
+                          resource.data.delivery.wholesalerId == request.auth.uid ||
+                          (resource.data.wholesalerIds != null &&
+                           request.auth.uid in resource.data.wholesalerIds)
+                       ) && request.resource.data.doctorId == resource.data.doctorId)
+                    || (isPatient() && (
+                          resource.data.patient.uid == request.auth.uid ||
+                          resource.data.shareWithPatient == true
+                       ) && request.resource.data.doctorId == resource.data.doctorId);
+      allow delete: if false;
+    }
+
+    // ── bulk_orders — Wholesaler bulk order aggregation ──────────────────────
+    // Wholesalers create and manage their own bulk orders.
+    // Admins have full read/write. Doctors can read bulk orders containing their Rx.
+    match /bulk_orders/{orderId} {
+      allow create: if (isWholesaler() || isAdmin()) &&
+                       request.resource.data.wholesalerId == request.auth.uid;
+      allow read:   if isAdmin()
+                    || (isWholesaler() && resource.data.wholesalerId == request.auth.uid);
+      allow update: if isAdmin()
+                    || (isWholesaler() && resource.data.wholesalerId == request.auth.uid
+                        && resource.data.status != 'delivered'); // Cannot edit delivered orders
+      allow delete: if false;
+    }
+
+    // Default catch-all: Admins only
     match /{document=**} {
       allow read, write: if isAdmin();
     }

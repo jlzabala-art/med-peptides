@@ -1,0 +1,85 @@
+export const apiCatalog = [
+  // Supplements
+  {
+    id: "api-nmn-powder",
+    name: "NMN (Nicotinamide Mononucleotide)",
+    category: "supplements",
+    baseUnit: "mg",
+    description: "Precursor directo de NAD+, utilizado para formulaciones antienvejecimiento y energía celular.",
+    supportedVehicles: ["capsule", "powder_blend"],
+  },
+  {
+    id: "api-resveratrol",
+    name: "Trans-Resveratrol",
+    category: "supplements",
+    baseUnit: "mg",
+    description: "Antioxidante polifenólico utilizado en sinergia con NMN.",
+    supportedVehicles: ["capsule", "powder_blend"],
+  },
+  {
+    id: "api-l-carnitine",
+    name: "L-Carnitine",
+    category: "supplements",
+    baseUnit: "mg",
+    description: "Aminoácido para transporte de ácidos grasos.",
+    supportedVehicles: ["capsule", "liquid_oral"],
+  },
+  // Peptides (Injectables/Topicals/Oral)
+  {
+    id: "api-bpc157",
+    name: "BPC-157",
+    category: "peptides",
+    baseUnit: "mcg",
+    description: "Péptido de recuperación y reparación de tejidos.",
+    supportedVehicles: ["sterile_water", "capsule", "topical_cream"],
+  },
+  {
+    id: "api-tb500",
+    name: "TB-500",
+    category: "peptides",
+    baseUnit: "mg",
+    description: "Fragmento sintético de la timosina beta-4 para regeneración.",
+    supportedVehicles: ["sterile_water"],
+  },
+  {
+    id: "api-epitalon",
+    name: "Epitalon",
+    category: "peptides",
+    baseUnit: "mg",
+    description: "Péptido regulador de telomerasa y glándula pineal.",
+    supportedVehicles: ["sterile_water", "nasal_spray"],
+  },
+  {
+    id: "api-semaglutide",
+    name: "Semaglutide",
+    category: "peptides",
+    baseUnit: "mg",
+    description: "Agonista del receptor GLP-1 para control de peso.",
+    supportedVehicles: ["sterile_water", "sublingual_drops"],
+  },
+  // Injectables (Vitamins, Amino Acids)
+  {
+    id: "api-nad-plus",
+    name: "NAD+ (Nicotinamide Adenine Dinucleotide)",
+    category: "injectables",
+    baseUnit: "mg",
+    description: "Coenzima esencial para el metabolismo energético.",
+    supportedVehicles: ["sterile_water", "iv_bag"],
+  },
+  {
+    id: "api-glutathione",
+    name: "L-Glutathione",
+    category: "injectables",
+    baseUnit: "mg",
+    description: "Antioxidante maestro.",
+    supportedVehicles: ["sterile_water", "iv_bag"],
+  },
+  {
+    id: "api-b12-methyl",
+    name: "Methylcobalamin (B12)",
+    category: "injectables",
+    baseUnit: "mcg",
+    description: "Forma activa de la vitamina B12.",
+    supportedVehicles: ["sterile_water", "iv_bag", "im_injection"],
+  }
+];

@@ -44,10 +44,10 @@
               "mapValue": {
                 "fields": {
                   "name": {
-                    "stringValue": "ReGen PEPT Clinical Team"
+                    "stringValue": "Med-Peptides Clinical Team"
                   },
                   "organization": {
-                    "stringValue": "ReGen PEPT"
+                    "stringValue": "Med-Peptides"
                   },
                   "title": {
                     "stringValue": "Peptide Specialists"

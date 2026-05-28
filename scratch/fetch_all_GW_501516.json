@@ -1,0 +1,38 @@
+[
+  {
+    "pmid": "16625823",
+    "title": "GW-501516 GlaxoSmithKline/Ligand.",
+    "authors": [
+      "Pelton P"
+    ],
+    "journal": "Current opinion in investigational drugs (London, England : 2000)",
+    "pubdate": "2006 Apr",
+    "doi": null,
+    "abstract": "GlaxoSmithKline and Ligand are developing GW-501516, a peroxisome proliferator-activator receptor-delta agonist for the potential treatment of dyslipidemia. Phase II clinical trials of this compound are ongoing."
+  },
+  {
+    "pmid": "32360434",
+    "title": "Differential effects of selective- and pan-PPAR agonists on experimental steatohepatitis and hepatic macrophages",
+    "authors": [
+      "Lefere S",
+      "Puengel T",
+      "Hundertmark J",
+      "Penners C",
+      "Frank AK",
+      "Guillot A",
+      "de Muynck K",
+      "Heymann F",
+      "Adarbes V",
+      "Defr\u00eane E",
+      "Estivalet C",
+      "Geerts A",
+      "Devisscher L",
+      "Wettstein G",
+      "Tacke F"
+    ],
+    "journal": "Journal of hepatology",
+    "pubdate": "2020 Oct",
+    "doi": "10.1016/j.jhep.2020.04.025",
+    "abstract": "BACKGROUND & AIMS: Peroxisome proliferator-activated receptors (PPARs) are essential regulators of whole-body metabolism, but also modulate inflammation in immune cells, notably macrophages. We compared the effects of selective PPAR agonists to those of the pan-PPAR agonist lanifibranor in non-alcoholic fatty liver disease (NAFLD), and studied isoform-specific effects on hepatic macrophage biology.\nMETHODS: Lanifibranor or selective PPAR\u03b1 (fenofibrate), PPAR\u03b3 (pioglitazone) and PPAR\u03b4 (GW501516) agonists were therapeutically administered in choline-deficient, amino acid-defined high-fat diet (CDAA-HFD)- and Western diet (WD)-fed mouse models of NAFLD. Acute liver injury was induced by carbon tetrachloride (CCl4). The role of PPARs on macrophage functionality was studied in isolated hepatic macrophages, bone marrow-derived macrophages stimulated with palmitic acid, and circulating monocytes from patients with NAFLD.\nRESULTS: Lanifibranor improved all histological features of steatohepatitis in CDAA-HFD-fed mice, including liver fibrosis, thereby combining and exceeding specific effects of the single PPAR agonists. Its potent anti-steatotic efficacy was confirmed in a 3D liver biochip model with primary cells. Infiltrating hepatic monocyte-derived macrophages were reduced following PPAR agonist administration, especially with lanifibranor, even after short-term treatment, paralleling improved steatosis and hepatitis. Lanifibranor similarly decreased steatosis, liver injury and monocyte infiltration in the WD model. In the acute CCl4 model, neither single nor pan-PPAR agonists directly affected monocyte recruitment. Hepatic macrophages isolated from WD-fed mice displayed a metabolically activated phenotype. Lanifibranor attenuated the accompanying inflammatory activation in both murine palmitic acid-stimulated bone marrow-derived macrophages, as well as patient-derived circulating monocytes, in a PPAR\u03b4-dependent fashion.\nCONCLUSION: Pan-PPAR agonists combine the beneficial effects of selective PPAR agonists and may counteract inflammation and disease progression more potently. PPAR\u03b4 agonism and lanifibranor directly modulate macrophage activation, but not infiltration, thereby synergizing with beneficial metabolic effects of PPAR\u03b1/\u03b3 agonists.\nLAY SUMMARY: Peroxisome proliferated-activated receptors (PPARs) are essential regulators of metabolism and inflammation. We demonstrated that the pan-PPAR agonist lanifibranor ameliorated all aspects of non-alcoholic fatty liver disease in independent experimental mouse models. Non-alcoholic fatty liver disease and fatty acids induce a specific polarization status in macrophages, which was altered by lanifibranor to increase expression of lipid handling genes, thereby decreasing inflammation. PPAR isoforms have differential therapeutic effects on fat-laden hepatocytes, activated hepatic stellate cells and inflammatory macrophages, supporting the clinical development of pan-PPAR agonists."
+  }
+]

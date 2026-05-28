@@ -1,27 +1,10 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc, setDoc, writeBatch } from 'firebase/firestore';
+import { db } from './lib/firebase-admin.mjs';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDOV2zFeLGtPsE_O2b-gR3NHZygPspiSws",
-  authDomain: "med-peptides-app-27a3a.firebaseapp.com",
-  projectId: "med-peptides-app",
-  storageBucket: "med-peptides-app.firebasestorage.app",
-  messagingSenderId: "514143707883",
-  appId: "1:514143707883:web:6c12470433ef6c992714ae",
-  measurementId: "G-LYMXGY71FJ"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// Data to migrate
 const templatesDataRaw = fs.readFileSync(path.join(__dirname, '../src/data/protocolTemplates.json'), 'utf-8');
 const protocolTemplates = JSON.parse(templatesDataRaw);
 
@@ -81,13 +64,13 @@ const MONITORING_TEMPLATES = {
 
 async function migrateProtocolTemplates() {
   console.log('🔄 Starting protocol templates migration...');
-  const batch = writeBatch(db);
-  const protocolsRef = collection(db, 'protocol_templates');
+  const batch = db.batch();
+  const protocolsRef = db.collection('protocols');
 
   let count = 0;
   for (const template of protocolTemplates) {
     const docId = template.protocol_id || `temp_${count}`;
-    const docRef = doc(protocolsRef, docId);
+    const docRef = protocolsRef.doc(docId);
 
     // Apply new required schema fields
     const enrichedTemplate = {
@@ -111,8 +94,8 @@ async function migrateProtocolTemplates() {
 
 async function migrateMonitoringProfiles() {
   console.log('🔄 Starting monitoring profiles migration...');
-  const batch = writeBatch(db);
-  const profilesRef = collection(db, 'monitoring_profiles');
+  const batch = db.batch();
+  const profilesRef = db.collection('monitoring_profiles');
 
   let count = 0;
   for (const [objective, labs] of Object.entries(MONITORING_TEMPLATES)) {
@@ -121,7 +104,7 @@ async function migrateMonitoringProfiles() {
         ? "default_profile" 
         : objective.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-    const docRef = doc(profilesRef, docId);
+    const docRef = profilesRef.doc(docId);
     
     const profileDoc = {
       id: docId,

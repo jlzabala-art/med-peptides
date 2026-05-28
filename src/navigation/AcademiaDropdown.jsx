@@ -1,3 +1,4 @@
+ 
 /**
  * AcademiaDropdown.jsx
  *
@@ -115,7 +116,7 @@ export default function AcademiaDropdown({ onClose }) {
                   }}
                 >
                   {item.label}
-                  <span style={{ fontSize: '0.65rem', fontWeight: 700, backgroundColor: '#f1f5f9', color: '#64748b', padding: '0.1rem 0.4rem', borderRadius: '4px', letterSpacing: '0.05em' }}>SOON</span>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 700, backgroundColor: '#f1f5f9', color: 'var(--color-text-secondary)', padding: '0.1rem 0.4rem', borderRadius: '4px', letterSpacing: '0.05em' }}>SOON</span>
                 </div>
               )
               : (

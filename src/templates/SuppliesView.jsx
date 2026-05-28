@@ -1,7 +1,9 @@
-import React, { useEffect, useMemo, useCallback } from 'react';
+/* eslint-disable no-unused-vars */
+import React, { useEffect, useMemo, useCallback, memo } from 'react';
 import { Droplets, Syringe, Info, CheckCircle, ShieldCheck, FlaskConical } from 'lucide-react';
 import { resolveVariantPrice } from '../utils/resolvePrice';
 import { usePricingTier } from '../hooks/usePricingTier';
+import { trackEvent } from '../hooks/useAnalytics';
 
 const SuppliesView = ({
   onSelectProduct,
@@ -17,7 +19,7 @@ const SuppliesView = ({
     window.scrollTo(0, 0);
   }, []);
 
-  // FASE 1: Optimización de Datos (Memoized)
+  // PHASE 1: Data Optimization (Memoized)
   const supplies = useMemo(() => {
     if (!products.length) return [];
 
@@ -40,7 +42,7 @@ const SuppliesView = ({
     return Array.from(map.values());
   }, [products, tier]);
 
-  // FASE 1.1: Formateo de precios — resuelto desde datos de variante en Firestore
+  // PHASE 1.1: Price Formatting — resolved from variant data in Firestore
   const formatPrice = useCallback((item) => {
     if (!region || !EXCHANGE_RATES[region]) return '---';
 
@@ -62,7 +64,7 @@ const SuppliesView = ({
   return (
     <div className="template-root" style={{ padding: 'clamp(1rem, 5vw, 4rem) 1rem', maxWidth: '1200px', margin: '0 auto' }}>
 
-      {/* Header Minimalista */}
+      {/* Minimalist Header */}
       <header style={{ marginBottom: '3rem', textAlign: 'center' }}>
         <div style={{ color: 'var(--secondary)', marginBottom: '1rem' }}>
           <FlaskConical size={48} strokeWidth={1.5} />
@@ -73,7 +75,7 @@ const SuppliesView = ({
         </p>
       </header>
 
-      {/* Grid Optimizado para Mobile */}
+      {/* Mobile-Optimized Grid */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
@@ -126,7 +128,13 @@ const SuppliesView = ({
                 Specs
               </button>
               <button
-                onClick={() => updateCart(item.name, 1)}
+                onClick={() => {
+                  trackEvent('purchase_intent', {
+                    intent_type: 'add_to_cart',
+                    peptide_name: item.name
+                  });
+                  updateCart(item.name, 1);
+                }}
                 className="btn"
                 style={{ flex: 2, fontSize: '0.85rem', padding: '0.6rem' }}
               >

@@ -1,3 +1,4 @@
+ 
 import React, { useEffect } from 'react';
 import { X, ZoomIn } from 'lucide-react';
 import { lockScroll, unlockScroll } from '../utils/scrollLock';
@@ -69,25 +70,29 @@ export default function ImageModal({ isOpen, onClose, imageSrc, altText }) {
       
       <button 
         onClick={onClose}
+        aria-label="Cerrar"
         style={{
           position: 'absolute',
-          top: '1.5rem',
-          right: '1.5rem',
-          background: 'rgba(255,255,255,0.1)',
-          border: '1px solid rgba(255,255,255,0.2)',
+          top: '1rem',
+          right: '1rem',
+          background: 'rgba(15,23,42,0.85)',
+          border: '1.5px solid rgba(255,255,255,0.35)',
           color: 'white',
-          width: '44px',
-          height: '44px',
+          width: '48px',
+          height: '48px',
           borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
           zIndex: 10000,
-          transition: 'all 0.2s ease'
+          transition: 'all 0.2s ease',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.15)',
         }}
+        onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.9)'; e.currentTarget.style.borderColor = 'var(--color-danger)'; e.currentTarget.style.transform = 'scale(1.08)'; }}
+        onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(15,23,42,0.85)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.35)'; e.currentTarget.style.transform = 'scale(1)'; }}
       >
-        <X size={24} />
+        <X size={22} strokeWidth={2.5} />
       </button>
       
       <div 

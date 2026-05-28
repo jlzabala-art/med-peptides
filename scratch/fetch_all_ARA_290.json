@@ -1,0 +1,32 @@
+[
+  {
+    "pmid": "24555851",
+    "title": "ARA 290 for treatment of small fiber neuropathy in sarcoidosis.",
+    "authors": [
+      "van Velzen M",
+      "Heij L",
+      "Niesters M",
+      "Cerami A",
+      "Dunne A",
+      "Dahan A",
+      "Brines M"
+    ],
+    "journal": "Expert opinion on investigational drugs",
+    "pubdate": "2014 Apr",
+    "doi": "10.1517/13543784.2014.892072",
+    "abstract": "INTRODUCTION: Painful peripheral neuropathy is a common, difficult-to-treat complication associated with a variety of diseases, including diabetes mellitus and sarcoidosis. It is caused by damage of small and autonomic nerve fibers, resulting in potentially debilitating symptoms of neuropathic pain and autonomic dysfunction. The limited efficacy of current treatment options dictates a rationalized design of novel compounds.\nAREAS COVERED: The authors present the recent data from two Phase II clinical trials on ARA290, an erythropoietin derivative with tissue protective and healing properties that does not stimulate erythropoiesis. ARA 290 treatment was consistently associated with a significant improvement of neuropathic pain symptoms in sarcoidosis patients, evidenced by a decrease in pain scores on validated questionnaires. Moreover, ARA 290 treatment resulted in significant increases in corneal nerve fibers, improved sensory pain thresholds, improved quality of life and physical functioning.\nEXPERT OPINION: Current treatment modalities of neuropathy are based on a trial-and-error approach, have limited efficacy and come with significant side effects. Given the excellent safety profile while reducing neuropathy symptoms, the prospects of ARA 290 treatment in sarcoid neuropathy seem promising. The long-lasting beneficial effects of ARA 290 on both pain-related and non-pain-related symptoms in sarcoidosis patients prompt additional studies on potential disease-modifying properties of ARA 290."
+  },
+  {
+    "pmid": "26774587",
+    "title": "ARA 290 relieves pathophysiological pain by targeting TRPV1 channel: Integration between immune system and nociception.",
+    "authors": [
+      "Zhang W",
+      "Yu G",
+      "Zhang M"
+    ],
+    "journal": "Peptides",
+    "pubdate": "2016 Feb",
+    "doi": "10.1016/j.peptides.2016.01.003",
+    "abstract": "ARA 290 is an erythropoietin-derived polypeptide that possesses analgesic and tissue protective effect in many diseases such as diabetes and cancer. The analgesic effect of ARA 290 is mediated by its anti-inflammatory and immunomodulatory functions, or more specifically, by targeting the innate repair receptor (IRR) to down-regulate inflammation to alleviate neuropathic pain. However, whether other mechanisms or pathways are involved in ARA 290-mediated analgesic effect remains elusive. In this study, we are particularly interested in whether ARA 290 could directly target peripheral nociceptors by blocking or influencing receptors in pain sensation. Using calcium imaging, cell culture and behavioral tests, we demonstrated that ARA 290 was able to specifically inhibit TRPV1 channel activity, and relieve the mechanical hypersensitivity induced by capsaicin. Our study suggested that ARA 290 could potentially function as a novel antagonist for TRPV1 channel. This finding would not only contribute to the development of new pain treatment using ARA 290, but also help to improve our understanding of the integration between the immune system and the peripheral nervous system."
+  }
+]

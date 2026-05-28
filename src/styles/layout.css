@@ -1,6 +1,6 @@
 
 /* =========================================
-   CLINICAL UI SYSTEM (PROTOCOL BUILDER V4)
+   CLINICAL UI SYSTEM (CLINICAL AI V1)
    ========================================= */
 
 /* Typography & Spacing */
@@ -135,11 +135,11 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-top: 1px solid var(--border);
-    z-index: 50;
+    z-index: var(--z-sticky);
     box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.03);
   }
   
-  .protocol-builder-container {
+  .protocol-finder-container {
     padding-bottom: 80px; /* Space for sticky footer */
   }
 }
@@ -289,6 +289,12 @@
   gap: 1.5rem;
 }
 
+.grid-5-col-responsive {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+}
+
 .timeline-overview-layout {
   display: grid;
   grid-template-columns: 1fr 300px;
@@ -305,6 +311,14 @@
 @media (max-width: 1024px) {
   .grid-3-col-responsive {
     grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .grid-4-col-responsive {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-5-col-responsive {
+    grid-template-columns: repeat(3, 1fr);
   }
   
   .timeline-overview-layout {
@@ -325,7 +339,8 @@
 @media (max-width: 768px) {
   .grid-3-col-responsive,
   .grid-2-col-responsive,
-  .grid-4-col-responsive {
+  .grid-4-col-responsive,
+  .grid-5-col-responsive {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
@@ -494,7 +509,7 @@
 }
 
 /* =========================================
-   CLINICAL PROTOCOL BUILDER V5 (MOBILE-FIRST)
+   CLINICAL AI INTELLIGENCE V1 (MOBILE-FIRST)
    ========================================= */
 
 /* Sticky Bottom Bar */
@@ -511,7 +526,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 1000;
+  z-index: var(--z-header);
   box-shadow: 0 -10px 25px rgba(0, 54, 102, 0.05);
 }
 
@@ -574,7 +589,7 @@
   border-color: var(--primary-light);
 }
 
-/* Hide public footer when in builder workflow */
+/* Hide public footer when in finder workflow */
 body:has(.workflow-main) footer {
   display: none !important;
 }
@@ -729,7 +744,7 @@ body:has(.workflow-main) footer {
     background: white;
     border-top-left-radius: 24px;
     border-top-right-radius: 24px;
-    z-index: 2000;
+    z-index: var(--z-drawer);
     box-shadow: 0 -10px 40px rgba(0, 54, 102, 0.2);
     transform: translateY(100%);
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);

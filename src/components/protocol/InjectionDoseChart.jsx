@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * InjectionDoseChart
  * ──────────────────
@@ -20,17 +21,18 @@
  */
 
 import React, { useState, useMemo, useEffect, useRef, memo } from 'react';
-import SyringeVisualizer from '../SyringeVisualizer';
+import { normalizeProtocol, frequencyToInjectionsPerWeek, doseToObject } from '../../utils/protocolSchemaAdapter';
+
 
 // Phase colour tokens — mirrors ProtocolTimeline's PHASE_META
 const PHASE_COLORS = {
   priming:     { bg: '#dbeafe', border: '#93c5fd', text: '#1e40af', label: 'Priming' },
   loading:     { bg: '#ede9fe', border: '#c4b5fd', text: '#5b21b6', label: 'Loading' },
   therapeutic: { bg: '#d1fae5', border: '#6ee7b7', text: '#065f46', label: 'Therapeutic' },
-  maintenance: { bg: '#f0fdf4', border: '#86efac', text: '#166534', label: 'Maintenance' },
+  maintenance: { bg: 'var(--color-success-bg)', border: '#86efac', text: '#166534', label: 'Maintenance' },
   tapering:    { bg: '#fef3c7', border: '#fcd34d', text: '#92400e', label: 'Taper' },
   washout:     { bg: '#fee2e2', border: '#fca5a5', text: '#991b1b', label: 'Washout' },
-  default:     { bg: '#f1f5f9', border: '#cbd5e1', text: '#475569', label: 'Phase' },
+  default:     { bg: '#f1f5f9', border: 'var(--color-border)', text: 'var(--color-text-secondary)', label: 'Phase' },
 };
 
 function normalizePhaseKey(phaseTitle = '') {
@@ -48,6 +50,7 @@ function normalizePhaseKey(phaseTitle = '') {
 const SyringeCard = memo(function SyringeCard({ week, units, dose, unit, note, phaseColor, cardIndex }) {
   const cardRef   = useRef(null);
   const [liveUnits, setLiveUnits] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     const el = cardRef.current;
@@ -65,7 +68,6 @@ const SyringeCard = memo(function SyringeCard({ week, units, dose, unit, note, p
     );
     observer.observe(el);
     return () => observer.disconnect();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [units, cardIndex]);
 
   // If units prop changes (concentration selector) — animate from current fill
@@ -80,29 +82,69 @@ const SyringeCard = memo(function SyringeCard({ week, units, dose, unit, note, p
   return (
     <div
       ref={cardRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         gap: '0.35rem',
-        padding: '0.75rem 0.5rem 0.6rem',
-        background: 'linear-gradient(160deg, #0c1a2e 0%, #0f2744 100%)',
+        padding: '0.85rem 0.5rem 0.6rem',
+        background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
         borderRadius: '12px',
-        border: `1px solid ${phaseColor.border}33`,
-        minWidth: '72px',
+        border: `1px solid ${phaseColor.border}66`,
+        minWidth: '78px',
         maxWidth: '90px',
         flex: '0 0 auto',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.18)',
+        boxShadow: isHovered ? '0 12px 24px -8px rgba(0,0,0,0.12)' : '0 2px 8px rgba(0,0,0,0.04)',
         position: 'relative',
-        overflow: 'hidden',
+        overflow: 'visible',
         animation: 'idc-card-in 0.45s ease both',
         animationDelay: `${Math.min(cardIndex * 55, 600)}ms`,
+        transition: 'all 0.2s ease',
+        transform: isHovered ? 'translateY(-3px)' : 'translateY(0)',
+        cursor: 'default'
       }}>
+      
+      {/* ── Hover Tooltip ── */}
+      {isHovered && (
+        <div style={{
+          position: 'absolute',
+          bottom: '100%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          marginBottom: '10px',
+          background: '#0f172a',
+          color: 'var(--color-bg-app)',
+          padding: '0.6rem 0.8rem',
+          borderRadius: '8px',
+          fontSize: '0.7rem',
+          whiteSpace: 'nowrap',
+          zIndex: 10,
+          boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '0.2rem',
+          animation: 'idc-card-in 0.2s ease-out forwards'
+        }}>
+          <div style={{ fontWeight: 800, color: '#38bdf8', fontSize: '0.8rem', fontFamily: "'JetBrains Mono', monospace" }}>
+            {liveUnits.toFixed(1)} Units
+          </div>
+          <div style={{ color: 'var(--color-text-tertiary)', fontSize: '0.65rem' }}>on U-100 Syringe</div>
+          {/* Arrow */}
+          <div style={{
+            position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)',
+            borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: '5px solid #0f172a'
+          }} />
+        </div>
+      )}
+
       {/* Phase accent strip at top */}
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0,
-        height: '3px',
+        height: '4px',
         background: phaseColor.border,
         borderRadius: '12px 12px 0 0',
       }} />
@@ -110,45 +152,77 @@ const SyringeCard = memo(function SyringeCard({ week, units, dose, unit, note, p
       {/* Week label */}
       <span style={{
         fontFamily: "'JetBrains Mono', 'Courier New', monospace",
-        fontSize: '0.6rem',
+        fontSize: '0.65rem',
         fontWeight: 800,
-        color: 'rgba(255,255,255,0.55)',
+        color: 'var(--color-text-secondary)',
         letterSpacing: '0.06em',
         marginTop: '0.2rem',
       }}>
         W{String(week).padStart(2, '0')}
       </span>
 
-      {/* The syringe — receives animated units */}
-      <SyringeVisualizer units={liveUnits} />
+      {/* The vial indicator */}
+      <div style={{
+        width: '42px',
+        height: '50px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: phaseColor.bg,
+        borderRadius: '8px',
+        border: `1px solid ${phaseColor.border}`,
+        margin: '0.3rem 0',
+      }}>
+        <div style={{
+          fontSize: '0.9rem',
+          fontWeight: 900,
+          color: phaseColor.text,
+          lineHeight: 1,
+        }}>
+          V{String(Math.floor(week / 4) + 1)}
+        </div>
+        <div style={{
+          fontSize: '0.55rem',
+          fontWeight: 800,
+          color: phaseColor.text,
+          opacity: 0.7,
+          marginTop: '0.15rem',
+          textTransform: 'uppercase',
+        }}>
+          Vial
+        </div>
+      </div>
 
       {/* Dose label below */}
       <div style={{ textAlign: 'center' }}>
         <div style={{
-          fontSize: '0.72rem',
-          fontWeight: 800,
-          color: 'rgba(255,255,255,0.9)',
+          fontSize: '0.75rem',
+          fontWeight: 900,
+          color: '#0f172a',
           fontFamily: "'JetBrains Mono', monospace",
           lineHeight: 1.1,
         }}>
           {dose}{unit}
         </div>
         <div style={{
-          fontSize: '0.58rem',
-          color: 'rgba(255,255,255,0.4)',
-          marginTop: '0.1rem',
+          fontSize: '0.6rem',
+          color: 'var(--color-text-secondary)',
+          marginTop: '0.15rem',
           lineHeight: 1.2,
+          fontWeight: 600
         }}>
-          ≈ {units.toFixed(0)} U
+          Per Dose
         </div>
         {note && (
           <div style={{
             fontSize: '0.58rem',
-            color: phaseColor.border,
-            marginTop: '0.2rem',
+            color: phaseColor.text,
+            marginTop: '0.3rem',
             lineHeight: 1.3,
             maxWidth: '78px',
             wordBreak: 'break-word',
+            fontWeight: 500
           }}>
             {note}
           </div>
@@ -196,11 +270,11 @@ const PhaseBlock = memo(function PhaseBlock({ phaseTitle, weeks, compact }) {
         }}>
           {phaseTitle}
         </span>
-        <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 500 }}>
+        <span style={{ fontSize: '0.65rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>
           {weeks.length} week{weeks.length !== 1 ? 's' : ''}
         </span>
         {compact && weeks.length > 2 && (
-          <span style={{ fontSize: '0.62rem', color: '#94a3b8', fontStyle: 'italic' }}>
+          <span style={{ fontSize: '0.62rem', color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>
             · showing W{weeks[0].week} & W{weeks[weeks.length - 1].week}
           </span>
         )}
@@ -232,7 +306,7 @@ const PhaseBlock = memo(function PhaseBlock({ phaseTitle, weeks, compact }) {
             display: 'flex',
             alignItems: 'center',
             padding: '0 0.75rem',
-            color: '#94a3b8',
+            color: 'var(--color-text-tertiary)',
             fontSize: '0.72rem',
             fontStyle: 'italic',
             flexShrink: 0,
@@ -248,85 +322,89 @@ const PhaseBlock = memo(function PhaseBlock({ phaseTitle, weeks, compact }) {
 // ── Main component ───────────────────────────────────────────────────────────
 const InjectionDoseChart = memo(function InjectionDoseChart({
   phase_blueprints = [],
-  defaultConc      = 2,    // mg/mL default reconstitution
+  protocol         = null,   // alternative: pass a full raw protocol object
+  defaultConc      = 2,      // mg/mL default reconstitution
   compact          = false,
 }) {
   const [conc, setConc] = useState(defaultConc); // mg per mL
 
-  // Build per-week injection data per phase
+  // Build per-week injection data per phase using the canonical adapter.
+  // Accepts either a full `protocol` object or the legacy `phase_blueprints` array.
   const phases = useMemo(() => {
-    let globalWeek = 1;
-    return phase_blueprints.map((ph) => {
-      const dur   = ph.default_duration_weeks || 4;
-      const drug  = (ph.drugs || [])[0]; // primary compound
-      if (!drug) { globalWeek += dur; return null; }
+    // Construct the raw input for the adapter
+    const rawInput = protocol
+      ? protocol
+      : { phase_blueprints };
 
-      const logic = drug.dose_logic || {};
-      const unit  = logic.dose_unit || 'mg';
-      const freq  = logic.administration_frequency || 'once_weekly';
-      const injectionsPerWeek =
-        freq.includes('daily')  ? 7
-        : freq.includes('twice') ? 2
-        : freq.includes('three') ? 3
-        : 1;
+    // Normalize into the canonical v3 schema
+    const normalized = normalizeProtocol(rawInput);
+    if (!normalized.phases || normalized.phases.length === 0) return [];
+
+    return normalized.phases.map((ph) => {
+      const startWeek = ph.start_week || 1;
+      const endWeek   = ph.end_week   || startWeek;
+      const dur       = endWeek - startWeek + 1;
+
+      // Use the primary compound from the canonical shape
+      const compound = (ph.compounds || [])[0];
+      if (!compound) return null;
+
+      // Resolve representative schedule entry (first one)
+      const schedule0 = (compound.schedule || [])[0];
+      if (!schedule0) return null;
+
+      const freqObj           = schedule0.frequency || { times: 1, period: 'week' };
+      const injectionsPerWeek = frequencyToInjectionsPerWeek(freqObj);
+
+      // Adapter always produces mg doses; convert mcg back for display if original unit was mcg
+      const unitLabel = schedule0.dose?.unit || 'mg';
+      const isMcg     = unitLabel === 'mcg';
+      // For volume maths, work in mg (1 mcg = 0.001 mg)
+      const unitFactor = isMcg ? 0.001 : 1;
+
+      // Find start/end dose across all schedule entries (support ramps)
+      const allEntries   = compound.schedule || [];
+      const firstEntry   = allEntries[0]  || schedule0;
+      const lastEntry    = allEntries[allEntries.length - 1] || schedule0;
+      const rawStart     = (firstEntry.dose?.amount || 0);
+      const rawEnd       = (lastEntry.dose?.amount  || rawStart);
+
+      const startDoseMg  = rawStart * unitFactor;
+      const endDoseMg    = rawEnd   * unitFactor;
 
       const weeks = [];
       for (let w = 0; w < dur; w++) {
-        // ── Resolve dose for this week ──────────────────────────────────────
-        // Priority: starting_weekly_dose → default_weekly_dose → dose_per_administration → 0
-        const rawStart  = parseFloat(
-          logic.starting_weekly_dose ??
-          logic.default_weekly_dose  ??
-          logic.dose_per_administration ??
-          0
-        );
-        const rawTarget = parseFloat(
-          logic.target_weekly_dose   ??
-          logic.max_weekly_dose      ??
-          logic.possible_next_step_dose ??
-          rawStart
-        );
+        // Linear ramp from start → end across the phase duration
+        const rampFraction = dur > 1 ? w / (dur - 1) : 0;
+        const weeklyDoseMg = startDoseMg + (endDoseMg - startDoseMg) * rampFraction;
 
-        // ── Unit normalisation: convert mcg → mg so volume maths is consistent ──
-        const isMcg       = (unit === 'mcg');
-        const unitFactor  = isMcg ? 0.001 : 1;          // 1 mcg = 0.001 mg
-        const startDose   = rawStart  * unitFactor;
-        const targetDose  = rawTarget * unitFactor;
+        // Per-injection dose (mg)
+        const injectionDoseMg = weeklyDoseMg / Math.max(1, injectionsPerWeek);
 
-        // Linear ramp from start → target across the phase duration
-        const rampFraction = dur > 1 ? w / (dur - 1) : 1;
-        const weeklyDose   = startDose + (targetDose - startDose) * rampFraction;
-
-        // Per-injection dose (mg equivalent)
-        const injectionDose = weeklyDose / injectionsPerWeek;
-
-        // Volume in mL → units (U-100 syringe: 1 mL = 100 U)
-        const volumeMl = conc > 0 ? injectionDose / conc : 0;
+        // Volume mL → U-100 insulin syringe units
+        const volumeMl = conc > 0 ? injectionDoseMg / conc : 0;
         const units    = volumeMl * 100; // insulin units
 
-        // Clinical event note for this week
-        const event = (ph.clinical_events || []).find(e => e.week === w + 1);
-
-        // ── Label: show value in original units (mcg stays as mcg) ──────────
-        const rawInjectionDose = (rawStart + (rawTarget - rawStart) * rampFraction) / injectionsPerWeek;
+        // Label in original units (mcg stays as mcg for display)
+        const rawWeeklyDose    = rawStart + (rawEnd - rawStart) * rampFraction;
+        const rawInjectionDose = rawWeeklyDose / Math.max(1, injectionsPerWeek);
         const doseLabel = rawInjectionDose % 1 === 0
           ? String(rawInjectionDose)
           : rawInjectionDose.toFixed(rawInjectionDose < 1 ? 2 : 1);
 
         weeks.push({
-          week: globalWeek + w,
-          dose: doseLabel,
-          unit,
-          units: Math.min(units, 120), // cap display at 120 (over-range shows red)
-          note: event?.title || '',
-          freq: injectionsPerWeek,
+          week:  startWeek + w,
+          dose:  doseLabel,
+          unit:  unitLabel,
+          units: Math.min(units, 120), // cap at 120 U (over-range renders red)
+          note:  schedule0.notes || '',
+          freq:  injectionsPerWeek,
         });
       }
 
-      globalWeek += dur;
-      return { phaseTitle: ph.phase_title || 'Phase', weeks };
+      return { phaseTitle: ph.phase_name || 'Phase', weeks };
     }).filter(Boolean);
-  }, [phase_blueprints, conc]);
+  }, [protocol, phase_blueprints, conc]);
 
   if (!phases.length) return null;
 
@@ -440,7 +518,7 @@ const InjectionDoseChart = memo(function InjectionDoseChart({
               borderRadius: '20px',
               border: '1px solid #e2e8f0',
               fontFamily: "'JetBrains Mono', monospace",
-              color: '#334155',
+              color: 'var(--color-text-primary)',
               outline: 'none',
             }}
           />

@@ -1,0 +1,14 @@
+node_modules/
+functions/node_modules/
+dist/
+build/
+.next/
+.firebase/
+.turbo/
+migration_bundle/
+export/
+faq_backups/
+*.pdf
+*.pptx
+*.log
+*.cache

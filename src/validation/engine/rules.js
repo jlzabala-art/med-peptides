@@ -1,7 +1,8 @@
+ 
 // Validation Rules Engine
 // Detects clinical violations and constraint breaches in generated protocols
 
-import { parseDosage, calculateVialsNeeded } from '../../services/protocolEngine';
+import { parseDosage } from '../../services/protocolEngine.js';
 
 /**
  * RULE 1: Goal Alignment
@@ -25,9 +26,9 @@ export const checkGoalAlignment = (testCase, generatedData, productsDb) => {
   let hasMetabolicTag = false;
 
   items.forEach(item => {
-    const dbProduct = productsDb.find(p => p.name === item.name);
+    const dbProduct = productsDb.find(p => p?.name === item?.name);
     if (dbProduct) {
-      const tags = (dbProduct.tags || []).map(t => t.toLowerCase());
+      const tags = (dbProduct.tags || []).map(t => t?.toLowerCase());
       const desc = (dbProduct.desc || "").toLowerCase();
       
       if (tags.includes("repair") || tags.includes("healing") || tags.includes("joint") || desc.includes("recovery")) hasRecoveryTag = true;
@@ -59,12 +60,12 @@ export const checkConstraintCompliance = (testCase, generatedData, productsDb) =
   const avoidBlends = constraints.includes("Avoid blends");
 
   items.forEach(item => {
-    const dbProduct = productsDb.find(p => p.name === item.name);
+    const dbProduct = productsDb.find(p => p?.name === item?.name);
     if (!dbProduct) return;
 
-    const tags = (dbProduct.tags || []).map(t => t.toLowerCase());
+    const tags = (dbProduct.tags || []).map(t => t?.toLowerCase());
     const desc = (dbProduct.desc || "").toLowerCase();
-    const pName = dbProduct.name.toLowerCase();
+    const pName = (dbProduct.name || "").toLowerCase();
 
     const isInjectable = tags.includes("injectable") || desc.includes("injectable") || dbProduct.dosage.includes("vial");
     const isBlend = tags.includes("blend") || desc.includes("blend") || pName.includes("/") || pName.includes("+");
@@ -91,7 +92,6 @@ export const checkPhaseSequence = (generatedData) => {
 
   if (items.length > 1) {
     const hasPhase1 = items.some(i => (i.phase || "").includes("1"));
-    const hasPhase2 = items.some(i => (i.phase || "").includes("2"));
     
     // In our simplified logic, if there's >1 item, item 0 is Phase 1 and item 1 is Phase 2
     if (!hasPhase1 && items.length > 0) {
@@ -108,15 +108,15 @@ export const checkPhaseSequence = (generatedData) => {
  */
 export const checkDoseProgression = (generatedData) => {
   const flags = [];
-  // Currently protocolBuilder assigns a static dose (default or pulled from db).
+  // Currently protocolFinder assigns a static dose (default or pulled from db).
   // In a real dose-escalation engine, we would verify week 1 vs week 4.
   // We flag if weeklyDose is > 10mg generically unless GLP-1 (which spans up to 15mg)
   
   const items = generatedData.timelineCache || [];
   items.forEach(item => {
-    const wDose = item.weeklyDose || parseDosage(item.dosage);
-    if (wDose > 20 && !item.name.toLowerCase().includes("bpc")) { // BPC can be high mg due to oral forms
-      flags.push(`Dose Progression Warning: Unusually high weekly dose spotted (${wDose}mg) for ${item.name}. Verify escalation protocol.`);
+    const wDose = item?.weeklyDose || parseDosage(item?.dosage);
+    if (wDose > 20 && !item?.name?.toLowerCase()?.includes("bpc")) { // BPC can be high mg due to oral forms
+      flags.push(`Dose Progression Warning: Unusually high weekly dose spotted (${wDose}mg) for ${item?.name || 'Unknown Product'}. Verify escalation protocol.`);
     }
   });
 
@@ -132,9 +132,9 @@ export const checkProductConsistency = (generatedData, productsDb) => {
   const items = generatedData.timelineCache || [];
 
   items.forEach(item => {
-    const exists = productsDb.some(p => p.name === item.name);
+    const exists = productsDb.some(p => p?.name === item?.name);
     if (!exists) {
-      flags.push(`Product Consistency Violation: Selected product "${item.name}" does NOT exist in the clinical database.`);
+      flags.push(`Product Consistency Violation: Selected product "${item?.name || 'Unknown'}" does NOT exist in the clinical database.`);
     }
   });
 

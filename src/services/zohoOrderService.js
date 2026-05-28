@@ -1,17 +1,18 @@
+ 
 /**
  * ZOHO BOOKS GATEWAY - ANTIGRAVITY VERSION
- * Optimizado para movilidad y resiliencia de datos.
+ * Optimized for mobility and data resilience.
  */
 
-// Simulación de una cola de sincronización para evitar cuelgues (Offline-First)
+// Simulation of a synchronization queue to prevent freezes (Offline-First)
 const PENDING_SYNC_KEY = 'regen_pending_zoho_orders';
 
 /**
- * Genera una Sales Order en Zoho Books.
- * Utiliza una arquitectura desacoplada para prevenir bloqueos en el UI móvil.
+ * Generates a Sales Order in Zoho Books.
+ * Uses a decoupled architecture to prevent UI blocking on mobile.
  */
 export const generateZohoSalesOrder = async (protocolData, patientContext) => {
-  // 1. Validación Pre-flight (Evita llamadas si faltan datos críticos)
+  // 1. Pre-flight Validation (Prevents calls if critical data is missing)
   if (!protocolData?.costData || !patientContext) {
     throw new Error('Incomplete protocol data for Sales Order generation.');
   }
@@ -20,9 +21,9 @@ export const generateZohoSalesOrder = async (protocolData, patientContext) => {
   const { primaryCondition, patientType } = patientContext;
 
   try {
-    // 2. Preparación de Payload (Lógica pesada fuera del loop de render)
+    // 2. Payload Preparation (Heavy logic outside the render loop)
     const lineItems = costData.aggregateVials.map(vial => ({
-      item_name: vial.name.toUpperCase(), // Estándar de inventario
+      item_name: vial.name.toUpperCase(), // Inventory standard
       description: `[RESEARCH ONLY] ${vial.mgPerVial}mg Vial - Protocol v${version}`,
       rate: Number(vial.pricePerVial.toFixed(2)),
       quantity: vial.totalVials,
@@ -39,19 +40,19 @@ export const generateZohoSalesOrder = async (protocolData, patientContext) => {
       line_items: lineItems,
     };
 
-    // 3. Simulación de Llamada con Timeout y AbortController (Resiliencia Mobile)
+    // 3. Call Simulation with Timeout and AbortController (Mobile Resilience)
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000); // 10s max wait
 
     console.log("🚀 Prepared Zoho Payload:", zohoPayload);
 
-    // TODO: Cuando tengas las credenciales, cambia este bloque por:
+    // TODO: When credentials are available, replace this block with:
     // const response = await fetch(ZOHO_CLOUD_FUNCTION_URL, { method: 'POST', body: JSON.stringify(zohoPayload), signal: controller.signal });
 
-    await new Promise(resolve => setTimeout(resolve, 1200)); // Latencia simulada
+    await new Promise(resolve => setTimeout(resolve, 1200)); // Simulated latency
     clearTimeout(timeout);
 
-    // 4. Respuesta Exitosa
+    // 4. Successful Response
     return {
       success: true,
       salesorder_id: `SO-GEN-${Math.floor(Math.random() * 100000)}`,
@@ -62,7 +63,7 @@ export const generateZohoSalesOrder = async (protocolData, patientContext) => {
     };
 
   } catch (error) {
-    // 5. Manejo de Fallos (No se cuelga, se guarda localmente)
+    // 5. Failure Handling (Prevents hanging, saves locally)
     console.error("⚠️ Zoho Service Error:", error.name === 'AbortError' ? 'Timeout' : error.message);
 
     saveToOfflineQueue(protocolData);
@@ -76,7 +77,7 @@ export const generateZohoSalesOrder = async (protocolData, patientContext) => {
 };
 
 /**
- * Guarda el pedido en el dispositivo si la red falla.
+ * Saves the order on the device if network fails.
  */
 function saveToOfflineQueue(data) {
   const existing = JSON.parse(localStorage.getItem(PENDING_SYNC_KEY) || '[]');

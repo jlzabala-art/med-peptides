@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, ExternalLink, BookOpen, Clock, Loader2, AlertCircle, ChevronDown, ChevronUp, Activity } from 'lucide-react';
 import { getPubMedLiterature } from '../../services/pubmedService';
@@ -120,7 +121,7 @@ export default function PubMedPreviewPanel({ isOpen, onClose, product }) {
               <p style={{ fontWeight: 600, fontSize: '1.1rem' }}>Querying PubMed Database...</p>
             </div>
           ) : error ? (
-            <div style={{ padding: '2rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', color: '#b91c1c', display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+            <div style={{ padding: '2rem', backgroundColor: 'var(--color-danger-bg)', border: '1px solid #fecaca', borderRadius: '12px', color: '#b91c1c', display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
               <AlertCircle size={24} style={{ flexShrink: 0 }} />
               <p style={{ margin: 0, lineHeight: 1.5 }}>{error}</p>
             </div>
@@ -170,7 +171,7 @@ export default function PubMedPreviewPanel({ isOpen, onClose, product }) {
                       <div style={{ 
                         marginBottom: '1.25rem', 
                         padding: '1rem', 
-                        backgroundColor: '#f8fafc', 
+                        backgroundColor: 'var(--color-bg-app)', 
                         borderRadius: '8px', 
                         borderLeft: '3px solid var(--primary)',
                         animation: 'fadeIn 0.3s ease-out'

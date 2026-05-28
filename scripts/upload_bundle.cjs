@@ -10,7 +10,7 @@ const path = require('path');
 
 const BUNDLE_PATH = path.join(__dirname, '../export/enhanced_protocols_bundle_cog_energy_horm.json');
 const COLLECTION = 'protocols';
-const PROJECT_ID = 'med-peptides-app';
+const PROJECT_ID = 'Med-Peptides-app';
 
 // Initialize with project ID — uses ADC (firebase CLI token)
 if (!admin.apps.length) {

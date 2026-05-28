@@ -3,9 +3,9 @@
     "protocol_id": "wm_001",
     "protocol_slug": "weight-management-structured-12w",
     "name": "Tirzepatide + MOTS-c Metabolic Protocol",
-    "category": "Weight Management / Obesity",
+    "category": "Metabolic & Weight",
     "tags": [
-      "Weight Management / Obesity",
+      "Metabolic & Weight",
       "standard",
       "Reduced appetite",
       "Progressive fat loss",
@@ -27,9 +27,9 @@
     "protocol_id": "met_001",
     "protocol_slug": "metabolic-optimization-10w",
     "name": "MOTS-c & AOD-9604 Metabolic Activation Protocol",
-    "category": "Metabolic Health",
+    "category": "Metabolic & Weight",
     "tags": [
-      "Metabolic Health",
+      "Metabolic & Weight",
       "moderate"
     ],
     "duration_weeks": 10,
@@ -41,27 +41,30 @@
   },
   {
     "protocol_id": "rec_001",
-    "protocol_slug": "injury-recovery-8w",
-    "name": "BPC-157 & TB-500 Tissue Repair Protocol",
-    "category": "Recovery / Injury",
+    "protocol_slug": "recovery-foundation-bpc-tb",
+    "name": "Recovery Foundation Protocol (BPC-157 + TB-500)",
+    "category": "Recovery & Repair",
     "tags": [
-      "Recovery / Injury",
-      "standard"
+      "Recovery & Repair",
+      "standard",
+      "acute",
+      "tissue repair",
+      "inflammation modulation"
     ],
     "duration_weeks": 8,
     "products_used": [
       "bpc 157",
       "tb 500"
     ],
-    "clinical_focus": ""
+    "clinical_focus": "Core foundation protocol for acute tissue repair, leveraging the synergistic effects of BPC-157 and TB-500."
   },
   {
     "protocol_id": "cog_001",
     "protocol_slug": "cognitive-support-6w",
     "name": "Semax & Selank Neurocognitive Protocol",
-    "category": "Cognitive Support",
+    "category": "Cognitive & Mood",
     "tags": [
-      "Cognitive Support",
+      "Cognitive & Mood",
       "simple"
     ],
     "duration_weeks": 6,
@@ -75,9 +78,9 @@
     "protocol_id": "lon_001",
     "protocol_slug": "longevity-foundation-12w",
     "name": "MOTS-c Longevity Foundation Protocol",
-    "category": "Longevity",
+    "category": "Longevity & Anti-Aging",
     "tags": [
-      "Longevity",
+      "Longevity & Anti-Aging",
       "moderate"
     ],
     "duration_weeks": 12,
@@ -94,9 +97,9 @@
     "protocol_id": "sleep_001",
     "protocol_slug": "sleep-restoration-8w",
     "name": "DSIP & Selank Sleep Restoration Protocol",
-    "category": "Sleep Support",
+    "category": "Cognitive & Mood",
     "tags": [
-      "Sleep Support",
+      "Cognitive & Mood",
       "moderate"
     ],
     "duration_weeks": 8,
@@ -110,9 +113,9 @@
     "protocol_id": "horm_001",
     "protocol_slug": "hormonal-support-12w",
     "name": "CJC-1295 / Ipamorelin GH Optimization Protocol",
-    "category": "Hormonal Support",
+    "category": "Hormonal Optimization",
     "tags": [
-      "Hormonal Support",
+      "Hormonal Optimization",
       "advanced"
     ],
     "duration_weeks": 12,
@@ -126,9 +129,9 @@
     "protocol_id": "skin_001",
     "protocol_slug": "skin-rejuvenation-12w",
     "name": "GHK-Cu Collagen Rejuvenation Protocol",
-    "category": "Skin / Anti-Aging",
+    "category": "Longevity & Anti-Aging",
     "tags": [
-      "Skin / Anti-Aging",
+      "Longevity & Anti-Aging",
       "moderate"
     ],
     "duration_weeks": 12,
@@ -141,9 +144,9 @@
     "protocol_id": "immune_001",
     "protocol_slug": "immune-modulation-8w",
     "name": "Thymosin Alpha-1 & TB-500 Immune Modulation Protocol",
-    "category": "Immune / Inflammation",
+    "category": "Immune Support",
     "tags": [
-      "Immune / Inflammation",
+      "Immune Support",
       "moderate"
     ],
     "duration_weeks": 8,
@@ -157,9 +160,9 @@
     "protocol_id": "energy_001",
     "protocol_slug": "mitochondrial-energy-10w",
     "name": "MOTS-c Mitochondrial Energy Protocol",
-    "category": "Energy / Mitochondrial",
+    "category": "Metabolic & Weight",
     "tags": [
-      "Energy / Mitochondrial",
+      "Metabolic & Weight",
       "moderate"
     ],
     "duration_weeks": 10,
@@ -172,9 +175,9 @@
     "protocol_id": "wm_002",
     "protocol_slug": "weight-management-cagrisem-12w",
     "name": "Semaglutide + Cagrilintide Dual-Agonist Protocol",
-    "category": "Weight Management / Obesity",
+    "category": "Metabolic & Weight",
     "tags": [
-      "Weight Management / Obesity",
+      "Metabolic & Weight",
       "advanced"
     ],
     "duration_weeks": 12,
@@ -189,9 +192,9 @@
     "protocol_id": "met_002",
     "protocol_slug": "metabolic-retatrutide-motsc-12w",
     "name": "Retatrutide + MOTS-c Metabolic Intensification Protocol",
-    "category": "Metabolic Health",
+    "category": "Metabolic & Weight",
     "tags": [
-      "Metabolic Health",
+      "Metabolic & Weight",
       "advanced"
     ],
     "duration_weeks": 12,
@@ -204,28 +207,31 @@
   },
   {
     "protocol_id": "rec_002",
-    "protocol_slug": "neuro-musculoskeletal-repair-8w",
-    "name": "BPC-157, TB-500 & ARA-290 Neuro-Musculoskeletal Protocol",
-    "category": "Recovery / Injury",
+    "protocol_slug": "recovery-advanced-chronic",
+    "name": "Advanced Recovery Protocol (Chronic Degeneration Focus)",
+    "category": "Recovery & Repair",
     "tags": [
-      "Recovery / Injury",
-      "advanced"
+      "Recovery & Repair",
+      "advanced",
+      "chronic",
+      "remodeling",
+      "systemic repair"
     ],
-    "duration_weeks": 8,
+    "duration_weeks": 12,
     "products_used": [
       "bpc 157",
       "tb 500",
-      "ara 290"
+      "ghk cu"
     ],
-    "clinical_focus": "Two-phase recovery protocol combining BPC-157 and TB-500 with ARA-290 support where tissue repair and neuropathic recovery overlap."
+    "clinical_focus": "Advanced long-term recovery protocol designed for chronic degenerative conditions, featuring systemic repair signaling and tissue remodeling support."
   },
   {
     "protocol_id": "cog_002",
     "protocol_slug": "focus-resilience-8w",
     "name": "Semax & Pinealon Neuro-Executive Protocol",
-    "category": "Cognitive Support",
+    "category": "Cognitive & Mood",
     "tags": [
-      "Cognitive Support",
+      "Cognitive & Mood",
       "moderate"
     ],
     "duration_weeks": 8,
@@ -239,9 +245,9 @@
     "protocol_id": "lon_002",
     "protocol_slug": "longevity-circadian-mitochondrial-12w",
     "name": "Epithalon + MOTS-c Circadian Longevity Protocol",
-    "category": "Longevity",
+    "category": "Longevity & Anti-Aging",
     "tags": [
-      "Longevity",
+      "Longevity & Anti-Aging",
       "moderate"
     ],
     "duration_weeks": 12,
@@ -255,9 +261,9 @@
     "protocol_id": "sleep_002",
     "protocol_slug": "sleep-circadian-6w",
     "name": "DSIP & Epithalon Circadian Sleep Protocol",
-    "category": "Sleep Support",
+    "category": "Cognitive & Mood",
     "tags": [
-      "Sleep Support",
+      "Cognitive & Mood",
       "simple"
     ],
     "duration_weeks": 6,
@@ -271,9 +277,9 @@
     "protocol_id": "horm_002",
     "protocol_slug": "gh-axis-support-12w",
     "name": "Tesamorelin + Ipamorelin GH-Axis Protocol",
-    "category": "Hormonal Support",
+    "category": "Hormonal Optimization",
     "tags": [
-      "Hormonal Support",
+      "Hormonal Optimization",
       "advanced"
     ],
     "duration_weeks": 12,
@@ -287,9 +293,9 @@
     "protocol_id": "skin_002",
     "protocol_slug": "skin-repair-aging-10w",
     "name": "GHK-Cu & Epithalon Cellular Repair Protocol",
-    "category": "Skin / Anti-Aging",
+    "category": "Longevity & Anti-Aging",
     "tags": [
-      "Skin / Anti-Aging",
+      "Longevity & Anti-Aging",
       "moderate"
     ],
     "duration_weeks": 10,
@@ -303,9 +309,9 @@
     "protocol_id": "immune_002",
     "protocol_slug": "immune-kpv-thymosin-8w",
     "name": "Thymosin Alpha-1 & KPV Anti-Inflammatory Protocol",
-    "category": "Immune / Inflammation",
+    "category": "Immune Support",
     "tags": [
-      "Immune / Inflammation",
+      "Immune Support",
       "moderate"
     ],
     "duration_weeks": 8,
@@ -319,9 +325,9 @@
     "protocol_id": "energy_002",
     "protocol_slug": "mitochondrial-resilience-10w",
     "name": "SS-31 & NMN Bioenergetic Resilience Protocol",
-    "category": "Energy / Mitochondrial",
+    "category": "Metabolic & Weight",
     "tags": [
-      "Energy / Mitochondrial",
+      "Metabolic & Weight",
       "advanced"
     ],
     "duration_weeks": 10,
@@ -336,9 +342,9 @@
     "protocol_id": "neuro_001",
     "protocol_slug": "lxv-neuro-restoration-12w",
     "name": "BPC-157, SS-31 & Pinealon Neuro-Restoration Protocol",
-    "category": "Recovery / Injury",
+    "category": "Recovery & Repair",
     "tags": [
-      "Recovery / Injury",
+      "Recovery & Repair",
       "advanced",
       "Improved energy and awareness",
       "Progressive cognitive responsiveness",
@@ -360,9 +366,9 @@
     "protocol_id": "wm_003",
     "protocol_slug": "advanced-metabolic-longevity-16w",
     "name": "Advanced Metabolic & Longevity Protocol",
-    "category": "Weight Management / Obesity",
+    "category": "Metabolic & Weight",
     "tags": [
-      "Weight Management / Obesity",
+      "Metabolic & Weight",
       "moderate",
       "Significant visceral fat reduction",
       "Enhanced insulin sensitivity",
@@ -385,9 +391,9 @@
     "protocol_id": "wm_004",
     "protocol_slug": "personalized-metabolic-weight-loss-12w",
     "name": "Tirzepatide + AOD-9604 & MOTS-c Metabolic Protocol",
-    "category": "Weight Management / Obesity",
+    "category": "Metabolic & Weight",
     "tags": [
-      "Weight Management / Obesity",
+      "Metabolic & Weight",
       "moderate",
       "Sustainable fat loss",
       "Improved metabolic rate",

@@ -3,8 +3,8 @@
   "active": true,
   "confidence_score": 88,
   "number_of_phases": 2,
-  "protocol_author_name": "ReGen PEPT Clinical Team",
-  "protocol_author_organization": "ReGen PEPT",
+  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_organization": "Med-Peptides",
   "protocol_author_title": "Peptide Specialists",
   "protocol_duration_weeks": 8,
   "protocol_is_curated": true,
@@ -194,9 +194,9 @@
           "product_title": "Dsip",
           "route": "subcutaneous",
           "dose_logic": {
-            "dose_unit": "protocol_defined",
+            "dose_unit": "mg",
             "administration_frequency": "daily_evening",
-            "selected_strength": "5mg"
+            "starting_weekly_dose": 5
           },
           "variantRef": {
             "type": "resolved",
@@ -207,16 +207,15 @@
         {
           "product_id": "prd_selank",
           "product_title": "Selank",
-          "route": "protocol_defined",
+          "route": "intranasal",
           "dose_logic": {
-            "dose_unit": "protocol_defined",
-            "administration_frequency": "daily",
-            "selected_strength": "nasal"
+            "dose_unit": "mcg",
+            "administration_frequency": "daily"
           },
           "variantRef": {
             "type": "resolved",
             "productId": "prd_selank",
-            "route": "protocol_defined"
+            "route": "intranasal"
           }
         }
       ],
@@ -238,16 +237,16 @@
         {
           "product_id": "prd_dsip",
           "product_title": "Dsip",
-          "route": "protocol_defined",
+          "route": "subcutaneous",
           "dose_logic": {
-            "dose_unit": "protocol_defined",
+            "dose_unit": "mg",
             "administration_frequency": "3x_week",
-            "selected_strength": "5mg"
+            "starting_weekly_dose": 5
           },
           "variantRef": {
             "type": "resolved",
             "productId": "prd_dsip",
-            "route": "protocol_defined"
+            "route": "subcutaneous"
           }
         }
       ],
@@ -396,8 +395,8 @@
     "scientificName": "DSIP & Selank Delta-Sleep-Inducing & GABAergic Anxiolytic Sleep Restoration Protocol",
     "description": "8-week sleep restoration protocol combining DSIP delta-wave sleep induction with Selank GABAergic anxiolysis to rebuild healthy sleep architecture and reduce cortisol-driven insomnia.",
     "author": {
-      "name": "ReGen PEPT Clinical Team",
-      "organization": "ReGen PEPT",
+      "name": "Med-Peptides Clinical Team",
+      "organization": "Med-Peptides",
       "title": "Peptide Specialists"
     },
     "review": {
@@ -432,5 +431,8 @@
       }
     }
   },
-  "_syncedAt": "2026-04-26T12:46:36.931Z"
+  "_syncedAt": "2026-04-26T12:46:36.931Z",
+  "recommended_tests": [
+    "cortisol-blood-test"
+  ]
 }

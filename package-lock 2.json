@@ -1,11 +1,11 @@
 {
-  "name": "regenpept-web",
+  "name": "Med-Peptides-web",
   "version": "5.3.0",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
-      "name": "regenpept-web",
+      "name": "Med-Peptides-web",
       "version": "5.3.0",
       "dependencies": {
         "@emailjs/browser": "^4.4.1",

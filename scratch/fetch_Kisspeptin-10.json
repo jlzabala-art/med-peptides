@@ -1,0 +1,37 @@
+[
+  {
+    "pmid": "26852256",
+    "title": "Pubertal development and regulation.",
+    "authors": [
+      "Abreu AP",
+      "Kaiser UB"
+    ],
+    "journal": "The lancet. Diabetes & endocrinology",
+    "pubdate": "2016 Mar",
+    "doi": "10.1016/S2213-8587(15)00418-0",
+    "abstract": "Puberty marks the end of childhood and is a period when individuals undergo physiological and psychological changes to achieve sexual maturation and fertility. The hypothalamic-pituitary-gonadal axis controls puberty and reproduction and is tightly regulated by a complex network of excitatory and inhibitory factors. This axis is active in the embryonic and early postnatal stages of life and is subsequently restrained during childhood, and its reactivation culminates in puberty initiation. The mechanisms underlying this reactivation are not completely known. The age of puberty onset varies between individuals and the timing of puberty initiation is associated with several health outcomes in adult life. In this Series paper, we discuss pubertal markers, epidemiological trends of puberty initiation over time, and the mechanisms whereby genetic, metabolic, and other factors control secretion of gonadotropin-releasing hormone to determine initiation of puberty."
+  },
+  {
+    "pmid": "32427949",
+    "title": "Metabolic regulation of kisspeptin - the link between energy balance and reproduction.",
+    "authors": [
+      "Navarro VM"
+    ],
+    "journal": "Nature reviews. Endocrinology",
+    "pubdate": "2020 Aug",
+    "doi": "10.1038/s41574-020-0363-7",
+    "abstract": "Hypothalamic kisspeptin neurons serve as the nodal regulatory centre of reproductive function. These neurons are subjected to a plethora of regulatory factors that ultimately affect the release of kisspeptin, which modulates gonadotropin-releasing hormone (GnRH) release from GnRH neurons to control the reproductive axis. The presence of sufficient energy reserves is critical to achieve successful reproduction. Consequently, metabolic factors impose a very tight control over kisspeptin synthesis and release. This Review offers a synoptic overview of the different steps in which kisspeptin neurons are subjected to metabolic regulation, from early developmental stages to adulthood. We cover an ample array of known mechanisms that underlie the metabolic regulation of KISS1 expression and kisspeptin release. Furthermore, the novel role of kisspeptin neurons as active players within the neuronal circuits that govern energy balance is discussed, offering evidence of a bidirectional role of these neurons as a nexus between metabolism and reproduction."
+  },
+  {
+    "pmid": "30086862",
+    "title": "Central precocious puberty: From genetics to treatment.",
+    "authors": [
+      "Aguirre RS",
+      "Eugster EA"
+    ],
+    "journal": "Best practice & research. Clinical endocrinology & metabolism",
+    "pubdate": "2018 Aug",
+    "doi": "10.1016/j.beem.2018.05.008",
+    "abstract": "Central precocious puberty (CPP) results from early activation of the hypothalamic - pituitary -gonadal (HPG) axis and follows the same sequence as normal puberty. While many factors involved in pubertal initiation remain poorly understood, the kisspeptin system is known to play a key role. Currently, mutations in the kisspeptin system, MKRN3, and DLK1 have been identified in sporadic and familial cases of CPP. The diagnosis is based on physical exam findings indicating advancing puberty and on laboratory tests confirming central HPG axis activation. GnRH analogs are the mainstay of treatment and are used with the goal of height preservation. Newer extended release formulations continue to be developed. Currently there is no evidence of long-term complications associated with treatment. However, many areas remain to be explored such as targeted therapies and aspects of clinical management. Further investigation into psychological effects and additional data regarding long-term outcomes, particularly in males, is needed."
+  }
+]

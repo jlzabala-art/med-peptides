@@ -1,0 +1,32 @@
+[
+  {
+    "pmid": "41490200",
+    "title": "Therapeutic Peptides in Orthopaedics: Applications, Challenges, and Future Directions.",
+    "authors": [
+      "Rahman OF",
+      "Lee SJ",
+      "Seeds WA"
+    ],
+    "journal": "Journal of the American Academy of Orthopaedic Surgeons. Global research & reviews",
+    "pubdate": "2026 Jan 01",
+    "doi": null,
+    "abstract": "Therapeutic peptides are emerging as promising adjuncts in the management of orthopaedic injuries, grounded in their ability to modulate molecular signaling networks central to cellular medicine. By acting on key pathways such as PI3K/Akt, mTOR, MAPK, TGF-\u03b2, and AMPK, peptides exert influence over tissue regeneration, inflammation resolution, and neuromuscular recovery. Wound-healing peptides such as BPC-157, TB-500, and GHK-Cu promote angiogenesis, integrin-mediated extracellular matrix remodeling, and fibroblast activation, whereas growth hormone secretagogues like ipamorelin, CJC-1295, tesamorelin, sermorelin, and AOD-9604 activate IGF-1 signaling and satellite cell repair. Recovery-enhancing agents such as epithalon, delta sleep-inducing peptide, and pinealon target circadian and mitochondrial regulators, and neuroactive peptides like selank, semax, and dihexa enhance brain-derived neurotrophic factor and HGF/c-Met pathways critical to neuroplasticity. Although preclinical studies are promising, there is a current lack of clinical trials. This review integrates current mechanistic insights with orthopaedic relevance, emphasizing safety, efficacy, and future directions for responsible integration into musculoskeletal care."
+  },
+  {
+    "pmid": "21978084",
+    "title": "Pinealon increases cell viability by suppression of free radical levels and activating proliferative processes.",
+    "authors": [
+      "Khavinson V",
+      "Ribakova Y",
+      "Kulebiakin K",
+      "Vladychenskaya E",
+      "Kozina L",
+      "Arutjunyan A",
+      "Boldyrev A"
+    ],
+    "journal": "Rejuvenation research",
+    "pubdate": "2011 Oct",
+    "doi": "10.1089/rej.2011.1172",
+    "abstract": "The synthetic tripeptide pinealon (Glu-Asp-Arg) demonstrates dose-dependent restriction of reactive oxygen species (ROS) accumulation in cerebellar granule cells, neutrophils, and pheochromocytoma (PC12) cells, induced by oxidative stress stimulated by receptor-dependent or -independent processes. At the same time, pinealon decreases necrotic cell death measured by the propidium iodide test. The protective effect of pinealon is accompanied with a delayed time course of ERK 1/2 activation and modification of the cell cycle. Because restriction of ROS accumulation and cell mortality is saturated at lower concentrations, whereas cell cycle modulation continues at higher concentrations of pinealon, one can conclude that besides its known antioxidant activity, pinealon is able to interact directly with the cell genome."
+  }
+]

@@ -1,0 +1,7381 @@
+{
+  "generatedAt": "2026-05-15T10:43:47.146Z",
+  "phase": "Phase 1 — Audit Current Product Metadata",
+  "summary": {
+    "totalRecords": 151,
+    "okRecords": 0,
+    "needsMigration": 151,
+    "productTypeBreakdown": {
+      "peptide": 57,
+      "supplement": 94
+    }
+  },
+  "missingRootFieldCounts": {
+    "id": 151,
+    "status": 57,
+    "categories": 151,
+    "slug": 94,
+    "productType": 94,
+    "secondaryFactors": 94,
+    "safetyNote": 94,
+    "variants": 94,
+    "mechanisms": 76
+  },
+  "legacyAiFieldsStillAtRoot": {
+    "faqModalItems": 55,
+    "faqModalEnabled": 55,
+    "scientificModalEnabled": 55
+  },
+  "recordsWithInconsistencies": [
+    {
+      "name": "BPC-157",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "bpc-157",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "TB-500 (Thymosin β4)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "tb-500-thymosin-4",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "GLOW (BPC-157/TB-500/GHK-Cu)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "glow-bpc-157-tb-500-ghk-cu",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": [
+        "Contains forbidden word \"compound\" — use peptide/supplement/product instead"
+      ]
+    },
+    {
+      "name": "KLOW (BPC-157/TB-500/GHK-Cu/KPV)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "klow-bpc-157-tb-500-ghk-cu-kpv",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "KPV",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "kpv",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "ARA-290",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "ara-290",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Tirzepatide",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "tirzepatide",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Tirzepatide",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "tirzepatide",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Tirzepatide",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "tirzepatide",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Retatrutide",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "retatrutide",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Semaglutide",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "semaglutide",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Cagrilintide",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "cagrilintide",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "AOD-9604",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "aod-9604",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "5-AMINO 1 MQ",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "5-amino-1-mq",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "MOTS-C",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "mots-c",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "SLU PP-332",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "slu-pp-332",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "GW-501516",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "gw-501516",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Epithalon",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "epithalon",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "GHK-Cu (Copper Peptide)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "ghk-cu-copper-peptide",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "NAD+",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "nad",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "NAD+",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "nad",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "NMN",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "nmn",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "SS-31",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "ss-31",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Selank",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "selank",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Semax",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "semax",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Pinealon",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "pinealon",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "DSIP",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "dsip",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "PE-22 28",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "pe-22-28",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "CJC-1295 without DAC (Modified GRF 1-29)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "cjc-1295-without-dac-modified-grf-1-29",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "CJC-1295 with DAC",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "cjc-1295-with-dac",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "FST-344 (Follistatin)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "fst-344-follistatin",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "IGF-1 LR3",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "igf-1-lr3",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "PEG MGF",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "peg-mgf",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "MK-677 (Ibutamoren)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "mk-677-ibutamoren",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "HGH",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "hgh",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "HCG",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "hcg",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "HMG",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "hmg",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Ipamorelin",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "ipamorelin",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "GHRP-2",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "ghrp-2",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Hexarelin",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "hexarelin",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Sermorelin",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "sermorelin",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Tesamorelin",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "tesamorelin",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Kisspeptin-10",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "kisspeptin-10",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Oxytocin Acetate",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "oxytocin-acetate",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "MT2 (Melanotan II)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "mt2-melanotan-ii",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "PT-141 (Bremelanotide)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "pt-141-bremelanotide",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "PNC-27",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "pnc-27",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Snap-8",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "snap-8",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Thymulin",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "thymulin",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Thymosin Alpha 1",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "thymosin-alpha-1",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Cartalax",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "cartalax",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Cardiogen",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "cardiogen",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Thymagen",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "thymagen",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Prostamax",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "prostamax",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Testagen",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "testagen",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Bacteriostatic Water",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "bacteriostatic-water",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Precision Insulin Syringes",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "precision-insulin-syringes",
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Ashwagandha",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Ashwagandha",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Rhodiola Rosea",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Rhodiola Rosea",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Ginkgo Biloba",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Boswellia",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Boswellia",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Boswellia",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Lion's Mane Mushroom",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Milk Thistle",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Magnolia",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Magnolia",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Acetyl-Carnitine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "L-Arginine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "L-Arginine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "L-Citrulline",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "L-Tryptophan",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Glutamine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Cystine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "5-HTP",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "5-HTP",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "5-HTP",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "A-Lipoic Acid",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "A-Lipoic Acid",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "A-Lipoic Acid",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Co-Q10",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Co-Q10",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Co-Q10",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Co-Q10",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Co-Q10",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Co-Q10",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Co-Q10",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Glutathione",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Glutathione",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "NAC",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Quercetin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Quercetin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Pycnogenol",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Grape Seed Extract",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "NMN",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "NMN",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "NMN",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "NMN",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "NMN",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Resveratrol",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Spermidine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Spermidine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Urolithin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Rapamycin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Rapamycin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Berberine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Metformin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Fenbendazole",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Fenbendazole",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Hyaluronic Acid",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Bromelain",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Serrapeptase 300,000SPU",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Curcumin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "B-Complex",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Biotin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Biotin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Vit. D3",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Vit. D3",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Vit. D3",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Vit. D3",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Vit. D3 10,000IU + K2",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Magnesium Citrate",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Magnesium Glycinate",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Magnesium Threonate",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Magnesium 5-Matrix",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Omega-3 Forte",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Zinc Citrate",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Zinc Gluconate",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Boron",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Melatonin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Melatonin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Melatonin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Melatonin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Sleep Support",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "L-Theanine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "5-HTP",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "LDN 0.5mg",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "LDN 1.5mg",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "LDN 2.5mg",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "LDN",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "LDN 4.5mg",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Tadalafil",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Tadalafil",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Tadalafil",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Phosphatidylserine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "DIM",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Saw Palmetto",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Spironolactone",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Lycopene",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    }
+  ],
+  "allRecords": [
+    {
+      "name": "BPC-157",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "bpc-157",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "TB-500 (Thymosin β4)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "tb-500-thymosin-4",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "GLOW (BPC-157/TB-500/GHK-Cu)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "glow-bpc-157-tb-500-ghk-cu",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": [
+        "Contains forbidden word \"compound\" — use peptide/supplement/product instead"
+      ]
+    },
+    {
+      "name": "KLOW (BPC-157/TB-500/GHK-Cu/KPV)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "klow-bpc-157-tb-500-ghk-cu-kpv",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "KPV",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "kpv",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "ARA-290",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "ara-290",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Tirzepatide",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "tirzepatide",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Tirzepatide",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "tirzepatide",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Tirzepatide",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "tirzepatide",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Retatrutide",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "retatrutide",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Semaglutide",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "semaglutide",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Cagrilintide",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "cagrilintide",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "AOD-9604",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "aod-9604",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "5-AMINO 1 MQ",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "5-amino-1-mq",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "MOTS-C",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "mots-c",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "SLU PP-332",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "slu-pp-332",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "GW-501516",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "gw-501516",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Epithalon",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "epithalon",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "GHK-Cu (Copper Peptide)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "ghk-cu-copper-peptide",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "NAD+",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "nad",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "NAD+",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "nad",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "NMN",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "nmn",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "SS-31",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "ss-31",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Selank",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "selank",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Semax",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "semax",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Pinealon",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "pinealon",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "DSIP",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "dsip",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "PE-22 28",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "pe-22-28",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "CJC-1295 without DAC (Modified GRF 1-29)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "cjc-1295-without-dac-modified-grf-1-29",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "CJC-1295 with DAC",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "cjc-1295-with-dac",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "FST-344 (Follistatin)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "fst-344-follistatin",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "IGF-1 LR3",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "igf-1-lr3",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "PEG MGF",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "peg-mgf",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "MK-677 (Ibutamoren)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "mk-677-ibutamoren",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "HGH",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "hgh",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "HCG",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "hcg",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "HMG",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "hmg",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Ipamorelin",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "ipamorelin",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "GHRP-2",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "ghrp-2",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Hexarelin",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "hexarelin",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Sermorelin",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "sermorelin",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Tesamorelin",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "tesamorelin",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Kisspeptin-10",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "kisspeptin-10",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Oxytocin Acetate",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "oxytocin-acetate",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "MT2 (Melanotan II)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "mt2-melanotan-ii",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "PT-141 (Bremelanotide)",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "pt-141-bremelanotide",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "PNC-27",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "pnc-27",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Snap-8",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "snap-8",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Thymulin",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "thymulin",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Thymosin Alpha 1",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "thymosin-alpha-1",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Cartalax",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "cartalax",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Cardiogen",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "cardiogen",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Thymagen",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "thymagen",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Prostamax",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "prostamax",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Testagen",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "testagen",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Bacteriostatic Water",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "bacteriostatic-water",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Precision Insulin Syringes",
+      "source": "products.js",
+      "productType": "peptide",
+      "slug": "precision-insulin-syringes",
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": true,
+      "missingRootFields": [
+        "id",
+        "status",
+        "categories"
+      ],
+      "legacyAiFieldsAtRoot": [
+        "faqModalItems",
+        "faqModalEnabled",
+        "scientificModalEnabled"
+      ],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"peptide\""
+      ],
+      "inconsistencies": []
+    },
+    {
+      "name": "Ashwagandha",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Ashwagandha",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Rhodiola Rosea",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Rhodiola Rosea",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Ginkgo Biloba",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Boswellia",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Boswellia",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Boswellia",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Lion's Mane Mushroom",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Milk Thistle",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Magnolia",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Magnolia",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Acetyl-Carnitine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "L-Arginine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "L-Arginine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "L-Citrulline",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "L-Tryptophan",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Glutamine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Cystine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "5-HTP",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "5-HTP",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "5-HTP",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "A-Lipoic Acid",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "A-Lipoic Acid",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "A-Lipoic Acid",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Co-Q10",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Co-Q10",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Co-Q10",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Co-Q10",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Co-Q10",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Co-Q10",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Co-Q10",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Glutathione",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Glutathione",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "NAC",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Quercetin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Quercetin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Pycnogenol",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Grape Seed Extract",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "NMN",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "NMN",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "NMN",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "NMN",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "NMN",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Resveratrol",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Spermidine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Spermidine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Urolithin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Rapamycin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Rapamycin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Berberine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Metformin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Fenbendazole",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Fenbendazole",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Hyaluronic Acid",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Bromelain",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Serrapeptase 300,000SPU",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Curcumin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "B-Complex",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Biotin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Biotin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Vit. D3",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Vit. D3",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Vit. D3",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Vit. D3",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Vit. D3 10,000IU + K2",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Magnesium Citrate",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Magnesium Glycinate",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Magnesium Threonate",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Magnesium 5-Matrix",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Omega-3 Forte",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Zinc Citrate",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Zinc Gluconate",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Boron",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Melatonin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Melatonin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Melatonin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Melatonin",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Sleep Support",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "L-Theanine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "5-HTP",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "LDN 0.5mg",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "LDN 1.5mg",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "LDN 2.5mg",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "LDN",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "LDN 4.5mg",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Tadalafil",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Tadalafil",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Tadalafil",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Phosphatidylserine",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "DIM",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Saw Palmetto",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Spironolactone",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    },
+    {
+      "name": "Lycopene",
+      "source": "supplements.js",
+      "productType": "supplement",
+      "slug": null,
+      "status": "NEEDS_MIGRATION",
+      "hasAiContent": false,
+      "hasTypeData": false,
+      "hasVariants": false,
+      "missingRootFields": [
+        "id",
+        "slug",
+        "productType",
+        "categories",
+        "secondaryFactors",
+        "mechanisms",
+        "safetyNote",
+        "variants"
+      ],
+      "legacyAiFieldsAtRoot": [],
+      "typeDataIssues": [
+        "typeData block missing for productType=\"supplement\""
+      ],
+      "inconsistencies": [
+        "slug is missing",
+        "variants array is missing or empty"
+      ]
+    }
+  ]
+}

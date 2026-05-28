@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   AlertTriangle, CheckCircle2, ChevronRight, Clock, DollarSign,
@@ -16,8 +17,8 @@ const BMI_BRACKETS = [
   { label: 'Obese Class II (35–39.9)',min: 35, max: 39.9 },
   { label: 'Obese Class III (≥40)',   min: 40, max: 99  },
 ];
-const PHASE_COLORS = ['#10b981','#3b82f6','#8b5cf6','#f59e0b'];
-const DRUG_COLORS  = { tirzepatide:'#3b82f6', 'mots-c':'#10b981', 'aod-9604':'#f59e0b' };
+const PHASE_COLORS = ['var(--color-success)','var(--color-primary)','#8b5cf6','#f59e0b'];
+const DRUG_COLORS  = { tirzepatide:'var(--color-primary)', 'mots-c':'var(--color-success)', 'aod-9604':'#f59e0b' };
 
 /* ─── helpers ────────────────────────────────────────────────────── */
 const fmt = s => s ? s.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()) : '';
@@ -194,7 +195,7 @@ function PhaseDetail({ phase, index }) {
       <div className="arch-drugs-grid">
         {phase.drugs.map((d,i) => {
           const ck = keyOf(d.product_id);
-          const dc = DRUG_COLORS[ck] ?? '#64748b';
+          const dc = DRUG_COLORS[ck] ?? 'var(--color-text-secondary)';
           return (
             <div key={i} className="arch-drug-card" style={{ '--dc': dc }}>
               <div className="arch-drug-card__dot" style={{ background: dc }}/>
@@ -246,7 +247,7 @@ function SupplyPanel({ phases, durationWeeks, proto }) {
           <tbody>
             {vials.map((v,i)=>(
               <tr key={i}>
-                <td><span className="arch-compound-dot" style={{background: DRUG_COLORS[v.name.toLowerCase().replace('-','').replace(' ','').replace('mots','mots-c').replace('aod9604','aod-9604')] ?? '#64748b'}}/>{v.name}</td>
+                <td><span className="arch-compound-dot" style={{background: DRUG_COLORS[v.name.toLowerCase().replace('-','').replace(' ','').replace('mots','mots-c').replace('aod9604','aod-9604')] ?? 'var(--color-text-secondary)'}}/>{v.name}</td>
                 <td>{v.totalMg} mg</td>
                 <td>{v.vialSize} mg</td>
                 <td><strong>{v.vials}</strong></td>
@@ -325,7 +326,7 @@ export default function ProtocolArchitect() {
 
   if (loading) return (
     <div className="arch-root" style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh' }}>
-      <div style={{ color:'#94a3b8', fontSize:'1rem' }}>Loading protocol…</div>
+      <div style={{ color:'var(--color-text-tertiary)', fontSize:'1rem' }}>Loading protocol…</div>
     </div>
   );
 

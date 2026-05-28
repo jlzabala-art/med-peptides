@@ -1,3 +1,4 @@
+ 
 import React from 'react';
 import { FlaskConical, Layers, BookOpen, Beaker, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -7,121 +8,112 @@ const DISCOVERY_CARDS = [
     id: 'peptides',
     icon: FlaskConical,
     title: 'Browse Peptides',
-    description: 'Explore our full catalog of research-grade peptides with clinical data.',
-    color: '#00A3E0',
-    bg: 'rgba(0,163,224,0.08)',
-    border: 'rgba(0,163,224,0.18)',
-    route: '/peptides',
+    description: 'Explore our full catalog and find the right compound for your goals.',
+    color: 'var(--color-primary)',
+    bg: 'rgba(0,163,224,0.06)',
+    border: 'rgba(0,163,224,0.15)',
+    searchTab: 'peptides',
   },
   {
     id: 'protocols',
     icon: Layers,
     title: 'Browse Protocols',
-    description: 'Pre-built clinical protocols designed by research specialists.',
+    description: 'Ready-to-use guides that show you how to get the most from each peptide.',
     color: '#10B981',
-    bg: 'rgba(16,185,129,0.08)',
-    border: 'rgba(16,185,129,0.18)',
-    route: '/protocols',
+    bg: 'rgba(16,185,129,0.06)',
+    border: 'rgba(16,185,129,0.15)',
+    searchTab: 'protocols',
   },
   {
     id: 'knowledge',
     icon: BookOpen,
-    title: 'Clinical Knowledge',
-    description: 'Evidence-based guides, dosing references, and clinical literature.',
-    color: '#A78BFA',
-    bg: 'rgba(167,139,250,0.08)',
-    border: 'rgba(167,139,250,0.18)',
-    route: '/knowledge',
+    title: 'Learn & Understand',
+    description: 'Clear explanations, dosing guidance, and answers to your questions.',
+    color: '#6366F1',
+    bg: 'rgba(99,102,241,0.06)',
+    border: 'rgba(99,102,241,0.15)',
+    searchTab: 'questions',
   },
   {
     id: 'reconstitution',
     icon: Beaker,
     title: 'Reconstitution Guides',
-    description: 'Step-by-step reconstitution protocols for every compound.',
-    color: '#F59E0B',
-    bg: 'rgba(245,158,11,0.08)',
-    border: 'rgba(245,158,11,0.18)',
-    route: '/guides',
+    description: 'Simple, step-by-step instructions to prepare each compound safely.',
+    color: '#D97706',
+    bg: 'rgba(217,119,6,0.06)',
+    border: 'rgba(217,119,6,0.15)',
+    route: '/reconstitution-guide',
   },
 ];
 
-export default function QuickDiscovery() {
+
+export default function QuickDiscovery({ onOpenSearch }) {
   const navigate = useNavigate();
 
+  const handleCardClick = (card) => {
+    if (card.soon) return;                       // Coming Soon — no action
+    if (card.searchTab && onOpenSearch) {
+      // Open search modal with the correct pre-selected tab
+      onOpenSearch(undefined, card.searchTab);
+    } else if (card.route) {
+      navigate(card.route);
+    }
+  };
+
   return (
-    <section style={{ padding: 'clamp(3rem, 6vw, 5rem) 1.25rem', background: 'var(--background, #0A0F1E)' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+    <section className="qd-section">
+      <div className="qd-container">
 
         {/* Section header */}
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#00A3E0', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-            Quick Access
+        <div className="qd-header">
+          <p className="qd-eyebrow">
+            Where Do You Want to Start?
           </p>
-          <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: 800, color: 'var(--text-primary, #fff)', letterSpacing: '-0.01em' }}>
-            Start Your Discovery
+          <h2 className="qd-title">
+            Your Wellness Journey, One Step at a Time
           </h2>
         </div>
 
         {/* Cards grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
-          gap: '1.25rem',
-        }}>
+        <div className="qd-grid">
           {DISCOVERY_CARDS.map((card) => {
             const Icon = card.icon;
             return (
               <button
                 key={card.id}
-                onClick={() => navigate(card.route)}
+                onClick={() => handleCardClick(card)}
+                className={`qd-card ${card.soon ? 'qd-card--soon' : ''}`}
                 style={{
-                  background: card.bg,
-                  border: `1.5px solid ${card.border}`,
-                  borderRadius: '16px',
-                  padding: '1.75rem',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  transition: 'all 0.22s ease',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem',
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.boxShadow = `0 16px 40px ${card.bg}`;
-                  e.currentTarget.style.borderColor = card.color;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'none';
-                  e.currentTarget.style.borderColor = card.border;
+                  '--qd-color': card.color,
+                  '--qd-bg': card.bg,
+                  '--qd-border': card.border,
                 }}
               >
                 {/* Icon */}
-                <div style={{
-                  width: '44px', height: '44px', borderRadius: '12px',
-                  background: `${card.color}20`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
+                <div className="qd-icon-wrapper">
                   <Icon size={22} color={card.color} strokeWidth={1.8} />
                 </div>
 
                 {/* Text */}
-                <div>
-                  <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary, #fff)', marginBottom: '0.4rem' }}>
+                <div className="qd-card-content">
+                  <div className="qd-card-title">
                     {card.title}
                   </div>
-                  <div style={{ fontSize: '0.83rem', color: 'rgba(255,255,255,0.50)', lineHeight: 1.55 }}>
+                  <div className="qd-card-desc">
                     {card.description}
                   </div>
                 </div>
 
-                {/* Arrow */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: card.color, fontSize: '0.82rem', fontWeight: 600, marginTop: 'auto' }}>
-                  Explore <ArrowRight size={14} strokeWidth={2.5} />
-                </div>
+                {/* Arrow or Coming Soon badge */}
+                {card.soon ? (
+                  <div className="qd-soon-badge">
+                    Coming Soon
+                  </div>
+                ) : (
+                  <div className="qd-action-link">
+                    Explore <ArrowRight size={14} strokeWidth={2.5} />
+                  </div>
+                )}
               </button>
             );
           })}

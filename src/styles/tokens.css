@@ -1,139 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700&display=swap');
-
+/* Google Cloud Design Tokens */
 :root {
-  --primary: #003666;      /* Deeper more sophisticated clinical blue */
-  --primary-light: #005A9C; 
-  --secondary: #00A3E0;    /* Bright accent blue */
-  --background: #F8FAFC;   /* Very light gray/blue background */
-  --surface: #FFFFFF;      /* White cards/surfaces */
-  --text-main: #0f172a;    /* Darker, richer slate for main text */
-  --text-muted: #475569;   /* Slate for muted text */
-  --border: #f1f5f9;       /* Softer, subtler border */
-  --success: #10B981;
-  --accent-soft: rgba(0, 163, 224, 0.05);
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  
-  --shadow-sm: 0 2px 8px -2px rgba(0, 54, 102, 0.04);
-  --shadow-md: 0 10px 24px -4px rgba(0, 54, 102, 0.08);
-  --shadow-lg: 0 20px 40px -8px rgba(0, 54, 102, 0.12);
-  --shadow-glow: 0 0 24px rgba(0, 163, 224, 0.25);
-  --shadow-premium: 0 30px 60px -12px rgba(0, 54, 102, 0.1), 0 18px 36px -18px rgba(0, 54, 102, 0.1);
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 
-  --font-sans: 'Inter', sans-serif;
-  --font-heading: 'Outfit', sans-serif;
-  --gradient-premium: linear-gradient(135deg, #003666 0%, #005A9C 100%);
-  --gradient-soft: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
-  --sidebar-width: 320px;
-  --stepper-height: 70px;
-}
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.18);
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-/* App wrapper — MUST NOT have overflow-x:hidden — that creates a scroll container in iOS Safari
-   which traps touch events and breaks native document scroll.
-   Use overflow-x:clip on html instead which does NOT create a new scroll container. */
-.app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--surface);
-  /* Ensure vertical scroll is prioritized and smooth on mobile */
-  touch-action: pan-y;
-  position: relative;
-}
-
-html {
-  /* overflow-x:clip does NOT create a new scroll container (unlike overflow-x:hidden)
-     This is safe for iOS Safari and prevents horizontal scroll without breaking vertical scroll */
-  overflow-x: clip;
-}
-
-body {
-  font-family: var(--font-sans);
-  background-color: var(--background);
-  color: var(--text-main);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  /* Do NOT set overflow-x:hidden here — use html overflow-x:clip above instead */
-}
-
-#root {
-  min-height: 100%;
-}
-
-/* Ensure template root doesn't block scroll */
-.template-root {
-  overflow: visible !important;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  line-height: 1.15;
-  color: var(--primary);
-  margin-bottom: 0.5em;
-  letter-spacing: -0.02em;
-}
-
-a {
-  color: var(--primary-light);
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-a:hover {
-  color: var(--secondary);
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 0 1.25rem;
-  }
-}
-
-.section {
-  padding: 6rem 0;
-}
-
-@media (max-width: 768px) {
-  .section {
-    padding: 4rem 0;
-  }
-}
-
-.section-light {
-  background-color: var(--background);
-}
-
-.section-white {
-  background-color: var(--surface);
-}
-
-.section-dark {
-  background-color: var(--primary);
-  color: white;
-}
-
-.section-dark h2 {
-  color: white;
-}
-
-.section-dark p {
-  color: #f1f5f9;
+  /* Colors (Google Cloud palette) */
+  --primary: #003666; /* Dark blue */
+  --secondary: #0096CC; /* Light blue */
+  --accent-soft: rgba(0, 150, 204, 0.06);
+  --accent-medium: rgba(0, 150, 204, 0.14);
+  --surface: #fff;
+  --border-light: #EBF2F8;
+  --text-main: #0D1B2E;
+  --text-muted: #4A6080;
+  --text-light: #7A93B0;
 }

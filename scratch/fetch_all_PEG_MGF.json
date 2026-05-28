@@ -1,0 +1,33 @@
+[
+  {
+    "pmid": "41104373",
+    "title": "Injectable Hydrogels for Programmable Nanoparticle Release.",
+    "authors": [
+      "Shi W",
+      "Xi Y",
+      "Sheng X",
+      "Das S",
+      "He D",
+      "Collins K",
+      "Hu Y",
+      "Finn MG"
+    ],
+    "journal": "Advanced functional materials",
+    "pubdate": "2025 Jan 02",
+    "doi": "10.1002/adfm.202409796",
+    "abstract": "Injectable hydrogels represent a promising strategy for the extended release of biological molecules, thereby reducing the frequency of injections. This study introduces a novel system based on Michael addition of dextran and polyethylene glycol (PEG) polymers functionalized with oxanorbornadiene (OND) and thiol groups, respectively. Reliable control over gelation speed allows administration by injection using a simple syringe-to-syringe mixing protocol that entrains more than 95% of virus-like particle (VLP) cargo. A combination of retro-Diels-Alder and hydrolytic ester bond cleavage gives rise to programmable release of the VLPs. Different release profiles, including burst, linear, and delayed release over a two-week period, are engineered using different OND linkages, and rheological characterization shows the hydrogels to be well within the desired range of stiffness for subcutaneous use. The modular nature of this system offers a generalizable platform for developing degradable materials aimed at sustained release biomedical applications."
+  },
+  {
+    "pmid": "32421335",
+    "title": "Dual Catalytic Ring-Opening Polymerization of Ethylene Carbonate for the Preparation of Degradable PEG.",
+    "authors": [
+      "von Seggern N",
+      "Schindler T",
+      "Naumann S"
+    ],
+    "journal": "Biomacromolecules",
+    "pubdate": "2020 Jul 13",
+    "doi": "10.1021/acs.biomac.0c00360",
+    "abstract": "A dual catalytic setup, consisting of a range of different Lewis bases (including N-heterocyclic olefins, phosphazenes and nitrogen bases) and simple Lewis acids (such as LiCl, MgF2, BEt3), was employed to prepare poly(ether carbonate)s from five-membered, cyclic ethylene carbonate (EC). Polymerizations were conducted under microwave irradiation at T = 160-200 \u00b0C with low catalyst loading (0.4-0.005 mol % regarding organobases) in the bulk, enabling access to molar masses of up to 10\u202f000 g/mol. A combination of kinetic investigation, GPC, MALDI-ToF MS, and NMR analysis underlines that the polymerization can be highly effective (TON up to >17\u202f000) but side reactions still occur, resulting in a moderately controlled process. In contrast to traditional procedures, where increased ether contents can typically only be realized by higher temperatures and longer reaction times (at the cost of much reduced molar masses), the dual catalytic approach reveals the choice of the Lewis acid as a more effective tuning parameter for this property. Thus, while carbonate contents of up to 30% are possible, application of LiCl as cocatalyst provides a polymer with high ether content (90-99%, Mn = 800-10\u202f000 g/mol), a finding that also seems to apply for other lithium salts. Thus, using this operationally simple setup and EC as a cheap feedstock, a copolymer which is essentially a degradable poly(ethylene glycol) can be prepared in a one-pot, one-step approach. Notably, the obtained low-carbonate content allows for the preparation of semicrystalline poly(ether carbonate), further underlining the \"PEG-likeness\" of the material."
+  }
+]

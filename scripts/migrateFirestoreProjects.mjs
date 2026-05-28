@@ -1,15 +1,15 @@
 /**
  * ─────────────────────────────────────────────────────────────────────────────
- * Migración única de Firestore: regenpept-web-app → med-peptides-app
+ * Migración única de Firestore: Med-Peptides-web-app → Med-Peptides-app
  * ─────────────────────────────────────────────────────────────────────────────
  *
- * ⚠️  DESTINO OFICIAL Y PERMANENTE: med-peptides-app  (med-peptides.com)
+ * ⚠️  DESTINO OFICIAL Y PERMANENTE: Med-Peptides-app  (Med-Peptides.com)
  *
  *     Este script se ejecutó UNA VEZ para migrar el catálogo histórico desde
- *     'regenpept-web-app' al proyecto de producción 'med-peptides-app'.
+ *     'Med-Peptides-web-app' al proyecto de producción 'Med-Peptides-app'.
  *
  *     A partir de ahora, TODOS los datos (productos, ajustes, FAQs, etc.)
- *     viven en 'med-peptides-app'. No escribir datos en ningún otro proyecto.
+ *     viven en 'Med-Peptides-app'. No escribir datos en ningún otro proyecto.
  *
  * Prerrequisitos:
  *   npm install firebase-admin
@@ -67,12 +67,12 @@ function initAdmin(name, projectId, saPath) {
 
 const sourceApp = initAdmin(
   'source',
-  'regenpept-web-app',
+  'Med-Peptides-web-app',
   resolve(root, 'serviceAccount-source.json')
 );
 const targetApp = initAdmin(
   'target',
-  'med-peptides-app',
+  'Med-Peptides-app',
   resolve(root, 'serviceAccount-target.json')
 );
 
@@ -116,7 +116,7 @@ async function migrateCollection(collectionId, mode) {
         batch.set(tgtDocRef, {
           ...srcDoc.data(),
           _migratedAt: new Date().toISOString(),
-          _migratedFrom: 'regenpept-web-app',
+          _migratedFrom: 'Med-Peptides-web-app',
         });
         created++;
       } catch (err) {
@@ -134,7 +134,7 @@ async function migrateCollection(collectionId, mode) {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
-  console.log('\n🚀 Starting Firestore migration: regenpept-web-app → med-peptides-app\n');
+  console.log('\n🚀 Starting Firestore migration: Med-Peptides-web-app → Med-Peptides-app\n');
   const summary = {};
 
   for (const [collectionId, mode] of Object.entries(COLLECTION_PLAN)) {

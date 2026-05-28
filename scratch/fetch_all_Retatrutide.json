@@ -1,0 +1,38 @@
+[
+  {
+    "pmid": "37366315",
+    "title": "Triple-Hormone-Receptor Agonist Retatrutide for Obesity - A Phase 2 Trial.",
+    "authors": [
+      "Jastreboff AM",
+      "Kaplan LM",
+      "Fr\u00edas JP",
+      "Wu Q",
+      "Du Y",
+      "Gurbuz S",
+      "Coskun T",
+      "Haupt A",
+      "Milicevic Z",
+      "Hartman ML",
+      "Retatrutide Phase 2 Obesity Trial Investigators"
+    ],
+    "journal": "The New England journal of medicine",
+    "pubdate": "2023 Aug 10",
+    "doi": "10.1056/NEJMoa2301972",
+    "abstract": "BACKGROUND: Retatrutide (LY3437943) is an agonist of the glucose-dependent insulinotropic polypeptide, glucagon-like peptide 1, and glucagon receptors. Its dose-response relationships with respect to side effects, safety, and efficacy for the treatment of obesity are not known.\nMETHODS: We conducted a phase 2, double-blind, randomized, placebo-controlled trial involving adults who had a body-mass index (BMI, the weight in kilograms divided by the square of the height in meters) of 30 or higher or who had a BMI of 27 to less than 30 plus at least one weight-related condition. Participants were randomly assigned in a 2:1:1:1:1:2:2 ratio to receive subcutaneous retatrutide (1 mg, 4 mg [initial dose, 2 mg], 4 mg [initial dose, 4 mg], 8 mg [initial dose, 2 mg], 8 mg [initial dose, 4 mg], or 12 mg [initial dose, 2 mg]) or placebo once weekly for 48 weeks. The primary end point was the percentage change in body weight from baseline to 24 weeks. Secondary end points included the percentage change in body weight from baseline to 48 weeks and a weight reduction of 5% or more, 10% or more, or 15% or more. Safety was also assessed.\nRESULTS: We enrolled 338 adults, 51.8% of whom were men. The least-squares mean percentage change in body weight at 24 weeks in the retatrutide groups was -7.2% in the 1-mg group, -12.9% in the combined 4-mg group, -17.3% in the combined 8-mg group, and -17.5% in the 12-mg group, as compared with -1.6% in the placebo group. At 48 weeks, the least-squares mean percentage change in the retatrutide groups was -8.7% in the 1-mg group, -17.1% in the combined 4-mg group, -22.8% in the combined 8-mg group, and -24.2% in the 12-mg group, as compared with -2.1% in the placebo group. At 48 weeks, a weight reduction of 5% or more, 10% or more, and 15% or more had occurred in 92%, 75%, and 60%, respectively, of the participants who received 4 mg of retatrutide; 100%, 91%, and 75% of those who received 8 mg; 100%, 93%, and 83% of those who received 12 mg; and 27%, 9%, and 2% of those who received placebo. The most common adverse events in the retatrutide groups were gastrointestinal; these events were dose-related, were mostly mild to moderate in severity, and were partially mitigated with a lower starting dose (2 mg vs. 4 mg). Dose-dependent increases in heart rate peaked at 24 weeks and declined thereafter.\nCONCLUSIONS: In adults with obesity, retatrutide treatment for 48 weeks resulted in substantial reductions in body weight. (Funded by Eli Lilly; ClinicalTrials.gov number, NCT04881760.)."
+  },
+  {
+    "pmid": "40563436",
+    "title": "Retatrutide-A Game Changer in Obesity Pharmacotherapy.",
+    "authors": [
+      "Katsi V",
+      "Koutsopoulos G",
+      "Fragoulis C",
+      "Dimitriadis K",
+      "Tsioufis K"
+    ],
+    "journal": "Biomolecules",
+    "pubdate": "2025 May 30",
+    "doi": "10.3390/biom15060796",
+    "abstract": "Obesity and type 2 diabetes mellitus (T2DM) are global health crises with significant morbidity and mortality. Retatrutide, a novel triple receptor agonist targeting glucagon-like peptide-1 (GLP-1), Glucose-Dependent Insulinotropic Polypeptide (GIP), and glucagon receptors, represents a groundbreaking advancement in obesity and T2DM pharmacotherapy. This review synthesizes findings from preclinical and clinical studies, highlighting retatrutide's mechanisms, efficacy, and safety profile. Retatrutide's unique molecular structure enables potent activation of GLP-1, GIP, and glucagon receptors, leading to significant weight reduction, improved glycemic control, and favorable metabolic outcomes. Animal studies demonstrate retatrutide's ability to delay gastric emptying, reduce food intake, and promote weight loss, with superior efficacy compared to other incretin-based therapies. Phase I and II clinical trials corroborate these findings, showing dose-dependent weight loss, reductions in Glycated Hemoglobin (HbA1c) levels, and improvements in liver steatosis and diabetic kidney disease. Common adverse effects are primarily gastrointestinal and dose-related. Ongoing Phase III trials, such as the TRIUMPH studies, aim to further evaluate retatrutide's long-term safety and efficacy in diverse patient populations. While retatrutide shows immense promise, considerations regarding cost and the quality of weight loss beyond BMI reduction warrant further investigation. Retatrutide heralds a new era in obesity and T2DM treatment, offering hope for improved patient outcomes."
+  }
+]

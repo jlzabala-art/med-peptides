@@ -1,0 +1,55 @@
+[
+  {
+    "pmid": "38346942",
+    "title": "Kisspeptin-10 binding to Gpr54 in osteoclasts prevents bone loss by activating Dusp18-mediated dephosphorylation of Src.",
+    "authors": [
+      "Li Z",
+      "Yang X",
+      "Fu R",
+      "Wu Z",
+      "Xu S",
+      "Jiao J",
+      "Qian M",
+      "Zhang L",
+      "Wu C",
+      "Xie T",
+      "Yao J",
+      "Wu Z",
+      "Li W",
+      "Ma G",
+      "You Y",
+      "Chen Y",
+      "Zhang HK",
+      "Cheng Y",
+      "Tang X",
+      "Wu P",
+      "Lian G",
+      "Wei H",
+      "Zhao J",
+      "Xu J",
+      "Ai L",
+      "Siwko S",
+      "Wang Y",
+      "Ding J",
+      "Song G",
+      "Luo J",
+      "Liu M",
+      "Xiao J"
+    ],
+    "journal": "Nature communications",
+    "pubdate": "2024 Feb 12",
+    "doi": "10.1038/s41467-024-44852-9",
+    "abstract": "Osteoclasts are over-activated as we age, which results in bone loss. Src deficiency in mice leads to severe osteopetrosis due to a functional defect in osteoclasts, indicating that Src function is essential in osteoclasts. G-protein-coupled receptors (GPCRs) are the targets for \u223c35% of approved drugs but it is still unclear how GPCRs regulate Src kinase activity. Here, we reveal that GPR54 activation by its natural ligand Kisspeptin-10 (Kp-10) causes Dusp18 to dephosphorylate Src at Tyr 416. Mechanistically, Gpr54 recruits both active Src and the Dusp18 phosphatase at its proline/arginine-rich motif in its C terminus. We show that Kp-10 binding to Gpr54 leads to the up-regulation of Dusp18. Kiss1, Gpr54 and Dusp18 knockout mice all exhibit osteoclast hyperactivation and bone loss, and Kp-10 abrogated bone loss by suppressing osteoclast activity in vivo. Therefore, Kp-10/Gpr54 is a promising therapeutic target to abrogate bone resorption by Dusp18-mediated Src dephosphorylation."
+  },
+  {
+    "pmid": "32427949",
+    "title": "Metabolic regulation of kisspeptin - the link between energy balance and reproduction.",
+    "authors": [
+      "Navarro VM"
+    ],
+    "journal": "Nature reviews. Endocrinology",
+    "pubdate": "2020 Aug",
+    "doi": "10.1038/s41574-020-0363-7",
+    "abstract": "Hypothalamic kisspeptin neurons serve as the nodal regulatory centre of reproductive function. These neurons are subjected to a plethora of regulatory factors that ultimately affect the release of kisspeptin, which modulates gonadotropin-releasing hormone (GnRH) release from GnRH neurons to control the reproductive axis. The presence of sufficient energy reserves is critical to achieve successful reproduction. Consequently, metabolic factors impose a very tight control over kisspeptin synthesis and release. This Review offers a synoptic overview of the different steps in which kisspeptin neurons are subjected to metabolic regulation, from early developmental stages to adulthood. We cover an ample array of known mechanisms that underlie the metabolic regulation of KISS1 expression and kisspeptin release. Furthermore, the novel role of kisspeptin neurons as active players within the neuronal circuits that govern energy balance is discussed, offering evidence of a bidirectional role of these neurons as a nexus between metabolism and reproduction."
+  }
+]

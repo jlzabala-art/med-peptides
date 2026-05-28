@@ -3,8 +3,8 @@
   "bundleVersion": "2.0",
   "number_of_phases": 3,
   "physician_supervision_required": true,
-  "protocol_author_name": "ReGen PEPT Clinical Team",
-  "protocol_author_organization": "ReGen PEPT",
+  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_organization": "Med-Peptides",
   "protocol_duration_weeks": 12,
   "protocol_id": "wm_002",
   "protocol_is_curated": true,
@@ -227,12 +227,12 @@
           "route": "subcutaneous",
           "dose_logic": {
             "dose_unit": "mg",
-            "default_weekly_dose": 0.5,
             "possible_next_step_dose": 1,
             "administration_frequency": "weekly",
             "administration_days_default": [
               "Monday"
-            ]
+            ],
+            "starting_weekly_dose": 0.5
           }
         },
         {
@@ -241,9 +241,9 @@
           "route": "subcutaneous",
           "dose_logic": {
             "dose_unit": "mg",
-            "default_weekly_dose": 0.6,
             "possible_next_step_dose": 1.2,
-            "administration_frequency": "weekly"
+            "administration_frequency": "weekly",
+            "starting_weekly_dose": 0.6
           }
         },
         {
@@ -287,9 +287,9 @@
           "route": "subcutaneous",
           "dose_logic": {
             "dose_unit": "mg",
-            "default_weekly_dose": 1,
             "max_weekly_dose": 2.4,
-            "administration_frequency": "weekly"
+            "administration_frequency": "weekly",
+            "starting_weekly_dose": 1
           }
         },
         {
@@ -298,8 +298,8 @@
           "route": "subcutaneous",
           "dose_logic": {
             "dose_unit": "mg",
-            "default_weekly_dose": 1.2,
-            "administration_frequency": "weekly"
+            "administration_frequency": "weekly",
+            "starting_weekly_dose": 1.2
           }
         }
       ],
@@ -600,5 +600,10 @@
     "notes": "Legacy fields retained for backward compatibility; phase_blueprints are preferred when present.",
     "enabled": true
   },
-  "_syncedAt": "2026-04-26T12:46:38.765Z"
+  "_syncedAt": "2026-04-26T12:46:38.765Z",
+  "recommended_tests": [
+    "fagron-nutrigen",
+    "24-genomics-nutrigen",
+    "nad-blood-test"
+  ]
 }

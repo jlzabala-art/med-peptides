@@ -1,3 +1,4 @@
+ 
 import React, { useState } from 'react';
 
 /**
@@ -61,6 +62,12 @@ const OptimizedImage = ({
 
   return (
     <div style={wrapStyle} className={className}>
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: -600px 0; }
+          100% { background-position: 600px 0; }
+        }
+      `}</style>
       {/* Shimmer skeleton */}
       <div style={skeletonStyle} />
 

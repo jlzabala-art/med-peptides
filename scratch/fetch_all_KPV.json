@@ -1,0 +1,42 @@
+[
+  {
+    "pmid": "39252648",
+    "title": "KPV and RAPA Self-Assembled into Carrier-Free Nanodrugs for Vascular Calcification Therapy.",
+    "authors": [
+      "Zhang L",
+      "Li D",
+      "Aierken Y",
+      "Zhang J",
+      "Liu Z",
+      "Lin Z",
+      "Jiang L",
+      "Li Q",
+      "Wu Y",
+      "Liu Y"
+    ],
+    "journal": "Advanced healthcare materials",
+    "pubdate": "2024 Dec",
+    "doi": "10.1002/adhm.202402320",
+    "abstract": "Cardiovascular disease (CVD) is a leading cause of death globally, and vascular calcification (VC) is an important independent risk factor for predicting CVD. Currently, there are no established therapeutic strategies for the treatment of VC. Although recognized combination therapies of nanomedicines can provide effective strategies for disease treatment, the clinical application of nanomedicines is limited because of their complex preparation processes, low drug loading rates, and unpredictable safety risks. Thus, developing a simple, efficient, and safe nanodrug to simultaneously regulate inflammation and autophagy may be a promising strategy for treating VC. Herein, an anti-inflammatory peptide (lysine-proline-valine peptides, KPV) and the autophagy activator rapamycin (RAPA) are self-assembled to form new carrier-free spherical nanoparticles (NPs), which shows good stability and biosafety. In vivo and in vitro, KPV-RAPA NPs significantly inhibit VC in mice compared to the other treatment groups. Mechanistically, KPV-RAPA NPs inhibit inflammatory responses and activated autophagy. Therefore, this study indicates that the new carrier-free KPV-RAPA NPs have great potential as therapeutic agents for VC combination therapy, which can promote the development of nanodrugs for VC."
+  },
+  {
+    "pmid": "35245681",
+    "title": "A KPV-binding double-network hydrogel restores gut mucosal barrier in an inflamed colon.",
+    "authors": [
+      "Zhao Y",
+      "Xue P",
+      "Lin G",
+      "Tong M",
+      "Yang J",
+      "Zhang Y",
+      "Ran K",
+      "Zhuge D",
+      "Yao Q",
+      "Xu H"
+    ],
+    "journal": "Acta biomaterialia",
+    "pubdate": "2022 Apr 15",
+    "doi": "10.1016/j.actbio.2022.02.039",
+    "abstract": "Ulcerative colitis (UC) usually occurs in the superficial mucosa of the colorectum. Here, a double-network hydrogel (PMSP) was constructed from maleimided \u03b3-polyglutamic acid and thiolated \u03b3-polyglutamic acid through crosslinking of thiol-maleimide and self-oxidized thiols. PMSP with a negative charge specifically adhered to the inflamed mucosa with positively charged proteins rather than to the healthy mucosa. PMSP exhibited good mechanical strength with storage modulus (G') of 17.6\u00a0Pa and a linear viscoelastic region (LVR) of 107.2% strain. Moreover, PMSP showed a stronger bio-adhesive force toward the inflamed tissue-mimicking substrate than toward its healthy counterpart. In vivo imaging confirmed that PMSP specifically adhered to the inflamed colonic mucosa of rats with TNBS-induced UC. KPV (Lys-Pro-Val) as a model drug was easily captured by PMSP through electrostatic interactions, thus retaining its bioactivity for a longer time under high temperature conditions. Moreover, the alleviating effect of KPV on rats with TNBS-induced colitis was significantly improved by PMSP after intracolonic administration. The epithelial barrier of the colon also effectively recovered following PMSP-KPV treatment. PMSP-KPV also modulated the gut flora, markedly augmenting the abundance of beneficial microorganisms in gut homeostasis. The mechanism by which PMSP-KPV induces a therapeutic effect may be associated with the inhibition of oxidative stress. Conclusively, the PMSP hydrogel seems to be a promising rectal delivery system for the therapy of UC. STATEMENT OF SIGNIFICANCE: Ulcerative colitis (UC) is a chronic and relapsing disease of the gastrointestinal tract. A key therapeutic approach to treat UC is to repair the mucosal barriers. Here, a double-network hydrogel (PMSP) was constructed from maleimided and thiolated \u03b3-polyglutamic acid through crosslinking of thiol-maleimide and self-oxidized thiols. The negatively charged PMSP specifically adhered to the inflamed colon rather than its healthy counterpart and was retained for a longer time. KPV as a model drug was easily captured by PMSP, which provided better stability to KPV when exposed to high temperature of 50 \u00b0C. The epithelial mucosal barrier of the colon was effectively recovered by the rectal administration of PMSP-KPV to rats with TNBS-induced UC. Moreover, PMSP-KPV modulated the gut flora of colitic rats, markedly augmenting the abundance of beneficial microorganisms. Conclusively, PMSP seems to be a promising rectal delivery system for UC therapy."
+  }
+]

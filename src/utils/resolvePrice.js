@@ -1,3 +1,4 @@
+ 
 /**
  * resolvePrice.js — Engine v2
  * ─────────────────────────────────────────────────────────────────────────────
@@ -27,7 +28,17 @@
  * @module resolvePrice
  */
 
-import { PRICING_TIER } from '../constants/productEnums';
+import { PRICING_TIER } from '../constants/productEnums.js';
+
+let globalActiveTenant = null;
+
+export function setActiveTenantForResolution(tenant) {
+  globalActiveTenant = tenant;
+}
+
+export function getActiveTenantForResolution() {
+  return globalActiveTenant;
+}
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -39,13 +50,118 @@ const TIER_FALLBACK_CHAIN = Object.freeze([
   PRICING_TIER.RETAIL,
 ]);
 
-/** Maps PRICING_TIER constants → Firestore short keys. */
+/** Maps PRICING_TIER constants → Firestore short keys (canonical schema). */
 const TIER_TO_KEY = Object.freeze({
   [PRICING_TIER.RETAIL]:    'retail',
   [PRICING_TIER.WHOLESALE]: 'wholesale',
   [PRICING_TIER.CLINIC]:    'clinic',
   [PRICING_TIER.MASTER]:    'master',
 });
+
+/**
+ * Maps legacy long-form keys (e.g. 'retailPrice') → canonical short keys.
+ * Handles Firestore docs created before the key migration.
+ */
+const LEGACY_KEY_MAP = Object.freeze({
+  retailPrice:    'retail',
+  wholesalePrice: 'wholesale',
+  clinicPrice:    'clinic',
+  masterPrice:    'master',
+});
+
+/**
+ * Normalise a single tier entry so it always exposes { perUnit, kit, currency }.
+ *
+ * Firestore variant docs may store tier prices in two different schemas:
+ *   Schema A (canonical): { perUnit: 50, kit: 45, currency: 'USD' }
+ *   Schema B (legacy):    { base: 50, byCountry: {...} }
+ *                     OR  { perUnit: 50, base: 50, byCountry: {...} }
+ *
+ * This function unifies both so extractBase always finds 'perUnit'.
+ *
+ * @param {Object|null} entry  - A single tier object (e.g. pricing.retail)
+ * @returns {Object|null}
+ */
+function normaliseTierEntry(entry) {
+  if (!entry || typeof entry !== 'object') return entry;
+  // If already has perUnit, nothing to do
+  if (entry.perUnit != null) return entry;
+  // Map 'base' → 'perUnit' (legacy Firestore schema)
+  if (entry.base != null) {
+    return { ...entry, perUnit: entry.base };
+  }
+  return entry;
+}
+
+/**
+ * Normalise a pricing object so that both canonical short keys ('retail')
+ * and legacy long keys ('retailPrice') resolve correctly, and that tier
+ * entries always expose { perUnit, kit, currency } regardless of whether
+ * the original Firestore doc used 'base' or 'perUnit'.
+ *
+ * Returns the original object if no changes are needed (zero-cost fast path).
+ *
+ * @param {Object|null} pricing
+ * @returns {Object|null}
+ */
+function normalisePricingKeys(pricing) {
+  if (!pricing) return pricing;
+
+  // ── Step 1: key normalization (retailPrice → retail, etc.) ──
+  const hasLegacy = Object.keys(LEGACY_KEY_MAP).some((k) => k in pricing);
+
+  let normalised = pricing;
+  if (hasLegacy) {
+    normalised = { ...pricing };
+    let warned = false;
+    for (const [legacyKey, canonicalKey] of Object.entries(LEGACY_KEY_MAP)) {
+      if (pricing[legacyKey] != null && normalised[canonicalKey] == null) {
+        normalised[canonicalKey] = pricing[legacyKey];
+        if (!warned) {
+          console.warn(
+            '[resolvePrice] Detected legacy pricing schema key "%s" on variant. ' +
+            'Update Firestore docs to use "%s" instead.',
+            legacyKey, canonicalKey
+          );
+          warned = true;
+        }
+      }
+    }
+  }
+
+  // ── Step 2: inner-field normalization (base → perUnit) ──
+  // Walk all canonical tier keys and normalise each tier entry.
+  const canonicalKeys = Object.values(TIER_TO_KEY); // ['retail','wholesale','clinic','master']
+  let needsInnerFix = false;
+  for (const key of canonicalKeys) {
+    const entry = normalised[key];
+    if (entry && typeof entry === 'object' && entry.perUnit == null && entry.base != null) {
+      needsInnerFix = true;
+      break;
+    }
+  }
+
+  if (needsInnerFix) {
+    if (normalised === pricing) normalised = { ...pricing }; // ensure we have a copy
+    for (const key of canonicalKeys) {
+      if (normalised[key]) {
+        const fixed = normaliseTierEntry(normalised[key]);
+        if (fixed !== normalised[key]) {
+          if (import.meta.env.MODE !== 'production') {
+            console.warn(
+              '[resolvePrice] Tier "%s" uses legacy "base" field instead of "perUnit". ' +
+              'Update Firestore docs to use "perUnit".',
+              key
+            );
+          }
+          normalised = { ...normalised, [key]: fixed };
+        }
+      }
+    }
+  }
+
+  return normalised;
+}
 
 /**
  * Default exchange rates (EUR base).
@@ -165,7 +281,17 @@ function extractBase(pricing, tier) {
   if (!pricing) return { perUnit: null, kit: null, currency: 'EUR' };
   const key   = TIER_TO_KEY[tier];
   const entry = key ? pricing[key] : null;
-  if (!entry) return { perUnit: null, kit: null, currency: pricing.currency ?? 'EUR' };
+  if (!entry) {
+    // Dev-time diagnostic: log available keys so mismatches are easy to spot
+    if (import.meta.env.MODE !== 'production') {
+      console.debug(
+        '[resolvePrice] extractBase: no entry for tier key "%s" (tier=%s). ' +
+        'Pricing keys present: %s',
+        key, tier, Object.keys(pricing).join(', ') || '(none)'
+      );
+    }
+    return { perUnit: null, kit: null, currency: pricing.currency ?? 'EUR' };
+  }
   return {
     perUnit:  entry.perUnit  ?? null,
     kit:      entry.kit      ?? null,
@@ -179,10 +305,16 @@ function extractCountry(pricing, tier, countryCode) {
   const entry    = key ? pricing[key] : null;
   const cc       = countryCode.toUpperCase();
   const override = entry?.byCountry?.[cc];
-  if (!override || (override.perUnit == null && override.kit == null)) return null;
+  if (!override) return null;
+
+  // Support both canonical { perUnit } and legacy { base } schemas
+  const perUnit = override.perUnit ?? override.base ?? null;
+  const kit     = override.kit     ?? null;
+
+  if (perUnit == null && kit == null) return null;
   return {
-    perUnit:  override.perUnit  ?? null,
-    kit:      override.kit      ?? null,
+    perUnit,
+    kit,
     currency: override.currency ?? entry?.currency ?? pricing.currency ?? 'EUR',
   };
 }
@@ -247,57 +379,181 @@ export function resolveVariantPrice(variant, {
   targetCurrency   = null,
   exchangeRates    = DEFAULT_EXCHANGE_RATES,
   includeTax       = false,
+  tenant           = null,
 } = {}) {
+  const activeTenant = tenant || globalActiveTenant;
   // ── Memoization key ──
-  const cacheKey = JSON.stringify({ tier, countryCode, targetCurrency, includeTax });
+  const cacheKey = JSON.stringify({ tier, countryCode, targetCurrency, includeTax, tenantId: activeTenant?.id || null });
   const cached   = _cacheGet(variant, cacheKey);
   if (cached) return cached;
 
-  const pricing = variant?.pricing ?? null;
+  // Normalise pricing keys (handles both 'retail' and 'retailPrice' schemas)
+  let pricing = variant?.pricing ?? null;
+  if (variant && (!pricing || (pricing.retail == null && pricing.retailPrice == null))) {
+    const flatPrice = variant.priceUSD ?? variant.perVialPriceUSD ?? variant.perUnit ?? null;
+    const flatKit = variant.kitPriceUSD ?? variant.kit ?? null;
+    if (flatPrice != null || flatKit != null) {
+      pricing = {
+        ...pricing,
+        retail: {
+          perUnit: flatPrice,
+          kit: flatKit,
+          currency: variant.currency ?? 'USD'
+        }
+      };
+    }
+  }
+  pricing = normalisePricingKeys(pricing);
+
+  // Apply B2B pricing calculations for NPLAB supplier (EUR->USD and tier multipliers)
+  if (pricing && variant && (variant.supplier === 'NPLAB' || variant.supplier === 'nplab')) {
+    const isEur = pricing.retail?.currency === 'EUR' || pricing.currency === 'EUR';
+    let retailPrice = pricing.retail?.perUnit ?? null;
+    let retailKit = pricing.retail?.kit ?? null;
+
+    if (isEur) {
+      if (retailPrice != null) retailPrice = retailPrice * 1.10;
+      if (retailKit != null) retailKit = retailKit * 1.10;
+    }
+
+    const masterPrice = retailPrice != null ? retailPrice / 1.5 : null;
+    const masterKit = retailKit != null ? retailKit / 1.5 : null;
+
+    const wholesalePrice = masterPrice != null ? masterPrice * 1.2 : null;
+    const wholesaleKit = masterKit != null ? masterKit * 1.2 : null;
+
+    const clinicPrice = masterPrice != null ? masterPrice * 1.3 : null;
+    const clinicKit = masterKit != null ? masterKit * 1.3 : null;
+
+    pricing = {
+      ...pricing,
+      retail: {
+        ...pricing.retail,
+        ...(retailPrice != null ? { perUnit: retailPrice } : {}),
+        ...(retailKit != null ? { kit: retailKit } : {}),
+        currency: 'USD'
+      },
+      master: {
+        ...pricing.master,
+        ...(masterPrice != null ? { perUnit: masterPrice } : {}),
+        ...(masterKit != null ? { kit: masterKit } : {}),
+        currency: 'USD'
+      },
+      wholesale: {
+        ...pricing.wholesale,
+        ...(wholesalePrice != null ? { perUnit: wholesalePrice } : {}),
+        ...(wholesaleKit != null ? { kit: wholesaleKit } : {}),
+        currency: 'USD'
+      },
+      clinic: {
+        ...pricing.clinic,
+        ...(clinicPrice != null ? { perUnit: clinicPrice } : {}),
+        ...(clinicKit != null ? { kit: clinicKit } : {}),
+        currency: 'USD'
+      }
+    };
+  }
 
   // ── Validate + fallback tier ──
   const { tier: effectiveTier, isFallback } = resolveTierWithFallback(pricing, tier);
   const base = extractBase(pricing, effectiveTier);
 
-  let resolved;
+  let resolved = null;
 
-  // 1. Customer override
-  if (customerOverride && (customerOverride.perUnit != null || customerOverride.kit != null)) {
-    resolved = {
-      perUnit:    customerOverride.perUnit  ?? base.perUnit,
-      kit:        customerOverride.kit      ?? base.kit,
-      currency:   customerOverride.currency ?? base.currency,
-      tier:       effectiveTier,
-      source:     'customer',
-      isFallback: false,
-      tax:        null,
-    };
-  } else {
-    // 2. Country override
-    const country = extractCountry(pricing, effectiveTier, countryCode);
-    if (country) {
-      resolved = {
-        perUnit:    country.perUnit  ?? base.perUnit,
-        kit:        country.kit      ?? base.kit,
-        currency:   country.currency ?? base.currency,
-        tier:       effectiveTier,
-        source:     'country',
-        isFallback,
-        tax:        null,
-      };
+  // 1. Tenant override
+  if (activeTenant) {
+    const productKey = variant.productSlug || variant.productId || variant.id || variant.name?.toLowerCase().replace(/\s+/g, '-');
+    const override = activeTenant.priceOverrides ? (activeTenant.priceOverrides[productKey] || activeTenant.priceOverrides[variant.name]) : undefined;
+    if (override !== undefined) {
+      if (typeof override === 'number') {
+        resolved = {
+          perUnit: override,
+          kit: null,
+          currency: 'USD',
+          tier: effectiveTier,
+          source: 'customer',
+          isFallback: false,
+          tax: null,
+        };
+      } else if (typeof override === 'object' && override !== null) {
+        resolved = {
+          perUnit: override.perUnit !== undefined ? override.perUnit : (override[effectiveTier] !== undefined ? override[effectiveTier] : base.perUnit),
+          kit: override.kit !== undefined ? override.kit : base.kit,
+          currency: override.currency || 'USD',
+          tier: effectiveTier,
+          source: 'customer',
+          isFallback: false,
+          tax: null,
+        };
+      }
     } else {
-      // 3. Base global
+      // If there's no override for this variant/product under the active tenant, hide prices
       resolved = {
-        perUnit:    base.perUnit,
-        kit:        base.kit,
-        currency:   base.currency,
-        tier:       effectiveTier,
-        source:     'base',
-        isFallback,
-        tax:        null,
+        perUnit: null,
+        kit: null,
+        currency: 'USD',
+        tier: effectiveTier,
+        source: 'customer',
+        isFallback: false,
+        tax: null,
       };
     }
   }
+
+  if (!resolved) {
+    // 2. Customer override
+    if (customerOverride && (customerOverride.perUnit != null || customerOverride.kit != null)) {
+      resolved = {
+        perUnit:    customerOverride.perUnit  ?? base.perUnit,
+        kit:        customerOverride.kit      ?? base.kit,
+        currency:   customerOverride.currency ?? base.currency,
+        tier:       effectiveTier,
+        source:     'customer',
+        isFallback: false,
+        tax:        null,
+      };
+    } else {
+      // 3. Country override
+      const country = extractCountry(pricing, effectiveTier, countryCode);
+      if (country) {
+        resolved = {
+          perUnit:    country.perUnit  ?? base.perUnit,
+          kit:        country.kit      ?? base.kit,
+          currency:   country.currency ?? base.currency,
+          tier:       effectiveTier,
+          source:     'country',
+          isFallback,
+          tax:        null,
+        };
+      } else {
+        // 4. Base global
+        resolved = {
+          perUnit:    base.perUnit,
+          kit:        base.kit,
+          currency:   base.currency,
+          tier:       effectiveTier,
+          source:     'base',
+          isFallback,
+          tax:        null,
+        };
+      }
+    }
+  }
+
+  // ── Dynamic kit price fallback ──
+  // If a tier lacks a kit price but has perUnit pricing, calculate the kit price
+  // using the retail tier's kit discount ratio (preserving any quantity-based pricing advantages)
+  if (resolved && resolved.kit == null && resolved.perUnit != null) {
+    const units = variant?.attributes?.unitsPerPack || 10;
+    const retailEntry = pricing?.retail;
+    if (retailEntry && retailEntry.perUnit != null && retailEntry.kit != null) {
+      const retailRatio = retailEntry.kit / (retailEntry.perUnit * units);
+      resolved.kit = resolved.perUnit * units * retailRatio;
+    } else {
+      resolved.kit = resolved.perUnit * units;
+    }
+  }
+
 
   // ── Currency conversion ──
   if (targetCurrency && targetCurrency !== resolved.currency) {

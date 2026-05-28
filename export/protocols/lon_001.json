@@ -1,6 +1,6 @@
 {
   "protocol_duration_weeks": 12,
-  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "protocol_author_name": "Med-Peptides Clinical Team",
   "bundleVersion": "2.0",
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -76,7 +76,7 @@
   },
   "protocol_author_notes": "Official curated protocol for general clinical use.",
   "_schemaVersion": "antigravity_v2",
-  "protocol_author_organization": "ReGen PEPT",
+  "protocol_author_organization": "Med-Peptides",
   "protocol_last_reviewed_at": "2026-03-29",
   "protocol_source_reference": "internal_guide",
   "expected_outcomes": {
@@ -177,18 +177,18 @@
         {
           "product_id": "MOTS-C-10mg-vial",
           "product_title": "Mots C",
-          "route": "protocol_defined",
+          "route": "subcutaneous",
           "dose_logic": {
-            "dose_unit": "protocol_defined",
+            "dose_unit": "mg",
             "administration_frequency": "3x_week",
-            "selected_strength": "5mg",
             "vials_required_for_phase": 18,
-            "starting_intensity": "standard"
+            "starting_weekly_dose": 5,
+            "intensity_label": "standard"
           },
           "variantRef": {
             "type": "legacy_mapped",
             "productId": "MOTS-C-10mg-vial",
-            "route": "protocol_defined"
+            "route": "subcutaneous"
           }
         }
       ],
@@ -218,18 +218,18 @@
         {
           "product_id": "MOTS-C-10mg-vial",
           "product_title": "Mots C",
-          "route": "protocol_defined",
+          "route": "subcutaneous",
           "dose_logic": {
-            "dose_unit": "protocol_defined",
+            "dose_unit": "mg",
             "administration_frequency": "2x_week",
-            "selected_strength": "5mg",
             "vials_required_for_phase": 12,
-            "starting_intensity": "standard"
+            "starting_weekly_dose": 5,
+            "intensity_label": "standard"
           },
           "variantRef": {
             "type": "legacy_mapped",
             "productId": "MOTS-C-10mg-vial",
-            "route": "protocol_defined"
+            "route": "subcutaneous"
           }
         }
       ],
@@ -354,7 +354,7 @@
     "source_refs": [],
     "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
   },
-  "_importBundle": "ReGen PEPT Core Clinical Protocol Library",
+  "_importBundle": "Med-Peptides Core Clinical Protocol Library",
   "_syncSource": "export/protocols/lon_001.json",
   "metadata": {
     "longDescription": "MOTS-c (mitochondrial open reading frame of the 12S rRNA-c) is an endogenous mitochondria-derived peptide encoded within the mitochondrial genome — the first peptide shown to be transcribed from mitochondrial rRNA rather than nuclear DNA (Lee C et al., Cell Metab 2015). MOTS-c circulates systemically and translocates to the nucleus under metabolic stress, where it activates AMPK (AMP-activated protein kinase), regulates the folate–methionine cycle, and modulates gene expression related to metabolic homeostasis, antioxidant defense, and insulin sensitivity. Circulating MOTS-c levels decline significantly with age, linking its reduction to age-associated metabolic decline (Reynolds JC et al., Nat Aging 2021). This 12-week foundation protocol delivers sustained MOTS-c supplementation across two phases — activation and maintenance — targeting the mitochondrial and metabolic hallmarks of aging as defined by López-Otín et al. (Cell 2023).",
@@ -465,7 +465,7 @@
   "_patchedAt": {
     "schema_gap_fix": "2026-04-26T12:37:11Z"
   },
-  "_patchBundle": "ReGen PEPT Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
   "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
   "variant_rules": {
     "tempo": {
@@ -514,5 +514,11 @@
       "phase_blueprints_legacy_mapped"
     ]
   },
-  "_syncedAt": "2026-04-26T12:46:30.063Z"
+  "_syncedAt": "2026-04-26T12:46:30.063Z",
+  "recommended_tests": [
+    "eterna-epigenetic-test",
+    "progen-longevity-test",
+    "fagron-telotest",
+    "nad-blood-test"
+  ]
 }

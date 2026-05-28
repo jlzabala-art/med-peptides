@@ -1,0 +1,30 @@
+[
+  {
+    "pmid": "33353981",
+    "title": "NAD",
+    "authors": [
+      "Covarrubias AJ",
+      "Perrone R",
+      "Grozio A",
+      "Verdin E"
+    ],
+    "journal": "Nature reviews. Molecular cell biology",
+    "pubdate": "2021 Feb",
+    "doi": "10.1038/s41580-020-00313-x",
+    "abstract": "Nicotinamide adenine dinucleotide (NAD+) is a coenzyme for redox reactions, making it central to energy metabolism. NAD+ is also an essential cofactor for non-redox NAD+-dependent enzymes, including sirtuins, CD38 and poly(ADP-ribose) polymerases. NAD+ can directly and indirectly influence many key cellular functions, including metabolic pathways, DNA repair, chromatin remodelling, cellular senescence and immune cell function. These cellular processes and functions are critical for maintaining tissue and metabolic homeostasis and for healthy ageing. Remarkably, ageing is accompanied by a gradual decline in tissue and cellular NAD+ levels in multiple model organisms, including rodents and humans. This decline in NAD+ levels is linked causally to numerous ageing-associated diseases, including cognitive decline, cancer, metabolic disease, sarcopenia and frailty. Many of these ageing-associated diseases can be slowed down and even reversed by restoring NAD+ levels. Therefore, targeting NAD+ metabolism has emerged as a potential therapeutic approach to ameliorate ageing-related disease, and extend the human healthspan and lifespan. However, much remains to be learnt about how NAD+ influences human\u00a0health and ageing biology. This includes a deeper understanding of the molecular mechanisms that regulate NAD+ levels, how to effectively restore NAD+ levels during ageing, whether doing so is safe and whether NAD+ repletion will have beneficial effects in ageing humans."
+  },
+  {
+    "pmid": "34041853",
+    "title": "NAD",
+    "authors": [
+      "Zapata-P\u00e9rez R",
+      "Wanders RJA",
+      "van Karnebeek CDM",
+      "Houtkooper RH"
+    ],
+    "journal": "EMBO molecular medicine",
+    "pubdate": "2021 Jul 07",
+    "doi": "10.15252/emmm.202113943",
+    "abstract": "Depletion of nicotinamide adenine dinucleotide (NAD+ ), a central redox cofactor and the substrate of key metabolic enzymes, is the causative factor of a number of inherited and acquired diseases in humans. Primary deficiencies of NAD+ homeostasis are the result of impaired biosynthesis, while secondary deficiencies can arise due to other factors affecting NAD+ homeostasis, such as increased NAD+ consumption or dietary deficiency of its vitamin B3 precursors. NAD+ depletion can manifest in a wide variety of pathological phenotypes, ranging from rare inherited defects, characterized by congenital malformations, retinal degeneration, and/or encephalopathy, to more common multifactorial, often age-related, diseases. Here, we discuss NAD+ biochemistry and metabolism and provide an overview of the etiology and pathological consequences of alterations of the NAD+ metabolism in humans. Finally, we discuss the state of the art of the potential therapeutic implications of NAD+ repletion for boosting health as well as treating rare and common diseases, and the possibilities to achieve this by means of the different NAD+ -enhancing agents."
+  }
+]

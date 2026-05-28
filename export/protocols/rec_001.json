@@ -8,8 +8,8 @@
   },
   "number_of_phases": 2,
   "overview_summary": "Eight-week tissue-repair protocol combining BPC-157 and TB-500 to support soft-tissue healing, angiogenesis, inflammation control, and musculoskeletal recovery.",
-  "protocol_author_name": "ReGen PEPT Clinical Team",
-  "protocol_author_organization": "ReGen PEPT",
+  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_organization": "Med-Peptides",
   "protocol_author_title": "Peptide Specialists",
   "protocol_duration_weeks": 8,
   "protocol_id": "rec_001",
@@ -323,10 +323,12 @@
       "review_status": "approved"
     },
     "shortCode": "REC-001",
-    "primary_goal": "Recovery / Injury"
+    "primary_goal": "Recovery / Injury",
+    "duration_weeks": 8
   },
   "_patchedAt": {
-    "schema_gap_fix": "2026-04-26T12:37:11Z"
+    "schema_gap_fix": "2026-04-26T12:37:11Z",
+    "phase1_fix": "2026-05-17T08:28:52.937542+00:00"
   },
   "_schemaVersion": "antigravity_v2",
   "_patchSchema": "antigravity_v2",
@@ -355,7 +357,75 @@
       }
     }
   },
-  "phase_blueprints": [],
+  "phase_blueprints": [
+    {
+      "phase_id": "rec_001_ph1",
+      "phase_name": "Acute Recovery",
+      "duration_weeks": 4,
+      "drugs": [
+        {
+          "product_id": "BPC-157-5mg-vial",
+          "product_title": "BPC-157",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mcg",
+            "administration_frequency": "daily",
+            "starting_daily_dose": 500,
+            "dose_per_administration": 500,
+            "administration_days_default": [
+              "monday",
+              "tuesday",
+              "wednesday",
+              "thursday",
+              "friday",
+              "saturday",
+              "sunday"
+            ],
+            "timing_hint": "Administer near rehabilitation work or recovery period"
+          }
+        },
+        {
+          "product_id": "TB-500-5mg-vial",
+          "product_title": "TB-500",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "administration_frequency": "weekly",
+            "starting_weekly_dose": 5,
+            "dose_per_administration": 5,
+            "administration_days_default": [
+              "monday"
+            ],
+            "timing_hint": "Administer consistently on the same day each week"
+          }
+        }
+      ]
+    },
+    {
+      "phase_id": "rec_001_ph2",
+      "phase_name": "Regeneration",
+      "duration_weeks": 4,
+      "drugs": [
+        {
+          "product_id": "BPC-157-5mg-vial",
+          "product_title": "BPC-157",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mcg",
+            "administration_frequency": "3x_week",
+            "starting_weekly_dose": 1500,
+            "dose_per_administration": 500,
+            "administration_days_default": [
+              "monday",
+              "wednesday",
+              "friday"
+            ],
+            "timing_hint": "Reduce frequency once pain and range of motion improve"
+          }
+        }
+      ]
+    }
+  ],
   "safety_profile": {
     "risk_level": "moderate",
     "common_side_effects": [],
@@ -363,5 +433,10 @@
     "serious_adverse_events": [],
     "contraindication_summary": "See eligibility_rules.contraindications."
   },
-  "_syncedAt": "2026-04-26T12:46:32.830Z"
+  "_syncedAt": "2026-04-26T12:46:32.830Z",
+  "title": "BPC-157 & TB-500 Tissue Repair Protocol",
+  "recommended_tests": [
+    "fagron-trichotest",
+    "fagron-acnetest"
+  ]
 }

@@ -9,6 +9,16 @@
     ],
     "rewrites": [
       {
+        "source": "/api/analytics-overview",
+        "function": "analyticsOverview",
+        "region": "europe-west1"
+      },
+      {
+        "source": "/api/*",
+        "function": "clinicalAiAssistant",
+        "region": "europe-west1"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
@@ -22,6 +32,15 @@
             "value": "no-cache, no-store, must-revalidate"
           }
         ]
+      },
+      {
+        "source": "/blueprint/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=3600"
+          }
+        ]
       }
     ]
   },
@@ -30,6 +49,9 @@
     "location": "nam5",
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
   },
   "functions": [
     {

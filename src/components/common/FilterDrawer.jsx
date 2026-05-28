@@ -1,3 +1,4 @@
+ 
 import React, { useEffect, useRef } from 'react';
 import { X, Star, CheckCircle2, AlertTriangle, XCircle, SlidersHorizontal } from 'lucide-react';
 
@@ -54,9 +55,9 @@ export default function FilterDrawer({
 
   const STATUS_OPTIONS = [
     { value: 'all',       label: 'All Statuses',  icon: null },
-    { value: 'pass',      label: 'Validated',      icon: <CheckCircle2 size={16} color="#10b981" /> },
+    { value: 'pass',      label: 'Validated',      icon: <CheckCircle2 size={16} color="var(--color-success)" /> },
     { value: 'warning',   label: 'With Warning',   icon: <AlertTriangle size={16} color="#f59e0b" /> },
-    { value: 'blocked',   label: 'Rejected',       icon: <XCircle size={16} color="#ef4444" /> },
+    { value: 'blocked',   label: 'Rejected',       icon: <XCircle size={16} color="var(--color-danger)" /> },
     { value: 'generated', label: 'Generated',      icon: <SlidersHorizontal size={16} color="#6b7280" /> },
   ];
 

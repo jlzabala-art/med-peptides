@@ -1,0 +1,473 @@
+GOAL
+
+Transform Med-Peptides into a white-label, territory-based franchise platform for wholesalers and regional partners.
+
+The platform must allow wholesalers to operate Med-Peptides as if it were their own platform in assigned territories and product categories, while Med-Peptides remains the central technology and catalog infrastructure.
+
+Do NOT redesign the entire app.
+Extend the current architecture.
+
+Keep:
+- Firebase
+- Google Cloud Agent Platform
+- ClinicAI
+- Product catalog
+- Protocol engine
+- Territory protection engine
+- Geography Areas page
+
+────────────────────────
+BUSINESS OBJECTIVE
+────────────────────────
+
+Wholesalers must feel comfortable that:
+
+1. Their clients remain assigned to them.
+2. Their territory is protected.
+3. Their brand can appear in the platform.
+4. Their doctors and clinics are not exposed to Med-Peptides direct pricing.
+5. Their customers are not reassigned to another partner.
+6. Their URL/domain can feel independent.
+7. Their categories and territories are configurable.
+
+Med-Peptides acts as:
+central platform provider.
+
+Wholesaler acts as:
+regional franchise / partner / commercial operator.
+
+────────────────────────
+CORE CONCEPT
+────────────────────────
+
+Create a multi-tenant white-label architecture.
+
+Main entity:
+
+tenant
+
+A tenant can be:
+- wholesaler
+- regional partner
+- clinic group
+- distributor
+- internal Med-Peptides market
+
+────────────────────────
+TENANT DATA MODEL
+────────────────────────
+
+Create Firebase collection:
+
+tenants
+
+Example:
+
+{
+  "tenantId": "magenta-uae",
+  "name": "Magenta",
+  "type": "wholesaler",
+  "status": "active",
+
+  "territories": ["AE"],
+
+  "categories": [
+    "peptide_vials",
+    "compounded_formulations"
+  ],
+
+  "branding": {
+    "logoUrl": "",
+    "faviconUrl": "",
+    "primaryColor": "",
+    "secondaryColor": "",
+    "accentColor": "",
+    "supportEmail": "",
+    "supportWhatsapp": "",
+    "footerText": ""
+  },
+
+  "domain": {
+    "mode": "subdomain",
+    "url": "magenta.med-peptides.com",
+    "customDomain": null
+  },
+
+  "commercialRules": {
+    "hidePricesForGuests": true,
+    "allowCheckout": false,
+    "defaultCTA": "Contact your clinic"
+  }
+}
+
+────────────────────────
+URL STRATEGY
+────────────────────────
+
+Support three URL modes:
+
+1. Subdomain:
+magenta.med-peptides.com
+
+2. Custom domain:
+protocols.magenta.ae
+
+3. Path-based fallback:
+med-peptides.com/partners/magenta
+
+Recommended implementation order:
+
+Phase 1:
+Path-based tenant routing.
+
+Phase 2:
+Subdomain tenant routing.
+
+Phase 3:
+Custom domain support.
+
+────────────────────────
+TENANT RESOLUTION
+────────────────────────
+
+Create:
+
+resolveTenant()
+
+Inputs:
+- hostname
+- URL path
+- referral code
+- logged user profile
+- assigned wholesaler
+- activeCommercialTerritory
+
+Resolution priority:
+
+1. custom domain
+2. subdomain
+3. path tenant slug
+4. logged user tenantId
+5. referral link
+6. territory default tenant
+7. Med-Peptides default
+
+────────────────────────
+CUSTOMER OWNERSHIP
+────────────────────────
+
+Every user, lead, cart and order must store:
+
+tenantId
+ownerType
+ownerId
+sourceDomain
+sourceTerritory
+attributionLocked
+
+Example:
+
+{
+  "tenantId": "magenta-uae",
+  "ownerType": "wholesaler",
+  "ownerId": "magenta",
+  "sourceDomain": "magenta.med-peptides.com",
+  "attributionLocked": true
+}
+
+Once attributionLocked is true:
+do not reassign customer automatically.
+
+Only admin can override.
+
+────────────────────────
+CLIENT PROTECTION RULE
+────────────────────────
+
+Wholesalers must only see:
+
+- their assigned clients
+- their assigned doctors
+- their assigned orders
+- their assigned territories
+- their assigned categories
+
+Wholesalers must NOT see:
+
+- other wholesalers’ clients
+- Med-Peptides direct clients outside their territory
+- other protected territories
+- hidden admin margins
+
+────────────────────────
+WHITE-LABEL BRANDING
+────────────────────────
+
+Implement dynamic branding by tenant.
+
+Tenant controls:
+
+- logo
+- colors
+- favicon
+- support contact
+- WhatsApp contact
+- footer
+- CTA wording
+- displayed business name
+- prescription instructions
+- clinic referral text
+
+Create:
+
+TenantBrandProvider
+
+This wraps the application and injects branding.
+
+If tenant missing:
+use Med-Peptides default branding.
+
+────────────────────────
+CLINICAI WHITE-LABEL
+────────────────────────
+
+ClinicAI must adapt to tenant.
+
+Examples:
+
+Default:
+ClinicAI
+
+Tenant-branded:
+ClinicAI for Magenta
+
+Optional:
+hide Med-Peptides branding if tenant config requires.
+
+ClinicAI must receive:
+
+tenantId
+territory
+category rules
+pricing visibility
+customer ownership context
+
+────────────────────────
+GEOGRAPHY AREAS INTEGRATION
+────────────────────────
+
+Extend existing Geography Areas page.
+
+Admin Portal:
+can manage all tenants and territories.
+
+Wholesaler Portal:
+can manage only assigned territories and categories.
+
+Add:
+
+Tenant Branding
+Domain Settings
+Client Ownership
+Protected Categories
+Pricing Visibility
+CTA Rules
+
+────────────────────────
+PRICING VISIBILITY BY TENANT
+────────────────────────
+
+Pricing depends on:
+
+- tenant
+- territory
+- category
+- user role
+- customer ownership
+- geography area rules
+
+Examples:
+
+UAE + Magenta tenant:
+peptide_vials:
+hide prices for guests
+
+supplements:
+public pricing allowed
+
+compounded_formulations:
+inquiry only
+
+────────────────────────
+CHECKOUT BEHAVIOR
+────────────────────────
+
+Tenant can configure:
+
+- direct checkout
+- inquiry only
+- contact clinic
+- WhatsApp lead
+- doctor approval required
+- quotation only
+
+CTA examples:
+
+Contact your clinic
+Request quotation
+Ask your doctor
+Login for professional access
+Send inquiry
+
+────────────────────────
+PARTNER PORTAL
+────────────────────────
+
+Create / extend Wholesaler Portal.
+
+Menu items:
+
+Dashboard
+Geography Areas
+Branding
+Domains
+Clients
+Doctors
+Leads
+Orders
+Product Categories
+Pricing Visibility
+Analytics
+Audit Logs
+
+────────────────────────
+BRANDING PAGE
+────────────────────────
+
+Wholesaler can edit:
+
+- logo
+- colors
+- support email
+- WhatsApp
+- footer
+- CTA copy
+- public display name
+
+Admin can approve or lock branding changes.
+
+────────────────────────
+DOMAINS PAGE
+────────────────────────
+
+Wholesaler can view:
+
+- assigned subdomain
+- custom domain status
+- DNS instructions
+- SSL status
+
+Admin can approve custom domains.
+
+────────────────────────
+AUDIT LOGGING
+────────────────────────
+
+Create collection:
+
+tenantAuditLogs
+
+Log:
+
+- branding changes
+- pricing visibility changes
+- geography rules changes
+- domain changes
+- ownership overrides
+- checkout rule changes
+
+────────────────────────
+SECURITY
+────────────────────────
+
+Do NOT rely only on frontend.
+
+Enforce tenant rules in:
+
+- Firestore security rules
+- backend APIs
+- pricing APIs
+- order APIs
+- ClinicalAI context loader
+
+────────────────────────
+SEO STRATEGY
+────────────────────────
+
+Tenant pages should support:
+
+- tenant-aware metadata
+- canonical URLs
+- no duplicate content penalties where possible
+- default Med-Peptides canonical when needed
+
+Custom domains:
+may use tenant-specific SEO metadata.
+
+────────────────────────
+IMPLEMENTATION PHASES
+────────────────────────
+
+PHASE 1
+Create tenant data model and resolveTenant()
+
+PHASE 2
+Apply tenant branding provider.
+
+PHASE 3
+Create customer ownership attribution.
+
+PHASE 4
+Extend Geography Areas for tenant/category protection.
+
+PHASE 5
+Create Wholesaler Portal pages:
+Branding
+Domains
+Clients
+Geography Areas
+
+PHASE 6
+Connect pricing visibility to tenant + territory + category.
+
+PHASE 7
+Pass tenant context to ClinicAI.
+
+PHASE 8
+Add audit logs.
+
+PHASE 9
+Add subdomain routing.
+
+PHASE 10
+Prepare custom domain support.
+
+────────────────────────
+SUCCESS CRITERIA
+────────────────────────
+
+A wholesaler can operate a branded version of the platform.
+
+Users from that version are assigned to the wholesaler.
+
+Prices and checkout follow territory/category rules.
+
+ClinicAI respects tenant rules.
+
+No customer leakage.
+
+No URL conflict.
+
+No duplicated codebase.
+
+Med-Peptides remains the central infrastructure.

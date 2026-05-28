@@ -1,0 +1,46 @@
+[
+  {
+    "pmid": "38285527",
+    "title": "5-Hydroxypyrroloindoline Affords Tryptathionine and 2,2'-bis-Indole Peptide Staples: Application to Melanotan-II.",
+    "authors": [
+      "Todorovic M",
+      "Blanc A",
+      "Wang Z",
+      "Lozada J",
+      "Froelich J",
+      "Zeisler J",
+      "Zhang C",
+      "Merkens H",
+      "Benard F",
+      "Perrin DM"
+    ],
+    "journal": "Chemistry (Weinheim an der Bergstrasse, Germany)",
+    "pubdate": "2024 Apr 02",
+    "doi": "10.1002/chem.202304270",
+    "abstract": "With peptides increasingly favored as drugs, natural product motifs, namely the tryptathionine staple, found in amatoxins and phallotoxins, and the 2,2'-bis-indole found in staurosporine represent unexplored staples for unnatural peptide macrocycles. We disclose the efficient condensation of a 5-hydroxypyrroloindoline with either a cysteine-thiol or a tryptophan-indole to form a tryptathionine or 2-2'-bis-indole staple. Judicious use of protecting groups provides for chemoselective stapling using \u03b1-MSH, which provides a basis for investigating both chemoselectivity and affinity. Both classes of stapled peptides show nanomolar Ki's, with one showing a sub-nanomolar Ki value."
+  },
+  {
+    "pmid": "22034091",
+    "title": "Melatonin.",
+    "authors": [
+      "P\u00e9vet P"
+    ],
+    "journal": "Dialogues in clinical neuroscience",
+    "pubdate": "2002 Mar",
+    "doi": null,
+    "abstract": "Melatonin (MEL) is a hormone synthesized and secreted by the pineal gland deep within the brain in response to photoperiodic cues relayed from the retina via an endogenous circadian oscillator within the suprachiasmatic nucleus in the hypothalamus. The circadian rhythm of melatonin production and release, characterized by nocturnal activity and daytime quiescence, is an important temporal signal to the body structures that can read it. Melatonin acts through high-affinity receptors located centrally and in numerous peripheral organs. Different receptor subtypes have been cloned and characterized: MT(1) and MT(2) (transmembrane G-protein-coupled receptors), and MT(3). However, their physiological role remains unelucidated, although livestock management applications already include the control of seasonal breeding and milk production. As for potential therapeutic applications, exogenous melatonin or a melatonin agonist and selective 5-hydroxytrypiamine receptor (5-HT(2c)) antagonist, eg, S 20098, can be used to manipulate circadian processes such as the sleep-vake cycle, which are frequently disrupted in many conditions, most notably seasonal affective disorder."
+  },
+  {
+    "pmid": "37478579",
+    "title": "Melanotan-II reverses memory impairment induced by a short-term HF diet.",
+    "authors": [
+      "Wekwejt P",
+      "Wojda U",
+      "Kiryk A"
+    ],
+    "journal": "Biomedicine & pharmacotherapy = Biomedecine & pharmacotherapie",
+    "pubdate": "2023 Sep",
+    "doi": "10.1016/j.biopha.2023.115129",
+    "abstract": "A high-fat (HF) diet has been shown to increase the risk of neurological impairments and neurodegenerative disorders. The melanotropins used in this study have been associated with diet-related disorders; however, there is an absence of studies on their effect on diet-induced neurobehavioral conditions. Here, we investigated the possible relationship among diet, Melanotan-II (MT-II) targeting melanotropin receptors, and the behavior of zebrafish (Danio rerio). Surprisingly, even a short-term HF diet lasting for \u223c\u00a01\u00a0% of the zebrafish's life had a strong developmental effect. Zebrafish fed the HF diet showed an impairment in recognition memory, elevated anxiety levels, and reduced exploratory propensity after just three weeks compared to zebrafish fed the control diet. These HF diet-induced abnormalities were reversed by MT-II. Animals fed a HF diet and treated with MT-II demonstrated recognition memory, anxiety, and exploratory behavior similar to the control group. This study provides evidence that even a short-term HF diet has an impact on memory and emotions and is the first study to show that MT-II reverses these changes."
+  }
+]

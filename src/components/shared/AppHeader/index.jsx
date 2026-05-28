@@ -1,0 +1,172 @@
+import React, { useState, useEffect } from 'react';
+import { Search, Bell, HelpCircle, User, ChevronDown, ShoppingCart, Menu, Bot } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
+import { useHeaderContext } from '../../../context/HeaderContext';
+import './AppHeader.css';
+import UserDropdown from '../../../navigation/UserDropdown';
+import NotificationsPanel from './NotificationsPanel';
+import AdminAIAssistant from './AdminAIAssistant';
+import GlobalSearchModal from './GlobalSearchModal';
+
+export default function AppHeader({ 
+  title, subtitle, onSearchClick, cartCount = 0, onOpenCart, onToggleSidebar,
+  onToggleDesktopAI, isDesktopAIOpen, showDesktopAIToggle
+}) {
+  const { user, userProfile, activeRole, logout } = useAuth();
+  const { headerContent } = useHeaderContext();
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isAIOpen, setIsAIOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  // Escuchar el evento global para abrir el buscador (Cmd+K)
+  useEffect(() => {
+    const handleToggle = () => setIsSearchOpen(prev => !prev);
+    document.addEventListener('toggle-global-search', handleToggle);
+    return () => document.removeEventListener('toggle-global-search', handleToggle);
+  }, []);
+  
+  // Try to get initials from the profile or user email
+  const getInitials = () => {
+    if (userProfile?.firstName && userProfile?.lastName) {
+      return `${userProfile.firstName[0]}${userProfile.lastName[0]}`.toUpperCase();
+    }
+    if (userProfile?.name) {
+      return userProfile.name.substring(0, 2).toUpperCase();
+    }
+    if (user?.email) {
+      return user.email.substring(0, 2).toUpperCase();
+    }
+    return 'RP';
+  };
+
+  const displayName = userProfile?.firstName 
+    ? `${userProfile.firstName} ${userProfile.lastName || ''}`.trim()
+    : userProfile?.name || user?.email || 'User';
+
+  return (
+    <header className="app-header glass-header">
+      {/* Left: Hamburger (Mobile) + Breadcrumbs / Context Title */}
+      <div className="app-header-left">
+        {onToggleSidebar && (
+          <button className="app-header-hamburger" onClick={onToggleSidebar} aria-label="Toggle Sidebar">
+            <Menu size={22} strokeWidth={1.8} />
+          </button>
+        )}
+        <div className="app-header-title-group">
+          <div className="app-header-title">
+            {title || 'Dashboard'}
+          </div>
+          {subtitle && (
+            <div className="app-header-subtitle">
+              {subtitle}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Center: Dynamic Utility Content OR Global Search */}
+      <div className="app-header-center">
+        {headerContent ? (
+          headerContent
+        ) : (
+          <div className="app-header-search-container">
+            <Search size={16} className="app-header-search-icon" />
+            <input 
+              type="text" 
+              className="app-header-search" 
+              placeholder="Search patients, protocols, products..." 
+              onClick={() => setIsSearchOpen(true)}
+              readOnly 
+            />
+            <div className="app-header-shortcut">
+              <kbd>⌘</kbd><kbd>K</kbd>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Right: Actions & Profile */}
+      <div className="app-header-right">
+        {onOpenCart && (
+          <button className="app-header-action" aria-label="Cart" onClick={onOpenCart}>
+            <ShoppingCart size={20} strokeWidth={1.8} />
+            {cartCount > 0 && (
+              <div className="app-header-badge cart-badge">{cartCount}</div>
+            )}
+          </button>
+        )}
+        
+        {showDesktopAIToggle && (
+          <button 
+            className="app-header-action" 
+            aria-label="Toggle Clinical AI"
+            onClick={onToggleDesktopAI}
+            style={{ color: isDesktopAIOpen ? 'var(--primary)' : 'inherit' }}
+          >
+            <Bot size={20} strokeWidth={1.8} />
+          </button>
+        )}
+        
+        <button 
+          className="app-header-action" 
+          aria-label="Help & Support"
+          onClick={() => setIsAIOpen(true)}
+        >
+          <HelpCircle size={20} strokeWidth={1.8} />
+          {isAIOpen && <AdminAIAssistant onClose={() => setIsAIOpen(false)} />}
+        </button>
+        
+        <button 
+          className="app-header-action" 
+          aria-label="Notifications"
+          style={{ position: 'relative' }}
+          onClick={() => setIsNotifOpen(!isNotifOpen)}
+        >
+          <Bell size={20} strokeWidth={1.8} />
+          {/* Mock notification badge */}
+          <div className="app-header-badge cart-badge">3</div>
+          
+          {isNotifOpen && (
+            <NotificationsPanel onClose={() => setIsNotifOpen(false)} />
+          )}
+        </button>
+
+        <div 
+          className="app-header-profile" 
+          tabIndex={0} 
+          role="button" 
+          aria-haspopup="true"
+          aria-expanded={isUserMenuOpen}
+          onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+          style={{ position: 'relative' }}
+        >
+          <div className="app-header-avatar">
+            {getInitials()}
+          </div>
+          <div className="app-header-user-info">
+            <span className="app-header-user-name">{displayName}</span>
+            <span className="app-header-user-role">{activeRole || 'User'}</span>
+          </div>
+          <ChevronDown size={14} color="var(--color-text-secondary)" style={{ marginLeft: '4px' }} />
+          
+          {isUserMenuOpen && (
+            <UserDropdown 
+              user={user}
+              userProfile={userProfile}
+              onClose={() => setIsUserMenuOpen(false)}
+              onLogout={() => {
+                setIsUserMenuOpen(false);
+                if (logout) logout();
+                window.location.href = '/';
+              }}
+            />
+          )}
+        </div>
+      </div>
+      
+      {/* Global Search Command Palette */}
+      <GlobalSearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+    </header>
+  );
+}

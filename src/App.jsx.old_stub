@@ -1,0 +1,35 @@
+import React from 'react';
+import Header from './layout/Header';
+import Footer from './components/Footer';
+import ComplianceBanner from './components/ComplianceBanner';
+
+// Sections
+import Hero from './sections/Hero';
+import TrustStrip from './sections/TrustStrip';
+import StartHere from './sections/StartHere';
+import ChoosingGuide from './sections/ChoosingGuide';
+import SignalResponse from './sections/SignalResponse';
+import TargetAudience from './sections/TargetAudience';
+import QuickFAQ from './sections/QuickFAQ';
+
+function App() {
+  return (
+    <div className="app-container">
+      <Header />
+      <main>
+        <Hero />
+        <TrustStrip />
+        <StartHere />
+        <ChoosingGuide />
+        <SignalResponse />
+        <TargetAudience />
+        <QuickFAQ />
+      </main>
+      
+      <ComplianceBanner />
+      <Footer />
+    </div>
+  );
+}
+
+export default App;

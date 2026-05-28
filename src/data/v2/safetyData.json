@@ -1,0 +1,226 @@
+{
+  "5-AMINO 1 MQ": {
+    "safetyNote": "Research compound. Not approved for human therapeutic use. Avoid in pregnancy/lactation. Monitor liver enzymes with prolonged use. May interact with methylation-dependent medications.",
+    "contraindications": ["Pregnancy", "Lactation", "Severe hepatic impairment", "Concurrent high-dose methionine supplementation"]
+  },
+  "AOD-9604": {
+    "safetyNote": "Research peptide derived from HGH C-terminus. Does not activate IGF-1 axis. Generally well tolerated; injection site reactions possible. Not approved by FDA for therapeutic use.",
+    "contraindications": ["Active malignancy", "Pregnancy", "Hypersensitivity to HGH-derived peptides"]
+  },
+  "ARA-290": {
+    "safetyNote": "Investigational compound for neuropathic pain and inflammation. Well tolerated in Phase II trials. Avoid in active hematological malignancy (erythropoietin receptor activity).",
+    "contraindications": ["Polycythemia vera", "Uncontrolled hypertension", "Pregnancy", "Active thromboembolic disease"]
+  },
+  "BPC-157": {
+    "safetyNote": "Research peptide with extensive animal data. No approved human clinical trials completed. Use with caution in patients with history of malignancy due to angiogenic properties.",
+    "contraindications": ["Active malignancy or high cancer risk", "Pregnancy", "Concurrent anticoagulant therapy (relative)"]
+  },
+  "Bacteriostatic Water": {
+    "safetyNote": "Contains 0.9% benzyl alcohol. NOT for use in neonates or premature infants (gasping syndrome). Do not use beyond 28 days after first puncture. For multi-dose vial use only with compatible peptides.",
+    "contraindications": ["Neonates and premature infants", "Benzyl alcohol hypersensitivity", "Intravenous use without dilution"]
+  },
+  "CJC-1295 with DAC": {
+    "safetyNote": "Long-acting GHRH analog. Monitor IGF-1 levels to avoid supraphysiologic GH elevation. Potential for water retention and carpal tunnel at high doses. Weekly dosing protocol; avoid stacking with other GHRH analogs.",
+    "contraindications": ["Active acromegaly", "Active malignancy", "Diabetic retinopathy", "Pregnancy", "Pediatric patients with open growth plates"]
+  },
+  "CJC-1295 without DAC": {
+    "safetyNote": "Short-acting GHRH analog. Requires pulsatile dosing (2–3× daily). Monitor IGF-1. Lower risk of supraphysiologic GH accumulation vs. DAC version. Injection site reactions common.",
+    "contraindications": ["Active acromegaly", "Active malignancy", "Pregnancy", "Pediatric patients with open growth plates"]
+  },
+  "Cagrilintide": {
+    "safetyNote": "Long-acting amylin analog under clinical investigation (CagriSema trials). Risk of nausea and vomiting especially on dose escalation. Thyroid C-cell monitoring may be warranted. Not approved for commercial use.",
+    "contraindications": ["Personal or family history of medullary thyroid carcinoma", "MEN2 syndrome", "Pregnancy", "Severe gastroparesis"]
+  },
+  "Cardiogen": {
+    "safetyNote": "Peptide bioregulator (Ala-Glu-Asp-Arg) targeting cardiac tissue. Limited peer-reviewed human data. Use under physician supervision. Generally well tolerated in available studies.",
+    "contraindications": ["Active cardiac arrhythmia (relative)", "Pregnancy", "Severe renal impairment"]
+  },
+  "Cartalax": {
+    "safetyNote": "Peptide bioregulator (Ala-Glu-Asp-Gly) targeting cartilage. Limited human clinical data. Well tolerated in available studies. Use under physician supervision.",
+    "contraindications": ["Pregnancy", "Active autoimmune joint disease (relative)", "Severe renal impairment"]
+  },
+  "DSIP": {
+    "safetyNote": "Delta Sleep-Inducing Peptide. May enhance sedation; avoid concurrent CNS depressants. Research compound with limited human PK data. Avoid operating heavy machinery after administration.",
+    "contraindications": ["Concurrent CNS depressant therapy", "Severe sleep apnea (uncontrolled)", "Pregnancy"]
+  },
+  "Epithalon": {
+    "safetyNote": "Telomerase-activating tetrapeptide. Well tolerated in available studies. Theoretical concern with telomerase activation in oncological contexts. Long-term safety data limited.",
+    "contraindications": ["Active malignancy or high oncological risk", "Pregnancy", "Lactation"]
+  },
+  "FST-344 (Follistatin)": {
+    "safetyNote": "Myostatin inhibitor. Significant muscle hypertrophy potential. Long-term cardiovascular and oncological effects unknown. Strict medical supervision required. Not approved for therapeutic use.",
+    "contraindications": ["Active malignancy (especially muscle-associated tumors)", "Pregnancy", "Cardiomyopathy (relative)", "Pediatric patients"]
+  },
+  "GHK-Cu (Copper Peptide)": {
+    "safetyNote": "Topical and injectable copper peptide. Generally well tolerated. Avoid excessive systemic dosing due to copper accumulation risk. Topical formulations may cause transient erythema.",
+    "contraindications": ["Wilson's disease", "Copper hypersensitivity", "Pregnancy (systemic use)", "Severe hepatic disease"]
+  },
+  "GHRP-2": {
+    "safetyNote": "GH secretagogue. May transiently elevate cortisol and prolactin. Monitor blood glucose in diabetics. Avoid in active malignancy. Appetite stimulation is a common side effect.",
+    "contraindications": ["Active malignancy", "Uncontrolled diabetes mellitus", "Hyperprolactinemia", "Active Cushing's syndrome", "Pregnancy"]
+  },
+  "GLOW (BPC-157/TB-500/GHK-Cu)": {
+    "safetyNote": "Combination regenerative peptide blend. Cumulative contraindications of component peptides apply. Angiogenic properties warrant caution in oncological history. Use under physician guidance.",
+    "contraindications": ["Active malignancy or high cancer risk", "Pregnancy", "Severe coagulopathy", "Wilson's disease"]
+  },
+  "GW-501516": {
+    "safetyNote": "PPAR-delta agonist (SARMs-adjacent). IMPORTANT: Preclinical studies showed rapid cancer progression across multiple species. Currently not recommended for human use by most regulatory bodies. Extreme caution required.",
+    "contraindications": ["Active malignancy", "Pregnancy", "Lactation", "Pediatric patients", "Pre-cancerous conditions"]
+  },
+  "HCG": {
+    "safetyNote": "Gonadotropin hormone. Risk of ovarian hyperstimulation syndrome (OHSS) in women. May promote benign and malignant androgen-sensitive conditions. Monitor testosterone and estradiol levels.",
+    "contraindications": ["Hormone-sensitive malignancy (prostate, breast)", "OHSS history", "Uncontrolled thyroid or adrenal dysfunction", "Pregnancy (except specific obstetric use)", "Precocious puberty"]
+  },
+  "HGH": {
+    "safetyNote": "Recombinant human growth hormone. Requires prescription. Risk of insulin resistance, edema, carpal tunnel, and intracranial hypertension. Monitor IGF-1, glucose, and thyroid function regularly.",
+    "contraindications": ["Active malignancy", "Acute critical illness", "Diabetic retinopathy", "Active Prader-Willi syndrome with severe obesity", "Epiphyseal closure not completed (inappropriate GH deficiency diagnosis)"]
+  },
+  "HMG": {
+    "safetyNote": "Human menopausal gonadotropin. Risk of OHSS and multiple gestation in fertility protocols. Requires careful monitoring with ultrasound and hormonal assays.",
+    "contraindications": ["Ovarian failure", "Hormone-sensitive malignancy", "Uncontrolled thyroid/adrenal disease", "Pregnancy", "Ovarian cysts not due to PCOS"]
+  },
+  "Hexarelin": {
+    "safetyNote": "Potent GH secretagogue with cardiac GHS-R1b activity. May cause significant cortisol and prolactin elevation. Tachyphylaxis observed with continuous use. Desensitization risk higher than ipamorelin.",
+    "contraindications": ["Active malignancy", "Hyperprolactinemia", "Active Cushing's syndrome", "Uncontrolled diabetes", "Pregnancy"]
+  },
+  "IGF-1 LR3": {
+    "safetyNote": "Long-acting IGF-1 analog. Significant hypoglycemia risk — administer post-meal. Promotes cell proliferation; avoid in oncological history. Requires careful dosing titration.",
+    "contraindications": ["Active malignancy", "Hypoglycemia susceptibility", "Diabetic retinopathy", "Pregnancy", "Acromegaly"]
+  },
+  "Ipamorelin": {
+    "safetyNote": "Highly selective GH secretagogue. Minimal cortisol/prolactin co-secretion. Well tolerated for long-term cyclic use. Monitor IGF-1 periodically. Preferred GHS for safety profile.",
+    "contraindications": ["Active malignancy", "Pregnancy", "Active acromegaly"]
+  },
+  "Kisspeptin-10": {
+    "safetyNote": "HPG axis activator. Use in reproductively active individuals requires hormonal monitoring. Potential for premature puberty in pediatric populations. Not approved for therapeutic use.",
+    "contraindications": ["Hormone-sensitive malignancy", "Pediatric patients", "Pregnancy", "Precocious puberty history"]
+  },
+  "KLOW (BPC-157/TB-500/GHK-Cu/KPV)": {
+    "safetyNote": "Multi-peptide anti-inflammatory and regenerative blend. Cumulative contraindications of component peptides apply. Angiogenic properties warrant caution in oncological history.",
+    "contraindications": ["Active malignancy or high cancer risk", "Pregnancy", "Wilson's disease", "Severe coagulopathy"]
+  },
+  "KPV": {
+    "safetyNote": "Alpha-MSH-derived anti-inflammatory tripeptide. Well tolerated. Limited human PK data. May modulate immune response; use caution in autoimmune protocols with concurrent immunosuppressants.",
+    "contraindications": ["Concurrent immunosuppressant therapy (relative)", "Pregnancy", "Known melanocortin hypersensitivity"]
+  },
+  "MK-677": {
+    "safetyNote": "Oral GH secretagogue. May cause significant fluid retention, increased appetite, and insulin resistance. Monitor fasting glucose and IGF-1. Not approved for therapeutic use.",
+    "contraindications": ["Uncontrolled diabetes", "Active malignancy", "Severe fluid retention/edema", "Pregnancy", "Active acromegaly"]
+  },
+  "MOTS-C": {
+    "safetyNote": "Mitochondrial-derived peptide. Limited human safety data. Generally well tolerated in early research. Exercise-mimetic effects may potentiate hypoglycemia in diabetics on insulin.",
+    "contraindications": ["Insulin-dependent diabetes without monitoring", "Pregnancy", "Mitochondrial disease (theoretical)"]
+  },
+  "MT2": {
+    "safetyNote": "Melanotan II. Non-selective melanocortin agonist. Risk of nausea, spontaneous erections, and blood pressure changes. IMPORTANT: Associated with melanocyte activation — monitor nevi. Not FDA approved.",
+    "contraindications": ["Personal or family history of melanoma", "Active cardiovascular disease", "Pregnancy", "Erectile dysfunction medications (interaction risk)"]
+  },
+  "NAD+": {
+    "safetyNote": "IV/SC NAD+ infusion. IV administration may cause flushing, chest tightness, and nausea if infused too rapidly — must be given slowly. Research supports safety at therapeutic doses.",
+    "contraindications": ["Active malignancy with high energy demand (theoretical)", "Rapid IV push (administration contraindication)", "Pregnancy (insufficient data)"]
+  },
+  "NMN": {
+    "safetyNote": "NAD+ precursor. Generally well tolerated orally. Theoretical concern about NAD+-dependent cancer cell proliferation. Limited long-term human safety data.",
+    "contraindications": ["Active malignancy (theoretical concern)", "Pregnancy", "Hypersensitivity to niacin derivatives"]
+  },
+  "Oxytocin Acetate": {
+    "safetyNote": "Synthetic oxytocin. Intranasal use for social cognition research. Avoid in cardiovascular disease. May cause uterine contractions. Psychiatric effects (anxiety, social behavior changes) reported with chronic use.",
+    "contraindications": ["Pregnancy (except obstetric indication under supervision)", "Severe cardiovascular disease", "Hyponatremia", "Uterine scars (relative)"]
+  },
+  "PE-22-28": {
+    "safetyNote": "BDNF-mimetic spadin analog targeting TREK-1 channels. Research compound with antidepressant-like activity in preclinical models. Limited human data. Use under psychiatric supervision.",
+    "contraindications": ["Pregnancy", "Severe psychiatric conditions without supervision", "Concurrent MAOI therapy"]
+  },
+  "PEG MGF": {
+    "safetyNote": "PEGylated mechano growth factor. Promotes local muscle repair and satellite cell activation. Long-term PEGylation immune response risk. Not for use in active cancer.",
+    "contraindications": ["Active malignancy", "Pregnancy", "PEG hypersensitivity (anti-PEG antibodies)", "Severe renal impairment"]
+  },
+  "Pinealon": {
+    "safetyNote": "Peptide bioregulator (Glu-Asp-Arg) targeting CNS/pineal. Limited human clinical data. Well tolerated in available studies. Possible melatonin pathway interaction.",
+    "contraindications": ["Pregnancy", "Active CNS malignancy", "Concurrent melatonin receptor therapy (relative)"]
+  },
+  "PNC-27": {
+    "safetyNote": "p53-derived cancer-selective peptide. Research compound. Intended for oncological research contexts. Limited human safety data available.",
+    "contraindications": ["Pregnancy", "Severe renal/hepatic impairment", "Non-research clinical use without oncological supervision"]
+  },
+  "Precision Insulin Syringes": {
+    "safetyNote": "Single-use sterile medical device. Never share needles. Dispose in approved sharps container. Verify insulin concentration (U-100 vs. U-40) before use to prevent dosing errors.",
+    "contraindications": ["Reuse of single-use devices", "Use with incompatible insulin concentrations without dose adjustment"]
+  },
+  "Prostamax": {
+    "safetyNote": "Prostatic peptide bioregulator (Lys-Glu-Asp-Pro). Limited peer-reviewed human data. Use under urological physician supervision. Well tolerated in available studies.",
+    "contraindications": ["Active prostate malignancy (relative)", "Pregnancy", "Severe renal impairment"]
+  },
+  "PT-141": {
+    "safetyNote": "FDA-approved (Vyleesi) for HSDD in premenopausal women. Risk of nausea (most common), transient hypertension, and hyperpigmentation with chronic use. Do not use within 8h of another dose.",
+    "contraindications": ["Cardiovascular disease (uncontrolled hypertension, history of stroke)", "Pregnancy", "Concurrent antihypertensive washout < 2h", "History of hyperpigmentation disorders"]
+  },
+  "Retatrutide": {
+    "safetyNote": "Investigational triple agonist (Phase III). Most potent weight reduction compound in trials to date (~24% body weight). Nausea/vomiting significant on dose escalation. Thyroid C-cell monitoring warranted.",
+    "contraindications": ["Personal or family history of medullary thyroid carcinoma", "MEN2 syndrome", "Pregnancy", "Active pancreatitis", "Severe gastroparesis"]
+  },
+  "Selank": {
+    "safetyNote": "Anxiolytic tuftsin analog. Non-addictive with favorable safety profile. May potentiate sedatives. Intranasal preferred. Limited head-to-head data vs. conventional anxiolytics.",
+    "contraindications": ["Concurrent benzodiazepine therapy (additive sedation)", "Pregnancy", "Severe psychiatric illness without supervision"]
+  },
+  "Semaglutide": {
+    "safetyNote": "GLP-1 agonist (Ozempic/Wegovy). Risk of nausea, pancreatitis, and gallbladder disease. Thyroid C-cell hyperplasia in rodents — monitor in MTC risk patients. Requires gradual dose titration.",
+    "contraindications": ["Personal or family history of medullary thyroid carcinoma", "MEN2 syndrome", "Pregnancy", "Active pancreatitis", "Severe gastroparesis"]
+  },
+  "Semax": {
+    "safetyNote": "ACTH(4-7)PGP analog. Nootropic and neuroprotective peptide. Generally well tolerated intranasally. May cause transient nasal irritation. Limited long-term human data.",
+    "contraindications": ["Pregnancy", "Seizure disorder (relative)", "Concurrent corticosteroid therapy (ACTH-like activity)"]
+  },
+  "Sermorelin": {
+    "safetyNote": "GHRH analog. Physiological GH stimulation with lower risk vs. exogenous GH. Monitor IGF-1 levels. Injection site reactions common. Headache and flushing reported.",
+    "contraindications": ["Active malignancy", "Pregnancy", "Hypothyroidism (treat before initiating)", "Pediatric patients with open growth plates (relative)"]
+  },
+  "SLU-PP-332": {
+    "safetyNote": "ERR agonist — exercise-mimetic research compound. Preclinical data only. Limited human safety data. Not approved for any therapeutic indication.",
+    "contraindications": ["Pregnancy", "Active hormonal malignancy", "Pediatric patients", "Concurrent hormonal therapy (relative)"]
+  },
+  "Snap-8": {
+    "safetyNote": "Acetyl octapeptide-3. Topical anti-wrinkle peptide (Argireline analog). For cosmetic/topical use only. Systemic injection not indicated. Generally well tolerated topically.",
+    "contraindications": ["Systemic injection use", "Known peptide hypersensitivity", "Active skin infections at application site"]
+  },
+  "SS-31": {
+    "safetyNote": "Mitochondria-targeted antioxidant peptide (Elamipretide). Phase II/III trials underway for heart failure and Barth syndrome. Well tolerated in clinical trials. IV/SC administration.",
+    "contraindications": ["Pregnancy", "Severe hepatic impairment", "Known hypersensitivity to aromatic amino acid derivatives"]
+  },
+  "TB-500 (Thymosin β4)": {
+    "safetyNote": "Actin-sequestering peptide with angiogenic and anti-inflammatory properties. Animal studies generally safe. Monitor in patients with oncological history due to angiogenic activity. Well tolerated in human case reports.",
+    "contraindications": ["Active malignancy", "Pregnancy", "Severe coagulopathy"]
+  },
+  "Tesamorelin": {
+    "safetyNote": "FDA-approved GHRH analog (Egrifta) for HIV-associated lipodystrophy. Monitor IGF-1, glucose, and fluid retention. Approved for specific indication only; off-label use requires informed consent.",
+    "contraindications": ["Active malignancy", "Pituitary tumor or radiation history", "Pregnancy", "Diabetic retinopathy", "Pediatric patients"]
+  },
+  "Testagen": {
+    "safetyNote": "Testicular peptide bioregulator (Lys-Asp-Glu). Limited human clinical data. Use under physician supervision. Well tolerated in available studies.",
+    "contraindications": ["Active testicular malignancy (relative)", "Pregnancy", "Pediatric patients"]
+  },
+  "Thymagen": {
+    "safetyNote": "Thymic peptide bioregulator. Immune-modulating peptide. Use with caution in autoimmune conditions. Limited peer-reviewed data.",
+    "contraindications": ["Active autoimmune disease on immunosuppressants (relative)", "Pregnancy", "Active organ transplant with immunosuppression"]
+  },
+  "Thymogen": {
+    "safetyNote": "Synthetic thymopoietin fragment (Glu-Trp). Immune system modulator. Limited peer-reviewed human data. Generally well tolerated in available studies.",
+    "contraindications": ["Active autoimmune disease on immunosuppressants (relative)", "Pregnancy", "Active organ transplant with immunosuppression"]
+  },
+  "Thymosin Alpha 1": {
+    "safetyNote": "FDA-approved in some countries for hepatitis and immune deficiency. Well-characterized safety profile. May enhance immune response — caution in autoimmune conditions. Generally safe and well tolerated.",
+    "contraindications": ["Active autoimmune conditions (relative)", "Post-transplant immunosuppression", "Pregnancy"]
+  },
+  "Thymulin": {
+    "safetyNote": "Thymic nonapeptide requiring zinc co-factor for activity. Immune regulatory peptide. Limited human clinical data. Generally well tolerated.",
+    "contraindications": ["Active autoimmune disease on immunosuppressants (relative)", "Zinc metabolism disorders", "Pregnancy"]
+  },
+  "Tirzepatide": {
+    "safetyNote": "FDA-approved dual GIP/GLP-1 agonist (Mounjaro/Zepbound). Dose titration required (2.5mg→5→7.5→10→12.5→15mg). GI adverse effects most common. Thyroid C-cell hyperplasia in rodents — monitor in at-risk patients. Do not use in MEN2 or MTC history.",
+    "contraindications": ["Personal or family history of medullary thyroid carcinoma", "MEN2 syndrome", "Active pancreatitis", "Pregnancy", "Severe gastroparesis", "Type 1 diabetes (monotherapy)"]
+  },
+  "Tesamorelin": {
+    "safetyNote": "FDA-approved GHRH analog (Egrifta) for HIV-associated lipodystrophy. Monitor IGF-1, glucose, and fluid retention. Approved for specific indication only; off-label use requires informed consent.",
+    "contraindications": ["Active malignancy", "Pituitary tumor or radiation history", "Pregnancy", "Diabetic retinopathy", "Pediatric patients"]
+  }
+}

@@ -1,15 +1,15 @@
+ 
 import React, { Suspense, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from '../layout/Header';
 import Footer from '../layout/Footer';
-import BottomNav from '../layout/BottomNav';
 import BackToTop from '../layout/BackToTop';
 import ErrorBoundary from '../components/ErrorBoundary'; // Crear este componente
 
 export default function MainLayout(props) {
   const { pathname } = useLocation();
 
-  // Mejora: Scroll to top automático en cambios de ruta
+  // Improvement: Automatic scroll to top on route changes
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
@@ -23,12 +23,12 @@ export default function MainLayout(props) {
     }}>
       <Header {...props} />
 
-      {/* Añadimos un main tag para SEO y accesibilidad.
+      {/* Adding a main tag for SEO and accessibility.
           padding-bottom asegura que el BottomNav no tape el contenido final.
       */}
       <main className="view-container with-header-padding" style={{
         flex: '1 0 auto',
-        paddingBottom: 'calc(80px + env(safe-area-inset-bottom))'
+        paddingBottom: '0' // Removed padding as BottomNav is gone
       }}>
         <ErrorBoundary fallback={<RouteErrorState />}>
           <Suspense fallback={<LoadingFallback />}>
@@ -39,24 +39,14 @@ export default function MainLayout(props) {
 
       <Footer onNavigate={props.onSelectCategory} />
 
-      {/* Solo mostrar BottomNav si no estamos en Checkout para evitar distracciones 
-      */}
-      {!pathname.includes('checkout') && (
-        <BottomNav
-          onGoHome={props.onGoHome}
-          onOpenSearch={props.onOpenSearch}
-          onOpenCart={props.onOpenCart}
-          onOpenProducts={props.onOpenProducts}
-          cartCount={props.cartCount}
-        />
-      )}
+
 
       <BackToTop />
     </div>
   );
 }
 
-// Sub-componentes para limpieza de código
+// Sub-components for code cleanup
 const LoadingFallback = () => (
   <div style={{
     height: '60vh',

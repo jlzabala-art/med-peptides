@@ -1,11 +1,12 @@
+/* eslint-disable no-unused-vars */
 import { protocolRepository } from '../repositories/protocolRepository.js';
 import { runClinicalValidation } from './validationEngine.js';
 import { resolveVariantPrice } from '../utils/resolvePrice.js';
 import { PRICING_TIER } from '../constants/productEnums.js';
 
 /**
- * REGEN PEPT - Clinical Protocol Engine 2.0
- * Adaptive, blueprint-driven generation for clinical protocols.
+ * Med-Peptides - Clinical Protocol Engine 2.0
+ * Adaptive, protocol-driven generation for clinical protocols.
  * 
  * This engine replaces the static phase-reading logic with dynamic
  * variant resolution and clinical corrections.
@@ -29,16 +30,20 @@ export const ProtocolEngine2 = {
         bmi = parseFloat((weight / (heightInMeters * heightInMeters)).toFixed(1));
     }
 
-    let ageGroup = "18-35";
-    if (age > 65) ageGroup = "65+";
-    else if (age > 50) ageGroup = "51-65";
-    else if (age > 35) ageGroup = "36-50";
+    let ageGroup = formData.ageGroup || "18–30";
+    if (formData.age) {
+      const a = parseInt(formData.age);
+      if (a >= 60) ageGroup = "60+";
+      else if (a >= 46) ageGroup = "46–60";
+      else if (a >= 31) ageGroup = "31–45";
+      else ageGroup = "18–30";
+    }
 
     return {
       primary_clinical_focus: formData.primaryCondition || "Weight Management / Obesity",
       primary_condition: formData.specificGoal || "obesity_metabolic_dysfunction",
-      patient_demographic: formData.patientType?.toLowerCase() || "female",
-      age_group: formData.ageGroup || ageGroup,
+      patient_demographic: (formData.gender || formData.patientType || "Prefer not to say").toLowerCase(),
+      age_group: ageGroup,
       baseline_weight_kg: weight,
       height_cm: height,
       bmi: bmi,
@@ -51,11 +56,10 @@ export const ProtocolEngine2 = {
   },
 
   /**
-   * 2. Select Protocol Blueprints (plural)
-   * Now returns an array of prioritized blueprints.
+   * 2. Select Protocol Templates (plural)
+   * Now returns an array of prioritized templates.
    */
   async selectProtocolBlueprints(patientProfile, injectedLibrary = null) {
-    // Use injected library (e.g. for testing) but still filter by objective
     let all = injectedLibrary || null;
 
     if (!all) {
@@ -63,57 +67,77 @@ export const ProtocolEngine2 = {
     }
 
     if (!all || all.length === 0) {
-      // Firebase returned empty — only use the local bundle as a dev-time safety net.
-      // In production (med-peptides-app) blueprints/ must be seeded via
-      // `node scripts/uploadProtocolBundle.mjs` before deploying.
       if (import.meta.env?.DEV) {
         try {
-          const bundleMod = await import('./protocol_builder_2_0_protocols_bundle/index.js');
+          const bundleMod = await import('./protocol_finder_2_0_protocols_bundle/index.js');
           all = bundleMod.protocolBundle;
-          console.warn('[ProtocolEngine2] ⚠ Firebase returned 0 blueprints — using local bundle (DEV only)');
+          console.warn('[ProtocolEngine2] ⚠ Firebase returned 0 protocols — using local bundle (DEV only)');
         } catch (e) {
           console.error('[ProtocolEngine2] Local bundle fallback also failed:', e);
           all = [];
         }
       } else {
-        console.error('[ProtocolEngine2] Firebase blueprints/ collection is empty in production!');
+        console.error('[ProtocolEngine2] Firebase protocols/ collection is empty!');
         all = [];
       }
     }
     
-    // Filter by objective — normalize underscores to spaces for consistent matching
+    // Filter by objective
     const normalize = (s) => (s || '').toLowerCase().replace(/_/g, ' ').trim();
-    const matches = all.filter(b => {
-      const rawGoal = b.metadata?.primary_goal || b.primary_goal || '';
-      const goal = normalize(rawGoal);
-      const objective = normalize(patientProfile.primary_clinical_focus);
-      return (
-        goal === objective ||
-        objective.includes(goal) ||
-        goal.includes(objective)
-      );
+    const objective = normalize(patientProfile.primary_clinical_focus);
+    const userComplexity = patientProfile.guidelines?.complexity || 'moderate';
+    
+    let matches = all.filter(b => {
+      const goal = normalize(b.metadata?.primary_goal || b.primary_goal || '');
+      return goal === objective || objective.includes(goal) || goal.includes(objective);
     });
 
-    if (matches.length === 0) return [all[0]];
+    // Normalize complexity in matches
+    matches = matches.map(m => {
+      let c = (m.metadata?.complexity_level || m.complexity_level || 'standard').toLowerCase();
+      if (c === 'simple' || c === 'minimal') c = 'moderate';
+      return { ...m, complexity_level: c };
+    });
 
-    // Prefix-alignment sort: prefer protocols whose ID category prefix matches objective
-    // e.g. 'met_001' preferred over 'wm_003' for 'metabolic optimization' objective
-    const focus = (patientProfile.primary_clinical_focus || '').toLowerCase();
+    // Filter by complexity if possible, or just rank them
+    // If user prefers advanced, we show advanced first.
+    // If user prefers moderate, we show moderate first.
+    matches.sort((a, b) => {
+      if (a.complexity_level === userComplexity && b.complexity_level !== userComplexity) return -1;
+      if (a.complexity_level !== userComplexity && b.complexity_level === userComplexity) return 1;
+      return 0;
+    });
+
+    // PROTOCOL FINDER: Always return at least 3 protocols. If sparse, backfill with general ones.
+    if (matches.length < 3) {
+      const others = all.filter(b => !matches.includes(b)).map(m => {
+        let c = (m.metadata?.complexity_level || m.complexity_level || 'standard').toLowerCase();
+        if (c === 'simple' || c === 'minimal') c = 'moderate';
+        return { ...m, complexity_level: c };
+      });
+      matches = [...matches, ...others.slice(0, 3 - matches.length)];
+    }
+    
+    // Prefix-alignment sort (secondary sort)
     const pidPrefixScore = (protocol) => {
-      const pid = (protocol.protocol_id || '').split('_')[0];
-      if (focus.includes('weight') || focus.includes('obesity')) return pid === 'wm' ? 0 : 1;
-      if (focus.includes('cognitive') || focus.includes('focus')) return pid === 'cog' ? 0 : 1;
-      if (focus.includes('metabolic') || focus.includes('metabolism')) return pid === 'met' ? 0 : 1;
-      if (focus.includes('energy') || focus.includes('mitochondrial')) return pid === 'energy' ? 0 : 1;
-      if (focus.includes('hormon')) return pid === 'horm' ? 0 : 1;
-      if (focus.includes('immune') || focus.includes('immun')) return pid === 'immune' ? 0 : 1;
-      if (focus.includes('longevity') || focus.includes('aging')) return pid === 'lon' ? 0 : 1;
-      if (focus.includes('skin') || focus.includes('anti-aging')) return pid === 'sa' ? 0 : 1;
+      const pid = (protocol.protocol_id || '').split('_')[0].toLowerCase();
+      const focus = (patientProfile.primary_clinical_focus || '').toLowerCase();
+      if (focus.includes('weight')) return pid === 'wm' ? 0 : 1;
+      if (focus.includes('cognitive')) return pid === 'cog' ? 0 : 1;
+      if (focus.includes('metabolic')) return pid === 'met' ? 0 : 1;
+      if (focus.includes('longevity')) return pid === 'lon' ? 0 : 1;
       return 1;
     };
-    matches.sort((a, b) => pidPrefixScore(a) - pidPrefixScore(b));
+    
+    matches.sort((a, b) => {
+      const prefA = a.complexity_level === userComplexity ? 0 : 1;
+      const prefB = b.complexity_level === userComplexity ? 0 : 1;
+      if (prefA !== prefB) return prefA - prefB;
+      return pidPrefixScore(a) - pidPrefixScore(b);
+    });
 
-    // Clinical Prioritization (Testing 1 - Part 1 & 2)
+    return this.rankProtocols(matches, patientProfile);
+
     return this.rankProtocols(matches, patientProfile);
   },
 
@@ -127,58 +151,69 @@ export const ProtocolEngine2 = {
   rankProtocols(protocols, patientProfile) {
     const focus = (patientProfile.primary_clinical_focus || '').toLowerCase();
     const isWeightManagement = focus.includes('weight') || focus.includes('obesity');
+    const userGender = (patientProfile.patient_demographic || '').toLowerCase();
+    const userAgeGroup = (patientProfile.age_group || '').toLowerCase();
 
-    if (!isWeightManagement) return protocols;
+    const getDemographicScore = (protocol) => {
+      let score = 0;
+      const targetGender = (protocol.metadata?.targetGender || protocol.targetGender || '').toLowerCase();
+      const targetAge = (protocol.metadata?.targetAge || protocol.targetAge || '').toLowerCase();
 
-    const metabolicStatus = (patientProfile.metabolic_status || '').toLowerCase();
-    const tempo = (patientProfile.tempo_preference || 'standard').toLowerCase();
+      // Gender Match (Light weight)
+      if (targetGender && targetGender !== 'neutral') {
+        if (targetGender === userGender) score -= 2;
+        else score += 1;
+      }
 
-    // Extract compound IDs from a blueprint's first phase
-    const getDrugIds = (blueprint) => {
-      const phase0 = blueprint.phase_blueprints?.[0] || blueprint.phases?.[0] || {};
+      // Age Match (Light weight)
+      // Normalize 'young' (18-30), 'adult' (31-60), 'senior' (60+)
+      if (targetAge) {
+        let isMatch = false;
+        if (targetAge === 'young' && userAgeGroup.includes('18–30')) isMatch = true;
+        if (targetAge === 'adult' && (userAgeGroup.includes('31–45') || userAgeGroup.includes('46–60'))) isMatch = true;
+        if (targetAge === 'senior' && userAgeGroup.includes('60+')) isMatch = true;
+        
+        if (isMatch) score -= 2;
+      }
+
+      return score;
+    };
+
+    const getDrugIds = (protocol) => {
+      const phase0 = protocol.phase_blueprints?.[0] || protocol.phases?.[0] || {};
       const drugs = phase0.medications || phase0.drugs || [];
       return drugs.map(d => (d.product_id || d.compound || '').toLowerCase()).join(' ');
     };
 
-    const getTier = (blueprint) => {
-      const title = (blueprint.protocol_title || '').toLowerCase();
-      const id    = (blueprint.protocol_id   || '').toLowerCase();
-      const drugs = getDrugIds(blueprint);
+    const getTier = (protocol) => {
+      const title = (protocol.protocol_title || '').toLowerCase();
+      const id    = (protocol.protocol_id   || '').toLowerCase();
+      const drugs = getDrugIds(protocol);
       const all   = `${title} ${id} ${drugs}`;
 
-      // Tier 1 — GLP1/GIP Axis (tirzepatide, retatrutide, semaglutide)
-      if (all.includes('tirzepatide') || all.includes('retatrutide') ||
-          all.includes('semaglutide') || id === 'wm_001' || id === 'wm_002' || id === 'wm_004') {
-        return 1;
+      if (isWeightManagement) {
+        if (all.includes('tirzepatide') || all.includes('retatrutide') ||
+            all.includes('semaglutide') || id === 'wm_001' || id === 'wm_002' || id === 'wm_004') {
+          return 1;
+        }
+        if (all.includes('mots-c') || all.includes('aod-9604') || id.startsWith('met_')) return 2;
+        if (all.includes('semax') || all.includes('selank') || id === 'wm_003') return 3;
+        return 4;
       }
-      // Tier 2 — Metabolic Support
-      if (all.includes('mots-c') || all.includes('aod-9604') || all.includes('aod9604') ||
-          id.startsWith('met_')) {
-        return 2;
-      }
-      // Tier 3 — Behavioral/Neuro
-      if (all.includes('semax') || all.includes('selank') || id === 'wm_003') {
-        return 3;
-      }
-      return 4;
+      return 1; // Default tier for other goals
     };
 
-    // Specific WM protocol preference score — lower wins
-    const getWMScore = (blueprint) => {
-      const id = (blueprint.protocol_id || '').toLowerCase();
-      // Route to wm_004 STRICTLY for metabolic_syndrome + aggressive (score -1 = highest priority)
+    const getWMScore = (protocol) => {
+      if (!isWeightManagement) return 0;
+      const id = (protocol.protocol_id || '').toLowerCase();
+      const metabolicStatus = (patientProfile.metabolic_status || '').toLowerCase();
+      const tempo = (patientProfile.tempo_preference || 'standard').toLowerCase();
+
       if (id === 'wm_004' && metabolicStatus.includes('metabolic_syndrome') && tempo === 'aggressive') return -1;
-      // Route to wm_002 for insulin_resistance (regardless of tempo)
       if (id === 'wm_002' && metabolicStatus.includes('insulin_resistance')) return -1;
-      // Route to wm_002 for aggressive (when no metabolic_syndrome present)
-      if (id === 'wm_002' && tempo === 'aggressive' && !metabolicStatus.includes('metabolic_syndrome')) return 0;
-      // Default: wm_001 is the standard first-line for impaired/normal
+      if (id === 'wm_002' && tempo === 'aggressive') return 0;
       if (id === 'wm_001') return (tempo === 'standard' || tempo === 'conservative') ? 0 : 2;
-      if (id === 'wm_002') return 1;
-      if (id === 'wm_004') return 2;
-      // Use numeric suffix for any others
-      const num = parseInt((id.match(/\d+/) || ['99'])[0], 10);
-      return num;
+      return 1;
     };
 
     return [...protocols].sort((a, b) => {
@@ -186,15 +221,17 @@ export const ProtocolEngine2 = {
       const tierB = getTier(b);
       if (tierA !== tierB) return tierA - tierB;
 
-      // Same tier: use WM-specific routing score
-      return getWMScore(a) - getWMScore(b);
+      // Combine demographic score and specific goal score
+      const scoreA = getWMScore(a) + getDemographicScore(a);
+      const scoreB = getWMScore(b) + getDemographicScore(b);
+      return scoreA - scoreB;
     });
   },
 
   /**
    * 3. Apply Variant Rules
    */
-  applyVariantRules(blueprint, patientProfile) {
+  applyVariantRules(protocol, patientProfile) {
     const variants = {
       age_variant: patientProfile.age_group,
       sex_variant: patientProfile.patient_demographic,
@@ -216,8 +253,8 @@ export const ProtocolEngine2 = {
   /**
    * 4. Build Phase Plan
    */
-  buildPhasePlan(blueprint, patientProfile) {
-    const blueprints = blueprint.phase_blueprints || blueprint.phases || [];
+  buildPhasePlan(protocol, patientProfile) {
+    const blueprints = protocol.phase_blueprints || protocol.phases || [];
     const totalWeeks = patientProfile.duration_weeks;
     const resolvedPhases = [];
     
@@ -260,10 +297,10 @@ export const ProtocolEngine2 = {
    * variantRef shape:
    *   { type: 'exact' | 'resolved', variantId?: string, productId: string, route: string }
    *
-   * Falls back gracefully for blueprints that don't carry variantRef yet.
+   * Falls back gracefully for protocols that don't carry variantRef yet.
    */
-  resolveMedicationSchedule(resolvedPhases, blueprint, appliedVariants) {
-    const escalationRules = blueprint.variant_rules?.tirzepatide_escalation || {
+  resolveMedicationSchedule(resolvedPhases, protocol, appliedVariants) {
+    const escalationRules = protocol.variant_rules?.tirzepatide_escalation || {
         "standard": [2.5, 2.5, 2.5, 2.5, 5, 5, 5, 5, 7.5, 7.5, 7.5, 7.5, 10, 10, 10, 10],
         "aggressive": [2.5, 2.5, 5, 5, 5, 5, 7.5, 7.5, 10, 10, 10, 10, 12.5, 12.5, 15, 15],
         "conservative": [2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 5, 5, 5, 5, 5, 5, 7.5, 7.5, 7.5, 7.5]
@@ -280,7 +317,7 @@ export const ProtocolEngine2 = {
             const isSemaglutide = compoundName.includes('semaglutide');
 
             // --- Phase 2: resolve variantRef ---
-            // If the blueprint supplies a typed variantRef, we honour it.
+            // If the protocol supplies a typed variantRef, we honour it.
             // type=exact → variantId is authoritative; engine skips supplier selection.
             // type=resolved → engine picks the best available variant at runtime.
             const variantRef = d.variantRef || null;
@@ -326,8 +363,8 @@ export const ProtocolEngine2 = {
   /**
    * 6. Generate Monitoring Schedule
    */
-  buildMonitoringSchedule(blueprint, patientProfile, appliedVariants) {
-    const basePlan = blueprint.monitoring_plan || { baseline_labs: [], baseline_required: [], checkpoints: [] };
+  buildMonitoringSchedule(protocol, patientProfile, appliedVariants) {
+    const basePlan = protocol.monitoring_plan || { baseline_labs: [], baseline_required: [], checkpoints: [] };
     const resolvedMonitoring = {
         baseline_required: [...(basePlan.baseline_required || []), ...(basePlan.baseline_labs || [])],
         scheduled_checkpoints: []
@@ -501,12 +538,12 @@ export const ProtocolEngine2 = {
    */
   async generateAdaptiveProtocol(formData, products) {
     const patientProfile = this.resolvePatientProfile(formData);
-    const blueprints = await this.selectProtocolBlueprints(patientProfile);
-    const blueprint = blueprints[0]; // Primary recommendation
+    const protocols = await this.selectProtocolBlueprints(patientProfile);
+    const protocol = protocols[0]; // Primary recommendation
     
     // PART 4, 18 & 17 — PROTOCOL IDENTITY VALIDATION & DEBUG LOGGING
     const allowedIDs = ['WM-001', 'WM-002', 'WM-003', 'WM-004', 'COG-001', 'MET-001', 'LON-001', 'IMM-001', 'HOR-001'];
-    const protocolID = (blueprint.protocol_id || '').toUpperCase();
+    const protocolID = (protocol.protocol_id || '').toUpperCase();
     const isNormalized = allowedIDs.some(id => protocolID.includes(id));
 
     console.log(`[ProtocolEngine2] Routing Outcome:`, {
@@ -516,12 +553,12 @@ export const ProtocolEngine2 = {
         metabolicStatus: patientProfile.metabolic_status
     });
 
-    const appliedVariants = this.applyVariantRules(blueprint, patientProfile);
+    const appliedVariants = this.applyVariantRules(protocol, patientProfile);
     
-    let resolvedPhases = this.buildPhasePlan(blueprint, patientProfile);
-    resolvedPhases = this.resolveMedicationSchedule(resolvedPhases, blueprint, appliedVariants);
+    let resolvedPhases = this.buildPhasePlan(protocol, patientProfile);
+    resolvedPhases = this.resolveMedicationSchedule(resolvedPhases, protocol, appliedVariants);
     
-    const monitoringSchedule = this.buildMonitoringSchedule(blueprint, patientProfile, appliedVariants);
+    const monitoringSchedule = this.buildMonitoringSchedule(protocol, patientProfile, appliedVariants);
     const timeline = this.generateTimeline(resolvedPhases, patientProfile, monitoringSchedule, products);
     // Pass through the caller's pricing tier so cost reflects the user's actual role.
     const cost = this.calculateClinicalCost(resolvedPhases, products || [], formData?.pricingTier ?? PRICING_TIER.RETAIL);
@@ -570,16 +607,16 @@ export const ProtocolEngine2 = {
     const output = {
         id: appliedVariants.tempo_variant,
         tempo: appliedVariants.tempo_variant,
-        generated_protocol_id: `gp_${blueprint.protocol_id}_${patientProfile.patient_demographic}_${patientProfile.age_group}_${patientProfile.duration_weeks}w_${new Date().getUTCFullYear()}${String(new Date().getUTCMonth()+1).padStart(2,'0')}${String(new Date().getUTCDate()).padStart(2,'0')}`,
-        protocol_id: blueprint.protocol_id,
-        protocol_slug: blueprint.protocol_slug,
-        protocol_title: (blueprint.protocol_title || "Untitled Protocol") + (appliedVariants.tempo_variant !== 'standard' ? ` (${appliedVariants.tempo_variant.charAt(0).toUpperCase() + appliedVariants.tempo_variant.slice(1)})` : ''),
-        protocol_version: blueprint.protocol_version || "1.0.0",
+        generated_protocol_id: `gp_${protocol.protocol_id}_${patientProfile.patient_demographic}_${patientProfile.age_group}_${patientProfile.duration_weeks}w_${new Date().getUTCFullYear()}${String(new Date().getUTCMonth()+1).padStart(2,'0')}${String(new Date().getUTCDate()).padStart(2,'0')}`,
+        protocol_id: protocol.protocol_id,
+        protocol_slug: protocol.protocol_slug,
+        protocol_title: (protocol.protocol_title || "Untitled Protocol") + (appliedVariants.tempo_variant !== 'standard' ? ` (${appliedVariants.tempo_variant.charAt(0).toUpperCase() + appliedVariants.tempo_variant.slice(1)})` : ''),
+        protocol_version: protocol.protocol_version || "1.0.0",
         patient_context: patientProfile,
         applied_variants: appliedVariants,
         clinical_summary: {
-            goal: blueprint.primary_goal,
-            risk_level: blueprint.complexity_level === 'advanced' ? 'high' : 'moderate',
+            goal: protocol.primary_goal,
+            risk_level: protocol.complexity_level === 'advanced' ? 'high' : 'moderate',
             requires_baseline_labs: true,
             is_normalized: isNormalized
         },
@@ -587,8 +624,8 @@ export const ProtocolEngine2 = {
         resolved_monitoring: monitoringSchedule,
         resolved_timeline: timeline,
         validation: validation,
-        justification: blueprint.overview_summary || "Optimized therapeutic stack aligned with biological markers.",
-        primaryClinicalFocus: blueprint.primary_goal || "Systemic optimization",
+        justification: protocol.overview_summary || "Optimized therapeutic stack aligned with biological markers.",
+        primaryClinicalFocus: protocol.primary_goal || "Systemic optimization",
         
         computedCost: cost,
         protocol_schedule: timeline.map(w => ({
@@ -611,20 +648,20 @@ export const ProtocolEngine2 = {
    */
   async generateAllVariants(formData, products) {
     const patientProfile = this.resolvePatientProfile(formData);
-    const blueprints = await this.selectProtocolBlueprints(patientProfile);
+    const protocols = await this.selectProtocolBlueprints(patientProfile);
     
-    // We generate the 'standard' variant for the top 3 recommended blueprints
+    // We generate the 'standard' variant for the top 3 recommended protocols
     const variants = {};
     const tempos = ['standard', 'aggressive', 'conservative'];
     
-    // If only one blueprint matched, generate its tempos
-    if (blueprints.length === 1) {
+    // If only one protocol matched, generate its tempos
+    if (protocols.length === 1) {
         for (const tempo of tempos) {
             variants[tempo] = await this.generateAdaptiveProtocol({ ...formData, tempo }, products);
         }
     } else {
-        // Generate primary blueprint variants
-        const primary = blueprints[0];
+        // Generate primary protocol variants
+        const primary = protocols[0];
         variants['standard'] = await this.generateAdaptiveProtocol({ ...formData, tempo: 'standard' }, products);
         variants['aggressive'] = await this.generateAdaptiveProtocol({ ...formData, tempo: 'aggressive' }, products);
         variants['conservative'] = await this.generateAdaptiveProtocol({ ...formData, tempo: 'conservative' }, products);

@@ -1,10 +1,11 @@
+ 
 /**
  * configService.js
  *
  * Fetches and caches application-level configuration from Firestore.
  *
  * Collections used:
- *   blueprints/       → protocol blueprints (each doc is one blueprint)
+ *   protocols/        → canonical protocol documents (each doc is one protocol blueprint)
  *   settings/         → singleton config docs (pathways, ui, dosageUnits)
  *
  * Session caching (sessionStorage) prevents redundant Firestore reads

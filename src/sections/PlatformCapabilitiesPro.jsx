@@ -1,11 +1,12 @@
+ 
 import React from 'react';
 import { Layers, Search, FileText, FileBarChart, PiggyBank, ShieldCheck, ArrowRight } from 'lucide-react';
 
 const capabilities = [
   {
-    title: 'Protocol Builder',
+    title: 'ClinicalAI',
     icon: Layers,
-    desc: 'Multi-phase AI-assisted titration logic for verified practitioners and clinical schedulers.',
+    desc: 'Advanced biological intelligence layer for multi-phase titration logic and clinical decision support.',
     stat: '200+ protocols built',
     statColor: '#6366f1',
   },
@@ -21,7 +22,7 @@ const capabilities = [
     icon: FileText,
     desc: 'On-demand SDS, CoA, and compliance bundles aligned with institutional review requirements.',
     stat: 'IRB-compatible',
-    statColor: '#10b981',
+    statColor: 'var(--color-success)',
   },
   {
     title: 'Analytical Reports',
@@ -55,8 +56,8 @@ export default function PlatformCapabilitiesPro() {
           {/* Discrete professional badge */}
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-            backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0',
-            color: '#15803d', padding: '4px 14px', borderRadius: '20px',
+            backgroundColor: 'var(--color-success-bg)', border: '1px solid #bbf7d0',
+            color: 'var(--color-success)', padding: '4px 14px', borderRadius: '20px',
             fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.08em',
             textTransform: 'uppercase', marginBottom: '1.25rem',
           }}>
@@ -69,7 +70,7 @@ export default function PlatformCapabilitiesPro() {
           }}>
             Clinical-Grade Tools
           </h2>
-          <p style={{ color: '#64748b', fontSize: '1.05rem', maxWidth: '560px', margin: '0 auto', lineHeight: 1.7 }}>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '1.05rem', maxWidth: '560px', margin: '0 auto', lineHeight: 1.7 }}>
             Exclusive infrastructure for accredited practitioners, institutional researchers, and verified procurement teams.
           </p>
         </div>
@@ -93,12 +94,12 @@ export default function PlatformCapabilitiesPro() {
           maxWidth: '860px', margin: '2.5rem auto 0', padding: '0 1rem',
           display: 'flex', alignItems: 'center', gap: '0.75rem',
           padding: '1.25rem 1.75rem',
-          backgroundColor: '#f8fafc',
+          backgroundColor: 'var(--color-bg-app)',
           border: '1px solid #e2e8f0',
           borderRadius: '14px',
         }}>
-          <ShieldCheck size={18} color="#15803d" style={{ flexShrink: 0 }} />
-          <p style={{ fontSize: '0.82rem', color: '#64748b', margin: 0, lineHeight: 1.6 }}>
+          <ShieldCheck size={18} color="var(--color-success)" style={{ flexShrink: 0 }} />
+          <p style={{ fontSize: '0.82rem', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.6 }}>
             Access to clinical-grade tools is restricted to verified professionals.
             {' '}<span style={{ color: '#0ea5e9', fontWeight: 700, cursor: 'pointer' }}>Request institutional access →</span>
           </p>
@@ -122,8 +123,8 @@ function ProCapRow({ cap, index }) {
         alignItems: 'center',
         gap: '1.5rem',
         padding: '1.25rem 1.5rem',
-        backgroundColor: hovered ? '#f8fafc' : 'white',
-        border: '1px solid ' + (hovered ? '#00A3E0' : '#e2e8f0'),
+        backgroundColor: hovered ? 'var(--color-bg-app)' : 'white',
+        border: '1px solid ' + (hovered ? 'var(--color-primary)' : 'var(--color-border)'),
         borderRadius: '16px',
         transition: 'all 0.2s ease',
         cursor: 'default',
@@ -133,7 +134,7 @@ function ProCapRow({ cap, index }) {
       <div style={{
         width: 28, height: 28, borderRadius: '8px',
         backgroundColor: hovered ? '#e0f4fd' : '#f1f5f9',
-        color: hovered ? '#00A3E0' : '#94a3b8',
+        color: hovered ? 'var(--color-primary)' : 'var(--color-text-tertiary)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: '0.7rem', fontWeight: 900, flexShrink: 0,
         transition: 'all 0.2s',
@@ -145,7 +146,7 @@ function ProCapRow({ cap, index }) {
       <div style={{
         width: 44, height: 44, borderRadius: '12px',
         backgroundColor: hovered ? '#e0f4fd' : '#f1f9fe',
-        color: '#00A3E0',
+        color: 'var(--color-primary)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         flexShrink: 0, transition: 'background 0.2s',
       }}>
@@ -157,7 +158,7 @@ function ProCapRow({ cap, index }) {
         <h3 style={{ fontSize: '0.95rem', color: '#0f172a', fontWeight: 800, margin: '0 0 0.2rem 0' }}>
           {cap.title}
         </h3>
-        <p style={{ color: '#64748b', fontSize: '0.82rem', margin: 0, lineHeight: 1.55 }}>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.82rem', margin: 0, lineHeight: 1.55 }}>
           {cap.desc}
         </p>
       </div>
@@ -174,7 +175,7 @@ function ProCapRow({ cap, index }) {
         </span>
       </div>
 
-      <ArrowRight size={16} color={hovered ? '#00A3E0' : '#e2e8f0'} style={{ flexShrink: 0, transition: 'color 0.2s' }} />
+      <ArrowRight size={16} color={hovered ? 'var(--color-primary)' : 'var(--color-border)'} style={{ flexShrink: 0, transition: 'color 0.2s' }} />
     </div>
   );
 }

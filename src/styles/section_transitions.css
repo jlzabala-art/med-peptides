@@ -1,0 +1,222 @@
+/* ============================================================
+   SECTION TRANSITIONS — Gradient bridges between homepage sections
+   ============================================================
+   Strategy: every section that lives on the home page gets a
+   ::before pseudo-element that fades FROM the previous section's
+   background colour INTO its own colour, creating a smooth blend.
+
+   We rely on CSS custom properties set per-section so the
+   gradient colours are driven by the same tokens used elsewhere.
+
+   Two repeating backgrounds are used in the app:
+     Odd sections  → --background  (#F4F8FB)
+     Even sections → --surface     (#FFFFFF)
+
+   The bridge height is 80px — tall enough to read as a smooth
+   blend but short enough not to crowd content above the fold.
+   ============================================================ */
+
+/* ── Bridge height token (override per media-query below) ─── */
+:root {
+  --section-bridge-h: 80px;
+}
+
+/* ── Base: every "bridged" section carries a fading ::before ─ */
+/*
+   .section-bridge is added programmatically via HomeSectionRenderer
+   (or via a direct className on individual section roots).
+   We target the two most common wrapper classes + the utility.
+*/
+.section-bridge,
+.peptide-section,
+.about-section-wrapper,
+.protocols-section,
+.professional-section,
+.home-section-wrapper {
+  position: relative; /* ensure stacking context for pseudo */
+}
+
+/* ── Fade-in from above (top bridge) ──────────────────────── */
+.section-bridge::before,
+.peptide-section::before,
+.about-section-wrapper::before,
+.protocols-section::before,
+.professional-section::before,
+.home-section-wrapper::before {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset-inline: 0;          /* full width */
+  top: 0;
+  height: var(--section-bridge-h);
+  z-index: 1;               /* above background, below content */
+
+  /*
+    Default: fades FROM transparent (the colour of the element
+    beneath leaks through) TO the section's own background.
+    We use the element's actual background by reading
+    --section-own-bg, which each section should set on itself.
+    If not set, we fall back to currentColor-neutral transparent.
+  */
+  background: linear-gradient(
+    to bottom,
+    var(--section-from-bg, transparent),
+    transparent
+  );
+}
+
+/* ── Fade-out to below (bottom bridge) ─────────────────────── */
+.section-bridge::after,
+.peptide-section::after,
+.about-section-wrapper::after,
+.protocols-section::after,
+.professional-section::after,
+.home-section-wrapper::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: var(--section-bridge-h);
+  z-index: 1;
+
+  background: linear-gradient(
+    to top,
+    var(--section-to-bg, transparent),
+    transparent
+  );
+}
+
+/*
+  NOTE: If a section's ::after is already used for a scroll-strip
+  fade or similar UI chrome, apply `.section-bridge--top-only`
+  to suppress the bottom pseudo:
+*/
+.section-bridge--top-only::after { display: none; }
+.section-bridge--bot-only::before { display: none; }
+
+/* ============================================================
+   ALTERNATING BACKGROUND SYSTEM
+   Applied to the home page section sequence so adjacent
+   sections always have visually distinct backgrounds.
+
+   Add `.home-seq` to the immediate parent of the section list,
+   then sections alternate automatically.
+
+   Odd  → --background  (#F4F8FB  cool off-white)
+   Even → --surface     (#FFFFFF  pure white)
+   ============================================================ */
+
+.home-seq > *:not([class*="home-section--dark"]):not([class*="home-section--glass"]):not([class*="home-section--none"]) {
+  --section-own-bg: var(--background);
+  background-color: var(--background);
+}
+
+.home-seq > *:nth-child(even):not([class*="home-section--dark"]):not([class*="home-section--glass"]):not([class*="home-section--none"]) {
+  --section-own-bg: var(--surface);
+  background-color: var(--surface);
+}
+
+/* Bridge top colour = what the previous sibling was */
+.home-seq > *:nth-child(even)::before {
+  background: linear-gradient(
+    to bottom,
+    var(--background),   /* previous odd sibling's colour */
+    transparent
+  );
+}
+
+.home-seq > *:nth-child(odd):not(:first-child)::before {
+  background: linear-gradient(
+    to bottom,
+    var(--surface),      /* previous even sibling's colour */
+    transparent
+  );
+}
+
+/* First section never needs a top bridge */
+.home-seq > *:first-child::before {
+  display: none;
+}
+
+/* ── Section-alt variant (EEF4FA — used by some hero sub-sections) */
+.home-seq > *.section-alt {
+  --section-own-bg: var(--section-alt);
+  background-color: var(--section-alt);
+}
+
+/* ============================================================
+   INDIVIDUAL SECTION OVERRIDES
+   For sections that explicitly override their own background
+   (dark/gradient banners, etc.) we expose --section-from-bg
+   and --section-to-bg so the caller can tune the bridges.
+   ============================================================ */
+
+/* Dark / premium navy sections blending into lighter ones */
+.section-dark-bridge::before {
+  background: linear-gradient(
+    to bottom,
+    var(--section-from-bg, rgba(0, 54, 102, 0.07)),
+    transparent
+  );
+}
+
+.section-dark-bridge::after {
+  background: linear-gradient(
+    to top,
+    var(--section-to-bg, rgba(0, 54, 102, 0.05)),
+    transparent
+  );
+}
+
+/* ============================================================
+   MOBILE ADJUSTMENTS
+   ============================================================ */
+@media (max-width: 768px) {
+  :root {
+    --section-bridge-h: 56px;
+  }
+}
+
+/* ============================================================
+   SCROLL REVEAL SYSTEM
+   ============================================================
+   Sections start in a "hidden" state (opacity 0, translated down)
+   and transition to visible once the IntersectionObserver fires.
+
+   Usage:
+     - Add class `section-reveal` to the section wrapper
+     - When the section enters the viewport the JS hook adds
+       `is-visible`, triggering the CSS transition
+     - The first section (hero) is excluded — it's visible
+       immediately on load (handled in HomeSectionRenderer)
+
+   Stagger: each section gets a tiny delay based on its index
+   via the CSS custom property `--reveal-delay` (set inline).
+   ============================================================ */
+
+/* ── Hidden state (before entering viewport) ──────────────── */
+.section-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity  0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+/* ── Visible state (after IntersectionObserver fires) ─────── */
+.section-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Respect reduced-motion preference ─────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .section-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

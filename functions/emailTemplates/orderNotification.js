@@ -23,10 +23,18 @@ function buildOrderNotificationHtml(order) {
     currency = 'EUR',
     shippingAddress = {},
     notes = '',
+    paymentMethod = '',
   } = order;
 
+  // Resolve payment method to a human-readable label
+  const paymentLabel =
+    paymentMethod === 'bank_transfer' ? '🏦 Bank Transfer'
+    : paymentMethod === 'credit_card'  ? '💳 Credit / Debit Card'
+    : paymentMethod ? paymentMethod
+    : '—';
+
   const fmt = (amount) =>
-    new Intl.NumberFormat('es-ES', { style: 'currency', currency }).format(amount);
+    new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
 
   // createdAt can be a Firestore Timestamp, a JS Date, or an ISO string
   let dateObj;
@@ -38,8 +46,8 @@ function buildOrderNotificationHtml(order) {
     dateObj = new Date();
   }
   const dateStr = isNaN(dateObj.getTime())
-    ? new Date().toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' })
-    : dateObj.toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' });
+    ? new Date().toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })
+    : dateObj.toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' });
 
   const itemsRows = items
     .map(
@@ -49,9 +57,9 @@ function buildOrderNotificationHtml(order) {
           ${item.name || '—'}
           ${item.variant ? `<br><span style="font-size:12px;color:#64748b;">${item.variant}</span>` : ''}
         </td>
-        <td style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:center;">${item.quantity || 1}</td>
-        <td style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:right;">${fmt(item.price || 0)}</td>
-        <td style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; font-weight:600; color:#003666; text-align:right;">${fmt((item.price || 0) * (item.quantity || 1))}</td>
+        <td class="hide-mobile" style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:center;">${item.quantity || 1}</td>
+        <td class="hide-mobile" style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:right;">${fmt(item.unitPrice || item.price || 0)}</td>
+        <td style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; font-weight:600; color:#003666; text-align:right;">${fmt(item.lineTotal || (item.unitPrice || item.price || 0) * (item.quantity || 1))}</td>
       </tr>`
     )
     .join('');
@@ -67,26 +75,38 @@ function buildOrderNotificationHtml(order) {
     .join(', ');
 
   return `<!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nuevo Pedido — Med-Peptides</title>
+  <title>New Order — Med-Peptides Admin</title>
+  <style>
+    @media only screen and (max-width: 600px) {
+      .email-wrapper  { padding: 16px 8px !important; }
+      .email-card     { padding: 24px 18px !important; }
+      .email-header   { padding: 24px 18px !important; }
+      .email-header h1 { font-size: 22px !important; }
+      .meta-row td    { display: block !important; width: 100% !important; padding: 4px 0 !important; }
+      .hide-mobile    { display: none !important; }
+      .pay-row        { display: block !important; }
+      .pay-row span   { display: block !important; margin-left: 0 !important; margin-top: 6px !important; }
+    }
+  </style>
 </head>
 <body style="margin:0;padding:0;background:#f1f5f9;font-family:'Segoe UI',Helvetica,Arial,sans-serif;">
 
   <!-- Wrapper -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:32px 16px;">
+  <table width="100%" cellpadding="0" cellspacing="0" class="email-wrapper" style="background:#f1f5f9;padding:32px 16px;">
     <tr>
       <td align="center">
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;">
 
           <!-- Header -->
           <tr>
-            <td style="background:linear-gradient(135deg,#003666 0%,#005a9c 100%);border-radius:14px 14px 0 0;padding:32px 36px;text-align:center;">
-              <p style="margin:0;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:8px;">Notificación de Pedido</p>
+            <td class="email-header" style="background:linear-gradient(135deg,#003666 0%,#005a9c 100%);border-radius:14px 14px 0 0;padding:32px 36px;text-align:center;">
+              <p style="margin:0;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:8px;">Order Notification</p>
               <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">Med-Peptides</h1>
-              <p style="margin:10px 0 0;font-size:13px;color:rgba(255,255,255,0.75);">Panel de Administración</p>
+              <p style="margin:10px 0 0;font-size:13px;color:rgba(255,255,255,0.75);">Admin Dashboard</p>
             </td>
           </tr>
 
@@ -94,32 +114,32 @@ function buildOrderNotificationHtml(order) {
           <tr>
             <td style="background:#00a3e0;padding:14px 36px;text-align:center;">
               <p style="margin:0;font-size:15px;font-weight:600;color:#ffffff;">
-                🛒 Nuevo pedido recibido — <span style="font-family:monospace;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:4px;">#${orderId}</span>
+                🛒 New order received — <span style="font-family:monospace;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:4px;">#${orderId}</span>
               </p>
             </td>
           </tr>
 
           <!-- Body card -->
           <tr>
-            <td style="background:#ffffff;padding:36px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">
+            <td class="email-card" style="background:#ffffff;padding:36px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">
 
               <!-- Meta row -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+              <table width="100%" cellpadding="0" cellspacing="0" class="meta-row" style="margin-bottom:28px;">
                 <tr>
-                  <td style="width:50%;vertical-align:top;padding-right:12px;">
-                    <p style="margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-weight:600;">Fecha</p>
+                  <td style="width:50%;vertical-align:top;padding-right:12px;padding-bottom:8px;">
+                    <p style="margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-weight:600;">Date</p>
                     <p style="margin:0;font-size:14px;color:#1e293b;font-weight:500;">${dateStr}</p>
                   </td>
-                  <td style="width:50%;vertical-align:top;padding-left:12px;">
-                    <p style="margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-weight:600;">Estado</p>
-                    <span style="display:inline-block;background:#dcfce7;color:#166534;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;">Pendiente confirmación</span>
+                  <td style="width:50%;vertical-align:top;padding-left:12px;padding-bottom:8px;">
+                    <p style="margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-weight:600;">Status</p>
+                    <span style="display:inline-block;background:#dcfce7;color:#166534;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;">Pending confirmation</span>
                   </td>
                 </tr>
               </table>
 
               <!-- Customer info -->
               <div style="background:#f8fafc;border-radius:10px;padding:20px 24px;margin-bottom:28px;border:1px solid #e2e8f0;">
-                <p style="margin:0 0 14px;font-size:13px;font-weight:700;color:#003666;text-transform:uppercase;letter-spacing:1px;">👤 Cliente</p>
+                <p style="margin:0 0 14px;font-size:13px;font-weight:700;color:#003666;text-transform:uppercase;letter-spacing:1px;">👤 Customer</p>
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="padding-bottom:8px;">
@@ -138,13 +158,13 @@ function buildOrderNotificationHtml(order) {
               </div>
 
               <!-- Products table -->
-              <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#003666;text-transform:uppercase;letter-spacing:1px;">📦 Productos</p>
+              <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#003666;text-transform:uppercase;letter-spacing:1px;">📦 Products</p>
               <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;margin-bottom:24px;">
                 <thead>
                   <tr style="background:#f1f5f9;">
-                    <th style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:left;font-weight:600;">Producto</th>
-                    <th style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:center;font-weight:600;">Cant.</th>
-                    <th style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:right;font-weight:600;">P. Unit.</th>
+                    <th class="col-product" style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:left;font-weight:600;">Product</th>
+                    <th class="hide-mobile" style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:center;font-weight:600;">Qty.</th>
+                    <th class="hide-mobile" style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:right;font-weight:600;">Unit Price</th>
                     <th style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:right;font-weight:600;">Total</th>
                   </tr>
                 </thead>
@@ -153,6 +173,12 @@ function buildOrderNotificationHtml(order) {
                 </tbody>
               </table>
 
+              <!-- Payment Method -->
+              <div class="pay-row" style="background:#f0f7ff;border-radius:10px;padding:16px 24px;margin-bottom:24px;border:1px solid #bfdbfe;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <span style="font-size:13px;font-weight:700;color:#003666;text-transform:uppercase;letter-spacing:1px;">💳 Payment Method</span>
+                <span style="margin-left:auto;font-size:14px;font-weight:600;color:#1e3a5f;background:#dbeafe;padding:4px 14px;border-radius:20px;">${paymentLabel}</span>
+              </div>
+
               <!-- Totals -->
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
                 <tr>
@@ -160,8 +186,8 @@ function buildOrderNotificationHtml(order) {
                   <td style="padding:6px 0;text-align:right;"><p style="margin:0;font-size:14px;color:#1e293b;">${fmt(subtotal)}</p></td>
                 </tr>
                 <tr>
-                  <td style="padding:6px 0;"><p style="margin:0;font-size:14px;color:#64748b;">Envío</p></td>
-                  <td style="padding:6px 0;text-align:right;"><p style="margin:0;font-size:14px;color:#1e293b;">${shipping === 0 ? 'Gratis' : fmt(shipping)}</p></td>
+                  <td style="padding:6px 0;"><p style="margin:0;font-size:14px;color:#64748b;">Shipping</p></td>
+                  <td style="padding:6px 0;text-align:right;"><p style="margin:0;font-size:14px;color:#1e293b;">${shipping === 0 ? 'Free' : fmt(shipping)}</p></td>
                 </tr>
                 <tr>
                   <td style="padding:14px 0 6px;border-top:2px solid #003666;">
@@ -182,9 +208,9 @@ function buildOrderNotificationHtml(order) {
 
               <!-- CTA button -->
               <div style="text-align:center;margin-top:8px;">
-                <a href="https://med-peptides-app-27a3a.web.app/admin"
+                <a href="https://med-peptides.com/admin?t=orders&orderId=${orderId}"
                    style="display:inline-block;background:linear-gradient(135deg,#003666 0%,#005a9c 100%);color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 36px;border-radius:10px;letter-spacing:0.3px;">
-                  Ver en el Panel de Admin →
+                  View Order #${orderId} in Admin →
                 </a>
               </div>
 
@@ -195,8 +221,8 @@ function buildOrderNotificationHtml(order) {
           <tr>
             <td style="background:#f8fafc;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 14px 14px;padding:20px 36px;text-align:center;">
               <p style="margin:0;font-size:12px;color:#94a3b8;">
-                Este email fue generado automáticamente por Med-Peptides.<br/>
-                No respondas a este correo — accede al panel para gestionar el pedido.
+                This email was automatically generated by Med-Peptides.<br/>
+                If you have any questions, please contact us at <a href="mailto:business@med-peptides.com" style="color:#003666;">business@med-peptides.com</a>
               </p>
             </td>
           </tr>
@@ -217,7 +243,7 @@ function buildOrderNotificationHtml(order) {
 function buildOrderEmail(order) {
   const orderId = order.id || order.orderId || '—';
   return {
-    subject: `🛒 Nuevo pedido #${orderId} — Med-Peptides`,
+    subject: `🛒 New order #${orderId} — Med-Peptides`,
     html: buildOrderNotificationHtml(order),
   };
 }

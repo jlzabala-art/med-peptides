@@ -1,0 +1,524 @@
+/* Admin Terminal — Modern Design System */
+
+.admin-terminal-root {
+  padding-top: clamp(4rem, 8vw, 6rem);
+  min-height: 100vh;
+  background-color: var(--background);
+  background-image: radial-gradient(circle at top right, rgba(0, 54, 102, 0.05), transparent 600px),
+                    radial-gradient(circle at bottom left, rgba(0, 150, 204, 0.03), transparent 600px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Glassmorphism Sidebar */
+.admin-sidebar {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-xl);
+  transition: var(--transition-smooth);
+}
+
+.admin-nav-item {
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.admin-nav-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 4px;
+  height: 60%;
+  background: var(--gradient-accent);
+  border-radius: 0 4px 4px 0;
+  transition: transform 0.2s ease;
+}
+
+.admin-nav-item.active {
+  background: var(--accent-soft);
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.admin-nav-item.active::before {
+  transform: translateY(-50%) scaleY(1);
+}
+
+/* Premium Metrics Cards */
+.admin-metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-metric-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--secondary);
+}
+
+.admin-metric-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, var(--accent-soft), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.admin-metric-card:hover::after {
+  opacity: 1;
+}
+
+/* Data Tables Optimization */
+.admin-table-container {
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.admin-table th {
+  background: var(--surface-raised);
+  padding: 1rem 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  border-bottom: 2px solid var(--border-light);
+  text-align: left;
+}
+
+.admin-table td {
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: middle;
+  transition: background 0.2s ease;
+}
+
+.admin-table tr:hover td {
+  background: rgba(0, 54, 102, 0.02);
+}
+
+/* Status Badges */
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.admin-badge--success { background: #ecfdf5; color: #059669; border: 1px solid #10b98130; }
+.admin-badge--warning { background: #fffbeb; color: #d97706; border: 1px solid #f59e0b30; }
+.admin-badge--error   { background: #fef2f2; color: #dc2626; border: 1px solid #ef444430; }
+.admin-badge--info    { background: #eff6ff; color: #2563eb; border: 1px solid #3b82f630; }
+
+/* Mobile Navigation */
+.admin-mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 1rem;
+  z-index: var(--z-header);
+}
+
+.admin-mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.admin-mobile-nav-item.active {
+  color: var(--primary);
+}
+
+.admin-mobile-nav-item svg {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.admin-mobile-nav-item.active svg {
+  transform: translateY(-4px) scale(1.1);
+  color: var(--secondary);
+}
+
+/* Dashboard Home / Command Center */
+.command-center-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.domain-summary-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  transition: var(--transition-smooth);
+}
+
+.domain-summary-card:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--secondary);
+}
+
+/* Animations */
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.anim-slide-up {
+  animation: slideUpFade 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@media (max-width: 768px) {
+  .admin-terminal-root {
+    padding-top: 80px; /* Safe space for sticky mobile header */
+    padding-bottom: 100px; /* Space for mobile nav */
+  }
+  
+  .admin-table-container {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+  
+  .admin-mobile-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* Redesigned Admin Dashboard Actions Center */
+.admin-action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.admin-action-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--glass-shadow);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-action-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.admin-action-card--warning::before { background: var(--warning); }
+.admin-action-card--error::before { background: var(--error); }
+.admin-action-card--info::before { background: var(--secondary); }
+.admin-action-card--success::before { background: var(--success); }
+
+.admin-action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--secondary);
+}
+
+.admin-action-card:hover::before {
+  width: 6px;
+}
+
+.admin-action-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.admin-action-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin: 0;
+  color: var(--primary);
+}
+
+.admin-action-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.25rem 0.65rem;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  flex: 1;
+}
+
+.admin-action-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease;
+  gap: 0.5rem;
+}
+
+.admin-action-item:hover {
+  border-color: var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-quick-btn {
+  background: var(--accent-soft);
+  color: var(--primary);
+  border: 1px solid transparent;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-quick-btn:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.admin-quick-btn--danger {
+  background: rgba(220, 38, 38, 0.08);
+  color: var(--error);
+}
+
+.admin-quick-btn--danger:hover {
+  background: var(--error);
+  color: white;
+}
+
+.admin-quick-input {
+  width: 55px;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+}
+
+.admin-quick-input:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.admin-pill-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  background: var(--success);
+}
+
+.admin-pill-status-dot--pulse {
+  animation: pulse-dot 1.8s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(5, 150, 105, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+}
+
+.admin-feed-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.admin-feed-item {
+  display: flex;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.admin-feed-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* ─── Glassmorphism & High-Fidelity UI updates (Phase 2) ─── */
+
+.glass-card-premium {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-xl);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.glass-card-premium:hover {
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  transform: translateY(-2px);
+}
+
+/* Custom interactive input elements */
+.admin-premium-input, 
+.admin-premium-select {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 0.4rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.admin-premium-input:focus, 
+.admin-premium-select:focus {
+  border-color: var(--primary);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Phase Editor Container Query setup */
+.phase-editor-root {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--border);
+  background: var(--section-alt);
+}
+
+.phase-card {
+  margin-bottom: 1.25rem;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  container-type: inline-size;
+}
+
+.phase-card:hover {
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Validation edge highlight using :has() */
+.phase-card:has(:user-invalid) {
+  border-left: 4px solid var(--error) !important;
+  border-color: rgba(239, 68, 68, 0.25) !important;
+  background-color: rgba(239, 68, 68, 0.015) !important;
+}
+
+/* Phase header inside card */
+.phase-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  background: rgba(0, 54, 102, 0.02);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Product list items responsive grid */
+.phase-product-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px dashed var(--border-light);
+}
+
+.phase-product-row:last-child {
+  border-bottom: none;
+}
+
+/* When the phase-card container is 600px wide or more, expand to custom inline layout */
+@container (min-width: 600px) {
+  .phase-product-row {
+    grid-template-columns: 2fr 1fr 1.2fr 1fr auto;
+    gap: 1.25rem;
+  }
+}
+

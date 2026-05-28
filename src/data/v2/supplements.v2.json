@@ -1,0 +1,4302 @@
+[
+  {
+    "id": "5-htp",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "5-htp"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "L-Tryptophan",
+      "Magnolia",
+      "Melatonin",
+      "B-Complex"
+    ],
+    "objective": "Amino Acids",
+    "tags": [
+      "Supplement",
+      "Amino Acids"
+    ],
+    "semanticKeywords": [
+      "5-htp",
+      "amino acids"
+    ],
+    "clinical_benefits": [],
+    "name": "5-HTP",
+    "_source": "supplements_js_seed",
+    "category": "Amino Acids",
+    "protocols": [
+      "Sleep Optimization Protocol",
+      "Stress & HPA Axis Reset",
+      "Mood & Serotonin Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "5-htp",
+    "desc": "High-purity 5-HTP for research and clinical applications.",
+    "goals": [
+      "amino_acids"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "recovery_repair"
+    ],
+    "dosage": "100mg – 500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "SSRI_or_MAOI_coadministration",
+        "serotonin_syndrome_risk",
+        "pregnancy_and_lactation",
+        "cardiovascular_disease",
+        "pre_surgery_anesthesia"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "max": 300,
+        "min": 50,
+        "unit": "mg"
+      },
+      "halfLife": "1.5-2 hours (oral)",
+      "synergies": [
+        "EGCG",
+        "Vitamin B6",
+        "L-Tyrosine",
+        "Melatonin"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "a-lipoic-acid",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "a-lipoic acid"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Acetyl-Carnitine",
+      "Co-Q10",
+      "Glutathione",
+      "NAC"
+    ],
+    "objective": "Antioxidants",
+    "tags": [
+      "Supplement",
+      "Antioxidants"
+    ],
+    "semanticKeywords": [
+      "a-lipoic acid",
+      "antioxidants"
+    ],
+    "clinical_benefits": [],
+    "name": "A-Lipoic Acid",
+    "_source": "supplements_js_seed",
+    "category": "Antioxidants",
+    "protocols": [
+      "Antioxidant Defense Protocol",
+      "Metabolic Reset Protocol",
+      "Mitochondrial Health Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "a-lipoic-acid",
+    "desc": "High-purity A-Lipoic Acid for research and clinical applications.",
+    "goals": [
+      "antioxidants"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "200mg – 600mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "thiamine_deficiency",
+        "hypoglycemia",
+        "thyroid_hormone_therapy",
+        "active_chemotherapy"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "unit": "mg",
+        "max": 600,
+        "min": 300
+      },
+      "halfLife": "30-60 minutes (oral)",
+      "synergies": [
+        "Acetyl-L-Carnitine",
+        "Coenzyme Q10",
+        "Vitamin C",
+        "Vitamin E"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "acetyl-carnitine",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "acetyl-carnitine"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "A-Lipoic Acid",
+      "Co-Q10",
+      "NMN",
+      "Glutathione"
+    ],
+    "objective": "Amino Acids",
+    "tags": [
+      "Supplement",
+      "Amino Acids"
+    ],
+    "semanticKeywords": [
+      "acetyl-carnitine",
+      "amino acids"
+    ],
+    "clinical_benefits": [],
+    "name": "Acetyl-Carnitine",
+    "_source": "supplements_js_seed",
+    "category": "Amino Acids",
+    "protocols": [
+      "Cognitive Performance Protocol",
+      "Mitochondrial Health Protocol",
+      "Athletic Recovery Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "acetyl-carnitine",
+    "desc": "High-purity Acetyl-Carnitine for research and clinical applications.",
+    "goals": [
+      "amino_acids"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "recovery_repair"
+    ],
+    "dosage": "1g",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "120 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "hypothyroidism",
+        "seizure_disorder",
+        "bipolar_disorder",
+        "warfarin_therapy"
+      ],
+      "dosageRange": {
+        "min": 500,
+        "frequency": "daily_oral",
+        "max": 2000,
+        "unit": "mg"
+      },
+      "halfLife": "4.2 hours (oral)",
+      "synergies": [
+        "Alpha-Lipoic Acid",
+        "Coenzyme Q10",
+        "Alpha-GPC",
+        "Phosphatidylserine"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "ashwagandha",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "ashwagandha"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Rhodiola Rosea",
+      "Magnolia",
+      "L-Theanine",
+      "Melatonin"
+    ],
+    "objective": "Stress & Recovery",
+    "tags": [
+      "Recovery",
+      "Stress",
+      "Adaptogen"
+    ],
+    "semanticKeywords": [
+      "adaptogens & botanicals",
+      "ashwagandha",
+      "stress & recovery",
+      "stress reduction",
+      "sleep",
+      "recovery"
+    ],
+    "clinical_benefits": [
+      "Stress reduction",
+      "Cortisol management",
+      "Sleep improvement",
+      "Fatigue reduction"
+    ],
+    "name": "Ashwagandha",
+    "_source": "supplements_js_seed",
+    "category": "Adaptogens & Botanicals",
+    "protocols": [
+      "Stress & HPA Axis Reset",
+      "Sleep Optimization Protocol",
+      "Athletic Recovery Protocol"
+    ],
+    "mechanisms": [
+      "HPA axis modulation",
+      "GABAergic signaling support"
+    ],
+    "slug": "ashwagandha",
+    "desc": "A potent Ayurvedic adaptogen studied for its ability to modulate the HPA axis and lower cortisol levels.",
+    "goals": [
+      "sleep",
+      "recovery",
+      "stress_reduction"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "sleep_circadian",
+      "recovery_repair",
+      "cognitive_mood"
+    ],
+    "dosage": "100mg – 500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "pregnancy",
+        "autoimmune_disorders",
+        "hyperthyroidism",
+        "hormone-sensitive_prostate_cancer",
+        "pre-surgery"
+      ],
+      "dosageRange": {
+        "unit": "mg",
+        "max": 1000,
+        "min": 300,
+        "frequency": "daily_oral"
+      },
+      "halfLife": "2-4 hours (active withanolides)",
+      "synergies": [
+        "L-Theanine",
+        "Magnesium",
+        "Rhodiola Rosea",
+        "Bacopa Monnieri",
+        "CBD"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "b-complex",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "b-complex"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Magnesium Glycinate",
+      "Vit. D3",
+      "Omega-3 Forte",
+      "Rhodiola Rosea"
+    ],
+    "objective": "Vitamins & Minerals",
+    "tags": [
+      "Supplement",
+      "Vitamins & Minerals"
+    ],
+    "semanticKeywords": [
+      "b-complex",
+      "vitamins & minerals"
+    ],
+    "clinical_benefits": [],
+    "name": "B-Complex",
+    "_source": "supplements_js_seed",
+    "category": "Vitamins & Minerals",
+    "protocols": [
+      "Energy & Fatigue Protocol",
+      "Cognitive Performance Protocol",
+      "Stress & HPA Axis Reset"
+    ],
+    "mechanisms": [],
+    "slug": "b-complex",
+    "desc": "High-purity B-Complex for research and clinical applications.",
+    "goals": [
+      "vitamins_minerals"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": null,
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "hypersensitivity_to_b_vitamins",
+        "lebers_hereditary_optic_atrophy",
+        "severe_renal_impairment",
+        "active_peptic_ulcer_disease",
+        "gout"
+      ],
+      "dosageRange": {
+        "unit": "mg",
+        "max": 100,
+        "min": 50,
+        "frequency": "daily_oral"
+      },
+      "halfLife": "2-12 hours (rapid renal clearance of water-soluble fractions; B12 tissue storage is longer)",
+      "synergies": [
+        "Magnesium",
+        "CoQ10",
+        "Vitamin C",
+        "Alpha-Lipoic Acid",
+        "Iron"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "berberine",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "berberine"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Metformin",
+      "NMN",
+      "A-Lipoic Acid",
+      "Omega-3 Forte"
+    ],
+    "objective": "Metabolic Health",
+    "tags": [
+      "Metabolic",
+      "Glucose",
+      "Weight"
+    ],
+    "semanticKeywords": [
+      "metabolism",
+      "berberine",
+      "metabolic & blood sugar",
+      "blood sugar",
+      "metabolic health",
+      "weight loss"
+    ],
+    "clinical_benefits": [
+      "Blood sugar management",
+      "Insulin sensitivity",
+      "Lipid lowering",
+      "Metabolic support"
+    ],
+    "name": "Berberine",
+    "_source": "supplements_js_seed",
+    "category": "Metabolic & Blood Sugar",
+    "protocols": [
+      "Metabolic Reset Protocol",
+      "Blood Sugar & Insulin Sensitivity Protocol",
+      "Longevity Foundation Protocol"
+    ],
+    "mechanisms": [
+      "AMPK activation",
+      "GLUT4 translocation support"
+    ],
+    "slug": "berberine",
+    "desc": "A bioactive alkaloid that acts as an AMPK activator, fundamentally influencing glucose and lipid metabolism.",
+    "goals": [
+      "blood_sugar",
+      "metabolism",
+      "weight_loss"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "metabolic_weight"
+    ],
+    "dosage": "500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "pregnancy",
+        "lactation",
+        "co-administration_with_cyp3a4_substrates",
+        "severe_hepatic_impairment",
+        "neonatal_hyperbilirubinemia"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "unit": "mg",
+        "max": 1500,
+        "min": 500
+      },
+      "halfLife": "3-5 hours (oral)",
+      "synergies": [
+        "Silymarin",
+        "Alpha-Lipoic Acid",
+        "Coenzyme Q10",
+        "Chromium Picolinate",
+        "Resveratrol"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "biotin",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "biotin"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "B-Complex",
+      "Zinc Citrate",
+      "Vit. D3",
+      "Omega-3 Forte"
+    ],
+    "objective": "Vitamins & Minerals",
+    "tags": [
+      "Supplement",
+      "Vitamins & Minerals"
+    ],
+    "semanticKeywords": [
+      "biotin",
+      "vitamins & minerals"
+    ],
+    "clinical_benefits": [],
+    "name": "Biotin",
+    "_source": "supplements_js_seed",
+    "category": "Vitamins & Minerals",
+    "protocols": [
+      "Skin & Collagen Protocol",
+      "Hair & Nail Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "biotin",
+    "desc": "High-purity Biotin for research and clinical applications.",
+    "goals": [
+      "vitamins_minerals"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "100mg – 500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "hypersensitivity_to_biotin",
+        "scheduled_laboratory_assays_interference"
+      ],
+      "dosageRange": {
+        "unit": "mcg",
+        "min": 300,
+        "frequency": "daily_oral",
+        "max": 10000
+      },
+      "halfLife": "24-26 hours",
+      "synergies": [
+        "Chromium",
+        "Zinc",
+        "Silicon",
+        "Pantothenic_acid"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "boron",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "boron"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Vit. D3",
+      "Magnesium Glycinate",
+      "Zinc Citrate",
+      "Omega-3 Forte"
+    ],
+    "objective": "Vitamins & Minerals",
+    "tags": [
+      "Supplement",
+      "Vitamins & Minerals"
+    ],
+    "semanticKeywords": [
+      "boron",
+      "vitamins & minerals"
+    ],
+    "clinical_benefits": [],
+    "name": "Boron",
+    "_source": "supplements_js_seed",
+    "category": "Vitamins & Minerals",
+    "protocols": [
+      "Bone & Hormonal Health Protocol",
+      "Hormonal Health Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "boron",
+    "desc": "High-purity Boron for research and clinical applications.",
+    "goals": [
+      "vitamins_minerals"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "3mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "hormone_sensitive_conditions",
+        "severe_renal_impairment",
+        "pregnancy_and_lactation_high_dose"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "min": 3,
+        "unit": "mg",
+        "max": 10
+      },
+      "halfLife": "15-21 hours",
+      "synergies": [
+        "Vitamin D3",
+        "Magnesium",
+        "Calcium"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "boswellia",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "boswellia"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Curcumin",
+      "Bromelain",
+      "Serrapeptase 300,000SPU",
+      "Omega-3 Forte"
+    ],
+    "objective": "Inflammation Control",
+    "tags": [
+      "Anti-inflammatory",
+      "Joints",
+      "Recovery"
+    ],
+    "semanticKeywords": [
+      "adaptogens & botanicals",
+      "mobility",
+      "joint health",
+      "inflammation",
+      "inflammation control",
+      "boswellia"
+    ],
+    "clinical_benefits": [
+      "Joint pain reduction",
+      "Inflammation control",
+      "Digestive support",
+      "Respiratory health"
+    ],
+    "name": "Boswellia",
+    "_source": "supplements_js_seed",
+    "category": "Adaptogens & Botanicals",
+    "protocols": [
+      "Anti-Inflammatory Protocol",
+      "Joint & Mobility Protocol"
+    ],
+    "mechanisms": [
+      "5-LOX inhibition",
+      "Cytokine modulation"
+    ],
+    "slug": "boswellia",
+    "desc": "A botanical resin containing boswellic acids that specifically inhibit the 5-LOX enzyme pathway.",
+    "goals": [
+      "joint_health",
+      "mobility",
+      "inflammation"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "recovery_repair"
+    ],
+    "dosage": "500mg – 1000mg + Colostrum 1000mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps – 120 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "pregnancy",
+        "lactation",
+        "bleeding_disorders",
+        "concomitant_immunosuppressant_therapy",
+        "hypersensitivity_to_burseraceae"
+      ],
+      "dosageRange": {
+        "unit": "mg",
+        "max": 1000,
+        "frequency": "daily_oral",
+        "min": 250
+      },
+      "halfLife": "4-6 hours (oral)",
+      "synergies": [
+        "Curcumin",
+        "Piperine",
+        "Ginger extract",
+        "Omega-3 fatty acids",
+        "Glucosamine"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "bromelain",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "bromelain"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Quercetin",
+      "Boswellia",
+      "Curcumin",
+      "Serrapeptase 300,000SPU"
+    ],
+    "objective": "Metabolic & Blood Sugar",
+    "tags": [
+      "Supplement",
+      "Metabolic & Blood Sugar"
+    ],
+    "semanticKeywords": [
+      "bromelain",
+      "metabolic & blood sugar"
+    ],
+    "clinical_benefits": [],
+    "name": "Bromelain",
+    "_source": "supplements_js_seed",
+    "category": "Metabolic & Blood Sugar",
+    "protocols": [
+      "Anti-Inflammatory Protocol",
+      "Joint & Mobility Protocol",
+      "Digestive Health Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "bromelain",
+    "desc": "High-purity Bromelain for research and clinical applications.",
+    "goals": [
+      "metabolic_blood_sugar"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "metabolic_weight"
+    ],
+    "dosage": "500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "bleeding_disorders",
+        "pineapple_allergy",
+        "upcoming_surgery",
+        "anticoagulant_therapy",
+        "pregnancy_or_lactation"
+      ],
+      "dosageRange": {
+        "max": 2000,
+        "min": 500,
+        "unit": "mg",
+        "frequency": "daily_oral"
+      },
+      "halfLife": "6-9 hours",
+      "synergies": [
+        "Quercetin",
+        "Curcumin",
+        "Papain",
+        "Vitamin C",
+        "Amoxicillin"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "co-q10",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "co-q10"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "NMN",
+      "Resveratrol",
+      "A-Lipoic Acid",
+      "Omega-3 Forte"
+    ],
+    "objective": "Cellular Energy",
+    "tags": [
+      "Energy",
+      "Antioxidant",
+      "Cardio"
+    ],
+    "semanticKeywords": [
+      "antioxidants",
+      "cardio health",
+      "co-q10",
+      "energy",
+      "cellular energy",
+      "longevity"
+    ],
+    "clinical_benefits": [
+      "Cellular energy production",
+      "Cardiovascular support",
+      "Antioxidant protection",
+      "Statins support"
+    ],
+    "name": "Co-Q10",
+    "_source": "supplements_js_seed",
+    "category": "Antioxidants",
+    "protocols": [
+      "Mitochondrial Health Protocol",
+      "Cardiovascular & Nitric Oxide Protocol",
+      "Longevity Foundation Protocol"
+    ],
+    "mechanisms": [
+      "Mitochondrial ETC support",
+      "ROS scavenging"
+    ],
+    "slug": "co-q10",
+    "desc": "A critical mitochondrial nutrient essential for ATP production and potent lipid-phase antioxidant protection.",
+    "goals": [
+      "cardio_health",
+      "longevity",
+      "energy"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "metabolic_weight",
+      "longevity_anti_aging"
+    ],
+    "dosage": "100mg – 400mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "30 caps – 60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "warfarin_therapy",
+        "anticoagulant_use",
+        "chemotherapy_interaction",
+        "biliary_obstruction"
+      ],
+      "dosageRange": {
+        "max": 600,
+        "min": 100,
+        "frequency": "daily_oral",
+        "unit": "mg"
+      },
+      "halfLife": "30-34 hours (oral)",
+      "synergies": [
+        "PQQ",
+        "Shilajit",
+        "L-Carnitine",
+        "Omega-3 fatty acids",
+        "Vitamin E"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "curcumin",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "curcumin"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Boswellia",
+      "Bromelain",
+      "Omega-3 Forte",
+      "Piperine"
+    ],
+    "objective": "Metabolic & Blood Sugar",
+    "tags": [
+      "Supplement",
+      "Metabolic & Blood Sugar"
+    ],
+    "semanticKeywords": [
+      "curcumin",
+      "metabolic & blood sugar"
+    ],
+    "clinical_benefits": [],
+    "name": "Curcumin",
+    "_source": "supplements_js_seed",
+    "category": "Metabolic & Blood Sugar",
+    "protocols": [
+      "Anti-Inflammatory Protocol",
+      "Joint & Mobility Protocol",
+      "Neuroprotection Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "curcumin",
+    "desc": "High-purity Curcumin for research and clinical applications.",
+    "goals": [
+      "metabolic_blood_sugar"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "metabolic_weight"
+    ],
+    "dosage": "500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "biliary_tract_obstruction",
+        "gallstones",
+        "bleeding_disorders",
+        "pregnancy",
+        "pre-surgery",
+        "iron_deficiency"
+      ],
+      "dosageRange": {
+        "min": 500,
+        "max": 2000,
+        "frequency": "daily_oral",
+        "unit": "mg"
+      },
+      "halfLife": "2-6 hours (oral)",
+      "synergies": [
+        "piperine",
+        "berberine",
+        "fish_oil",
+        "resveratrol",
+        "ginger"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "cystine",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "cystine"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "NAC",
+      "Glutathione",
+      "A-Lipoic Acid",
+      "Vit. D3"
+    ],
+    "objective": "Amino Acids",
+    "tags": [
+      "Supplement",
+      "Amino Acids"
+    ],
+    "semanticKeywords": [
+      "cystine",
+      "amino acids"
+    ],
+    "clinical_benefits": [],
+    "name": "Cystine",
+    "_source": "supplements_js_seed",
+    "category": "Amino Acids",
+    "protocols": [
+      "Antioxidant Defense Protocol",
+      "Liver Detox & Regeneration Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "cystine",
+    "desc": "High-purity Cystine for research and clinical applications.",
+    "goals": [
+      "amino_acids"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "recovery_repair"
+    ],
+    "dosage": "500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "120 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "cystinuria",
+        "renal_calculi",
+        "sulfur_allergy",
+        "severe_hepatic_impairment"
+      ],
+      "dosageRange": {
+        "max": 1500,
+        "frequency": "daily_oral",
+        "unit": "mg",
+        "min": 500
+      },
+      "halfLife": "1.5-3 hours (oral)",
+      "synergies": [
+        "Vitamin C",
+        "Vitamin B6",
+        "Selenium",
+        "Glycine",
+        "Glutamic Acid"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "dim",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "dim"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Zinc Citrate",
+      "Vit. D3",
+      "Omega-3 Forte",
+      "B-Complex"
+    ],
+    "clinical_benefits": [],
+    "name": "DIM",
+    "_source": "supplements_js_seed",
+    "protocols": [
+      "Hormonal Health Protocol",
+      "Estrogen Balance Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "dim",
+    "desc": "High-purity DIM for research and clinical applications.",
+    "status": "active",
+    "canonicalGoals": [
+      "hormonal_optimization",
+      "longevity_anti_aging"
+    ],
+    "dosage": "100mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "semanticKeywords": [
+      "dim",
+      "hormonal vitality",
+      "estrogen balance",
+      "diindolylmethane"
+    ],
+    "quantity": "60 caps",
+    "category": "Hormonal Vitality",
+    "objective": "Hormonal Vitality",
+    "tags": [
+      "Supplement",
+      "Hormonal Vitality"
+    ],
+    "goals": [
+      "hormonal"
+    ],
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "pregnancy",
+        "lactation",
+        "hormone_sensitive_malignancies",
+        "hepatic_impairment",
+        "cyp1a2_substrate_coadministration"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "min": 100,
+        "unit": "mg",
+        "max": 300
+      },
+      "halfLife": "4-7 hours (oral)",
+      "synergies": [
+        "Calcium D-Glucarate",
+        "Sulforaphane",
+        "Piperine",
+        "Resveratrol",
+        "Zinc"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "eterna-longevity-platform",
+    "dosage": "1 test",
+    "image": "/assets/vials/eterna-longevity.png",
+    "quantity": "1 kit",
+    "synonyms": [],
+    "type": "testing",
+    "commonly_combined_with": [],
+    "objective": "Biological Age Assessment & Health Optimization",
+    "tags": [
+      "Testing",
+      "Longevity",
+      "Digital Health",
+      "Multi-Omics"
+    ],
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "semanticKeywords": [
+      "proteomics",
+      "genetics",
+      "wearables",
+      "biological age",
+      "preventive medicine",
+      "health optimization"
+    ],
+    "clinical_benefits": [],
+    "name": "ETERNA® Longevity Platform",
+    "_source": "supplements_js_seed",
+    "category": "Longevity Diagnostics",
+    "protocols": [],
+    "mechanisms": [],
+    "slug": "eterna-longevity-platform",
+    "desc": "Advanced longevity assessment platform integrating genetics, proteomics, biomarkers, wearable data and longitudinal analytics to generate personalized biological aging insights.",
+    "goals": [
+      "longevity",
+      "health optimization",
+      "aging"
+    ],
+    "status": "active",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "recent_blood_transfusion",
+        "bone_marrow_transplant",
+        "acute_systemic_infection",
+        "pregnancy_altering_baseline_biomarkers"
+      ],
+      "dosageRange": {
+        "frequency": "as_needed",
+        "unit": "assessment",
+        "min": 1,
+        "max": 4
+      },
+      "halfLife": "not applicable (diagnostic platform)",
+      "synergies": [
+        "continuous_glucose_monitoring",
+        "epigenetic_clocks",
+        "metabolomic_profiling",
+        "senotherapeutic_interventions"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "fenbendazole",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "fenbendazole"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Quercetin",
+      "Berberine",
+      "Vit. D3",
+      "NMN"
+    ],
+    "objective": "Metabolic & Blood Sugar",
+    "tags": [
+      "Supplement",
+      "Metabolic & Blood Sugar"
+    ],
+    "semanticKeywords": [
+      "fenbendazole",
+      "metabolic & blood sugar"
+    ],
+    "clinical_benefits": [],
+    "name": "Fenbendazole",
+    "_source": "supplements_js_seed",
+    "category": "Metabolic & Blood Sugar",
+    "protocols": [
+      "Metabolic Reset Protocol",
+      "Cellular Health Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "fenbendazole",
+    "desc": "High-purity Fenbendazole for research and clinical applications.",
+    "goals": [
+      "metabolic_blood_sugar"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "metabolic_weight"
+    ],
+    "dosage": "200mg – 400mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "hepatic_impairment",
+        "pregnancy",
+        "hypersensitivity_to_benzimidazoles",
+        "concomitant_use_with_cimetidine",
+        "concomitant_use_with_disulfiram"
+      ],
+      "dosageRange": {
+        "max": 1000,
+        "min": 222,
+        "frequency": "daily_oral",
+        "unit": "mg"
+      },
+      "halfLife": "8-11 hours",
+      "synergies": [
+        "Vitamin_E",
+        "Curcumin",
+        "CBD",
+        "Berberine"
+      ],
+      "evidenceLevel": "anecdotal"
+    }
+  },
+  {
+    "id": "ginkgo-biloba",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "ginkgo biloba"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Rhodiola Rosea",
+      "Lion's Mane Mushroom",
+      "Phosphatidylserine",
+      "Co-Q10"
+    ],
+    "objective": "Cognitive Health",
+    "tags": [
+      "Circulation",
+      "Cognitive",
+      "Herbal"
+    ],
+    "semanticKeywords": [
+      "adaptogens & botanicals",
+      "focus",
+      "cognitive health",
+      "memory",
+      "ginkgo biloba",
+      "circulation"
+    ],
+    "clinical_benefits": [
+      "Memory support",
+      "Focus improvement",
+      "Cerebral circulation",
+      "Antioxidant"
+    ],
+    "name": "Ginkgo Biloba",
+    "_source": "supplements_js_seed",
+    "category": "Adaptogens & Botanicals",
+    "protocols": [
+      "Cognitive Performance Protocol",
+      "Neuroprotection Protocol"
+    ],
+    "mechanisms": [
+      "Vasodilation support",
+      "PAF inhibition"
+    ],
+    "slug": "ginkgo-biloba",
+    "desc": "One of the oldest living tree species, ginkgo is researched for enhancing peripheral and cerebral microcirculation.",
+    "goals": [
+      "focus",
+      "circulation",
+      "memory"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "cognitive_mood",
+      "metabolic_weight"
+    ],
+    "dosage": "200mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "bleeding_disorders",
+        "pre_surgical_status",
+        "epilepsy",
+        "pregnancy",
+        "anticoagulant_medication_use"
+      ],
+      "dosageRange": {
+        "min": 120,
+        "unit": "mg",
+        "frequency": "daily",
+        "max": 240
+      },
+      "halfLife": "2-4 hours (terpenoids); 4-10 hours (flavonoids)",
+      "synergies": [
+        "Panax Ginseng",
+        "Bacopa Monnieri",
+        "Phosphatidylserine",
+        "Omega-3 fatty acids",
+        "Vinpocetine"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "glutamine",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "glutamine"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "NAC",
+      "Quercetin",
+      "Berberine",
+      "Omega-3 Forte"
+    ],
+    "objective": "Amino Acids",
+    "tags": [
+      "Supplement",
+      "Amino Acids"
+    ],
+    "semanticKeywords": [
+      "glutamine",
+      "amino acids"
+    ],
+    "clinical_benefits": [],
+    "name": "Glutamine",
+    "_source": "supplements_js_seed",
+    "category": "Amino Acids",
+    "protocols": [
+      "Gut Health & Leaky Gut Protocol",
+      "Athletic Recovery Protocol",
+      "Immune Support Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "glutamine",
+    "desc": "High-purity Glutamine for research and clinical applications.",
+    "goals": [
+      "amino_acids"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "recovery_repair"
+    ],
+    "dosage": "500mg + Bromelain 500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "severe_hepatic_impairment",
+        "renal_failure",
+        "bipolar_disorder",
+        "glutamate_sensitivity",
+        "oncological_history_glutamine_dependent_tumors"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "unit": "g",
+        "max": 20,
+        "min": 5
+      },
+      "halfLife": "1-2 hours (oral)",
+      "synergies": [
+        "BPC-157",
+        "Zinc Carnosine",
+        "Probiotics",
+        "Creatine"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "glutathione",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "glutathione"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "NAC",
+      "A-Lipoic Acid",
+      "Vit. D3",
+      "Quercetin"
+    ],
+    "objective": "Antioxidants",
+    "tags": [
+      "Supplement",
+      "Antioxidants"
+    ],
+    "semanticKeywords": [
+      "glutathione",
+      "antioxidants"
+    ],
+    "clinical_benefits": [],
+    "name": "Glutathione",
+    "_source": "supplements_js_seed",
+    "category": "Antioxidants",
+    "protocols": [
+      "Antioxidant Defense Protocol",
+      "Liver Detox & Regeneration Protocol",
+      "Immune Support Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "glutathione",
+    "desc": "High-purity Glutathione for research and clinical applications.",
+    "goals": [
+      "antioxidants"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "5% – 50mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps – 100ml solution",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "asthma_bronchospasm_risk",
+        "active_chemotherapy",
+        "hypersensitivity_to_glutathione",
+        "pregnancy_and_lactation"
+      ],
+      "dosageRange": {
+        "unit": "mg",
+        "frequency": "daily_oral",
+        "min": 250,
+        "max": 1000
+      },
+      "halfLife": "1.5 - 15 minutes (plasma clearance)",
+      "synergies": [
+        "Vitamin C",
+        "Alpha-Lipoic Acid",
+        "Selenium",
+        "N-Acetylcysteine",
+        "Milk Thistle"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "grape-seed-extract",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "grape seed extract"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Pycnogenol",
+      "Quercetin",
+      "Resveratrol",
+      "Omega-3 Forte"
+    ],
+    "objective": "Antioxidants",
+    "tags": [
+      "Supplement",
+      "Antioxidants"
+    ],
+    "semanticKeywords": [
+      "grape seed extract",
+      "antioxidants"
+    ],
+    "clinical_benefits": [],
+    "name": "Grape Seed Extract",
+    "_source": "supplements_js_seed",
+    "category": "Antioxidants",
+    "protocols": [
+      "Antioxidant Defense Protocol",
+      "Cardiovascular & Nitric Oxide Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "grape-seed-extract",
+    "desc": "High-purity Grape Seed Extract for research and clinical applications.",
+    "goals": [
+      "antioxidants"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "bleeding_disorders",
+        "pre_surgical_status",
+        "anticoagulant_medication_use",
+        "antiplatelet_medication_use",
+        "pregnancy"
+      ],
+      "dosageRange": {
+        "min": 100,
+        "frequency": "daily_oral",
+        "unit": "mg",
+        "max": 300
+      },
+      "halfLife": "11 hours (procyanidin metabolites)",
+      "synergies": [
+        "Vitamin C",
+        "Vitamin E",
+        "Resveratrol",
+        "Quercetin",
+        "CoQ10"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "hyaluronic-acid",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "hyaluronic acid"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Bromelain",
+      "Boswellia",
+      "Curcumin",
+      "Omega-3 Forte"
+    ],
+    "objective": "Metabolic & Blood Sugar",
+    "tags": [
+      "Supplement",
+      "Metabolic & Blood Sugar"
+    ],
+    "semanticKeywords": [
+      "hyaluronic acid",
+      "metabolic & blood sugar"
+    ],
+    "clinical_benefits": [],
+    "name": "Hyaluronic Acid",
+    "_source": "supplements_js_seed",
+    "category": "Metabolic & Blood Sugar",
+    "protocols": [
+      "Skin & Collagen Protocol",
+      "Joint & Mobility Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "hyaluronic-acid",
+    "desc": "High-purity Hyaluronic Acid for research and clinical applications.",
+    "goals": [
+      "metabolic_blood_sugar"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "metabolic_weight"
+    ],
+    "dosage": "100mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "oncological_history",
+        "hypersensitivity_to_hyaluronan",
+        "active_infection_at_injection_site"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "max": 250,
+        "unit": "mg",
+        "min": 100
+      },
+      "halfLife": "1-2 days (systemic circulation)",
+      "synergies": [
+        "Collagen_Peptides",
+        "Vitamin_C",
+        "MSM",
+        "Glucosamine",
+        "Chondroitin"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "l-arginine",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "l-arginine"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "L-Citrulline",
+      "Co-Q10",
+      "Omega-3 Forte",
+      "Zinc Citrate"
+    ],
+    "objective": "Amino Acids",
+    "tags": [
+      "Supplement",
+      "Amino Acids"
+    ],
+    "semanticKeywords": [
+      "l-arginine",
+      "amino acids"
+    ],
+    "clinical_benefits": [],
+    "name": "L-Arginine",
+    "_source": "supplements_js_seed",
+    "category": "Amino Acids",
+    "protocols": [
+      "Cardiovascular & Nitric Oxide Protocol",
+      "Athletic Performance Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "l-arginine",
+    "desc": "High-purity L-Arginine for research and clinical applications.",
+    "goals": [
+      "amino_acids"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "recovery_repair"
+    ],
+    "dosage": "500mg – 500mg + L-Citrulline 500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "recent_myocardial_infarction",
+        "hypotension",
+        "herpes_simplex_virus_infection",
+        "renal_impairment",
+        "guanidinoacetate_methyltransferase_deficiency"
+      ],
+      "dosageRange": {
+        "unit": "mg",
+        "max": 6000,
+        "frequency": "daily_oral",
+        "min": 3000
+      },
+      "halfLife": "1-2 hours",
+      "synergies": [
+        "L-Citrulline",
+        "Nitrosigine",
+        "Pycnogenol",
+        "Beetroot_Extract",
+        "Vitamin_C"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "l-citrulline",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "l-citrulline"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "L-Arginine",
+      "Co-Q10",
+      "Omega-3 Forte",
+      "Zinc Citrate"
+    ],
+    "objective": "Amino Acids",
+    "tags": [
+      "Supplement",
+      "Amino Acids"
+    ],
+    "semanticKeywords": [
+      "l-citrulline",
+      "amino acids"
+    ],
+    "clinical_benefits": [],
+    "name": "L-Citrulline",
+    "_source": "supplements_js_seed",
+    "category": "Amino Acids",
+    "protocols": [
+      "Cardiovascular & Nitric Oxide Protocol",
+      "Athletic Performance Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "l-citrulline",
+    "desc": "High-purity L-Citrulline for research and clinical applications.",
+    "goals": [
+      "amino_acids"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "recovery_repair"
+    ],
+    "dosage": "500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "hypotension",
+        "nitrate_medication_use",
+        "phosphodiesterase_inhibitor_use",
+        "renal_impairment",
+        "hepatic_dysfunction"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "min": 3,
+        "unit": "g",
+        "max": 10
+      },
+      "halfLife": "1-3 hours",
+      "synergies": [
+        "L-Arginine",
+        "Nitrate-rich_vegetables",
+        "Glutathione",
+        "Vitamin_C",
+        "Betaine_Anhydrous"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "l-theanine",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "l-theanine"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Ashwagandha",
+      "Rhodiola Rosea",
+      "Magnesium Glycinate",
+      "Melatonin"
+    ],
+    "objective": "Sleep & Mood",
+    "tags": [
+      "Supplement",
+      "Sleep & Mood"
+    ],
+    "semanticKeywords": [
+      "l-theanine",
+      "sleep & mood"
+    ],
+    "clinical_benefits": [],
+    "name": "L-Theanine",
+    "_source": "supplements_js_seed",
+    "category": "Sleep & Mood",
+    "protocols": [
+      "Stress & HPA Axis Reset",
+      "Cognitive Performance Protocol",
+      "Sleep Optimization Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "l-theanine",
+    "desc": "High-purity L-Theanine for research and clinical applications.",
+    "goals": [
+      "sleep_mood"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "sleep_circadian",
+      "cognitive_mood"
+    ],
+    "dosage": "200mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "hypotension",
+        "concurrent_antihypertensive_medication",
+        "schizophrenia",
+        "bipolar_disorder"
+      ],
+      "dosageRange": {
+        "frequency": "as_needed",
+        "max": 400,
+        "unit": "mg",
+        "min": 100
+      },
+      "halfLife": "0.5-1.1 hours (oral)",
+      "synergies": [
+        "caffeine",
+        "magnesium_glycinate",
+        "apigenin",
+        "phosphatidylserine"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "l-tryptophan",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "l-tryptophan"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "5-HTP",
+      "Magnolia",
+      "Melatonin",
+      "B-Complex"
+    ],
+    "objective": "Amino Acids",
+    "tags": [
+      "Supplement",
+      "Amino Acids"
+    ],
+    "semanticKeywords": [
+      "l-tryptophan",
+      "amino acids"
+    ],
+    "clinical_benefits": [],
+    "name": "L-Tryptophan",
+    "_source": "supplements_js_seed",
+    "category": "Amino Acids",
+    "protocols": [
+      "Sleep Optimization Protocol",
+      "Stress & HPA Axis Reset"
+    ],
+    "mechanisms": [],
+    "slug": "l-tryptophan",
+    "desc": "High-purity L-Tryptophan for research and clinical applications.",
+    "goals": [
+      "amino_acids"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "recovery_repair"
+    ],
+    "dosage": "500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "serotonin_syndrome",
+        "use_with_ssri_or_maoi_medications",
+        "eosinophilia_myalgia_syndrome",
+        "hepatic_impairment",
+        "pregnancy"
+      ],
+      "dosageRange": {
+        "max": 2000,
+        "unit": "mg",
+        "frequency": "daily_oral",
+        "min": 500
+      },
+      "halfLife": "1.5-2.5 hours",
+      "synergies": [
+        "Vitamin B6",
+        "Magnesium",
+        "5-HTP",
+        "Melatonin",
+        "Inositol"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "ldn",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "ldn"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Vit. D3",
+      "Omega-3 Forte",
+      "NAC",
+      "Glutathione"
+    ],
+    "clinical_benefits": [],
+    "name": "LDN",
+    "_source": "supplements_js_seed",
+    "protocols": [
+      "Low-Dose Naltrexone Immune Protocol",
+      "Autoimmune & Inflammation Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "ldn",
+    "desc": "High-purity LDN for research and clinical applications.",
+    "status": "active",
+    "canonicalGoals": [
+      "immune_support",
+      "cognitive_mood",
+      "recovery_repair"
+    ],
+    "dosage": "3mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "semanticKeywords": [
+      "ldn",
+      "immune function",
+      "low dose naltrexone",
+      "inflammation"
+    ],
+    "quantity": "30 caps",
+    "category": "Immune Function",
+    "objective": "Immune Function",
+    "tags": [
+      "Supplement",
+      "Immune Function"
+    ],
+    "goals": [
+      "immune"
+    ],
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "concurrent_opioid_use",
+        "acute_hepatitis",
+        "hepatic_failure",
+        "opioid_dependence"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "min": 1.5,
+        "max": 4.5,
+        "unit": "mg"
+      },
+      "halfLife": "4 hours (parent drug), 13 hours (active metabolite)",
+      "synergies": [
+        "Alpha-Lipoic Acid",
+        "Vitamin D3",
+        "Curcumin",
+        "BPC-157",
+        "Cannabidiol"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "ldn-0-5mg",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "ldn 0.5mg"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Vit. D3",
+      "Omega-3 Forte",
+      "NAC",
+      "Glutathione"
+    ],
+    "clinical_benefits": [],
+    "name": "LDN 0.5mg",
+    "_source": "supplements_js_seed",
+    "protocols": [
+      "Low-Dose Naltrexone Immune Protocol",
+      "Autoimmune & Inflammation Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "ldn-0-5mg",
+    "desc": "High-purity LDN 0.5mg for research and clinical applications.",
+    "status": "active",
+    "canonicalGoals": [
+      "immune_support",
+      "cognitive_mood",
+      "recovery_repair"
+    ],
+    "dosage": null,
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "semanticKeywords": [
+      "ldn 0.5mg",
+      "ldn",
+      "immune function",
+      "low dose naltrexone",
+      "inflammation"
+    ],
+    "quantity": "30 caps",
+    "category": "Immune Function",
+    "objective": "Immune Function",
+    "tags": [
+      "Supplement",
+      "Immune Function"
+    ],
+    "goals": [
+      "immune"
+    ],
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "concurrent_opioid_analgesic_use",
+        "acute_opioid_withdrawal",
+        "acute_hepatitis",
+        "hepatic_failure"
+      ],
+      "dosageRange": {
+        "max": 4.5,
+        "min": 0.5,
+        "unit": "mg",
+        "frequency": "daily_oral"
+      },
+      "halfLife": "4 hours (parent drug), 13 hours (active metabolite)",
+      "synergies": [
+        "Alpha-Lipoic Acid",
+        "Vitamin D3",
+        "BPC-157",
+        "Palmitoylethanolamide"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "ldn-1-5mg",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "ldn 1.5mg"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Vit. D3",
+      "Omega-3 Forte",
+      "NAC",
+      "Glutathione"
+    ],
+    "clinical_benefits": [],
+    "name": "LDN 1.5mg",
+    "_source": "supplements_js_seed",
+    "protocols": [
+      "Low-Dose Naltrexone Immune Protocol",
+      "Autoimmune & Inflammation Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "ldn-1-5mg",
+    "desc": "High-purity LDN 1.5mg for research and clinical applications.",
+    "status": "active",
+    "canonicalGoals": [
+      "immune_support",
+      "cognitive_mood",
+      "recovery_repair"
+    ],
+    "dosage": null,
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "semanticKeywords": [
+      "ldn 1.5mg",
+      "ldn",
+      "immune function",
+      "low dose naltrexone",
+      "inflammation"
+    ],
+    "quantity": "30 caps",
+    "category": "Immune Function",
+    "objective": "Immune Function",
+    "tags": [
+      "Supplement",
+      "Immune Function"
+    ],
+    "goals": [
+      "immune"
+    ],
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "concurrent_opioid_analgesic_use",
+        "acute_opioid_withdrawal",
+        "acute_hepatitis",
+        "hepatic_failure"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "unit": "mg",
+        "max": 4.5,
+        "min": 1.5
+      },
+      "halfLife": "4 hours (parent drug), 13 hours (active metabolite)",
+      "synergies": [
+        "Alpha-Lipoic Acid",
+        "Vitamin D3",
+        "BPC-157",
+        "Palmitoylethanolamide",
+        "Curcumin"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "ldn-2-5mg",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "ldn 2.5mg"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Vit. D3",
+      "Omega-3 Forte",
+      "NAC",
+      "Glutathione"
+    ],
+    "clinical_benefits": [],
+    "name": "LDN 2.5mg",
+    "_source": "supplements_js_seed",
+    "protocols": [
+      "Low-Dose Naltrexone Immune Protocol",
+      "Autoimmune & Inflammation Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "ldn-2-5mg",
+    "desc": "High-purity LDN 2.5mg for research and clinical applications.",
+    "status": "active",
+    "canonicalGoals": [
+      "immune_support",
+      "cognitive_mood",
+      "recovery_repair"
+    ],
+    "dosage": null,
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "semanticKeywords": [
+      "ldn 2.5mg",
+      "ldn",
+      "immune function",
+      "low dose naltrexone",
+      "inflammation"
+    ],
+    "quantity": "30 caps",
+    "category": "Immune Function",
+    "objective": "Immune Function",
+    "tags": [
+      "Supplement",
+      "Immune Function"
+    ],
+    "goals": [
+      "immune"
+    ],
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "opioid_analgesic_use",
+        "acute_narcotic_dependence",
+        "hepatic_impairment",
+        "hypersensitivity_to_naltrexone"
+      ],
+      "dosageRange": {
+        "unit": "mg",
+        "min": 1.5,
+        "frequency": "daily_oral",
+        "max": 4.5
+      },
+      "halfLife": "4-10 hours (metabolite 6-beta-naltrexol has a longer half-life of 10-13 hours)",
+      "synergies": [
+        "Alpha-Lipoic Acid",
+        "Vitamin D3",
+        "Magnesium",
+        "BPC-157"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "ldn-4-5mg",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "ldn 4.5mg"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Vit. D3",
+      "Omega-3 Forte",
+      "NAC",
+      "Glutathione"
+    ],
+    "clinical_benefits": [],
+    "name": "LDN 4.5mg",
+    "_source": "supplements_js_seed",
+    "protocols": [
+      "Low-Dose Naltrexone Immune Protocol",
+      "Autoimmune & Inflammation Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "ldn-4-5mg",
+    "desc": "High-purity LDN 4.5mg for research and clinical applications.",
+    "status": "active",
+    "canonicalGoals": [
+      "immune_support",
+      "cognitive_mood",
+      "recovery_repair"
+    ],
+    "dosage": null,
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "semanticKeywords": [
+      "ldn 4.5mg",
+      "ldn",
+      "immune function",
+      "low dose naltrexone",
+      "inflammation"
+    ],
+    "quantity": "30 caps",
+    "category": "Immune Function",
+    "objective": "Immune Function",
+    "tags": [
+      "Supplement",
+      "Immune Function"
+    ],
+    "goals": [
+      "immune"
+    ],
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "acute_opioid_use",
+        "hepatic_impairment",
+        "hypersensitivity_to_naltrexone",
+        "acute_hepatitis"
+      ],
+      "dosageRange": {
+        "max": 4.5,
+        "frequency": "daily_oral",
+        "unit": "mg",
+        "min": 1.5
+      },
+      "halfLife": "4-10 hours",
+      "synergies": [
+        "Alpha-Lipoic Acid",
+        "Magnesium",
+        "Vitamin D3",
+        "BPC-157"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "lion-s-mane-mushroom",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "lion's mane mushroom"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Ginkgo Biloba",
+      "Phosphatidylserine",
+      "B-Complex",
+      "Ashwagandha"
+    ],
+    "objective": "Neuroprotection",
+    "tags": [
+      "Neuroprotection",
+      "Brain Health",
+      "Nootropic"
+    ],
+    "semanticKeywords": [
+      "adaptogens & botanicals",
+      "neuroregeneration",
+      "lion's mane mushroom",
+      "neuroprotection",
+      "brain health",
+      "focus"
+    ],
+    "clinical_benefits": [
+      "Neuroprotection",
+      "Nerve growth support",
+      "Cognitive enhancement",
+      "Mood support"
+    ],
+    "name": "Lion's Mane Mushroom",
+    "_source": "supplements_js_seed",
+    "category": "Adaptogens & Botanicals",
+    "protocols": [
+      "Cognitive Performance Protocol",
+      "Neuroprotection Protocol",
+      "Gut-Brain Axis Protocol"
+    ],
+    "mechanisms": [
+      "NGF stimulation",
+      "Neurogenesis support"
+    ],
+    "slug": "lion-s-mane-mushroom",
+    "desc": "A medicinal mushroom containing hericenones and erinacines that stimulate Nerve Growth Factor (NGF) synthesis.",
+    "goals": [
+      "brain_health",
+      "neuroregeneration",
+      "focus"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "cognitive_mood"
+    ],
+    "dosage": "500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "bleeding_disorders",
+        "pre_surgical_status",
+        "hypoglycemia",
+        "known_mushroom_allergy"
+      ],
+      "dosageRange": {
+        "min": 500,
+        "unit": "mg",
+        "max": 3000,
+        "frequency": "daily_oral"
+      },
+      "halfLife": "unknown; standard oral absorption",
+      "synergies": [
+        "Bacopa monnieri",
+        "Phosphatidylserine",
+        "Omega-3 fatty acids",
+        "Alpha-GPC",
+        "Vitamin B12"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "lycopene",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "lycopene"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Saw Palmetto",
+      "Zinc Citrate",
+      "Vit. D3",
+      "Omega-3 Forte"
+    ],
+    "clinical_benefits": [],
+    "name": "Lycopene",
+    "_source": "supplements_js_seed",
+    "protocols": [
+      "Antioxidant Defense Protocol",
+      "Prostate Health Protocol",
+      "Cardiovascular & Nitric Oxide Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "lycopene",
+    "desc": "High-purity Lycopene for research and clinical applications.",
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging",
+      "immune_support"
+    ],
+    "dosage": "25mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "semanticKeywords": [
+      "lycopene",
+      "longevity",
+      "antioxidant",
+      "cellular health"
+    ],
+    "quantity": "60 caps",
+    "category": "Longevity",
+    "objective": "Longevity",
+    "tags": [
+      "Supplement",
+      "Longevity"
+    ],
+    "goals": [
+      "longevity"
+    ],
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "lycopene_allergy",
+        "bleeding_disorders",
+        "pre_surgical_status",
+        "pregnancy",
+        "lactation"
+      ],
+      "dosageRange": {
+        "max": 30,
+        "min": 10,
+        "unit": "mg",
+        "frequency": "daily_oral"
+      },
+      "halfLife": "2-3 days",
+      "synergies": [
+        "Vitamin E",
+        "Vitamin C",
+        "Selenium",
+        "Lutein",
+        "Zeaxanthin",
+        "Omega-3 fatty acids"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "magnesium-5-matrix",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "magnesium 5-matrix"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Vit. D3",
+      "B-Complex",
+      "L-Theanine",
+      "Melatonin"
+    ],
+    "objective": "Vitamins & Minerals",
+    "tags": [
+      "Supplement",
+      "Vitamins & Minerals"
+    ],
+    "semanticKeywords": [
+      "magnesium 5-matrix",
+      "vitamins & minerals"
+    ],
+    "clinical_benefits": [],
+    "name": "Magnesium 5-Matrix",
+    "_source": "supplements_js_seed",
+    "category": "Vitamins & Minerals",
+    "protocols": [
+      "Sleep Optimization Protocol",
+      "Stress & HPA Axis Reset",
+      "Bone & Hormonal Health Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "magnesium-5-matrix",
+    "desc": "High-purity Magnesium 5-Matrix for research and clinical applications.",
+    "goals": [
+      "vitamins_minerals"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": null,
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "120 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "severe_renal_impairment",
+        "myasthenia_gravis",
+        "heart_block",
+        "hypermagnesemia"
+      ],
+      "dosageRange": {
+        "max": 400,
+        "frequency": "daily_oral",
+        "min": 200,
+        "unit": "mg"
+      },
+      "halfLife": "24-48 hours (serum)",
+      "synergies": [
+        "Vitamin_D3",
+        "Vitamin_B6",
+        "Zinc",
+        "Glycine",
+        "Taurine"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "magnesium-citrate",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "magnesium citrate"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Magnesium Glycinate",
+      "Vit. D3",
+      "B-Complex",
+      "Melatonin"
+    ],
+    "objective": "Vitamins & Minerals",
+    "tags": [
+      "Supplement",
+      "Vitamins & Minerals"
+    ],
+    "semanticKeywords": [
+      "magnesium citrate",
+      "vitamins & minerals"
+    ],
+    "clinical_benefits": [],
+    "name": "Magnesium Citrate",
+    "_source": "supplements_js_seed",
+    "category": "Vitamins & Minerals",
+    "protocols": [
+      "Sleep Optimization Protocol",
+      "Stress & HPA Axis Reset",
+      "Bone & Hormonal Health Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "magnesium-citrate",
+    "desc": "High-purity Magnesium Citrate for research and clinical applications.",
+    "goals": [
+      "vitamins_minerals"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "250mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "severe_renal_impairment",
+        "myasthenia_gravis",
+        "heart_block",
+        "hypermagnesemia",
+        "intestinal_obstruction"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "unit": "mg",
+        "min": 200,
+        "max": 400
+      },
+      "halfLife": "24-48 hours (renal clearance dependent)",
+      "synergies": [
+        "Vitamin_D3",
+        "Vitamin_B6",
+        "Zinc",
+        "Glycine",
+        "Taurine"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "magnesium-glycinate",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "magnesium glycinate"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Vit. D3",
+      "B-Complex",
+      "L-Theanine",
+      "Melatonin"
+    ],
+    "objective": "Vitamins & Minerals",
+    "tags": [
+      "Supplement",
+      "Vitamins & Minerals"
+    ],
+    "semanticKeywords": [
+      "magnesium glycinate",
+      "vitamins & minerals"
+    ],
+    "clinical_benefits": [],
+    "name": "Magnesium Glycinate",
+    "_source": "supplements_js_seed",
+    "category": "Vitamins & Minerals",
+    "protocols": [
+      "Sleep Optimization Protocol",
+      "Stress & HPA Axis Reset",
+      "Bone & Hormonal Health Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "magnesium-glycinate",
+    "desc": "High-purity Magnesium Glycinate for research and clinical applications.",
+    "goals": [
+      "vitamins_minerals"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "250mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "severe_renal_impairment",
+        "myasthenia_gravis",
+        "heart_block",
+        "hypermagnesemia"
+      ],
+      "dosageRange": {
+        "max": 400,
+        "frequency": "daily_oral",
+        "unit": "mg",
+        "min": 200
+      },
+      "halfLife": "24-48 hours (renal clearance dependent)",
+      "synergies": [
+        "Vitamin D3",
+        "Vitamin K2",
+        "Zinc",
+        "Taurine",
+        "L-Theanine"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "magnesium-threonate",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "magnesium threonate"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Lion's Mane Mushroom",
+      "Phosphatidylserine",
+      "L-Theanine",
+      "B-Complex"
+    ],
+    "objective": "Vitamins & Minerals",
+    "tags": [
+      "Supplement",
+      "Vitamins & Minerals"
+    ],
+    "semanticKeywords": [
+      "magnesium threonate",
+      "vitamins & minerals"
+    ],
+    "clinical_benefits": [],
+    "name": "Magnesium Threonate",
+    "_source": "supplements_js_seed",
+    "category": "Vitamins & Minerals",
+    "protocols": [
+      "Cognitive Performance Protocol",
+      "Sleep Optimization Protocol",
+      "Neuroprotection Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "magnesium-threonate",
+    "desc": "High-purity Magnesium Threonate for research and clinical applications.",
+    "goals": [
+      "vitamins_minerals"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "1000mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "severe_renal_impairment",
+        "myasthenia_gravis",
+        "heart_block",
+        "hypotension"
+      ],
+      "dosageRange": {
+        "min": 1000,
+        "frequency": "daily_oral",
+        "unit": "mg",
+        "max": 2000
+      },
+      "halfLife": "approximately 24-48 hours (serum magnesium turnover)",
+      "synergies": [
+        "L-Theanine",
+        "Apigenin",
+        "Vitamin D3",
+        "Zinc",
+        "Glycine"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "magnolia",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "magnolia"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Ashwagandha",
+      "L-Theanine",
+      "5-HTP",
+      "Melatonin"
+    ],
+    "objective": "Adaptogens & Botanicals",
+    "tags": [
+      "Supplement",
+      "Adaptogens & Botanicals"
+    ],
+    "semanticKeywords": [
+      "magnolia",
+      "adaptogens & botanicals"
+    ],
+    "clinical_benefits": [],
+    "name": "Magnolia",
+    "_source": "supplements_js_seed",
+    "category": "Adaptogens & Botanicals",
+    "protocols": [
+      "Stress & HPA Axis Reset",
+      "Sleep Optimization Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "magnolia",
+    "desc": "High-purity Magnolia for research and clinical applications.",
+    "goals": [
+      "adaptogens_botanicals"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "sleep_circadian",
+      "recovery_repair",
+      "cognitive_mood"
+    ],
+    "dosage": "200mg – 400mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "pregnancy",
+        "lactation",
+        "sedative_hypnotic_use",
+        "alcohol_consumption",
+        "pre_surgical_anesthesia"
+      ],
+      "dosageRange": {
+        "unit": "mg",
+        "frequency": "daily_oral",
+        "min": 200,
+        "max": 800
+      },
+      "halfLife": "1-3 hours (oral)",
+      "synergies": [
+        "L-Theanine",
+        "Ashwagandha",
+        "GABA",
+        "Magnesium_Glycinate",
+        "Apigenin"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "melatonin",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "melatonin"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Magnesium Glycinate",
+      "L-Theanine",
+      "5-HTP",
+      "Magnolia"
+    ],
+    "objective": "Sleep & Mood",
+    "tags": [
+      "Supplement",
+      "Sleep & Mood"
+    ],
+    "semanticKeywords": [
+      "melatonin",
+      "sleep & mood"
+    ],
+    "clinical_benefits": [],
+    "name": "Melatonin",
+    "_source": "supplements_js_seed",
+    "category": "Sleep & Mood",
+    "protocols": [
+      "Sleep Optimization Protocol",
+      "Circadian Rhythm Reset Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "melatonin",
+    "desc": "High-purity Melatonin for research and clinical applications.",
+    "goals": [
+      "sleep_mood"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "sleep_circadian",
+      "cognitive_mood"
+    ],
+    "dosage": "1mg – 20mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "autoimmune_disorder",
+        "pregnancy",
+        "breastfeeding",
+        "epilepsy",
+        "bleeding_disorders",
+        "depression"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "max": 10,
+        "min": 0.3,
+        "unit": "mg"
+      },
+      "halfLife": "30-60 minutes (oral)",
+      "synergies": [
+        "Magnesium",
+        "L-Theanine",
+        "Glycine",
+        "Apigenin",
+        "Valerian Root"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "metformin",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "metformin"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Berberine",
+      "NMN",
+      "A-Lipoic Acid",
+      "Omega-3 Forte"
+    ],
+    "objective": "Metabolic & Blood Sugar",
+    "tags": [
+      "Supplement",
+      "Metabolic & Blood Sugar"
+    ],
+    "semanticKeywords": [
+      "metformin",
+      "metabolic & blood sugar"
+    ],
+    "clinical_benefits": [],
+    "name": "Metformin",
+    "_source": "supplements_js_seed",
+    "category": "Metabolic & Blood Sugar",
+    "protocols": [
+      "Metabolic Reset Protocol",
+      "Blood Sugar & Insulin Sensitivity Protocol",
+      "Longevity Foundation Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "metformin",
+    "desc": "High-purity Metformin for research and clinical applications.",
+    "goals": [
+      "metabolic_blood_sugar"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "metabolic_weight"
+    ],
+    "dosage": "500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "renal_impairment",
+        "metabolic_acidosis",
+        "diabetic_ketoacidosis",
+        "hypersensitivity",
+        "hepatic_impairment"
+      ],
+      "dosageRange": {
+        "max": 2550,
+        "frequency": "daily_oral",
+        "unit": "mg",
+        "min": 500
+      },
+      "halfLife": "4-9 hours",
+      "synergies": [
+        "Berberine",
+        "Resveratrol",
+        "Alpha-Lipoic Acid",
+        "CoQ10",
+        "Vitamin B12"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "milk-thistle",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "milk thistle"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "NAC",
+      "Glutathione",
+      "A-Lipoic Acid",
+      "Berberine"
+    ],
+    "objective": "Adaptogens & Botanicals",
+    "tags": [
+      "Supplement",
+      "Adaptogens & Botanicals"
+    ],
+    "semanticKeywords": [
+      "milk thistle",
+      "adaptogens & botanicals"
+    ],
+    "clinical_benefits": [],
+    "name": "Milk Thistle",
+    "_source": "supplements_js_seed",
+    "category": "Adaptogens & Botanicals",
+    "protocols": [
+      "Liver Detox & Regeneration Protocol",
+      "Metabolic Reset Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "milk-thistle",
+    "desc": "High-purity Milk Thistle for research and clinical applications.",
+    "goals": [
+      "adaptogens_botanicals"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "sleep_circadian",
+      "recovery_repair",
+      "cognitive_mood"
+    ],
+    "dosage": "500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "hormone_sensitive_conditions",
+        "ragweed_allergy",
+        "asteraceae_family_allergy",
+        "pregnancy",
+        "breastfeeding"
+      ],
+      "dosageRange": {
+        "unit": "mg",
+        "max": 600,
+        "min": 200,
+        "frequency": "daily_oral"
+      },
+      "halfLife": "6-8 hours (oral)",
+      "synergies": [
+        "N-acetylcysteine",
+        "Alpha-lipoic acid",
+        "Curcumin",
+        "Selenium",
+        "Vitamin E"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "nac",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "nac"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Glutathione",
+      "A-Lipoic Acid",
+      "Milk Thistle",
+      "Quercetin"
+    ],
+    "objective": "Antioxidants",
+    "tags": [
+      "Supplement",
+      "Antioxidants"
+    ],
+    "semanticKeywords": [
+      "nac",
+      "antioxidants"
+    ],
+    "clinical_benefits": [],
+    "name": "NAC",
+    "_source": "supplements_js_seed",
+    "category": "Antioxidants",
+    "protocols": [
+      "Antioxidant Defense Protocol",
+      "Liver Detox & Regeneration Protocol",
+      "Respiratory Health Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "nac",
+    "desc": "High-purity NAC for research and clinical applications.",
+    "goals": [
+      "antioxidants"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "600mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "bleeding_disorders",
+        "peptic_ulcer_disease",
+        "asthma_hypersensitivity",
+        "cystinuria"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "unit": "mg",
+        "max": 2400,
+        "min": 600
+      },
+      "halfLife": "5.6 hours",
+      "synergies": [
+        "Glycine",
+        "Selenium",
+        "Vitamin C",
+        "Glutamine"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "nmn",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "nmn"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Resveratrol",
+      "Co-Q10",
+      "Spermidine",
+      "Berberine"
+    ],
+    "objective": "Longevity",
+    "tags": [
+      "Supplement",
+      "Longevity"
+    ],
+    "semanticKeywords": [
+      "nmn",
+      "longevity"
+    ],
+    "clinical_benefits": [],
+    "name": "NMN",
+    "_source": "supplements_js_seed",
+    "category": "Longevity",
+    "protocols": [
+      "Longevity Foundation Protocol",
+      "Mitochondrial Health Protocol",
+      "NAD+ Restoration Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "nmn",
+    "desc": "High-purity NMN for research and clinical applications.",
+    "goals": [
+      "longevity"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "100mg – 1000mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "30 troches – 100 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "active_malignancy",
+        "pregnancy",
+        "lactation",
+        "history_of_hypersensitivity"
+      ],
+      "dosageRange": {
+        "min": 250,
+        "frequency": "daily_oral",
+        "unit": "mg",
+        "max": 1000
+      },
+      "halfLife": "1-2 hours (plasma clearance)",
+      "synergies": [
+        "Resveratrol",
+        "TMG",
+        "Pterostilbene",
+        "NAD+",
+        "Apigenin"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "omega-3-forte",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "omega-3 forte"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Vit. D3",
+      "Co-Q10",
+      "Berberine",
+      "Quercetin"
+    ],
+    "objective": "Vitamins & Minerals",
+    "tags": [
+      "Supplement",
+      "Vitamins & Minerals"
+    ],
+    "semanticKeywords": [
+      "omega-3 forte",
+      "vitamins & minerals"
+    ],
+    "clinical_benefits": [],
+    "name": "Omega-3 Forte",
+    "_source": "supplements_js_seed",
+    "category": "Vitamins & Minerals",
+    "protocols": [
+      "Cardiovascular & Nitric Oxide Protocol",
+      "Anti-Inflammatory Protocol",
+      "Longevity Foundation Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "omega-3-forte",
+    "desc": "High-purity Omega-3 Forte for research and clinical applications.",
+    "goals": [
+      "vitamins_minerals"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": null,
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "30 softgels",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "coagulopathy",
+        "anticoagulant_therapy",
+        "hypersensitivity_to_fish_or_shellfish",
+        "pre_surgical_status"
+      ],
+      "dosageRange": {
+        "min": 1000,
+        "unit": "mg",
+        "frequency": "daily_oral",
+        "max": 4000
+      },
+      "halfLife": "48-96 hours (plasma phospholipids)",
+      "synergies": [
+        "CoQ10",
+        "Vitamin_D3",
+        "Vitamin_E",
+        "Curcumin"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "phosphatidylserine",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "phosphatidylserine"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Ginkgo Biloba",
+      "Lion's Mane Mushroom",
+      "Magnesium Threonate",
+      "Omega-3 Forte"
+    ],
+    "clinical_benefits": [],
+    "name": "Phosphatidylserine",
+    "_source": "supplements_js_seed",
+    "protocols": [
+      "Cognitive Performance Protocol",
+      "Stress & HPA Axis Reset",
+      "Neuroprotection Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "phosphatidylserine",
+    "desc": "High-purity Phosphatidylserine for research and clinical applications.",
+    "status": "active",
+    "canonicalGoals": [
+      "cognitive_mood",
+      "sleep_circadian"
+    ],
+    "dosage": "100mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "semanticKeywords": [
+      "phosphatidylserine",
+      "cognitive performance",
+      "focus",
+      "neuroprotection"
+    ],
+    "quantity": "60 caps",
+    "category": "Cognitive Performance",
+    "objective": "Cognitive Performance",
+    "tags": [
+      "Supplement",
+      "Cognitive Performance"
+    ],
+    "goals": [
+      "cognitive"
+    ],
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "anticoagulant_medication_use",
+        "cholinergic_hypersensitivity",
+        "autoimmune_disorder"
+      ],
+      "dosageRange": {
+        "frequency": "daily",
+        "min": 100,
+        "unit": "mg",
+        "max": 300
+      },
+      "halfLife": "unknown; standard oral absorption",
+      "synergies": [
+        "Omega-3_fatty_acids",
+        "Ginkgo_biloba",
+        "Acetyl-L-carnitine",
+        "Bacopa_monnieri"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "pycnogenol",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "pycnogenol"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Grape Seed Extract",
+      "Quercetin",
+      "Omega-3 Forte",
+      "Vit. D3"
+    ],
+    "objective": "Antioxidants",
+    "tags": [
+      "Supplement",
+      "Antioxidants"
+    ],
+    "semanticKeywords": [
+      "pycnogenol",
+      "antioxidants"
+    ],
+    "clinical_benefits": [],
+    "name": "Pycnogenol",
+    "_source": "supplements_js_seed",
+    "category": "Antioxidants",
+    "protocols": [
+      "Antioxidant Defense Protocol",
+      "Cardiovascular & Nitric Oxide Protocol",
+      "Skin & Collagen Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "pycnogenol",
+    "desc": "High-purity Pycnogenol for research and clinical applications.",
+    "goals": [
+      "antioxidants"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "100mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "autoimmune_disorders",
+        "bleeding_disorders",
+        "pre_surgical_status",
+        "immunosuppressant_therapy"
+      ],
+      "dosageRange": {
+        "max": 300,
+        "min": 50,
+        "unit": "mg",
+        "frequency": "daily_oral"
+      },
+      "halfLife": "2-4 hours",
+      "synergies": [
+        "Vitamin C",
+        "Vitamin E",
+        "CoQ10",
+        "L-Arginine",
+        "Resveratrol"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "quercetin",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "quercetin"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "NAC",
+      "Glutathione",
+      "Bromelain",
+      "Vit. D3"
+    ],
+    "objective": "Antioxidants",
+    "tags": [
+      "Supplement",
+      "Antioxidants"
+    ],
+    "semanticKeywords": [
+      "quercetin",
+      "antioxidants"
+    ],
+    "clinical_benefits": [],
+    "name": "Quercetin",
+    "_source": "supplements_js_seed",
+    "category": "Antioxidants",
+    "protocols": [
+      "Anti-Inflammatory Protocol",
+      "Immune Support Protocol",
+      "Antioxidant Defense Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "quercetin",
+    "desc": "High-purity Quercetin for research and clinical applications.",
+    "goals": [
+      "antioxidants"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "250mg + Resveratrol 250mg + Astaxanthin 5mg – 500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "renal_impairment",
+        "hypothyroidism",
+        "pregnancy",
+        "breastfeeding",
+        "drug_interactions_with_CYP450_substrates"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "min": 500,
+        "unit": "mg",
+        "max": 1000
+      },
+      "halfLife": "3.5-11 hours (oral)",
+      "synergies": [
+        "Bromelain",
+        "Vitamin C",
+        "Resveratrol",
+        "Zinc",
+        "Piperine"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "rapamycin",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "rapamycin"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Berberine",
+      "Metformin",
+      "NMN",
+      "Quercetin"
+    ],
+    "objective": "Longevity",
+    "tags": [
+      "Supplement",
+      "Longevity"
+    ],
+    "semanticKeywords": [
+      "rapamycin",
+      "longevity"
+    ],
+    "clinical_benefits": [],
+    "name": "Rapamycin",
+    "_source": "supplements_js_seed",
+    "category": "Longevity",
+    "protocols": [
+      "Longevity Foundation Protocol",
+      "Autophagy & Cellular Renewal Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "rapamycin",
+    "desc": "High-purity Rapamycin for research and clinical applications.",
+    "goals": [
+      "longevity"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "1mg – 2mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "30 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "hypersensitivity_to_sirolimus",
+        "severe_hepatic_impairment",
+        "active_infection",
+        "pregnancy",
+        "recent_surgery",
+        "wound_healing_disorders"
+      ],
+      "dosageRange": {
+        "frequency": "weekly_oral",
+        "unit": "mg",
+        "max": 10,
+        "min": 1
+      },
+      "halfLife": "57-63 hours",
+      "synergies": [
+        "metformin",
+        "acarbose",
+        "resveratrol",
+        "spermidine",
+        "nad_precursors"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "resveratrol",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "resveratrol"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "NMN",
+      "Quercetin",
+      "Co-Q10",
+      "Omega-3 Forte"
+    ],
+    "objective": "Longevity",
+    "tags": [
+      "Sirtuin",
+      "Antioxidant",
+      "Longevity"
+    ],
+    "semanticKeywords": [
+      "resveratrol",
+      "anti aging",
+      "longevity",
+      "cardio health"
+    ],
+    "clinical_benefits": [
+      "Cardiovascular protection",
+      "Anti-aging support",
+      "Antioxidant defense",
+      "Metabolic health"
+    ],
+    "name": "Resveratrol",
+    "_source": "supplements_js_seed",
+    "category": "Longevity",
+    "protocols": [
+      "Longevity Foundation Protocol",
+      "Cardiovascular & Nitric Oxide Protocol",
+      "Anti-Inflammatory Protocol"
+    ],
+    "mechanisms": [
+      "Sirtuin activation (SIRT1)",
+      "Nrf2 pathway support"
+    ],
+    "slug": "resveratrol",
+    "desc": "A polyphenol known for activating sirtuins and providing robust cardiovascular and antioxidant defense.",
+    "goals": [
+      "longevity",
+      "anti_aging",
+      "cardio_health"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging",
+      "metabolic_weight"
+    ],
+    "dosage": "500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "anticoagulant_therapy",
+        "antiplatelet_therapy",
+        "pregnancy",
+        "lactation",
+        "bleeding_disorders",
+        "prior_to_surgery",
+        "CYP450_metabolized_drugs"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "unit": "mg",
+        "max": 500,
+        "min": 250
+      },
+      "halfLife": "2-4 hours (free form); metabolites circulate longer",
+      "synergies": [
+        "Quercetin",
+        "Pterostilbene",
+        "NMN",
+        "NR",
+        "Fisetin",
+        "Curcumin",
+        "Piperine"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "rhodiola-rosea",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "rhodiola rosea"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Ashwagandha",
+      "L-Theanine",
+      "Ginkgo Biloba",
+      "B-Complex"
+    ],
+    "objective": "Energy & Focus",
+    "tags": [
+      "Energy",
+      "Cognitive",
+      "Adaptogen"
+    ],
+    "semanticKeywords": [
+      "adaptogens & botanicals",
+      "focus",
+      "energy",
+      "stamina",
+      "rhodiola rosea",
+      "energy & focus"
+    ],
+    "clinical_benefits": [
+      "Fatigue reduction",
+      "Stress resilience",
+      "Cognitive support",
+      "Physical stamina"
+    ],
+    "name": "Rhodiola Rosea",
+    "_source": "supplements_js_seed",
+    "category": "Adaptogens & Botanicals",
+    "protocols": [
+      "Stress & HPA Axis Reset",
+      "Cognitive Performance Protocol",
+      "Athletic Recovery Protocol"
+    ],
+    "mechanisms": [
+      "Monoamine modulation",
+      "Beta-endorphin support"
+    ],
+    "slug": "rhodiola-rosea",
+    "desc": "An arctic adaptogen researched for reducing stress-related fatigue and enhancing mental clarity during physical exertion.",
+    "goals": [
+      "focus",
+      "stamina",
+      "energy"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "cognitive_mood",
+      "metabolic_weight"
+    ],
+    "dosage": "200mg – 500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "bipolar_disorder",
+        "pregnancy",
+        "breastfeeding",
+        "hypotension",
+        "MAOI_medication_use"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "unit": "mg",
+        "min": 200,
+        "max": 600
+      },
+      "halfLife": "2-4 hours (salidroside)",
+      "synergies": [
+        "Ashwagandha",
+        "Panax Ginseng",
+        "Magnesium",
+        "L-Theanine",
+        "Bacopa Monnieri"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "saw-palmetto",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "saw palmetto"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Zinc Citrate",
+      "Lycopene",
+      "Vit. D3",
+      "Omega-3 Forte"
+    ],
+    "clinical_benefits": [],
+    "name": "Saw Palmetto",
+    "_source": "supplements_js_seed",
+    "protocols": [
+      "Hormonal Health Protocol",
+      "Prostate Health Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "saw-palmetto",
+    "desc": "High-purity Saw Palmetto for research and clinical applications.",
+    "status": "active",
+    "canonicalGoals": [
+      "hormonal_optimization"
+    ],
+    "dosage": "100mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "semanticKeywords": [
+      "saw palmetto",
+      "hormonal vitality",
+      "dht blocker",
+      "prostate"
+    ],
+    "quantity": "60 caps",
+    "category": "Hormonal Vitality",
+    "objective": "Hormonal Vitality",
+    "tags": [
+      "Supplement",
+      "Hormonal Vitality"
+    ],
+    "goals": [
+      "hormonal"
+    ],
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "pregnancy",
+        "breastfeeding",
+        "hormone-sensitive_cancers",
+        "pre-surgical_coagulation_disorders",
+        "anticoagulant_medication_users"
+      ],
+      "dosageRange": {
+        "unit": "mg",
+        "frequency": "daily_oral",
+        "max": 320,
+        "min": 160
+      },
+      "halfLife": "unknown; standard oral absorption",
+      "synergies": [
+        "Beta-sitosterol",
+        "Zinc",
+        "Pumpkin_seed_oil",
+        "Pygeum_africanum",
+        "Nettle_root"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "serrapeptase-300-000spu",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "serrapeptase 300,000spu"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Bromelain",
+      "Boswellia",
+      "Curcumin",
+      "Omega-3 Forte"
+    ],
+    "objective": "Metabolic & Blood Sugar",
+    "tags": [
+      "Supplement",
+      "Metabolic & Blood Sugar"
+    ],
+    "semanticKeywords": [
+      "serrapeptase 300,000spu",
+      "metabolic & blood sugar"
+    ],
+    "clinical_benefits": [],
+    "name": "Serrapeptase 300,000SPU",
+    "_source": "supplements_js_seed",
+    "category": "Metabolic & Blood Sugar",
+    "protocols": [
+      "Anti-Inflammatory Protocol",
+      "Joint & Mobility Protocol",
+      "Cardiovascular & Nitric Oxide Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "serrapeptase-300-000spu",
+    "desc": "High-purity Serrapeptase 300,000SPU for research and clinical applications.",
+    "goals": [
+      "metabolic_blood_sugar"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "metabolic_weight"
+    ],
+    "dosage": null,
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "bleeding_disorders",
+        "pre_surgical_status",
+        "anticoagulant_therapy",
+        "antiplatelet_therapy",
+        "pregnancy",
+        "lactation"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "max": 120,
+        "unit": "mg",
+        "min": 10
+      },
+      "halfLife": "2-4 hours (plasma)",
+      "synergies": [
+        "Nattokinase",
+        "Bromelain",
+        "Curcumin",
+        "Omega-3_fatty_acids",
+        "Vitamin_K2"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "sleep-support",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "sleep support"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Melatonin",
+      "Magnesium Glycinate",
+      "L-Theanine",
+      "Magnolia"
+    ],
+    "objective": "Sleep & Mood",
+    "tags": [
+      "Supplement",
+      "Sleep & Mood"
+    ],
+    "semanticKeywords": [
+      "sleep support",
+      "sleep & mood"
+    ],
+    "clinical_benefits": [],
+    "name": "Sleep Support",
+    "_source": "supplements_js_seed",
+    "category": "Sleep & Mood",
+    "protocols": [
+      "Sleep Optimization Protocol",
+      "Stress & HPA Axis Reset"
+    ],
+    "mechanisms": [],
+    "slug": "sleep-support",
+    "desc": "High-purity Sleep Support for research and clinical applications.",
+    "goals": [
+      "sleep_mood"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "sleep_circadian",
+      "cognitive_mood"
+    ],
+    "dosage": null,
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "pregnancy",
+        "lactation",
+        "history_of_hypersensitivity",
+        "severe_hepatic_impairment",
+        "concurrent_use_of_sedative_hypnotics"
+      ],
+      "dosageRange": {
+        "frequency": "daily_oral",
+        "min": 1,
+        "unit": "mg",
+        "max": 10
+      },
+      "halfLife": "0.5-1 hour (oral)",
+      "synergies": [
+        "Magnesium_Glycinate",
+        "L-Theanine",
+        "Apigenin",
+        "Glycine"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "spermidine",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "spermidine"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "NMN",
+      "Resveratrol",
+      "Berberine",
+      "Quercetin"
+    ],
+    "objective": "Longevity",
+    "tags": [
+      "Supplement",
+      "Longevity"
+    ],
+    "semanticKeywords": [
+      "spermidine",
+      "longevity"
+    ],
+    "clinical_benefits": [],
+    "name": "Spermidine",
+    "_source": "supplements_js_seed",
+    "category": "Longevity",
+    "protocols": [
+      "Longevity Foundation Protocol",
+      "Autophagy & Cellular Renewal Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "spermidine",
+    "desc": "High-purity Spermidine for research and clinical applications.",
+    "goals": [
+      "longevity"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "3mg – 10mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "active_oncological_malignancy",
+        "polyamine_sensitive_tumors",
+        "severe_gastrointestinal_malabsorption",
+        "pregnancy_and_lactation"
+      ],
+      "dosageRange": {
+        "min": 1,
+        "frequency": "daily_oral",
+        "unit": "mg",
+        "max": 10
+      },
+      "halfLife": "approximately 2-4 hours (plasma)",
+      "synergies": [
+        "Resveratrol",
+        "NMN",
+        "Quercetin",
+        "Fisetin",
+        "Magnesium"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "spironolactone",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "spironolactone"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Zinc Citrate",
+      "Vit. D3",
+      "Omega-3 Forte",
+      "DIM"
+    ],
+    "clinical_benefits": [],
+    "name": "Spironolactone",
+    "_source": "supplements_js_seed",
+    "protocols": [
+      "Hormonal Health Protocol",
+      "Androgen Regulation Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "spironolactone",
+    "desc": "High-purity Spironolactone for research and clinical applications.",
+    "status": "active",
+    "canonicalGoals": [
+      "hormonal_optimization",
+      "metabolic_weight"
+    ],
+    "dosage": "50mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "semanticKeywords": [
+      "spironolactone",
+      "hormonal vitality",
+      "anti-androgen",
+      "acne"
+    ],
+    "quantity": "180 caps",
+    "category": "Hormonal Vitality",
+    "objective": "Hormonal Vitality",
+    "tags": [
+      "Supplement",
+      "Hormonal Vitality"
+    ],
+    "goals": [
+      "hormonal"
+    ],
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "hyperkalemia",
+        "addisons_disease",
+        "anuria",
+        "acute_renal_insufficiency",
+        "concomitant_potassium_supplementation",
+        "pregnancy"
+      ],
+      "dosageRange": {
+        "unit": "mg",
+        "max": 200,
+        "frequency": "daily_oral",
+        "min": 25
+      },
+      "halfLife": "1.3-2.0 hours (parent drug); 13.5-16.5 hours (active metabolites)",
+      "synergies": [
+        "estradiol",
+        "finasteride",
+        "minoxidil",
+        "thiazide_diuretics"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "tadalafil",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "tadalafil"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "L-Arginine",
+      "L-Citrulline",
+      "Co-Q10",
+      "Zinc Citrate"
+    ],
+    "clinical_benefits": [],
+    "name": "Tadalafil",
+    "_source": "supplements_js_seed",
+    "protocols": [
+      "Cardiovascular & Nitric Oxide Protocol",
+      "Hormonal Health Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "tadalafil",
+    "desc": "High-purity Tadalafil for research and clinical applications.",
+    "status": "active",
+    "canonicalGoals": [
+      "hormonal_optimization",
+      "metabolic_weight"
+    ],
+    "dosage": "5mg – 20mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "semanticKeywords": [
+      "tadalafil",
+      "hormonal vitality",
+      "blood flow",
+      "nitric oxide"
+    ],
+    "quantity": "30 caps",
+    "category": "Hormonal Vitality",
+    "objective": "Hormonal Vitality",
+    "tags": [
+      "Supplement",
+      "Hormonal Vitality"
+    ],
+    "goals": [
+      "hormonal"
+    ],
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "nitrate_medication_use",
+        "severe_hepatic_impairment",
+        "severe_renal_impairment",
+        "unstable_angina",
+        "recent_myocardial_infarction",
+        "hypotension",
+        "alpha_blocker_therapy"
+      ],
+      "dosageRange": {
+        "frequency": "as_needed",
+        "unit": "mg",
+        "max": 20,
+        "min": 2.5
+      },
+      "halfLife": "17.5 hours",
+      "synergies": [
+        "L-Citrulline",
+        "Arginine",
+        "Pycnogenol",
+        "DHEA",
+        "Testosterone"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "urolithin",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "urolithin"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "NMN",
+      "Co-Q10",
+      "Spermidine",
+      "Omega-3 Forte"
+    ],
+    "objective": "Longevity",
+    "tags": [
+      "Supplement",
+      "Longevity"
+    ],
+    "semanticKeywords": [
+      "urolithin",
+      "longevity"
+    ],
+    "clinical_benefits": [],
+    "name": "Urolithin",
+    "_source": "supplements_js_seed",
+    "category": "Longevity",
+    "protocols": [
+      "Mitochondrial Health Protocol",
+      "Autophagy & Cellular Renewal Protocol",
+      "Athletic Recovery Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "urolithin",
+    "desc": "High-purity Urolithin for research and clinical applications.",
+    "goals": [
+      "longevity"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "500mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "pregnancy",
+        "breastfeeding",
+        "history_of_hormone_sensitive_cancers",
+        "severe_renal_impairment"
+      ],
+      "dosageRange": {
+        "max": 1000,
+        "min": 250,
+        "frequency": "daily_oral",
+        "unit": "mg"
+      },
+      "halfLife": "12-24 hours",
+      "synergies": [
+        "CoQ10",
+        "NMN",
+        "Resveratrol",
+        "PQQ",
+        "Creatine"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "vit-d3",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "vit. d3"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Vit. D3 10,000IU + K2",
+      "Magnesium Glycinate",
+      "Omega-3 Forte",
+      "Zinc Citrate"
+    ],
+    "objective": "Vitamins & Minerals",
+    "tags": [
+      "Supplement",
+      "Vitamins & Minerals"
+    ],
+    "semanticKeywords": [
+      "vit. d3",
+      "vitamins & minerals"
+    ],
+    "clinical_benefits": [],
+    "name": "Vit. D3",
+    "_source": "supplements_js_seed",
+    "category": "Vitamins & Minerals",
+    "protocols": [
+      "Immune Support Protocol",
+      "Bone & Hormonal Health Protocol",
+      "Longevity Foundation Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "vit-d3",
+    "desc": "High-purity Vit. D3 for research and clinical applications.",
+    "goals": [
+      "vitamins_minerals"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "1000IU – 5000IU + K2",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "30 softgels – 60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "hypercalcemia",
+        "hypervitaminosis_D",
+        "nephrolithiasis",
+        "sarcoidosis",
+        "primary_hyperparathyroidism"
+      ],
+      "dosageRange": {
+        "max": 100,
+        "frequency": "daily",
+        "unit": "mcg",
+        "min": 10
+      },
+      "halfLife": "15-22 days (as 25-hydroxyvitamin D)",
+      "synergies": [
+        "Vitamin K2",
+        "Magnesium",
+        "Calcium",
+        "Zinc",
+        "Omega-3_fatty_acids"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "vit-d3-10-000iu-k2",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "vit. d3 10,000iu + k2"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Magnesium Glycinate",
+      "Omega-3 Forte",
+      "Zinc Citrate",
+      "Vit. D3"
+    ],
+    "objective": "Vitamins & Minerals",
+    "tags": [
+      "Supplement",
+      "Vitamins & Minerals"
+    ],
+    "semanticKeywords": [
+      "vit. d3 10,000iu + k2",
+      "vitamins & minerals"
+    ],
+    "clinical_benefits": [],
+    "name": "Vit. D3 10,000IU + K2",
+    "_source": "supplements_js_seed",
+    "category": "Vitamins & Minerals",
+    "protocols": [
+      "Immune Support Protocol",
+      "Bone & Hormonal Health Protocol",
+      "Longevity Foundation Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "vit-d3-10-000iu-k2",
+    "desc": "High-purity Vit. D3 10,000IU + K2 for research and clinical applications.",
+    "goals": [
+      "vitamins_minerals"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": null,
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "hypercalcemia",
+        "hypervitaminosis_d",
+        "primary_hyperparathyroidism",
+        "sarcoidosis",
+        "renal_calculi",
+        "warfarin_therapy"
+      ],
+      "dosageRange": {
+        "max": 10000,
+        "min": 1000,
+        "frequency": "daily_oral",
+        "unit": "IU"
+      },
+      "halfLife": "15-22 days (25-hydroxyvitamin D)",
+      "synergies": [
+        "Magnesium",
+        "Zinc",
+        "Omega-3_fatty_acids",
+        "Boron"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "zinc-citrate",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "zinc citrate"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Vit. D3",
+      "Magnesium Glycinate",
+      "B-Complex",
+      "Quercetin"
+    ],
+    "objective": "Vitamins & Minerals",
+    "tags": [
+      "Supplement",
+      "Vitamins & Minerals"
+    ],
+    "semanticKeywords": [
+      "zinc citrate",
+      "vitamins & minerals"
+    ],
+    "clinical_benefits": [],
+    "name": "Zinc Citrate",
+    "_source": "supplements_js_seed",
+    "category": "Vitamins & Minerals",
+    "protocols": [
+      "Immune Support Protocol",
+      "Hormonal Health Protocol",
+      "Skin & Collagen Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "zinc-citrate",
+    "desc": "High-purity Zinc Citrate for research and clinical applications.",
+    "goals": [
+      "vitamins_minerals"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "25mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "copper_deficiency",
+        "hypersensitivity_to_zinc",
+        "renal_impairment",
+        "excessive_supplementation_risk"
+      ],
+      "dosageRange": {
+        "max": 40,
+        "unit": "mg",
+        "frequency": "daily_oral",
+        "min": 10
+      },
+      "halfLife": "280 days (whole body turnover)",
+      "synergies": [
+        "Copper",
+        "Vitamin C",
+        "Vitamin D3",
+        "Magnesium",
+        "Selenium"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  },
+  {
+    "id": "zinc-gluconate",
+    "image": "/assets/vials/generic-supplement.png",
+    "synonyms": [
+      "zinc gluconate"
+    ],
+    "type": "supplement",
+    "commonly_combined_with": [
+      "Vit. D3",
+      "Magnesium Glycinate",
+      "B-Complex",
+      "Quercetin"
+    ],
+    "objective": "Vitamins & Minerals",
+    "tags": [
+      "Supplement",
+      "Vitamins & Minerals"
+    ],
+    "semanticKeywords": [
+      "zinc gluconate",
+      "vitamins & minerals"
+    ],
+    "clinical_benefits": [],
+    "name": "Zinc Gluconate",
+    "_source": "supplements_js_seed",
+    "category": "Vitamins & Minerals",
+    "protocols": [
+      "Immune Support Protocol",
+      "Hormonal Health Protocol"
+    ],
+    "mechanisms": [],
+    "slug": "zinc-gluconate",
+    "desc": "High-purity Zinc Gluconate for research and clinical applications.",
+    "goals": [
+      "vitamins_minerals"
+    ],
+    "status": "active",
+    "canonicalGoals": [
+      "longevity_anti_aging"
+    ],
+    "dosage": "30mg",
+    "createdAt": "2026-05-21T13:55:08.506Z",
+    "quantity": "60 caps",
+    "updatedAt": "2026-05-21T13:55:08.506Z",
+    "typeData": {
+      "contraindications": [
+        "hypersensitivity_to_zinc",
+        "copper_deficiency",
+        "renal_impairment",
+        "acute_gastrointestinal_ulceration"
+      ],
+      "dosageRange": {
+        "unit": "mg",
+        "frequency": "daily_oral",
+        "max": 40,
+        "min": 10
+      },
+      "halfLife": "280 days (whole body turnover)",
+      "synergies": [
+        "Copper",
+        "Vitamin C",
+        "Vitamin D3",
+        "Magnesium",
+        "Quercetin"
+      ],
+      "evidenceLevel": "human-clinical-trial"
+    }
+  }
+]

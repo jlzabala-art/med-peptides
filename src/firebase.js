@@ -1,6 +1,9 @@
+/* eslint-disable no-unused-vars */
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, setPersistence, browserLocalPersistence, browserSessionPersistence, signOut } from 'firebase/auth';
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
+import { getAnalytics } from 'firebase/analytics';
+import { getFunctions } from 'firebase/functions';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PROYECTO FIREBASE OFICIAL: med-peptides-app  (med-peptides.com)
@@ -19,9 +22,67 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
-// persistentLocalCache: modern offline persistence (replaces deprecated experimentalForceLongPolling).
-// persistentMultipleTabManager: allows multiple tabs to share the same Firestore connection.
+
+if (typeof window !== 'undefined') {
+  setPersistence(auth, browserLocalPersistence).catch(err => console.warn('Failed to set persistence:', err));
+  if (window.Cypress) {
+    window.firebaseSignOut = () => signOut(auth);
+  }
+}
+export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+
+// Firebase App Check
+// App Check initialization is skipped in development mode to avoid access control issues.
+if (typeof window !== 'undefined' && import.meta.env.PROD) {
+  const recaptchaKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+  if (recaptchaKey) {
+    try {
+      initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider(recaptchaKey),
+        isTokenAutoRefreshEnabled: true
+      });
+      console.log('Firebase App Check initialized.');
+    } catch (err) {
+      console.warn('Firebase App Check initialization skipped or failed:', err);
+    }
+  }
+}
+
+/**
+ * Log error events to Firebase Analytics (Web equivalent to Crashlytics)
+ */
+export const logErrorToAnalytics = (error, context = {}) => {
+  if (analytics) {
+    import('firebase/analytics')
+      .then(({ logEvent }) => {
+        logEvent(analytics, 'exception', {
+          description: error.message || String(error),
+          fatal: context.fatal || false,
+          ...context
+        });
+      })
+      .catch(err => console.error('Failed to log error to analytics:', err));
+  }
+};
+
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager()
+  })
 });
+
+if (typeof window !== 'undefined') {
+  window.db = db;
+  import('firebase/firestore').then((fs) => {
+    window.fs = fs;
+  }).catch(e => console.error('Failed to expose firestore on window:', e));
+}
+
+export const storage = getStorage(app);
+export const functions = getFunctions(app);
+export { ref, uploadBytes, getDownloadURL };
+
 export default app;
+

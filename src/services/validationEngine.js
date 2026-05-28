@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 /**
- * REGEN PEPT - Multi-Layer Clinical Validation Engine
+ * Med-Peptides - Multi-Layer Clinical Validation Engine
  * Assesses protocol safety, coherence, and completeness.
  */
 

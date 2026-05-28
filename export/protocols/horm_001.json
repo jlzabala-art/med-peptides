@@ -1,6 +1,6 @@
 {
   "protocol_duration_weeks": 12,
-  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "protocol_author_name": "Med-Peptides Clinical Team",
   "bundleVersion": "2.0",
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -78,7 +78,7 @@
     "resolved_monitoring": []
   },
   "protocol_author_notes": "Official curated protocol for general clinical use.",
-  "protocol_author_organization": "ReGen PEPT",
+  "protocol_author_organization": "Med-Peptides",
   "protocol_last_reviewed_at": "2026-03-29",
   "protocol_source_reference": "internal_guide",
   "expected_outcomes": {
@@ -125,16 +125,16 @@
               "Thursday"
             ],
             "administration_frequency": "2x_week",
-            "dose_unit": "protocol_defined",
-            "starting_intensity": "standard",
-            "timing_hint": "consistent_time"
+            "dose_unit": "mcg",
+            "timing_hint": "consistent_time",
+            "starting_weekly_dose": 0.5
           },
           "product_id": "prd_kisspeptin",
           "product_title": "Kisspeptin",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_kisspeptin",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         },
@@ -145,15 +145,15 @@
               "Friday"
             ],
             "administration_frequency": "1x_week",
-            "dose_unit": "protocol_defined",
-            "starting_intensity": "optional_low"
+            "dose_unit": "mcg",
+            "intensity_label": "optional_low"
           },
           "product_id": "prd_gonadorelin",
           "product_title": "Gonadorelin",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_gonadorelin",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         }
@@ -183,15 +183,15 @@
               "Thursday"
             ],
             "administration_frequency": "2x_week",
-            "dose_unit": "protocol_defined",
-            "intensity": "standard_plus"
+            "dose_unit": "mcg",
+            "starting_weekly_dose": 1
           },
           "product_id": "prd_kisspeptin",
           "product_title": "Kisspeptin",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_kisspeptin",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         },
@@ -202,15 +202,15 @@
               "Friday"
             ],
             "administration_frequency": "1x_week",
-            "dose_unit": "protocol_defined",
-            "intensity": "conditional"
+            "dose_unit": "mcg",
+            "intensity_label": "conditional"
           },
           "product_id": "prd_gonadorelin",
           "product_title": "Gonadorelin",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_gonadorelin",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         }
@@ -239,15 +239,15 @@
               "Thursday"
             ],
             "administration_frequency": "1x_week",
-            "dose_unit": "protocol_defined",
-            "intensity": "maintenance"
+            "dose_unit": "mcg",
+            "starting_weekly_dose": 1
           },
           "product_id": "prd_kisspeptin",
           "product_title": "Kisspeptin",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_kisspeptin",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         }
@@ -486,7 +486,7 @@
     ]
   },
   "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
-  "_importBundle": "ReGen PEPT Clinical Protocol Library · Updated 2026-04-26",
+  "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
   "_schemaGapFixed": {
     "_nanoseconds": 670000000,
     "_seconds": 1777190718
@@ -545,8 +545,8 @@
     "visibility": "public",
     "scientificName": "CJC-1295 / Ipamorelin GHRH & Ghrelin-Mimetic GH Secretagogue Optimization Protocol",
     "author": {
-      "organization": "ReGen PEPT",
-      "name": "ReGen PEPT Clinical Team",
+      "organization": "Med-Peptides",
+      "name": "Med-Peptides Clinical Team",
       "title": "Peptide Specialists"
     },
     "evidence_grade_note": "GRADE B: Ipamorelin Phase I/II data (Raun K, Eur J Endocrinol 1998); CJC-1295 Phase II human PK/PD data (Teichman SL, J Clin Endocrinol Metab 2006). IGF-1 endpoints well-validated. Limited long-term RCT data for body composition endpoints.",
@@ -590,7 +590,7 @@
     },
     "regulatory_note": "Ipamorelin and CJC-1295: Not FDA-approved for weight management, anti-aging, or body composition. FDA issued warning letters against compounding of these peptides in 2024 (Category 2 bulk substances). Available via 503A compounding pharmacies under physician supervision in jurisdictions where permitted. Not WADA-prohibited if used therapeutically."
   },
-  "_patchBundle": "ReGen PEPT Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
   "canonical_enrichment": {
     "compatibleWith": "antigravity_v2_firebase_import",
     "auditFieldsCompleted": [
@@ -736,5 +736,9 @@
       "Transient hypoglycemic-like symptoms (light-headedness, sweating) post-injection (~5%)"
     ],
     "contraindication_summary": "Absolute contraindications: active malignancy or history of hormone-sensitive cancer (GH axis stimulation may promote tumor proliferation); pituitary adenoma or active pituitary pathology; uncontrolled diabetes mellitus (GH raises insulin resistance — monitor fasting glucose and HbA1c); untreated severe obstructive sleep apnea (GH pulses worsen OSA); pregnancy or breastfeeding. Relative contraindications: pre-existing carpal tunnel syndrome (fluid retention may exacerbate); active thyroid dysfunction (correct before initiating); concomitant exogenous GH or IGF-1 therapy. Monitor IGF-1 levels at baseline, week 6, and week 12. Physician supervision mandatory throughout."
-  }
+  },
+  "recommended_tests": [
+    "testosterone-blood-test",
+    "fagron-trichotest"
+  ]
 }

@@ -1,3 +1,4 @@
+ 
 import { useState, useRef, useEffect } from 'react';
 import { Search, X, Sparkles } from 'lucide-react';
 

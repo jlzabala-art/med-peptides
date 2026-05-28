@@ -1,9 +1,13 @@
+/* eslint-disable no-unused-vars */
 import { useState, useMemo, useCallback, memo, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useResponsive } from '../hooks/useResponsive';
 import { usePageMeta } from '../hooks/usePageMeta';
 import SyringeVisualizer from '../components/SyringeVisualizer';
+import VialVisualizer from '../components/VialVisualizer';
 import { jsPDF } from 'jspdf';
+import { motion } from 'framer-motion';
+import { trackToolUsage } from '../hooks/useAnalytics';
 import {
   FlaskConical,
   Download,
@@ -35,7 +39,7 @@ function exportPDF({ mg, ml, dose, units }) {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text('REGEN PEPT', 14, 12);
+  doc.text('Med-Peptides', 14, 12);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.text('Research Report', 14, 20);
@@ -114,7 +118,7 @@ function exportPDF({ mg, ml, dose, units }) {
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  doc.text('REGEN PEPT — Research Report  |  regenpept.com', 14, FOOTER_Y + 5.5);
+  doc.text('Med-Peptides — Research Report  |  Med-Peptides.com', 14, FOOTER_Y + 5.5);
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(7);
   doc.setTextColor(180, 205, 230);
@@ -123,8 +127,25 @@ function exportPDF({ mg, ml, dose, units }) {
     105, FOOTER_Y + 11, { align: 'center' }
   );
 
-  doc.save(`RegenPept_Reconstitution_${Date.now()}.pdf`);
+  doc.save(`Med-Peptides_Reconstitution_${Date.now()}.pdf`);
 }
+
+/* ─── Shared style tokens (must live before the component for minifier safety) ── */
+const amberVal = {
+  color: '#fbbf24',
+  backgroundColor: 'rgba(251,191,36,0.12)',
+  borderRadius: '3px',
+  padding: '0 3px',
+  fontWeight: 700,
+};
+const amberValLg = {
+  color: '#f59e0b',
+  backgroundColor: 'rgba(251,191,36,0.2)',
+  borderRadius: '4px',
+  padding: '1px 5px',
+  fontWeight: 800,
+  fontSize: '1.05em',
+};
 
 /* ─── InputField — memoised ────────────────────────────────────────────────── */
 const InputField = memo(function InputField({ label, unit, hint, value, onChange, invalid }) {
@@ -184,31 +205,57 @@ export default function Calculator() {
     path: '/calculator',
   });
 
+  // ── All state declarations first (prevents TDZ under minification) ──────────
   const isMobile = useResponsive('(max-width: 767px)');
-  const [reconData, setReconData] = useState({ mg: '5', ml: '2', dose: '250' });
+  const [bacWater, setBacWater] = useState('2');
+  const [vialDosageMg, setVialDosageMg] = useState('5');
+  const [desiredDosageMcg, setDesiredDosageMcg] = useState('250');
 
-  // Memoised calculation
+  // ── Derived values (useMemo BEFORE useEffect that reads them) ────────────────
   const units = useMemo(
-    () => calcUnits(reconData.mg, reconData.ml, reconData.dose),
-    [reconData]
+    () => {
+        const m = parseFloat(vialDosageMg);
+        const l = parseFloat(bacWater);
+        const d = parseFloat(desiredDosageMcg);
+        if (!m || !l || !d || isNaN(m) || isNaN(l) || isNaN(d)) return '—';
+        return ((d / (m * 1000)) * l * 100).toFixed(1);
+    },
+    [vialDosageMg, bacWater, desiredDosageMcg]
   );
 
-  // Validation per field
   const invalid = useMemo(() => ({
-    mg:   !reconData.mg   || parseFloat(reconData.mg)   <= 0,
-    ml:   !reconData.ml   || parseFloat(reconData.ml)   <= 0,
-    dose: !reconData.dose || parseFloat(reconData.dose) <= 0,
-  }), [reconData]);
+    mg:   !vialDosageMg   || parseFloat(vialDosageMg)   <= 0,
+    ml:   !bacWater       || parseFloat(bacWater)       <= 0,
+    dose: !desiredDosageMcg || parseFloat(desiredDosageMcg) <= 0,
+  }), [vialDosageMg, bacWater, desiredDosageMcg]);
 
-  const handleChange = useCallback((field) => (e) =>
-    setReconData((prev) => ({ ...prev, [field]: e.target.value })),
-    []
-  );
+  // ── Callbacks ────────────────────────────────────────────────────────────────
+  const handleChange = (setter) => (e) => setter(e.target.value);
 
   const handleExport = useCallback(
-    () => exportPDF({ mg: reconData.mg, ml: reconData.ml, dose: reconData.dose, units }),
-    [reconData, units]
+    () => {
+      trackToolUsage('peptide_calculator_export', {
+        mg: vialDosageMg,
+        ml: bacWater,
+        dose: desiredDosageMcg,
+        result_units: units,
+      });
+      exportPDF({ mg: vialDosageMg, ml: bacWater, dose: desiredDosageMcg, units });
+    },
+    [vialDosageMg, bacWater, desiredDosageMcg, units]
   );
+
+  // ── Effects (after all memo/state so `units` is already initialised) ─────────
+  useEffect(() => {
+    if (units !== '—' && !isNaN(parseFloat(units))) {
+      trackToolUsage('peptide_calculator', {
+        mg: vialDosageMg,
+        ml: bacWater,
+        dose: desiredDosageMcg,
+        result_units: units,
+      });
+    }
+  }, [units, vialDosageMg, bacWater, desiredDosageMcg]);
 
   return (
     <div className="calc-page">
@@ -238,12 +285,14 @@ export default function Calculator() {
         {/* Mobile Picture-in-Picture syringe strip */}
         {isMobile && (
           <div className="calc-pip">
+            <div className="calc-pip__visuals" style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center', marginBottom: '1rem' }}>
+              <VialVisualizer waterAmount={bacWater} />
+              <ChevronRight size={24} color="rgba(255,255,255,0.3)" />
+              <SyringeVisualizer units={units} />
+            </div>
             <div className="calc-pip__result">
               <span className="calc-pip__label">Units to Inject</span>
               <ResultDisplay units={units} />
-            </div>
-            <div className="calc-pip__syringe">
-              <SyringeVisualizer units={units} compact />
             </div>
           </div>
         )}
@@ -261,25 +310,25 @@ export default function Calculator() {
             <InputField
               label="Peptide Quantity"
               unit="mg"
-              hint={`e.g. ${reconData.mg} mg BPC-157 vial`}
-              value={reconData.mg}
-              onChange={handleChange('mg')}
+              hint={`e.g. ${vialDosageMg} mg BPC-157 vial`}
+              value={vialDosageMg}
+              onChange={handleChange(setVialDosageMg)}
               invalid={invalid.mg}
             />
             <InputField
               label="Bacteriostatic Water"
               unit="ml"
-              hint={`e.g. ${reconData.ml} ml added to vial`}
-              value={reconData.ml}
-              onChange={handleChange('ml')}
+              hint={`e.g. ${bacWater} ml added to vial`}
+              value={bacWater}
+              onChange={handleChange(setBacWater)}
               invalid={invalid.ml}
             />
             <InputField
               label="Desired Dose"
               unit="mcg"
-              hint={`e.g. ${reconData.dose} mcg per injection`}
-              value={reconData.dose}
-              onChange={handleChange('dose')}
+              hint={`e.g. ${desiredDosageMcg} mcg per injection`}
+              value={desiredDosageMcg}
+              onChange={handleChange(setDesiredDosageMcg)}
               invalid={invalid.dose}
             />
 
@@ -287,7 +336,7 @@ export default function Calculator() {
             <div className="calc-formula">
               <div className="calc-formula__label">Formula</div>
               <code className="calc-formula__eq">
-                ({reconData.dose} mcg ÷ ({reconData.mg} mg × 1000)) × {reconData.ml} ml × 100
+                ({desiredDosageMcg || 0} mcg ÷ ({vialDosageMg || 0} mg × 1000)) × {bacWater || 0} ml × 100
                 {' '}= <strong className="calc-formula__result">{units} units</strong>
               </code>
             </div>
@@ -301,7 +350,35 @@ export default function Calculator() {
                 <ResultDisplay units={units} />
                 <div className="calc-result__units-label">UNITS</div>
 
-                <SyringeVisualizer units={units} />
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '2.5rem', 
+                  margin: '2rem 0',
+                  justifyContent: 'center',
+                  background: 'rgba(255,255,255,0.03)',
+                  padding: '2rem',
+                  borderRadius: '24px',
+                  border: '1px solid rgba(255,255,255,0.05)'
+                }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', marginBottom: '1rem' }}>Step 1: Reconstitute</div>
+                    <VialVisualizer waterAmount={bacWater} />
+                  </div>
+                  
+                  <motion.div 
+                    animate={{ x: [0, 5, 0] }} 
+                    transition={{ repeat: Infinity, duration: 2 }}
+                    style={{ color: 'rgba(255,255,255,0.2)' }}
+                  >
+                    <ChevronRight size={32} strokeWidth={1} />
+                  </motion.div>
+
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', marginBottom: '1rem' }}>Step 2: Draw Dose</div>
+                    <SyringeVisualizer units={units} />
+                  </div>
+                </div>
 
                 <div className="calc-result__tip">
                   Pull the syringe to the{' '}
@@ -341,11 +418,11 @@ export default function Calculator() {
             </div>
             <p className="calc-card__text">
               Think of your peptide{' '}
-              <mark style={amberVal}>{reconData.mg} mg</mark>{' '}
+              <mark style={amberVal}>{vialDosageMg} mg</mark>{' '}
               as coffee grounds and{' '}
-              <mark style={amberVal}>{reconData.ml} ml</mark>{' '}
+              <mark style={amberVal}>{bacWater} ml</mark>{' '}
               of water as your brew. To get your{' '}
-              <mark style={amberVal}>{reconData.dose} mcg</mark>{' '}
+              <mark style={amberVal}>{desiredDosageMcg} mcg</mark>{' '}
               dose, draw{' '}
               <mark style={amberValLg}>{units} units</mark>{' '}
               into your syringe.
@@ -365,24 +442,37 @@ export default function Calculator() {
               </h3>
             </div>
             <ul className="calc-guide-list">
-              {[
-                'Use <strong>Bacteriostatic Water</strong> for multi-dose research vials.',
-                'Gently swirl; <strong>never shake</strong> — shaking damages the molecular structure.',
-                'Store at <strong>2°C – 8°C</strong>, away from light, after reconstitution.',
-                'U-100 syringes have <strong>100 units per 1ml</strong>. Each unit = 0.01 ml.',
-              ].map((tip, i) => (
-                <li key={i} className="calc-guide-list__item">
-                  <span className="calc-guide-list__num">{i + 1}</span>
-                  <span dangerouslySetInnerHTML={{ __html: tip }} />
-                </li>
-              ))}
+              <li className="calc-guide-list__item">
+                <span className="calc-guide-list__num">1</span>
+                <span>
+                  Use <Link to="/product/bacteriostatic-water" className="calc-guide-link">Bacteriostatic Water</Link> for multi-dose research vials.
+                </span>
+              </li>
+              <li className="calc-guide-list__item">
+                <span className="calc-guide-list__num">2</span>
+                <span>
+                  Gently swirl; <strong>never shake</strong> — shaking damages the molecular structure.
+                </span>
+              </li>
+              <li className="calc-guide-list__item">
+                <span className="calc-guide-list__num">3</span>
+                <span>
+                  Store at <strong>2°C – 8°C</strong>, away from light, after reconstitution.
+                </span>
+              </li>
+              <li className="calc-guide-list__item">
+                <span className="calc-guide-list__num">4</span>
+                <span>
+                  <Link to="/product/precision-insulin-syringes" className="calc-guide-link">U-100 syringes</Link> have <strong>100 units per 1ml</strong>. Each unit = 0.01 ml.
+                </span>
+              </li>
             </ul>
           </div>
         </div>
 
         {/* ── Supply CTAs ──────────────────────────────────────────────────── */}
         <div className={`calc-ctas${isMobile ? ' calc-ctas--mobile' : ''}`}>
-          <Link to="/supplies" className="calc-cta calc-cta--water">
+          <Link to="/product/bacteriostatic-water" className="calc-cta calc-cta--water">
             <div className="calc-cta__left">
               <span className="calc-cta__emoji">💧</span>
               <div>
@@ -393,7 +483,7 @@ export default function Calculator() {
             <ChevronRight size={17} className="calc-cta__arrow" />
           </Link>
 
-          <Link to="/supplies" className="calc-cta calc-cta--syringe">
+          <Link to="/product/precision-insulin-syringes" className="calc-cta calc-cta--syringe">
             <div className="calc-cta__left">
               <span className="calc-cta__emoji">💉</span>
               <div>
@@ -410,19 +500,4 @@ export default function Calculator() {
   );
 }
 
-/* ─── Shared style tokens ──────────────────────────────────────────────────── */
-const amberVal = {
-  color: '#b45309',
-  backgroundColor: 'rgba(251,191,36,0.18)',
-  borderRadius: '3px',
-  padding: '0 3px',
-  fontWeight: 700,
-};
-const amberValLg = {
-  color: '#92400e',
-  backgroundColor: 'rgba(251,191,36,0.28)',
-  borderRadius: '4px',
-  padding: '1px 5px',
-  fontWeight: 800,
-  fontSize: '1.05em',
-};
+// (style tokens moved above the component — see top of file)

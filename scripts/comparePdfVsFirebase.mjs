@@ -1,7 +1,7 @@
 /**
  * comparePdfVsFirebase.mjs
  *
- * Compares the "master" pricing from RegenPept_Portfolio_rev7.pdf
+ * Compares the "master" pricing from Med-Peptides_Portfolio_rev7.pdf
  * against the Firestore `products/{id}/variants` subcollection.
  *
  * The PDF contains RETAIL prices (per vial + per kit of 10).
@@ -24,7 +24,7 @@ const serviceAccount = require(path.join(__dirname, '../serviceAccountKey.json')
 admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 const db = admin.firestore();
 
-// ── PDF Master Pricing (extracted from RegenPept_Portfolio_rev7.pdf) ──────────
+// ── PDF Master Pricing (extracted from Med-Peptides_Portfolio_rev7.pdf) ──────────
 // Format: { productName, dosage, perVial (USD), perKit (USD) }
 // The PDF lists RETAIL prices. Dosage format matches variant labels in Firestore.
 const PDF_PRICES = [

@@ -1,8 +1,9 @@
+/* eslint-disable no-unused-vars */
 import React, { lazy, Suspense, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Microscope, FlaskConical, Grid3X3, ArrowRight } from 'lucide-react';
+import { Search, Microscope, FlaskConical, Grid3X3, ArrowRight, Leaf } from 'lucide-react';
 import { usePageMeta } from '../hooks/usePageMeta';
-import FeaturedProtocols from '../sections/FeaturedProtocols';
+// import FeaturedProtocols from '../sections/FeaturedProtocols'; // TODO: re-enable when optimized
 
 const FeaturedPeptides = lazy(() => import('../sections/FeaturedPeptides'));
 
@@ -13,30 +14,40 @@ const BROWSE_TILES = [
     label: 'Protocols',
     description: 'Evidence-based clinical protocols built for real outcomes.',
     icon: Microscope,
-    path: '/protocols',
-    accent: 'var(--primary)',
-    bg: 'rgba(0,163,224,0.06)',
-    border: 'rgba(0,163,224,0.18)',
+    path: '/collection/protocols',
+    accent: '#00D1FF',
+    bg: 'rgba(0,209,255,0.06)',
+    border: 'rgba(0,209,255,0.18)',
   },
   {
     id: 'peptides',
     label: 'Peptides',
     description: 'Research-grade compounds with full purity documentation.',
     icon: FlaskConical,
-    path: '/products',
+    path: '/collection/peptides',
     accent: '#7C3AED',
     bg: 'rgba(124,58,237,0.06)',
     border: 'rgba(124,58,237,0.18)',
+  },
+  {
+    id: 'supplements',
+    label: 'Supplements',
+    description: 'Precision nutraceuticals and research-backed formulations.',
+    icon: Leaf,
+    path: '/collection/supplements',
+    accent: 'var(--color-success)',
+    bg: 'rgba(5,150,105,0.06)',
+    border: 'rgba(5,150,105,0.18)',
   },
   {
     id: 'categories',
     label: 'Categories',
     description: 'Browse by clinical objective — metabolic, recovery, longevity and more.',
     icon: Grid3X3,
-    path: '/catalog/categories',
-    accent: '#059669',
-    bg: 'rgba(5,150,105,0.06)',
-    border: 'rgba(5,150,105,0.18)',
+    path: '/collection/all',
+    accent: '#EA580C',
+    bg: 'rgba(234,88,12,0.06)',
+    border: 'rgba(234,88,12,0.18)',
   },
 ];
 
@@ -98,7 +109,7 @@ function CatalogPage({ onOpenSearch }) {
           100% { background-position:  600px 0; }
         }
         .catalog-hero {
-          background: linear-gradient(160deg, #001f3f 0%, #003d6b 55%, #004e8c 100%);
+          background: linear-gradient(160deg, #050A0F 0%, #0A141E 55%, #102030 100%);
           padding: clamp(4rem, 8vw, 7rem) 1.5rem clamp(3rem, 6vw, 5rem);
           text-align: center;
           position: relative;
@@ -108,7 +119,7 @@ function CatalogPage({ onOpenSearch }) {
           content: '';
           position: absolute;
           inset: 0;
-          background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,163,224,0.22) 0%, transparent 70%);
+          background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,209,255,0.15) 0%, transparent 70%);
           pointer-events: none;
         }
         .catalog-search-bar {
@@ -134,7 +145,7 @@ function CatalogPage({ onOpenSearch }) {
         }
         .catalog-search-input::placeholder { color: rgba(255,255,255,0.45); }
         .catalog-search-input:focus {
-          border-color: rgba(0,163,224,0.7);
+          border-color: rgba(0,209,255,0.6);
           background: rgba(255,255,255,0.12);
         }
         .catalog-search-icon {
@@ -147,21 +158,25 @@ function CatalogPage({ onOpenSearch }) {
         }
         .catalog-browse-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(4, 1fr);
           gap: 1.25rem;
           margin-top: -2.5rem;
           position: relative;
           z-index: 10;
         }
-        @media (max-width: 768px) {
+        @media (max-width: 600px) {
           .catalog-browse-grid {
             grid-template-columns: 1fr;
             margin-top: 0;
             padding-top: 1.5rem;
           }
         }
-        @media (min-width: 769px) and (max-width: 1024px) {
-          .catalog-browse-grid { grid-template-columns: repeat(3, 1fr); }
+        @media (min-width: 601px) and (max-width: 1024px) {
+          .catalog-browse-grid {
+            grid-template-columns: repeat(2, 1fr);
+            margin-top: 0;
+            padding-top: 1.5rem;
+          }
         }
         .browse-tile {
           display: flex;
@@ -230,7 +245,7 @@ function CatalogPage({ onOpenSearch }) {
       {/* ── Hero Search ─────────────────────────────────────────────────────── */}
       <div className="catalog-hero">
         <p style={{
-          color: 'rgba(0,163,224,0.9)',
+          color: 'rgba(0,209,255,0.9)',
           fontSize: '0.75rem',
           fontWeight: 800,
           textTransform: 'uppercase',
@@ -249,7 +264,7 @@ function CatalogPage({ onOpenSearch }) {
           letterSpacing: '-0.02em',
         }}>
           Protocols &amp; Peptides.<br />
-          <span style={{ color: 'rgba(0,163,224,0.85)' }}>One Catalog.</span>
+          <span style={{ color: 'rgba(0,209,255,0.85)' }}>One Catalog.</span>
         </h1>
         <p style={{
           color: 'rgba(255,255,255,0.55)',
@@ -319,8 +334,8 @@ function CatalogPage({ onOpenSearch }) {
           })}
         </div>
 
-        {/* ── Featured Protocols ───────────────────────────────────────────── */}
-        <div className="catalog-divider">
+        {/* Featured Protocols — temporarily hidden until optimized */}
+        {/* <div className="catalog-divider">
           <div className="catalog-divider-line" />
           <span className="catalog-divider-label">Featured Protocols</span>
           <div className="catalog-divider-line" />
@@ -339,7 +354,7 @@ function CatalogPage({ onOpenSearch }) {
           >
             View all protocols <ArrowRight size={15} />
           </Link>
-        </div>
+        </div> */}
 
         {/* ── Featured Peptides ────────────────────────────────────────────── */}
         <div className="catalog-divider">
@@ -354,7 +369,7 @@ function CatalogPage({ onOpenSearch }) {
 
         <div style={{ textAlign: 'center', marginTop: '1.5rem', paddingBottom: '4rem' }}>
           <Link
-            to="/products"
+            to="/collection/peptides"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
               color: '#7C3AED', fontWeight: 700, fontSize: '0.9rem',

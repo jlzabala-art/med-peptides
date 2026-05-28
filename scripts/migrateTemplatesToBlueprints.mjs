@@ -35,7 +35,7 @@ if (existsSync(localKeyPath)) {
 } else {
   initializeApp({
     credential: applicationDefault(),
-    projectId: 'med-peptides-app',
+    projectId: 'Med-Peptides-app',
   });
   console.log('🔑  Using Application Default Credentials (Firebase CLI / gcloud)');
 }

@@ -1,0 +1,472 @@
+{
+  "protocol_id": "cog_002",
+  "protocol_slug": "focus-resilience-structured",
+  "protocol_title": "Focus & Resilience Protocol",
+  "protocol_version": "v6.0",
+  "status": "approved",
+  "active": true,
+  "metadata": {
+    "primary_goal": "focus_resilience",
+    "primary_condition": "stress_cognition_emotional_regulation_support",
+    "complexity_level": "standard",
+    "visibility": "public",
+    "source_type": "curated_library",
+    "source_reference": "Med-Peptides_COGNITIVE_002_Protocol_2026",
+    "marker_alignment": {
+      "cognitive_dimension": {
+        "focus": {
+          "score": 85,
+          "note": "Cerebrolysin neuro-regeneration"
+        },
+        "memory": {
+          "score": 90,
+          "note": "Synaptic maintenance"
+        },
+        "neuro": {
+          "score": 95,
+          "note": "Primary neuro-protective focus"
+        }
+      }
+    },
+    "author": {
+      "name": "Med-Peptides Clinical Team",
+      "organization": "Med-Peptides",
+      "title": "Peptide Specialists"
+    },
+    "review": {
+      "review_status": "approved",
+      "last_reviewed_at": "2026-04-02"
+    },
+    "created_at": "2026-04-02T00:00:00.000Z",
+    "updated_at": "2026-04-02T00:00:00.000Z",
+    "evidence_basis": {
+      "core_active": "Selank",
+      "optional_support": "Semax",
+      "evidence_strength": "exploratory_translational",
+      "evidence_notes": [
+        "Designed for stress-linked focus inefficiency and resilience support.",
+        "Evidence base is more exploratory than for immune, reproductive, or metabolic protocols."
+      ]
+    }
+  },
+  "eligibility_rules": {
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ],
+    "supported_goals": [
+      "focus_resilience",
+      "stress_resilience",
+      "cognitive_flexibility",
+      "anxious_focus_support"
+    ],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "patient_demographic",
+      "age_group",
+      "start_date"
+    ],
+    "contraindications": [],
+    "relative_cautions": []
+  },
+  "variant_rules": {
+    "age_variants": {
+      "18-35": {
+        "default_duration_weeks": 8,
+        "monitoring_intensity": "standard"
+      },
+      "36-50": {
+        "default_duration_weeks": 12,
+        "monitoring_intensity": "moderate"
+      },
+      "51-65": {
+        "default_duration_weeks": 12,
+        "monitoring_intensity": "enhanced"
+      },
+      "65+": {
+        "default_duration_weeks": 16,
+        "monitoring_intensity": "enhanced"
+      }
+    },
+    "sex_variants": {
+      "female": {
+        "recommended_flags": [],
+        "special_notes": [
+          "Use conservative ramping if sensitivity profile is high."
+        ]
+      },
+      "male": {
+        "recommended_flags": [
+          "sleep_recovery_watch"
+        ],
+        "special_notes": [
+          "Reassess tolerance and response before escalation."
+        ]
+      }
+    },
+    "duration_variants": {
+      "8_weeks": {
+        "mode": "short",
+        "extra_monitoring": false
+      },
+      "12_weeks": {
+        "mode": "standard",
+        "extra_monitoring": false
+      },
+      "16_weeks": {
+        "mode": "extended",
+        "extra_monitoring": true
+      },
+      "20_weeks": {
+        "mode": "extended_plus",
+        "extra_monitoring": true
+      }
+    },
+    "tempo_variants": {
+      "conservative": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "up"
+      },
+      "standard": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "none"
+      },
+      "aggressive": {
+        "dose_step_interval_weeks": 2,
+        "monitoring_intensity_modifier": "up"
+      }
+    }
+  },
+  "phase_blueprints": [
+    {
+      "phase_key": "stabilization",
+      "phase_title": "Stabilization",
+      "default_start_week": 1,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "stress_modulation",
+        "anxious_focus_support",
+        "tolerance_building"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_selank",
+          "product_title": "Selank",
+          "route": "nasal",
+          "dose_logic": {
+            "dose_unit": "mcg",
+            "administration_frequency": "2x_daily",
+            "starting_intensity": "standard",
+            "administration_days_default": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "timing_hint": "evening_or_split_use",
+            "starting_weekly_dose": 3500,
+            "default_weekly_dose": 3500,
+            "dose_per_administration": 250
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_selank",
+            "route": "SC"
+          },
+          "dosage_form": "nasal spray"
+        },
+        {
+          "product_id": "prd_semax",
+          "product_title": "Semax",
+          "route": "nasal",
+          "dose_logic": {
+            "dose_unit": "mcg",
+            "administration_frequency": "daily",
+            "starting_intensity": "optional_low",
+            "administration_days_default": [
+              "Tuesday",
+              "Thursday"
+            ],
+            "activation_condition": "if_attention_deficit_pattern_present",
+            "starting_weekly_dose": 2100,
+            "default_weekly_dose": 2100,
+            "dose_per_administration": 300
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_semax",
+            "route": "SC"
+          },
+          "dosage_form": "nasal spray"
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 1,
+          "event_type": "baseline_review",
+          "title": "Baseline stress-resilience and attention review"
+        }
+      ]
+    },
+    {
+      "phase_key": "adaptive_focus",
+      "phase_title": "Adaptive Focus",
+      "default_start_week": 5,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "stress_tolerance",
+        "executive_focus",
+        "recovery_support"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_selank",
+          "product_title": "Selank",
+          "route": "nasal",
+          "dose_logic": {
+            "dose_unit": "mcg",
+            "administration_frequency": "2x_daily",
+            "intensity": "standard_plus",
+            "administration_days_default": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ],
+            "starting_weekly_dose": 3500,
+            "default_weekly_dose": 3500,
+            "dose_per_administration": 250
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_selank",
+            "route": "SC"
+          },
+          "dosage_form": "nasal spray"
+        },
+        {
+          "product_id": "prd_semax",
+          "product_title": "Semax",
+          "route": "nasal",
+          "dose_logic": {
+            "dose_unit": "mcg",
+            "administration_frequency": "daily",
+            "intensity": "conditional",
+            "administration_days_default": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "activation_condition": "if_focus_activation_needed",
+            "starting_weekly_dose": 2100,
+            "default_weekly_dose": 2100,
+            "dose_per_administration": 300
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_semax",
+            "route": "SC"
+          },
+          "dosage_form": "nasal spray"
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 6,
+          "event_type": "checkpoint",
+          "title": "Stress response and cognitive control reassessment"
+        }
+      ]
+    },
+    {
+      "phase_key": "maintenance",
+      "phase_title": "Maintenance",
+      "default_start_week": 9,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "resilience_maintenance",
+        "relapse_prevention"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_selank",
+          "product_title": "Selank",
+          "route": "nasal",
+          "dose_logic": {
+            "dose_unit": "mcg",
+            "administration_frequency": "2x_daily",
+            "intensity": "maintenance",
+            "administration_days_default": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "starting_weekly_dose": 3500,
+            "default_weekly_dose": 3500,
+            "dose_per_administration": 250
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_selank",
+            "route": "SC"
+          },
+          "dosage_form": "nasal spray"
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 12,
+          "event_type": "outcome_review",
+          "title": "Final resilience and focus review"
+        }
+      ]
+    }
+  ],
+  "monitoring_plan": {
+    "baseline_required": [
+      "stress_score",
+      "sleep_quality",
+      "focus_baseline",
+      "anxiety_pattern"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "week": 4,
+        "type": "stability_review",
+        "measures": [
+          "stress",
+          "sleep",
+          "focus"
+        ],
+        "purpose": "Assess early stabilization"
+      },
+      {
+        "week": 8,
+        "type": "resilience_reassessment",
+        "measures": [
+          "recovery_from_stress",
+          "focus_under_load"
+        ],
+        "purpose": "Assess resilience progression"
+      },
+      {
+        "week": 12,
+        "type": "final_outcome_review",
+        "measures": [
+          "overall_resilience",
+          "sleep",
+          "focus"
+        ],
+        "purpose": "End-of-cycle evaluation"
+      }
+    ],
+    "labs": []
+  },
+  "expected_outcomes": {
+    "qualitative": [
+      "better stress tolerance",
+      "improved calm focus",
+      "reduced cognitive volatility"
+    ],
+    "quantitative_ranges": {
+      "stress_resilience_improvement_expected": "mild_to_moderate",
+      "focus_under_load_expected": "mild_to_moderate"
+    }
+  },
+  "generator_rules": {
+    "selection_priority": [
+      "goal_match",
+      "stress_pattern",
+      "sleep_profile",
+      "age_variant_match"
+    ],
+    "profile_notes": [
+      "Prefer conservative tempo if insomnia or high reactivity is present."
+    ]
+  },
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "patient_demographic": null,
+      "age_group": null,
+      "duration_weeks": null,
+      "start_date": null,
+      "tempo_preference": "standard"
+    },
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "resolved_monitoring": [],
+    "resolved_costs": {},
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    }
+  },
+  "legacy_compatibility": {
+    "enabled": true,
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ],
+    "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode."
+  },
+  "recommended_supplements": [
+    {
+      "name": "Rhodiola Rosea",
+      "dosage": "300mg",
+      "rationale": "Adaptogen reducing mental fatigue and stress resilience",
+      "frequency": "Daily",
+      "weekly_dose": "2100mg"
+    },
+    {
+      "name": "Lion's Mane Mushroom",
+      "dosage": "500mg",
+      "rationale": "NGF stimulation for neurogenesis and focus",
+      "frequency": "Daily",
+      "weekly_dose": "3500mg"
+    },
+    {
+      "name": "Ginkgo Biloba",
+      "dosage": "120mg",
+      "rationale": "Cerebral blood flow enhancement",
+      "frequency": "Daily",
+      "weekly_dose": "840mg"
+    }
+  ],
+  "mechanism_of_action": [
+    "Targeted receptor modulation and cellular signaling optimization.",
+    "Restoration of physiological homeostasis via peptide-mediated pathways."
+  ],
+  "safety_profile": {
+    "adverse_events": [
+      "Mild injection site reactions (redness, transient pain).",
+      "Potential for mild, transient nausea during initial dose titration."
+    ],
+    "drug_interactions": [
+      "Monitor concurrent use of medications that affect blood glucose levels.",
+      "No severe drug-drug interactions documented, but caution advised with polypharmacy."
+    ],
+    "contraindications": [
+      "Pregnancy and lactation.",
+      "Active malignancies or history of specific hormone-sensitive cancers.",
+      "Known hypersensitivity to any protocol components."
+    ]
+  }
+}

@@ -1,0 +1,41 @@
+[
+  {
+    "pmid": "36870668",
+    "title": "Critical Aspects of pH Measurement for Bacteriostatic Water for Injection.",
+    "authors": [
+      "Hu J",
+      "Kyad A",
+      "Burke K",
+      "Sakiyama L",
+      "Moraes De Souza C",
+      "Pope S",
+      "Blue L",
+      "Cohen D",
+      "Semin D",
+      "Goudar C"
+    ],
+    "journal": "Journal of pharmaceutical sciences",
+    "pubdate": "2023 Aug",
+    "doi": "10.1016/j.xphs.2023.02.023",
+    "abstract": "Bacteriostatic water for injection (bWFI) is a common diluent for parenteral pharmaceutical products. bWFI is sterile water for injection containing one or more suitable antimicrobial agents to suppress the growth of microbial contaminants. United States Pharmacopeia (USP) monograph describes bWFI with pH ranging from pH 4.5 to 7.0. Lacking buffering reagents, bWFI has very low ionic strength, no buffering capacity and is prone to sample contamination. These characteristics pose a challenge for accurate bWFI pH measurements which are characterized by long response times and noisy signals, resulting in inconsistent results. The challenging nature of bWFI pH measurement, however, is not fully recognized as pH is generally considered a routine analytical technique. Even with the addition of KCl to increase ionic strength as recommended by the USP bWFI monograph, variability in pH results is still observed without careful consideration of other critical measurement factors. To bring awareness to the challenges associated with bWFI pH measurement, we present a comprehensive characterization of the bWFI pH measurement process that includes an evaluation of probe suitability, measurement stabilization time, and pH meter settings. While these factors may be non-critical and sometimes overlooked when developing pH methods for buffered samples, they can have a significant impact on bWFI pH measurement. We present recommendations that can help reliable bWFI pH measurements for routine execution in a controlled environment. These recommendations also apply to other pharmaceutical solutions or water samples with low ionic strength."
+  },
+  {
+    "pmid": "39561832",
+    "title": "Water-in-oil-in-water (W/O/W) emulsions with antioxidant and bacteriostatic capabilities: A preliminary exploration of food preservation films.",
+    "authors": [
+      "Hu Y",
+      "Xu L",
+      "Sun H",
+      "Wu W",
+      "Wang Y",
+      "Lu L",
+      "Zeng T",
+      "Sheng L",
+      "Cai Z"
+    ],
+    "journal": "International journal of biological macromolecules",
+    "pubdate": "2024 Dec",
+    "doi": "10.1016/j.ijbiomac.2024.137657",
+    "abstract": "The development of stable water-in-oil-in-water (W/O/W) emulsions for edible preservation coatings and films, utilizing their properties, deserves scientific attention. In this study, oregano essential oil and D\u2011sodium erythorbate were simultaneously loaded into W/O/W emulsions, and the homogenization conditions of the W/O/W emulsions were optimized. The structure and interactions of gum Arabic (GA) and whey protein isolate (WPI) as the outer phase were analyzed. Stable W1/O/W2 emulsions with excellent antimicrobial and antioxidant activities could be produced under the conditions of GA: WPI at 1:1 and W2: W1/O at 5:5. The diphenyl-1-picrylhydrazyl radical (DPPH) and 2,2'-azinobis-(3-ethylbenzenthiazoline-6-sulphonic acid) (ABTS) radical scavenging rates were 86.35\u00a0% and 89.35\u00a0%, and the inhibition zone diameters for S. aureus and E. coli were 14.03\u00a0\u00b1\u00a00.42\u00a0mm and 14.17\u00a0\u00b1\u00a00.70\u00a0mm, respectively. Finally, the W1/O/W2 emulsions were successfully applied to prepare chitosan-based films. This study has the potential to promote the application of W/O/W emulsions in food preservation, emphasizing the need for advancements for real-world adaptability."
+  }
+]

@@ -2,7 +2,7 @@
  * ============================================================
  *  Antigravity · Universal Pharma-Grade Nomenclature Script
  *  Covers ALL 16 protocols across all therapeutic categories
- *  Firebase Project : med-peptides-app | Collection: protocols
+ *  Firebase Project : Med-Peptides-app | Collection: protocols
  * ============================================================
  *
  * Naming convention (mechanism-first, INN-compliant):
@@ -21,7 +21,7 @@
 import { initializeApp, getApps, applicationDefault } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 
-const PROJECT_ID = "med-peptides-app";
+const PROJECT_ID = "Med-Peptides-app";
 const COLLECTION  = "protocol_templates";
 const DRY_RUN     = process.env.DRY_RUN !== "false";
 

@@ -8,8 +8,8 @@
     "total_vials_required": 4
   },
   "number_of_phases": 2,
-  "protocol_author_name": "ReGen PEPT Clinical Team",
-  "protocol_author_organization": "ReGen PEPT",
+  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_organization": "Med-Peptides",
   "protocol_author_title": "Peptide Specialists",
   "protocol_duration_weeks": 12,
   "protocol_is_curated": true,
@@ -97,7 +97,7 @@
   "physician_supervision_required": false,
   "dosing_enrichment": {
     "cycling_recommendation": "12-week collagen activation cycle followed by 4-week reassessment. Maintenance may continue 3x/week if skin tolerance is good.",
-    "maintenance_dose": "GHK-Cu topical or protocol-defined route 3x/week during maintenance. If injectable/localized use is selected, it should remain clinician-supervised and cyclic.",
+    "maintenance_dose": "GHK-Cu 50 mg subcutaneous 3x/week (Mon/Wed/Fri) during maintenance phase (weeks 7–12). Loading phase (weeks 1–6): GHK-Cu 50 mg SC daily. Subcutaneous route delivers systemic GHK-Cu for dermal repair; clinician supervision required for injection administration.",
     "timing_optimization": "Evening use is preferred for topical GHK-Cu. Avoid layering with strong acids, high-strength retinoids, or exfoliating agents in the same application window if irritation occurs.",
     "titration_note": "Start daily for weeks 1-2 if tolerated, continue loading through week 6, then reduce to 3x/week maintenance in weeks 7-12."
   },
@@ -180,16 +180,16 @@
         {
           "product_id": "prd_ghk_cu",
           "product_title": "Ghk Cu",
-          "route": "protocol_defined",
+          "route": "subcutaneous",
           "dose_logic": {
-            "dose_unit": "protocol_defined",
+            "dose_unit": "mg",
             "administration_frequency": "daily",
-            "selected_strength": "50mg"
+            "starting_weekly_dose": 50
           },
           "variantRef": {
             "type": "resolved",
             "productId": "prd_ghk_cu",
-            "route": "protocol_defined"
+            "route": "subcutaneous"
           }
         }
       ],
@@ -211,16 +211,16 @@
         {
           "product_id": "prd_ghk_cu",
           "product_title": "Ghk Cu",
-          "route": "protocol_defined",
+          "route": "subcutaneous",
           "dose_logic": {
-            "dose_unit": "protocol_defined",
+            "dose_unit": "mg",
             "administration_frequency": "3x_week",
-            "selected_strength": "50mg"
+            "starting_weekly_dose": 50
           },
           "variantRef": {
             "type": "resolved",
             "productId": "prd_ghk_cu",
-            "route": "protocol_defined"
+            "route": "subcutaneous"
           }
         }
       ],
@@ -369,8 +369,8 @@
     "scientificName": "GHK-Cu Copper-Peptide Collagen Induction & Skin Rejuvenation Protocol",
     "description": "12-week skin rejuvenation protocol using GHK-Cu copper tripeptide to stimulate collagen and elastin synthesis, upregulate antioxidant gene expression, and reverse dermal aging markers.",
     "author": {
-      "name": "ReGen PEPT Clinical Team",
-      "organization": "ReGen PEPT",
+      "name": "Med-Peptides Clinical Team",
+      "organization": "Med-Peptides",
       "title": "Peptide Specialists"
     },
     "review": {
@@ -405,5 +405,8 @@
       }
     }
   },
-  "_syncedAt": "2026-04-26T12:46:35.020Z"
+  "_syncedAt": "2026-04-26T12:46:35.020Z",
+  "recommended_tests": [
+    "fagron-acnetest"
+  ]
 }

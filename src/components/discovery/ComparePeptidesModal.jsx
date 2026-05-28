@@ -1,3 +1,4 @@
+ 
 import React, { useEffect } from 'react';
 import { X, ShieldCheck } from 'lucide-react';
 import ComparePeptidesBlock from './ComparePeptidesBlock';

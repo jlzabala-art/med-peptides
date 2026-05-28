@@ -1,9 +1,12 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo } from 'react';
-import { ArrowLeft, Info, FlaskConical, Beaker, Zap, Activity, HelpCircle, BookOpen, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Info, FlaskConical, Beaker, Zap, Activity, HelpCircle, BookOpen, ChevronRight, Bot } from 'lucide-react';
 import MobileProductCard from '../snippets/MobileProductCard';
 import FAQModal from '../components/discovery/FAQModal';
 import PubMedPreviewPanel from '../components/discovery/PubMedPreviewPanel';
+import Breadcrumbs from '../components/common/Breadcrumbs';
 import { getFAQForProduct, searchFAQ } from '../utils/discoveryEngine';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 export default function CategoryDetailView({ 
   category, 
@@ -22,6 +25,40 @@ export default function CategoryDetailView({
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [category]);
+
+  const categorySlug = (category || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  
+  const structuredData = useMemo(() => ({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://Med-Peptides-app-27a3a.web.app/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Research Catalog",
+        "item": "https://Med-Peptides-app-27a3a.web.app/collection/peptides"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": category,
+        "item": `https://Med-Peptides-app-27a3a.web.app/collection/${categorySlug}`
+      }
+    ]
+  }), [category, categorySlug]);
+
+  usePageMeta({
+    title: `${category} | Research Catalog`,
+    description: `Explore our collection of high-purity ${category}. Verified analytical compounds for specialized laboratory protocols and research workflows.`,
+    path: `/collection/${categorySlug}`,
+    structuredData
+  });
 
   const handleOpenFAQ = (product) => {
     setActiveFAQProduct(product);
@@ -91,7 +128,15 @@ export default function CategoryDetailView({
   if (!category) return null;
 
   return (
-    <div className="template-root" style={{ padding: '1.5rem 1.5rem 4rem 1.5rem', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}>
+    <div className="template-root" style={{ padding: '0 1.5rem 4rem 1.5rem', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}>
+      <Breadcrumbs 
+        items={[
+          { label: 'Home', path: '/' },
+          { label: 'Catalog', path: '/collection/peptides' },
+          { label: category }
+        ]} 
+        style={{ marginBottom: '2rem' }}
+      />
 
       <div style={{ marginBottom: '4rem', textAlign: 'center' }}>
         <div style={{ 
@@ -130,7 +175,7 @@ export default function CategoryDetailView({
               <tr>
                 <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Research Peptide</th>
                 <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem', textTransform: 'uppercase', width: '30%' }}>Description</th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Investigational Strengths</th>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Research Strengths</th>
                 <th style={{ padding: '1rem 1.5rem', textAlign: 'center', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Scientific Tools</th>
               </tr>
             </thead>
@@ -159,10 +204,45 @@ export default function CategoryDetailView({
                   <td style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
                       <button 
-                        onClick={() => handleOpenFAQ(product)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.85rem', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'white', color: 'var(--text-main)', fontWeight: 600, cursor: 'pointer' }}
+                        onClick={() => {
+                          try {
+                            localStorage.removeItem('clinical_ai_messages_v2');
+                            sessionStorage.removeItem('clinical_ai_messages');
+                          } catch {}
+                          window.dispatchEvent(new CustomEvent('open-clinical-ai', {
+                            detail: {
+                              action: 'ask_about_entity',
+                              entityName: product.name || '',
+                              section: 'CategoryDetailView.Row',
+                              autoSend: true
+                            }
+                          }));
+                        }}
+                        title="Ask ClinicAI"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                          padding: '0.5rem 0.85rem',
+                          fontSize: '0.8rem',
+                          borderRadius: '8px',
+                          border: '1px solid rgba(0, 163, 224, 0.2)',
+                          background: 'rgba(0, 163, 224, 0.05)',
+                          color: 'var(--primary)',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.background = 'rgba(0, 163, 224, 0.12)';
+                          e.currentTarget.style.borderColor = 'rgba(0, 163, 224, 0.4)';
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.background = 'rgba(0, 163, 224, 0.05)';
+                          e.currentTarget.style.borderColor = 'rgba(0, 163, 224, 0.2)';
+                        }}
                       >
-                        <HelpCircle size={14} /> FAQ
+                        <Bot size={14} /> ClinicAI
                       </button>
                       <button 
                         onClick={() => handleOpenPubMed(product)}
@@ -207,7 +287,7 @@ export default function CategoryDetailView({
       <div style={{ 
         marginTop: '4rem', 
         padding: '2rem', 
-        backgroundColor: '#f8fafc', 
+        backgroundColor: 'var(--color-bg-app)', 
         borderRadius: 'var(--radius-lg)', 
         border: '1px solid var(--border)',
         display: 'flex',
@@ -233,17 +313,7 @@ export default function CategoryDetailView({
         </div>
       </div>
 
-      <FAQModal 
-          isOpen={showFAQModal}
-          onClose={() => setShowFAQModal(false)}
-          faqItems={faqItems}
-          product={activeFAQProduct}
-          relatedProducts={products}
-          onProductClick={(p) => {
-            setShowFAQModal(false);
-            setTimeout(() => onSelectProduct(p.name), 50);
-          }}
-      />
+      {/* FAQModal removed per user request (ClinicAI handles FAQs) */}
 
       <PubMedPreviewPanel 
         isOpen={showPubMedPanel}

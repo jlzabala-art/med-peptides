@@ -1,8 +1,9 @@
+/* eslint-disable no-unused-vars */
 import React, { Suspense, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Header from '../layout/Header';
 import Footer from '../layout/Footer';
-import BottomNav from '../layout/BottomNav';
+
 import BackToTop from '../layout/BackToTop';
 
 export default function ProfessionalLayout(props) {
@@ -38,7 +39,7 @@ export default function ProfessionalLayout(props) {
 
       <main style={{
         flex: 1,
-        paddingBottom: 'calc(90px + env(safe-area-inset-bottom))'
+        paddingBottom: 'env(safe-area-inset-bottom)'
       }}>
         <Suspense fallback={<ProLoadingState />}>
           {/* Usamos el context de Outlet para pasar funciones de utilidad a las páginas hijas */}
@@ -49,13 +50,7 @@ export default function ProfessionalLayout(props) {
       {/* Footer simplificado para profesionales (menos marketing, más soporte) */}
       <Footer onNavigate={props.onSelectCategory} isProfessional={true} />
 
-      <BottomNav
-        onGoHome={props.onGoHome}
-        onOpenSearch={props.onOpenSearch}
-        onOpenCart={props.onOpenCart}
-        onOpenProducts={() => navigate('/catalog')}
-        cartCount={props.cartCount}
-      />
+
 
       <BackToTop />
     </div>
@@ -77,7 +72,7 @@ const ProLoadingState = () => (
       <p style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--primary)', letterSpacing: '0.05em' }}>
         SECURE DATA SYNC
       </p>
-      <p style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Accessing professional catalog...</p>
+      <p style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)' }}>Accessing professional catalog...</p>
     </div>
   </div>
 );

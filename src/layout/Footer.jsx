@@ -1,115 +1,261 @@
-import { memo } from 'react';
-import { Lock } from 'lucide-react';
+ 
+import { memo, useState } from 'react';
+import { Lock, Shield, FileText, Scale, ExternalLink, AlertTriangle, X, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTenant } from '../context/TenantContext';
 
-// ── Static style objects (defined once, never recreated on render) ──────────
 const S = {
   footer: {
-    borderTop: '0.5px solid rgba(148, 163, 184, 0.35)',
-    background: '#ffffff',
-    padding: '3rem 2rem',
+    borderTop: '1px solid var(--border-light)',
+    background: 'var(--surface)',
+    padding: '4rem 2rem 3rem',
+    position: 'relative',
+    zIndex: 50,
   },
-  inner: {
+  container: {
     maxWidth: '1200px',
     margin: '0 auto',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    gap: '1rem',
   },
-  copyright: {
+  top: {
+    display: 'grid',
+    gridTemplateColumns: '1.5fr 1fr 1fr',
+    gap: '4rem',
+    marginBottom: '4rem',
+  },
+  branding: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.25rem',
+  },
+  columnTitle: {
     fontSize: '0.75rem',
+    fontWeight: 800,
+    textTransform: 'uppercase',
+    letterSpacing: '0.1em',
+    color: 'var(--primary)',
+    marginBottom: '1.5rem',
+  },
+  linkList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.85rem',
+  },
+  link: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '0.85rem',
     color: 'var(--text-muted)',
     fontWeight: 500,
-    letterSpacing: '0.02em',
+    padding: 0,
+    textAlign: 'left',
+    transition: 'var(--transition-smooth)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+  },
+  bottom: {
+    paddingTop: '2rem',
+    borderTop: '1px solid var(--border-light)',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '1.5rem',
+  },
+  copyright: {
+    fontSize: '0.8rem',
+    color: 'var(--text-light)',
+    fontWeight: 500,
   },
   badge: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '0.4rem',
-    fontSize: '0.68rem',
-    color: 'var(--text-muted)',
-    background: 'rgba(0, 54, 102, 0.06)',
-    border: '1px solid rgba(0, 54, 102, 0.14)',
+    gap: '0.5rem',
+    fontSize: '0.7rem',
+    color: 'var(--secondary)',
+    background: 'var(--secondary-light)',
+    border: '1px solid rgba(0, 150, 204, 0.15)',
     borderRadius: '99px',
-    padding: '0.38rem 0.9rem',
-    letterSpacing: '0.03em',
-    fontWeight: 600,
-  },
-  linkBase: {
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '0.65rem',
-    color: 'var(--text-muted)',
-    fontWeight: 600,
-    padding: 0,
+    padding: '0.4rem 1rem',
+    fontWeight: 700,
     textTransform: 'uppercase',
-    letterSpacing: '0.12em',
-    transition: 'opacity 0.3s, transform 0.3s',
-    display: 'inline-block',
-    opacity: 1,
-    transform: 'translateY(0)',
+    letterSpacing: '0.04em',
   },
+  disclaimerBox: {
+    background: 'rgba(239, 68, 68, 0.05)',
+    border: '1px dashed rgba(239, 68, 68, 0.2)',
+    borderRadius: '12px',
+    padding: '1rem',
+    marginTop: '1.5rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+  }
 };
 
-// ── Responsive overrides injected once via <style> ──────────────────────────
 const mobileCSS = `
-  @media (max-width: 640px) {
-    .footer-inner {
-      flex-direction: column !important;
+  @media (max-width: 768px) {
+    .footer-top {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 2.5rem 1rem !important;
+    }
+    .footer-branding {
+      grid-column: span 2 !important;
       align-items: center !important;
       text-align: center !important;
     }
-    .footer-badge  { order: -1; margin-bottom: 0.25rem; }
-    .footer-links  { gap: 1.5rem !important; }
+    .footer-branding p {
+      max-width: 100% !important;
+      margin: 0 auto !important;
+    }
+    .footer-badges-container {
+      justify-content: center !important;
+    }
+    .footer-column {
+      align-items: center !important;
+      text-align: center !important;
+    }
+    .footer-column h4 {
+      margin-bottom: 1rem !important;
+      font-size: 0.72rem !important;
+    }
+    .footer-link {
+      justify-content: center !important;
+      font-size: 0.82rem !important;
+      gap: 0.4rem !important;
+    }
+    .footer-bottom {
+      flex-direction: column !important;
+      text-align: center !important;
+      gap: 0.75rem !important;
+      padding-top: 1.5rem !important;
+    }
   }
 `;
 
 function Footer() {
   const navigate = useNavigate();
+  const { tenant } = useTenant();
   const year = new Date().getFullYear();
+  const [showQuickDisclaimer, setShowQuickDisclaimer] = useState(false);
 
-  const handleLinkHover = (e, entering) => {
-    e.currentTarget.style.opacity  = entering ? '0.5' : '1';
-    e.currentTarget.style.transform = entering ? 'translateY(-1px)' : 'translateY(0)';
-  };
+  const tenantName = tenant?.name || 'Med-Peptides';
+
+  const legalLinks = [
+    { label: 'Privacy Policy', path: '/privacy', icon: <Shield size={14} /> },
+    { label: 'Terms of Use', path: '/terms', icon: <Scale size={14} /> },
+    { label: 'Legal Conditions', path: '/legal', icon: <FileText size={14} /> },
+  ];
+
+  const institutionalLinks = [
+    { label: 'Clinical Academy', path: '/academy', icon: <ExternalLink size={14} /> },
+    { label: 'Science Blog', path: '/blog', icon: <ExternalLink size={14} /> },
+    { label: 'Reconstitution Guide', path: '/reconstitution-guide', icon: <ExternalLink size={14} /> },
+    { label: 'Research Protocols', path: '/what-are-protocols', icon: <ExternalLink size={14} /> },
+  ];
 
   return (
     <>
-      {/* Inject mobile rules exactly once */}
       <style>{mobileCSS}</style>
-
       <footer style={S.footer}>
-        <div className="footer-inner" style={S.inner}>
+        <div style={S.container}>
+          {/* Main Footer Grid */}
+          <div className="footer-top" style={S.top}>
+            {/* Branding & RUO */}
+            <div className="footer-branding" style={S.branding}>
+              {tenant?.branding?.logoUrl ? (
+                <img src={tenant.branding.logoUrl} alt={tenantName} style={{ height: '32px', objectFit: 'contain', alignSelf: 'flex-start' }} />
+              ) : (
+                <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--primary)', fontWeight: 900, fontSize: '1.25rem', letterSpacing: '-0.02em' }}>
+                  {tenantName}
+                </h3>
+              )}
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: '320px' }}>
+                Global distribution network for advanced research compounds and validated clinical protocols. Ensuring data integrity since 2018.
+              </p>
+              
+              <div className="footer-badges-container" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <span style={S.badge}>
+                  <Lock size={12} strokeWidth={2.5} />
+                  Institutional Grade
+                </span>
+                <button 
+                  onClick={() => setShowQuickDisclaimer(!showQuickDisclaimer)}
+                  style={{ ...S.badge, background: 'rgba(239, 68, 68, 0.08)', color: 'var(--color-danger)', borderColor: 'rgba(239, 68, 68, 0.2)', cursor: 'pointer' }}
+                >
+                  <AlertTriangle size={12} strokeWidth={2.5} />
+                  Medical Disclaimer
+                </button>
+              </div>
 
-          {/* Copyright */}
-          <span style={S.copyright}>
-            © {year} ReGen PEPT. All rights reserved.
-          </span>
+              {showQuickDisclaimer && (
+                <div style={S.disclaimerBox} className="anim-fade-in">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--color-danger)', textTransform: 'uppercase' }}>Crucial Research Notice</span>
+                    <button onClick={() => setShowQuickDisclaimer(false)} style={{ background: 'none', border: 'none', color: 'var(--color-danger)', cursor: 'pointer', padding: 0 }}><X size={14} /></button>
+                  </div>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>
+                    All peptide compounds are strictly for <strong>laboratory research use only</strong>. Dietary supplements are excluded from research-only restrictions.
+                  </p>
+                  <button 
+                    onClick={() => { navigate('/legal'); window.scrollTo(0,0); }}
+                    style={{ background: 'none', border: 'none', padding: 0, color: 'var(--primary)', fontSize: '0.7rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', cursor: 'pointer' }}
+                  >
+                    View Full Compliance Protocol <ChevronRight size={10} />
+                  </button>
+                </div>
+              )}
+            </div>
 
-          {/* RUO Security Badge */}
-          <span className="footer-badge" style={S.badge}>
-            <Lock size={11} strokeWidth={1.8} />
-            Research Use Only — Not for human consumption
-          </span>
+            {/* Legal Hub */}
+            <div className="footer-column" style={{ display: 'flex', flexDirection: 'column' }}>
+              <h4 style={S.columnTitle}>Legal Hub</h4>
+              <div style={S.linkList}>
+                {legalLinks.map((link) => (
+                  <button
+                    key={link.label}
+                    className="footer-link"
+                    onClick={() => { navigate(link.path); window.scrollTo(0,0); }}
+                    style={S.link}
+                  >
+                    <span style={{ color: 'var(--secondary)', opacity: 0.8 }}>{link.icon}</span>
+                    {link.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-          {/* Legal links */}
-          <div className="footer-links" style={{ display: 'flex', gap: '1.5rem' }}>
-            {[['Terms', '/legal'], ['Privacy', '/legal']].map(([label, path]) => (
-              <button
-                key={label}
-                onClick={() => navigate(path)}
-                style={S.linkBase}
-                onMouseEnter={e => handleLinkHover(e, true)}
-                onMouseLeave={e => handleLinkHover(e, false)}
-              >
-                {label}
-              </button>
-            ))}
+            {/* Institutional */}
+            <div className="footer-column" style={{ display: 'flex', flexDirection: 'column' }}>
+              <h4 style={S.columnTitle}>Institutional</h4>
+              <div style={S.linkList}>
+                {institutionalLinks.map((link) => (
+                  <button
+                    key={link.label}
+                    className="footer-link"
+                    onClick={() => { navigate(link.path); window.scrollTo(0,0); }}
+                    style={S.link}
+                  >
+                    <span style={{ color: 'var(--secondary)', opacity: 0.8 }}>{link.icon}</span>
+                    {link.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
+          {/* Bottom Bar */}
+          <div className="footer-bottom" style={S.bottom}>
+            <span style={S.copyright}>
+              © {year} {tenantName} International Distribution. All rights reserved.
+            </span>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-light)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Peptides: RUO — Not for human consumption
+              </span>
+            </div>
+          </div>
         </div>
       </footer>
     </>

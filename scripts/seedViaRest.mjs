@@ -12,7 +12,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { homedir } from 'os';
 
-const PROJECT_ID = 'med-peptides-app';
+const PROJECT_ID = 'Med-Peptides-app';
 const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 const DRY_RUN = process.argv.includes('--dry-run');
 

@@ -1,13 +1,15 @@
-import React, { memo, useEffect, useCallback } from 'react';
+ 
+import React, { memo, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Contact from './Contact';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 /**
  * ContactTemplate - Antigravity Version
- * Refactorizado para alto rendimiento y UX móvil.
- * - Memoizado para evitar re-renders desde el estado global.
- * - Gestión de scroll automática al montar.
- * - Navegación segura con fallback.
+ * Refactored for high performance and mobile UX.
+ * - Memoized to prevent re-renders from global state.
+ * - Automatic scroll management on mount.
+ * - Secure navigation with fallback.
  */
 const ContactTemplate = memo(({
   cart,
@@ -19,18 +21,54 @@ const ContactTemplate = memo(({
 }) => {
   const navigate = useNavigate();
 
-  // FASE 1: Mobile UX - Asegurar posición de lectura inicial
+  const structuredData = useMemo(() => ({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://Med-Peptides-app-27a3a.web.app/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Contact Us",
+            "item": "https://Med-Peptides-app-27a3a.web.app/contact"
+          }
+        ]
+      },
+      {
+        "@type": "ContactPage",
+        "name": "Contact Med-Peptides",
+        "description": "Contact our team for research support, institutional inquiries, and order assistance.",
+        "url": "https://Med-Peptides-app-27a3a.web.app/contact"
+      }
+    ]
+  }), []);
+
+  usePageMeta({
+    title: 'Contact Us | Research Support & Inquiries | Med-Peptides',
+    description: 'Get in touch with Med-Peptides for technical support, institutional inquiries, or order assistance regarding our research-grade peptides.',
+    canonicalUrl: 'https://Med-Peptides-app-27a3a.web.app/contact',
+    structuredData
+  });
+
+  // PHASE 1: Mobile UX - Ensure initial reading position
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // FASE 2: Navegación Segura
-  // Evita que el usuario quede atrapado si no hay historial previo en el móvil
+  // PHASE 2: Secure Navigation
+  // Prevents the user from getting trapped if there is no previous history on mobile
   const handleBack = useCallback(() => {
     if (window.history.length > 1) {
       navigate(-1);
     } else {
-      navigate('/catalog'); // Fallback seguro a la tienda
+      navigate('/catalog'); // Safe fallback to catalog
     }
   }, [navigate]);
 
@@ -47,7 +85,7 @@ const ContactTemplate = memo(({
   );
 });
 
-// Asignar display name para debugging (buenas prácticas de React.memo)
+// Assign display name for debugging (React.memo best practices)
 ContactTemplate.displayName = 'ContactTemplate';
 
 export default ContactTemplate;

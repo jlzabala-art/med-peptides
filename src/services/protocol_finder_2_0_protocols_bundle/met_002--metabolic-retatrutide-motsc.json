@@ -1,0 +1,653 @@
+{
+  "id": "met_002",
+  "protocol_duration_weeks": 12,
+  "protocol_author_name": "Med-Peptides Clinical Team",
+  "bundleVersion": "2.0",
+  "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
+  "protocol_is_physician_authored": false,
+  "seeded_at": "2026-04-25T06:10:36.133Z",
+  "protocol_source_version": "v5.0",
+  "dosing_enrichment": {
+    "titration_note": "Begin conservatively to minimize GI intolerance. Use phase 1 as tolerability priming, phase 2 for escalation, and phase 3 for metabolic maintenance. Do not escalate if significant nausea, vomiting, dehydration, gallbladder symptoms, or hypoglycemia occur.",
+    "cycling_recommendation": "12-week active metabolic intensification protocol followed by reassessment. Continuation or escalation beyond 12 weeks should depend on tolerability, glycemic response, weight trajectory, and physician review.",
+    "maintenance_dose": "Retatrutide maintenance should be individualized after escalation. MOTS-c may be continued at 5-10 mg 2x/week as metabolic support if tolerated. SS-31 may be reserved for mitochondrial support in the final phase.",
+    "timing_optimization": "Retatrutide should be administered once weekly on the same day. MOTS-c is best administered in a fasted morning or pre-exercise window. SS-31 should be administered consistently, preferably morning or early afternoon."
+  },
+  "complexity_level": "advanced",
+  "eligibility_rules": {
+    "contraindications": [
+      "MEN2_syndrome",
+      "medullary_thyroid_carcinoma_history",
+      "active_pancreatitis",
+      "pregnancy",
+      "severe_gastrointestinal_disease"
+    ],
+    "supported_goals": [
+      "metabolic_health",
+      "obesity",
+      "insulin_resistance",
+      "body_composition"
+    ],
+    "relative_cautions": [
+      "gallbladder_disease",
+      "rapid_weight_loss_history",
+      "advanced_renal_impairment",
+      "uncontrolled_diabetes",
+      "history_of_eating_disorder"
+    ],
+    "required_patient_inputs": [
+      "baseline_weight",
+      "height",
+      "BMI",
+      "metabolic_status",
+      "HbA1c",
+      "medication_review",
+      "age_group",
+      "start_date"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "tempo_preference": "standard",
+      "age_group": null,
+      "patient_demographic": null,
+      "duration_weeks": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "protocol_author_notes": "Official curated protocol for general clinical use.",
+  "_schemaVersion": "antigravity_v2",
+  "protocol_author_organization": "Med-Peptides",
+  "protocol_last_reviewed_at": "2026-03-29",
+  "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
+  "protocol_source_reference": "internal_guide",
+  "protocol_slug": "metabolic-retatrutide-motsc-12w",
+  "phases": [
+    {
+      "drugs_used": [
+        {
+          "phases": "daily",
+          "faq_ref": "retatrutide_faq",
+          "productId": "Retatrutide-10mg-vial",
+          "product_slug": "retatrutide",
+          "pubmed_ref": "retatrutide_pubmed",
+          "route": "subcutaneous",
+          "selected_strength": "2mg",
+          "vials_required_for_phase": 2,
+          "weekly_dose": "1mg",
+          "dosing_frequency": "daily"
+        },
+        {
+          "phases": "daily",
+          "dosing_frequency": "3x_week",
+          "faq_ref": "motsc_faq",
+          "productId": "MOTS-C-10mg-vial",
+          "product_slug": "mots-c",
+          "pubmed_ref": "motsc_pubmed",
+          "route": "subcutaneous",
+          "selected_strength": "5mg",
+          "vials_required_for_phase": 12,
+          "weekly_dose": "TODO: specify"
+        }
+      ],
+      "end_week": 4,
+      "phase_number": 1,
+      "phase_title": "Metabolic Primer",
+      "start_week": 1
+    },
+    {
+      "drugs_used": [
+        {
+          "phases": "daily",
+          "productId": "Retatrutide-10mg-vial",
+          "product_slug": "retatrutide",
+          "selected_strength": "5mg",
+          "vials_required_for_phase": 2,
+          "weekly_dose": "2mg",
+          "dosing_frequency": "daily"
+        },
+        {
+          "phases": "daily",
+          "dosing_frequency": "2x_week",
+          "productId": "MOTS-C-10mg-vial",
+          "product_slug": "mots-c",
+          "selected_strength": "5mg",
+          "vials_required_for_phase": 8,
+          "weekly_dose": "TODO: specify"
+        }
+      ],
+      "end_week": 8,
+      "phase_number": 2,
+      "phase_title": "Escalation",
+      "start_week": 5
+    },
+    {
+      "drugs_used": [
+        {
+          "phases": "daily",
+          "productId": "Retatrutide-10mg-vial",
+          "product_slug": "retatrutide",
+          "selected_strength": "5mg",
+          "vials_required_for_phase": 3,
+          "weekly_dose": "3mg",
+          "dosing_frequency": "daily"
+        },
+        {
+          "phases": "daily",
+          "dosing_frequency": "3x_week",
+          "productId": "SS-31-5mg-vial",
+          "product_slug": "ss-31",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 4,
+          "weekly_dose": "TODO: specify"
+        }
+      ],
+      "end_week": 12,
+      "phase_number": 3,
+      "phase_title": "Maintenance",
+      "start_week": 9
+    }
+  ],
+  "protocol_is_curated": true,
+  "number_of_phases": 3,
+  "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+  "primary_goal": "Metabolic Health",
+  "risk_class": "high_complexity",
+  "protocol_review_status": "approved",
+  "protocol_source_type": "curated_library",
+  "active": true,
+  "overview_summary": "Advanced metabolic intensification protocol built around retatrutide triple-receptor agonism with MOTS-c and SS-31 support for body-composition shift, glucose regulation, and mitochondrial resilience.",
+  "protocol_id": "met_002",
+  "monitoring_plan": {
+    "baseline_required": [
+      "HbA1c",
+      "fasting_glucose",
+      "fasting_insulin",
+      "lipid_profile",
+      "AST",
+      "ALT",
+      "creatinine",
+      "body_weight",
+      "waist_circumference",
+      "blood_pressure",
+      "body_composition",
+      "gallbladder_history_review"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "labs": [
+          "fasting_glucose",
+          "body_weight",
+          "blood_pressure",
+          "GI_tolerance_score"
+        ],
+        "purpose": "Assess retatrutide tolerability and early glycemic response.",
+        "type": "tolerance_and_glycemic_review",
+        "week": 4
+      },
+      {
+        "labs": [
+          "HbA1c",
+          "fasting_glucose",
+          "fasting_insulin",
+          "lipid_profile",
+          "AST",
+          "ALT"
+        ],
+        "purpose": "Evaluate metabolic response before maintenance phase.",
+        "type": "metabolic_reassessment",
+        "week": 8
+      },
+      {
+        "labs": [
+          "HbA1c",
+          "lipid_profile",
+          "AST",
+          "ALT",
+          "creatinine",
+          "body_composition"
+        ],
+        "purpose": "End-of-cycle cardiometabolic and safety review.",
+        "type": "final_outcome_review",
+        "week": 12
+      }
+    ]
+  },
+  "protocol_version": "v6.1",
+  "economics": {
+    "total_protocol_cost_estimate": 1550,
+    "total_vials_required": 31
+  },
+  "protocol_author_title": "Peptide Specialists",
+  "confidence_score": 91,
+  "protocol_title": "Retatrutide + MOTS-c Metabolic Intensification Protocol",
+  "safety_profile": {
+    "drug_interactions": [],
+    "contraindications": [
+      "MEN2_syndrome",
+      "medullary_thyroid_carcinoma_history",
+      "active_pancreatitis",
+      "pregnancy",
+      "severe_gastrointestinal_disease"
+    ],
+    "monitoring_required": [
+      "HbA1c",
+      "fasting_glucose",
+      "fasting_insulin",
+      "lipid_profile",
+      "AST",
+      "ALT",
+      "creatinine",
+      "body_weight",
+      "waist_circumference",
+      "blood_pressure",
+      "body_composition",
+      "gallbladder_history_review",
+      "Week 4: tolerance_and_glycemic_review",
+      "Week 8: metabolic_reassessment",
+      "Week 12: final_outcome_review"
+    ],
+    "adverse_events_serious": [],
+    "adverse_events_common": [],
+    "relative_cautions": [
+      "gallbladder_disease",
+      "rapid_weight_loss_history",
+      "advanced_renal_impairment",
+      "uncontrolled_diabetes",
+      "history_of_eating_disorder"
+    ]
+  },
+  "legacy_compatibility": {
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ],
+    "notes": "Enhanced protocol preserves legacy fields while supporting canonical blueprint-based loading.",
+    "enabled": true
+  },
+  "physician_supervision_required": true,
+  "status": "approved",
+  "metadata": {
+    "longDescription": "Retatrutide is a first-in-class triple agonist targeting GLP-1, GIP, and glucagon receptors (GcgR), achieving weight reductions of up to 24% in Phase 2 trials — superior to dual agonists (Jastreboff AM et al., NEJM 2023). The addition of glucagon receptor agonism increases hepatic glucose output acutely but primarily drives energy expenditure through thermogenesis and increased fat oxidation, complementing the appetite suppression of the GLP-1 component. MOTS-c is layered to reinforce peripheral insulin sensitivity, AMPK activation, and mitochondrial biogenesis, offsetting any GcgR-mediated glycaemic variability. This advanced 12-week protocol, structured across three escalating phases, is intended for patients with significant obesity (BMI ≥ 35) or cardiometabolic disease requiring intensive intervention.",
+    "primary_goal": "Metabolic Health",
+    "keywords": [
+      "retatrutide protocol",
+      "triple agonist GLP-1 GIP glucagon",
+      "MOTS-c metabolic intensification",
+      "advanced obesity protocol",
+      "retatrutide weight loss",
+      "triple receptor agonist peptide"
+    ],
+    "references": [
+      {
+        "citation": "Jastreboff AM et al. Triple-Hormone-Receptor Agonist Retatrutide for Obesity. NEJM 2023;389:514-526.",
+        "pmid": "37334676"
+      },
+      {
+        "citation": "Lee C et al. The Mitochondrial-Derived Peptide MOTS-c Promotes Metabolic Homeostasis. Cell Metab 2015;21:443-454.",
+        "pmid": "25738459"
+      },
+      {
+        "citation": "Reynolds JC et al. MOTS-c mitochondrial-encoded regulator of physical decline. Nat Aging 2021;1:147-159.",
+        "pmid": "34282400"
+      }
+    ],
+    "visibility": "public",
+    "scientificName": "Retatrutide + MOTS-c GLP-1/GIP/Glucagon Triple-Agonist Metabolic Intensification Protocol",
+    "description": "12-week advanced metabolic protocol combining retatrutide triple-receptor agonism with MOTS-c mitokine support for profound body-composition shift and glucose regulation.",
+    "primary_condition": "obesity_type2_diabetes",
+    "version": "1.0",
+    "schema_version": "antigravity_v2",
+    "updated_at": "2026-04-25T00:00:00.000Z",
+    "abbreviatedName": "MET-002 · Dual Incretin Escalation – 16wk",
+    "shortCode": "MET-002",
+    "source_quality_note": "Clinical content consolidated from protocol library and public biomedical literature; final medical use requires qualified clinician review.",
+    "review": {
+      "last_reviewed_at": "2026-04-25",
+      "review_status": "approved",
+      "last_external_evidence_review_at": "2026-04-26"
+    },
+    "regulatory_note": "Updated 2026: Retatrutide remains investigational and is not FDA/EMA-approved for obesity, type 2 diabetes, or any commercial indication as of April 2026. Lilly reported positive Phase 3 TRIUMPH-4 topline data in December 2025, including average 28.7% body-weight reduction at 68 weeks in adults with obesity/overweight and knee osteoarthritis; full peer-reviewed Phase 3 publication and regulatory filing are still pending.",
+    "created_at": "2026-04-02T00:00:00.000Z",
+    "clinical_summary": "Retatrutide (GLP-1/GIP/glucagon triple agonist) produces robust weight loss (up to 24% body weight in Phase 2 trials) through combined incretin augmentation, appetite suppression, and glucagon-mediated hepatic fat oxidation. MOTS-c is added to counteract the lean mass loss associated with GLP-1-class agents via AMPK/mTORC1 crosstalk and mitochondrial biogenesis support. This combination targets both the adipose and the muscle compartment, aiming for fat-predominant weight loss with preserved lean mass.",
+    "evidence_grade": "B"
+  },
+  "_patchedAt": {},
+  "_importedAt": {
+    "_nanoseconds": 752000000,
+    "_seconds": 1777189743
+  },
+  "_patchSchema": "antigravity_v2",
+  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+  "expected_outcomes": {
+    "qualitative": [
+      "Substantial body-weight reduction in high-BMI patients when managed under clinical-trial-level supervision",
+      "Improved cardiometabolic markers where weight loss and insulin sensitivity improve",
+      "Possible improvement in weight-related mobility or knee osteoarthritis symptoms based on Phase 3 topline data",
+      "Requires active mitigation of excessive weight loss, dehydration, GI intolerance, gallbladder events, and lean-mass loss"
+    ],
+    "time_to_onset_weeks": 4,
+    "quantitative_ranges": {
+      "week_12": "Early response signal should be assessed conservatively; full weight-loss effect is not expected by week 12.",
+      "week_24": "Progressive weight-loss trajectory may be substantial; avoid excessive rapid escalation outside formal clinical protocols.",
+      "week_68": "Phase 3 TRIUMPH-4 topline data reported average 28.7% body-weight reduction at 68 weeks with 12 mg retatrutide in obesity/overweight with knee osteoarthritis."
+    },
+    "responder_rate_pct": "Not finalized for routine care; use clinical-trial data only until peer-reviewed Phase 3 publication and regulatory review are complete."
+  },
+  "clinical_evidence_update_2026": {
+    "evidence_limitations": [
+      "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+      "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+      "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+    ],
+    "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+    "last_updated_at": "2026-04-26T08:05:00.000Z",
+    "latest_clinical_notes": [
+      "Retatrutide should be classified as investigational-only; do not present as commercially prescribable or routinely compoundable.",
+      "Add stronger safeguards for excessive weight loss, lean-mass loss, malnutrition risk, gallbladder disease, pancreatitis symptoms, dehydration, and psychiatric/reward-system symptoms until full Phase 3 safety data are published.",
+      "Use body composition, protein intake, resistance training, and micronutrient monitoring when large weight-loss trajectories are expected."
+    ],
+    "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use."
+  },
+  "phase_blueprints": [
+    {
+      "phase_key": "metabolic_primer",
+      "phase_title": "Metabolic Primer",
+      "default_start_week": 1,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "legacy_phase_mapping",
+        "protocol_continuity"
+      ],
+      "drugs": [
+        {
+          "product_id": "Retatrutide-10mg-vial",
+          "product_title": "Retatrutide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "protocol_defined",
+            "selected_strength": "2mg",
+            "vials_required_for_phase": 2,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "Retatrutide-10mg-vial",
+            "route": "subcutaneous"
+          }
+        },
+        {
+          "product_id": "MOTS-C-10mg-vial",
+          "product_title": "Mots C",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "3x_week",
+            "selected_strength": "5mg",
+            "vials_required_for_phase": 12,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "MOTS-C-10mg-vial",
+            "route": "subcutaneous"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 1,
+          "event_type": "phase_start",
+          "title": "Start Metabolic Primer"
+        },
+        {
+          "week": 4,
+          "event_type": "phase_review",
+          "title": "Review Metabolic Primer"
+        }
+      ]
+    },
+    {
+      "phase_key": "escalation",
+      "phase_title": "Escalation",
+      "default_start_week": 5,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "legacy_phase_mapping",
+        "protocol_continuity"
+      ],
+      "drugs": [
+        {
+          "product_id": "Retatrutide-10mg-vial",
+          "product_title": "Retatrutide",
+          "route": "protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "protocol_defined",
+            "selected_strength": "5mg",
+            "vials_required_for_phase": 2,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "Retatrutide-10mg-vial",
+            "route": "protocol_defined"
+          }
+        },
+        {
+          "product_id": "MOTS-C-10mg-vial",
+          "product_title": "Mots C",
+          "route": "protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "2x_week",
+            "selected_strength": "5mg",
+            "vials_required_for_phase": 8,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "MOTS-C-10mg-vial",
+            "route": "protocol_defined"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 5,
+          "event_type": "phase_start",
+          "title": "Start Escalation"
+        },
+        {
+          "week": 8,
+          "event_type": "phase_review",
+          "title": "Review Escalation"
+        }
+      ]
+    },
+    {
+      "phase_key": "maintenance",
+      "phase_title": "Maintenance",
+      "default_start_week": 9,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "legacy_phase_mapping",
+        "protocol_continuity"
+      ],
+      "drugs": [
+        {
+          "product_id": "Retatrutide-10mg-vial",
+          "product_title": "Retatrutide",
+          "route": "protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "protocol_defined",
+            "selected_strength": "5mg",
+            "vials_required_for_phase": 3,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "Retatrutide-10mg-vial",
+            "route": "protocol_defined"
+          }
+        },
+        {
+          "product_id": "SS-31-5mg-vial",
+          "product_title": "Ss 31",
+          "route": "protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "3x_week",
+            "selected_strength": "10mg",
+            "vials_required_for_phase": 4,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "SS-31-5mg-vial",
+            "route": "protocol_defined"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 9,
+          "event_type": "phase_start",
+          "title": "Start Maintenance"
+        },
+        {
+          "week": 12,
+          "event_type": "phase_review",
+          "title": "Review Maintenance"
+        }
+      ]
+    }
+  ],
+  "canonical_enrichment": {
+    "auditFieldsCompleted": [
+      "phase_blueprints_legacy_mapped"
+    ]
+  },
+  "category": "Metabolic Health",
+  "_schemaGapFixed": {
+    "_seconds": 1777190726,
+    "_nanoseconds": 576000000
+  },
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 6,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "Fasting glucose",
+        "Insulin",
+        "HOMA-IR",
+        "Lipid panel"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 12,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "HbA1c",
+        "Full lipid panel",
+        "Body composition (DEXA or impedance)"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "riskManagement": {
+    "contraindications": [
+      "Type 1 diabetes (insulin-dependent, use with caution)",
+      "Severe renal impairment",
+      "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (10–30%)",
+        "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+      },
+      {
+        "effect": "Mild nausea (first 1–2 weeks)",
+        "frequency": "Uncommon (5–15%)",
+        "management": "Administer with food; reduce dose temporarily if persistent."
+      },
+      {
+        "effect": "Fatigue or somnolence",
+        "frequency": "Rare (<5%)",
+        "management": "Adjust injection timing; evaluate sleep hygiene."
+      },
+      {
+        "effect": "Headache",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Hydration; paracetamol as needed; review dosing."
+      }
+    ],
+    "escalation_criteria": [
+      "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+      "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+      "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+      "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ]
+  },
+  "_enrichment_notes": [
+    "phases.drugs.weekly_dose: CALCULATED where possible"
+  ],
+  "mechanism_of_action": [
+    "Targeted receptor modulation and cellular signaling optimization.",
+    "Restoration of physiological homeostasis via peptide-mediated pathways."
+  ]
+}

@@ -1,8 +1,9 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react';
 
 /**
  * Manages cart state with localStorage persistence, stock validation,
- * guest unit limits, and cart-level metadata (e.g. Protocol Builder tags).
+ * guest unit limits, and cart-level metadata (e.g. ClinicalAI tags).
  *
  * @param {Array}   products       – live product list for stock validation
  * @param {boolean} isProfessional – relaxes the 20-unit guest limit when true
@@ -10,36 +11,56 @@ import { useState, useEffect } from 'react';
  * @returns {{ cart, setCart, cartMetadata, setCartMetadata, cartCount, updateCart }}
  */
 export function useCart(products, isProfessional, user) {
-  // ── Hydrate from localStorage ─────────────────────────────────────────────
+  // ── Cart expiration: clear if older than 30 days ────────────────────────
   const [cart, setCart] = useState(() => {
     try {
-      const saved = localStorage.getItem('regenpept_cart');
+      const saved = localStorage.getItem('mp_cart');
+      const meta = localStorage.getItem('mp_cart_meta');
+      if (saved && meta) {
+        const parsedMeta = JSON.parse(meta);
+        const updatedAt = parsedMeta?.updatedAt;
+        if (updatedAt) {
+          const age = Date.now() - new Date(updatedAt).getTime();
+          const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+          if (age > THIRTY_DAYS) {
+            localStorage.removeItem('mp_cart');
+            localStorage.removeItem('mp_cart_meta');
+            return {};
+          }
+        }
+      }
       return saved ? JSON.parse(saved) : {};
     } catch { return {}; }
   });
 
   const [cartMetadata, setCartMetadata] = useState(() => {
     try {
-      const saved = localStorage.getItem('regenpept_cart_meta');
+      const saved = localStorage.getItem('mp_cart_meta');
       return saved ? JSON.parse(saved) : {};
     } catch { return {}; }
   });
 
-  // ── Persist on change ─────────────────────────────────────────────────────
+  // ── Persist on change + stamp ownership metadata ──────────────────────────
   useEffect(() => {
-    try { localStorage.setItem('regenpept_cart', JSON.stringify(cart)); }
+    try { localStorage.setItem('mp_cart', JSON.stringify(cart)); }
     catch (e) { console.warn('Could not save cart:', e); }
   }, [cart]);
 
   useEffect(() => {
-    try { localStorage.setItem('regenpept_cart_meta', JSON.stringify(cartMetadata)); }
+    try {
+      const ownerUid  = user?.uid  ?? null;
+      const ownerType = user?.uid  ? 'authenticated' : 'guest';
+      const stamped   = { ...cartMetadata, ownerUid, ownerType, updatedAt: new Date().toISOString() };
+      localStorage.setItem('mp_cart_meta', JSON.stringify(stamped));
+    }
     catch (e) { console.warn('Could not save cart metadata:', e); }
-  }, [cartMetadata]);
+  }, [cartMetadata, user]);
 
-  // ── Clear cart on auth change (login / logout) ────────────────────────────
+  // ── On logout: keep cart, downgrade ownership to guest ───────────────────
   useEffect(() => {
-    setCart({});
-    setCartMetadata({});
+    if (!user) {
+      setCartMetadata(prev => ({ ...prev, ownerUid: null, ownerType: 'guest', updatedAt: new Date().toISOString() }));
+    }
   }, [user]);
 
   // ── Derived ───────────────────────────────────────────────────────────────
@@ -72,18 +93,7 @@ export function useCart(products, isProfessional, user) {
         return prev;
       }
 
-      // Guest 20-unit cap
-      if (!isProfessional) {
-        const currentTotal = Object.values(prev).reduce((a, b) => a + b, 0);
-        if (currentTotal + delta > 20) {
-          alert(
-            'For security and research compliance, individual guest inquiries are limited to ' +
-            '20 units total. Please log in to a Professional account or contact us for bulk ' +
-            'institutional requirements.'
-          );
-          return prev;
-        }
-      }
+
 
       // Attach metadata if provided
       if (metadata && delta > 0) {

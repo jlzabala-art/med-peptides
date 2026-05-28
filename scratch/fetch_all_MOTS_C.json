@@ -1,0 +1,42 @@
+[
+  {
+    "pmid": "36677050",
+    "title": "MOTS-c Functionally Prevents Metabolic Disorders.",
+    "authors": [
+      "Gao Y",
+      "Wei X",
+      "Wei P",
+      "Lu H",
+      "Zhong L",
+      "Tan J",
+      "Liu H",
+      "Liu Z"
+    ],
+    "journal": "Metabolites",
+    "pubdate": "2023 Jan 13",
+    "doi": "10.3390/metabo13010125",
+    "abstract": "Mitochondrial-derived peptides are a family of peptides encoded by short open reading frames in the mitochondrial genome, which have regulatory effects on mitochondrial functions, gene expression, and metabolic homeostasis of the body. As a new member of the mitochondrial-derived peptide family, mitochondrial open reading frame of the 12S rRNA-c (MOTS-c) is regarding a peptide hormone that could reduce insulin resistance, prevent obesity, improve muscle function, promote bone metabolism, enhance immune regulation, and postpone aging. MOTS-c plays these physiological functions mainly through activating the AICAR-AMPK signaling pathways by disrupting the folate-methionine cycle in cells. Recent studies have shown that the above hormonal effect can be achieved through MOTS-c regulating the expression of genes such as GLUT4, STAT3, and IL-10. However, there is a lack of articles summarizing the genes and pathways involved in the physiological activity of MOTS-c. This article aims to summarize and interpret the interesting and updated findings of MOTS-c-associated genes and pathways involved in pathological metabolic processes. Finally, it is expected to develop novel diagnostic markers and treatment approaches with MOTS-c to prevent and treat metabolic disorders in the future."
+  },
+  {
+    "pmid": "33554779",
+    "title": "MOTS-c reduces myostatin and muscle atrophy signaling.",
+    "authors": [
+      "Kumagai H",
+      "Coelho AR",
+      "Wan J",
+      "Mehta HH",
+      "Yen K",
+      "Huang A",
+      "Zempo H",
+      "Fuku N",
+      "Maeda S",
+      "Oliveira PJ",
+      "Cohen P",
+      "Kim SJ"
+    ],
+    "journal": "American journal of physiology. Endocrinology and metabolism",
+    "pubdate": "2021 Apr 01",
+    "doi": "10.1152/ajpendo.00275.2020",
+    "abstract": "Obesity and type 2 diabetes are metabolic diseases, often associated with sarcopenia and muscle dysfunction. MOTS-c, a mitochondrial-derived peptide, acts as a systemic hormone and has been implicated in metabolic homeostasis. Although MOTS-c improves insulin sensitivity in skeletal muscle, whether MOTS-c impacts muscle atrophy is not known. Myostatin is a negative regulator of skeletal muscle mass and also one of the possible mediators of insulin resistance-induced skeletal muscle wasting. Interestingly, we found that plasma MOTS-c levels are inversely correlated with myostatin levels in human subjects. We further demonstrated that MOTS-c prevents palmitic acid-induced atrophy in differentiated C2C12 myotubes, whereas MOTS-c administration decreased myostatin levels in plasma in diet-induced obese mice. By elevating AKT phosphorylation, MOTS-c inhibits the activity of an upstream transcription factor for myostatin and other muscle wasting genes, FOXO1. MOTS-c increases mTORC2 and inhibits PTEN activity, which modulates AKT phosphorylation. Further upstream, MOTS-c increases CK2 activity, which leads to PTEN inhibition. These results suggest that through inhibition of myostatin, MOTS-c could be a potential therapy for insulin resistance-induced skeletal muscle atrophy as well as other muscle wasting phenotypes including sarcopenia.NEW & NOTEWORTHY MOTS-c, a mitochondrial-derived peptide reduces high-fat-diet-induced muscle atrophy signaling by reducing myostatin expression. The CK2-PTEN-mTORC2-AKT-FOXO1 pathways play key roles in MOTS-c action on myostatin expression."
+  }
+]

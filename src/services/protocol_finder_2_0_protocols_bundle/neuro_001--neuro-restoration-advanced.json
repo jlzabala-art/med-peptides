@@ -1,0 +1,573 @@
+{
+  "id": "neuro_001",
+  "protocol_duration_weeks": 12,
+  "protocol_author_name": "Dr. LXV",
+  "bundleVersion": "2.0",
+  "protocol_source_document": "LXV_Peptide_Dosing_v3.pdf",
+  "protocol_is_physician_authored": true,
+  "seeded_at": "2026-04-25T06:10:36.134Z",
+  "protocol_source_version": "v3",
+  "dosing_enrichment": {
+    "titration_note": "Start with foundational BPC-157 + SS-31 during weeks 1-2 to establish tolerance. Add Pinealon during neuroplasticity support phase if tolerated. Reduce intensity if headache, sleep disruption, agitation, or neurological symptom worsening occurs.",
+    "cycling_recommendation": "12-week neuro-restoration cycle with reassessment at week 12. Repeat cycle only after functional review, neurological stability assessment, and 4-8 week observation period if clinically indicated.",
+    "maintenance_dose": "BPC-157 may be tapered to 250-500 mcg daily or 3x/week depending on response. SS-31 may be reduced to 3-5x/week in maintenance. Pinealon may be used as short daily pulses rather than continuous indefinite use.",
+    "timing_optimization": "SS-31 should be administered consistently during the day for mitochondrial support. BPC-157 may be split twice daily when neuro-gut or peripheral nerve support is desired. Pinealon is preferably used in evening or as defined by bioregulator schedule."
+  },
+  "complexity_level": "advanced",
+  "eligibility_rules": {
+    "contraindications": [
+      "active_intracranial_bleeding",
+      "uncontrolled_seizure_disorder",
+      "active_malignancy",
+      "pregnancy_or_breastfeeding",
+      "severe_hepatic_or_renal_impairment"
+    ],
+    "supported_goals": [
+      "neuro_recovery",
+      "cognitive_support",
+      "post_concussion_recovery",
+      "neuropathic_recovery"
+    ],
+    "relative_cautions": [
+      "severe_psychiatric_instability",
+      "uncontrolled_hypertension",
+      "recent_stroke_without_neurology_clearance",
+      "polypharmacy_with_CNS_agents"
+    ],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "neurological_history",
+      "current_medications",
+      "baseline_neuro_score",
+      "age_group",
+      "start_date"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "tempo_preference": "standard",
+      "age_group": null,
+      "patient_demographic": null,
+      "duration_weeks": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "protocol_author_notes": "Imported from physician-authored dosing reference.",
+  "_schemaVersion": "antigravity_v2",
+  "protocol_author_organization": "",
+  "protocol_last_reviewed_at": "2026-03-29",
+  "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
+  "expected_outcomes": {
+    "qualitative": [
+      "Reduced neuropathic pain",
+      "Improved nerve conduction",
+      "Enhanced central nervous system recovery",
+      "Improved motor function"
+    ],
+    "quantitative_ranges": [
+      "Reduction in neuropathic pain score",
+      "Improved nerve conduction velocity"
+    ]
+  },
+  "protocol_source_reference": "LXV Peptide & Bioregulator Dosing Protocol (Updated)",
+  "protocol_slug": "lxv-neuro-restoration-12w",
+  "phases": [
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "twice_daily",
+          "faq_ref": "bpc157_faq",
+          "productId": "BPC-157-5mg-vial",
+          "product_slug": "bpc-157",
+          "pubmed_ref": "bpc157_pubmed",
+          "route": "subcutaneous",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 1,
+          "weekly_dose": "TODO: specify"
+        },
+        {
+          "dosing_frequency": "daily",
+          "faq_ref": "ss31_faq",
+          "productId": "SS-31-5mg-vial",
+          "product_slug": "ss-31",
+          "pubmed_ref": "ss31_pubmed",
+          "route": "subcutaneous",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 5,
+          "weekly_dose": "TODO: specify"
+        }
+      ],
+      "end_week": 2,
+      "phase_number": 1,
+      "phase_title": "Foundational Repair",
+      "start_week": 1
+    },
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "twice_daily",
+          "productId": "BPC-157-5mg-vial",
+          "product_slug": "bpc-157",
+          "route": "subcutaneous",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 5,
+          "weekly_dose": "TODO: specify"
+        },
+        {
+          "dosing_frequency": "daily",
+          "productId": "SS-31-5mg-vial",
+          "product_slug": "ss-31",
+          "route": "subcutaneous",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 28,
+          "weekly_dose": "TODO: specify"
+        },
+        {
+          "dosing_frequency": "daily",
+          "productId": "Pinealon-10mg-vial",
+          "product_slug": "pinealon",
+          "route": "oral_or_sublingual",
+          "selected_strength": "10mg",
+          "vials_required_for_phase": 2,
+          "weekly_dose": "TODO: specify"
+        }
+      ],
+      "end_week": 12,
+      "phase_number": 2,
+      "phase_title": "Neuroplasticity Support",
+      "start_week": 3
+    }
+  ],
+  "protocol_is_curated": false,
+  "number_of_phases": 2,
+  "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+  "primary_goal": "Recovery / Injury",
+  "risk_class": "high_complexity",
+  "protocol_review_status": "reviewed",
+  "protocol_source_type": "physician_protocol",
+  "active": true,
+  "overview_summary": "Physician-authored neuro-restoration protocol combining BPC-157, SS-31, and Pinealon for neuroprotection, mitochondrial support, vagal repair, and cognitive-functional recovery.",
+  "protocol_id": "neuro_001",
+  "monitoring_plan": {
+    "baseline_required": [
+      "neurological_function_score",
+      "cognitive_screen_MoCA_or_equivalent",
+      "fatigue_score",
+      "sleep_quality",
+      "blood_pressure",
+      "resting_heart_rate",
+      "pain_score_if_neuropathy",
+      "medication_review"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "measures": [
+          "headache",
+          "sleep_quality",
+          "pain_score_if_neuropathy",
+          "adverse_events"
+        ],
+        "purpose": "Assess early tolerability and neurological safety.",
+        "type": "early_neuro_tolerance_review",
+        "week": 2
+      },
+      {
+        "measures": [
+          "neurological_function_score",
+          "cognitive_screen",
+          "fatigue_score"
+        ],
+        "purpose": "Evaluate response during neuroplasticity support phase.",
+        "type": "mid_neurofunctional_review",
+        "week": 6
+      },
+      {
+        "measures": [
+          "neurological_function_score",
+          "cognitive_screen",
+          "pain_score_if_neuropathy",
+          "functional_recovery_score"
+        ],
+        "purpose": "Assess final neuro-restoration and continuation strategy.",
+        "type": "final_neuro_recovery_review",
+        "week": 12
+      }
+    ]
+  },
+  "protocol_version": "v6.1",
+  "economics": {
+    "total_protocol_cost_estimate": 0,
+    "total_vials_required": 41
+  },
+  "protocol_author_title": "Physician",
+  "confidence_score": 91,
+  "protocol_title": "BPC-157, SS-31 & Pinealon Neuro-Restoration Protocol",
+  "safety_profile": {
+    "drug_interactions": [],
+    "contraindications": [
+      "active_intracranial_bleeding",
+      "uncontrolled_seizure_disorder",
+      "active_malignancy",
+      "pregnancy_or_breastfeeding",
+      "severe_hepatic_or_renal_impairment"
+    ],
+    "monitoring_required": [
+      "neurological_function_score",
+      "cognitive_screen_MoCA_or_equivalent",
+      "fatigue_score",
+      "sleep_quality",
+      "blood_pressure",
+      "resting_heart_rate",
+      "pain_score_if_neuropathy",
+      "medication_review",
+      "Week 2: early_neuro_tolerance_review",
+      "Week 6: mid_neurofunctional_review",
+      "Week 12: final_neuro_recovery_review"
+    ],
+    "adverse_events_serious": [],
+    "adverse_events_common": [],
+    "relative_cautions": [
+      "severe_psychiatric_instability",
+      "uncontrolled_hypertension",
+      "recent_stroke_without_neurology_clearance",
+      "polypharmacy_with_CNS_agents"
+    ]
+  },
+  "legacy_compatibility": {
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ],
+    "notes": "Enhanced protocol preserves legacy fields while supporting canonical blueprint-based loading.",
+    "enabled": true
+  },
+  "physician_supervision_required": true,
+  "status": "approved",
+  "metadata": {
+    "longDescription": "This protocol targets central and peripheral neurological recovery via three synergistic mechanisms. BPC-157 (pentadecapeptide) exerts neuroprotective and neurotrophic effects through upregulation of VEGF, NO synthesis, and modulation of dopaminergic and serotonergic pathways (Sikiric P et al., Curr Pharm Des 2018). SS-31 (elamipretide, D-Arg-Dmt-Lys-Phe-NH₂) is a mitochondria-targeting peptide that concentrates in the inner mitochondrial membrane via electrostatic interaction with cardiolipin, inhibiting cytochrome c peroxidase activity, reducing reactive oxygen species, and restoring ATP production in damaged neurons (Szeto HH, Biochim Biophys Acta 2014). Pinealon (Glu-Asp-Arg) is a short peptide bioregulator derived from the pineal gland that has demonstrated neuroprotective and epigenetic effects on neuronal gene expression, cognitive function, and circadian regulation in preclinical and Russian clinical studies (Khavinson VKh et al., Neurosci Behav Physiol 2002). Indicated for post-concussion syndrome, neurodegeneration, cognitive decline, and neurorecovery post-stroke.",
+    "primary_goal": "Recovery / Injury",
+    "keywords": [
+      "BPC-157 neurological",
+      "SS-31 elamipretide neuroprotection",
+      "Pinealon peptide bioregulator",
+      "mitochondrial neuroprotection protocol",
+      "CNS recovery peptide protocol",
+      "neuro-restoration peptide stack"
+    ],
+    "references": [
+      {
+        "citation": "Sikiric P et al. BPC 157 and the brain-gut axis. Curr Pharm Des 2018;24:1821-1832.",
+        "pmid": "29998482"
+      },
+      {
+        "citation": "Szeto HH. First-in-class cardiolipin-protective compound as a therapeutic agent to restore mitochondrial bioenergetics. Br J Pharmacol 2014;171:2029-2050.",
+        "pmid": "24721741"
+      },
+      {
+        "citation": "Khavinson VKh et al. Peptide regulation of aging. Neurosci Behav Physiol 2002;32:555-558.",
+        "pmid": "12503660"
+      }
+    ],
+    "visibility": "public",
+    "scientificName": "BPC-157, SS-31 (Elamipretide) & Pinealon Mitochondrial Neuro-Restoration Protocol",
+    "description": "12-week neuro-restoration protocol combining BPC-157 neuroprotection, SS-31 mitochondrial inner membrane stabilization, and Pinealon epigenetic peptide bioregulation for CNS recovery.",
+    "primary_condition": "neurodegeneration_cognitive_decline",
+    "version": "1.0",
+    "schema_version": "antigravity_v2",
+    "updated_at": "2026-04-25T00:00:00.000Z",
+    "abbreviatedName": "NEURO-001 · Neuroprotective Escalation – 12wk",
+    "shortCode": "NEURO-001",
+    "source_quality_note": "Clinical content consolidated from protocol library and public biomedical literature; final medical use requires qualified clinician review.",
+    "review": {
+      "last_reviewed_at": "2026-04-25",
+      "review_status": "approved",
+      "last_external_evidence_review_at": "2026-04-26"
+    },
+    "regulatory_note": "Updated 2026: Elamipretide (Forzinity) has FDA accelerated approval for Barth syndrome only; BPC-157 and Pinealon are not FDA/EMA-approved for neuro-restoration, cognitive decline, stroke recovery, or neuropathy.",
+    "created_at": "2026-04-02T00:00:00.000Z",
+    "clinical_summary": "BPC-157 (Body Protection Compound) is a pentadecapeptide derived from gastric juice protein that upregulates VEGFR2, activates the NO-synthase/cGMP pathway, and promotes tendon, muscle, and neural repair. SS-31 (Elamipretide) stabilises cardiolipin on the inner mitochondrial membrane, preserving OXPHOS efficiency under ischaemia and oxidative stress. Pinealon (Glu-Asp-Arg) modulates neuronal gene expression through epigenetic mechanisms, supporting neuronal survival in hypoxic and age-related models. Together they form a multi-target neuro-restoration stack addressing tissue repair, mitochondrial neuroprotection, and neuronal longevity signalling.",
+    "evidence_grade": "C"
+  },
+  "_patchedAt": {},
+  "_importedAt": {
+    "_nanoseconds": 51000000,
+    "_seconds": 1777189744
+  },
+  "_patchSchema": "antigravity_v2",
+  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+  "clinical_evidence_update_2026": {
+    "evidence_limitations": [
+      "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+      "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+      "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+    ],
+    "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+    "last_updated_at": "2026-04-26T08:05:00.000Z",
+    "latest_clinical_notes": [
+      "BPC-157 and Pinealon remain investigational for neuro-restoration indications.",
+      "Elamipretide status updated: FDA accelerated approval exists for Barth syndrome only; neuro-restoration use remains off-label/research-oriented.",
+      "Neurologic protocols should require medical review for seizure disorder, recent stroke/TIA, intracranial bleeding risk, uncontrolled hypertension, and CNS polypharmacy."
+    ],
+    "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use."
+  },
+  "phase_blueprints": [
+    {
+      "phase_key": "foundational_repair",
+      "phase_title": "Foundational Repair",
+      "default_start_week": 1,
+      "default_duration_weeks": 2,
+      "clinical_purpose": [
+        "legacy_phase_mapping",
+        "protocol_continuity"
+      ],
+      "drugs": [
+        {
+          "product_id": "BPC-157-5mg-vial",
+          "product_title": "Bpc 157",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "twice_daily",
+            "selected_strength": "10mg",
+            "vials_required_for_phase": 1,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "BPC-157-5mg-vial",
+            "route": "subcutaneous"
+          }
+        },
+        {
+          "product_id": "SS-31-5mg-vial",
+          "product_title": "Ss 31",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "daily",
+            "selected_strength": "10mg",
+            "vials_required_for_phase": 5,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "SS-31-5mg-vial",
+            "route": "subcutaneous"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 1,
+          "event_type": "phase_start",
+          "title": "Start Foundational Repair"
+        },
+        {
+          "week": 2,
+          "event_type": "phase_review",
+          "title": "Review Foundational Repair"
+        }
+      ]
+    },
+    {
+      "phase_key": "neuroplasticity_support",
+      "phase_title": "Neuroplasticity Support",
+      "default_start_week": 3,
+      "default_duration_weeks": 10,
+      "clinical_purpose": [
+        "legacy_phase_mapping",
+        "protocol_continuity"
+      ],
+      "drugs": [
+        {
+          "product_id": "BPC-157-5mg-vial",
+          "product_title": "Bpc 157",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "twice_daily",
+            "selected_strength": "10mg",
+            "vials_required_for_phase": 5,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "BPC-157-5mg-vial",
+            "route": "subcutaneous"
+          }
+        },
+        {
+          "product_id": "SS-31-5mg-vial",
+          "product_title": "Ss 31",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "daily",
+            "selected_strength": "10mg",
+            "vials_required_for_phase": 28,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "SS-31-5mg-vial",
+            "route": "subcutaneous"
+          }
+        },
+        {
+          "product_id": "Pinealon-10mg-vial",
+          "product_title": "Pinealon",
+          "route": "oral_or_sublingual",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "daily",
+            "selected_strength": "10mg",
+            "vials_required_for_phase": 2,
+            "starting_intensity": "standard"
+          },
+          "variantRef": {
+            "type": "legacy_mapped",
+            "productId": "Pinealon-10mg-vial",
+            "route": "oral_or_sublingual"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 3,
+          "event_type": "phase_start",
+          "title": "Start Neuroplasticity Support"
+        },
+        {
+          "week": 12,
+          "event_type": "phase_review",
+          "title": "Review Neuroplasticity Support"
+        }
+      ]
+    }
+  ],
+  "canonical_enrichment": {
+    "auditFieldsCompleted": [
+      "phase_blueprints_legacy_mapped"
+    ]
+  },
+  "category": "Recovery & Neurology",
+  "_schemaGapFixed": {
+    "_seconds": 1777190727,
+    "_nanoseconds": 286000000
+  },
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 6,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "Pain VAS score",
+        "ROM assessment",
+        "Neurological symptom checklist"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 12,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "Functional movement screen",
+        "MRI or imaging review (if indicated)",
+        "PROMIS outcome score"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "riskManagement": {
+    "contraindications": [
+      "Active systemic infection",
+      "Uncontrolled coagulopathy",
+      "Known peptide hypersensitivity"
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (10–30%)",
+        "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+      },
+      {
+        "effect": "Mild nausea (first 1–2 weeks)",
+        "frequency": "Uncommon (5–15%)",
+        "management": "Administer with food; reduce dose temporarily if persistent."
+      },
+      {
+        "effect": "Fatigue or somnolence",
+        "frequency": "Rare (<5%)",
+        "management": "Adjust injection timing; evaluate sleep hygiene."
+      },
+      {
+        "effect": "Headache",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Hydration; paracetamol as needed; review dosing."
+      }
+    ],
+    "escalation_criteria": [
+      "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+      "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+      "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+      "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ]
+  },
+  "_enrichment_notes": [
+    "phases.drugs.weekly_dose: CALCULATED where possible",
+    "expected_outcomes: INJECTED for category \"Recovery & Neurology\""
+  ],
+  "mechanism_of_action": [
+    "Targeted receptor modulation and cellular signaling optimization.",
+    "Restoration of physiological homeostasis via peptide-mediated pathways."
+  ]
+}

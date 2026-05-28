@@ -43,7 +43,8 @@
     "evidence_grade": "B",
     "schema_version": "antigravity_v2",
     "abbreviatedName": "Retatrutide · Triple Agonist Intensive",
-    "shortCode": "WMT-003"
+    "shortCode": "WMT-003",
+    "duration_weeks": 16
   },
   "protocol_author_name": "Clinical Longevity Protocol Team",
   "seeded_at": "2026-04-25T06:10:36.134Z",
@@ -152,7 +153,250 @@
       "week_12": "Total body weight reduction 5–10%"
     }
   },
-  "phase_blueprints": [],
+  "phase_blueprints": [
+    {
+      "phase_id": "wm_003_ph1",
+      "phase_name": "Metabolic Priming",
+      "duration_weeks": 4,
+      "drugs": [
+        {
+          "product_id": "Retatrutide-10mg-vial",
+          "product_title": "Retatrutide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "administration_frequency": "weekly",
+            "starting_weekly_dose": 2,
+            "dose_per_administration": 2,
+            "administration_days_default": [
+              "monday"
+            ],
+            "timing_hint": "Administer once weekly on a consistent day"
+          }
+        },
+        {
+          "product_id": "MOTS-C-10mg-vial",
+          "product_title": "MOTS-c",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "administration_frequency": "3x_week",
+            "starting_weekly_dose": 15,
+            "dose_per_administration": 5,
+            "administration_days_default": [
+              "monday",
+              "wednesday",
+              "friday"
+            ],
+            "timing_hint": "Administer on training days for metabolic priming"
+          }
+        },
+        {
+          "product_id": "Tesamorelin-2mg-vial",
+          "product_title": "Tesamorelin",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "administration_frequency": "5x_week",
+            "starting_weekly_dose": 5,
+            "dose_per_administration": 1,
+            "administration_days_default": [
+              "monday",
+              "tuesday",
+              "wednesday",
+              "thursday",
+              "friday"
+            ],
+            "timing_hint": "Administer before bed to align with GH pulse"
+          }
+        },
+        {
+          "product_id": "SS-31-10mg-vial",
+          "product_title": "SS-31 (Elamipretide)",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "administration_frequency": "2x_week",
+            "starting_weekly_dose": 10,
+            "dose_per_administration": 5,
+            "administration_days_default": [
+              "tuesday",
+              "friday"
+            ],
+            "timing_hint": "Administer on non-training days for mitochondrial support"
+          }
+        },
+        {
+          "product_id": "GHK-Cu_(Copper_Peptide)-5mg-vial",
+          "product_title": "GHK-Cu",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "administration_frequency": "daily",
+            "starting_daily_dose": 1,
+            "dose_per_administration": 1,
+            "administration_days_default": [
+              "monday",
+              "tuesday",
+              "wednesday",
+              "thursday",
+              "friday",
+              "saturday",
+              "sunday"
+            ],
+            "timing_hint": "Administer in the morning for anti-aging support"
+          }
+        }
+      ]
+    },
+    {
+      "phase_id": "wm_003_ph2",
+      "phase_name": "Active Fat Loss",
+      "duration_weeks": 8,
+      "drugs": [
+        {
+          "product_id": "Retatrutide-10mg-vial",
+          "product_title": "Retatrutide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "administration_frequency": "weekly",
+            "starting_weekly_dose": 6,
+            "dose_per_administration": 6,
+            "administration_days_default": [
+              "monday"
+            ],
+            "timing_hint": "Escalated dose for active fat loss phase"
+          }
+        },
+        {
+          "product_id": "AOD-9604-5mg-vial",
+          "product_title": "AOD-9604",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mcg",
+            "administration_frequency": "daily",
+            "starting_daily_dose": 300,
+            "dose_per_administration": 300,
+            "administration_days_default": [
+              "monday",
+              "tuesday",
+              "wednesday",
+              "thursday",
+              "friday",
+              "saturday",
+              "sunday"
+            ],
+            "timing_hint": "Administer in the morning, fasted for best lipolytic effect"
+          }
+        },
+        {
+          "product_id": "MOTS-C-10mg-vial",
+          "product_title": "MOTS-c",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "administration_frequency": "3x_week",
+            "starting_weekly_dose": 15,
+            "dose_per_administration": 5,
+            "administration_days_default": [
+              "monday",
+              "wednesday",
+              "friday"
+            ],
+            "timing_hint": "Maintain metabolic signaling alongside GLP-1 agonist"
+          }
+        },
+        {
+          "product_id": "GHK-Cu_(Copper_Peptide)-5mg-vial",
+          "product_title": "GHK-Cu",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "administration_frequency": "3x_week",
+            "starting_weekly_dose": 3.5,
+            "dose_per_administration": 1.17,
+            "administration_days_default": [
+              "tuesday",
+              "thursday",
+              "saturday"
+            ],
+            "timing_hint": "Skin and anti-aging support during fat loss phase"
+          }
+        },
+        {
+          "product_id": "NAD-Plus-vial",
+          "product_title": "NAD+",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "administration_frequency": "2x_week",
+            "starting_weekly_dose": 100,
+            "dose_per_administration": 50,
+            "administration_days_default": [
+              "wednesday",
+              "saturday"
+            ],
+            "timing_hint": "Supports cellular energy and mitochondrial function"
+          }
+        }
+      ]
+    },
+    {
+      "phase_id": "wm_003_ph3",
+      "phase_name": "Metabolic Stabilization",
+      "duration_weeks": 4,
+      "drugs": [
+        {
+          "product_id": "Retatrutide-10mg-vial",
+          "product_title": "Retatrutide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "administration_frequency": "weekly",
+            "starting_weekly_dose": 4,
+            "dose_per_administration": 4,
+            "administration_days_default": [
+              "monday"
+            ],
+            "timing_hint": "Maintenance dose for weight stabilization"
+          }
+        },
+        {
+          "product_id": "MOTS-C-10mg-vial",
+          "product_title": "MOTS-c",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "administration_frequency": "2x_week",
+            "starting_weekly_dose": 10,
+            "dose_per_administration": 5,
+            "administration_days_default": [
+              "monday",
+              "thursday"
+            ],
+            "timing_hint": "Reduced frequency for metabolic maintenance"
+          }
+        },
+        {
+          "product_id": "GHK-Cu_(Copper_Peptide)-5mg-vial",
+          "product_title": "GHK-Cu",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "administration_frequency": "2x_week",
+            "starting_weekly_dose": 2,
+            "dose_per_administration": 1,
+            "administration_days_default": [
+              "tuesday",
+              "friday"
+            ],
+            "timing_hint": "Continue skin and longevity support during stabilization"
+          }
+        }
+      ]
+    }
+  ],
   "protocol_slug": "advanced-metabolic-longevity-16w",
   "phases": [
     {
@@ -464,7 +708,8 @@
     "total_vials_required": null
   },
   "_patchedAt": {
-    "schema_gap_fix": "2026-04-26T12:37:11Z"
+    "schema_gap_fix": "2026-04-26T12:37:11Z",
+    "phase1_fix": "2026-05-17T08:28:52.937542+00:00"
   },
   "_schemaVersion": "antigravity_v2",
   "_patchSchema": "antigravity_v2",
@@ -493,5 +738,11 @@
     "notes": "Legacy fields retained for backward compatibility; phase_blueprints are preferred when present.",
     "enabled": true
   },
-  "_syncedAt": "2026-04-26T12:46:39.587Z"
+  "_syncedAt": "2026-04-26T12:46:39.587Z",
+  "title": "Advanced Metabolic & Longevity Protocol",
+  "recommended_tests": [
+    "fagron-nutrigen",
+    "24-genomics-nutrigen",
+    "nad-blood-test"
+  ]
 }

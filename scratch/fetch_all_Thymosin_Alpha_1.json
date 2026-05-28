@@ -1,0 +1,37 @@
+[
+  {
+    "pmid": "11381492",
+    "title": "Thymosin alpha-1.",
+    "authors": [
+      "Ancell CD",
+      "Phipps J",
+      "Young L"
+    ],
+    "journal": "American journal of health-system pharmacy : AJHP : official journal of the American Society of Health-System Pharmacists",
+    "pubdate": "2001 May 15",
+    "doi": null,
+    "abstract": "The pharmacology, pharmacokinetics, clinical efficacy, adverse effects, and dosage and administration of thymosin alpha-1 (TA1) are reviewed. TA1 is a synthetic polypeptide. The drug is in Phase III trials for the treatment of hepatitis C and in Phase II trials for hepatitis B. Additional possible indications are malignant melanoma, hepatocellular carcinoma, drug-resistant tuberculosis, and DiGeorge's syndrome. TA1 is thought to modulate the immune system by augmenting T-cell function. TA1 may affect thymocytes by stimulating their differentiation or by converting them to active T cells. TA1 is rapidly absorbed, achieving peak serum concentrations within two hours. Blood levels return to baseline within 24 hours, and the serum half-life is approximately 2 hours. TA1's efficacy in hepatitis B has been evaluated in 195 patients in four clinical trials. One study found hepatitis B virus (HBV) DNA clearance at six months in 9 of 17 patients receiving TA1, compared with 10 of 16 patients treated with interferon alfa-2b (IFN-alpha 2b) and 4 of 15 historical controls. An open-label trial found HBV DNA clearance in 53% of patients at six months. A randomized, controlled trial found HBV DNA clearance in 40.6% and 25.6% of patients treated with TA1 for 6 and 12 months, respectively, compared with 9.4% of untreated controls. Efficacy for hepatitis C has been evaluated in 162 patients in three clinical trials. In one trial, the number of patients who achieved normal serum alanine aminotransferase (ALT) levels did not differ significantly between TA1 and placebo. In the other two trials, combination TA1 and IFN-alpha 2b was compared with IFN-alpha 2b alone. One trial found a normal serum ALT level at six months in 71% of patients receiving combination therapy, versus 35% of patients receiving IFN-alpha 2b alone. Hepatitis C virus RNA clearance occurred in 65% of patients treated with combination therapy and 29% of patients treated with IFN-alpha 2b alone. The third trial, comparing combination TA1 and IFN-alpha 2b with IFN-alpha 2b alone and with placebo, found normalization of ALT levels at six months in 37.1% of patients receiving combination therapy, 16.2% of patients receiving IFN-alpha 2b alone, and 2.7% of patients receiving placebo. TA1 is well tolerated. Most studies observed only local irritation at the injection site. For hepatitis B and C, TA1 1.6 mg (900 micrograms/m2) should be administered subcutaneously twice a week. Clinical trials of TA1 for chronic hepatitis B or C have had mixed results. TA1 may be useful as monotherapy for hepatitis B or in combination with IFN-alpha 2b for hepatitis C, but its effects on morbidity and mortality remain to be seen."
+  },
+  {
+    "pmid": "41373628",
+    "title": "Aging and Thymosin Alpha-1.",
+    "authors": [
+      "Simonova MA",
+      "Ivanov I",
+      "Shoshina NS",
+      "Komyakova AM",
+      "Makarov DA",
+      "Baranovskii DS",
+      "Klabukov ID",
+      "Telepenina KP",
+      "Atiakshin DA",
+      "Shegay PV",
+      "Kaprin AD",
+      "Stepanenko VN"
+    ],
+    "journal": "International journal of molecular sciences",
+    "pubdate": "2025 Nov 27",
+    "doi": "10.3390/ijms262311470",
+    "abstract": "Aging is characterized by immune decline, mainly due to thymic involution-the age-related shrinkage of the thymus gland. This leads to reduced T-cell production, chronic inflammation, and increased susceptibility to age-related diseases. Thymosin alpha-1 (T\u03b11), a peptide hormone produced by the thymus, exhibits potent immunomodulatory, anti-inflammatory, and antioxidant properties. It helps restore immune function by stimulating T-cell differentiation, enhancing thymic output, and modulating dendritic cell and macrophage activity. Preclinical and clinical studies show that T\u03b11 can improve vaccine response in the elderly and mitigate immunosenescence. The hybrid drug Refnot (a fusion of tumor necrosis factor alpha (TNF\u03b1) and T\u03b11) combines T\u03b11's immunomodulation with TNF's antitumor activity but has reduced toxicity. It represents a promising therapeutic approach to counteract age-related immune dysfunction and inflammation, potentially by slowing the aging process. Further research is needed to validate its long-term efficacy and safety in geriatrics."
+  }
+]

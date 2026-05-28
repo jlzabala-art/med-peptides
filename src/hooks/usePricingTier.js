@@ -1,3 +1,4 @@
+ 
 /**
  * usePricingTier.js
  *
@@ -27,16 +28,21 @@ const ROLE_TO_TIER = Object.freeze({
   // Unauthenticated / basic
   guest:            PRICING_TIER.RETAIL,
   researcher:       PRICING_TIER.RETAIL,
+  sales_agent:      PRICING_TIER.RETAIL,
+  patient:          PRICING_TIER.RETAIL,
 
   // Verified professional → wholesale discount
   verified_medical: PRICING_TIER.WHOLESALE,
   professional:     PRICING_TIER.WHOLESALE,
   distributor:      PRICING_TIER.WHOLESALE,
+  wholesaler:       PRICING_TIER.WHOLESALE,
 
   // Institutional → clinic rate
   clinic:           PRICING_TIER.CLINIC,
   pharmacy:         PRICING_TIER.CLINIC,
   hospital:         PRICING_TIER.CLINIC,
+  doctor:           PRICING_TIER.CLINIC,
+  staff:            PRICING_TIER.CLINIC,
 
   // Admin → full cost visibility
   admin:            PRICING_TIER.MASTER,
@@ -45,13 +51,11 @@ const ROLE_TO_TIER = Object.freeze({
 /**
  * Resolve tier from a raw role string (handles nulls & legacy userType values).
  * @param {string|undefined} role
- * @param {boolean} isAdmin
  * @returns {string} One of PRICING_TIER values
  */
-function resolveTierFromRole(role, isAdmin) {
-  if (isAdmin) return PRICING_TIER.MASTER;
-
+function resolveTierFromRole(role) {
   const normalised = (role ?? 'guest').toLowerCase().trim();
+  if (normalised === 'admin') return PRICING_TIER.MASTER;
 
   // Direct match
   if (ROLE_TO_TIER[normalised]) return ROLE_TO_TIER[normalised];
@@ -76,7 +80,7 @@ function resolveTierFromRole(role, isAdmin) {
  * }}
  */
 export function usePricingTier() {
-  const { user, userProfile, isAdmin, loading } = useAuth();
+  const { user, activeRole, loading } = useAuth();
 
   const { tier, role } = useMemo(() => {
     // While auth is loading, default to retail to avoid flash of wrong price
@@ -88,12 +92,10 @@ export function usePricingTier() {
       return { tier: PRICING_TIER.RETAIL, role: 'guest' };
     }
 
-    // Prefer explicit 'role' field; fall back to legacy 'userType'
-    const rawRole = userProfile?.role || userProfile?.userType || 'researcher';
-    const resolvedTier = resolveTierFromRole(rawRole, isAdmin);
+    const resolvedTier = resolveTierFromRole(activeRole);
 
-    return { tier: resolvedTier, role: rawRole.toLowerCase() };
-  }, [user, userProfile, isAdmin, loading]);
+    return { tier: resolvedTier, role: (activeRole || 'guest').toLowerCase() };
+  }, [user, activeRole, loading]);
 
   return {
     tier,

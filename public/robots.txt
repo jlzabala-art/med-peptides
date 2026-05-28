@@ -8,4 +8,4 @@ Disallow: /checkout
 Disallow: /settings
 Disallow: /auth
 
-Sitemap: https://med-peptides-app-27a3a.web.app/sitemap.xml
+Sitemap: https://Med-Peptides-app-27a3a.web.app/sitemap.xml

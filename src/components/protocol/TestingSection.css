@@ -1,0 +1,125 @@
+.proto-testing {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 32px;
+  margin-top: 32px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.proto-testing__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.proto-testing__icon {
+  color: #3b82f6;
+  background: #eff6ff;
+  padding: 8px;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+}
+
+.proto-testing__title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.proto-testing__subtitle {
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+  max-width: 600px;
+}
+
+.proto-testing__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.proto-testing__card {
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.proto-testing__card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.proto-testing__card-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.proto-testing__card-header--baseline {
+  background: #eff6ff;
+  color: #1e3a8a;
+  border-bottom-color: #bfdbfe;
+}
+
+.proto-testing__card-header--baseline svg {
+  color: #3b82f6;
+}
+
+.proto-testing__card-header--followup {
+  background: #fdf4ff;
+  color: #701a75;
+  border-bottom-color: #f5d0fe;
+}
+
+.proto-testing__card-header--followup svg {
+  color: #d946ef;
+}
+
+.proto-testing__list {
+  list-style: none;
+  padding: 20px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.proto-testing__list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.95rem;
+  color: #334155;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.proto-testing__check {
+  margin-top: 2px;
+  flex-shrink: 0;
+  color: #3b82f6;
+}
+
+.proto-testing__check--followup {
+  color: #d946ef;
+}
+
+@media (max-width: 768px) {
+  .proto-testing__grid {
+    grid-template-columns: 1fr;
+  }
+  .proto-testing {
+    padding: 20px;
+  }
+}

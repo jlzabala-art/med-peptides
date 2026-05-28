@@ -1,0 +1,28 @@
+[
+  {
+    "pmid": "9114437",
+    "title": "Characterization of mouse leukemia L1210 cells resistant to the ribonucleotide reductase inhibitor 4-methyl-5-amino-1-formylisoquinoline thiosemicarbazone.",
+    "authors": [
+      "Cory AH",
+      "Sato A",
+      "Thompson DP",
+      "Cory JG"
+    ],
+    "journal": "Oncology research",
+    "pubdate": "1996",
+    "doi": null,
+    "abstract": "Mouse leukemia L1210 cells were generated for resistance to 4-methyl-5-amino-1-formylisoquinoline thiosemicarbazone (MAIQ), a potent inhibitor of ribonucleotide reductase that is directed in the nonheme iron subunit (NHI) of the enzyme. The resistant cells, MQ-580, showed an 8-fold increase in IC50 toward MAIQ, a 4-fold increase in IC50 toward hydroxyurea, and also showed resistance to other ribonucleotide reductase inhibitors. In addition, the MQ-580 cell line was resistant to nonribonucleotide reductase inhibitors such as etoposide, daunomycin and vinblastine, but not to cisplatin. The mRNA for the NHI subunit was increased 7-fold in the MQ-580 cells with essentially no change in the mRNA level for the effector-binding subunit. The ribonucleotide reductase activity in the cell-free extracts prepared from the MQ-580 cells was only slightly elevated (30%). However, passage of the cell-free extract from the MQ-580 cells over Sephadex G-25 resulted in a 4.8-fold increase in specific activity over that of the wild-type cells. While the reductase activity in the cell-free extract from the MQ-580 cells did not show altered sensitivity to MAIQ, the reductase activity in the cell-free extract from the MQ-580 cells was much more sensitive to the effects of the iron-chelating agents Desferal and EDTA. The cell pellets from the MQ-580 cells were much darker in color than the pellets from the wild-type cells or hydroxyurea-resistant cells. The supernatant fraction from the MQ-580 cells after-SDS-PAGE showed the appearance of a strong Coomassie blue-staining band at 50 kDA that was not apparent in either the wild-type or hydroxyurea-resistant cells. This new resistant cell line offers an opportunity to explore differences in resistance mechanisms of drugs (e.g. MAIQ and hydroxyurea) that are directed at the same subunit of ribonucleotide reductase."
+  },
+  {
+    "pmid": "10427129",
+    "title": "Mouse leukemia L1210 cells selected for resistance to the ribonucleotide reductase inhibitor, 4-methyl-5-amino-1-formylisoquinoline thiosemicarbazone show altered response to DNA damaging agents.",
+    "authors": [
+      "Crenshaw TR",
+      "Cory JG"
+    ],
+    "journal": "International journal of oncology",
+    "pubdate": "1999 Sep",
+    "doi": null,
+    "abstract": "An L1210 cell line (MQ-580) selected for resistance to the ribonucleotide reductase inhibitor, 4-methyl-5-amino-1-formylisoquinoline thiosemicarbazone (MAIQ), had been previously shown to have altered properties related to the non-heme iron subunit of ribonucleotide reductase (RR). In addition, the MQ-580 cells had other metabolic alterations that were consistent with multidrug resistance. Neither the wild-type (WT) nor the MQ-580 cells showed a G0/G1 block in response to X-irradiation. Since the MQ-580 cells also showed resistance to adriamycin (ADR), the WT cells were more sensitive to the effects of ADR than the MQ-580 cells. However, when the MQ-580 cells were treated with the combination of ADR plus verapamil, the MQ-580 cells showed cellular responses that included cell cycle block in G2/M and increased apoptosis. The WT cells, in response to the combination of ADR plus verapamil, blocked in the S-phase of the cell cycle with an increased necrotic cell population in comparison to treatment with ADR alone. While MAIQ could be shown to cause an apoptotic response in the WT and MQ-580 cells, the concentrations of MAIQ required to induce apoptosis were 20- to 40-times the IC50 value. However, even though the MQ-580 cells were 8-fold more resistant to MAIQ than the WT cells, the MQ-580 cells were more sensitive to MAIQ-induced apoptosis. These data show that alterations at the RR site lead to phenotypic expressions not overtly related to RR. However, because of the critical role that RR plays in cell division and DNA repair, the changes observed with respect to cell cycle and apoptosis, may in fact, be a direct consequence of the alteration at RR."
+  }
+]

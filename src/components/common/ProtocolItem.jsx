@@ -1,3 +1,4 @@
+ 
 import React, { memo } from 'react';
 import {
   CheckCircle2, AlertTriangle, XCircle, Clock,
@@ -7,9 +8,9 @@ import {
 /* ─── helpers (fuera del componente para no recrearlos en cada render) ─── */
 
 const STATUS_MAP = {
-  pass:      { icon: CheckCircle2, color: '#10b981', label: 'Validated' },
+  pass:      { icon: CheckCircle2, color: 'var(--color-success)', label: 'Validated' },
   warning:   { icon: AlertTriangle, color: '#f59e0b', label: 'Warning'  },
-  blocked:   { icon: XCircle,       color: '#ef4444', label: 'Rejected' },
+  blocked:   { icon: XCircle,       color: 'var(--color-danger)', label: 'Rejected' },
   generated: { icon: Clock,         color: '#6b7280', label: 'Generated'},
 };
 

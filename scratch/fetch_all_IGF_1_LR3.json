@@ -1,0 +1,44 @@
+[
+  {
+    "pmid": "39679943",
+    "title": "IGF-1 LR3 does not promote growth in late-gestation growth-restricted fetal sheep.",
+    "authors": [
+      "White A",
+      "Stremming J",
+      "Wesolowski SR",
+      "Al-Juboori SI",
+      "Dobrinskikh E",
+      "Limesand SW",
+      "Brown LD",
+      "Rozance PJ"
+    ],
+    "journal": "American journal of physiology. Endocrinology and metabolism",
+    "pubdate": "2025 Jan 01",
+    "doi": "10.1152/ajpendo.00259.2024",
+    "abstract": "Insulin-like growth factor-1 (IGF-1) and insulin are important fetal anabolic hormones. Complications of pregnancy, such as placental insufficiency, can lead to fetal growth restriction (FGR) with low-circulating IGF-1 and insulin concentrations and attenuated glucose-stimulated insulin secretion (GSIS), which likely contribute to neonatal glucose dysregulation. We previously demonstrated that a 1-wk infusion of IGF-1 LR3, an IGF-1 analog with low affinity for IGF-binding proteins and high affinity for the IGF-1 receptor, at 6.6 \u00b5g\u00b7kg-1\u00b7h-1 into normal fetal sheep increased body weight but lowered insulin concentrations and GSIS. In this study, FGR fetal sheep received either IGF-1 LR3 treatment at 1.17\u2009\u00b1\u20090.12 \u03bcg\u00b7kg-1\u00b7h-1 (LR3; n = 7) or vehicle (VEH; n = 7) for 1 wk. Plasma insulin, glucose, oxygen, and amino acids were measured before starting treatment and at the end of the treatment period. GSIS was measured on the final treatment day. Fetal body weights, insulin, glucose, oxygen, and GSIS were not different between groups. Amino acid concentrations decreased in LR3 (baseline vs. final individual means comparison P = 0.0232) but not in VEH (P = 0.3866). In summary, a 1-wk IGF-1 LR3 treatment did not improve growth in FGR fetuses. Insulin concentrations and GSIS were not attenuated by IGF-1 LR3, yet circulating amino acids decreased, which could reflect increased amino acid utilization. We speculate that maintaining amino acid concentrations or raising insulin, glucose, and/or oxygen concentrations to values consistent with normally growing fetuses during IGF-1 LR3 treatment may be necessary to increase fetal growth in the setting of placental insufficiency and FGR.NEW & NOTEWORTHY IGF-1 LR3 treatment administered directly into growth-restricted fetal sheep circulation did not improve fetal growth or attenuate circulating insulin or fetal GSIS. Importantly, IGF-1 LR3 treatment reduced circulating amino acids, notably branched-chain amino acids, which have been shown to potentiate GSIS and protein accretion supporting fetal growth."
+  },
+  {
+    "pmid": "37261455",
+    "title": "Recombinant expression of IGF-1 and LR3 IGF-1 fused with xylanase in Pichia pastoris.",
+    "authors": [
+      "Lu Z",
+      "Liu N",
+      "Huang H",
+      "Wang Y",
+      "Tu T",
+      "Qin X",
+      "Wang X",
+      "Zhang J",
+      "Su X",
+      "Tian J",
+      "Bai Y",
+      "Luo H",
+      "Yao B",
+      "Zhang H"
+    ],
+    "journal": "Applied microbiology and biotechnology",
+    "pubdate": "2023 Jul",
+    "doi": "10.1007/s00253-023-12606-0",
+    "abstract": "Insulin-like growth factor-1 (IGF-1) is a pleiotropic protein hormone and has become an attractive therapeutic target because of its multiple roles in various physiological processes, including growth, development, and metabolism. However, its production is hindered by low heterogenous protein expression levels in various expression systems and hard to meet the needs of clinical and scientific research. Here, we report that human IGF-1 and its analog Long R3 IGF-1 (LR3 IGF-1) are recombinant expressed and produced in the Pichia pastoris (P. pastoris) expression system through being fused with highly expressed xylanase XynCDBFV. Furthermore, purified IGF-1 and LR3 IGF-1 display excellent bioactivity of cell proliferation compared to the standard IGF-1. Moreover, higher heterologous expression levels of the fusion proteins XynCDBFV-IGF-1 and XynCDBFV-LR3 IGF-1 are achieved by fermentation in a 15-L bioreactor, reaching up to about 0.5\u00a0g/L XynCDBFV-IGF-1 and 1\u00a0g/L XynCDBFV-TEV-LR3 IGF-1. Taken together, high recombinant expression of bioactive IGF-1 and LR3 IGF-1 is acquired with the assistance of xylanase as a fusion partner in P. pastoris, which could be used for both clinical and scientific applications. KEY POINTS: \u2022 Human IGF-1 and LR3 IGF-1 are produced in the P. pastoris expression system. \u2022 Purified IGF-1 and LR3 IGF-1 show bioactivity comparable to the standard IGF-1. \u2022 High heterologous expression of IGF-1 and LR3 IGF-1 is achieved by fermentation in a bioreactor."
+  }
+]

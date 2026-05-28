@@ -13,7 +13,7 @@ const path  = require('path');
 const fs    = require('fs');
 
 // ── Firebase init ─────────────────────────────────────────────────────────────
-const SA_PATH = path.resolve(__dirname, '../med-peptides-app-firebase-adminsdk-fbsvc-d01b0469f1.json');
+const SA_PATH = path.resolve(__dirname, '../Med-Peptides-app-firebase-adminsdk-fbsvc-d01b0469f1.json');
 admin.initializeApp({ credential: admin.credential.cert(JSON.parse(fs.readFileSync(SA_PATH, 'utf8'))) });
 const db = admin.firestore();
 

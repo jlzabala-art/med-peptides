@@ -1,3 +1,4 @@
+ 
 /**
  * pricingService.js
  *
@@ -6,7 +7,9 @@
  *
  * Canonical Firestore schema (variants subcollection):
  *   products/{productId}/variants/{variantId}.pricing.{retail|wholesale|clinic|master}
- *   Each tier entry: { perUnit: number, kit: number, currency: string }
+ *   Canonical tier entry:  { perUnit: number, kit: number, currency: string }
+ *   Legacy tier entry:     { base: number, byCountry: { [CC]: { base, currency } } }
+ *   resolvePrice.js normalises the legacy schema transparently at runtime.
  *
  * Public API:
  *   resolveVariantPrice(variant, opts)        — resolve a single variant price
@@ -33,12 +36,17 @@ export { resolveVariantPrice, resolveAndFormatPrice, formatPrice };
 const ROLE_TO_TIER = Object.freeze({
   guest:            PRICING_TIER.RETAIL,
   researcher:       PRICING_TIER.RETAIL,
+  sales_agent:      PRICING_TIER.RETAIL,
+  patient:          PRICING_TIER.RETAIL,
   verified_medical: PRICING_TIER.WHOLESALE,
   professional:     PRICING_TIER.WHOLESALE,
   distributor:      PRICING_TIER.WHOLESALE,
+  wholesaler:       PRICING_TIER.WHOLESALE,
   clinic:           PRICING_TIER.CLINIC,
   pharmacy:         PRICING_TIER.CLINIC,
   hospital:         PRICING_TIER.CLINIC,
+  doctor:           PRICING_TIER.CLINIC,
+  staff:            PRICING_TIER.CLINIC,
   admin:            PRICING_TIER.MASTER,
 });
 
@@ -77,9 +85,10 @@ export function resolvePriceForRole(variant, {
   isAdmin = false,
   countryCode = null,
   customerOverride = null,
+  tenant = null,
 } = {}) {
   const tier = getTierForRole(role, isAdmin);
-  return resolveVariantPrice(variant, { tier, countryCode, customerOverride });
+  return resolveVariantPrice(variant, { tier, countryCode, customerOverride, tenant });
 }
 
 /**
@@ -95,5 +104,6 @@ export function resolvePriceForRoleDisplay(variant, opts = {}) {
     tier,
     countryCode: opts.countryCode ?? null,
     customerOverride: opts.customerOverride ?? null,
+    tenant: opts.tenant ?? null,
   });
 }

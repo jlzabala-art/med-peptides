@@ -1,25 +1,15 @@
+/* eslint-disable no-undef */
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Activity, ArrowRight, Brain, Clock, Dna, Flame,
-  FlaskConical, Heart, Layers, Leaf, Moon, Shield,
-  Sparkles,
+  Activity, ArrowRight, Brain, ChevronDown, ChevronUp, Clock, Dna, Flame,
+  FlaskConical, Heart, Layers, Moon, Shield, Sparkles
 } from 'lucide-react';
-import protocolIndex from '../data/protocol_search_index.json';
+import { useCategoryBestItems } from '../hooks/useCategoryBestItems';
+import { useResponsive } from '../hooks/useResponsive';
+import { useAnalytics } from '../hooks/useAnalytics';
 
-// ── Category config ───────────────────────────────────────────────────────────
-const CATEGORIES = [
-  { key: 'all',                       label: 'All Protocols',    Icon: Sparkles },
-  { key: 'Weight Management / Obesity', label: 'Weight & Metabolic', Icon: Flame    },
-  { key: 'Recovery / Injury',           label: 'Recovery',           Icon: Heart   },
-  { key: 'Cognitive Support',           label: 'Cognitive',          Icon: Brain   },
-  { key: 'Longevity',                   label: 'Longevity',          Icon: Leaf    },
-  { key: 'Sleep Support',               label: 'Sleep',              Icon: Moon    },
-  { key: 'Hormonal Support',            label: 'Hormonal',           Icon: Activity},
-  { key: 'Immune / Inflammation',       label: 'Immune',             Icon: Shield  },
-  { key: 'Energy / Mitochondrial',      label: 'Energy',             Icon: Activity  },
-  { key: 'Skin / Anti-Aging',           label: 'Skin',               Icon: Dna     },
-];
+// CATEGORIES removed — categories are now read dynamically from Firestore.
 
 // ── Card visual theming per category ─────────────────────────────────────────
 const THEME = {
@@ -45,7 +35,7 @@ const THEME = {
     gradient: 'linear-gradient(135deg,#10b981 0%,#0ea5e9 100%)',
     glow: 'rgba(16,185,129,0.18)',
     accent: '#34d399',
-    Icon: Leaf,
+    Icon: Sparkles,
   },
   'Sleep Support': {
     gradient: 'linear-gradient(135deg,#3b82f6 0%,#8b5cf6 100%)',
@@ -87,6 +77,8 @@ function getTheme(category) {
     Icon: FlaskConical,
   };
 }
+
+
 
 // ── Protocol card ─────────────────────────────────────────────────────────────
 function ProtocolCard({ protocol, onClick }) {
@@ -281,16 +273,80 @@ function ProtocolCard({ protocol, onClick }) {
   );
 }
 
+// ── Skeleton card (loading state) ────────────────────────────────────────────
+function SkeletonCard() {
+  return (
+    <div style={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.07)', overflow: 'hidden', background: 'rgba(255,255,255,0.88)' }}>
+      <div style={{ height: '5px', background: 'rgba(0,0,0,0.08)' }} />
+      <div style={{ padding: '1.4rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ width: 42, height: 42, borderRadius: 12, background: 'rgba(0,0,0,0.08)' }} />
+          <div style={{ width: 80, height: 20, borderRadius: 20, background: 'rgba(0,0,0,0.06)' }} />
+        </div>
+        <div style={{ height: 16, borderRadius: 8, background: 'rgba(0,0,0,0.08)' }} />
+        <div style={{ height: 12, borderRadius: 8, background: 'rgba(0,0,0,0.05)', width: '70%' }} />
+        <div style={{ height: 36, borderRadius: 8, background: 'rgba(0,0,0,0.05)' }} />
+      </div>
+    </div>
+  );
+}
+
+// ── Mobile: one accordion item per category ───────────────────────────────────
+// Phase B3 — internal useState removed; open state fully controlled by parent
+function AccordionItem({ category, protocol, navigate, isOpen, onToggle }) {
+  const theme = getTheme(category);
+  const { Icon } = theme;
+  return (
+    <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: '16px', overflow: 'hidden', background: 'white', marginBottom: '0.75rem' }}>
+      <button
+        onClick={() => onToggle(category)}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.2rem', background: 'transparent', border: 'none', cursor: 'pointer', gap: '0.75rem' }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <div style={{ width: 32, height: 32, borderRadius: '10px', background: theme.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon size={16} color="white" strokeWidth={1.8} />
+          </div>
+          <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)', textAlign: 'left' }}>{category}</span>
+        </div>
+        {isOpen ? <ChevronUp size={18} color="var(--text-muted)" /> : <ChevronDown size={18} color="var(--text-muted)" />}
+      </button>
+      {isOpen && (
+        <div style={{ padding: '0 1rem 1rem' }}>
+          <ProtocolCard
+            protocol={protocol}
+            onClick={() => {
+              trackProtocolClick({ protocolId: protocol.protocol_id, category, source: 'trending_mobile_accordion' });
+              navigate(`/protocol/${protocol.protocol_id}`);
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main section ──────────────────────────────────────────────────────────────
 export default function TrendingProtocols() {
   const navigate = useNavigate();
-  const [activeCategory, setActiveCategory] = useState('all');
+  const isMobile = useResponsive('(max-width: 767px)');
+  const { allItems, loading } = useCategoryBestItems('blueprints', 'protocol_id');
 
-  const filtered = activeCategory === 'all'
-    ? protocolIndex
-    : protocolIndex.filter(p => p.category === activeCategory);
+  // Phase D1 — pagination: show 4 categories per page
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 4;
+  const items = allItems.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
 
-  const displayed = filtered.slice(0, 6);
+  // Phase E1 — analytics
+  const { trackProtocolClick, trackTrendingCategoryOpen } = useAnalytics();
+
+  // Phase B1 — mutual-exclusion: only one accordion open at a time
+  const [openCategory, setOpenCategory] = useState(null);
+
+  function handleAccordionToggle(cat) {
+    const willOpen = openCategory !== cat;
+    setOpenCategory(prev => (prev === cat ? null : cat));
+    if (willOpen) trackTrendingCategoryOpen({ section: 'protocols', category: cat });
+  }
 
   return (
     <section style={{ padding: '4rem 1rem', background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)' }}>
@@ -338,82 +394,95 @@ export default function TrendingProtocols() {
           </p>
         </div>
 
-        {/* ── Category filter strip ── */}
-        <div style={{
-          display: 'flex',
-          gap: '0.5rem',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          marginBottom: '2.5rem',
-        }}>
-          {CATEGORIES.map(({ key, label, Icon: CatIcon }) => {
-            const active = activeCategory === key;
-            return (
-              <button
-                key={key}
-                onClick={() => setActiveCategory(key)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  padding: '0.45rem 1rem',
-                  borderRadius: '30px',
-                  border: active ? '1.5px solid var(--primary)' : '1px solid rgba(0,0,0,0.1)',
-                  background: active ? 'var(--primary)' : 'white',
-                  color: active ? 'white' : 'var(--text-muted)',
-                  fontWeight: 700,
-                  fontSize: '0.78rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: active ? '0 4px 14px rgba(0,113,189,0.25)' : 'none',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                <CatIcon size={13} strokeWidth={2} />
-                {label}
-              </button>
-            );
-          })}
-        </div>
+        {/* ── Loading: 4 skeleton cards ── */}
+        {loading && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+            {[0, 1, 2, 3].map(i => <SkeletonCard key={i} />)}
+          </div>
+        )}
 
-        {/* ── Cards grid ── */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-          gap: '1.25rem',
-          marginBottom: '2.5rem',
-        }}>
-          {displayed.map(protocol => (
-            <ProtocolCard
-              key={protocol.protocol_id}
-              protocol={protocol}
-              onClick={() => navigate(`/protocol/${protocol.protocol_id}`)}
-            />
-          ))}
-        </div>
+        {/* ── Phase F1: Empty state ── */}
+        {!loading && allItems.length === 0 && (
+          <div style={{
+            textAlign: 'center', padding: '3rem 1.5rem', marginBottom: '2.5rem',
+            background: 'rgba(0,113,189,0.03)', borderRadius: '16px',
+            border: '1.5px dashed rgba(0,113,189,0.15)',
+          }}>
+            <FlaskConical size={40} style={{ color: 'rgba(0,113,189,0.25)', marginBottom: '1rem' }} />
+            <p style={{ fontSize: '1rem', color: '#9ca3af', fontWeight: 600, margin: 0 }}>
+              No protocols available right now. Check back soon.
+            </p>
+          </div>
+        )}
+
+        {/* ── Mobile: accordions per category ── */}
+        {!loading && isMobile && allItems.length > 0 && (
+          <div style={{ marginBottom: '2.5rem' }}>
+            {items.map(({ category, item }) => (
+              <AccordionItem
+                key={category}
+                category={category}
+                protocol={item}
+                navigate={navigate}
+                isOpen={openCategory === category}
+                onToggle={handleAccordionToggle}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* ── Desktop: 4-card grid ── */}
+        {!loading && !isMobile && allItems.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+            {items.map(({ item }) => (
+              <ProtocolCard
+                key={item.protocol_id}
+                protocol={item}
+                onClick={() => {
+                  trackProtocolClick({ protocolId: item.protocol_id, source: 'trending_desktop_grid' });
+                  navigate(`/protocol/${item.protocol_id}`);
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* ── Phase D2: Pagination controls ── */}
+        {!loading && allItems.length > PAGE_SIZE && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
+            {page > 0 && (
+              <button
+                onClick={() => { setPage(p => p - 1); setOpenCategory(null); }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1.25rem', background: 'white', border: '1.5px solid rgba(0,113,189,0.2)', borderRadius: '40px', fontWeight: 700, fontSize: '0.85rem', color: 'var(--primary)', cursor: 'pointer' }}
+              >
+                ← Anterior
+              </button>
+            )}
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              {page + 1} / {Math.ceil(allItems.length / PAGE_SIZE)}
+            </span>
+            {allItems.length > (page + 1) * PAGE_SIZE && (
+              <button
+                onClick={() => { setPage(p => p + 1); setOpenCategory(null); }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1.25rem', background: 'linear-gradient(135deg,#003666,#0071bd)', border: 'none', borderRadius: '40px', fontWeight: 700, fontSize: '0.85rem', color: 'white', cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,113,189,0.25)' }}
+              >
+                Ver 4 más →
+              </button>
+            )}
+          </div>
+        )}
 
         {/* ── Footer CTA row ── */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '1rem',
-          flexWrap: 'wrap',
-        }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
           <button
-            onClick={() => navigate('/protocol-builder')}
+            onClick={() => navigate('/protocol-finder')}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.6rem',
               padding: '0.85rem 2rem',
               background: 'linear-gradient(135deg,#003666,#0071bd)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '40px',
-              fontWeight: 800,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              boxShadow: '0 8px 24px rgba(0,113,189,0.3)',
-              transition: 'all 0.2s ease',
+              color: 'white', border: 'none', borderRadius: '40px',
+              fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer',
+              boxShadow: '0 8px 24px rgba(0,113,189,0.3)', transition: 'all 0.2s ease',
             }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(0,113,189,0.4)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,113,189,0.3)'; }}
@@ -422,29 +491,21 @@ export default function TrendingProtocols() {
             Build a Custom Protocol
             <ArrowRight size={15} />
           </button>
-
-          {filtered.length > 6 && (
-            <button
-              onClick={() => navigate('/protocols')}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.85rem 1.75rem',
-                background: 'white',
-                color: 'var(--primary)',
-                border: '1.5px solid rgba(0,113,189,0.2)',
-                borderRadius: '40px',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.background = 'rgba(0,113,189,0.04)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,113,189,0.2)'; e.currentTarget.style.background = 'white'; }}
-            >
-              View all {filtered.length} protocols
-              <ArrowRight size={14} />
-            </button>
-          )}
+          <button
+            onClick={() => navigate('/protocols')}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+              padding: '0.85rem 1.75rem', background: 'white',
+              color: 'var(--primary)', border: '1.5px solid rgba(0,113,189,0.2)',
+              borderRadius: '40px', fontWeight: 700, fontSize: '0.9rem',
+              cursor: 'pointer', transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.background = 'rgba(0,113,189,0.04)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,113,189,0.2)'; e.currentTarget.style.background = 'white'; }}
+          >
+            View all protocols
+            <ArrowRight size={14} />
+          </button>
         </div>
 
       </div>

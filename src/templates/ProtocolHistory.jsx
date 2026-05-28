@@ -1,3 +1,4 @@
+ 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Activity, Search, Star, ArrowLeft, AlertCircle, SlidersHorizontal, FilterX, BookOpen } from 'lucide-react';
@@ -12,39 +13,47 @@ import { useToast } from '../hooks/useToast';
 import { deleteProtocol } from '../services/protocolStorage';
 
 /* ─────────────────────────────────────────────
-   FASE 4 — ProtocolHistory
-   3.1 · Persistencia de filtros en localStorage
-   3.2 · Empty State dinámico (3 variantes)
-   3.3 · Error Boundary + manejo robusto de
-         errores de Firestore/Firebase
+   PHASE 4 — ProtocolHistory
+   3.1 · Filter persistence in localStorage
+   3.2 · Dynamic Empty State (3 variants)
+   3.3 · Error Boundary + robust error handling
+         for Firestore/Firebase
    4   · Optimistic UI + Toast Notifications
 ───────────────────────────────────────────── */
 
-// ── Claves de persistencia (únicas y con namespace)
+// ── Persistence keys (unique with namespace)
 const LS_STATUS_KEY   = 'ph_filter_status';
 const LS_FAVORITE_KEY = 'ph_filter_favorite';
 
-// ── Inicializadores lazy: se ejecutan solo en el primer render
+// ── Lazy initializers: run only on first render
 const initStatus   = () => localStorage.getItem(LS_STATUS_KEY)   ?? 'all';
 const initFavorite = () => localStorage.getItem(LS_FAVORITE_KEY) === 'true';
+
+const parseDate = (d) => {
+  if (!d) return 0;
+  if (typeof d.toDate === 'function') return d.toDate().getTime();
+  if (d.seconds) return d.seconds * 1000;
+  const parsed = new Date(d);
+  return isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+};
 
 export default function ProtocolHistory() {
   const navigate = useNavigate();
 
-  // ── Estado (lazy init desde localStorage)
+  // ── State (lazy init from localStorage)
   const [protocols, setProtocols]           = useState([]);
   const [loading, setLoading]               = useState(true);
-  const [error, setError]                   = useState(null);   // FASE 3.3
-  const [retryKey, setRetryKey]             = useState(0);      // FASE 3.3
+  const [error, setError]                   = useState(null);   // PHASE 3.3
+  const [retryKey, setRetryKey]             = useState(0);      // PHASE 3.3
   const [searchTerm, setSearchTerm]         = useState('');
   const [filterFavorite, setFilterFavorite] = useState(initFavorite);
   const [statusFilter, setStatusFilter]     = useState(initStatus);
   const [drawerOpen, setDrawerOpen]         = useState(false);
 
-  // ── Toast (FASE 4)
+  // ── Toast (PHASE 4)
   const { toasts, toast } = useToast();
 
-  // ── Persistir filtros en localStorage cuando cambian
+  // ── Persist filters in localStorage when they change
   useEffect(() => {
     localStorage.setItem(LS_STATUS_KEY, statusFilter);
   }, [statusFilter]);
@@ -53,10 +62,10 @@ export default function ProtocolHistory() {
     localStorage.setItem(LS_FAVORITE_KEY, String(filterFavorite));
   }, [filterFavorite]);
 
-  // ── Debounce del search input
+  // ── Search input debounce
   const debouncedSearch = useDebounce(searchTerm, 300);
 
-  // ── Carga inicial — con manejo explícito de errores (FASE 3.3)
+  // ── Initial load — with explicit error handling (PHASE 3.3)
   useEffect(() => {
     let cancelled = false;
     const fetchProtocols = async () => {
@@ -71,7 +80,7 @@ export default function ProtocolHistory() {
         if (!cancelled) {
           console.error('[ProtocolHistory] fetch error:', err);
           setError(err);
-          // FASE 4: inform user via toast as well
+          // PHASE 4: inform user via toast as well
           toast.error(
             err?.code === 'unavailable'
               ? 'Network unavailable — check your connection.'
@@ -84,9 +93,9 @@ export default function ProtocolHistory() {
     };
     fetchProtocols();
     return () => { cancelled = true; };
-  }, [retryKey]); // re-ejecuta cuando el usuario pulsa "Retry"
+  }, [retryKey]); // re-runs when the user clicks "Retry"
 
-  // ── Filtrado memoizado
+  // ── Memoized filtering
   const filteredProtocols = useMemo(() => {
     const term = debouncedSearch.toLowerCase();
     return protocols.filter((p) => {
@@ -97,12 +106,13 @@ export default function ProtocolHistory() {
     });
   }, [protocols, debouncedSearch, filterFavorite, statusFilter]);
 
-  // ── Handlers estables
+  // ── Stable handlers
   const handleNavigate = useCallback((id) => {
-    navigate(`/protocol-builder?id=${id}`);
+    // Navigating to the consolidated protocol view
+    navigate(`/protocol/${id}`);
   }, [navigate]);
 
-  // FASE 4: Optimistic favorite toggle — instant UI, Firestore in background
+  // PHASE 4: Optimistic favorite toggle — instant UI, Firestore in background
   const handleToggleFavorite = useCallback(async (id, currentFav) => {
     // 1. Optimistic update
     setProtocols((prev) =>
@@ -124,7 +134,7 @@ export default function ProtocolHistory() {
     }
   }, [toast]);
 
-  // FASE 4: Optimistic delete — instant UI removal, Firestore in background
+  // PHASE 4: Optimistic delete — instant UI removal, Firestore in background
   const handleDelete = useCallback(async (id) => {
     // 1. Snapshot for rollback
     const snapshot = protocols.find((p) => p.id === id);
@@ -141,9 +151,11 @@ export default function ProtocolHistory() {
       if (snapshot) {
         setProtocols((prev) => {
           // Insert back maintaining order by createdAt
-          const next = [...prev, snapshot].sort((a, b) =>
-            new Date(b.createdAt) - new Date(a.createdAt)
-          );
+          const next = [...prev, snapshot].sort((a, b) => {
+            const timeA = parseDate(a.createdAt || a.created_at);
+            const timeB = parseDate(b.createdAt || b.created_at);
+            return timeB - timeA;
+          });
           return next;
         });
       }
@@ -157,13 +169,13 @@ export default function ProtocolHistory() {
     setStatusFilter('all');
   }, []);
 
-  // ── Retry handler para el ErrorBoundary (FASE 3.3)
+  // ── Retry handler for ErrorBoundary (PHASE 3.3)
   const handleRetry = useCallback(() => {
     setError(null);
     setRetryKey((k) => k + 1);
   }, []);
 
-  // ── Derivados de UI
+  // ── UI derivatives
   const hasActiveFilters      = filterFavorite || statusFilter !== 'all' || searchTerm.trim() !== '';
   const activeFilterCount     = [filterFavorite, statusFilter !== 'all'].filter(Boolean).length;
 
@@ -177,10 +189,10 @@ export default function ProtocolHistory() {
           <div>
             <button
               className="ph-back-btn"
-              onClick={() => navigate('/protocol-builder')}
-              aria-label="Back to Protocol Builder"
+              onClick={() => navigate('/')}
+              aria-label="Back to Knowledge Hub"
             >
-              <ArrowLeft size={16} /> Back to Builder
+              <ArrowLeft size={16} /> Back to Hub
             </button>
             <h1 className="ph-title">Protocol Archives</h1>
           </div>
@@ -190,8 +202,8 @@ export default function ProtocolHistory() {
         </header>
 
         {/* ── Filter bar (desktop) ── */}
-        {/* En desktop: search + select + favorites inline                     */}
-        {/* En mobile: search + botón "Filters" que abre el DrawerBottom Sheet */}
+        {/* Desktop: search + select + favorites inline */}
+        {/* Mobile: search + "Filters" button that opens Bottom Sheet Drawer */}
         <div className="ph-filters" role="search" aria-label="Filter protocols">
 
           {/* Search — visible en todos los breakpoints */}
@@ -207,7 +219,7 @@ export default function ProtocolHistory() {
             />
           </div>
 
-          {/* ── DESKTOP: controles inline ── */}
+          {/* ── DESKTOP: inline controls ── */}
           <div className="ph-filters__desktop-controls">
             <select
               className="ph-filters__select"
@@ -243,7 +255,7 @@ export default function ProtocolHistory() {
             )}
           </div>
 
-          {/* ── MOBILE: botón "Filters" que abre Bottom Sheet ── */}
+          {/* ── MOBILE: "Filters" button that opens Bottom Sheet ── */}
           <button
             className={`ph-filters__drawer-btn${activeFilterCount > 0 ? ' has-badge' : ''}`}
             onClick={() => setDrawerOpen(true)}
@@ -260,7 +272,7 @@ export default function ProtocolHistory() {
           </button>
         </div>
 
-        {/* ── FASE 2: FilterDrawer (Bottom Sheet mobile) ── */}
+        {/* ── PHASE 2: FilterDrawer (Mobile Bottom Sheet) ── */}
         <FilterDrawer
           isOpen={drawerOpen}
           onClose={() => setDrawerOpen(false)}
@@ -275,7 +287,7 @@ export default function ProtocolHistory() {
         {/* ── Content ── */}
         {loading && <ProtocolSkeleton count={5} />}
 
-        {/* Error de fetch (async — no render-phase): mostrado inline */}
+        {/* Fetch error (async — non-render phase): shown inline */}
         {!loading && error && (
           <div className="ph-fetch-error" role="alert">
             <AlertCircle size={32} className="ph-fetch-error__icon" aria-hidden="true" />
@@ -301,7 +313,7 @@ export default function ProtocolHistory() {
             hasActiveFilters={hasActiveFilters}
             searchOnly={debouncedSearch.trim() !== '' && !filterFavorite && statusFilter === 'all'}
             onClear={clearFilters}
-            onBuild={() => navigate('/protocol-builder')}
+            onBuild={() => navigate('/')}
           />
         )}
 
@@ -321,7 +333,7 @@ export default function ProtocolHistory() {
 
       </div>
 
-      {/* ── FASE 4: Toast Notifications (fixed overlay) */}
+      {/* ── PHASE 4: Toast Notifications (fixed overlay) */}
       <ToastContainer toasts={toasts} onDismiss={toast.dismiss} />
 
       </ProtocolErrorBoundary>
@@ -330,11 +342,11 @@ export default function ProtocolHistory() {
 }
 
 /* ─────────────────────────────────────────────
-   FASE 3.2 — EmptyState
-   Componente interno: tres variantes contextuales
-   1. searchOnly  → búsqueda sin resultados
-   2. hasActiveFilters → filtros de drawer activos
-   3. vacío real  → sin protocolos guardados
+   PHASE 3.2 — EmptyState
+   Internal component: three contextual variants
+   1. searchOnly → search without results
+   2. hasActiveFilters → active drawer filters
+   3. actual empty → no saved protocols
 ───────────────────────────────────────────── */
 function EmptyState({ hasActiveFilters, searchOnly, onClear, onBuild }) {
   const config = searchOnly

@@ -184,7 +184,7 @@ async function main() {
   // Initialize Firebase Admin
   try {
     admin.initializeApp({
-      projectId: 'med-peptides-app',
+      projectId: 'Med-Peptides-app',
     });
   } catch (e) {
     // Already initialized

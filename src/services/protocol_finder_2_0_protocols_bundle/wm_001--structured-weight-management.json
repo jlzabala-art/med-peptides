@@ -1,0 +1,576 @@
+{
+  "protocol_id": "wm_001",
+  "protocol_slug": "weight-management-structured-12w",
+  "protocol_title": "Structured Weight Management Protocol",
+  "protocol_version": "v6.0",
+  "status": "approved",
+  "active": true,
+  "metadata": {
+    "primary_goal": "weight_management",
+    "primary_condition": "obesity_metabolic_dysfunction",
+    "complexity_level": "standard",
+    "visibility": "public",
+    "source_type": "curated_library",
+    "source_reference": "Med-Peptides_Weight_Management_Protocols_2026",
+    "marker_alignment": {
+      "metabolic_objective": {
+        "fat_loss": {
+          "score": 90,
+          "note": "Primary lipolytic pathway activation via GLP-1/GIP"
+        },
+        "insulin": {
+          "score": 85,
+          "note": "Strong glucose disposal optimization"
+        },
+        "appetite": {
+          "score": 95,
+          "note": "Superior satiety signaling modulation"
+        }
+      }
+    },
+    "author": {
+      "name": "Med-Peptides Clinical Team",
+      "organization": "Med-Peptides",
+      "title": "Peptide Specialists"
+    },
+    "review": {
+      "review_status": "approved",
+      "last_reviewed_at": "2026-04-02"
+    },
+    "created_at": "2026-04-02T00:00:00.000Z",
+    "updated_at": "2026-04-02T00:00:00.000Z"
+  },
+  "eligibility_rules": {
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ],
+    "supported_goals": [
+      "weight_management",
+      "obesity",
+      "metabolic_health",
+      "body_composition"
+    ],
+    "required_patient_inputs": [
+      "primary_clinical_focus",
+      "patient_demographic",
+      "age_group",
+      "start_date",
+      "baseline_weight",
+      "height",
+      "bmi",
+      "metabolic_status",
+      "tolerance_profile",
+      "duration_weeks"
+    ],
+    "contraindications": [
+      "history_of_pancreatitis",
+      "active_gallbladder_disease",
+      "pregnancy",
+      "MEN2_syndrome",
+      "medullary_thyroid_carcinoma_history",
+      "severe_gi_disorder"
+    ],
+    "relative_cautions": [
+      "frailty",
+      "advanced_renal_impairment",
+      "poor_oral_intake",
+      "rapid_weight_loss_history"
+    ]
+  },
+  "variant_rules": {
+    "age_variants": {
+      "18-35": {
+        "default_duration_weeks": 12,
+        "escalation_profile": "standard",
+        "monitoring_intensity": "standard"
+      },
+      "36-50": {
+        "default_duration_weeks": 12,
+        "escalation_profile": "moderate",
+        "monitoring_intensity": "moderate"
+      },
+      "51-65": {
+        "default_duration_weeks": 16,
+        "escalation_profile": "conservative",
+        "monitoring_intensity": "enhanced"
+      },
+      "65+": {
+        "default_duration_weeks": 16,
+        "escalation_profile": "conservative",
+        "monitoring_intensity": "enhanced"
+      }
+    },
+    "sex_variants": {
+      "female": {
+        "recommended_baseline_labs": [
+          "ferritin",
+          "TSH",
+          "free_T4"
+        ],
+        "special_flags": [
+          "cycle_variability",
+          "fluid_retention"
+        ]
+      },
+      "male": {
+        "recommended_baseline_labs": [
+          "total_testosterone",
+          "SHBG",
+          "estradiol"
+        ],
+        "special_flags": [
+          "androgen_status"
+        ]
+      }
+    },
+    "duration_variants": {
+      "8_weeks": {
+        "mode": "short",
+        "maintenance_phase": false,
+        "extra_monitoring": false
+      },
+      "12_weeks": {
+        "mode": "standard",
+        "maintenance_phase": true,
+        "extra_monitoring": false
+      },
+      "16_weeks": {
+        "mode": "extended",
+        "maintenance_phase": true,
+        "extra_monitoring": true
+      },
+      "20_weeks": {
+        "mode": "extended_metabolic",
+        "maintenance_phase": true,
+        "extra_monitoring": true
+      }
+    },
+    "tempo_variants": {
+      "conservative": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "up"
+      },
+      "standard": {
+        "dose_step_interval_weeks": 4,
+        "monitoring_intensity_modifier": "none"
+      },
+      "aggressive": {
+        "dose_step_interval_weeks": 2,
+        "monitoring_intensity_modifier": "up",
+        "restricted_to": [
+          "18-35",
+          "36-50"
+        ]
+      }
+    }
+  },
+  "phase_blueprints": [
+    {
+      "phase_key": "initiation",
+      "phase_title": "Initiation",
+      "default_start_week": 1,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "tolerance_building",
+        "initial_appetite_control",
+        "mitochondrial_activation"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_tirzepatide",
+          "product_title": "Tirzepatide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "starting_weekly_dose": 2.5,
+            "administration_frequency": "weekly",
+            "administration_days_default": [
+              "Monday"
+            ],
+            "default_weekly_dose": 5,
+            "dose_per_administration": 2.5
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_tirzepatide",
+            "route": "SC"
+          },
+          "dosage_form": "vial"
+        },
+        {
+          "product_id": "prd_mots-c",
+          "product_title": "MOTS-C",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "dose_per_administration": 5,
+            "administration_frequency": "2x_week",
+            "administration_days_default": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "role": "optional_metabolic_adjunct",
+            "starting_weekly_dose": 10,
+            "default_weekly_dose": 10
+          },
+          "variantRef": {
+            "type": "exact",
+            "variantId": "var_mots-c_sc_5mg",
+            "productId": "prd_mots-c",
+            "route": "SC"
+          },
+          "dosage_form": "vial"
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 1,
+          "event_type": "baseline_review",
+          "title": "Baseline metabolic and tolerance review"
+        }
+      ]
+    },
+    {
+      "phase_key": "escalation",
+      "phase_title": "Escalation",
+      "default_start_week": 5,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "dose_optimization",
+        "fat_loss_acceleration",
+        "metabolic_response_assessment"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_tirzepatide",
+          "product_title": "Tirzepatide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "default_weekly_dose": 5,
+            "possible_next_step_dose": 7.5,
+            "administration_frequency": "weekly",
+            "administration_days_default": [
+              "Monday"
+            ],
+            "starting_weekly_dose": 2.5,
+            "dose_per_administration": 2.5
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_tirzepatide",
+            "route": "SC"
+          },
+          "dosage_form": "vial"
+        },
+        {
+          "product_id": "prd_mots-c",
+          "product_title": "MOTS-C",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "dose_per_administration": 5,
+            "administration_frequency": "2x_week",
+            "administration_days_default": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "role": "optional_metabolic_adjunct",
+            "starting_weekly_dose": 10,
+            "default_weekly_dose": 10
+          },
+          "variantRef": {
+            "type": "exact",
+            "variantId": "var_mots-c_sc_5mg",
+            "productId": "prd_mots-c",
+            "route": "SC"
+          },
+          "dosage_form": "vial"
+        },
+        {
+          "product_id": "prd_aod-9604",
+          "product_title": "AOD-9604",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mcg",
+            "dose_per_administration": 300,
+            "administration_frequency": "daily",
+            "administration_days_default": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "timing_hint": "morning_fasting",
+            "role": "optional_lipolytic_adjunct",
+            "starting_weekly_dose": 2100,
+            "default_weekly_dose": 2100
+          },
+          "variantRef": {
+            "type": "exact",
+            "variantId": "var_aod9604_sc_2mg",
+            "productId": "prd_aod-9604",
+            "route": "SC"
+          },
+          "dosage_form": "vial"
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 8,
+          "event_type": "metabolic_reassessment",
+          "title": "Mid-course metabolic review"
+        }
+      ]
+    },
+    {
+      "phase_key": "maintenance",
+      "phase_title": "Maintenance",
+      "default_start_week": 9,
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "stabilization",
+        "habit_consolidation",
+        "maintenance_of_response"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_tirzepatide",
+          "product_title": "Tirzepatide",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "default_weekly_dose": 5,
+            "max_weekly_dose": 10,
+            "administration_frequency": "weekly",
+            "administration_days_default": [
+              "Monday"
+            ],
+            "starting_weekly_dose": 2.5,
+            "dose_per_administration": 2.5
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_tirzepatide",
+            "route": "SC"
+          },
+          "dosage_form": "vial"
+        },
+        {
+          "product_id": "prd_mots-c",
+          "product_title": "MOTS-C",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "dose_per_administration": 5,
+            "administration_frequency": "2x_week",
+            "administration_days_default": [
+              "Tuesday",
+              "Thursday"
+            ],
+            "role": "optional_metabolic_adjunct",
+            "starting_weekly_dose": 10,
+            "default_weekly_dose": 10
+          },
+          "variantRef": {
+            "type": "exact",
+            "variantId": "var_mots-c_sc_5mg",
+            "productId": "prd_mots-c",
+            "route": "SC"
+          },
+          "dosage_form": "vial"
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 12,
+          "event_type": "outcome_review",
+          "title": "Outcome review and continuation decision"
+        }
+      ]
+    }
+  ],
+  "monitoring_plan": {
+    "baseline_required": [
+      "HbA1c",
+      "fasting_glucose",
+      "insulin",
+      "lipid_profile",
+      "AST",
+      "ALT",
+      "creatinine",
+      "blood_pressure",
+      "body_weight",
+      "waist_circumference",
+      "body_composition"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "week": 4,
+        "type": "tolerance_and_safety",
+        "labs": [
+          "fasting_glucose",
+          "AST",
+          "ALT",
+          "body_weight",
+          "blood_pressure"
+        ],
+        "purpose": "early tolerance and metabolic response review"
+      },
+      {
+        "week": 8,
+        "type": "metabolic_reassessment",
+        "labs": [
+          "HbA1c",
+          "fasting_glucose",
+          "insulin",
+          "lipid_profile"
+        ],
+        "purpose": "mid-course metabolic reassessment"
+      },
+      {
+        "week": 12,
+        "type": "outcome_and_safety_review",
+        "labs": [
+          "HbA1c",
+          "lipid_profile",
+          "AST",
+          "ALT",
+          "creatinine"
+        ],
+        "purpose": "end-of-cycle review"
+      }
+    ],
+    "labs": []
+  },
+  "expected_outcomes": {
+    "qualitative": [
+      "reduced appetite",
+      "progressive fat loss",
+      "improved metabolic efficiency"
+    ],
+    "quantitative_ranges": {
+      "weight_loss_percent": "5-15%",
+      "waist_reduction_cm": "5-12",
+      "HbA1c_reduction_percent": "0.4-1.2",
+      "fat_mass_reduction_percent": "4-10%"
+    }
+  },
+  "generator_rules": {
+    "selection_priority": [
+      "goal_match",
+      "age_variant_match",
+      "sex_variant_match",
+      "duration_variant_match",
+      "contraindication_screen",
+      "tolerance_profile"
+    ],
+    "tolerance_profiles": {
+      "good": {
+        "max_intensity": "aggressive"
+      },
+      "average": {
+        "max_intensity": "standard"
+      },
+      "sensitive": {
+        "max_intensity": "conservative"
+      }
+    }
+  },
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "patient_demographic": null,
+      "age_group": null,
+      "baseline_weight": null,
+      "height_cm": null,
+      "bmi": null,
+      "metabolic_status": null,
+      "duration_weeks": null,
+      "start_date": null,
+      "tempo_preference": "standard"
+    },
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "resolved_monitoring": [],
+    "resolved_costs": {},
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    }
+  },
+  "legacy_compatibility": {
+    "enabled": true,
+    "legacy_aliases": {
+      "protocol_duration_weeks": 12,
+      "primary_goal": "Weight Management / Obesity",
+      "author": "system"
+    },
+    "notes": "Legacy simplified fields can be generated downstream if needed."
+  },
+  "economics": {
+    "estimated_total_cost": 1691,
+    "estimated_weekly_cost": 141,
+    "currency": "USD"
+  },
+  "recommended_supplements": [
+    {
+      "name": "Berberine",
+      "dosage": "500mg",
+      "rationale": "Supports insulin sensitivity and glucose metabolism",
+      "frequency": "2x Daily",
+      "weekly_dose": "7000mg"
+    },
+    {
+      "name": "Alpha-Lipoic Acid",
+      "dosage": "300mg",
+      "rationale": "Mitochondrial antioxidant supporting fat metabolism",
+      "frequency": "Daily",
+      "weekly_dose": "2100mg"
+    },
+    {
+      "name": "Coenzyme Q10",
+      "dosage": "100mg",
+      "rationale": "Cellular energy production and metabolic support",
+      "frequency": "Daily",
+      "weekly_dose": "700mg"
+    }
+  ],
+  "mechanism_of_action": [
+    "Targeted receptor modulation and cellular signaling optimization.",
+    "Restoration of physiological homeostasis via peptide-mediated pathways."
+  ],
+  "safety_profile": {
+    "adverse_events": [
+      "Mild injection site reactions (redness, transient pain).",
+      "Potential for mild, transient nausea during initial dose titration."
+    ],
+    "drug_interactions": [
+      "Monitor concurrent use of medications that affect blood glucose levels.",
+      "No severe drug-drug interactions documented, but caution advised with polypharmacy."
+    ],
+    "contraindications": [
+      "Pregnancy and lactation.",
+      "Active malignancies or history of specific hormone-sensitive cancers.",
+      "Known hypersensitivity to any protocol components."
+    ]
+  }
+}

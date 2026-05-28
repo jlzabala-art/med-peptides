@@ -1,0 +1,191 @@
+/* ── Hero Card Design System ── */
+
+.hero-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 2.25rem;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Hover & Focus Micro-Animations */
+.hero-card:hover {
+  transform: translateY(-6px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(0, 150, 204, 0.4);
+  box-shadow: 0 40px 80px rgba(0, 150, 204, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.hero-card .icon-box {
+  background: rgba(0, 150, 204, 0.1);
+  color: var(--secondary, #0096CC);
+  border: 1px solid rgba(0, 150, 204, 0.25);
+  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.hero-card:hover .icon-box {
+  background: var(--secondary, #0096CC);
+  color: white;
+  transform: scale(1.05);
+}
+
+.card-title {
+  font-family: var(--font-heading, inherit);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: white;
+  margin: 0 0 0.5rem 0;
+}
+
+.card-desc {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.5;
+  margin: 0 0 1.5rem 0;
+  flex-grow: 1;
+}
+
+/* Form inputs & custom styling */
+.card-input {
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: white;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.3s ease;
+  margin-bottom: 1rem;
+}
+
+.card-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.card-input:focus {
+  border-color: var(--secondary, #0096CC);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 4px rgba(0, 150, 204, 0.2);
+}
+
+/* CTA Buttons */
+.card-cta {
+  width: 100%;
+  padding: 0.95rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.card-cta {
+  background: var(--secondary, #0096CC);
+  color: white;
+}
+
+.card-cta:hover {
+  background: #00b0f0;
+  transform: translateY(-2px);
+}
+
+.card-cta.secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.card-cta.secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Helpers */
+.card-helper {
+  display: block;
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+/* Chip list for Search Card */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.chip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.4rem 0.85rem;
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chip:hover {
+  background: rgba(0, 150, 204, 0.15);
+  border-color: rgba(0, 150, 204, 0.4);
+  color: white;
+  transform: scale(1.03);
+}
+
+/* Suggestions list for ClinicAI Card */
+.suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 0.6rem 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.suggestion-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--secondary, #0096CC);
+  color: white;
+}

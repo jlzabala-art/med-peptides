@@ -1,0 +1,37 @@
+[
+  {
+    "pmid": "28856733",
+    "title": "A bacteriophages journey through the human body.",
+    "authors": [
+      "Barr JJ"
+    ],
+    "journal": "Immunological reviews",
+    "pubdate": "2017 Sep",
+    "doi": "10.1111/imr.12565",
+    "abstract": "The human body is colonized by a diverse collective of microorganisms, including bacteria, fungi, protozoa and viruses. The smallest entity of this microbial conglomerate are the bacterial viruses. Bacteriophages, or phages for short, exert significant selective pressure on their bacterial hosts, undoubtedly influencing the human microbiome and its impact on our health and well-being. Phages colonize all niches of the body, including the skin, oral cavity, lungs, gut, and urinary tract. As such our bodies are frequently and continuously exposed to diverse collections of phages. Despite the prevalence of phages throughout our bodies, the extent of their interactions with human cells, organs, and immune system is still largely unknown. Phages physically interact with our mucosal surfaces, are capable of bypassing epithelial cell layers, disseminate throughout the body and may manipulate our immune system. Here, I establish the novel concept of an \"intra-body phageome,\" which encompasses the collection of phages residing within the classically \"sterile\" regions of the body. This review will take a phage-centric view of the microbiota, human body, and immune system with the ultimate goal of inspiring a greater appreciation for both the indirect and direct interactions between bacteriophages and their mammalian hosts."
+  },
+  {
+    "pmid": "33581889",
+    "title": "Modeling the Human Body on Microfluidic Chips.",
+    "authors": [
+      "Jalili-Firoozinezhad S",
+      "Miranda CC",
+      "Cabral JMS"
+    ],
+    "journal": "Trends in biotechnology",
+    "pubdate": "2021 Aug",
+    "doi": "10.1016/j.tibtech.2021.01.004",
+    "abstract": "Animals often fail to faithfully mimic human diseases and drug toxicities, and most in vitro models are not complex enough to recapitulate human body function and pathophysiology. Organ-on-chip culture technology, however, offers a promising tool for the study of tissue development and homeostasis, which has brought us one step closer to performing human experimentation in vitro. To recapitulate the complex functionality of multiple organs at once, their respective on-chip models can be linked to create a functional human body-on-chip platform. Here, we highlight the advantages and translational potentials of body-on-chip platforms in disease modeling, therapeutic development, and personalized medicine. We provide the reader with current limitations of the body-on-chip approach and new ideas to address the pending issues moving forwards."
+  },
+  {
+    "pmid": "32654216",
+    "title": "Admiring the conduct of providence in the formation of a human body.",
+    "authors": [
+      "Tubbs RS"
+    ],
+    "journal": "Clinical anatomy (New York, N.Y.)",
+    "pubdate": "2020 Sep",
+    "doi": "10.1002/ca.23650",
+    "abstract": null
+  }
+]

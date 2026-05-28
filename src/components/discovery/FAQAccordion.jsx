@@ -1,13 +1,17 @@
+ 
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
+import { ChevronDown, ChevronUp, ArrowRight, Play, Video, Target } from 'lucide-react';
+import { useHeaderHeight } from '../../hooks/useHeaderHeight';
+import { highlightMatch } from '../../utils/textUtils';
 
 /**
  * FAQAccordion — renders a list of FAQ items with expand/collapse,
  * inline peptide suggestions below each answer, and a CTA.
  */
-function FAQAccordionItem({ faq, isOpen, onToggle, relatedProducts, onProductClick }) {
+function FAQAccordionItem({ faq, isOpen, onToggle, relatedProducts, onProductClick, searchQuery }) {
   const itemRef = useRef(null);
   const isInitialMount = useRef(true);
+  const headerHeight = useHeaderHeight();
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -16,13 +20,12 @@ function FAQAccordionItem({ faq, isOpen, onToggle, relatedProducts, onProductCli
     }
     if (isOpen && itemRef.current) {
       setTimeout(() => {
-        const headerHeight = 120;
         const rect = itemRef.current.getBoundingClientRect();
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        window.scrollTo({ top: rect.top + scrollTop - headerHeight, behavior: 'smooth' });
+        window.scrollTo({ top: rect.top + scrollTop - headerHeight - 16, behavior: 'smooth' });
       }, 100);
     }
-  }, [isOpen]);
+  }, [isOpen, headerHeight]);
 
   // Find peptides suggested by this FAQ
   const suggested = (faq.relatedPeptideNames || [])
@@ -35,7 +38,7 @@ function FAQAccordionItem({ faq, isOpen, onToggle, relatedProducts, onProductCli
       ref={itemRef}
       style={{
         borderBottom: '1px solid var(--border)',
-        backgroundColor: isOpen ? 'rgba(0, 43, 77, 0.02)' : 'transparent',
+        backgroundColor: isOpen ? 'rgba(56, 189, 248, 0.03)' : 'transparent',
         transition: 'background-color 0.3s ease',
       }}
     >
@@ -54,53 +57,82 @@ function FAQAccordionItem({ faq, isOpen, onToggle, relatedProducts, onProductCli
           gap: '1rem',
         }}
       >
-        <span
-          style={{
-            fontSize: '1.05rem',
-            fontWeight: 600,
-            color: isOpen ? 'var(--primary)' : 'var(--text-main)',
-            transition: 'color 0.3s ease',
-            lineHeight: 1.4,
-          }}
-        >
-          {faq.question}
-        </span>
-        <span style={{ color: 'var(--primary)', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {faq.videoUrl && <Video size={16} style={{ color: '#38bdf8' }} />}
+          <span
+            style={{
+              fontSize: '1.05rem',
+              fontWeight: 700,
+              color: isOpen ? 'var(--color-primary)' : 'var(--text-main)',
+              transition: 'color 0.3s ease',
+              lineHeight: 1.4,
+            }}
+          >
+            {highlightMatch(faq.question, searchQuery)}
+          </span>
+        </div>
+        <span style={{ color: '#38bdf8', flexShrink: 0 }}>
           {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
         </span>
       </button>
 
       {isOpen && (
         <div style={{ padding: '0 1.5rem 1.5rem 1.5rem' }}>
+          {/* Pro Video Integration */}
+          {faq.videoUrl && (
+            <div style={{ 
+              marginBottom: '1.5rem', 
+              borderRadius: '16px', 
+              overflow: 'hidden', 
+              aspectRatio: '16/9', 
+              background: '#000',
+              border: '1px solid var(--border)',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+            }}>
+              <iframe
+                width="100%"
+                height="100%"
+                src={faq.videoUrl.replace('watch?v=', 'embed/')}
+                title="Clinical Explanation Video"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
+          )}
+
           {/* Answer */}
-          <p
+          <div
             style={{
               color: 'var(--text-muted)',
               lineHeight: 1.8,
               fontSize: '1rem',
-              marginBottom: suggested.length > 0 ? '1.25rem' : 0,
+              marginBottom: suggested.length > 0 ? '1.5rem' : 0,
               whiteSpace: 'pre-line',
             }}
           >
-            {faq.answer}
-          </p>
+            {highlightMatch(faq.answer, searchQuery)}
+          </div>
 
           {/* Inline peptide suggestions */}
           {suggested.length > 0 && (
-            <div>
+            <div style={{ background: 'var(--color-bg-app)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
               <p
                 style={{
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
+                  fontSize: '0.75rem',
+                  fontWeight: 800,
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase',
-                  color: 'var(--text-muted)',
-                  marginBottom: '0.75rem',
+                  color: 'var(--color-text-secondary)',
+                  marginBottom: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
                 }}
               >
-                Related Peptides
+                <Target size={14} /> Recommended for this Domain
               </p>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                 {suggested.map((prod) => (
                   <button
                     key={prod.id || prod.name}
@@ -108,41 +140,42 @@ function FAQAccordionItem({ faq, isOpen, onToggle, relatedProducts, onProductCli
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '0.35rem',
-                      padding: '0.4rem 0.85rem',
-                      borderRadius: '999px',
-                      border: '1.5px solid var(--primary)',
+                      gap: '0.5rem',
+                      padding: '0.5rem 1rem',
+                      borderRadius: '12px',
+                      border: '1px solid #38bdf8',
                       background: 'white',
-                      color: 'var(--primary)',
+                      color: '#0369a1',
                       fontSize: '0.85rem',
-                      fontWeight: 600,
+                      fontWeight: 700,
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
+                      boxShadow: '0 2px 4px rgba(56,189,248,0.1)'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'var(--primary)';
+                      e.currentTarget.style.backgroundColor = '#38bdf8';
                       e.currentTarget.style.color = 'white';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = 'white';
-                      e.currentTarget.style.color = 'var(--primary)';
+                      e.currentTarget.style.color = '#0369a1';
+                      e.currentTarget.style.transform = 'translateY(0)';
                     }}
                   >
-                    {prod.name} <ArrowRight size={13} />
+                    {prod.name} <ArrowRight size={14} />
                   </button>
                 ))}
               </div>
             </div>
           )}
-
-
         </div>
       )}
     </div>
   );
 }
 
-export default function FAQAccordion({ faqItems = [], relatedProducts = [], onProductClick }) {
+export default function FAQAccordion({ faqItems = [], relatedProducts = [], onProductClick, searchQuery }) {
   const [openIndex, setOpenIndex] = useState(0);
 
   if (!faqItems.length) {
@@ -157,8 +190,8 @@ export default function FAQAccordion({ faqItems = [], relatedProducts = [], onPr
     <div
       style={{
         backgroundColor: 'white',
-        borderRadius: 'var(--radius-lg)',
-        boxShadow: 'var(--shadow-md)',
+        borderRadius: '24px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
         border: '1px solid var(--border)',
         overflow: 'hidden',
       }}
@@ -171,6 +204,7 @@ export default function FAQAccordion({ faqItems = [], relatedProducts = [], onPr
           onToggle={() => setOpenIndex(openIndex === index ? -1 : index)}
           relatedProducts={relatedProducts}
           onProductClick={onProductClick}
+          searchQuery={searchQuery}
         />
       ))}
     </div>

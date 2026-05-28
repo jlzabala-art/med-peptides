@@ -1,25 +1,603 @@
 /* ============================================================
-   ReGen PEPT — Design System Entry Point
-   All styles are split into focused modules in src/styles/
+   Med-Peptides — Design System Entry Point
+   Single source of truth: all imports are managed by master.css
    ============================================================ */
 
-/* 1. Design tokens (CSS variables: colors, shadows, fonts, radii) */
-@import './styles/tokens.css';
+@import './styles/theme.css';
+@import './styles/master.css';
 
-/* 2. Base reset, html/body, typography, buttons, forms, cards, grid utilities */
-@import './styles/base.css';
+/* --- Start Here Section --- */
+.start-here-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: var(--space-xl);
+  align-items: center;
+}
 
-/* 3. Layout — nav, footer, sidebar, profile bar, clinical workflow layout */
-@import './styles/layout.css';
+.start-here-image {
+  position: relative;
+  height: 400px;
+}
 
-/* 4. Protocol Builder — stepper, workspace, variant cards, step-specific UI */
-@import './styles/protocol_builder.css';
+.start-here-image .image-placeholder {
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
 
-/* 5. Mobile — responsive breakpoints, touch targets, mobile-specific fixes */
-@import './styles/mobile.css';
+.peptide-structure-art {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
 
-/* 6. Page Sections — TrendingPeptides, TrendingProtocols, ProtocolTemplate, Academy */
-@import './styles/sections.css';
+.atom {
+  width: 40px;
+  height: 40px;
+  background: var(--primary);
+  border-radius: 50%;
+  position: absolute;
+  box-shadow: 0 0 30px var(--primary-glow);
+  animation: float 4s ease-in-out infinite;
+}
 
-/* 7. Calculator — Reconstitution calculator page */
-@import './styles/calculator.css';
+.atom:nth-child(1) { top: 20%; left: 20%; animation-delay: 0s; }
+.atom:nth-child(2) { top: 60%; left: 70%; animation-delay: 1s; }
+.atom:nth-child(3) { top: 10%; left: 80%; animation-delay: 2s; }
+.atom:nth-child(4) { top: 80%; left: 10%; animation-delay: 3s; }
+
+/* --- Signal Response Diagram --- */
+.diagram-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-m);
+}
+
+.diagram-node {
+  flex: 1;
+  max-width: 280px;
+}
+
+.node-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin: 0 auto;
+  border: 1px solid rgba(var(--primary-rgb), 0.2);
+  box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.1);
+}
+
+.role-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.role-btn:hover {
+  background: var(--surface);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.role-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* ── Admin Dashboard Layout ───────────────────────── */
+.admin-action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.admin-action-card {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  box-shadow: none;
+  border: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-action-card--info { border-top: 4px solid var(--primary); }
+.admin-action-card--warning { border-top: 4px solid #d97706; }
+.admin-action-card--success { border-top: 4px solid #10b981; }
+
+.admin-action-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.admin-action-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-main);
+}
+
+.admin-action-badge {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.admin-badge--info { background: rgba(0, 54, 102, 0.1); color: var(--primary); }
+.admin-badge--warning { background: rgba(217, 119, 6, 0.1); color: #d97706; }
+.admin-badge--success { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+
+.admin-action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-action-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  transition: all 0.2s ease;
+}
+
+.admin-action-item:hover {
+  background: white;
+  border-color: var(--primary);
+  box-shadow: none;
+}
+
+.admin-quick-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  background: white;
+  color: var(--primary);
+  border: 1px solid var(--border-light);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-quick-btn:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.diagram-arrow {
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex: 0 0 80px;
+}
+
+.arrow-line {
+  height: 2px;
+  background: linear-gradient(to right, var(--primary), transparent);
+  width: 100%;
+}
+
+.arrow-head {
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid var(--primary);
+  border-right: 2px solid var(--primary);
+  transform: rotate(45deg);
+  position: absolute;
+  right: 0;
+}
+
+/* Spinner — Enhanced for a premium feel */
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 2.5px solid rgba(0, 163, 224, 0.15);
+  border-radius: 50%;
+  border-top-color: var(--primary);
+  animation: spin 0.75s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
+  box-shadow: 0 0 12px rgba(0, 163, 224, 0.1);
+}
+
+/* Skeleton — Enhanced Shimmer */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(241, 245, 249, 0.5) 25%,
+    rgba(226, 232, 240, 0.8) 50%,
+    rgba(241, 245, 249, 0.5) 75%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+
+.audience-item {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid transparent;
+  transition: var(--transition-medium);
+}
+
+.audience-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--border-color);
+  transform: translateX(10px);
+}
+
+@media (max-width: 768px) {
+  .diagram-container {
+    flex-direction: column;
+    gap: var(--space-xl);
+  }
+  
+  .diagram-arrow {
+    display: none;
+  }
+}
+
+/* --- Research Search --- */
+.max-w-700 { max-width: 700px; }
+
+.search-input {
+  outline: none;
+  transition: var(--transition-medium);
+}
+
+.search-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.2);
+}
+
+.goal-chip {
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--border-color);
+}
+
+.goal-chip:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* --- Peptide Cards --- */
+.peptide-card {
+  transition: var(--transition-medium);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.peptide-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(var(--primary-rgb), 0.3);
+}
+
+.bg-primary-soft {
+  background: rgba(var(--primary-rgb), 0.1);
+}
+
+.p-s-hover:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.border-primary-light {
+  border-color: rgba(var(--primary-rgb), 0.2);
+}
+
+.border-dashed {
+  border-style: dashed;
+}
+
+.border-secondary {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.steps-grid {
+  margin-top: var(--space-xl);
+}
+
+.step-card {
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.02);
+  transition: var(--transition-medium);
+}
+
+.step-card:hover {
+  border-color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.05);
+}
+
+.step-icon {
+  background: rgba(var(--primary-rgb), 0.1);
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+@media (max-width: 992px) {
+  .start-here-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .start-here-image {
+    height: 300px;
+    order: -1;
+  }
+}
+
+/* --- Safety Check --- */
+.safety-feature {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: var(--transition-medium);
+}
+
+.safety-feature:hover {
+  background: rgba(var(--primary-rgb), 0.05);
+  border-color: var(--primary);
+}
+
+.feature-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+}
+
+/* --- FAQ --- */
+.faq-item {
+  background: var(--surface-light);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-m);
+  overflow: hidden;
+  transition: var(--transition-medium);
+}
+
+.faq-question {
+  cursor: pointer;
+  padding: var(--space-m);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.faq-answer {
+  padding: 0 var(--space-m) var(--space-m);
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* --- Compliance Banner --- */
+.compliance-banner {
+  border-top: 1px solid var(--border-color);
+  background: var(--background);
+}
+
+.compliance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-l);
+}
+
+.compliance-item {
+  display: flex;
+  gap: var(--space-m);
+}
+
+.compliance-item h4 {
+  font-size: 0.9375rem;
+  margin-bottom: 0.25rem;
+  color: var(--text-main);
+}
+
+.compliance-item p {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+/* ─── Section device-visibility utilities ─────────────────────────────────────
+   Applied by HomeSectionRenderer based on the visibility field in Firestore.
+   'desktop' → hidden on screens ≤ 768 px
+   'mobile'  → hidden on screens > 768 px
+   ─────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .rp-desktop-only { display: none !important; }
+  .hide-on-mobile { display: none !important; }
+}
+
+@media (min-width: 769px) {
+  .rp-mobile-only  { display: none !important; }
+  .show-on-mobile { display: none !important; }
+}
+
+/* ── UX Enhancements: Glassmorphism ─────────────────────────────────────── */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+}
+
+.glass-header {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0, 54, 102, 0.06);
+}
+
+/* ── UX Enhancements: Micro-interactions ────────────────────────────────── */
+.hover-lift {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: none;
+}
+
+.btn-magnetic {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-magnetic:hover {
+  transform: scale(1.03);
+}
+
+.btn-magnetic:active {
+  transform: scale(0.97);
+}
+
+/* ── UX Enhancements: Scroll Reveals ────────────────────────────────────── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scroll-reveal {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.scroll-reveal-delay-1 { animation-delay: 0.1s; }
+.scroll-reveal-delay-2 { animation-delay: 0.2s; }
+.scroll-reveal-delay-3 { animation-delay: 0.3s; }
+
+/* ── GCP Style Utilities (Admin / Physician Portal) ─────────────────────── */
+.gcp-card {
+  background-color: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.gcp-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #dadce0;
+  background-color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #3c4043;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gcp-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.45rem 1rem;
+  border-radius: 4px;
+  border: none;
+  background-color: #1a73e8;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s, box-shadow 0.15s;
+}
+
+.gcp-btn-primary:hover:not(:disabled) {
+  background-color: #1765cc;
+  box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+}
+
+.gcp-btn-primary:disabled {
+  background-color: #f1f3f4;
+  color: #a8aab0;
+  cursor: not-allowed;
+}
+
+.gcp-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.45rem 1rem;
+  border-radius: 4px;
+  border: 1px solid #dadce0;
+  background-color: #ffffff;
+  color: #1a73e8;
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.gcp-btn-secondary:hover:not(:disabled) {
+  background-color: #f8f9fa;
+}
+
+.gcp-input {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #3c4043;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #ffffff;
+}
+
+.gcp-input:focus {
+  outline: none;
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 1px #1a73e8;
+}
+
+.gcp-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #5f6368;
+  margin-bottom: 0.25rem;
+}
+

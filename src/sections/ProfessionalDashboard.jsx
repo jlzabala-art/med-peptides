@@ -1,3 +1,4 @@
+ 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -46,13 +47,13 @@ export default function ProfessionalDashboard({
     { label: 'Active Protocols', value: protocols.length, icon: Activity, color: '#0ea5e9' },
     { label: 'Safety Alerts', value: '0', icon: ShieldAlert, color: '#f59e0b' },
     { label: 'Drafts', value: protocols.filter(p => p.status === 'draft').length, icon: Clock, color: '#6366f1' },
-    { label: 'Project Savings', value: '$1,240', icon: BarChart3, color: '#10b981' },
+    { label: 'Project Savings', value: '$1,240', icon: BarChart3, color: 'var(--color-success)' },
   ];
 
   return (
     <section
       id="professional-dashboard"
-      style={{ backgroundColor: '#f8fafc', paddingBottom: '5rem' }}
+      style={{ backgroundColor: 'var(--color-bg-app)', paddingBottom: '5rem' }}
     >
       {/* Header bar */}
       <div style={{
@@ -67,18 +68,18 @@ export default function ProfessionalDashboard({
           <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)', margin: 0 }}>
             Operational Dashboard
           </h2>
-          <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.25rem 0 0 0' }}>
+          <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', margin: '0.25rem 0 0 0' }}>
             {userProfile?.fullName || 'Practitioner'} &bull; {userProfile?.institution || 'Clinical Facility'}
           </p>
         </div>
 
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <div style={{ position: 'relative', cursor: 'pointer' }}>
-            <Bell size={20} color="#64748b" />
+            <Bell size={20} color="var(--color-text-secondary)" />
             <span style={{
               position: 'absolute', top: -2, right: -2,
               width: 8, height: 8,
-              backgroundColor: '#ef4444',
+              backgroundColor: 'var(--color-danger)',
               borderRadius: '50%',
               border: '2px solid white',
             }} />
@@ -100,25 +101,25 @@ export default function ProfessionalDashboard({
 
         {/* Quick Workflows */}
         <section style={{ marginBottom: '2.5rem' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1e293b', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--color-text-primary)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <PlusSquare size={20} color="var(--primary)" /> Quick Workflows
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
-            <button onClick={() => navigate('/protocol-builder')} style={actionButtonStyle}>
+            <button onClick={() => navigate('/protocol-finder')} style={actionButtonStyle}>
               <div style={iconBox('#eff6ff', 'var(--primary)')}><PlusSquare size={24} /></div>
               <div style={{ textAlign: 'left' }}>
                 <h4 style={actionTitleStyle}>Create New Protocol</h4>
-                <p style={actionDescStyle}>Launch AI-assisted titration builder</p>
+                <p style={actionDescStyle}>Launch AI-assisted titration finder</p>
               </div>
-              <ChevronRight size={20} color="#cbd5e1" style={{ marginLeft: 'auto' }} />
+              <ChevronRight size={20} color="var(--color-border)" style={{ marginLeft: 'auto' }} />
             </button>
             <button onClick={() => navigate('/search')} style={actionButtonStyle}>
-              <div style={iconBox('#f0fdf4', '#10b981')}><Search size={24} /></div>
+              <div style={iconBox('var(--color-success-bg)', 'var(--color-success)')}><Search size={24} /></div>
               <div style={{ textAlign: 'left' }}>
                 <h4 style={actionTitleStyle}>Literature Search</h4>
                 <p style={actionDescStyle}>Query 2,500+ clinical publications</p>
               </div>
-              <ChevronRight size={20} color="#cbd5e1" style={{ marginLeft: 'auto' }} />
+              <ChevronRight size={20} color="var(--color-border)" style={{ marginLeft: 'auto' }} />
             </button>
             <button onClick={() => navigate('/products')} style={actionButtonStyle}>
               <div style={iconBox('#faf5ff', '#a855f7')}><Library size={24} /></div>
@@ -126,7 +127,7 @@ export default function ProfessionalDashboard({
                 <h4 style={actionTitleStyle}>Open Library</h4>
                 <p style={actionDescStyle}>Browse standardized peptide catalog</p>
               </div>
-              <ChevronRight size={20} color="#cbd5e1" style={{ marginLeft: 'auto' }} />
+              <ChevronRight size={20} color="var(--color-border)" style={{ marginLeft: 'auto' }} />
             </button>
           </div>
         </section>
@@ -165,8 +166,8 @@ export default function ProfessionalDashboard({
                 <stat.icon size={24} />
               </div>
               <div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#1e293b' }}>{stat.value}</div>
-                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--color-text-primary)' }}>{stat.value}</div>
+                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
               </div>
             </div>
           ))}
@@ -178,26 +179,26 @@ export default function ProfessionalDashboard({
           {/* Protocol list */}
           <section>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1e293b', margin: 0 }}>Recent Protocol Activities</h3>
-              <button onClick={() => navigate('/protocol-builder')} style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--color-text-primary)', margin: 0 }}>Recent Protocol Activities</h3>
+              <button onClick={() => navigate('/protocol-finder')} style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
                 View All
               </button>
             </div>
             <div style={{ backgroundColor: 'white', borderRadius: '20px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
               {loading ? (
-                <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>Loading your clinical vault...</div>
+                <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Loading your clinical vault...</div>
               ) : protocols.length === 0 ? (
                 <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>
-                  <div style={{ marginBottom: '1.5rem', opacity: 0.5 }}><PlusSquare size={48} color="#cbd5e1" /></div>
-                  <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem' }}>No Active Protocols</h4>
-                  <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1.5rem' }}>
+                  <div style={{ marginBottom: '1.5rem', opacity: 0.5 }}><PlusSquare size={48} color="var(--color-border)" /></div>
+                  <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '0.5rem' }}>No Active Protocols</h4>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>
                     Start your first multi-phase research protocol to see it here.
                   </p>
                   <button
-                    onClick={() => navigate('/protocol-builder')}
+                    onClick={() => navigate('/protocol-finder')}
                     style={{ padding: '0.75rem 1.5rem', backgroundColor: 'var(--primary)', color: 'white', borderRadius: '8px', border: 'none', fontWeight: 700, cursor: 'pointer' }}
                   >
-                    Launch Builder
+                    Launch Finder
                   </button>
                 </div>
               ) : (
@@ -216,16 +217,16 @@ export default function ProfessionalDashboard({
                       {protocols.map((p, idx) => (
                         <tr key={idx} style={{ borderBottom: idx === protocols.length - 1 ? 'none' : '1px solid #f1f5f9' }}>
                           <td style={tdStyle}>
-                            <div style={{ fontWeight: 700, color: '#1e293b' }}>
+                            <div style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>
                               {p.metadata?.scientificName || p.protocol_name}
                             </div>
                             {p.metadata?.scientificName && (
-                              <div style={{ fontSize: '0.68rem', color: '#94a3b8', fontStyle: 'italic' }}>{p.protocol_name}</div>
+                              <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>{p.protocol_name}</div>
                             )}
-                            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>v{p.version_number || 1.0}</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>v{p.version_number || 1.0}</div>
                           </td>
                           <td style={tdStyle}>
-                            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#475569' }}>{p.therapeutic_category}</span>
+                            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>{p.therapeutic_category}</span>
                           </td>
                           <td style={tdStyle}>
                             <span style={{
@@ -238,13 +239,13 @@ export default function ProfessionalDashboard({
                             </span>
                           </td>
                           <td style={tdStyle}>
-                            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
                               {p.updated_at?.toDate ? new Date(p.updated_at.toDate()).toLocaleDateString() : 'Active Now'}
                             </div>
                           </td>
                           <td style={{ ...tdStyle, textAlign: 'right' }}>
                             <button
-                              onClick={() => navigate('/protocol-builder?id=' + p.id)}
+                              onClick={() => navigate('/protocol-finder?id=' + p.id)}
                               style={{ padding: '6px 12px', border: '1px solid #e2e8f0', background: 'white', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
                             >
                               Open Workfile
@@ -262,16 +263,16 @@ export default function ProfessionalDashboard({
           {/* Sidebar */}
           <aside style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <section style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: '#dc2626' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--color-danger)' }}>
                 <ShieldAlert size={22} />
                 <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: 0 }}>Safety Monitoring</h3>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ backgroundColor: '#fef2f2', padding: '1rem', borderRadius: '12px', borderLeft: '4px solid #ef4444', color: '#1e293b' }}>
+                <div style={{ backgroundColor: 'var(--color-danger-bg)', padding: '1rem', borderRadius: '12px', borderLeft: '4px solid #ef4444', color: 'var(--color-text-primary)' }}>
                   <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Institutional Guidelines Updated</div>
                   <p style={{ fontSize: '0.75rem', margin: '0.25rem 0 0 0', opacity: 0.8 }}>Verify PT-141 titration schedules against latest ethics review.</p>
                 </div>
-                <div style={{ backgroundColor: '#f0fdf4', padding: '1rem', borderRadius: '12px', borderLeft: '4px solid #10b981', color: '#1e293b' }}>
+                <div style={{ backgroundColor: 'var(--color-success-bg)', padding: '1rem', borderRadius: '12px', borderLeft: '4px solid #10b981', color: 'var(--color-text-primary)' }}>
                   <CheckCircle2 size={16} style={{ marginBottom: '0.25rem' }} />
                   <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Cold Chain Verification</div>
                   <p style={{ fontSize: '0.75rem', margin: '0.25rem 0 0 0', opacity: 0.8 }}>All active logistics paths are within standard temp range.</p>
@@ -306,7 +307,7 @@ export default function ProfessionalDashboard({
 
         {/* Professional Resources */}
         <div style={{ marginTop: '4rem' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1e293b', marginBottom: '1.5rem' }}>Professional Resources</h3>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--color-text-primary)', marginBottom: '1.5rem' }}>Professional Resources</h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
             <AcademyBanner onNavigate={navigate} compact={true} />
             <CustomSynthesisBanner onNavigate={navigate} compact={true} />
@@ -338,12 +339,12 @@ const iconBox = (bg, color) => ({
   flexShrink: 0,
 });
 
-const actionTitleStyle = { margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#1e293b' };
-const actionDescStyle = { margin: '0.15rem 0 0 0', fontSize: '0.8rem', color: '#64748b', fontWeight: 500 };
+const actionTitleStyle = { margin: 0, fontSize: '0.95rem', fontWeight: 800, color: 'var(--color-text-primary)' };
+const actionDescStyle = { margin: '0.15rem 0 0 0', fontSize: '0.8rem', color: 'var(--color-text-secondary)', fontWeight: 500 };
 
 const thStyle = {
   padding: '1rem 1.5rem', fontSize: '0.75rem',
-  fontWeight: 800, color: '#64748b',
+  fontWeight: 800, color: 'var(--color-text-secondary)',
   textTransform: 'uppercase', letterSpacing: '0.05em',
 };
 

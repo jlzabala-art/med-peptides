@@ -37,7 +37,7 @@ async function main() {
 
   // 5. Create a manifest
   const manifest = {
-    projectName: 'med-peptides-app',
+    projectName: 'Med-Peptides-app',
     timestamp: new Date().toISOString(),
     version: require('../package.json').version,
     deploymentTarget: 'Firebase Hosting + Firestore'

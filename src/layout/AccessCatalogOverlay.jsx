@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { MapPin, ShieldCheck, Globe, X, Search, ChevronRight } from 'lucide-react';
 import { REGION_FLAGS } from '../data/regions';
@@ -23,34 +24,36 @@ export default function AccessCatalogOverlay({
 
   // Combine static country list with main regions and sorting
   const sortedCountries = useMemo(() => {
-    const searchLower = searchTerm.toLowerCase();
+    const searchLower = (searchTerm || '').toLowerCase();
     
     // 1. Get regional keys from EXCHANGE_RATES but filter out 'row' and 'eu'
     const regionalList = mainRegionKeys
-      .filter(key => key !== 'eu')
+      .filter(key => key !== 'eu' && EXCHANGE_RATES && EXCHANGE_RATES[key])
       .map(key => ({
         code: key,
-        name: EXCHANGE_RATES[key].name,
+        name: EXCHANGE_RATES[key]?.name || key,
         flag: REGION_FLAGS[key] || '🏳️'
       }));
 
     // 2. Get all other countries from COUNTRIES data
-    const otherList = COUNTRIES
-      .filter(c => !mainRegionKeys.includes(c.code) && c.code !== 'eu')
+    const otherList = (COUNTRIES || [])
+      .filter(c => c && !mainRegionKeys.includes(c.code) && c.code !== 'eu')
       .map(c => ({
         code: c.code,
-        name: c.name,
-        flag: c.flag
+        name: c.name || c.code,
+        flag: c.flag || '🏳️'
       }));
 
     // 3. Combine and filter by search
     const combined = [...regionalList, ...otherList].filter(c => 
-      c.name.toLowerCase().includes(searchLower) || 
-      c.code.toLowerCase().includes(searchLower)
+      c.name && (
+        c.name.toLowerCase().includes(searchLower) || 
+        c.code.toLowerCase().includes(searchLower)
+      )
     );
 
     // 4. Sort: Pure alphabetical
-    return combined.sort((a, b) => a.name.localeCompare(b.name));
+    return combined.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   }, [searchTerm, mainRegionKeys, EXCHANGE_RATES]);
 
   useEffect(() => {
@@ -61,7 +64,7 @@ export default function AccessCatalogOverlay({
       } else if (detectedCountry) {
         // Try to match detected country to our lists
         const matched = sortedCountries.find(c => 
-          c.name.toLowerCase() === detectedCountry.toLowerCase()
+          c.name && c.name.toLowerCase() === detectedCountry.toLowerCase()
         );
         if (matched) {
           setSelectedRegion(matched.code);
@@ -133,29 +136,38 @@ export default function AccessCatalogOverlay({
         <div style={{ padding: '2rem 1.5rem 1rem 1.5rem', flexShrink: 0 }}>
           <button 
             onClick={handleClose}
+            aria-label="Cerrar"
             style={{
               position: 'absolute',
-              top: '1rem',
-              right: '1rem',
-              background: 'rgba(0,0,0,0.05)',
-              border: 'none',
-              width: '32px',
-              height: '32px',
+              top: '1.25rem',
+              right: '1.25rem',
+              background: 'rgba(15, 23, 42, 0.08)',
+              border: '1px solid rgba(15, 23, 42, 0.1)',
+              width: '36px',
+              height: '36px',
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              color: 'var(--text-muted)',
-              transition: 'all 0.2s',
+              color: '#0f172a',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
               zIndex: 10
             }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = 'rgba(15, 23, 42, 0.12)';
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'rgba(15, 23, 42, 0.08)';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
           >
-            <X size={18} />
+            <X size={20} strokeWidth={2.5} />
           </button>
 
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-            <img src="/logo.png" alt="Logo" style={{ width: '60px', height: '60px', borderRadius: '16px' }} />
+            <img src="/logo.png" alt="Med-Peptides Logo" style={{ width: '60px', height: '60px', borderRadius: '16px' }} />
           </div>
           
           <h2 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
@@ -180,7 +192,7 @@ export default function AccessCatalogOverlay({
                 border: '1px solid var(--border)',
                 fontSize: '1rem',
                 outline: 'none',
-                backgroundColor: '#f8fafc',
+                backgroundColor: 'var(--color-bg-app)',
                 transition: 'border-color 0.2s'
               }}
               onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
@@ -257,7 +269,7 @@ export default function AccessCatalogOverlay({
             disabled={!selectedRegion}
             style={{
               width: '100%', padding: '1.1rem', borderRadius: '14px',
-              backgroundColor: selectedRegion ? 'var(--primary)' : '#e2e8f0',
+              backgroundColor: selectedRegion ? 'var(--primary)' : 'var(--color-border)',
               color: 'white', fontWeight: 800, border: 'none',
               cursor: selectedRegion ? 'pointer' : 'not-allowed',
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', 

@@ -1,0 +1,40 @@
+[
+  {
+    "pmid": "37710348",
+    "title": "Hexarelin alleviates apoptosis on ischemic acute kidney injury via MDM2/p53 pathway.",
+    "authors": [
+      "Guan C",
+      "Li C",
+      "Shen X",
+      "Yang C",
+      "Liu Z",
+      "Zhang N",
+      "Xu L",
+      "Zhao L",
+      "Zhou B",
+      "Man X",
+      "Luo C",
+      "Luan H",
+      "Che L",
+      "Wang Y",
+      "Xu Y"
+    ],
+    "journal": "European journal of medical research",
+    "pubdate": "2023 Sep 14",
+    "doi": "10.1186/s40001-023-01318-w",
+    "abstract": "INTRODUCTION: Hexarelin exhibits significant protection against organ injury in models of ischemia/reperfusion (I/R)-induced injury (IRI). Nevertheless, the impact of Hexarelin on acute kidney injury (AKI) and its underlying mechanism remains unclear. In this study, we investigated the therapeutic potential of Hexarelin in I/R-induced AKI and elucidated its molecular mechanisms.\nMETHODS: We assessed the protective effects of Hexarelin through both in vivo and in vitro experiments. In the I/R-induced AKI model, rats were pretreated with Hexarelin at 100\u00a0\u03bcg/kg/d for 7\u00a0days before being sacrificed 24\u00a0h post-IRI. Subsequently, kidney function, histology, and apoptosis were assessed. In vitro, hypoxia/reoxygenation (H/R)-induced HK-2 cell model was used to investigate the impact of Hexarelin on apoptosis in HK-2 cells. Then, we employed molecular docking using a pharmmapper server and autodock software to identify potential target proteins of Hexarelin.\nRESULTS: In this study, rats subjected to I/R developed severe kidney injury characterized by tubular necrosis, tubular dilatation, increased serum creatinine levels, and cell apoptosis. However, pretreatment with Hexarelin exhibited a protective effect by mitigating post-ischemic kidney pathological changes, improving renal function, and inhibiting apoptosis. This was achieved through the downregulation of conventional apoptosis-related genes, such as Caspase-3, Bax and Bad, and the upregulation of the anti-apoptotic protein Bcl-2. Consistent with the in vivo results, Hexarelin also reduced cell apoptosis in post-H/R HK-2 cells. Furthermore, our analysis using GSEA confirmed the essential role of the apoptosis pathway in I/R-induced AKI. Molecular docking revealed a strong binding affinity between Hexarelin and MDM2, suggesting the potential mechanism of Hexarelin's anti-apoptosis effect at least partially through its interaction with MDM2, a well-known negative regulator of apoptosis-related protein that of p53. To validate these findings, we evaluated the relative expression of MDM2 and p53 in I/R-induced AKI with or without Hexarelin pre-administration and observed a significant suppression of MDM2 and p53 by Hexarelin in both in vivo and in vitro experiments.\nCONCLUSION: Collectively, Hexarelin was identified as a promising medication in protecting apoptosis against I/R-induced AKI."
+  },
+  {
+    "pmid": "25278975",
+    "title": "The cardiovascular action of hexarelin.",
+    "authors": [
+      "Mao Y",
+      "Tokudome T",
+      "Kishimoto I"
+    ],
+    "journal": "Journal of geriatric cardiology : JGC",
+    "pubdate": "2014 Sep",
+    "doi": "10.11909/j.issn.1671-5411.2014.03.007",
+    "abstract": "Hexarelin, a synthetic growth hormone-releasing peptide, can bind to and activate the growth hormone secretagogue receptor (GHSR) in the brain similar to its natural analog ghrelin. However, the peripheral distribution of GHSR in the heart and blood vessels suggests that hexarelin might have direct cardiovascular actions beyond growth hormone release and neuroendocrine effects. Furthermore, the non-GHSR CD36 had been demonstrated to be a specific cardiac receptor for hexarelin\u00a0and to mediate its cardioprotective effects. When compared with ghrelin, hexarelin is chemically more stable and functionally more potent. Therefore, it may be a promising therapeutic agent for some cardiovascular conditions. In this concise review, we discuss the current evidence for the cardiovascular action of hexarelin."
+  }
+]

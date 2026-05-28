@@ -1,0 +1,443 @@
+/* ============================================================
+   MED-PEPTIDES — MASTER STYLE SHEET
+   Import order matters: tokens → base → layout → components
+   ============================================================ */
+
+/* 1. Design tokens (CSS custom properties — single source of truth) */
+@import './tokens.css';
+@import './gcp-theme.css';
+
+/* 2. Base resets, typography, buttons, forms */
+@import './base.css';
+
+/* 3. Layout system (workflow, sidebar, stepper, scroll) */
+@import './layout.css';
+
+/* 4. Header / Navbar */
+@import './header.css';
+
+/* 5. Hero section */
+@import './hero.css';
+@import './hero_search.css';
+
+/* 6. Shared peptide section components */
+@import './sections.css';
+
+/* 6b. Protocol brochure tokens & component styles */
+@import './protocol_brochure.css';
+
+/* 6a. Section-to-section gradient transitions */
+@import './section_transitions.css';
+
+/* 7. Feature-specific section sheets */
+@import './featured_peptides.css';
+@import './featured_protocols.css';
+@import './key_peptides.css';
+
+/* 8. Protocol Architect / Finder */
+@import './protocol_finder.css';
+@import './architect.css';
+
+/* 9. Dosage / Reconstitution Calculator */
+@import './calculator.css';
+
+/* 11. About page */
+@import './about.css';
+
+/* 11b. Privacy & Legal */
+@import './legal.css';
+
+/* 12. Mobile overrides (must be last so specificity wins on small screens) */
+@import './mobile.css';
+
+/* 13. Admin Terminal styles */
+@import './admin.css';
+
+/* ============================================================
+   GLOBAL PAGE SHELL PRIMITIVES
+   Utility classes consumed by all templates/views
+   ============================================================ */
+
+/* ── Page wrapper ───────────────────────────────────────────── */
+.page-shell {
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+}
+
+/* ── Content container (max-width + side padding) ──────────── */
+.page-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 0 1.25rem;
+  }
+}
+
+/* ── Standard inner section ────────────────────────────────── */
+.page-section {
+  padding: 5rem 0;
+  scroll-margin-top: 72px; /* sticky nav clearance */
+}
+
+@media (max-width: 768px) {
+  .page-section {
+    padding: 3.5rem 0;
+    scroll-margin-top: 64px;
+  }
+}
+
+/* ── Section header block ──────────────────────────────────── */
+.section-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background-color: rgba(0, 163, 224, 0.08);
+  color: var(--secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1.25rem;
+  border: 1px solid rgba(0, 163, 224, 0.15);
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.section-subtitle {
+  font-size: clamp(1rem, 2vw, 1.125rem);
+  color: var(--text-muted);
+  max-width: 640px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ── Divider line ──────────────────────────────────────────── */
+.section-divider {
+  width: 48px;
+  height: 3px;
+  background: var(--secondary);
+  border-radius: 9999px;
+  margin: 1.25rem auto 0;
+  opacity: 0.5;
+}
+
+/* ── Standard page hero banner (inner pages) ───────────────── */
+.page-hero {
+  padding: 6rem 0 4rem;
+  background: linear-gradient(160deg, #f8faff 0%, #eef4fb 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.page-hero__eyebrow {
+  composes: section-eyebrow;
+}
+
+.page-hero__title {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 1.25rem;
+}
+
+.page-hero__subtitle {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: var(--text-muted);
+  max-width: 560px;
+  line-height: 1.7;
+}
+
+/* ── Grid utilities ────────────────────────────────────────── */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+}
+
+.grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .grid-5 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .grid-4,
+  .grid-3,
+  .grid-2 { grid-template-columns: 1fr; gap: 1rem; }
+}
+
+/* ── Flex utilities ────────────────────────────────────────── */
+.flex-row { display: flex; flex-direction: row; }
+.flex-col { display: flex; flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-xs { gap: 0.25rem; }
+.gap-sm { gap: 0.5rem; }
+.gap-md { gap: 1rem; }
+.gap-lg { gap: 1.5rem; }
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+.relative { position: relative; }
+.absolute { position: absolute; }
+
+/* ── Card primitives ───────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.75rem;
+  transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+}
+
+.card--hover:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+  border-color: rgba(0, 54, 102, 0.12);
+}
+
+.card--flat {
+  box-shadow: none;
+  background: #f8fafc;
+}
+
+/* ── Inline highlight badge ────────────────────────────────── */
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(0, 54, 102, 0.06);
+  color: var(--primary);
+  border: 1px solid rgba(0, 54, 102, 0.1);
+}
+
+/* ── Horizontal scroll strip (mobile filter rows) ──────────── */
+.scroll-strip {
+  position: relative;
+}
+
+.scroll-strip__track {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroll-strip__track::-webkit-scrollbar { display: none; }
+
+/* Fade-right indicator — signals more content scrollable */
+.scroll-strip::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 52px;
+  height: calc(100% - 0.5rem); /* exclude bottom padding */
+  background: linear-gradient(to right, transparent, var(--background));
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Status / alert banners ────────────────────────────────── */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  border-left: 4px solid;
+}
+
+.alert--info {
+  background: #e8f4fd;
+  border-color: var(--secondary);
+  color: #1a5276;
+}
+
+.alert--warning {
+  background: #fef9e7;
+  border-color: #f39c12;
+  color: #7d6608;
+}
+
+.alert--success {
+  background: #e9f7ef;
+  border-color: var(--success);
+  color: #1e8449;
+}
+
+.alert--ruo {
+  background: rgba(0, 54, 102, 0.04);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* ── Spinner / loading state ───────────────────────────────── */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Skeleton loader ───────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f1f5f9 25%,
+    #e9eff6 50%,
+    #f1f5f9 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* ── Entrance animations ───────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.anim-fade-up {
+  animation: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.anim-slide-left {
+  animation: slideInLeft 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.anim-slide-right {
+  animation: slideInRight 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.anim-fade-up--delay-1 { animation-delay: 0.1s; }
+.anim-fade-up--delay-2 { animation-delay: 0.2s; }
+.anim-fade-up--delay-3 { animation-delay: 0.3s; }
+.anim-fade-up--delay-4 { animation-delay: 0.4s; }
+
+.anim-fade-in {
+  animation: fadeIn 0.5s ease both;
+}
+
+/* ── RUO disclaimer bar ────────────────────────────────────── */
+.ruo-bar {
+  background: var(--primary);
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  padding: 0.55rem 1rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── Empty / zero-state ────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 5rem 1.5rem;
+}
+
+.empty-state__icon {
+  font-size: 3rem;
+  margin-bottom: 1.25rem;
+  opacity: 0.35;
+}
+
+.empty-state__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.empty-state__body {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  max-width: 360px;
+  margin: 0 auto 1.5rem;
+  line-height: 1.6;
+}

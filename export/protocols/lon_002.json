@@ -1,6 +1,6 @@
 {
   "protocol_duration_weeks": 12,
-  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "protocol_author_name": "Med-Peptides Clinical Team",
   "bundleVersion": "2.0",
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -81,7 +81,7 @@
   },
   "protocol_author_notes": "Official curated protocol for general clinical use.",
   "_schemaVersion": "antigravity_v2",
-  "protocol_author_organization": "ReGen PEPT",
+  "protocol_author_organization": "Med-Peptides",
   "protocol_last_reviewed_at": "2026-03-29",
   "protocol_source_reference": "internal_guide",
   "expected_outcomes": {
@@ -121,16 +121,16 @@
               "Friday"
             ],
             "administration_frequency": "5x_week",
-            "dose_unit": "protocol_defined",
-            "starting_intensity": "standard",
-            "timing_hint": "evening"
+            "dose_unit": "mg",
+            "timing_hint": "evening",
+            "starting_weekly_dose": 0.5
           },
           "product_id": "prd_epitalon",
           "product_title": "Epitalon",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_epitalon",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         },
@@ -142,15 +142,15 @@
               "Thursday"
             ],
             "administration_frequency": "2x_week",
-            "dose_unit": "protocol_defined",
-            "starting_intensity": "optional_low"
+            "dose_unit": "mg",
+            "intensity_label": "optional_low"
           },
           "product_id": "prd_dsip",
           "product_title": "DSIP",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_dsip",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         }
@@ -184,16 +184,16 @@
               "Friday"
             ],
             "administration_frequency": "5x_week",
-            "dose_unit": "protocol_defined",
-            "intensity": "standard_plus",
-            "timing_hint": "evening"
+            "dose_unit": "mg",
+            "timing_hint": "evening",
+            "starting_weekly_dose": 1
           },
           "product_id": "prd_epitalon",
           "product_title": "Epitalon",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_epitalon",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         },
@@ -205,15 +205,15 @@
               "Thursday"
             ],
             "administration_frequency": "2x_week",
-            "dose_unit": "protocol_defined",
-            "intensity": "conditional"
+            "dose_unit": "mg",
+            "intensity_label": "conditional"
           },
           "product_id": "prd_dsip",
           "product_title": "DSIP",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_dsip",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         }
@@ -244,16 +244,16 @@
               "Friday"
             ],
             "administration_frequency": "3x_week",
-            "dose_unit": "protocol_defined",
-            "intensity": "maintenance",
-            "timing_hint": "evening"
+            "dose_unit": "mg",
+            "timing_hint": "evening",
+            "starting_weekly_dose": 1
           },
           "product_id": "prd_epitalon",
           "product_title": "Epitalon",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "variantRef": {
             "productId": "prd_epitalon",
-            "route": "SC",
+            "route": "subcutaneous",
             "type": "resolved"
           }
         }
@@ -532,7 +532,7 @@
     ],
     "generatedAt": "2026-04-26T09:05:00+02:00"
   },
-  "_importBundle": "ReGen PEPT Core Clinical Protocol Library",
+  "_importBundle": "Med-Peptides Core Clinical Protocol Library",
   "_syncSource": "export/protocols/lon_002.json",
   "metadata": {
     "longDescription": "Epithalon (Epitalon; Ala-Glu-Asp-Gly) is a synthetic tetrapeptide bioregulator developed by the St. Petersburg Institute of Bioregulation and Gerontology. It stimulates telomerase (TERT) activity in somatic cells, elongates telomeres in aged cell cultures, and has demonstrated life-extension effects in multiple animal models (Khavinson VKh et al., Bull Exp Biol Med 2003; Anisimov VN et al., Mech Ageing Dev 2003). Epithalon also modulates pineal melatonin secretion and normalises circadian gene expression (BMAL1, CLOCK), improving circadian amplitude — a key driver of healthy aging (Khavinson V et al., Adv Gerontol 2012). Combined with MOTS-c (mitochondrial AMPK activation, metabolic homeostasis, see lon_001), this protocol targets two independent pillars of the hallmarks of aging: replicative senescence/telomere shortening and mitochondrial dysfunction. The dual-phase structure allows maximal combined loading in weeks 1–6, followed by MOTS-c maintenance to sustain metabolic gains through week 12.",
@@ -572,8 +572,8 @@
     },
     "scientificName": "Epithalon (Epitalon) + MOTS-c Telomere & Mitokine Circadian Longevity Protocol",
     "author": {
-      "organization": "ReGen PEPT",
-      "name": "ReGen PEPT Clinical Team",
+      "organization": "Med-Peptides",
+      "name": "Med-Peptides Clinical Team",
       "title": "Peptide Specialists"
     },
     "created_at": "2026-04-02T00:00:00.000Z",
@@ -601,7 +601,7 @@
     "_nanoseconds": 114000000,
     "_seconds": 1777190724
   },
-  "_patchBundle": "ReGen PEPT Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
   "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
   "safety_profile": {
     "contraindications": [
@@ -662,5 +662,11 @@
       }
     ]
   },
-  "_syncedAt": "2026-04-26T12:46:30.345Z"
+  "_syncedAt": "2026-04-26T12:46:30.345Z",
+  "recommended_tests": [
+    "eterna-epigenetic-test",
+    "progen-longevity-test",
+    "fagron-telotest",
+    "nad-blood-test"
+  ]
 }

@@ -1,0 +1,49 @@
+[
+  {
+    "pmid": "37739806",
+    "title": "A Synthetic ERR Agonist Alleviates Metabolic Syndrome.",
+    "authors": [
+      "Billon C",
+      "Schoepke E",
+      "Avdagic A",
+      "Chatterjee A",
+      "Butler AA",
+      "Elgendy B",
+      "Walker JK",
+      "Burris TP"
+    ],
+    "journal": "The Journal of pharmacology and experimental therapeutics",
+    "pubdate": "2024 Jan 17",
+    "doi": "10.1124/jpet.123.001733",
+    "abstract": "Physical exercise induces physiologic adaptations and is effective at reducing the risk of premature death from all causes. Pharmacological exercise mimetics may be effective in the treatment of a range of diseases including obesity and metabolic syndrome. Previously, we described the development of SLU-PP-332, an agonist for the estrogen-related receptor (ERR)\u03b1, \u03b2, and \u03b3 nuclear receptors that activates an acute aerobic exercise program. Here we examine the effects of this exercise mimetic in mouse models of obesity and metabolic syndrome. Diet-induced obese or ob/ob mice were administered SLU-PP-332, and the effects on a range of metabolic parameters were assessed. SLU-PP-332 administration mimics exercise-induced benefits on whole-body metabolism in mice including increased energy expenditure and fatty acid oxidation. These effects were accompanied by decreased fat mass accumulation. Additionally, the ERR agonist effectively reduced obesity and improved insulin sensitivity in models of metabolic syndrome. Pharmacological activation of ERR may be an effective method to treat metabolic syndrome and obesity. SIGNIFICANCE STATEMENT: An estrogen receptor-related orphan receptor agonist, SLU-PP-332, with exercise mimetic activity, holds promise as a therapeutic to treat metabolic diseases by decreasing fat mass in mouse models of obesity."
+  },
+  {
+    "pmid": "36988910",
+    "title": "Synthetic ERR\u03b1/\u03b2/\u03b3 Agonist Induces an ERR\u03b1-Dependent Acute Aerobic Exercise Response and Enhances Exercise Capacity.",
+    "authors": [
+      "Billon C",
+      "Sitaula S",
+      "Banerjee S",
+      "Welch R",
+      "Elgendy B",
+      "Hegazy L",
+      "Oh TG",
+      "Kazantzis M",
+      "Chatterjee A",
+      "Chrivia J",
+      "Hayes ME",
+      "Xu W",
+      "Hamilton A",
+      "Huss JM",
+      "Zhang L",
+      "Walker JK",
+      "Downes M",
+      "Evans RM",
+      "Burris TP"
+    ],
+    "journal": "ACS chemical biology",
+    "pubdate": "2023 Apr 21",
+    "doi": "10.1021/acschembio.2c00720",
+    "abstract": "Repetitive physical exercise induces physiological adaptations in skeletal muscle that improves exercise performance and is effective for the prevention and treatment of several diseases. Genetic evidence indicates that the orphan nuclear receptors estrogen receptor-related receptors (ERRs) play an important role in skeletal muscle exercise capacity. Three ERR subtypes exist (ERR\u03b1, \u03b2, and \u03b3), and although ERR\u03b2/\u03b3 agonists have been designed, there have been significant difficulties in designing compounds with ERR\u03b1 agonist activity. Additionally, there are limited synthetic agonists that can be used to target ERRs in vivo. Here, we report the identification of a synthetic ERR pan agonist, SLU-PP-332, that targets all three ERRs but has the highest potency for ERR\u03b1. Additionally, SLU-PP-332 has sufficient pharmacokinetic properties to be used as an in vivo chemical tool. SLU-PP-332 increases mitochondrial function and cellular respiration in a skeletal muscle cell line. When administered to mice, SLU-PP-332 increased the type IIa oxidative skeletal muscle fibers and enhanced exercise endurance. We also observed that SLU-PP-332 induced an ERR\u03b1-specific acute aerobic exercise genetic program, and the ERR\u03b1 activation was critical for enhancing exercise endurance in mice. These data indicate the feasibility of targeting ERR\u03b1 for the development of compounds that act as exercise mimetics that may be effective in the treatment of numerous metabolic disorders and to improve muscle function in the aging."
+  }
+]

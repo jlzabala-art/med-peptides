@@ -1,135 +1,165 @@
-import React, { useEffect } from 'react';
-import { Shield, Lock, Truck, AlertCircle, Scale, ChevronRight } from 'lucide-react';
+/* eslint-disable no-unused-vars */
+import React, { useEffect, useState } from 'react';
+import { Shield, Lock, Truck, AlertCircle, Scale, ChevronRight, Mail, Gavel, FileCheck } from 'lucide-react';
 
-export default function LegalConditions({ onBack }) {
+const LegalConditions = ({ onBack }) => {
+  const [activeSection, setActiveSection] = useState(0);
+
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
   }, []);
 
   const sections = [
     {
       id: 'terms',
       title: 'Terms & Conditions',
-      icon: <Scale className="text-primary" size={24} />,
-      content: `
-        By accessing and using med-peptides.com, you agree to comply with and be bound by the following terms and conditions. These terms constitute a legally binding agreement between you and Med-Peptides.
-        
-        1. RESEARCH USE ONLY: All products listed on this website are intended for laboratory research purposes only. They are not for human or animal consumption, nor are they intended for diagnostic or therapeutic use.
-        2. AGE RESTRICTION: You must be at least 21 years of age to purchase products from this site.
-        3. ORDER ACCEPTANCE: We reserve the right to refuse or cancel any order for any reason, including limitations on quantities available for purchase or inaccuracies in product or pricing information.
-        4. INTELLECTUAL PROPERTY: All content on this site, including text, graphics, and logos, is the property of Med-Peptides and is protected by international copyright laws.
-      `
+      icon: <Scale size={24} />,
+      content: (
+        <>
+          <p>By accessing and using Med-Peptides.com, you agree to comply with and be bound by the following terms and conditions. These terms constitute a legally binding agreement between you and Med-Peptides.</p>
+          <p><strong>RESEARCH USE ONLY:</strong> All products listed on this website are intended for laboratory research purposes only. They are not for human or animal consumption, nor are they intended for diagnostic or therapeutic use.</p>
+          <p><strong>AGE RESTRICTION:</strong> You must be at least 21 years of age to purchase products from this site. We reserve the right to verify credentials and refuse or cancel any order at our discretion.</p>
+        </>
+      )
     },
     {
-      id: 'privacy',
-      title: 'Privacy Policy',
-      icon: <Lock className="text-secondary" size={24} />,
-      content: `
-        Your privacy is paramount to us. This policy outlines how we collect, use, and protect your personal information.
-        
-        1. INFORMATION COLLECTION: We collect information you provide when creating an account, placing an order, or contacting us (e.g., name, email, shipping address).
-        2. DATA USAGE: We use your data to process orders, improve our services, and send relevant updates if you've opted in.
-        3. DATA SECURITY: We implement robust physical and electronic security measures to protect your information from unauthorized access.
-        4. THIRD PARTIES: We do not sell or lease your personal data. Information is shared only with essential partners (e.g., shipping carriers) to fulfill your requests.
-      `
+      id: 'compliance',
+      title: 'Regulatory Compliance',
+      icon: <Gavel size={24} />,
+      content: (
+        <>
+          <p>Med-Peptides operates in strict accordance with international standards for the distribution of research compounds. It is the responsibility of the purchasing institution to ensure that the use of these compounds complies with all local regulations and safety protocols.</p>
+          <p>Our compounds are manufactured to meet precise molecular specifications, ensuring consistent data reproduction across laboratory environments.</p>
+        </>
+      )
     },
     {
       id: 'shipping',
       title: 'Shipping & Delivery',
-      icon: <Truck className="text-primary-light" size={24} />,
-      content: `
-        We strive for efficient and secure delivery of your research materials.
-        
-        1. PROCESSING TIME: Orders are typically processed within 24-48 hours.
-        2. DELIVERY ESTIMATES: Local UAE delivery is usually next-day. International shipping varies by destination.
-        3. CUSTOMS: It is the researcher's responsibility to ensure compliance with local import regulations. Med-Peptides is not responsible for seizures or delays at customs.
-        4. TRACKING: A tracking number will be provided via email once your order has shipped.
-      `
+      icon: <Truck size={24} />,
+      content: (
+        <>
+          <p>We strive for efficient and secure delivery of your research materials. Orders are typically processed within 24-48 hours. Local UAE delivery is usually next-day, while international shipping varies by destination.</p>
+          <p><strong>CUSTOMS:</strong> It is the researcher's responsibility to ensure compliance with local import regulations. Med-Peptides is not responsible for seizures or delays at customs.</p>
+        </>
+      )
     },
     {
       id: 'disclaimer',
       title: 'Medical Disclaimer',
-      icon: <AlertCircle className="text-error" style={{ color: '#ef4444' }} size={24} />,
-      content: `
-        IMPORTANT: The products sold by Med-Peptides are NOT medicines, drugs, or supplements.
-        
-        - They have not been approved by the FDA or any other regulatory body for the treatment of any medical condition.
-        - Med-Peptides makes no claims regarding the therapeutic efficacy of its products.
-        - Handling of these substances should only be performed by qualified professionals in a controlled laboratory environment.
-      `
+      icon: <AlertCircle size={24} />,
+      content: (
+        <>
+          <p className="text-error" style={{ fontWeight: 700 }}>IMPORTANT: The products sold by Med-Peptides are NOT medicines, drugs, or supplements.</p>
+          <p>They have not been approved by the FDA or any other regulatory body for the treatment of any medical condition. Med-Peptides makes no claims regarding the therapeutic efficacy of its products.</p>
+          <p>Handling of these substances should only be performed by qualified professionals in a controlled laboratory environment.</p>
+        </>
+      )
     }
   ];
 
-  return (
-    <div className="view-container with-header-padding" style={{ maxWidth: '1000px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-      {/* Back Button */}
-      <button 
-        onClick={onBack}
-        className="btn btn-secondary"
-        style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem' }}
-      >
-        <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} /> Back to Shop
-      </button>
-
-      {/* Hero Section */}
-      <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-        <div style={{ 
-          display: 'inline-flex', 
-          padding: '1rem', 
-          backgroundColor: 'rgba(0, 54, 102, 0.05)', 
-          borderRadius: '20px',
-          marginBottom: '1.5rem'
-        }}>
-          <Shield size={48} className="text-primary" />
-        </div>
-        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', marginBottom: '1rem' }}>Legal Conditions</h1>
-        <p className="subtitle" style={{ marginBottom: 0 }}>
-          Transparency and compliance are the foundation of our research partnership. 
-          Please review our governing policies below.
-        </p>
-      </div>
-
-      {/* Detailed Sections */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        {sections.map((section) => (
-          <div key={section.id} className="card" style={{ padding: '2.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-              {section.icon}
-              <h2 style={{ margin: 0, fontSize: '1.5rem' }}>{section.title}</h2>
-            </div>
-            <div style={{ 
-              color: 'var(--text-muted)', 
-              lineHeight: 1.8, 
-              fontSize: '1.05rem',
-              whiteSpace: 'pre-line' 
-            }}>
-              {section.content}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Contact Footer */}
-      <div className="card" style={{ 
-        marginTop: '3rem', 
-        textAlign: 'center', 
-        background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%)',
-        color: 'white'
-      }}>
-        <h3 style={{ color: 'white', marginBottom: '1rem' }}>Have questions?</h3>
-        <p style={{ opacity: 0.9, marginBottom: '2rem' }}>
-          Our legal and compliance team is here to help clarify any of our policies.
-        </p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-          <a href="mailto:info@med-peptides.com" className="btn btn-primary" style={{ backgroundColor: 'white', color: 'var(--primary)' }}>
-            Email Compliance
-          </a>
-        </div>
-      </div>
+  const scrollToSection = (id, index) => {
+    setActiveSection(index);
+    const element = document.getElementById(id);
+    if (element) {
+      const offset = 120;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
       
-      <div style={{ textAlign: 'center', marginTop: '3rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-        Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-      </div>
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  return (
+    <div className="legal-page page-shell">
+      {/* ── Hero Section ───────────────────────────────────────────── */}
+      <section className="legal-hero">
+        <div className="page-container">
+          <div className="legal-hero__content anim-fade-up">
+            <div className="legal-hero__eyebrow">
+              <Shield size={14} />
+              <span>Compliance Framework</span>
+            </div>
+            <h1 className="legal-hero__title font-heading">Legal Conditions</h1>
+            <p className="legal-hero__subtitle">
+              Transparency and compliance are the foundation of our research partnership. Please review our governing policies below.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Main Content ────────────────────────────────────────────── */}
+      <section className="page-section">
+        <div className="page-container">
+          <div className="legal-grid">
+            {/* Sidebar Nav */}
+            <aside className="legal-nav anim-slide-left">
+              <nav>
+                <ul className="legal-nav__list">
+                  {sections.map((section, idx) => (
+                    <li 
+                      key={section.id}
+                      className={`legal-nav__item ${activeSection === idx ? 'legal-nav__item--active' : ''}`}
+                      onClick={() => scrollToSection(section.id, idx)}
+                    >
+                      <span className="text-secondary">{React.cloneElement(section.icon, { size: 18 })}</span>
+                      {section.title}
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+
+              <div className="card card--flat mt-12" style={{ padding: '1.5rem', borderRadius: '20px' }}>
+                <h4 className="text-primary mb-3">Questions?</h4>
+                <p className="text-muted text-xs mb-4">Our legal and compliance team is here to help clarify any of our policies.</p>
+                <a href="mailto:compliance@med-peptides.com" className="btn btn-primary btn-s w-full">
+                  <Mail size={14} /> Email Compliance
+                </a>
+              </div>
+            </aside>
+
+            {/* Content Cards */}
+            <main className="legal-content anim-fade-up--delay-1">
+              <div className="legal-card mb-12" style={{ background: 'var(--gradient-soft)', border: '1px solid rgba(0, 54, 102, 0.05)' }}>
+                <h2 className="h3 text-primary mb-6">Governing Framework</h2>
+                <p className="text-muted leading-relaxed mb-0">
+                  This document outlines the legal requirements and operational constraints governing the distribution and use of Med-Peptides compounds. By engaging with our platform, institutional partners and individual researchers acknowledge the research-only nature of our products and commit to maintaining the highest standards of laboratory safety and regulatory adherence.
+                </p>
+              </div>
+
+              {sections.map((section) => (
+                <article key={section.id} id={section.id} className="legal-card">
+                  <div className="legal-card__header">
+                    <div className="legal-card__icon">
+                      {section.icon}
+                    </div>
+                    <h3 className="legal-card__title h4 text-primary font-heading">
+                      {section.title}
+                    </h3>
+                  </div>
+                  <div className="legal-card__content">
+                    {section.content}
+                  </div>
+                </article>
+              ))}
+
+              {/* Version Footer */}
+              <footer className="legal-footer">
+                <div className="legal-version-tag">Version 4.1.0 • Verified Protocol</div>
+                <p className="text-xs text-light mb-2">Last Updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                <p className="text-xs text-light">
+                  Med-Peptides International Distribution • Legal Compliance Division
+                </p>
+              </footer>
+            </main>
+          </div>
+        </div>
+      </section>
     </div>
   );
-}
+};
+
+export default LegalConditions;

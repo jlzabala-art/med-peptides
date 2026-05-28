@@ -1,75 +1,163 @@
-import React, { useEffect } from 'react';
-import { Scale, ChevronRight, AlertCircle, ShieldCheck, Ban, FileText } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+/* eslint-disable no-unused-vars */
+import React, { useEffect, useState } from 'react';
+import { Scale, ChevronRight, AlertCircle, ShieldCheck, Ban, FileText, Mail, Info } from 'lucide-react';
 
-export default function TermsOfUse({ onBack }) {
-  const navigate = useNavigate();
-  const handleBack = onBack ?? (() => navigate(-1));
+const TermsOfUse = ({ onBack }) => {
+  const [activeSection, setActiveSection] = useState(0);
 
-  useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const sections = [
     {
       id: 'research',
-      icon: <FileText size={24} />,
       title: 'Research Use Only',
-      content: `All products listed on RegenPept are intended exclusively for laboratory research purposes. They are not for human or animal consumption, nor are they approved for diagnostic or therapeutic use. By purchasing, you confirm that you are a qualified researcher operating within a controlled environment.`,
+      icon: <FileText size={24} />,
+      content: (
+        <>
+          <p>All products listed on Med-Peptides are intended exclusively for laboratory research purposes. They are not for human or animal consumption, nor are they approved for diagnostic or therapeutic use.</p>
+          <p>By purchasing, you confirm that you are a qualified researcher operating within a controlled environment and that you possess the necessary expertise to handle advanced chemical compounds.</p>
+        </>
+      )
     },
     {
       id: 'eligibility',
-      icon: <ShieldCheck size={24} />,
       title: 'Eligibility',
-      content: `You must be at least 21 years of age and a verified professional researcher to purchase products from this platform. We reserve the right to verify credentials and refuse or cancel any order at our discretion, including due to quantity limitations or inaccurate information.`,
+      icon: <ShieldCheck size={24} />,
+      content: (
+        <>
+          <p>You must be at least 21 years of age and a verified professional researcher to purchase products from this platform. Access to our clinical database and procurement systems is restricted to authorized personnel.</p>
+          <p>We reserve the right to verify credentials and refuse or cancel any order at our discretion, including due to quantity limitations or inaccurate institutional information.</p>
+        </>
+      )
     },
     {
       id: 'prohibited',
-      icon: <Ban size={24} />,
       title: 'Prohibited Uses',
-      content: `You may not use our platform to: resell products without authorization, misrepresent the intended use of purchased items, violate any applicable local, national, or international laws, or engage in any fraudulent or deceptive activity. Violations may result in immediate account termination.`,
+      icon: <Ban size={24} />,
+      content: (
+        <>
+          <p>You may not use our platform to: resell products without authorization, misrepresent the intended use of purchased items, or violate any applicable local or international laws.</p>
+          <p>Any attempt to engage in fraudulent activity, data scraping, or unauthorized access to our clinical AI systems will result in immediate account termination and potential legal action.</p>
+        </>
+      )
     },
     {
       id: 'disclaimer',
-      icon: <AlertCircle size={24} />,
       title: 'Disclaimer of Warranties',
-      content: `Products are provided "as is" for research purposes. RegenPept makes no warranties, express or implied, regarding the fitness of products for any particular purpose. We are not liable for any direct, indirect, incidental, or consequential damages arising from the use or misuse of our products.`,
-    },
+      icon: <AlertCircle size={24} />,
+      content: (
+        <>
+          <p>Products are provided "as is" for research purposes. Med-Peptides makes no warranties, express or implied, regarding the fitness of products for any particular purpose.</p>
+          <p>We are not liable for any direct, indirect, incidental, or consequential damages arising from the use or misuse of our products or information provided through our platform.</p>
+        </>
+      )
+    }
   ];
 
+  const scrollToSection = (id, index) => {
+    setActiveSection(index);
+    const element = document.getElementById(id);
+    if (element) {
+      const offset = 120;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
-    <div className="view-container with-header-padding" style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-      <button
-        onClick={handleBack}
-        className="btn btn-secondary"
-        style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem' }}
-      >
-        <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} /> Back
-      </button>
-
-      <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-        <div style={{ display: 'inline-flex', padding: '1rem', backgroundColor: 'rgba(0,54,102,0.06)', borderRadius: '20px', marginBottom: '1.5rem' }}>
-          <Scale size={48} />
-        </div>
-        <h1 style={{ fontSize: 'clamp(1.8rem, 5vw, 2.8rem)', marginBottom: '1rem' }}>Terms of Use</h1>
-        <p className="subtitle" style={{ marginBottom: 0 }}>
-          Please read these terms carefully before using our platform. Access implies acceptance.
-        </p>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        {sections.map(s => (
-          <div key={s.id} className="card" style={{ padding: '2rem 2.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-              {s.icon}
-              <h2 style={{ margin: 0, fontSize: '1.25rem' }}>{s.title}</h2>
+    <div className="legal-page page-shell">
+      {/* ── Hero Section ───────────────────────────────────────────── */}
+      <section className="legal-hero">
+        <div className="page-container">
+          <div className="legal-hero__content anim-fade-up">
+            <div className="legal-hero__eyebrow">
+              <Scale size={14} />
+              <span>User Agreement</span>
             </div>
-            <p style={{ color: 'var(--text-muted)', lineHeight: 1.8, margin: 0 }}>{s.content}</p>
+            <h1 className="legal-hero__title font-heading">Terms of Use</h1>
+            <p className="legal-hero__subtitle">
+              Please read these terms carefully before using our platform. Access implies full acceptance of our research-grade protocols.
+            </p>
           </div>
-        ))}
-      </div>
+        </div>
+      </section>
 
-      <div style={{ textAlign: 'center', marginTop: '3rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-        Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-      </div>
+      {/* ── Main Content ────────────────────────────────────────────── */}
+      <section className="page-section">
+        <div className="page-container">
+          <div className="legal-grid">
+            {/* Sidebar Nav */}
+            <aside className="legal-nav anim-slide-left">
+              <nav>
+                <ul className="legal-nav__list">
+                  {sections.map((section, idx) => (
+                    <li 
+                      key={section.id}
+                      className={`legal-nav__item ${activeSection === idx ? 'legal-nav__item--active' : ''}`}
+                      onClick={() => scrollToSection(section.id, idx)}
+                    >
+                      <span className="text-secondary">{React.cloneElement(section.icon, { size: 18 })}</span>
+                      {section.title}
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+
+              <div className="card card--flat mt-12" style={{ padding: '1.5rem', borderRadius: '20px' }}>
+                <h4 className="text-primary mb-3">Institutional Access</h4>
+                <p className="text-muted text-xs mb-4">For bulk procurement or partnership agreements, please contact our logistics team.</p>
+                <a href="mailto:logistics@med-peptides.com" className="btn btn-secondary btn-s w-full">
+                  <Mail size={14} /> Contact Logistics
+                </a>
+              </div>
+            </aside>
+
+            {/* Content Cards */}
+            <main className="legal-content anim-fade-up--delay-1">
+              <div className="legal-card mb-12" style={{ background: 'var(--gradient-soft)', border: '1px solid rgba(0, 54, 102, 0.05)' }}>
+                <h2 className="h3 text-primary mb-6">Terms of Engagement</h2>
+                <p className="text-muted leading-relaxed mb-0">
+                  Med-Peptides provides a secure interface for the procurement of research-grade molecular compounds and access to advanced clinical protocols. By utilizing our platform, you agree to adhere to the standards set forth in this document, which are designed to ensure the safety, integrity, and scientific accuracy of the research conducted using our materials.
+                </p>
+              </div>
+
+              {sections.map((section) => (
+                <article key={section.id} id={section.id} className="legal-card">
+                  <div className="legal-card__header">
+                    <div className="legal-card__icon">
+                      {section.icon}
+                    </div>
+                    <h3 className="legal-card__title h4 text-primary font-heading">
+                      {section.title}
+                    </h3>
+                  </div>
+                  <div className="legal-card__content">
+                    {section.content}
+                  </div>
+                </article>
+              ))}
+
+              {/* Version Footer */}
+              <footer className="legal-footer">
+                <div className="legal-version-tag">Version 3.5.2 • Professional Access</div>
+                <p className="text-xs text-light mb-2">Effective Date: May 1, 2026</p>
+                <p className="text-xs text-light">
+                  Med-Peptides Platform Operations • Research Compliance Division
+                </p>
+              </footer>
+            </main>
+          </div>
+        </div>
+      </section>
     </div>
   );
-}
+};
+
+export default TermsOfUse;

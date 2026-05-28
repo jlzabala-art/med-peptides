@@ -35,7 +35,7 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
   );
 }
 
-initializeApp({ credential, projectId: 'med-peptides-app' });
+initializeApp({ credential, projectId: 'Med-Peptides-app' });
 const db = getFirestore();
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

@@ -1,0 +1,299 @@
+.peptides-section {
+  padding: 6rem 1.25rem;
+  background-color: var(--surface);
+}
+
+.peptides-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.peptides-header {
+  margin-bottom: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.peptides-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--primary-light);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.peptides-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 54, 102, 0.05);
+  color: var(--primary);
+  border: 1px solid rgba(0, 54, 102, 0.15);
+  border-radius: 99px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 1px 8px;
+  letter-spacing: 0.04em;
+}
+
+.peptides-title {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.peptides-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.peptide-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 3rem;
+}
+
+.peptide-chip {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.5rem 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+}
+
+.peptide-chip:hover {
+  border-color: var(--secondary);
+  color: var(--secondary);
+  transform: translateY(-1px);
+}
+
+.peptide-chip.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.peptide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.peptide-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.peptide-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--card-accent, var(--secondary));
+  opacity: 0.3;
+  transition: opacity 0.3s;
+}
+
+.peptide-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border);
+}
+
+.peptide-card:hover::before {
+  opacity: 1;
+}
+
+.peptide-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.peptide-relevance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 0.2rem 0.75rem;
+  border: 1px solid transparent;
+}
+
+.peptide-info-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.peptide-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.peptide-name-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.peptide-name {
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--primary);
+  line-height: 1.2;
+}
+
+.peptide-role {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.peptide-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.peptide-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--background);
+  color: var(--text-muted);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+
+.dosage-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.dosage-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.dosage-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.dosage-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid transparent;
+}
+
+.dosage-skeleton-row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.dosage-skeleton {
+  width: 40px;
+  height: 20px;
+  border-radius: 6px;
+  background: var(--background);
+  animation: pulse 2s infinite;
+}
+
+.peptide-card-footer {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.peptide-card:hover .peptide-card-footer {
+  gap: 0.75rem;
+}
+
+.load-more-section {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+}
+
+.peptide-load-btn {
+  background: white;
+  border: 2px solid var(--primary);
+  border-radius: 999px;
+  color: var(--primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.8rem 2.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.peptide-load-btn:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 640px) {
+  .peptides-section {
+    padding: 4rem 1rem;
+  }
+  .peptide-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,8 +1,12 @@
+/* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Mail, Phone, User, Send, ChevronDown, ArrowLeft, CheckCircle2, Globe, FileText, Users, Clock, MessageSquare, Calendar, CloudUpload, ShieldCheck } from 'lucide-react';
 import { COUNTRIES } from '../data/countries';
 import { useAuth } from '../context/AuthContext';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { trackFormEngagement } from '../hooks/useAnalytics';
+
 
 export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, region }) {
   usePageMeta({
@@ -12,6 +16,7 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
   });
 
   const { user, userProfile } = useAuth();
+  const location = useLocation();
   const [submitted, setSubmitted] = useState(false);
   const [topic, setTopic] = useState('Product Information');
   const [userType, setUserType] = useState(null);
@@ -25,6 +30,8 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
 
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+  const [hasStartedTracking, setHasStartedTracking] = useState(false);
+
 
   const validateField = (name, value) => {
     let error = '';
@@ -73,14 +80,15 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
   const USER_TYPES = [
     { id: 'clinics', label: 'Clinics', icon: <Users size={16} />, defaultInquiry: 'Clinic Inquiry' },
     { id: 'pharmacies', label: 'Pharmacies', icon: <Globe size={16} />, defaultInquiry: 'Pharmacy Inquiry' },
-    { id: 'researchers', label: 'Researchers', icon: <FileText size={16} />, defaultInquiry: 'Research Inquiry' },
-    { id: 'distributors', label: 'Distributors', icon: <Globe size={16} />, defaultInquiry: 'Distributor Inquiry' }
+    { id: 'researchers', label: 'Researchers', icon: <FileText size={16} />, defaultInquiry: 'Sample Order' },
+    { id: 'distributors', label: 'Distributors', icon: <Globe size={16} />, defaultInquiry: 'Distributor Inquiry' },
+    { id: 'individual', label: 'Non-Professional', icon: <User size={16} />, defaultInquiry: 'Product Information' }
   ];
 
   const INQUIRY_TYPES = [
     'Clinic Inquiry',
     'Pharmacy Inquiry',
-    'Research Inquiry',
+    'Sample Order',
     'Distributor Inquiry',
     'Product Information',
     'Bulk Order',
@@ -93,6 +101,7 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
   const MESSAGE_PLACEHOLDERS = {
     'clinics': 'Example: "I am a clinic interested in Tirzepatide bulk pricing."',
     'researchers': 'Example: "I need COA documentation for BPC-157."',
+    'individual': 'Example: "I would like more information about your quality standards for individual research."',
     'default': 'Example: "Interested in technical data or bulk pricing for research materials."'
   };
 
@@ -106,11 +115,18 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setLocalFormData(prev => ({ ...prev, [name]: value }));
+
+    if (!hasStartedTracking) {
+      trackFormEngagement('institutional_inquiry', 'start');
+      setHasStartedTracking(true);
+    }
+
     if (touched[name]) {
       const error = validateField(name, value);
       setErrors(prev => ({ ...prev, [name]: error }));
     }
   };
+
 
   const handleBlur = (e) => {
     const { name, value } = e.target;
@@ -123,6 +139,21 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
     setUserType(type.id);
     setTopic(type.defaultInquiry);
   };
+
+  // Pre-fill form from router location state (e.g. from CoA requests)
+  useEffect(() => {
+    if (location.state) {
+      if (location.state.topic) {
+        setTopic(location.state.topic);
+      }
+      if (location.state.prefillMessage) {
+        setLocalFormData(prev => ({
+          ...prev,
+          message: location.state.prefillMessage
+        }));
+      }
+    }
+  }, [location.state]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -157,10 +188,10 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
   }, [user, userProfile, userType]);
 
   // We rely on Formspree for actual email delivery securely without a backend
-  // The user specifies they want the email to go to business@med-peptides.com
+  // The user specifies they want the email to go to business@Med-Peptides.com
   // Normally you'd create a specific hash. In this demo setting, we'll use a mailto action or direct form action
   // if they have a formspree/other endpoint. Given no API keys, we'll use a direct mailto as fallback, 
-  // OR simulated submission that says "Emails to business@med-peptides.com" since we can't register an endpoint for them automatically.
+  // OR simulated submission that says "Emails to business@Med-Peptides.com" since we can't register an endpoint for them automatically.
   // Actually, standard HTML form to formsubmit.co is free and requires no registration.
 
   const handleSubmit = (e) => {
@@ -181,7 +212,12 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
     formDataObj.append('region', region);
     formDataObj.append('timestamp', new Date().toISOString());
 
-    fetch('https://formsubmit.co/ajax/business@med-peptides.com', {
+    trackFormEngagement('institutional_inquiry', 'submit', {
+      inquiry_topic: topic,
+      user_type: userType || 'none'
+    });
+
+    fetch('https://formsubmit.co/ajax/business@Med-Peptides.com', {
         method: 'POST',
         headers: {
             'Accept': 'application/json'
@@ -190,6 +226,8 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
     })
     .then(response => response.json())
     .then(data => {
+        trackFormEngagement('institutional_inquiry', 'success');
+
         setSubmitted(true);
         form.reset();
         setLocalFormData({ name: '', email: '', phone: '', message: '' });
@@ -202,8 +240,8 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
             const text = encodeURIComponent(`Hello, I have submitted my details via the form. I would like to request an official quote for: ${pendingQuote.summary}`);
             window.open(`https://wa.me/971553561058?text=${text}`, '_blank');
           } else if (pendingQuote.type === 'Email') {
-            const body = encodeURIComponent(`Research Inquiry Summary:\n${pendingQuote.summary}\n\nI have just submitted the contact form with my official details.`);
-            window.location.href = `mailto:business@med-peptides.com?subject=Official Quote Request&body=${body}`;
+            const body = encodeURIComponent(`Sample Order Summary:\n${pendingQuote.summary}\n\nI have just submitted the contact form with my official details.`);
+            window.location.href = `mailto:business@Med-Peptides.com?subject=Official Quote Request&body=${body}`;
           }
           setPendingQuote(null);
         }
@@ -212,8 +250,10 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
     })
     .catch(error => {
         console.error(error);
+        trackFormEngagement('institutional_inquiry', 'error', { error_message: error.message });
         setErrors({ general: 'There was an error sending your message. Please try emailing directly.' });
     });
+
   };
 
   const TrustIndicator = ({ icon: Icon, text }) => (
@@ -234,33 +274,7 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
 
   return (
     <div className="template-root" style={{ paddingTop: 'clamp(2rem, 8vw, 6rem)', minHeight: '100vh', backgroundColor: 'var(--surface)', position: 'relative' }}>
-      {/* Floating WhatsApp Button */}
-      <a 
-        href="https://wa.me/971553561058"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="floating-whatsapp"
-        style={{
-          position: 'fixed',
-          bottom: '2rem',
-          right: '2rem',
-          width: '60px',
-          height: '60px',
-          backgroundColor: '#25D366',
-          color: 'white',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          zIndex: 1000,
-          transition: 'transform 0.3s ease'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-      >
-        <MessageSquare size={30} fill="white" />
-      </a>
+
 
       <div className="container" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
         <div className="grid-2" style={{ gap: '4rem', alignItems: 'flex-start' }}>
@@ -328,25 +342,38 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
 
             <div style={{ display: 'grid', gap: '1.5rem', marginTop: '2rem' }}>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--surface-subtle)', display: 'flex', alignItems: 'center', justifyCenter: 'center', color: 'var(--primary)' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--surface-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--primary)' }}>
                   <Mail size={18} />
                 </div>
                 <div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Email Inquiry</div>
-                  <div style={{ fontWeight: 600 }}>business@med-peptides.com</div>
+                  <div style={{ fontWeight: 600 }}>business@Med-Peptides.com</div>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--surface-subtle)', display: 'flex', alignItems: 'center', justifyCenter: 'center', color: '#25D366' }}>
+              <div
+                style={{ display: 'flex', gap: '1rem', alignItems: 'center', cursor: 'pointer' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.querySelector('.wa-num').style.textDecoration = 'underline';
+                  e.currentTarget.querySelector('.wa-icon-bg').style.backgroundColor = '#25D366';
+                  e.currentTarget.querySelector('.wa-icon-bg').style.color = 'white';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.querySelector('.wa-num').style.textDecoration = 'none';
+                  e.currentTarget.querySelector('.wa-icon-bg').style.backgroundColor = 'var(--surface-subtle)';
+                  e.currentTarget.querySelector('.wa-icon-bg').style.color = '#25D366';
+                }}
+                onClick={() => window.open('https://wa.me/971553561058', '_blank')}
+              >
+                <div className="wa-icon-bg" style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--surface-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#25D366', transition: 'all 0.2s ease', flexShrink: 0 }}>
                   <MessageSquare size={18} />
                 </div>
                 <div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>WhatsApp Hub</div>
-                  <div style={{ fontWeight: 600 }}>+971 55 356 1058</div>
+                  <div className="wa-num" style={{ fontWeight: 600, color: '#25D366' }}>+971 55 356 1058</div>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--surface-subtle)', display: 'flex', alignItems: 'center', justifyCenter: 'center', color: 'var(--primary)' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--surface-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--primary)' }}>
                   <Calendar size={18} />
                 </div>
                 <div>

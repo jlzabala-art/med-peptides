@@ -1,21 +1,7 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, writeBatch, doc } from 'firebase/firestore';
 import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-
-// ⚠️ CANONICAL PROJECT: med-peptides-app — NEVER change to regenpept-web-app
-const firebaseConfig = {
-  apiKey: "AIzaSyDOV2zFeLGtPsE_O2b-gR3NHZygPspiSws",
-  authDomain: "med-peptides-app-27a3a.firebaseapp.com",
-  projectId: "med-peptides-app",
-  storageBucket: "med-peptides-app.firebasestorage.app",
-  messagingSenderId: "514143707883",
-  appId: "1:514143707883:web:6c12470433ef6c992714ae",
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+import { db } from './scripts/lib/firebase-admin.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -25,11 +11,11 @@ async function repair() {
   console.log("Starting FAQ mapping repair...");
   
   // 1. Fetch old mappings to delete
-  const mappingRef = collection(db, 'faq_peptide_mapping');
-  const snap = await getDocs(mappingRef);
+  const mappingRef = db.collection('faq_peptide_mapping');
+  const snap = await mappingRef.get();
   
   const deleteBatches = [];
-  let deleteBatch = writeBatch(db);
+  let deleteBatch = db.batch();
   let deleteCount = 0;
   
   snap.docs.forEach((d) => {
@@ -37,10 +23,10 @@ async function repair() {
     deleteCount++;
     if (deleteCount % 400 === 0) {
       deleteBatches.push(deleteBatch);
-      deleteBatch = writeBatch(db);
+      deleteBatch = db.batch();
     }
   });
-  if (deleteCount % 400 !== 0) {
+  if (deleteCount % 400 !== 0 && deleteCount > 0) {
     deleteBatches.push(deleteBatch);
   }
 
@@ -49,16 +35,16 @@ async function repair() {
   const newMappings = JSON.parse(newMappingsRaw);
   
   const addBatches = [];
-  let addBatch = writeBatch(db);
+  let addBatch = db.batch();
   let addCount = 0;
   
   newMappings.forEach((m) => {
     // Generate a consistent ID based on peptide name and faqId
     const safeName = m.peptideName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
     const customId = `${safeName}_${m.faqId}`.slice(0, 150);
-    const newRef = doc(mappingRef, customId);
+    const newDocRef = mappingRef.doc(customId);
     
-    addBatch.set(newRef, {
+    addBatch.set(newDocRef, {
       ...m,
       syncedAt: new Date().toISOString()
     });
@@ -66,10 +52,10 @@ async function repair() {
     
     if (addCount % 400 === 0) {
       addBatches.push(addBatch);
-      addBatch = writeBatch(db);
+      addBatch = db.batch();
     }
   });
-  if (addCount % 400 !== 0) {
+  if (addCount % 400 !== 0 && addCount > 0) {
     addBatches.push(addBatch);
   }
 
@@ -95,3 +81,4 @@ repair().catch(err => {
   console.error(err);
   process.exit(1);
 });
+

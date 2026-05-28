@@ -3,7 +3,7 @@
  *  Antigravity · Seed Naming Metadata  (Admin SDK)
  *  Writes: metadata.scientificName · metadata.shortCode
  *          metadata.abbreviatedName · metadata.version
- *  Collection: protocol_templates   Project: med-peptides-app
+ *  Collection: protocol_templates   Project: Med-Peptides-app
  *
  *  Usage:
  *    node scripts/seed-naming-metadata.mjs            # dry-run

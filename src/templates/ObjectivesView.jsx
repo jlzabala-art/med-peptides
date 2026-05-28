@@ -1,54 +1,63 @@
-import { Beaker, Activity, Zap, Sparkles, Brain, Dumbbell, Droplets, FlaskConical, ArrowRight } from 'lucide-react';
+/* eslint-disable no-unused-vars */
+import { Beaker, Activity, Zap, Sparkles, Brain, ShieldCheck, Droplets, FlaskConical, ArrowRight, Moon } from 'lucide-react';
 import { useEffect } from 'react';
 
 const objectives = [
   {
-    id: "Healing & Recovery",
-    title: "Healing & Recovery",
-    shortTitle: "Healing",
+    id: "Recovery & Repair",
+    title: "Recovery & Repair",
+    shortTitle: "Recovery",
     icon: Activity,
     description: "Scientific investigation into tissue regeneration, cellular repair mechanisms, and inflammatory modulation.",
-    color: "#3b82f6"
+    color: "var(--color-primary)"
   },
   {
-    id: "Weight Management & Metabolic",
-    title: "Weight Management & Metabolic",
-    shortTitle: "Weight Mgmt",
+    id: "Metabolic & Weight",
+    title: "Metabolic & Weight",
+    shortTitle: "Metabolic",
     icon: Zap,
     description: "Advanced research on metabolic pathways, energy expenditure, and peptide-mediated hormonal signaling.",
     color: "#f59e0b"
   },
   {
-    id: "Anti-Aging & Longevity",
-    title: "Anti-Aging & Longevity",
-    shortTitle: "Anti-Aging",
+    id: "Longevity & Anti-Aging",
+    title: "Longevity & Anti-Aging",
+    shortTitle: "Longevity",
     icon: Sparkles,
     description: "Molecular studies regarding telomerase activity, DNA repair, and systemic physiological rejuvenation.",
     color: "#8b5cf6"
   },
   {
-    id: "Cognitive & Neuro-Protection",
-    title: "Cognitive & Neuro-Protection",
+    id: "Cognitive & Mood",
+    title: "Cognitive & Mood",
     shortTitle: "Cognitive",
     icon: Brain,
-    description: "Neurological research focused on anxiolytic properties, neuroplasticity, and neuroprotective shielding.",
-    color: "#ec4899"
+    description: "Inquiry into neurotrophic factors, neurotransmitter balance, and cognitive optimization through specialized reagents.",
+    color: "#8b5cf6"
   },
   {
-    id: "Muscle Growth & Performance",
-    title: "Muscle Growth & Performance",
-    shortTitle: "Muscle Growth",
-    icon: Dumbbell,
-    description: "In-depth analysis of protein synthesis, muscular hypertrophy, and physiological performance enhancement.",
-    color: "#ef4444"
+    id: "Sleep & Circadian",
+    title: "Sleep & Circadian",
+    shortTitle: "Sleep",
+    icon: Moon,
+    description: "Research into circadian rhythm regulation, sleep architecture, and restorative biological signaling.",
+    color: "#6366f1"
   },
   {
-    id: "Hormonal Support",
-    title: "Hormonal Support",
+    id: "Hormonal Optimization",
+    title: "Hormonal Optimization",
     shortTitle: "Hormonal",
     icon: Droplets,
-    description: "Investigation into endocrine system regulation and growth hormone secretagogue mechanisms.",
-    color: "#10b981"
+    description: "Exploration of GH axis support, endocrine signaling, and physiological balance in research models.",
+    color: "var(--color-success)"
+  },
+  {
+    id: "Immune Support",
+    title: "Immune Support",
+    shortTitle: "Immune",
+    icon: ShieldCheck,
+    description: "Research on immune modulation, inflammatory cytokines, and systemic defense mechanisms.",
+    color: "var(--color-success)"
   },
   {
     id: "Research Supplies",
@@ -56,7 +65,7 @@ const objectives = [
     shortTitle: "Supplies",
     icon: Beaker,
     description: "High-purity essential materials for standardized laboratory reconstitution and experimental procedures.",
-    color: "#64748b"
+    color: "var(--color-text-secondary)"
   },
   {
     id: "Other Research Peptides",
@@ -241,7 +250,7 @@ export default function ObjectivesView({
             marginBottom: '1rem',
             fontWeight: 800
           }}>
-            Investigational Pathways
+            Research Pathways
           </h1>
           <p style={{ 
             maxWidth: '700px', 
@@ -259,13 +268,13 @@ export default function ObjectivesView({
           {objectives
             .filter(obj => isProfessional || (obj.title !== 'Research Supplies' && obj.title !== 'Other Research Peptides'))
             .map(objective => {
-            const rgb = objective.color === '#3b82f6' ? '59, 130, 246' :
+            const rgb = objective.color === 'var(--color-primary)' ? '59, 130, 246' :
                         objective.color === '#f59e0b' ? '245, 158, 11' :
                         objective.color === '#8b5cf6' ? '139, 92, 246' :
                         objective.color === '#ec4899' ? '236, 72, 153' :
-                        objective.color === '#ef4444' ? '239, 68, 68' :
-                        objective.color === '#10b981' ? '16, 185, 129' :
-                        objective.color === '#64748b' ? '100, 116, 139' : '15, 23, 42';
+                        objective.color === 'var(--color-danger)' ? '239, 68, 68' :
+                        objective.color === 'var(--color-success)' ? '16, 185, 129' :
+                        objective.color === 'var(--color-text-secondary)' ? '100, 116, 139' : '15, 23, 42';
 
             return (
               <div 
@@ -307,13 +316,13 @@ export default function ObjectivesView({
           {objectives
             .filter(obj => isProfessional || (obj.title !== 'Research Supplies' && obj.title !== 'Other Research Peptides'))
             .map(objective => {
-            const rgb = objective.color === '#3b82f6' ? '59, 130, 246' :
+            const rgb = objective.color === 'var(--color-primary)' ? '59, 130, 246' :
                         objective.color === '#f59e0b' ? '245, 158, 11' :
                         objective.color === '#8b5cf6' ? '139, 92, 246' :
                         objective.color === '#ec4899' ? '236, 72, 153' :
-                        objective.color === '#ef4444' ? '239, 68, 68' :
-                        objective.color === '#10b981' ? '16, 185, 129' :
-                        objective.color === '#64748b' ? '100, 116, 139' : '15, 23, 42';
+                        objective.color === 'var(--color-danger)' ? '239, 68, 68' :
+                        objective.color === 'var(--color-success)' ? '16, 185, 129' :
+                        objective.color === 'var(--color-text-secondary)' ? '100, 116, 139' : '15, 23, 42';
 
             return (
               <div 

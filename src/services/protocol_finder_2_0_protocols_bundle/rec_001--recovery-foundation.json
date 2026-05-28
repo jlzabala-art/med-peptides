@@ -1,0 +1,199 @@
+{
+  "protocol_id": "rec_001",
+  "protocol_slug": "recovery-foundation-bpc-tb",
+  "protocol_title": "Recovery Foundation Protocol (BPC-157 + TB-500)",
+  "protocol_version": "v1.0",
+  "status": "approved",
+  "active": true,
+  "metadata": {
+    "primary_goal": "recovery_repair",
+    "primary_condition": "acute_tissue_injury",
+    "complexity_level": "standard",
+    "visibility": "public",
+    "marker_alignment": {
+      "condition_type": {
+        "acute": {
+          "score": 80,
+          "note": "Primary alignment for rapid repair"
+        },
+        "chronic": {
+          "score": 40,
+          "note": "Secondary alignment; consider Advanced Recovery"
+        }
+      }
+    },
+    "author": {
+      "name": "Med-Peptides Clinical Team",
+      "organization": "Med-Peptides"
+    },
+    "created_at": "2026-05-04T00:00:00.000Z",
+    "updated_at": "2026-05-04T00:00:00.000Z"
+  },
+  "eligibility_rules": {
+    "supported_age_groups": [
+      "20-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_goals": [
+      "Recovery & Repair",
+      "recovery_repair"
+    ],
+    "contraindications": [
+      "active_malignancy",
+      "pregnancy"
+    ],
+    "relative_cautions": [
+      "high_angiogenic_risk"
+    ]
+  },
+  "phase_blueprints": [
+    {
+      "phase_key": "activation",
+      "phase_title": "Phase 1: Activation",
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "inflammation_modulation",
+        "angiogenesis_initiation"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_bpc157",
+          "product_title": "BPC-157",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mcg",
+            "dose_per_administration": 250,
+            "administration_frequency": "2x_daily",
+            "administration_days_default": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "starting_weekly_dose": 3500,
+            "default_weekly_dose": 3500
+          },
+          "dosage_form": "vial"
+        },
+        {
+          "product_id": "prd_tb500",
+          "product_title": "TB-500",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "dose_per_administration": 2.5,
+            "administration_frequency": "2x_week",
+            "administration_days_default": [
+              "Tuesday",
+              "Friday"
+            ],
+            "starting_weekly_dose": 5,
+            "default_weekly_dose": 5
+          },
+          "dosage_form": "vial"
+        }
+      ]
+    },
+    {
+      "phase_key": "regeneration",
+      "phase_title": "Phase 2: Regeneration",
+      "default_duration_weeks": 4,
+      "clinical_purpose": [
+        "tissue_remodeling",
+        "collagen_synthesis"
+      ],
+      "drugs": [
+        {
+          "product_id": "prd_bpc157",
+          "product_title": "BPC-157",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mcg",
+            "dose_per_administration": 250,
+            "administration_frequency": "2x_daily",
+            "starting_weekly_dose": 3500,
+            "default_weekly_dose": 3500
+          },
+          "dosage_form": "vial"
+        },
+        {
+          "product_id": "prd_tb500",
+          "product_title": "TB-500",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "dose_unit": "mg",
+            "dose_per_administration": 2.5,
+            "administration_frequency": "2x_week",
+            "administration_days_default": [
+              "Wednesday"
+            ],
+            "starting_weekly_dose": 5,
+            "default_weekly_dose": 5
+          },
+          "dosage_form": "vial"
+        }
+      ]
+    }
+  ],
+  "monitoring_plan": {
+    "baseline_required": [
+      "inflammatory_markers",
+      "site_assessment"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "week": 4,
+        "type": "mobility_review",
+        "purpose": "Assess range of motion improvement"
+      }
+    ],
+    "labs": []
+  },
+  "recommended_supplements": [
+    {
+      "name": "Ashwagandha",
+      "dosage": "300mg",
+      "rationale": "HPA axis modulation and cortisol management",
+      "frequency": "Daily",
+      "weekly_dose": "2100mg"
+    },
+    {
+      "name": "Boswellia",
+      "dosage": "300mg",
+      "rationale": "5-LOX inhibition for joint and inflammation support",
+      "frequency": "Daily",
+      "weekly_dose": "2100mg"
+    },
+    {
+      "name": "Magnesium",
+      "dosage": "200mg",
+      "rationale": "Muscle relaxation, sleep and repair support",
+      "frequency": "Daily (Bedtime)",
+      "weekly_dose": "1400mg"
+    }
+  ],
+  "mechanism_of_action": [
+    "Targeted receptor modulation and cellular signaling optimization.",
+    "Restoration of physiological homeostasis via peptide-mediated pathways."
+  ],
+  "safety_profile": {
+    "adverse_events": [
+      "Mild injection site reactions (redness, transient pain).",
+      "Potential for mild, transient nausea during initial dose titration."
+    ],
+    "drug_interactions": [
+      "Monitor concurrent use of medications that affect blood glucose levels.",
+      "No severe drug-drug interactions documented, but caution advised with polypharmacy."
+    ],
+    "contraindications": [
+      "Pregnancy and lactation.",
+      "Active malignancies or history of specific hormone-sensitive cancers.",
+      "Known hypersensitivity to any protocol components."
+    ]
+  }
+}

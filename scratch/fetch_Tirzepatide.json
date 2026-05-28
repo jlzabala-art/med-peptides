@@ -1,0 +1,72 @@
+[
+  {
+    "pmid": "38078870",
+    "title": "Continued Treatment With Tirzepatide for Maintenance of Weight Reduction in Adults With Obesity: The SURMOUNT-4 Randomized Clinical Trial.",
+    "authors": [
+      "Aronne LJ",
+      "Sattar N",
+      "Horn DB",
+      "Bays HE",
+      "Wharton S",
+      "Lin WY",
+      "Ahmad NN",
+      "Zhang S",
+      "Liao R",
+      "Bunck MC",
+      "Jouravskaya I",
+      "Murphy MA",
+      "SURMOUNT-4 Investigators"
+    ],
+    "journal": "JAMA",
+    "pubdate": "2024 Jan 02",
+    "doi": "10.1001/jama.2023.24945",
+    "abstract": "IMPORTANCE: The effect of continued treatment with tirzepatide on maintaining initial weight reduction is unknown.\nOBJECTIVE: To assess the effect of tirzepatide, with diet and physical activity, on the maintenance of weight reduction.\nDESIGN, SETTING, AND PARTICIPANTS: This phase 3, randomized withdrawal clinical trial conducted at 70 sites in 4 countries with a 36-week, open-label tirzepatide lead-in period followed by a 52-week, double-blind, placebo-controlled period included adults with a body mass index greater than or equal to 30 or greater than or equal to 27 and a weight-related complication, excluding diabetes.\nINTERVENTIONS: Participants (n\u2009=\u2009783) enrolled in an open-label lead-in period received once-weekly subcutaneous maximum tolerated dose (10 or 15 mg) of tirzepatide for 36 weeks. At week 36, a total of 670 participants were randomized (1:1) to continue receiving tirzepatide (n\u2009=\u2009335) or switch to placebo (n\u2009=\u2009335) for 52 weeks.\nMAIN OUTCOMES AND MEASURES: The primary end point was the mean percent change in weight from week 36 (randomization) to week 88. Key secondary end points included the proportion of participants at week 88 who maintained at least 80% of the weight loss during the lead-in period.\nRESULTS: Participants (n\u2009=\u2009670; mean age, 48 years; 473 [71%] women; mean weight, 107.3 kg) who completed the 36-week lead-in period experienced a mean weight reduction of 20.9%. The mean percent weight change from week 36 to week 88 was -5.5% with tirzepatide vs 14.0% with placebo (difference, -19.4% [95% CI, -21.2% to -17.7%]; P\u2009<\u2009.001). Overall, 300 participants (89.5%) receiving tirzepatide at 88 weeks maintained at least 80% of the weight loss during the lead-in period compared with 16.6% receiving placebo (P\u2009<\u2009.001). The overall mean weight reduction from week 0 to 88 was 25.3% for tirzepatide and 9.9% for placebo. The most common adverse events were mostly mild to moderate gastrointestinal events, which occurred more commonly with tirzepatide vs placebo.\nCONCLUSIONS AND RELEVANCE: In participants with obesity or overweight, withdrawing tirzepatide led to substantial regain of lost weight, whereas continued treatment maintained and augmented initial weight reduction.\nTRIAL REGISTRATION: ClinicalTrials.gov Identifier: NCT04660643."
+  },
+  {
+    "pmid": "39536238",
+    "title": "Tirzepatide for Obesity Treatment and Diabetes Prevention.",
+    "authors": [
+      "Jastreboff AM",
+      "le Roux CW",
+      "Stefanski A",
+      "Aronne LJ",
+      "Halpern B",
+      "Wharton S",
+      "Wilding JPH",
+      "Perreault L",
+      "Zhang S",
+      "Battula R",
+      "Bunck MC",
+      "Ahmad NN",
+      "Jouravskaya I",
+      "SURMOUNT-1 Investigators"
+    ],
+    "journal": "The New England journal of medicine",
+    "pubdate": "2025 Mar 06",
+    "doi": "10.1056/NEJMoa2410819",
+    "abstract": "BACKGROUND: Obesity is a chronic disease and causal precursor to myriad other conditions, including type 2 diabetes. In an earlier analysis of the SURMOUNT-1 trial, tirzepatide was shown to provide substantial and sustained reductions in body weight in persons with obesity over a 72-week period. Here, we report the 3-year safety outcomes with tirzepatide and its efficacy in reducing weight and delaying progression to type 2 diabetes in persons with both obesity and prediabetes.\nMETHODS: We performed a phase 3, double-blind, randomized, controlled trial in which 2539 participants with obesity, of whom 1032 also had prediabetes, were assigned in a 1:1:1:1 ratio to receive tirzepatide at a once-weekly dose of 5 mg, 10 mg, or 15 mg or placebo. The current analysis involved the participants with both obesity and prediabetes, who received their assigned dose of tirzepatide or placebo for a total of 176 weeks, followed by a 17-week off-treatment period. The three key secondary end points, which were controlled for type I error, were the percent change in body weight from baseline to week 176 and onset of type 2 diabetes during the 176-week and 193-week periods.\nRESULTS: At 176 weeks, the mean percent change in body weight among the participants who received tirzepatide was -12.3% with the 5-mg dose, -18.7% with the 10-mg dose, and -19.7% with the 15-mg dose, as compared with -1.3% among those who received placebo (P<0.001 for all comparisons with placebo). Fewer participants received a diagnosis of type 2 diabetes in the tirzepatide groups than in the placebo group (1.3% vs. 13.3%; hazard ratio, 0.07; 95% confidence interval [CI], 0.0 to 0.1; P<0.001). After 17 weeks off treatment or placebo, 2.4% of the participants who received tirzepatide and 13.7% of those who received placebo had type 2 diabetes (hazard ratio, 0.12; 95% CI, 0.1 to 0.2; P<0.001). Other than coronavirus disease 2019, the most common adverse events were gastrointestinal, most of which were mild to moderate in severity and occurred primarily during the dose-escalation period in the first 20 weeks of the trial. No new safety signals were identified.\nCONCLUSIONS: Three years of treatment with tirzepatide in persons with obesity and prediabetes resulted in substantial and sustained weight reduction and a markedly lower risk of progression to type 2 diabetes than that with placebo. (Funded by Eli Lilly; SURMOUNT-1 ClinicalTrials.gov number, NCT04184622.)."
+  },
+  {
+    "pmid": "37385275",
+    "title": "Tirzepatide once weekly for the treatment of obesity in people with type 2 diabetes (SURMOUNT-2): a double-blind, randomised, multicentre, placebo-controlled, phase 3 trial.",
+    "authors": [
+      "Garvey WT",
+      "Frias JP",
+      "Jastreboff AM",
+      "le Roux CW",
+      "Sattar N",
+      "Aizenberg D",
+      "Mao H",
+      "Zhang S",
+      "Ahmad NN",
+      "Bunck MC",
+      "Benabbad I",
+      "Zhang XM",
+      "SURMOUNT-2 investigators"
+    ],
+    "journal": "Lancet (London, England)",
+    "pubdate": "2023 Aug 19",
+    "doi": "10.1016/S0140-6736(23)01200-X",
+    "abstract": "BACKGROUND: Weight reduction is essential for improving health outcomes in people with obesity and type 2 diabetes. We assessed the efficacy and safety of tirzepatide, a glucose-dependent insulinotropic polypeptide and glucagon-like peptide-1 receptor agonist, versus placebo, for weight management in people living with obesity and type 2 diabetes.\nMETHODS: This phase 3, double-blind, randomised, placebo-controlled trial was conducted in seven countries. Adults (aged \u226518 years) with a body-mass index (BMI) of 27 kg/m2 or higher and glycated haemoglobin (HbA1c) of 7-10% (53-86 mmol/mol) were randomly assigned (1:1:1), using a computer-generated random sequence via a validated interactive web-response system, to receive either once-weekly, subcutaneous tirzepatide (10 mg or 15 mg) or placebo for 72 weeks. All participants, investigators, and the sponsor were masked to treatment assignment. Coprimary endpoints were the percent change in bodyweight from baseline and bodyweight reduction of 5% or higher. The treatment-regimen estimand assessed effects regardless of treatment discontinuation or initiation of antihyperglycaemic rescue therapy. Efficacy and safety endpoints were analysed with data from all randomly assigned participants (intention-to-treat population). This trial is registered with ClinicalTrials.gov, NCT04657003.\nFINDINGS: Between March 29, 2021, and April 10, 2023, of 1514 adults assessed for eligibility, 938 (mean age 54\u00b72 years [SD 10\u00b76], 476 [51%] were female, 710 [76%] were White, and 561 [60%] were Hispanic or Latino) were randomly assigned and received at least one dose of tirzepatide 10 mg (n=312), tirzepatide 15 mg (n=311), or placebo (n=315). Baseline mean bodyweight was 100\u00b77 kg (SD 21\u00b71), BMI 36\u00b71 kg/m2 (SD 6\u00b76), and HbA1c 8\u00b702% (SD 0\u00b789; 64\u00b71 mmol/mol [SD 9\u00b77]). Least-squares mean change in bodyweight at week 72 with tirzepatide 10 mg and 15 mg was -12\u00b78% (SE 0\u00b76) and -14\u00b77% (0\u00b75), respectively, and -3\u00b72% (0\u00b75) with placebo, resulting in estimated treatment differences versus placebo of -9\u00b76% percentage points (95% CI -11\u00b71 to -8\u00b71) with tirzepatide 10 mg and -11\u00b76% percentage points (-13\u00b70 to -10\u00b71) with tirzepatide 15 mg (all p<0\u00b70001). More participants treated with tirzepatide versus placebo met bodyweight reduction thresholds of 5% or higher (79-83% vs 32%). The most frequent adverse events with tirzepatide were gastrointestinal-related, including nausea, diarrhoea, and vomiting and were mostly mild to moderate in severity, with few events leading to treatment discontinuation (<5%). Serious adverse events were reported by 68 (7%) participants overall and two deaths occurred in the tirzepatide 10 mg group, but deaths were not considered to be related to the study treatment by the investigator.\nINTERPRETATION: In this 72-week trial in adults living with obesity and type 2 diabetes, once-weekly tirzepatide 10 mg and 15 mg provided substantial and clinically meaningful reduction in bodyweight, with a safety profile that was similar to other incretin-based therapies for weight management.\nFUNDING: Eli Lilly and Company."
+  }
+]

@@ -1,0 +1,177 @@
+{
+  "hero": {
+    "eyebrow": "Biological Optimization Ecosystem",
+    "title": "The Modern Guide to Biological Optimization",
+    "description": "Explore peptides, supplements and intelligent protocols for recovery, metabolism, cognition, sleep and longevity.",
+    "features": [
+      {
+        "icon": "RefreshCw",
+        "title": "Peptides & Supplements",
+        "desc": "Curated catalog spanning research peptides and precision supplements."
+      },
+      {
+        "icon": "ShieldCheck",
+        "title": "Intelligent Protocols",
+        "desc": "Goal-driven exploration guided by ClinicalAI and structured research pathways."
+      }
+    ],
+    "primaryCta": "Explore Ecosystem",
+    "secondaryCta": "Browse Protocols"
+  },
+  "trustStrip": {
+    "items": [
+      {
+        "icon": "ShieldCheck",
+        "label": "≥98% Purity",
+        "desc": "Verified every batch, no exceptions"
+      },
+      {
+        "icon": "FileCheck",
+        "label": "COA Included",
+        "desc": "Full certificate of analysis per order"
+      },
+      {
+        "icon": "Globe",
+        "label": "Global Delivery",
+        "desc": "Secure, tracked shipping worldwide"
+      },
+      {
+        "icon": "MessageCircle",
+        "label": "Expert Support",
+        "desc": "Real answers from knowledgeable staff"
+      }
+    ]
+  },
+  "startHere": {
+    "badge": "Internal Expertise",
+    "title": "The Scientific {gradient:Internal Bridge}",
+    "description": "Med-Peptides operates as an internal scientific bridge between high-tech manufacturing and clinical research. We prioritize technical integrity over simple logistics, managing a rigorous multi-step internal workflow to validate the molecular integrity of every compound.",
+    "cta": "Our Process",
+    "ctaLink": "/about"
+  },
+  "choosingGuide": {
+    "title": "The Technical {gradient:Workflow}",
+    "subtitle": "A comprehensive 5-step protocol designed to maintain scientific standards from synthesis to delivery.",
+    "steps": [
+      {
+        "icon": "SearchCheck",
+        "title": "1. Catalog Curation",
+        "desc": "Research and evaluation to identify high-potential molecular compounds."
+      },
+      {
+        "icon": "FileCheck",
+        "title": "2. Documentation Review",
+        "desc": "Rigorous verification of CoA and analytical validation from primary labs."
+      },
+      {
+        "icon": "Activity",
+        "title": "3. Batch Monitoring",
+        "desc": "Longitudinal tracking to ensure absolute continuity of molecular purity."
+      },
+      {
+        "icon": "HelpCircle",
+        "title": "4. Technical Inquiry",
+        "desc": "Specialized support for scientific queries and compound properties."
+      },
+      {
+        "icon": "Globe",
+        "title": "5. Logistics Management",
+        "desc": "End-to-end oversight ensuring cold-chain integrity and secure fulfillment."
+      }
+    ]
+  },
+  "signalResponse": {
+    "title": "Molecular {gradient:Binding Specificity}",
+    "description": "Investigational peptides are engineered for high affinity, acting as specific ligands that interact with target receptor domains to study biological pathways.",
+    "steps": [
+      {
+        "label": "Molecular Ligand",
+        "desc": "Directly sourced high-purity peptide"
+      },
+      {
+        "label": "Domain Interaction",
+        "desc": "Precise binding to receptor complexes"
+      },
+      {
+        "label": "Data Acquisition",
+        "desc": "Observation of biochemical outcomes"
+      }
+    ]
+  },
+  "targetAudience": {
+    "title": "Supporting the {gradient:Scientific Community}",
+    "subtitle": "Our technical framework supports research-driven entities focused on precision molecular studies.",
+    "audiences": [
+      {
+        "icon": "Building",
+        "title": "Research Institutions",
+        "desc": "Academic and private labs conducting metabolic studies."
+      },
+      {
+        "icon": "Microscope",
+        "title": "Clinical Investigators",
+        "desc": "Professionals exploring novel therapeutic pathways."
+      },
+      {
+        "icon": "ShieldCheck",
+        "title": "Quality Labs",
+        "desc": "Verification partners requiring verified technical data."
+      },
+      {
+        "icon": "Activity",
+        "title": "Independent Researchers",
+        "desc": "Qualified individuals pursuing data-driven longevity science."
+      }
+    ]
+  },
+  "quickFAQ": {
+    "title": "Technical {gradient:Inquiry Center}",
+    "subtitle": "Essential information regarding our technical protocols and scientific oversight.",
+    "faqs": [
+      {
+        "question": "What is Med-Peptides's primary role?",
+        "answer": "We act as a technical representative for primary manufacturing labs, providing scientific oversight and internal process management to ensure researchers receive verified compounds."
+      },
+      {
+        "question": "How do you verify product integrity?",
+        "answer": "Through a 5-step internal workflow including primary document review, batch-specific monitoring, and coordination with independent analytical labs."
+      },
+      {
+        "question": "Do you provide technical support?",
+        "answer": "Yes. Our team provides scientific inquiry support to help researchers understand compound properties, documentation, and batch continuity."
+      },
+      {
+        "question": "Is international logistics managed?",
+        "answer": "Yes, we oversee the entire distribution chain to ensure cold-chain integrity and secure global fulfillment directly from the source labs."
+      },
+      {
+        "question": "What is the intended use of these products?",
+        "answer": "These compounds are strictly for laboratory research and in-vitro testing. They are not intended for human consumption or therapeutic use."
+      }
+    ],
+    "cta": "Technical FAQ →",
+    "ctaLink": "/faq"
+  },
+  "footer": {
+    "tagline": "Technical Oversight & Internal Governance for Advanced Research",
+    "quickLinks": [
+      { "label": "Portfolio", "url": "/products" },
+      { "label": "Technical Process", "url": "/about" },
+      { "label": "Quality Control", "url": "/quality" },
+      { "label": "Inquiry Center", "url": "/faq" }
+    ],
+    "social": [
+      { "icon": "Twitter", "url": "#" },
+      { "icon": "Instagram", "url": "#" },
+      { "icon": "Linkedin", "url": "#" },
+      { "icon": "Mail", "url": "mailto:info@med-peptides.com" }
+    ],
+    "legal": [
+      { "label": "Terms of Service", "url": "/terms" },
+      { "label": "Privacy Policy", "url": "/privacy" },
+      { "label": "Research Guidelines", "url": "/guidelines" },
+      { "label": "Contact Support", "url": "/contact" }
+    ],
+    "copyright": "© 2026 Med-Peptides. Scientific Integrity & Technical Governance. All rights reserved."
+  }
+}

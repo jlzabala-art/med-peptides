@@ -1,0 +1,38 @@
+const { GoogleAuth } = require("google-auth-library");
+const fs = require("fs");
+const path = require("path");
+
+async function listFlows() {
+  try {
+    const projectId = "med-peptides-app";
+    const locationId = "global";
+    const agentId = "7f3effe5-c4bf-4b8f-b9f4-32d8d6dd09a9";
+    const url = `https://dialogflow.googleapis.com/v3/projects/${projectId}/locations/${locationId}/agents/${agentId}/flows`;
+
+    const keyPath = path.resolve(__dirname, "../serviceAccountKey.json");
+    const auth = new GoogleAuth({
+      keyFile: keyPath,
+      scopes: ["https://www.googleapis.com/auth/cloud-platform"]
+    });
+    const client = await auth.getClient();
+    const tokenResponse = await client.getAccessToken();
+    const token = tokenResponse.token;
+
+    console.log(`Listing flows for 7f3 at ${url}`);
+    
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    console.log(`Response status: ${response.status}`);
+    const text = await response.text();
+    console.log("Response text:", JSON.stringify(JSON.parse(text), null, 2));
+  } catch (err) {
+    console.error("Error:", err);
+  }
+}
+
+listFlows();

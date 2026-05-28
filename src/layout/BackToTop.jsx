@@ -1,3 +1,4 @@
+ 
 import { useState, useEffect } from 'react';
 import { ChevronUp } from 'lucide-react';
 
@@ -57,6 +58,13 @@ export default function BackToTop() {
           
           /* Evita que el zoom del sistema interfiera */
           touch-action: manipulation;
+        }
+
+        /* Hidden on mobile — competes with sticky purchase CTA */
+        @media (max-width: 768px) {
+          .back-to-top-btn {
+            display: none !important;
+          }
         }
 
         /* Desktop Hover */

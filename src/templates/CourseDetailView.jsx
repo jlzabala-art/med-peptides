@@ -1,3 +1,4 @@
+ 
 import React from 'react';
 import { ChevronLeft, CheckCircle2, Calendar, Clock, MonitorPlay, Award, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';

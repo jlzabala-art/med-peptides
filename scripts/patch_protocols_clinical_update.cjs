@@ -13,7 +13,7 @@ const path  = require('path');
 const fs    = require('fs');
 
 // ── Config ───────────────────────────────────────────────────────────────────
-const SA_PATH     = path.resolve(__dirname, '../med-peptides-app-firebase-adminsdk-fbsvc-d01b0469f1.json');
+const SA_PATH     = path.resolve(__dirname, '../Med-Peptides-app-firebase-adminsdk-fbsvc-d01b0469f1.json');
 const BUNDLE_PATH = path.resolve(__dirname, '../export/protocols/regen_pept_protocols_clinical_update_2026-04-26.json');
 const COLLECTION  = 'protocols';
 // ─────────────────────────────────────────────────────────────────────────────

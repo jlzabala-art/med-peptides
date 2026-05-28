@@ -1,0 +1,240 @@
+/* ============================================================
+   MED-PEPTIDES — LEGAL & POLICY STYLES (Shared)
+   ============================================================ */
+
+.legal-page {
+  background-color: var(--background);
+  min-height: 100vh;
+}
+
+/* ── Hero Section ───────────────────────────────────────────── */
+.legal-hero {
+  position: relative;
+  padding: 8rem 0 5rem;
+  background: var(--gradient-clinical);
+  overflow: hidden;
+  color: white;
+}
+
+.legal-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 70% 30%, rgba(26, 94, 168, 0.4) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.legal-hero__content {
+  position: relative;
+  z-index: 10;
+  max-width: 800px;
+}
+
+.legal-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1.25rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 2rem;
+}
+
+.legal-hero__title {
+  color: white !important;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1.05;
+  margin-bottom: 1.5rem;
+}
+
+.legal-hero__subtitle {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 1.15rem;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+/* ── Main Content Layout ────────────────────────────────────── */
+.legal-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 4rem;
+  margin-top: -3rem; /* overlap hero */
+  position: relative;
+  z-index: 20;
+}
+
+@media (max-width: 1024px) {
+  .legal-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    margin-top: 2rem;
+  }
+}
+
+/* ── Sticky Sidebar Navigation ─────────────────────────────── */
+.legal-nav {
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+}
+
+@media (max-width: 1024px) {
+  .legal-nav {
+    display: none;
+  }
+}
+
+.legal-nav__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.legal-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: var(--transition-smooth);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.legal-nav__item:hover {
+  background: var(--surface);
+  color: var(--primary);
+  transform: translateX(5px);
+}
+
+.legal-nav__item--active {
+  background: var(--surface);
+  color: var(--primary);
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Policy Sections ────────────────────────────────────────── */
+.legal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 3rem;
+  margin-bottom: 2.5rem;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-smooth);
+}
+
+@media (max-width: 768px) {
+  .legal-card {
+    padding: 1.75rem;
+    border-radius: 20px;
+  }
+}
+
+.legal-card:hover {
+  border-color: var(--secondary);
+  box-shadow: var(--shadow-lg);
+}
+
+.legal-card__header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.legal-card__icon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--secondary-light);
+  color: var(--secondary);
+  border-radius: 16px;
+  flex-shrink: 0;
+}
+
+.legal-card__title {
+  margin: 0 !important;
+  font-size: 1.75rem;
+}
+
+.legal-card__content {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+.legal-card__content p {
+  margin-bottom: 1.5rem;
+}
+
+/* ── Info Cards Row ────────────────────────────────────────── */
+.legal-info-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 4rem;
+}
+
+@media (max-width: 768px) {
+  .legal-info-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.legal-info-box {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.legal-info-box__icon {
+  color: var(--primary);
+  opacity: 0.7;
+}
+
+/* ── Version Footer ─────────────────────────────────────────── */
+.legal-footer {
+  margin-top: 6rem;
+  padding: 4rem 0;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  color: var(--text-light);
+}
+
+.legal-version-tag {
+  display: inline-block;
+  padding: 0.35rem 1rem;
+  background: var(--border-light);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.5rem;
+}

@@ -1,4 +1,4 @@
-# ReGen PEPT - Pricing & Search Integrity Audit
+# Med-Peptides - Pricing & Search Integrity Audit
 
 ## Overview
 A comprehensive audit and architecture refactor was completed to ensure **100% precise pricing integrity** across the platform by dynamically linking product variants against the master wholesale catalog (`wholesale_parsed.json`).

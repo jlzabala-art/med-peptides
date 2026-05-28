@@ -1,3 +1,4 @@
+ 
 import { useState, useEffect } from 'react';
 import {
   collection,
@@ -29,9 +30,9 @@ const COMPLEXITY_STYLE = {
 
 // ── Confidence score colour ───────────────────────────────────────────────────
 function scoreColor(score) {
-  if (score >= 90) return '#16a34a';
+  if (score >= 90) return 'var(--color-success)';
   if (score >= 75) return '#ca8a04';
-  return '#dc2626';
+  return 'var(--color-danger)';
 }
 
 // ── Phase row ─────────────────────────────────────────────────────────────────
@@ -42,7 +43,7 @@ function PhaseRow({ phase }) {
         borderLeft: '3px solid var(--primary)',
         paddingLeft: '1rem',
         marginBottom: '0.75rem',
-        background: '#f8fafc',
+        background: 'var(--color-bg-app)',
         borderRadius: '0 8px 8px 0',
         padding: '0.75rem 1rem',
       }}
@@ -62,7 +63,7 @@ function PhaseRow({ phase }) {
             style={{
               background: 'white',
               border: '1px solid var(--border)',
-              borderRadius: '8px',
+              borderRadius: 'var(--radius-sm)',
               padding: '0.4rem 0.75rem',
               fontSize: '0.78rem',
               display: 'flex',
@@ -111,7 +112,7 @@ function BlueprintCard({ blueprint, onToggleActive }) {
       style={{
         background: 'white',
         border: '1px solid var(--border)',
-        borderRadius: '16px',
+        borderRadius: 'var(--radius-md)',
         overflow: 'hidden',
         boxShadow: 'var(--shadow-sm)',
         transition: 'box-shadow 0.2s',
@@ -125,8 +126,8 @@ function BlueprintCard({ blueprint, onToggleActive }) {
           style={{
             width: 44,
             height: 44,
-            borderRadius: '12px',
-            background: 'linear-gradient(135deg, var(--primary-light), var(--primary))',
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--surface)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -147,7 +148,7 @@ function BlueprintCard({ blueprint, onToggleActive }) {
                 fontSize: '0.72rem',
                 fontWeight: 700,
                 padding: '0.2rem 0.6rem',
-                borderRadius: '20px',
+                borderRadius: 'var(--radius-md)',
                 background: complexity.bg,
                 color: complexity.color,
                 textTransform: 'uppercase',
@@ -190,13 +191,13 @@ function BlueprintCard({ blueprint, onToggleActive }) {
               alignItems: 'center',
               gap: '0.35rem',
               border: 'none',
-              borderRadius: '20px',
+              borderRadius: 'var(--radius-md)',
               padding: '0.4rem 0.9rem',
               cursor: saving ? 'wait' : 'pointer',
               fontSize: '0.8rem',
               fontWeight: 700,
               background: blueprint.active ? '#dcfce7' : '#fee2e2',
-              color: blueprint.active ? '#16a34a' : '#dc2626',
+              color: blueprint.active ? 'var(--color-success)' : 'var(--color-danger)',
               transition: 'all 0.2s',
             }}
           >
@@ -212,7 +213,7 @@ function BlueprintCard({ blueprint, onToggleActive }) {
             style={{
               background: 'transparent',
               border: '1px solid var(--border)',
-              borderRadius: '8px',
+              borderRadius: 'var(--radius-sm)',
               padding: '0.4rem',
               cursor: 'pointer',
               display: 'flex',
@@ -231,7 +232,7 @@ function BlueprintCard({ blueprint, onToggleActive }) {
           display: 'flex',
           gap: '1.5rem',
           padding: '0.6rem 1.5rem',
-          background: '#f8fafc',
+          background: 'var(--color-bg-app)',
           borderTop: '1px solid var(--border)',
           borderBottom: expanded ? '1px solid var(--border)' : 'none',
           flexWrap: 'wrap',
@@ -245,6 +246,12 @@ function BlueprintCard({ blueprint, onToggleActive }) {
             label: blueprint.economics?.total_protocol_cost_estimate
               ? `$${blueprint.economics.total_protocol_cost_estimate.toLocaleString()}`
               : 'N/A cost',
+          },
+          { 
+            icon: <Activity size={13} />, 
+            label: blueprint.protocol_last_reviewed_at 
+              ? `Reviewed: ${blueprint.protocol_last_reviewed_at}`
+              : 'Unreviewed'
           },
           { icon: <FlaskConical size={13} />, label: blueprint.protocol_id },
         ].map((item, i) => (
@@ -279,10 +286,10 @@ function BlueprintCard({ blueprint, onToggleActive }) {
                   <span
                     key={i}
                     style={{
-                      background: '#f0fdf4',
-                      color: '#15803d',
+                      background: 'var(--color-success-bg)',
+                      color: 'var(--color-success)',
                       border: '1px solid #bbf7d0',
-                      borderRadius: '20px',
+                      borderRadius: 'var(--radius-md)',
                       padding: '0.2rem 0.65rem',
                       fontSize: '0.78rem',
                     }}
@@ -320,7 +327,7 @@ export default function AdminBlueprintsTab() {
       setLoading(true);
       setError(null);
       try {
-        const snap = await getDocs(collection(db, 'protocols'));
+        const snap = await getDocs(collection(db, 'blueprints'));
         const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         // Sort by confidence score descending
         data.sort((a, b) => (b.confidence_score || 0) - (a.confidence_score || 0));
@@ -380,14 +387,14 @@ export default function AdminBlueprintsTab() {
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
         {[
           { label: 'Total', value: blueprints.length, color: 'var(--primary)', bg: 'var(--primary-light)' },
-          { label: 'Active', value: activeCount, color: '#16a34a', bg: '#dcfce7' },
-          { label: 'Inactive', value: inactiveCount, color: '#dc2626', bg: '#fee2e2' },
+          { label: 'Active', value: activeCount, color: 'var(--color-success)', bg: '#dcfce7' },
+          { label: 'Inactive', value: inactiveCount, color: 'var(--color-danger)', bg: '#fee2e2' },
         ].map(stat => (
           <div
             key={stat.label}
             style={{
               background: stat.bg,
-              borderRadius: '12px',
+              borderRadius: 'var(--radius-md)',
               padding: '0.75rem 1.25rem',
               display: 'flex',
               flexDirection: 'column',
@@ -422,7 +429,7 @@ export default function AdminBlueprintsTab() {
               paddingLeft: '2.25rem',
               padding: '0.65rem 0.75rem 0.65rem 2.25rem',
               border: '1px solid var(--border)',
-              borderRadius: '10px',
+              borderRadius: 'var(--radius-sm)',
               fontSize: '0.875rem',
               boxSizing: 'border-box',
             }}
@@ -436,7 +443,7 @@ export default function AdminBlueprintsTab() {
             onClick={() => setFilter(f)}
             style={{
               padding: '0.6rem 1.1rem',
-              borderRadius: '10px',
+              borderRadius: 'var(--radius-sm)',
               border: '1px solid',
               borderColor: filter === f ? 'var(--primary)' : 'var(--border)',
               background: filter === f ? 'var(--primary)' : 'white',
@@ -461,7 +468,7 @@ export default function AdminBlueprintsTab() {
       )}
 
       {error && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#fee2e2', padding: '1rem 1.25rem', borderRadius: '12px', color: '#dc2626', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#fee2e2', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', color: 'var(--color-danger)', marginBottom: '1rem' }}>
           <AlertTriangle size={18} />
           <span>{error}</span>
         </div>

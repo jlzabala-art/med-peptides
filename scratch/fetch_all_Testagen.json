@@ -1,0 +1,35 @@
+[
+  {
+    "pmid": "40807317",
+    "title": "The Inhibitory Effect and Adsorption Properties of Testagen Peptide on Copper Surfaces in Saline Environments: An Experimental and Computational Study.",
+    "authors": [
+      "Dobri\u0163escu A",
+      "Samide A",
+      "Cioater\u0103 N",
+      "Mic OC",
+      "Ionescu C",
+      "D\u0103buleanu I",
+      "Tigae C",
+      "Sp\u00eenu CI",
+      "Oprea B"
+    ],
+    "journal": "Molecules (Basel, Switzerland)",
+    "pubdate": "2025 Jul 26",
+    "doi": "10.3390/molecules30153141",
+    "abstract": "Experimental and theoretical studies were applied to investigate the adsorption properties of testagen (KEDG) peptide on copper surfaces in sodium chloride solution and, implicitly, its inhibition efficiency (IE) on metal corrosion. The tetrapeptide synthesized from the amino acids lysine (Lys), glutamic acid (Glu), aspartic acid (Asp), and glycine (Gly), named as H-Lys-Glu-Asp-Gly-OH, achieved an inhibition efficiency of around 86% calculated from electrochemical measurements, making KEDG a promising new copper corrosion inhibitor. The experimental data were best fitted to the Freundlich adsorption isotherm. The standard free energy of adsorption (\u0394Gadso) reached the value of -30.86 kJ mol-1, which revealed a mixed action mechanism of tetrapeptide, namely, chemical and physical spontaneous adsorption. The copper surface characterization was performed using optical microscopy and SEM/EDS analysis. In the KEDG presence, post-corrosion, SEM images showed a network surface morphology including microdeposits with an acicular appearance, and EDS analysis highlighted an upper surface layer consisting of KEDG, sodium chloride, and copper corrosion compounds. The computational study based on DFT and Monte Carlo simulation confirmed the experimental results and concluded that the spontaneous adsorption equilibrium establishment was the consequence of the contribution of noncovalent (electrostatic, van der Waals) interactions and covalent bonds."
+  },
+  {
+    "pmid": "22117547",
+    "title": "Penetration of short fluorescence-labeled peptides into the nucleus in HeLa cells and in vitro specific interaction of the peptides with deoxyribooligonucleotides and DNA.",
+    "authors": [
+      "Fedoreyeva LI",
+      "Kireev II",
+      "Khavinson VKh",
+      "Vanyushin BF"
+    ],
+    "journal": "Biochemistry. Biokhimiia",
+    "pubdate": "2011 Nov",
+    "doi": null,
+    "abstract": "Marked fluorescence in cytoplasm, nucleus, and nucleolus was observed in HeLa cells after incubation with each of several fluorescein isothiocyanate-labeled peptides (epithalon, Ala-Glu-Asp-Gly; pinealon, Glu-Asp-Arg; testagen, Lys-Glu-Asp-Gly). This means that short biologically active peptides are able to penetrate into an animal cell and its nucleus and, in principle they may interact with various components of cytoplasm and nucleus including DNA and RNA. It was established that various initial (intact) peptides differently affect the fluorescence of the 5,6-carboxyfluorescein-labeled deoxyribooligonucleotides and DNA-ethidium bromide complexes. The Stern-Volmer constants characterizing the degree of fluorescence quenching of various single- and double-stranded fluorescence-labeled deoxyribooligonucleotides with short peptides used were different depending on the peptide primary structures. This indicates the specific interaction between short biologically active peptides and nucleic acid structures. On binding to them, the peptides discriminate between different nucleotide sequences and recognize even their cytosine methylation status. Judging from corresponding constants of the fluorescence quenching, the epithalon, pinealon, and bronchogen (Ala-Glu-Asp-Leu) bind preferentially with deoxyribooligonucleotides containing CNG sequence (CNG sites are targets for cytosine DNA methylation in eukaryotes). Epithalon, testagen, and pinealon seem to preferentially bind with CAG- but bronchogen with CTG-containing sequences. The site-specific interactions of peptides with DNA can control epigenetically the cell genetic functions, and they seem to play an important role in regulation of gene activity even at the earliest stages of life origin and in evolution."
+  }
+]

@@ -1,8 +1,12 @@
+ 
+ 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { HelpCircle, BookOpen, ChevronRight, Activity, Beaker, Zap, Sparkles, ShoppingCart, Check } from 'lucide-react';
+import { HelpCircle, BookOpen, ChevronRight, Activity, Beaker, Zap, Sparkles, ShoppingCart, Check, Bot } from 'lucide-react';
 import { getFAQForProduct } from '../utils/discoveryEngine';
 import FAQModal from '../components/discovery/FAQModal';
 import PubMedPreviewPanel from '../components/discovery/PubMedPreviewPanel';
+import { trackEvent } from '../hooks/useAnalytics';
+import { resolveAndFormatPrice } from '../utils/resolvePrice';
 
 const CATEGORY_ICONS = {
   'Healing': Activity,
@@ -95,8 +99,8 @@ const MobileProductCard = React.memo(function MobileProductCard({
     if (productVariants.length === 0) return null;
     const idx = Math.min(selectedStrengthIdx, productVariants.length - 1);
     const variant = productVariants[idx];
-    const price = parseFloat(variant?.perVialPriceUSD || variant?.proVialPrice || variant?.guestVialPrice);
-    if (!isNaN(price) && price > 0) return `$${price.toFixed(0)} USD`;
+    const { resolved } = resolveAndFormatPrice(variant);
+    if (resolved.perUnit != null) return `$${resolved.perUnit.toFixed(0)} USD`;
     return null;
   }, [productVariants, selectedStrengthIdx, products, product.category]);
 
@@ -121,21 +125,27 @@ const MobileProductCard = React.memo(function MobileProductCard({
 
   const handleAddToCart = useCallback(() => {
     if (!onAddToCart) return;
-    onAddToCart(selectedVariant || product, 1);
+    const target = selectedVariant || product;
+    onAddToCart(target, 1);
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1500);
+
+    trackEvent('purchase_intent', {
+      peptide_name: target.name,
+      protocol_id: 'mobile_card'
+    });
   }, [onAddToCart, selectedVariant, product]);
 
   // Navigate to full product detail
   const handleViewDetails = useCallback(() => {
-    onSelectProduct(product.name);
-  }, [onSelectProduct, product.name]);
+    onSelectProduct(product);
+  }, [onSelectProduct, product]);
 
   const CategoryIcon = getCategoryIcon(product.category);
   const canAddToCart = !!onAddToCart && product.category !== 'Research Supplies';
 
   return (
-    <div ref={cardRef} style={{
+    <div ref={cardRef} className="scroll-reveal hover-lift" style={{
       backgroundColor: 'white',
       borderRadius: 'var(--radius-lg)',
       border: '1px solid var(--border)',
@@ -252,7 +262,7 @@ const MobileProductCard = React.memo(function MobileProductCard({
           </div>
         )}
 
-        {/* Price for selected strength */}
+                    {/* Price hidden on home view */}
         {priceLabel && (
           <div style={{
             marginBottom: '0.75rem',
@@ -273,69 +283,69 @@ const MobileProductCard = React.memo(function MobileProductCard({
         )}
 
         {/* Actions */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-          <button
-            className="mpc-btn"
-            onClick={() => handleOpenFAQ(product)}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              gap: '0.4rem', padding: '0.6rem 0.5rem', borderRadius: '8px',
-              border: '1px solid var(--border)', background: 'white',
-              color: 'var(--text-main)', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer'
-            }}
-          >
-            <HelpCircle size={14} /> FAQ
-          </button>
-          <button
-            className="mpc-btn"
-            onClick={() => handleOpenPubMed(product)}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              gap: '0.4rem', padding: '0.6rem 0.5rem', borderRadius: '8px',
-              border: '1px solid var(--border)', background: 'white',
-              color: 'var(--text-main)', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer'
-            }}
-          >
-            <BookOpen size={14} /> PubMed
-          </button>
-
-          {/* Add to cart — "Añadir al encargo" */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: 'auto' }}>
+          
+          {/* Add to order (if applicable) */}
           {canAddToCart && (
             <button
+              type="button"
               className="mpc-btn"
               onClick={handleAddToCart}
               style={{
-                gridColumn: 'span 2',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 gap: '0.4rem', padding: '0.65rem', borderRadius: '8px',
                 border: 'none',
-                background: justAdded ? '#10b981' : 'rgba(0,163,224,0.12)',
+                background: justAdded ? 'var(--color-success)' : 'rgba(0,163,224,0.1)',
                 color: justAdded ? 'white' : 'var(--primary)',
-                fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer',
+                fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer',
                 transition: 'background 0.25s, color 0.25s',
               }}
             >
               {justAdded
-                ? <><Check size={15} /> Added to Order</>
-                : <><ShoppingCart size={15} /> Add to Order{currentQty > 0 ? ` (${currentQty})` : ''}</>
+                ? <><Check size={14} /> Added to Order</>
+                : <><ShoppingCart size={14} /> Add to Order{currentQty > 0 ? ` (${currentQty})` : ''}</>
               }
             </button>
           )}
 
-          {/* View full profile */}
-          <button
-            className="mpc-btn"
-            onClick={handleViewDetails}
-            style={{
-              gridColumn: 'span 2',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              gap: '0.4rem', padding: '0.7rem', borderRadius: '8px',
-              border: 'none', background: 'var(--primary)', color: 'white',
-              fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer'
-            }}
-          >
-            View Full Profile <ChevronRight size={15} />
-          </button>
+          {/* Dual Action: ClinicAI vs Details */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
+            <button
+              type="button"
+              className="mpc-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.dispatchEvent(
+                  new CustomEvent('open-clinical-ai', {
+                    detail: { query: `I want to explore research options for the compound ${product.displayName || product.name}.`, autoSend: true },
+                  })
+                );
+              }}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                gap: '0.35rem', padding: '0.65rem 0.5rem', borderRadius: '8px',
+                border: '1px solid rgba(0, 150, 204, 0.2)', background: 'rgba(0, 150, 204, 0.05)',
+                color: 'var(--secondary, #0096cc)', fontWeight: 800, fontSize: '0.76rem', cursor: 'pointer'
+              }}
+            >
+              <Bot size={13} strokeWidth={2.5} /> ClinicAI
+            </button>
+
+            <button
+              type="button"
+              className="mpc-btn"
+              onClick={handleViewDetails}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                gap: '0.35rem', padding: '0.65rem 0.5rem', borderRadius: '8px',
+                border: 'none', background: 'var(--primary)',
+                color: 'white', fontWeight: 800, fontSize: '0.76rem', cursor: 'pointer'
+              }}
+            >
+              Details <ChevronRight size={13} strokeWidth={2.5} />
+            </button>
+          </div>
+
         </div>
       </div>
 

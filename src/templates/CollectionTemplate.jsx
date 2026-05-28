@@ -1,30 +1,44 @@
+/* eslint-disable no-unused-vars */
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Catalog from './Catalog';
 import CategoryDetailView from './CategoryDetailView';
+import Breadcrumbs from '../components/common/Breadcrumbs';
+import PeptideCollectionPage from './PeptideCollectionPage';
+import ProtocolCollectionPage from './ProtocolCollectionPage';
+import SupplementCollectionPage from './SupplementCollectionPage';
+import SuppliesView from './SuppliesView';
+
 
 // Slug → exact category name mapping
 const SLUG_TO_CATEGORY = {
-  'healing-recovery': 'Healing & Recovery',
-  'healing': 'Healing & Recovery',
-  'recovery': 'Healing & Recovery',
-  'weight-management-metabolic': 'Weight Management & Metabolic',
-  'weight-management': 'Weight Management & Metabolic',
-  'metabolic': 'Weight Management & Metabolic',
-  'anti-aging-longevity': 'Anti-Aging & Longevity',
-  'anti-aging': 'Anti-Aging & Longevity',
-  'longevity': 'Anti-Aging & Longevity',
-  'longevity-vitality': 'Anti-Aging & Longevity',
-  'cognitive-neuro-protection': 'Cognitive & Neuro-Protection',
-  'cognitive': 'Cognitive & Neuro-Protection',
-  'neuro': 'Cognitive & Neuro-Protection',
-  'muscle-growth-performance': 'Muscle Growth & Performance',
-  'muscle': 'Muscle Growth & Performance',
-  'performance': 'Muscle Growth & Performance',
-  'hormonal-support': 'Hormonal Support',
-  'hormonal': 'Hormonal Support',
+  'recovery-repair': 'Recovery & Repair',
+  'recovery': 'Recovery & Repair',
+  'healing': 'Recovery & Repair',
+  'healing-recovery': 'Recovery & Repair',
+  'metabolic-weight': 'Metabolic & Weight',
+  'metabolic': 'Metabolic & Weight',
+  'weight-management': 'Metabolic & Weight',
+  'weight-management-metabolic': 'Metabolic & Weight',
+  'longevity-anti-aging': 'Longevity & Anti-Aging',
+  'longevity': 'Longevity & Anti-Aging',
+  'anti-aging': 'Longevity & Anti-Aging',
+  'cognitive-mood': 'Cognitive & Mood',
+  'cognitive': 'Cognitive & Mood',
+  'neuro': 'Cognitive & Mood',
+  'cognitive-neuro-protection': 'Cognitive & Mood',
+  'hormonal-optimization': 'Hormonal Optimization',
+  'hormonal': 'Hormonal Optimization',
+  'hormonal-support': 'Hormonal Optimization',
+  'muscle': 'Hormonal Optimization',
+  'muscle-growth-performance': 'Hormonal Optimization',
+  'sleep-circadian': 'Sleep & Circadian',
+  'sleep': 'Sleep & Circadian',
+  'immune-support': 'Immune Support',
+  'immune': 'Immune Support',
   'research-supplies': 'Research Supplies',
   'other-research-peptides': 'Other Research Peptides',
+  'hormone-pellets': 'Hormone Pellets',
 };
 
 /**
@@ -37,6 +51,7 @@ const SLUG_TO_CATEGORY = {
 export default function CollectionTemplate({
   region, isProfessional, isAdmin,
   cart, setCart, updateCart, setRegion,
+  toggleCompare,
   isCartOpen, setIsCartOpen,
   setPendingQuote,
   onOpenSearch,
@@ -54,8 +69,58 @@ export default function CollectionTemplate({
   };
 
   const s = (slug || '').toLowerCase();
-  // "peptides" / "all" / "pathways" → show the full accordion catalog
-  if (!s || s === 'peptides' || s === 'all' || s === 'pathways' || s === 'investigation-pathways') {
+
+  // /collection/peptides → dedicated full-page collection
+  if (s === 'peptides') {
+    return (
+      <PeptideCollectionPage
+        onNavigate={(productSlug) => navigate(`/product/${productSlug}`)}
+        onBack={() => navigate(-1)}
+        toggleCompare={toggleCompare}
+      />
+    );
+  }
+
+  // /collection/protocols → protocol library
+  if (s === 'protocols') {
+    return (
+      <ProtocolCollectionPage
+        onNavigate={(slug) => navigate(`/protocol/${slug}`)}
+        onBack={() => navigate(-1)}
+      />
+    );
+  }
+
+  // /collection/supplements → supplement catalog
+  if (s === 'supplements') {
+    return (
+      <SupplementCollectionPage
+        onNavigate={(supplementSlug) => navigate(`/supplements/${supplementSlug}`)}
+        onBack={() => navigate(-1)}
+        toggleCompare={toggleCompare}
+      />
+    );
+  }
+
+  // /collection/research-supplies → research supplies catalog
+  if (s === 'research-supplies') {
+    return (
+      <SuppliesView
+        onBack={() => navigate(-1)}
+        onSelectProduct={handleProductSelect}
+        updateCart={updateCart}
+        cart={cart}
+        region={region}
+        setRegion={setRegion}
+        isProfessional={isProfessional}
+        EXCHANGE_RATES={EXCHANGE_RATES || {}}
+        products={products || []}
+      />
+    );
+  }
+
+  // "all" / "pathways" → show the legacy full accordion catalog
+  if (!s || s === 'all' || s === 'pathways' || s === 'investigation-pathways') {
     return (
       <Catalog
         region={region}
@@ -80,19 +145,30 @@ export default function CollectionTemplate({
   const categoryName = SLUG_TO_CATEGORY[slug]
     || slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
+  const breadcrumbItems = [
+    { label: 'Home', path: '/' },
+    { label: 'Catalog', path: '/collection/peptides' },
+    { label: categoryName }
+  ];
+
   return (
-    <CategoryDetailView
-      category={categoryName}
-      products={products || []}
-      region={region}
-      isProfessional={isProfessional}
-      cart={cart}
-      updateCart={updateCart}
-      setRegion={setRegion}
-      EXCHANGE_RATES={EXCHANGE_RATES || {}}
-      onBack={() => navigate(-1)}
-      onSelectProduct={handleProductSelect}
-      allFaqs={allFaqs}
-    />
+    <div className="template-root">
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem' }}>
+        <Breadcrumbs items={breadcrumbItems} />
+      </div>
+      <CategoryDetailView
+        category={categoryName}
+        products={products || []}
+        region={region}
+        isProfessional={isProfessional}
+        cart={cart}
+        updateCart={updateCart}
+        setRegion={setRegion}
+        EXCHANGE_RATES={EXCHANGE_RATES || {}}
+        onBack={() => navigate(-1)}
+        onSelectProduct={handleProductSelect}
+        allFaqs={allFaqs}
+      />
+    </div>
   );
 }

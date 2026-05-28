@@ -1,0 +1,395 @@
+{
+  "id": "skin_001",
+  "protocol_id": "skin_001",
+  "active": true,
+  "complexity_level": "moderate",
+  "confidence_score": 91,
+  "economics": {
+    "total_protocol_cost_estimate": 800,
+    "total_vials_required": 4
+  },
+  "number_of_phases": 2,
+  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_organization": "Med-Peptides",
+  "protocol_author_title": "Peptide Specialists",
+  "protocol_duration_weeks": 12,
+  "protocol_is_curated": true,
+  "protocol_is_physician_authored": false,
+  "protocol_last_reviewed_at": "2026-03-29",
+  "protocol_review_status": "approved",
+  "protocol_slug": "skin-rejuvenation-12w",
+  "protocol_source_type": "curated_library",
+  "protocol_author_notes": "Official curated protocol for general clinical use.",
+  "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
+  "protocol_source_reference": "internal_guide",
+  "overview_summary": "12-week GHK-Cu collagen and dermal quality protocol structured as collagen activation followed by maintenance for skin texture, elasticity, and barrier support.",
+  "protocol_title": "GHK-Cu Collagen Rejuvenation Protocol",
+  "protocol_source_version": "v5.0",
+  "status": "approved",
+  "seeded_at": "2026-04-25T06:10:36.132Z",
+  "phases": [
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "daily",
+          "product_slug": "ghk-cu",
+          "selected_strength": "50mg",
+          "vials_required_for_phase": 2,
+          "productId": "GHK-Cu_(Copper_Peptide)-5mg-vial",
+          "weekly_dose": "TODO: specify"
+        }
+      ],
+      "end_week": 6,
+      "phase_number": 1,
+      "phase_title": "Collagen Activation",
+      "start_week": 1
+    },
+    {
+      "drugs_used": [
+        {
+          "dosing_frequency": "3x_week",
+          "product_slug": "ghk-cu",
+          "selected_strength": "50mg",
+          "vials_required_for_phase": 2,
+          "productId": "GHK-Cu_(Copper_Peptide)-5mg-vial",
+          "weekly_dose": "TODO: specify"
+        }
+      ],
+      "end_week": 12,
+      "phase_number": 2,
+      "phase_title": "Maintenance",
+      "start_week": 7
+    }
+  ],
+  "bundleVersion": "2.0",
+  "protocol_version": "v6.1",
+  "generated_protocol_template": {
+    "patient_context": {
+      "primary_clinical_focus": null,
+      "tempo_preference": "standard",
+      "age_group": null,
+      "patient_demographic": null,
+      "duration_weeks": null,
+      "start_date": null
+    },
+    "resolved_costs": {},
+    "applied_variants": {
+      "age_variant": null,
+      "sex_variant": null,
+      "duration_variant": null,
+      "tempo_variant": "standard"
+    },
+    "resolved_phases": [],
+    "resolved_timeline": [],
+    "validation": {
+      "state": "NOT_EVALUATED",
+      "modules": []
+    },
+    "resolved_monitoring": []
+  },
+  "legacy_compatibility": {
+    "enabled": true,
+    "notes": "Legacy simplified fields are preserved for backward compatibility while canonical phase_blueprints are used for generation.",
+    "deprecated_fields": [
+      "phases",
+      "computedTimeline",
+      "computedCost"
+    ]
+  },
+  "risk_class": "low",
+  "physician_supervision_required": false,
+  "dosing_enrichment": {
+    "cycling_recommendation": "12-week collagen activation cycle followed by 4-week reassessment. Maintenance may continue 3x/week if skin tolerance is good.",
+    "maintenance_dose": "GHK-Cu topical or protocol-defined route 3x/week during maintenance. If injectable/localized use is selected, it should remain clinician-supervised and cyclic.",
+    "timing_optimization": "Evening use is preferred for topical GHK-Cu. Avoid layering with strong acids, high-strength retinoids, or exfoliating agents in the same application window if irritation occurs.",
+    "titration_note": "Start daily for weeks 1-2 if tolerated, continue loading through week 6, then reduce to 3x/week maintenance in weeks 7-12."
+  },
+  "monitoring_plan": {
+    "baseline_required": [
+      "standardized_photography",
+      "skin_texture_score",
+      "skin_elasticity_score",
+      "irritation_score",
+      "skin_sensitivity_profile"
+    ],
+    "scheduled_checkpoints": [
+      {
+        "week": 6,
+        "type": "collagen_activation_review",
+        "measures": [
+          "photography",
+          "skin_texture_score",
+          "irritation_score"
+        ],
+        "purpose": "Assess collagen-response signal and topical tolerance."
+      },
+      {
+        "week": 12,
+        "type": "maintenance_review",
+        "measures": [
+          "photography",
+          "skin_elasticity_score",
+          "patient_satisfaction_score"
+        ],
+        "purpose": "Document aesthetic outcome and maintenance plan."
+      }
+    ]
+  },
+  "eligibility_rules": {
+    "supported_goals": [
+      "skin_rejuvenation",
+      "collagen_support",
+      "dermal_repair",
+      "anti_aging_skin_support"
+    ],
+    "contraindications": [
+      "known_hypersensitivity_to_copper_peptides",
+      "active_malignant_skin_lesion",
+      "active_infection_at_application_site",
+      "pregnancy_or_breastfeeding"
+    ],
+    "relative_cautions": [
+      "rosacea",
+      "active_acne",
+      "recent_deep_peel_or_laser",
+      "very_sensitive_skin"
+    ],
+    "required_patient_inputs": [
+      "skin_type",
+      "primary_clinical_focus",
+      "sensitivity_profile",
+      "recent_procedure_history",
+      "start_date"
+    ],
+    "supported_age_groups": [
+      "18-35",
+      "36-50",
+      "51-65",
+      "65+"
+    ],
+    "supported_sex": [
+      "female",
+      "male"
+    ]
+  },
+  "phase_blueprints": [
+    {
+      "phase_key": "collagen_activation",
+      "phase_title": "Collagen Activation",
+      "default_start_week": 1,
+      "default_duration_weeks": 6,
+      "clinical_purpose": [],
+      "drugs": [
+        {
+          "product_id": "prd_ghk_cu",
+          "product_title": "Ghk Cu",
+          "route": "protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "daily",
+            "selected_strength": "50mg"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_ghk_cu",
+            "route": "protocol_defined"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 1,
+          "event_type": "phase_start",
+          "title": "Collagen Activation"
+        }
+      ]
+    },
+    {
+      "phase_key": "maintenance",
+      "phase_title": "Maintenance",
+      "default_start_week": 7,
+      "default_duration_weeks": 6,
+      "clinical_purpose": [],
+      "drugs": [
+        {
+          "product_id": "prd_ghk_cu",
+          "product_title": "Ghk Cu",
+          "route": "protocol_defined",
+          "dose_logic": {
+            "dose_unit": "protocol_defined",
+            "administration_frequency": "3x_week",
+            "selected_strength": "50mg"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_ghk_cu",
+            "route": "protocol_defined"
+          }
+        }
+      ],
+      "clinical_events": [
+        {
+          "week": 7,
+          "event_type": "phase_start",
+          "title": "Maintenance"
+        }
+      ]
+    }
+  ],
+  "expected_outcomes": {
+    "qualitative": [
+      "Improved skin elasticity and firmness",
+      "Reduction in fine lines and wrinkles",
+      "Enhanced collagen density",
+      "Improved skin hydration"
+    ],
+    "quantitative_ranges": [
+      "Improvement in skin elasticity measurement",
+      "Reduction in subjective skin aging score"
+    ]
+  },
+  "safety_profile": {
+    "adverse_events_common": [],
+    "adverse_events_serious": [],
+    "drug_interactions": [],
+    "monitoring_required": []
+  },
+  "monitoringSchedule": [
+    {
+      "week": 0,
+      "label": "Baseline Assessment",
+      "tests": [
+        "Full blood count (CBC)",
+        "Comprehensive metabolic panel (CMP)",
+        "Vitals & weight"
+      ],
+      "notes": "Establish baseline before starting protocol."
+    },
+    {
+      "week": 6,
+      "label": "Mid-Protocol Check-In",
+      "tests": [
+        "Symptom review",
+        "Subjective wellbeing score (1–10)",
+        "Side-effect screening",
+        "Fasting glucose",
+        "Insulin",
+        "HOMA-IR",
+        "Lipid panel"
+      ],
+      "notes": "Assess tolerability and early response."
+    },
+    {
+      "week": 12,
+      "label": "End-of-Protocol Evaluation",
+      "tests": [
+        "Repeat CBC & CMP",
+        "Outcome questionnaire",
+        "Physician review",
+        "HbA1c",
+        "Full lipid panel",
+        "Body composition (DEXA or impedance)"
+      ],
+      "notes": "Full outcome assessment and decision on continuation or cycling."
+    }
+  ],
+  "riskManagement": {
+    "contraindications": [
+      "Type 1 diabetes (insulin-dependent, use with caution)",
+      "Severe renal impairment",
+      "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+    ],
+    "side_effects": [
+      {
+        "effect": "Injection site reactions",
+        "frequency": "Common (10–30%)",
+        "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+      },
+      {
+        "effect": "Mild nausea (first 1–2 weeks)",
+        "frequency": "Uncommon (5–15%)",
+        "management": "Administer with food; reduce dose temporarily if persistent."
+      },
+      {
+        "effect": "Fatigue or somnolence",
+        "frequency": "Rare (<5%)",
+        "management": "Adjust injection timing; evaluate sleep hygiene."
+      },
+      {
+        "effect": "Headache",
+        "frequency": "Uncommon (5–10%)",
+        "management": "Hydration; paracetamol as needed; review dosing."
+      }
+    ],
+    "escalation_criteria": [
+      "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+      "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+      "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+      "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+    ],
+    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+    "patient_education": [
+      "Demonstrate subcutaneous injection technique before starting.",
+      "Provide written dosing schedule and injection site rotation map.",
+      "Instruct patient to report any unusual symptoms within 24h.",
+      "Advise on proper sharps disposal.",
+      "Provide emergency contact number for out-of-hours concerns."
+    ]
+  },
+  "primary_goal": "Skin & Aesthetics",
+  "metadata": {
+    "visibility": "public",
+    "primary_condition": "skin_aging_collagen_loss",
+    "abbreviatedName": "SKIN-001 · Copper Peptide Escalation – 12wk",
+    "version": "1.0",
+    "longDescription": "GHK-Cu (glycyl-L-histidyl-L-lysine copper complex) is an endogenous tripeptide-copper complex that circulates at high levels in young adults (200 ng/mL at age 20) and declines with age. It was discovered in 1973 by Loren Pickart and extensively characterised for its role in wound healing and tissue remodeling (Pickart L & Margolina A, Biomedicines 2018). GHK-Cu activates fibroblast proliferation, upregulates collagen I, III, and VI synthesis, stimulates elastin and glycosaminoglycan production, and inhibits matrix metalloproteinases (MMP-1, MMP-2, MMP-3). Transcriptomic studies show GHK-Cu modulates over 4,000 human genes, significantly affecting pathways of collagen metabolism, antioxidant defense (SOD, catalase upregulation), and anti-inflammatory signaling (Pickart L et al., J Aging Sci 2015). This 12-week protocol delivers daily loading (collagen activation phase, weeks 1–6) transitioning to 3× weekly maintenance (weeks 7–12) for dermal matrix consolidation.",
+    "keywords": [
+      "GHK-Cu collagen protocol",
+      "copper peptide skin rejuvenation",
+      "collagen stimulation peptide",
+      "anti-aging skin peptide",
+      "GHK-Cu protocol",
+      "dermal repair peptide protocol"
+    ],
+    "references": [
+      {
+        "pmid": "29990473",
+        "citation": "Pickart L, Margolina A. Regenerative and Protective Actions of the GHK-Cu Peptide. Biomedicines 2018;6:77."
+      },
+      {
+        "pmid": "25984600",
+        "citation": "Pickart L et al. GHK Peptide as a Natural Modulator of Multiple Cellular Pathways. J Aging Sci 2015;3:132."
+      },
+      {
+        "pmid": "4583463",
+        "citation": "Pickart L. The biological effects of the tripeptide-copper complex GHK-Cu. Biochem Biophys Res Commun 1973."
+      }
+    ],
+    "scientificName": "GHK-Cu Copper-Peptide Collagen Induction & Skin Rejuvenation Protocol",
+    "description": "12-week skin rejuvenation protocol using GHK-Cu copper tripeptide to stimulate collagen and elastin synthesis, upregulate antioxidant gene expression, and reverse dermal aging markers.",
+    "author": {
+      "name": "Med-Peptides Clinical Team",
+      "organization": "Med-Peptides",
+      "title": "Peptide Specialists"
+    },
+    "review": {
+      "last_reviewed_at": "2026-03-29",
+      "review_status": "approved"
+    },
+    "source_type": "curated_library",
+    "source_reference": "internal_guide",
+    "schema_version": "antigravity_v2",
+    "complexity_level": "moderate",
+    "shortCode": "SKIN-001",
+    "primary_goal": "Skin & Aesthetics"
+  },
+  "category": "Skin & Aesthetics",
+  "_enrichment_notes": [
+    "phases.drugs.weekly_dose: CALCULATED where possible",
+    "expected_outcomes: INJECTED for category \"Skin & Aesthetics\""
+  ],
+  "mechanism_of_action": [
+    "Targeted receptor modulation and cellular signaling optimization.",
+    "Restoration of physiological homeostasis via peptide-mediated pathways."
+  ]
+}

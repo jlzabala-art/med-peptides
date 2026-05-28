@@ -16,7 +16,7 @@ import { fileURLToPath } from "url";
 // ── CONFIG ──────────────────────────────────────────────────────────────────
 const SERVICE_ACCOUNT_PATH = resolve(
   dirname(fileURLToPath(import.meta.url)),
-  "../med-peptides-app-firebase-adminsdk-fbsvc-d01b0469f1.json"
+  "../Med-Peptides-app-firebase-adminsdk-fbsvc-d01b0469f1.json"
 );
 
 const OUTPUT_DIR = resolve(

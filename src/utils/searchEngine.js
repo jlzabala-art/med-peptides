@@ -1,3 +1,4 @@
+ 
 /**
  * Hybrid Search Engine Logic
  * Combines keyword matching with semantic attribute weighting,
@@ -6,13 +7,19 @@
  */
 
 
-// ─── Protocol Index Builder ──────────────────────────────────────────────
+// ─── Protocol Index Finder ──────────────────────────────────────────────
 // Supports blueprints v2.0 schema (single source of truth: 'blueprints' collection).
 // Falls back gracefully to older flat-field schemas.
 export const buildProtocolIndex = (templates) => {
   if (!templates || !Array.isArray(templates)) return [];
   return templates
-    .filter(t => t && (t.protocol_title || t.name) && t.protocol_id) // skip ghost/empty docs
+    // Accept both schemas: legacy (protocol_id, protocol_title/name) and
+    // actual Firestore export (id, overview_summary)
+    .filter(t => {
+      const hasId   = !!(t.protocol_id || t.id);
+      const hasName = !!(t.protocol_title || t.name || t.overview_summary);
+      return t && hasId && hasName;
+    })
     .map(t => {
       const products = new Set();
       const meta = t.metadata || {};  // blueprints v2.0: nested metadata object
@@ -60,29 +67,48 @@ export const buildProtocolIndex = (templates) => {
         duration_weeks = t.phase_blueprints.reduce((sum, p) => sum + (p.default_duration_weeks || 0), 0) || 12;
       }
 
+      // Gather qualitative outcome descriptions for free-text matching
+      const qualitativeOutcomes = [];
+      const outcomesObj = t.expected_outcomes || {};
+      if (Array.isArray(outcomesObj.qualitative)) {
+        outcomesObj.qualitative.forEach(o => qualitativeOutcomes.push(o.toLowerCase()));
+      }
+
+      // Gather eligibility indication slugs (e.g. 'cognitive_fatigue_or_mental_fog')
+      const indicationSlugs = [];
+      const elRules = t.eligibility_rules || {};
+      if (Array.isArray(elRules.indications)) {
+        elRules.indications.forEach(ind => indicationSlugs.push(ind.replace(/_/g, ' ')));
+      }
+
       return {
-        protocol_id:    t.protocol_id,
-        protocol_slug:  t.protocol_slug || t.protocol_id,
-        name:           t.protocol_title || t.name || '',
+        protocol_id:    t.protocol_id  || t.id,
+        protocol_slug:  t.protocol_slug || t.protocol_id || t.id,
+        name:           t.protocol_title || t.name || t.overview_summary || '',
+        overview:       t.overview_summary || t.protocol_title || t.name || '',
         category,
         tags: [
           category,
+          meta.primary_goal,
           meta.primary_condition,
           t.primary_goal,
           t.category,
-          ...(t.tags || [])
+          ...(t.tags || []),
+          ...indicationSlugs
         ].filter(Boolean),
         duration_weeks,
         products_used: Array.from(products),
         clinical_focus: meta.primary_condition ||
           t.clinical_focus ||
           t.description ||
-          (t.protocol_description ? t.protocol_description.substring(0, 120) + '...' : '')
+          (t.protocol_description ? t.protocol_description.substring(0, 120) + '...' : ''),
+        outcomes_text:   qualitativeOutcomes.join(' '),
+        indications_text: indicationSlugs.join(' ')
       };
     });
 };
 
-// ─── FAQ Index Builder ─────────────────────────────────────────────────────
+// ─── FAQ Index Finder ─────────────────────────────────────────────────────
 // Reads product_ids and protocol_ids directly from each FAQ document.
 // No external mapping collection is needed.
 export const buildFAQIndex = (faqs) => {
@@ -140,9 +166,9 @@ const INTENT_MAP = [
   { phrases: ["telomere", "telómero", "dna repair", "epigenetic", "epigenética", "nad", "nad+", "sirtuins"], goals: ["longevity", "anti_aging"], boost: 7 },
 
   // ── COGNITIVE / NEURO ──
-  { phrases: ["brain", "cerebro", "memory", "memoria", "focus", "concentración", "cognitive", "cognitivo", "mental clarity", "alzheimer", "neuroprotection"], goals: ["cognitive_enhancement", "neuroprotection", "focus"], boost: 7 },
+  { phrases: ["brain", "cerebro", "memory", "memoria", "focus", "concentración", "cognitive", "cognitivo", "mental clarity", "claridad mental", "mental fog", "niebla mental", "alzheimer", "neuroprotection", "neurocognitive", "attention", "atención", "neuro"], goals: ["cognitive_enhancement", "neuroprotection", "focus", "cognitive_support"], boost: 8 },
   { phrases: ["mood", "estado de ánimo", "depression", "depresión", "anxiety", "ansiedad", "stress", "estrés"], goals: ["mood_enhancement", "stress_reduction"], boost: 6 },
-  { phrases: ["sleep", "sueño", "dormir", "insomnia", "insomnio"], goals: ["sleep_improvement"], boost: 6 },
+  { phrases: ["sleep", "sueño", "dormir", "insomnia", "insomnio", "better sleep", "good sleep", "deep sleep", "sleep quality", "sleep support", "delta sleep", "improve sleep", "mejorar sueño"], goals: ["sleep_improvement", "sleep_quality", "sleep_optimization", "deep_sleep"], boost: 8 },
 
   // ── HORMONAL ──
   { phrases: ["testosterone", "testosterona", "hormone", "hormona", "libido", "sex drive", "fertility", "fertilidad"], goals: ["testosterone_support", "hormonal_balance", "sexual_health"], boost: 7 },
@@ -174,7 +200,11 @@ const resolveIntents = (normalizedQuery, tokens) => {
   const intentLabels = [];
 
   INTENT_MAP.forEach(({ phrases, goals, keywords, boost }) => {
-    const matched = phrases.some(p => normalizedQuery.includes(p) || tokens.some(t => p.includes(t)));
+    const matched = phrases.some(p => 
+      normalizedQuery === p || 
+      (p.length > 3 && normalizedQuery.includes(p)) || 
+      tokens.some(t => t === p || (t.length > 3 && p.includes(t)))
+    );
     if (matched) {
       goals.forEach(g => matchedGoals.add(g));
       if (keywords) keywords.forEach(k => matchedKeywords.add(k));
@@ -210,9 +240,11 @@ export const searchProducts = (query, products, protocolIndex = []) => {
     let score = 0;
     const matchedThemes = new Set();
 
-    const searchTarget = (enrichedProduct.displayName || enrichedProduct.name || "").toLowerCase();
+    // Use id as ultimate fallback so products with no name/displayName can still be found
+    const searchTarget = (enrichedProduct.displayName || enrichedProduct.name || enrichedProduct.id || "").toLowerCase();
     if (searchTarget.includes(normalizedQuery)) {
       score += 12;
+      if (searchTarget.startsWith(normalizedQuery)) score += 20; // Strong boost for name starts
       matchedThemes.add("Direct Match");
     }
 
@@ -247,6 +279,16 @@ export const searchProducts = (query, products, protocolIndex = []) => {
         if (matchedGoals.has(goal)) {
           score += intentBoost;
           matchedThemes.add(goal.replace(/_/g, ' '));
+        }
+      });
+    }
+
+    // Also boost products whose secondaryFactors match the detected intent goals
+    if (enrichedProduct.secondaryFactors && matchedGoals.size > 0) {
+      enrichedProduct.secondaryFactors.forEach(factor => {
+        if (matchedGoals.has(factor)) {
+          score += Math.ceil(intentBoost * 0.6); // Slightly lower than primary goals
+          matchedThemes.add(factor.replace(/_/g, ' '));
         }
       });
     }
@@ -390,11 +432,14 @@ export const searchProtocols = (query, protocolIndex = []) => {
 
   return protocolIndex.map(protocol => {
     let score = 0;
-    const { name, category, tags, products_used, clinical_focus } = protocol;
+    const { name, category, tags, products_used, clinical_focus, overview, outcomes_text, indications_text } = protocol;
 
     const safeName = (name || '').toLowerCase();
+    const safeOverview = (overview || '').toLowerCase();
     const safeCategory = (category || '').toLowerCase();
     const safeFocus = (clinical_focus || '').toLowerCase();
+    const safeOutcomes = (outcomes_text || '').toLowerCase();
+    const safeIndications = (indications_text || '').toLowerCase();
     const safeTags = Array.isArray(tags) ? tags : [];
     const safeProducts = Array.isArray(products_used) ? products_used : [];
 
@@ -402,12 +447,17 @@ export const searchProtocols = (query, protocolIndex = []) => {
     if (safeName === normalizedQuery) score += 100;
     // Partial title match
     if (safeName.includes(normalizedQuery)) score += 50;
+    // Overview summary match
+    if (safeOverview.includes(normalizedQuery)) score += 30;
 
     // Token-level scoring for multi-word queries
     tokens.forEach(token => {
       if (safeName.includes(token)) score += 15;
+      if (safeOverview.includes(token)) score += 10;
       if (safeCategory.includes(token)) score += 10;
       if (safeFocus.includes(token)) score += 6;
+      if (safeOutcomes.includes(token)) score += 5;
+      if (safeIndications.includes(token)) score += 5;
       if (safeTags.some(tag => (tag || '').toLowerCase().includes(token))) score += 8;
       if (safeProducts.some(p => (p || '').toLowerCase().includes(token))) score += 8;
     });
@@ -432,6 +482,96 @@ export const searchProtocols = (query, protocolIndex = []) => {
   .filter(p => p.searchScore > 0)
   .sort((a, b) => b.searchScore - a.searchScore)
   .slice(0, 5);
+};
+
+// ─── Supplement Search Function ───────────────────────────────────────────
+/**
+ * Search the supplements catalogue.
+ * Reuses the same INTENT_MAP / token scoring machinery as searchProducts.
+ * Returns up to 8 best-matching supplements sorted by score.
+ *
+ * @param {string}   query       - Raw user query
+ * @param {Array}    supplements - Array of supplement objects from supplements.js
+ * @returns {Array}              - Scored, sorted supplement objects
+ */
+export const searchSupplements = (query, supplements = []) => {
+  if (!query || !query.trim() || !supplements.length) return [];
+
+  const normalizedQuery = query.toLowerCase().trim();
+  const rawTokens = normalizedQuery.split(/\s+/).filter(t => t.length >= 2);
+  const tokens = rawTokens.filter(t => !STOP_WORDS.has(t));
+
+  const { matchedGoals, matchedKeywords, intentBoost } = resolveIntents(normalizedQuery, tokens);
+
+  const scored = supplements.map(supp => {
+    let score = 0;
+
+    const safeName     = (supp.name     || '').toLowerCase();
+    const safeCat      = (supp.category || '').toLowerCase();
+    const safeObj      = (supp.objective|| '').toLowerCase();
+    const safeDesc     = (supp.desc     || '').toLowerCase();
+    const safeGoals    = Array.isArray(supp.goals)            ? supp.goals            : [];
+    const safeTags     = Array.isArray(supp.tags)             ? supp.tags             : [];
+    const safeKws      = Array.isArray(supp.semanticKeywords) ? supp.semanticKeywords : [];
+    const safeSyns     = Array.isArray(supp.synonyms)         ? supp.synonyms         : [];
+    const safeMechs    = Array.isArray(supp.mechanisms)       ? supp.mechanisms       : [];
+    const safeBenefits = Array.isArray(supp.clinical_benefits)? supp.clinical_benefits: [];
+
+    // ── Exact / prefix name match ──
+    if (safeName === normalizedQuery)          { score += 100; }
+    else if (safeName.startsWith(normalizedQuery)) { score += 50; }
+    else if (safeName.includes(normalizedQuery))   { score += 30; }
+
+    // ── Category / objective ──
+    if (safeCat.includes(normalizedQuery)) score += 15;
+    if (safeObj.includes(normalizedQuery)) score += 10;
+
+    // ── Token-level scoring ──
+    tokens.forEach(token => {
+      if (safeName.includes(token))  score += 8;
+      if (safeCat.includes(token))   score += 5;
+      if (safeObj.includes(token))   score += 4;
+      if (safeDesc.includes(token))  score += 2;
+      safeTags.forEach(tag => { if ((tag || '').toLowerCase().includes(token)) score += 3; });
+      safeKws.forEach(kw  => { if ((kw  || '').toLowerCase().includes(token)) score += 3; });
+      safeSyns.forEach(syn => { if ((syn || '').toLowerCase().includes(token)) score += 5; });
+      safeMechs.forEach(m  => { if ((m   || '').toLowerCase().includes(token)) score += 2; });
+      safeBenefits.forEach(b => { if ((b  || '').toLowerCase().includes(token)) score += 2; });
+    });
+
+    // ── Intent / goal matching ──
+    if (matchedGoals.size > 0) {
+      safeGoals.forEach(goal => {
+        if (matchedGoals.has(goal) || matchedGoals.has(goal.replace(/ /g, '_'))) {
+          score += intentBoost;
+        }
+      });
+      safeTags.forEach(tag => {
+        const t = (tag || '').toLowerCase().replace(/ /g, '_');
+        if (matchedGoals.has(t)) score += 4;
+      });
+    }
+
+    // ── Semantic keyword boost ──
+    safeKws.forEach(kw => {
+      const k = (kw || '').toLowerCase();
+      if (normalizedQuery.includes(k) || matchedKeywords.has(k)) score += 4;
+    });
+
+    return { ...supp, searchScore: score };
+  });
+
+  // Deduplicate by name (keep highest-scoring variant)
+  const byName = new Map();
+  scored
+    .filter(s => s.searchScore > 0)
+    .sort((a, b) => b.searchScore - a.searchScore)
+    .forEach(s => {
+      const key = (s.name || '').toLowerCase().trim();
+      if (!byName.has(key)) byName.set(key, s);
+    });
+
+  return Array.from(byName.values()).slice(0, 8);
 };
 
 // ─── FAQ Search Function ──────────────────────────────────────────────────

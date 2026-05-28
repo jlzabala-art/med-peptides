@@ -1,0 +1,1293 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "source": "NP_LABS_Supplements.pdf",
+    "eur_to_usd_rate": 1.08,
+    "description": "Supplements catalog with EUR to USD conversion"
+  },
+  "supplements": [
+    {
+      "id": "ashwagandha",
+      "name": "Ashwagandha",
+      "displayName": "Ashwagandha",
+      "category": "Adaptogens & Botanicals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "100mg-60-caps",
+          "dosage": "100mg",
+          "quantity": "60 caps",
+          "priceEUR": 11.0,
+          "priceUSD": 11.88,
+          "category": "Adaptogens & Botanicals"
+        },
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 20.0,
+          "priceUSD": 21.6,
+          "category": "Adaptogens & Botanicals"
+        }
+      ]
+    },
+    {
+      "id": "rhodiola-rosea",
+      "name": "Rhodiola Rosea",
+      "displayName": "Rhodiola Rosea",
+      "category": "Adaptogens & Botanicals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "200mg-60-caps",
+          "dosage": "200mg",
+          "quantity": "60 caps",
+          "priceEUR": 22.0,
+          "priceUSD": 23.76,
+          "category": "Adaptogens & Botanicals"
+        },
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 28.0,
+          "priceUSD": 30.24,
+          "category": "Adaptogens & Botanicals"
+        }
+      ]
+    },
+    {
+      "id": "ginkgo-biloba",
+      "name": "Ginkgo Biloba",
+      "displayName": "Ginkgo Biloba",
+      "category": "Adaptogens & Botanicals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "200mg-60-caps",
+          "dosage": "200mg",
+          "quantity": "60 caps",
+          "priceEUR": 22.0,
+          "priceUSD": 23.76,
+          "category": "Adaptogens & Botanicals"
+        }
+      ]
+    },
+    {
+      "id": "boswellia",
+      "name": "Boswellia",
+      "displayName": "Boswellia",
+      "category": "Adaptogens & Botanicals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 22.0,
+          "priceUSD": 23.76,
+          "category": "Adaptogens & Botanicals"
+        },
+        {
+          "id": "500mg-colostrum-500mg-60-caps",
+          "dosage": "500mg + Colostrum 500mg",
+          "quantity": "60 caps",
+          "priceEUR": 40.0,
+          "priceUSD": 43.2,
+          "category": "Adaptogens & Botanicals"
+        },
+        {
+          "id": "1000mg-colostrum-1000mg-120-caps",
+          "dosage": "1000mg + Colostrum 1000mg",
+          "quantity": "120 caps",
+          "priceEUR": 65.0,
+          "priceUSD": 70.2,
+          "category": "Adaptogens & Botanicals"
+        }
+      ]
+    },
+    {
+      "id": "lion-s-mane-mushroom",
+      "name": "Lion's Mane Mushroom",
+      "displayName": "Lion's Mane Mushroom",
+      "category": "Adaptogens & Botanicals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 12.0,
+          "priceUSD": 12.96,
+          "category": "Adaptogens & Botanicals"
+        }
+      ]
+    },
+    {
+      "id": "milk-thistle",
+      "name": "Milk Thistle",
+      "displayName": "Milk Thistle",
+      "category": "Adaptogens & Botanicals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 35.0,
+          "priceUSD": 37.8,
+          "category": "Adaptogens & Botanicals"
+        }
+      ]
+    },
+    {
+      "id": "magnolia",
+      "name": "Magnolia",
+      "displayName": "Magnolia",
+      "category": "Adaptogens & Botanicals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "200mg-60-caps",
+          "dosage": "200mg",
+          "quantity": "60 caps",
+          "priceEUR": 17.0,
+          "priceUSD": 18.36,
+          "category": "Adaptogens & Botanicals"
+        },
+        {
+          "id": "400mg-60-caps",
+          "dosage": "400mg",
+          "quantity": "60 caps",
+          "priceEUR": 25.0,
+          "priceUSD": 27.0,
+          "category": "Adaptogens & Botanicals"
+        }
+      ]
+    },
+    {
+      "id": "acetyl-carnitine",
+      "name": "Acetyl-Carnitine",
+      "displayName": "Acetyl-Carnitine",
+      "category": "Amino Acids",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "1g-120-caps",
+          "dosage": "1g",
+          "quantity": "120 caps",
+          "priceEUR": 30.0,
+          "priceUSD": 32.4,
+          "category": "Amino Acids"
+        }
+      ]
+    },
+    {
+      "id": "l-arginine",
+      "name": "L-Arginine",
+      "displayName": "L-Arginine",
+      "category": "Amino Acids",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 25.0,
+          "priceUSD": 27.0,
+          "category": "Amino Acids"
+        },
+        {
+          "id": "500mg-l-citrulline-500mg-60-caps",
+          "dosage": "500mg + L-Citrulline 500mg",
+          "quantity": "60 caps",
+          "priceEUR": 55.0,
+          "priceUSD": 59.4,
+          "category": "Amino Acids"
+        }
+      ]
+    },
+    {
+      "id": "l-citrulline",
+      "name": "L-Citrulline",
+      "displayName": "L-Citrulline",
+      "category": "Amino Acids",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 22.0,
+          "priceUSD": 23.76,
+          "category": "Amino Acids"
+        }
+      ]
+    },
+    {
+      "id": "l-tryptophan",
+      "name": "L-Tryptophan",
+      "displayName": "L-Tryptophan",
+      "category": "Amino Acids",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 28.0,
+          "priceUSD": 30.24,
+          "category": "Amino Acids"
+        }
+      ]
+    },
+    {
+      "id": "glutamine",
+      "name": "Glutamine",
+      "displayName": "Glutamine",
+      "category": "Amino Acids",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "500mg-bromelain-500mg-60-caps",
+          "dosage": "500mg + Bromelain 500mg",
+          "quantity": "60 caps",
+          "priceEUR": 35.0,
+          "priceUSD": 37.8,
+          "category": "Amino Acids"
+        }
+      ]
+    },
+    {
+      "id": "cystine",
+      "name": "Cystine",
+      "displayName": "Cystine",
+      "category": "Amino Acids",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "500mg-120-caps",
+          "dosage": "500mg",
+          "quantity": "120 caps",
+          "priceEUR": 33.0,
+          "priceUSD": 35.64,
+          "category": "Amino Acids"
+        }
+      ]
+    },
+    {
+      "id": "5-htp",
+      "name": "5-HTP",
+      "displayName": "5-HTP",
+      "category": "Amino Acids",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "100mg-60-caps",
+          "dosage": "100mg",
+          "quantity": "60 caps",
+          "priceEUR": 26.0,
+          "priceUSD": 28.08,
+          "category": "Amino Acids"
+        },
+        {
+          "id": "200mg-60-caps",
+          "dosage": "200mg",
+          "quantity": "60 caps",
+          "priceEUR": 55.0,
+          "priceUSD": 59.4,
+          "category": "Amino Acids"
+        },
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 100.0,
+          "priceUSD": 108.0,
+          "category": "Amino Acids"
+        },
+        {
+          "id": "100mg-60-caps",
+          "dosage": "100mg",
+          "quantity": "60 caps",
+          "priceEUR": 26.0,
+          "priceUSD": 28.08,
+          "category": "Sleep & Mood"
+        }
+      ]
+    },
+    {
+      "id": "a-lipoic-acid",
+      "name": "A-Lipoic Acid",
+      "displayName": "A-Lipoic Acid",
+      "category": "Antioxidants",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "200mg-60-caps",
+          "dosage": "200mg",
+          "quantity": "60 caps",
+          "priceEUR": 25.0,
+          "priceUSD": 27.0,
+          "category": "Antioxidants"
+        },
+        {
+          "id": "600mg-60-caps",
+          "dosage": "600mg",
+          "quantity": "60 caps",
+          "priceEUR": 68.0,
+          "priceUSD": 73.44,
+          "category": "Antioxidants"
+        },
+        {
+          "id": "200mg-berberine-200mg-60-caps",
+          "dosage": "200mg + Berberine 200mg",
+          "quantity": "60 caps",
+          "priceEUR": 50.0,
+          "priceUSD": 54.0,
+          "category": "Antioxidants"
+        }
+      ]
+    },
+    {
+      "id": "co-q10",
+      "name": "Co-Q10",
+      "displayName": "Co-Q10",
+      "category": "Antioxidants",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "100mg-60-caps",
+          "dosage": "100mg",
+          "quantity": "60 caps",
+          "priceEUR": 44.0,
+          "priceUSD": 47.52,
+          "category": "Antioxidants"
+        },
+        {
+          "id": "200mg-30-caps",
+          "dosage": "200mg",
+          "quantity": "30 caps",
+          "priceEUR": 35.0,
+          "priceUSD": 37.8,
+          "category": "Antioxidants"
+        },
+        {
+          "id": "200mg-60-caps",
+          "dosage": "200mg",
+          "quantity": "60 caps",
+          "priceEUR": 68.0,
+          "priceUSD": 73.44,
+          "category": "Antioxidants"
+        },
+        {
+          "id": "300mg-60-caps",
+          "dosage": "300mg",
+          "quantity": "60 caps",
+          "priceEUR": 75.0,
+          "priceUSD": 81.0,
+          "category": "Antioxidants"
+        },
+        {
+          "id": "400mg-60-caps",
+          "dosage": "400mg",
+          "quantity": "60 caps",
+          "priceEUR": 85.0,
+          "priceUSD": 91.8,
+          "category": "Antioxidants"
+        },
+        {
+          "id": "100mg-resveratrol-50mg-a-lipoic-200mg-60-caps",
+          "dosage": "100mg + Resveratrol 50mg + A-Lipoic 200mg",
+          "quantity": "60 caps",
+          "priceEUR": 60.0,
+          "priceUSD": 64.8,
+          "category": "Antioxidants"
+        },
+        {
+          "id": "200mg-resveratrol-250mg-nmn-200mg-60-caps",
+          "dosage": "200mg + Resveratrol 250mg + NMN 200mg",
+          "quantity": "60 caps",
+          "priceEUR": 80.0,
+          "priceUSD": 86.4,
+          "category": "Antioxidants"
+        }
+      ]
+    },
+    {
+      "id": "glutathione",
+      "name": "Glutathione",
+      "displayName": "Glutathione",
+      "category": "Antioxidants",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "50mg-60-caps",
+          "dosage": "50mg",
+          "quantity": "60 caps",
+          "priceEUR": 30.0,
+          "priceUSD": 32.4,
+          "category": "Antioxidants"
+        },
+        {
+          "id": "5-100ml-solution",
+          "dosage": "5%",
+          "quantity": "100ml solution",
+          "priceEUR": 50.0,
+          "priceUSD": 54.0,
+          "category": "Antioxidants"
+        }
+      ]
+    },
+    {
+      "id": "nac",
+      "name": "NAC",
+      "displayName": "NAC",
+      "category": "Antioxidants",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "600mg-60-caps",
+          "dosage": "600mg",
+          "quantity": "60 caps",
+          "priceEUR": 14.0,
+          "priceUSD": 15.12,
+          "category": "Antioxidants"
+        }
+      ]
+    },
+    {
+      "id": "quercetin",
+      "name": "Quercetin",
+      "displayName": "Quercetin",
+      "category": "Antioxidants",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 30.0,
+          "priceUSD": 32.4,
+          "category": "Antioxidants"
+        },
+        {
+          "id": "250mg-resveratrol-250mg-astaxanthin-5mg-60-caps",
+          "dosage": "250mg + Resveratrol 250mg + Astaxanthin 5mg",
+          "quantity": "60 caps",
+          "priceEUR": 55.0,
+          "priceUSD": 59.4,
+          "category": "Antioxidants"
+        }
+      ]
+    },
+    {
+      "id": "pycnogenol",
+      "name": "Pycnogenol",
+      "displayName": "Pycnogenol",
+      "category": "Antioxidants",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "100mg-60-caps",
+          "dosage": "100mg",
+          "quantity": "60 caps",
+          "priceEUR": 33.0,
+          "priceUSD": 35.64,
+          "category": "Antioxidants"
+        }
+      ]
+    },
+    {
+      "id": "grape-seed-extract",
+      "name": "Grape Seed Extract",
+      "displayName": "Grape Seed Extract",
+      "category": "Antioxidants",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 18.0,
+          "priceUSD": 19.44,
+          "category": "Antioxidants"
+        }
+      ]
+    },
+    {
+      "id": "nmn",
+      "name": "NMN",
+      "displayName": "NMN",
+      "category": "Longevity",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 40.0,
+          "priceUSD": 43.2,
+          "category": "Longevity"
+        },
+        {
+          "id": "1000mg-100-caps",
+          "dosage": "1000mg",
+          "quantity": "100 caps",
+          "priceEUR": 110.0,
+          "priceUSD": 118.8,
+          "category": "Longevity"
+        },
+        {
+          "id": "100mg-30-troches",
+          "dosage": "100mg",
+          "quantity": "30 troches",
+          "priceEUR": 20.0,
+          "priceUSD": 21.6,
+          "category": "Longevity"
+        },
+        {
+          "id": "500mg-30-troches",
+          "dosage": "500mg",
+          "quantity": "30 troches",
+          "priceEUR": 30.0,
+          "priceUSD": 32.4,
+          "category": "Longevity"
+        },
+        {
+          "id": "500mg-dhea-20mg-pregnenolone-20mg-naltrexone-5mg-60-caps",
+          "dosage": "500mg + DHEA 20mg + Pregnenolone 20mg + Naltrexone 5mg",
+          "quantity": "60 caps",
+          "priceEUR": 80.0,
+          "priceUSD": 86.4,
+          "category": "Longevity"
+        }
+      ]
+    },
+    {
+      "id": "resveratrol",
+      "name": "Resveratrol",
+      "displayName": "Resveratrol",
+      "category": "Longevity",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 40.0,
+          "priceUSD": 43.2,
+          "category": "Longevity"
+        }
+      ]
+    },
+    {
+      "id": "spermidine",
+      "name": "Spermidine",
+      "displayName": "Spermidine",
+      "category": "Longevity",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "3mg-60-caps",
+          "dosage": "3mg",
+          "quantity": "60 caps",
+          "priceEUR": 20.0,
+          "priceUSD": 21.6,
+          "category": "Longevity"
+        },
+        {
+          "id": "10mg-60-caps",
+          "dosage": "10mg",
+          "quantity": "60 caps",
+          "priceEUR": 40.0,
+          "priceUSD": 43.2,
+          "category": "Longevity"
+        }
+      ]
+    },
+    {
+      "id": "urolithin",
+      "name": "Urolithin",
+      "displayName": "Urolithin",
+      "category": "Longevity",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 45.0,
+          "priceUSD": 48.6,
+          "category": "Longevity"
+        }
+      ]
+    },
+    {
+      "id": "rapamycin",
+      "name": "Rapamycin",
+      "displayName": "Rapamycin",
+      "category": "Longevity",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "1mg-30-caps",
+          "dosage": "1mg",
+          "quantity": "30 caps",
+          "priceEUR": 88.0,
+          "priceUSD": 95.04,
+          "category": "Longevity"
+        },
+        {
+          "id": "2mg-30-caps",
+          "dosage": "2mg",
+          "quantity": "30 caps",
+          "priceEUR": 176.0,
+          "priceUSD": 190.08,
+          "category": "Longevity"
+        }
+      ]
+    },
+    {
+      "id": "berberine",
+      "name": "Berberine",
+      "displayName": "Berberine",
+      "category": "Metabolic & Blood Sugar",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 33.0,
+          "priceUSD": 35.64,
+          "category": "Metabolic & Blood Sugar"
+        }
+      ]
+    },
+    {
+      "id": "metformin",
+      "name": "Metformin",
+      "displayName": "Metformin",
+      "category": "Metabolic & Blood Sugar",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 7.0,
+          "priceUSD": 7.56,
+          "category": "Metabolic & Blood Sugar"
+        }
+      ]
+    },
+    {
+      "id": "fenbendazole",
+      "name": "Fenbendazole",
+      "displayName": "Fenbendazole",
+      "category": "Metabolic & Blood Sugar",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "200mg-60-caps",
+          "dosage": "200mg",
+          "quantity": "60 caps",
+          "priceEUR": 20.0,
+          "priceUSD": 21.6,
+          "category": "Metabolic & Blood Sugar"
+        },
+        {
+          "id": "400mg-60-caps",
+          "dosage": "400mg",
+          "quantity": "60 caps",
+          "priceEUR": 40.0,
+          "priceUSD": 43.2,
+          "category": "Metabolic & Blood Sugar"
+        }
+      ]
+    },
+    {
+      "id": "hyaluronic-acid",
+      "name": "Hyaluronic Acid",
+      "displayName": "Hyaluronic Acid",
+      "category": "Metabolic & Blood Sugar",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "100mg-60-caps",
+          "dosage": "100mg",
+          "quantity": "60 caps",
+          "priceEUR": 22.0,
+          "priceUSD": 23.76,
+          "category": "Metabolic & Blood Sugar"
+        }
+      ]
+    },
+    {
+      "id": "bromelain",
+      "name": "Bromelain",
+      "displayName": "Bromelain",
+      "category": "Metabolic & Blood Sugar",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 42.0,
+          "priceUSD": 45.36,
+          "category": "Metabolic & Blood Sugar"
+        }
+      ]
+    },
+    {
+      "id": "serrapeptase-300-000spu",
+      "name": "Serrapeptase 300,000SPU",
+      "displayName": "Serrapeptase 300,000SPU",
+      "category": "Metabolic & Blood Sugar",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "60-caps",
+          "dosage": "",
+          "quantity": "60 caps",
+          "priceEUR": 34.0,
+          "priceUSD": 36.72,
+          "category": "Metabolic & Blood Sugar"
+        }
+      ]
+    },
+    {
+      "id": "curcumin",
+      "name": "Curcumin",
+      "displayName": "Curcumin",
+      "category": "Metabolic & Blood Sugar",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 25.0,
+          "priceUSD": 27.0,
+          "category": "Metabolic & Blood Sugar"
+        }
+      ]
+    },
+    {
+      "id": "b-complex",
+      "name": "B-Complex",
+      "displayName": "B-Complex",
+      "category": "Vitamins & Minerals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "60-caps",
+          "dosage": "",
+          "quantity": "60 caps",
+          "priceEUR": 11.0,
+          "priceUSD": 11.88,
+          "category": "Vitamins & Minerals"
+        }
+      ]
+    },
+    {
+      "id": "biotin",
+      "name": "Biotin",
+      "displayName": "Biotin",
+      "category": "Vitamins & Minerals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "100mg-60-caps",
+          "dosage": "100mg",
+          "quantity": "60 caps",
+          "priceEUR": 35.0,
+          "priceUSD": 37.8,
+          "category": "Vitamins & Minerals"
+        },
+        {
+          "id": "500mg-60-caps",
+          "dosage": "500mg",
+          "quantity": "60 caps",
+          "priceEUR": 55.0,
+          "priceUSD": 59.4,
+          "category": "Vitamins & Minerals"
+        }
+      ]
+    },
+    {
+      "id": "vit-d3",
+      "name": "Vit. D3",
+      "displayName": "Vit. D3",
+      "category": "Vitamins & Minerals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "1000iu-60-caps",
+          "dosage": "1000IU",
+          "quantity": "60 caps",
+          "priceEUR": 9.0,
+          "priceUSD": 9.72,
+          "category": "Vitamins & Minerals"
+        },
+        {
+          "id": "2000iu-k2-60-caps",
+          "dosage": "2000IU + K2",
+          "quantity": "60 caps",
+          "priceEUR": 11.0,
+          "priceUSD": 11.88,
+          "category": "Vitamins & Minerals"
+        },
+        {
+          "id": "4000iu-30-softgels",
+          "dosage": "4000IU",
+          "quantity": "30 softgels",
+          "priceEUR": 10.0,
+          "priceUSD": 10.8,
+          "category": "Vitamins & Minerals"
+        },
+        {
+          "id": "5000iu-k2-60-caps",
+          "dosage": "5000IU + K2",
+          "quantity": "60 caps",
+          "priceEUR": 18.0,
+          "priceUSD": 19.44,
+          "category": "Vitamins & Minerals"
+        }
+      ]
+    },
+    {
+      "id": "vit-d3-10-000iu-k2",
+      "name": "Vit. D3 10,000IU + K2",
+      "displayName": "Vit. D3 10,000IU + K2",
+      "category": "Vitamins & Minerals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "60-caps",
+          "dosage": "",
+          "quantity": "60 caps",
+          "priceEUR": 33.0,
+          "priceUSD": 35.64,
+          "category": "Vitamins & Minerals"
+        }
+      ]
+    },
+    {
+      "id": "magnesium-citrate",
+      "name": "Magnesium Citrate",
+      "displayName": "Magnesium Citrate",
+      "category": "Vitamins & Minerals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "250mg-60-caps",
+          "dosage": "250mg",
+          "quantity": "60 caps",
+          "priceEUR": 25.0,
+          "priceUSD": 27.0,
+          "category": "Vitamins & Minerals"
+        }
+      ]
+    },
+    {
+      "id": "magnesium-glycinate",
+      "name": "Magnesium Glycinate",
+      "displayName": "Magnesium Glycinate",
+      "category": "Vitamins & Minerals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "250mg-60-caps",
+          "dosage": "250mg",
+          "quantity": "60 caps",
+          "priceEUR": 20.0,
+          "priceUSD": 21.6,
+          "category": "Vitamins & Minerals"
+        }
+      ]
+    },
+    {
+      "id": "magnesium-threonate",
+      "name": "Magnesium Threonate",
+      "displayName": "Magnesium Threonate",
+      "category": "Vitamins & Minerals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "1000mg-60-caps",
+          "dosage": "1000mg",
+          "quantity": "60 caps",
+          "priceEUR": 40.0,
+          "priceUSD": 43.2,
+          "category": "Vitamins & Minerals"
+        }
+      ]
+    },
+    {
+      "id": "magnesium-5-matrix",
+      "name": "Magnesium 5-Matrix",
+      "displayName": "Magnesium 5-Matrix",
+      "category": "Vitamins & Minerals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "120-caps",
+          "dosage": "",
+          "quantity": "120 caps",
+          "priceEUR": 25.0,
+          "priceUSD": 27.0,
+          "category": "Vitamins & Minerals"
+        }
+      ]
+    },
+    {
+      "id": "omega-3-forte",
+      "name": "Omega-3 Forte",
+      "displayName": "Omega-3 Forte",
+      "category": "Vitamins & Minerals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "30-softgels",
+          "dosage": "",
+          "quantity": "30 softgels",
+          "priceEUR": 15.0,
+          "priceUSD": 16.2,
+          "category": "Vitamins & Minerals"
+        }
+      ]
+    },
+    {
+      "id": "zinc-citrate",
+      "name": "Zinc Citrate",
+      "displayName": "Zinc Citrate",
+      "category": "Vitamins & Minerals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "25mg-60-caps",
+          "dosage": "25mg",
+          "quantity": "60 caps",
+          "priceEUR": 12.0,
+          "priceUSD": 12.96,
+          "category": "Vitamins & Minerals"
+        }
+      ]
+    },
+    {
+      "id": "zinc-gluconate",
+      "name": "Zinc Gluconate",
+      "displayName": "Zinc Gluconate",
+      "category": "Vitamins & Minerals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "30mg-60-caps",
+          "dosage": "30mg",
+          "quantity": "60 caps",
+          "priceEUR": 13.0,
+          "priceUSD": 14.04,
+          "category": "Vitamins & Minerals"
+        }
+      ]
+    },
+    {
+      "id": "boron",
+      "name": "Boron",
+      "displayName": "Boron",
+      "category": "Vitamins & Minerals",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "3mg-60-caps",
+          "dosage": "3mg",
+          "quantity": "60 caps",
+          "priceEUR": 17.0,
+          "priceUSD": 18.36,
+          "category": "Vitamins & Minerals"
+        }
+      ]
+    },
+    {
+      "id": "melatonin",
+      "name": "Melatonin",
+      "displayName": "Melatonin",
+      "category": "Sleep & Mood",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "1mg-60-caps",
+          "dosage": "1mg",
+          "quantity": "60 caps",
+          "priceEUR": 20.0,
+          "priceUSD": 21.6,
+          "category": "Sleep & Mood"
+        },
+        {
+          "id": "3mg-60-caps",
+          "dosage": "3mg",
+          "quantity": "60 caps",
+          "priceEUR": 24.0,
+          "priceUSD": 25.92,
+          "category": "Sleep & Mood"
+        },
+        {
+          "id": "10mg-60-caps",
+          "dosage": "10mg",
+          "quantity": "60 caps",
+          "priceEUR": 45.0,
+          "priceUSD": 48.6,
+          "category": "Sleep & Mood"
+        },
+        {
+          "id": "20mg-60-caps",
+          "dosage": "20mg",
+          "quantity": "60 caps",
+          "priceEUR": 66.0,
+          "priceUSD": 71.28,
+          "category": "Sleep & Mood"
+        }
+      ]
+    },
+    {
+      "id": "sleep-support",
+      "name": "Sleep Support",
+      "displayName": "Sleep Support",
+      "category": "Sleep & Mood",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "60-caps",
+          "dosage": "",
+          "quantity": "60 caps",
+          "priceEUR": 30.0,
+          "priceUSD": 32.4,
+          "category": "Sleep & Mood"
+        }
+      ]
+    },
+    {
+      "id": "l-theanine",
+      "name": "L-Theanine",
+      "displayName": "L-Theanine",
+      "category": "Sleep & Mood",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "200mg-60-caps",
+          "dosage": "200mg",
+          "quantity": "60 caps",
+          "priceEUR": 66.0,
+          "priceUSD": 71.28,
+          "category": "Sleep & Mood"
+        }
+      ]
+    },
+    {
+      "id": "ldn-0-5mg",
+      "name": "LDN 0.5mg",
+      "displayName": "LDN 0.5mg",
+      "category": "Other",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "30-caps",
+          "dosage": "",
+          "quantity": "30 caps",
+          "priceEUR": 12.0,
+          "priceUSD": 12.96,
+          "category": "Other"
+        }
+      ]
+    },
+    {
+      "id": "ldn-1-5mg",
+      "name": "LDN 1.5mg",
+      "displayName": "LDN 1.5mg",
+      "category": "Other",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "30-caps",
+          "dosage": "",
+          "quantity": "30 caps",
+          "priceEUR": 16.0,
+          "priceUSD": 17.28,
+          "category": "Other"
+        }
+      ]
+    },
+    {
+      "id": "ldn-2-5mg",
+      "name": "LDN 2.5mg",
+      "displayName": "LDN 2.5mg",
+      "category": "Other",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "30-caps",
+          "dosage": "",
+          "quantity": "30 caps",
+          "priceEUR": 22.0,
+          "priceUSD": 23.76,
+          "category": "Other"
+        }
+      ]
+    },
+    {
+      "id": "ldn",
+      "name": "LDN",
+      "displayName": "LDN",
+      "category": "Other",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "3mg-30-caps",
+          "dosage": "3mg",
+          "quantity": "30 caps",
+          "priceEUR": 19.0,
+          "priceUSD": 20.52,
+          "category": "Other"
+        }
+      ]
+    },
+    {
+      "id": "ldn-4-5mg",
+      "name": "LDN 4.5mg",
+      "displayName": "LDN 4.5mg",
+      "category": "Other",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "30-caps",
+          "dosage": "",
+          "quantity": "30 caps",
+          "priceEUR": 22.0,
+          "priceUSD": 23.76,
+          "category": "Other"
+        }
+      ]
+    },
+    {
+      "id": "tadalafil",
+      "name": "Tadalafil",
+      "displayName": "Tadalafil",
+      "category": "Other",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "5mg-30-caps",
+          "dosage": "5mg",
+          "quantity": "30 caps",
+          "priceEUR": 30.0,
+          "priceUSD": 32.4,
+          "category": "Other"
+        },
+        {
+          "id": "10mg-30-caps",
+          "dosage": "10mg",
+          "quantity": "30 caps",
+          "priceEUR": 40.0,
+          "priceUSD": 43.2,
+          "category": "Other"
+        },
+        {
+          "id": "20mg-30-caps",
+          "dosage": "20mg",
+          "quantity": "30 caps",
+          "priceEUR": 50.0,
+          "priceUSD": 54.0,
+          "category": "Other"
+        }
+      ]
+    },
+    {
+      "id": "phosphatidylserine",
+      "name": "Phosphatidylserine",
+      "displayName": "Phosphatidylserine",
+      "category": "Other",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "100mg-60-caps",
+          "dosage": "100mg",
+          "quantity": "60 caps",
+          "priceEUR": 33.0,
+          "priceUSD": 35.64,
+          "category": "Other"
+        }
+      ]
+    },
+    {
+      "id": "dim",
+      "name": "DIM",
+      "displayName": "DIM",
+      "category": "Other",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "100mg-60-caps",
+          "dosage": "100mg",
+          "quantity": "60 caps",
+          "priceEUR": 18.0,
+          "priceUSD": 19.44,
+          "category": "Other"
+        }
+      ]
+    },
+    {
+      "id": "saw-palmetto",
+      "name": "Saw Palmetto",
+      "displayName": "Saw Palmetto",
+      "category": "Other",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "100mg-60-caps",
+          "dosage": "100mg",
+          "quantity": "60 caps",
+          "priceEUR": 11.0,
+          "priceUSD": 11.88,
+          "category": "Other"
+        }
+      ]
+    },
+    {
+      "id": "spironolactone",
+      "name": "Spironolactone",
+      "displayName": "Spironolactone",
+      "category": "Other",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "50mg-180-caps",
+          "dosage": "50mg",
+          "quantity": "180 caps",
+          "priceEUR": 40.0,
+          "priceUSD": 43.2,
+          "category": "Other"
+        }
+      ]
+    },
+    {
+      "id": "lycopene",
+      "name": "Lycopene",
+      "displayName": "Lycopene",
+      "category": "Other",
+      "type": "supplement",
+      "variants": [
+        {
+          "id": "25mg-60-caps",
+          "dosage": "25mg",
+          "quantity": "60 caps",
+          "priceEUR": 28.0,
+          "priceUSD": 30.24,
+          "category": "Other"
+        }
+      ]
+    }
+  ]
+}

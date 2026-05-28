@@ -3,7 +3,7 @@
  * 
  * Updates EXISTING products in Firestore:
  *   1. Sets correct `master` tier prices (perUnit + kit) from PDF
- *   2. Adds `supplier: "RegenPept"` to product doc metadata
+ *   2. Adds `supplier: "Med-Peptides"` to product doc metadata
  *   3. Fixes combo product variant labels (e.g. "5mg | 5mg / vial")
  * 
  * Usage: node scripts/phase1_masterPrices.mjs
@@ -129,7 +129,7 @@ async function main() {
 
       // 1. Update product doc: add supplier metadata
       await productRef.update({
-        supplier: 'RegenPept',
+        supplier: 'Med-Peptides',
         supplierUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 

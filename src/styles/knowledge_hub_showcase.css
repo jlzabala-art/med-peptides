@@ -1,0 +1,280 @@
+/* ============================================================
+   Knowledge Hub Showcase — aligned with clinical design system
+   Uses tokens from tokens.css for consistent visual language
+   ============================================================ */
+
+.khs-section {
+  padding: 6rem 1.25rem;
+  background: var(--section-alt);      /* #EEF4FA – alternating section tint */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle decorative background circle */
+.khs-section::before {
+  content: '';
+  position: absolute;
+  width: 700px;
+  height: 700px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 150, 204, 0.06) 0%, transparent 70%);
+  top: -200px;
+  right: -200px;
+  pointer-events: none;
+}
+
+.khs-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Header ─────────────────────────────────────────────────── */
+.khs-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.khs-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--secondary);            /* #0096CC – bright medical blue */
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: rgba(0, 150, 204, 0.08);
+  padding: 0.4rem 1.1rem;
+  border-radius: 9999px;
+  margin-bottom: 1.25rem;
+  border: 1px solid rgba(0, 150, 204, 0.18);
+}
+
+.khs-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-weight: 800;
+  color: var(--primary);             /* #003666 – deep clinical navy */
+  margin-bottom: 1.1rem;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.khs-gradient {
+  background: var(--gradient-accent);  /* #0096CC → #00B8D9 */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.khs-subtitle {
+  font-size: clamp(1rem, 2vw, 1.1rem);
+  color: var(--text-muted);           /* #4A6080 */
+  max-width: 640px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ── Card grid ──────────────────────────────────────────────── */
+.khs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.khs-card {
+  background: var(--surface);         /* #FFFFFF */
+  border: 1px solid var(--border);    /* #D8E6F0 */
+  border-radius: var(--radius-xl);    /* 24px */
+  padding: 2.5rem;
+  position: relative;
+  cursor: pointer;
+  transition: box-shadow 0.35s ease, transform 0.35s ease, border-color 0.35s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.khs-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(0, 150, 204, 0.30);
+}
+
+.khs-card-glow {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: var(--radius-xl);
+  /* accent tint on hover, driven by inline style (kept for subtle depth only) */
+}
+
+.khs-card-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ── Icon box ───────────────────────────────────────────────── */
+.khs-icon-box {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.75rem;
+  /* colour set via inline style – keeps the per-pillar accent */
+}
+
+/* ── Text ───────────────────────────────────────────────────── */
+.khs-card-subtitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-light);           /* #7A93B0 */
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.khs-card-title {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.khs-card-desc {
+  font-size: 0.97rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+  margin-bottom: 1.75rem;
+}
+
+/* ── Feature list ───────────────────────────────────────────── */
+.khs-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2.25rem;
+  flex-grow: 1;
+}
+
+.khs-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+/* ── CTA button ─────────────────────────────────────────────── */
+.khs-button {
+  background: transparent;
+  color: var(--primary);
+  border: 1.5px solid var(--secondary);
+  padding: 0.85rem 1.75rem;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: var(--font-heading);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.khs-card:hover .khs-button {
+  background: var(--secondary);       /* #0096CC */
+  color: #fff;
+  box-shadow: var(--shadow-glow);
+}
+
+/* ── Bridge bar ─────────────────────────────────────────────── */
+.khs-bridge {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 1.75rem 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.khs-bridge-icon {
+  width: 52px;
+  height: 52px;
+  background: var(--gradient-clinical);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: var(--shadow-glow);
+  flex-shrink: 0;
+}
+
+.khs-bridge-content {
+  flex-grow: 1;
+}
+
+.khs-bridge-content h4 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin: 0 0 0.2rem 0;
+}
+
+.khs-bridge-content p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.khs-bridge-cta {
+  background: var(--gradient-clinical);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.6rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  white-space: nowrap;
+}
+
+.khs-bridge-cta:hover {
+  opacity: 0.88;
+  transform: scale(1.03);
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 1023px) {
+  .khs-grid { grid-template-columns: 1fr; }
+  .khs-bridge { flex-direction: column; text-align: center; gap: 1.25rem; padding: 2rem; }
+  .khs-bridge-cta { width: 100%; }
+}
+
+@media (max-width: 640px) {
+  .khs-section { padding: 4rem 1.25rem; }
+  .khs-card { padding: 1.75rem; border-radius: var(--radius-lg); }
+  .khs-card-title { font-size: 1.3rem; }
+  .khs-bridge { padding: 1.5rem; }
+}

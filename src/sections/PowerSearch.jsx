@@ -1,3 +1,4 @@
+ 
 import { Search, FlaskConical, BookOpen, MessageSquare, ArrowRight } from 'lucide-react';
 
 export default function PowerSearch({ onOpenSearch, searchQuery, setSearchQuery }) {
@@ -36,7 +37,7 @@ export default function PowerSearch({ onOpenSearch, searchQuery, setSearchQuery 
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.5rem',
-              color: '#00A3E0',
+              color: 'var(--color-primary)',
               fontWeight: 800,
               fontSize: '0.75rem',
               textTransform: 'uppercase',
@@ -212,7 +213,7 @@ export default function PowerSearch({ onOpenSearch, searchQuery, setSearchQuery 
           </form>
 
           <div className="ps-examples-container">
-            <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Try:</span>
+            <span style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)', fontWeight: 700, textTransform: 'uppercase' }}>Try:</span>
             {examples.map(ex => (
               <button
                 key={ex}
@@ -234,22 +235,22 @@ export default function PowerSearch({ onOpenSearch, searchQuery, setSearchQuery 
         <div className="ps-indicators-grid">
 
           <div className="indicator-item">
-            <div className="indicator-icon" style={{ width: '36px', height: '36px', borderRadius: '10px', backgroundColor: 'rgba(0,163,224,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00A3E0', flexShrink: 0 }}>
+            <div className="indicator-icon" style={{ width: '36px', height: '36px', borderRadius: '10px', backgroundColor: 'rgba(0,163,224,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-primary)', flexShrink: 0 }}>
               <FlaskConical size={18} />
             </div>
             <div>
               <div className="indicator-title" style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>Products</div>
-              <div className="indicator-sub" style={{ fontSize: '0.75rem', color: '#94a3b8' }}>HPLC Purity</div>
+              <div className="indicator-sub" style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>HPLC Purity</div>
             </div>
           </div>
 
           <div className="indicator-item">
-            <div className="indicator-icon" style={{ width: '36px', height: '36px', borderRadius: '10px', backgroundColor: 'rgba(16,185,129,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981', flexShrink: 0 }}>
+            <div className="indicator-icon" style={{ width: '36px', height: '36px', borderRadius: '10px', backgroundColor: 'rgba(16,185,129,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-success)', flexShrink: 0 }}>
               <BookOpen size={18} />
             </div>
             <div>
               <div className="indicator-title" style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>Protocols</div>
-              <div className="indicator-sub" style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Step-by-step</div>
+              <div className="indicator-sub" style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>Step-by-step</div>
             </div>
           </div>
 
@@ -259,7 +260,7 @@ export default function PowerSearch({ onOpenSearch, searchQuery, setSearchQuery 
             </div>
             <div>
               <div className="indicator-title" style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>Knowledge</div>
-              <div className="indicator-sub" style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Clinical FAQ</div>
+              <div className="indicator-sub" style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>Clinical FAQ</div>
             </div>
           </div>
 

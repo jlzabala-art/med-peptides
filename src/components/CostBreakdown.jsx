@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React from 'react';
 import { 
   X, 
@@ -129,7 +130,7 @@ export default function CostBreakdown({ protocol = {}, products = [], onClose, i
                   </div>
                 )}
                 {count === 1 && (
-                   <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.8rem', color: '#059669' }}>
+                   <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.8rem', color: 'var(--color-success)' }}>
                      <Info size={14} /> <span>Stability window compliant.</span>
                    </div>
                 )}
@@ -138,7 +139,7 @@ export default function CostBreakdown({ protocol = {}, products = [], onClose, i
           })}
         </div>
 
-        <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: '#f8fafc', borderRadius: '16px' }}>
+        <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: 'var(--color-bg-app)', borderRadius: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
             <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Total Units Required</span>
             <span style={{ fontWeight: 800 }}>{timelineCache?.reduce((acc, p) => acc + (p.items?.length || 0), 0) || 0} Products</span>

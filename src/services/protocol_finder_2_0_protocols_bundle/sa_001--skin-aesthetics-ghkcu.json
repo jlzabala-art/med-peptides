@@ -1,0 +1,175 @@
+{
+  "protocol_id": "sa_001",
+  "protocol_slug": "skin-aesthetics-ghkcu-structured",
+  "protocol_title": "Structured Skin & Aesthetics Protocol",
+  "protocol_version": "v6.1",
+  "status": "approved",
+  "active": true,
+  "metadata": {
+    "primary_goal": "Skin / Anti-Aging",
+    "complexity_level": "standard",
+    "visibility": "public"
+  },
+  "phase_blueprints": [
+    {
+      "phase_key": "barrier_priming",
+      "phase_title": "Barrier Priming",
+      "default_duration_weeks": 4,
+      "drugs": [
+        {
+          "product_id": "prd_ghkcu",
+          "product_title": "GHK-Cu",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "administration_frequency": "5x_week",
+            "intensity": "standard",
+            "starting_weekly_dose": 10,
+            "default_weekly_dose": 10,
+            "dose_per_administration": 2,
+            "dose_unit": "mg"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_ghkcu",
+            "route": "TOP"
+          },
+          "dosage_form": "vial"
+        }
+      ]
+    },
+    {
+      "phase_key": "remodeling",
+      "phase_title": "Active Remodeling",
+      "default_duration_weeks": 4,
+      "drugs": [
+        {
+          "product_id": "prd_ghkcu",
+          "product_title": "GHK-Cu",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "administration_frequency": "5x_week",
+            "intensity": "standard_plus",
+            "starting_weekly_dose": 10,
+            "default_weekly_dose": 10,
+            "dose_per_administration": 2,
+            "dose_unit": "mg"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_ghkcu",
+            "route": "TOP"
+          },
+          "dosage_form": "vial"
+        },
+        {
+          "product_id": "prd_bpc157",
+          "product_title": "BPC-157",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "administration_frequency": "2x_daily",
+            "intensity": "low_optional",
+            "starting_weekly_dose": 3500,
+            "default_weekly_dose": 3500,
+            "dose_per_administration": 250,
+            "dose_unit": "mcg"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_bpc157",
+            "route": "SC"
+          },
+          "dosage_form": "vial"
+        }
+      ]
+    },
+    {
+      "phase_key": "consolidation",
+      "phase_title": "Consolidation & Maintenance",
+      "default_duration_weeks": 4,
+      "drugs": [
+        {
+          "product_id": "prd_ghkcu",
+          "product_title": "GHK-Cu",
+          "route": "subcutaneous",
+          "dose_logic": {
+            "administration_frequency": "5x_week",
+            "intensity": "maintenance",
+            "starting_weekly_dose": 10,
+            "default_weekly_dose": 10,
+            "dose_per_administration": 2,
+            "dose_unit": "mg"
+          },
+          "variantRef": {
+            "type": "resolved",
+            "productId": "prd_ghkcu",
+            "route": "TOP"
+          },
+          "dosage_form": "vial"
+        }
+      ]
+    }
+  ],
+  "monitoring_plan": {
+    "baseline_required": [
+      "photography",
+      "skin_scoring"
+    ],
+    "checkpoints": [
+      {
+        "type": "barrier_review",
+        "week": 4
+      },
+      {
+        "type": "remodeling_review",
+        "week": 8
+      },
+      {
+        "type": "final_review",
+        "week": 12
+      }
+    ],
+    "labs": []
+  },
+  "recommended_supplements": [
+    {
+      "name": "Vitamin C",
+      "dosage": "500mg",
+      "rationale": "Collagen synthesis cofactor and skin antioxidant",
+      "frequency": "Daily",
+      "weekly_dose": "3500mg"
+    },
+    {
+      "name": "Astaxanthin",
+      "dosage": "4mg",
+      "rationale": "Potent carotenoid for UV and skin protection",
+      "frequency": "Daily",
+      "weekly_dose": "28mg"
+    },
+    {
+      "name": "Collagen",
+      "dosage": "10g",
+      "rationale": "Marine collagen peptides for skin elasticity",
+      "frequency": "Daily",
+      "weekly_dose": "70g"
+    }
+  ],
+  "mechanism_of_action": [
+    "Targeted receptor modulation and cellular signaling optimization.",
+    "Restoration of physiological homeostasis via peptide-mediated pathways."
+  ],
+  "safety_profile": {
+    "adverse_events": [
+      "Mild injection site reactions (redness, transient pain).",
+      "Potential for mild, transient nausea during initial dose titration."
+    ],
+    "drug_interactions": [
+      "Monitor concurrent use of medications that affect blood glucose levels.",
+      "No severe drug-drug interactions documented, but caution advised with polypharmacy."
+    ],
+    "contraindications": [
+      "Pregnancy and lactation.",
+      "Active malignancies or history of specific hormone-sensitive cancers.",
+      "Known hypersensitivity to any protocol components."
+    ]
+  }
+}

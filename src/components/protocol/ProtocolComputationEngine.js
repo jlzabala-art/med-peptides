@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ProtocolComputationEngine.js
  * Centralized pure-computation layer for protocol data.
@@ -16,7 +17,7 @@ export function getCompoundColor(index) {
 }
 
 export function getPhaseShadeColor(phaseName = '') {
-  const n = phaseName.toLowerCase();
+  const n = String(phaseName || '').toLowerCase();
   if (n.includes('initiat')) return '#38bdf8';
   if (n.includes('escal'))   return '#34d399';
   if (n.includes('stabili')) return '#34d399';
@@ -65,59 +66,140 @@ export function intensityToNumeric(str = '') {
   return 2; // default to "standard"
 }
 
+import { parseDosageToMg, parseFrequencyToInjectionsPerWeek } from '../../utils/dosageUtils';
+import { normalizeProtocol, frequencyToInjectionsPerWeek } from '../../utils/protocolSchemaAdapter';
+
 // ── Drug field resolver (protocol-schema-agnostic) ────────────────────────────
 // Parse numeric mg from strings like "2.5mg", "10 mg", or plain numbers
 function parseMg(val) {
-  if (val === undefined || val === null) return undefined;
-  const n = parseFloat(String(val).replace(/[^0-9.]/g, ''));
-  return isNaN(n) ? undefined : n;
+  return parseDosageToMg(val);
 }
 
 export function resolveDrug(d, phaseIdx) {
-  const logic = d.dose_logic || {};
-  const name  = d.product_title || d.name || d.compound || d.product_slug || ('Compound ' + (phaseIdx + 1));
+  // ── NEW FLAT SCHEMA (post-migration) ──────────────────────────────────────
+  // After migration, dose fields live directly on the drug object.
+  // We still support legacy dose_logic for any document not yet migrated.
+  const legacy = d.dose_logic || null;
+  const name   = d.product_title || d.name || d.compound || d.product_slug || ('Compound ' + (phaseIdx + 1));
 
-  // Try numeric dose fields first (support both nested dose_logic and flat weekly_dose schema)
-  const rawStart =
-    parseMg(logic.starting_dose) ??
-    parseMg(logic.starting_weekly_dose) ??
-    parseMg(logic.default_weekly_dose) ??
-    parseMg(logic.dose_per_administration) ??
-    parseMg(d.weekly_dose) ??          // flat schema: e.g. "2.5mg"
-    parseMg(d.selected_strength) ??
-    0;
+  // ── Frequency ─────────────────────────────────────────────────────────────
+  const frequency = d.frequency
+    || legacy?.frequency
+    || legacy?.administration_frequency
+    || d.dosing_frequency
+    || 'weekly';
+  const injectionsPerWeek = d.injections_per_week
+    ?? parseFrequencyToInjectionsPerWeek(frequency);
 
-  const rawEnd =
-    parseMg(logic.peak_dose) ??
-    parseMg(logic.max_dose) ??
-    parseMg(logic.max_weekly_dose) ??
-    parseMg(logic.maintenance_dose) ??
-    parseMg(logic.possible_next_step_dose) ??
-    parseMg(logic.default_weekly_dose) ??
-    rawStart;
+  // ── Administration days ───────────────────────────────────────────────────
+  const rawDays = d.administration_days
+    || legacy?.administration_days_default
+    || legacy?.administration_days
+    || [];
+  const administrationDays = Array.isArray(rawDays) ? rawDays : [];
 
-  // Detect intensity-based schema (dose_unit === 'protocol_defined' or intensity string present)
-  const intensityStr = logic.starting_intensity || logic.intensity || logic.intensity_level || '';
-  const isIntensityBased = !!(intensityStr || logic.dose_unit === 'protocol_defined');
+  // ── Dose resolution ───────────────────────────────────────────────────────
+  // New flat schema: weekly_dose is pre-computed; dose_per_injection is per-shot.
+  // Legacy fallback: use dose_logic fields via parseMg chain.
+  let rawStartWeekly;
+  let rawEndWeekly;
+
+  if (d.weekly_dose_amount != null) {
+    // ✅ New separated model — use numeric weekly dose amount directly
+    const unit = d.weekly_dose_unit || 'mg';
+    const isMcg = unit === 'mcg' || unit === 'µg' || unit === 'ug';
+    rawStartWeekly = isMcg ? d.weekly_dose_amount / 1000 : d.weekly_dose_amount;
+    
+    // Resolve peak weekly dose
+    let peakMg = null;
+    if (d.peak_dose_per_injection_amount != null) {
+      const peakUnit = d.peak_dose_per_injection_unit || unit;
+      const isPeakMcg = peakUnit === 'mcg' || peakUnit === 'µg' || peakUnit === 'ug';
+      peakMg = isPeakMcg ? d.peak_dose_per_injection_amount / 1000 : d.peak_dose_per_injection_amount;
+    } else if (d.peak_dose_per_injection != null) {
+      peakMg = parseMg(d.peak_dose_per_injection);
+    }
+    
+    rawEndWeekly = peakMg != null
+      ? peakMg * injectionsPerWeek
+      : rawStartWeekly;
+  } else if (d.weekly_dose != null) {
+    // ✅ New flat schema string fallback — parse numeric value safely
+    rawStartWeekly = parseMg(d.weekly_dose);
+    rawEndWeekly   = d.peak_dose_per_injection != null
+      ? parseMg(d.peak_dose_per_injection) * injectionsPerWeek
+      : rawStartWeekly;
+  } else if (legacy) {
+    // 🔄 Legacy dose_logic fallback
+    const perAdminDose = parseMg(legacy.dose_per_administration);
+    const hasExplicitWeekly =
+      parseMg(legacy.starting_weekly_dose) != null ||
+      parseMg(legacy.default_weekly_dose)  != null ||
+      parseMg(legacy.weekly_dose)          != null;
+
+    rawStartWeekly =
+      parseMg(legacy.starting_dose) ??
+      parseMg(legacy.starting_weekly_dose) ??
+      parseMg(legacy.default_weekly_dose) ??
+      (perAdminDose != null && !hasExplicitWeekly
+        ? perAdminDose * injectionsPerWeek
+        : null) ??
+      parseMg(legacy.weekly_dose) ??
+      (parseMg(legacy.starting_daily_dose) != null
+        ? parseMg(legacy.starting_daily_dose) * injectionsPerWeek
+        : null) ??
+      (parseMg(d.selected_strength) != null
+        ? parseMg(d.selected_strength) * injectionsPerWeek
+        : null) ??
+      0;
+
+    rawEndWeekly =
+      parseMg(legacy.peak_dose) ??
+      parseMg(legacy.max_dose) ??
+      parseMg(legacy.max_weekly_dose) ??
+      (parseMg(legacy.possible_daily_dose) != null
+        ? parseMg(legacy.possible_daily_dose) * injectionsPerWeek
+        : null) ??
+      parseMg(legacy.maintenance_dose) ??
+      parseMg(legacy.possible_next_step_dose) ??
+      parseMg(legacy.default_weekly_dose) ??
+      rawStartWeekly;
+  } else {
+    rawStartWeekly = 0;
+    rawEndWeekly   = 0;
+  }
+
+  // ── Intensity-based schema ────────────────────────────────────────────────
+  // New schema: intensity_level field. Legacy: starting_intensity / intensity.
+  const intensityStr = d.intensity_level
+    || legacy?.starting_intensity
+    || legacy?.intensity
+    || legacy?.intensity_level
+    || '';
+  const isIntensityBased = !!(intensityStr)
+    || (legacy?.dose_unit === 'protocol_defined' && !d.weekly_dose);
 
   let startDose, endDose;
-  if (isIntensityBased && rawStart === 0) {
-    // Map intensity strings to 1–5 scale
+  if (isIntensityBased && (rawStartWeekly === 0 || rawStartWeekly == null)) {
     const startInt = intensityStr ? intensityToNumeric(intensityStr) : 2;
-    const endInt   = logic.target_intensity ? intensityToNumeric(logic.target_intensity) : startInt;
+    const endInt   = legacy?.target_intensity ? intensityToNumeric(legacy.target_intensity) : startInt;
     startDose = startInt;
     endDose   = endInt;
   } else {
-    startDose = rawStart;
-    endDose   = rawEnd;
+    startDose = rawStartWeekly || 0;
+    endDose   = rawEndWeekly   || startDose;
   }
 
-  const frequency   = logic.frequency || logic.administration_frequency || d.dosing_frequency || '';
-  const route       = logic.route || d.route || '';
-  const doseUnit    = logic.dose_unit || d.dose_unit || 'mg';
-  const vialSize    = parseMg(logic.vial_size || logic.vial_volume || d.vial_size) || 0;
-  const costPerVial = parseMg(d.cost_per_vial || logic.cost_per_vial) || 0;
-  return { name, startDose, endDose, frequency, route, doseUnit, vialSize, costPerVial, isIntensityBased };
+  const route       = d.route || legacy?.route || '';
+  const doseUnit    = d.dose_unit || legacy?.dose_unit || 'mg';
+  const vialSize    = parseMg(d.vial_size || legacy?.vial_size || legacy?.vial_volume) || 0;
+  const costPerVial = parseMg(d.cost_per_vial || legacy?.cost_per_vial) || 0;
+
+  return {
+    name, startDose, endDose,
+    frequency, injectionsPerWeek, administrationDays,
+    route, doseUnit, vialSize, costPerVial, isIntensityBased,
+  };
 }
 
 // ── Build chart data ──────────────────────────────────────────────────────────
@@ -138,10 +220,19 @@ export function buildChartData(phase_blueprints = [], phases = []) {
 
       drugs.forEach(drug => {
         if (!compoundMap[drug.name]) {
-          compoundMap[drug.name] = { color: getCompoundColor(Object.keys(compoundMap).length), points: [] };
+          compoundMap[drug.name] = { 
+            color: getCompoundColor(Object.keys(compoundMap).length), 
+            points: [],
+            frequencies: [] 
+          };
         }
         const pts = compoundMap[drug.name].points;
-        // Avoid duplicate week entries: update existing point if same week already exists
+        const freqs = compoundMap[drug.name].frequencies;
+
+        // Track frequency for this phase
+        freqs.push({ week: weekCursor, duration: dur, injectionsPerWeek: drug.injectionsPerWeek });
+
+        // Avoid duplicate week entries
         const existStart = pts.findIndex(p => p.week === weekCursor);
         if (existStart >= 0) {
           pts[existStart] = { week: weekCursor, dose: (pts[existStart].dose + drug.startDose) / 2 };
@@ -170,7 +261,8 @@ export function buildChartData(phase_blueprints = [], phases = []) {
     const compounds    = Object.entries(compoundMap).map(([name, d]) => ({ name, ...d }));
     const maxDose      = Math.max(...compounds.flatMap(c => c.points.map(p => p.dose)), 1);
     const allUnits     = source.flatMap(ph =>
-      (ph.drugs || ph.compounds || ph.medications || []).map(d => d.dose_logic?.dose_unit || d.dose_unit || '').filter(Boolean)
+      (ph.drugs || ph.compounds || ph.medications || [])
+        .map(d => d.dose_unit || d.dose_logic?.dose_unit || '').filter(Boolean)
     );
     const unitCounts   = allUnits.reduce((acc, u) => { acc[u] = (acc[u] || 0) + 1; return acc; }, {});
     const dominantUnit = Object.keys(unitCounts).sort((a, b) => unitCounts[b] - unitCounts[a])[0] || 'mg';
@@ -188,32 +280,117 @@ export function buildChartData(phase_blueprints = [], phases = []) {
   }
 }
 
-// ── Aggregate totals ──────────────────────────────────────────────────────────
+import { SCIENTIFIC_STANDARDS, standardizeData } from '../../services/protocol_finder_2_0_protocols_bundle/ScientificStandards';
+
+// ── Aggregate totals (STABILITY-AWARE) ────────────────────────────────────────
 export function computeTotals(protocol, phaseBlocks, compounds) {
   try {
-    const allDrugNames  = [...new Set(phaseBlocks.flatMap(ph => ph.drugs.map(d => d.name)).filter(Boolean))];
-    const compoundCount = allDrugNames.length || compounds.length;
+    const compoundResults = {};
+    const totalWeeks = phaseBlocks.reduce((s, ph) => s + ph.durationWeeks, 0);
 
-    let totalMg = 0;
     phaseBlocks.forEach(ph => {
-      ph.drugs.forEach(drug => { totalMg += ((drug.startDose + drug.endDose) / 2) * ph.durationWeeks; });
+      if (!ph.drugs) return;
+      ph.drugs.forEach(drug => {
+        const name = drug.name || 'Unknown';
+        const cleanId = name.toLowerCase().replace('prd_', '').replace(/[^a-z0-9]/g, '');
+        const standard = SCIENTIFIC_STANDARDS.registry[cleanId] || {};
+        
+        if (!compoundResults[name]) {
+          compoundResults[name] = {
+            totalMg: 0,
+            vials: 0,
+            cost: 0,
+            rationale: [],
+            vialSize: drug.vialSize || standard.available_vial_sizes?.[0] || 5,
+            availableSizes: standard.available_vial_sizes || [drug.vialSize || 5],
+            stabilityWeeks: standard.stability_weeks || 4,
+            costPerVial: drug.costPerVial || protocol?.cost_per_vial || 0,
+            weeklyDoses: new Array(totalWeeks).fill(0)
+          };
+        }
+
+        const isMcg = drug.doseUnit && (
+          drug.doseUnit.toLowerCase() === 'mcg' ||
+          drug.doseUnit.toLowerCase() === 'μg' ||
+          drug.doseUnit.toLowerCase() === 'ug'
+        );
+
+        // Map weekly doses for this phase
+        for (let w = 0; w < ph.durationWeeks; w++) {
+          const absoluteWeek = ph.startWeek + w;
+          if (absoluteWeek < totalWeeks) {
+            const t = ph.durationWeeks > 1 ? w / (ph.durationWeeks - 1) : 0;
+            const rawDose = drug.startDose + t * (drug.endDose - drug.startDose);
+            const dose = isMcg ? rawDose / 1000 : rawDose;
+            compoundResults[name].weeklyDoses[absoluteWeek] = dose;
+            compoundResults[name].totalMg += dose;
+          }
+        }
+      });
     });
 
-    const source     = protocol?.phase_blueprints || protocol?.phases || [];
-    const firstPhase = source[0] || {};
-    const firstDrug  = (firstPhase.drugs || firstPhase.compounds || firstPhase.medications || [])[0];
-    const firstDrugR = firstDrug ? resolveDrug(firstDrug, 0) : null;
+    let totalVials = 0;
+    let totalCost = 0;
+    let totalMg = 0;
 
-    const vialSize     = parseFloat(firstDrugR?.vialSize || protocol?.vial_size || 2) || 2;
-    const totalVials   = totalMg > 0 ? Math.ceil(totalMg / vialSize) : 0;
-    const pricePerVial = parseFloat(protocol?.cost_per_vial || protocol?.price_per_vial || firstDrugR?.costPerVial || 0) || 0;
-    const totalCost    = pricePerVial > 0 ? totalVials * pricePerVial : 0;
-    const dominantFreq = firstDrugR?.frequency || firstDrug?.dose_logic?.frequency || firstDrug?.dose_logic?.administration_frequency || 'Weekly';
+    Object.keys(compoundResults).forEach(name => {
+      const res = compoundResults[name];
+      const stability = res.stabilityWeeks;
+      const weeklyDoses = res.weeklyDoses;
+      const sizes = [...res.availableSizes].sort((a, b) => b - a); // Prefer larger sizes
 
-    return { totalMg, totalVials, totalCost, compoundCount, dominantFreq };
+      let vialsForCompound = 0;
+      let costForCompound = 0;
+
+      // Calculate vials per stability window
+      for (let i = 0; i < totalWeeks; i += stability) {
+        const windowWeeks = Math.min(stability, totalWeeks - i);
+        let mgInWindow = 0;
+        for (let j = 0; j < windowWeeks; j++) {
+          mgInWindow += weeklyDoses[i + j];
+        }
+
+        if (mgInWindow > 0) {
+          // Find optimal vial configuration for this window
+          // Simple greedy approach: use largest vial that fits, or one larger if needed
+          let remaining = mgInWindow;
+          let windowVials = 0;
+          
+          // Optimization: If we need 15mg and sizes are [10, 20], prefer one 20mg over two 10mg.
+          // For now, we'll pick the single best size that covers the window or multiple of that size.
+          const bestSize = sizes.find(s => s >= mgInWindow) || sizes[0];
+          const count = Math.ceil(mgInWindow / bestSize);
+          
+          windowVials = count;
+          vialsForCompound += windowVials;
+          
+          // If we have price mapping for different sizes, we'd use it here.
+          // Since we currently have costPerVial at drug level, we assume it's for the 'default' size.
+          // Adjusting logic: if size matches drug.vialSize, use costPerVial.
+          costForCompound += windowVials * (res.costPerVial || 0);
+          
+          if (i === 0 && stability < totalWeeks) {
+            res.rationale.push(`Calculated in ${stability}-week stability windows.`);
+          }
+        }
+      }
+
+      res.vials = vialsForCompound;
+      res.cost = costForCompound;
+      
+      totalMg += res.totalMg;
+      totalVials += vialsForCompound;
+      totalCost += costForCompound;
+    });
+
+    const compoundCount = Object.keys(compoundResults).length;
+    const firstDrug = phaseBlocks[0]?.drugs?.[0];
+    const dominantFreq = firstDrug?.frequency || 'Weekly';
+
+    return { totalMg, totalVials, totalCost, compoundCount, dominantFreq, compoundResults };
   } catch (err) {
     console.warn('[ProtocolComputationEngine] computeTotals error:', err);
-    return { totalMg: 0, totalVials: 0, totalCost: 0, compoundCount: 0, dominantFreq: 'Weekly' };
+    return { totalMg: 0, totalVials: 0, totalCost: 0, compoundCount: 0, dominantFreq: 'Weekly', compoundResults: {} };
   }
 }
 
@@ -225,18 +402,36 @@ export function getPhaseAtWeek(phaseBlocks, week) {
 }
 
 // ── Dose interpolation ────────────────────────────────────────────────────────
-export function interpolateDose(points, week) {
+/**
+ * Interpolates dose at a given week.
+ * By default, uses 'step' mode to reflect fixed weekly dosages.
+ */
+export function interpolateDose(points, week, mode = 'step') {
   const sorted = [...points].sort((a, b) => a.week - b.week);
   if (!sorted.length) return 0;
   if (week <= sorted[0].week) return sorted[0].dose;
   if (week >= sorted[sorted.length - 1].week) return sorted[sorted.length - 1].dose;
+  
   for (let i = 0; i < sorted.length - 1; i++) {
-    if (week >= sorted[i].week && week <= sorted[i + 1].week) {
-      const t = (week - sorted[i].week) / (sorted[i + 1].week - sorted[i].week);
-      return +(sorted[i].dose + t * (sorted[i + 1].dose - sorted[i].dose)).toFixed(2);
+    const p1 = sorted[i];
+    const p2 = sorted[i+1];
+    if (week >= p1.week && week < p2.week) {
+      if (mode === 'step') {
+        // Clinical Step: The dose is fixed for the duration of each week.
+        // If we are at week 4.5, we use the dose for week 4.
+        const weekIndex = Math.floor(week - p1.week);
+        const duration = p2.week - p1.week;
+        if (duration <= 0) return p1.dose;
+        const totalDelta = p2.dose - p1.dose;
+        // Step interpolation: dose increments at the start of each week
+        return +(p1.dose + (weekIndex * (totalDelta / duration))).toFixed(2);
+      }
+      // Linear fallback
+      const t = (week - p1.week) / (p2.week - p1.week);
+      return +(p1.dose + t * (p2.dose - p1.dose)).toFixed(2);
     }
   }
-  return 0;
+  return sorted[sorted.length - 1].dose;
 }
 
 // ── Clinical event markers ────────────────────────────────────────────────────
@@ -246,7 +441,7 @@ export function buildClinicalEvents(phaseBlocks) {
     const peakWeek = ph.startWeek + ph.durationWeeks;
     const n = ph.name.toLowerCase();
     if (n.includes('escal') || n.includes('peak')) {
-      events.push({ week: peakWeek, label: 'Peak Dose', icon: '⬆', color: '#10b981' });
+      events.push({ week: peakWeek, label: 'Peak Dose', icon: '⬆', color: 'var(--color-success)' });
     } else if (n.includes('mainten')) {
       events.push({ week: ph.startWeek + Math.floor(ph.durationWeeks / 2), label: 'Assessment', icon: '🩺', color: '#60a5fa' });
     } else if (n.includes('taper')) {
@@ -385,17 +580,7 @@ export function buildWeeklyCsv(protocol, phaseBlocks, compounds) {
       const doses = compoundNames.map(name => {
         const comp = compounds.find(c => c.name === name);
         if (!comp) return 0;
-        const pts = [...comp.points].sort((a, b) => a.week - b.week);
-        if (!pts.length) return 0;
-        if (w <= pts[0].week) return pts[0].dose;
-        if (w >= pts[pts.length - 1].week) return pts[pts.length - 1].dose;
-        for (let i = 0; i < pts.length - 1; i++) {
-          if (w >= pts[i].week && w <= pts[i + 1].week) {
-            const t = (w - pts[i].week) / (pts[i + 1].week - pts[i].week);
-            return +(pts[i].dose + t * (pts[i + 1].dose - pts[i].dose)).toFixed(2);
-          }
-        }
-        return 0;
+        return interpolateDose(comp.points, w - 1, 'step'); // Use w-1 because csv is 1-indexed week
       });
       const total = doses.reduce((s, d) => s + d, 0).toFixed(2);
       lines.push([w, q(ph?.name || ''), ...doses, total].join(','));
@@ -405,5 +590,103 @@ export function buildWeeklyCsv(protocol, phaseBlocks, compounds) {
   } catch (err) {
     console.warn('[ProtocolComputationEngine] buildWeeklyCsv error:', err);
     return 'Week,Phase,Total\n';
+  }
+}
+
+// ── V2: Schema-adapter-based chart builder ────────────────────────────────────
+/**
+ * buildChartDataV2(protocol)
+ * ──────────────────────────────────────────────────────────────────────────────
+ * Accepts ANY raw Firestore protocol document (v1/v2/v3/flat) and returns
+ * the same { compounds, phaseBlocks, totalWeeks, maxDose, dominantUnit,
+ * isIntensityMode } shape as buildChartData(), but reading from the canonical
+ * normalized schema via normalizeProtocol().
+ *
+ * Use this in new chart components. Legacy buildChartData() is kept as-is.
+ *
+ * @param {object} protocol  Raw Firestore protocol document
+ */
+export function buildChartDataV2(protocol) {
+  try {
+    const normalized = normalizeProtocol(protocol);
+    if (!normalized.phases.length) return null;
+
+    const compoundMap = {};
+
+    const phaseBlocks = normalized.phases.map((ph) => {
+      const compounds = ph.compounds.map((c, ci) => {
+        // Flatten schedule → single startDose / endDose for the phase
+        const firstEntry  = c.schedule[0]  || {};
+        const lastEntry   = c.schedule[c.schedule.length - 1] || firstEntry;
+
+        const freqObj     = firstEntry.frequency || { times: 1, period: 'week' };
+        const injPerWeek  = frequencyToInjectionsPerWeek(freqObj);
+        const startDose   = (firstEntry.dose?.amount ?? 0) * injPerWeek;
+        const endDose     = (lastEntry.dose?.amount  ?? startDose) * injPerWeek;
+        const doseUnit    = firstEntry.dose?.unit || 'mg';
+
+        // Register compound for the chart line
+        if (!compoundMap[c.name]) {
+          compoundMap[c.name] = {
+            color:  getCompoundColor(Object.keys(compoundMap).length),
+            points: [],
+            unit:   doseUnit,
+            frequencies: []
+          };
+        }
+        const pts = compoundMap[c.name].points;
+        const freqs = compoundMap[c.name].frequencies;
+
+        freqs.push({ week: ph.start_week, duration: ph.end_week - ph.start_week + 1, injectionsPerWeek: injPerWeek });
+
+        const addOrUpdate = (week, dose) => {
+          const ex = pts.findIndex(p => p.week === week);
+          if (ex >= 0) pts[ex] = { week, dose: (pts[ex].dose + dose) / 2 };
+          else pts.push({ week, dose });
+        };
+        addOrUpdate(ph.start_week, startDose);
+        addOrUpdate(ph.end_week,   endDose);
+
+        return {
+          name:           c.name,
+          startDose,
+          endDose,
+          frequency:      freqObj.label || `${freqObj.times}x/${freqObj.period}`,
+          injectionsPerWeek: injPerWeek,
+          doseUnit,
+          isIntensityBased: false,
+          route:          c.route || 'subcutaneous',
+        };
+      });
+
+      return {
+        name:          ph.phase_name,
+        startWeek:     ph.start_week,
+        durationWeeks: ph.end_week - ph.start_week + 1,
+        drugs:         compounds,
+      };
+    });
+
+    const totalWeeks = normalized.phases.reduce(
+      (max, ph) => Math.max(max, ph.end_week),
+      0
+    );
+    const compounds  = Object.entries(compoundMap).map(([name, d]) => ({ name, ...d }));
+    const maxDose    = Math.max(...compounds.flatMap(c => c.points.map(p => p.dose)), 1);
+
+    // Dominant unit
+    const unitCounts = {};
+    compounds.forEach(c => { unitCounts[c.unit] = (unitCounts[c.unit] || 0) + 1; });
+    const dominantUnit = Object.keys(unitCounts).sort((a, b) => unitCounts[b] - unitCounts[a])[0] || 'mg';
+
+    const allDrugs       = phaseBlocks.flatMap(pb => pb.drugs);
+    const isIntensityMode = allDrugs.length > 0 &&
+      allDrugs.every(d => d.isIntensityBased) &&
+      allDrugs.every(d => d.startDose <= 5 && d.endDose <= 5);
+
+    return { compounds, phaseBlocks, totalWeeks, maxDose, dominantUnit, isIntensityMode };
+  } catch (err) {
+    console.warn('[ProtocolComputationEngine] buildChartDataV2 error:', err);
+    return null;
   }
 }

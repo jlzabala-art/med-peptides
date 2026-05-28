@@ -1,4 +1,4 @@
-Project: ReGen PEPT
+Project: Med-Peptides
 Module: Institutional & Clinical Inquiries page
 Priority: High
 Platform: Desktop first
@@ -8,7 +8,7 @@ Implement and validate the inquiry form so that:
 1. The “Schedule Video Call” action opens the correct booking page:
    https://us.bigin.online/org900319019/bookings/mhs
 2. The booking-related email shown and used in contact workflows is:
-   business@med-peptides.com
+   business@Med-Peptides.com
 3. The selected value in “Identify your inquiry type” is reflected correctly in the form state and submission payload.
 4. The form cannot be submitted unless all required fields are completed correctly.
 5. Add a small validation test suite to confirm the form works.
@@ -41,7 +41,7 @@ A. Booking CTA
 
 B. Contact Email
 - Replace any old booking/contact email for this section with:
-  business@med-peptides.com
+  business@Med-Peptides.com
 - Use this email consistently in:
   visible contact blocks
   fallback contact actions
@@ -130,7 +130,7 @@ Create a lightweight form test suite covering:
 7. Empty message blocks submission
 8. Valid form enables submission
 9. Schedule Video Call opens the correct Bigin booking URL
-10. business@med-peptides.com appears in the correct contact area
+10. business@Med-Peptides.com appears in the correct contact area
 
 I. Manual QA checklist
 Run these manual checks:
@@ -141,12 +141,12 @@ Run these manual checks:
 - Click “Schedule Video Call” and verify it opens:
   https://us.bigin.online/org900319019/bookings/mhs
 - Confirm visible email is:
-  business@med-peptides.com
+  business@Med-Peptides.com
 
 J. Success criteria
 - Inquiry type card and form field remain synchronized
 - Required field validation works correctly
 - Form cannot be submitted with incomplete required data
 - Booking CTA opens the correct page
-- business@med-peptides.com is used consistently
+- business@Med-Peptides.com is used consistently
 - No broken states, no silent submission failures, no browser-native validation popups

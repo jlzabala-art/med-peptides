@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { Info, MapPin, Globe, X, MessageCircle, Mail, Activity, Zap, Sparkles, Brain, Dumbbell, Droplets, Beaker, FlaskConical, ChevronDown, Check, Filter, ChevronRight, Search, HelpCircle, BookOpen, ExternalLink } from 'lucide-react';
+import { Info, MapPin, Globe, X, MessageCircle, Mail, Activity, Zap, Sparkles, Brain, ShieldCheck, Droplets, Beaker, FlaskConical, ChevronDown, Check, Filter, ChevronRight, Search, HelpCircle, BookOpen, ExternalLink, Moon, Bot } from 'lucide-react';
+import { trackEvent } from '../hooks/useAnalytics';
 import MobileProductCard from '../snippets/MobileProductCard';
 import FAQModal from '../components/discovery/FAQModal';
 import PubMedPreviewPanel from '../components/discovery/PubMedPreviewPanel';
@@ -7,8 +9,11 @@ import { getFAQForProduct } from '../utils/discoveryEngine';
 import { configService } from '../services/configService';
 import { productCategories as _fallbackCategories } from '../data/productConstants';
 import { usePageMeta } from '../hooks/usePageMeta';
+import Breadcrumbs from '../components/common/Breadcrumbs';
+import Skeleton from '../components/common/Skeleton';
+import { useHeaderContext } from '../context/HeaderContext';
 
-// ── FASE 4: Lazy Table Row ──────────────────────────────────────────────────
+// ── PHASE 4: Lazy Table Row ──────────────────────────────────────────────────
 // Renders a skeleton placeholder until the row enters the viewport,
 // then mounts the full content. Prevents heavy initial paint for large catalogs.
 const LazyTableRow = React.memo(function LazyTableRow({ product: p, onSelectProduct, handleOpenFAQ, handleOpenPubMed }) {
@@ -36,7 +41,7 @@ const LazyTableRow = React.memo(function LazyTableRow({ product: p, onSelectProd
     return (
       <tr ref={rowRef} style={{ height: '72px', borderBottom: '1px solid var(--border)' }}>
         <td colSpan={4} style={{ padding: '1rem' }}>
-          <div className="lazy-row-skeleton" />
+          <Skeleton height="24px" borderRadius="6px" />
         </td>
       </tr>
     );
@@ -66,13 +71,45 @@ const LazyTableRow = React.memo(function LazyTableRow({ product: p, onSelectProd
       <td style={{ padding: '1.25rem 1rem' }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
           <button
-            onClick={() => handleOpenFAQ(p)}
-            title="Scientific FAQ"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.75rem', fontSize: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'white', color: 'var(--text-main)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
-            onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)'; }}
-            onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-main)'; }}
+            onClick={() => {
+              try {
+                localStorage.removeItem('clinical_ai_messages_v2');
+                sessionStorage.removeItem('clinical_ai_messages');
+              } catch {}
+              window.dispatchEvent(new CustomEvent('open-clinical-ai', {
+                detail: {
+                  action: 'ask_about_entity',
+                  entityName: p.name || '',
+                  section: 'Catalog.Row',
+                  autoSend: true
+                }
+              }));
+            }}
+            title="Ask ClinicAI"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              padding: '0.5rem 0.75rem',
+              fontSize: '0.75rem',
+              borderRadius: '8px',
+              border: '1px solid rgba(0, 163, 224, 0.2)',
+              background: 'rgba(0, 163, 224, 0.05)',
+              color: 'var(--primary)',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = 'rgba(0, 163, 224, 0.12)';
+              e.currentTarget.style.borderColor = 'rgba(0, 163, 224, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'rgba(0, 163, 224, 0.05)';
+              e.currentTarget.style.borderColor = 'rgba(0, 163, 224, 0.2)';
+            }}
           >
-            <HelpCircle size={14} /> FAQ
+            <Bot size={14} /> ClinicAI
           </button>
           <button
             onClick={() => handleOpenPubMed(p)}
@@ -84,7 +121,13 @@ const LazyTableRow = React.memo(function LazyTableRow({ product: p, onSelectProd
             <BookOpen size={14} /> PubMed
           </button>
           <button
-            onClick={() => onSelectProduct(p.name)}
+            onClick={() => {
+              trackEvent('purchase_intent', {
+                intent_type: 'view_profile',
+                peptide_name: p.name
+              });
+              onSelectProduct(p.name);
+            }}
             title="Technical Profile"
             style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.75rem', fontSize: '0.75rem', borderRadius: '8px', border: 'none', background: 'var(--primary)', color: 'white', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
             onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
@@ -112,10 +155,45 @@ const Catalog = React.memo(function Catalog({
   products,
   allFaqs,
 }) {
+  const { setHeader, clearHeader } = useHeaderContext();
+  const structuredData = useMemo(() => ({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://Med-Peptides-app-27a3a.web.app/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Research Catalog",
+            "item": "https://Med-Peptides-app-27a3a.web.app/catalog"
+          }
+        ]
+      },
+      {
+        "@type": "ItemList",
+        "name": "Research Peptide Catalog",
+        "description": "Comprehensive catalog of high-purity research peptides for scientific investigation.",
+        "itemListElement": (products || []).slice(0, 50).map((p, idx) => ({
+          "@type": "ListItem",
+          "position": idx + 1,
+          "url": `https://Med-Peptides-app-27a3a.web.app/product/${p.slug || p.name.toLowerCase().replace(/\s+/g, '-')}`
+        }))
+      }
+    ]
+  }), [products]);
+
   usePageMeta({
-    title: 'Research Peptide Catalog',
-    description: 'Browse our complete catalog of research-grade peptides organized by investigational pathway — verified purity, multiple formats, global shipping.',
-    path: '/catalog',
+    title: 'High-Purity Research Peptide Catalog | Med-Peptides',
+    description: 'Explore our complete catalog of research-grade peptides organized by research pathway — verified purity, multiple formats, and global shipping.',
+    canonicalUrl: 'https://Med-Peptides-app-27a3a.web.app/catalog',
+    structuredData
   });
 
   const formatPrice = (val) => val?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -136,6 +214,11 @@ const Catalog = React.memo(function Catalog({
   const [activePubMedProduct, setActivePubMedProduct] = useState(null);
   const [showPubMedPanel, setShowPubMedPanel] = useState(false);
   const [showFAQModal, setShowFAQModal] = useState(false);
+
+  // Ensure we start from the top of the page on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Support for deep linking from product views
   useEffect(() => {
@@ -203,6 +286,68 @@ const Catalog = React.memo(function Catalog({
     return result;
   }, [products]);
 
+  // Inject Quick Navigation into the Global Header
+  useEffect(() => {
+    const headerQuickNav = (
+      <nav className="header-quick-nav" aria-label="Quick category navigation" style={{
+        display: 'flex', gap: '0.5rem', overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none'
+      }}>
+        <style>{`.header-quick-nav::-webkit-scrollbar { display: none; }`}</style>
+        {productCategories.map((category) => {
+          const hasProducts = (groupedProducts[category] || []).length > 0;
+          if (!hasProducts && !isProfessional) return null;
+
+          const QIcon = {
+            "Recovery & Repair":       Activity,
+            "Cognitive & Mood":        Brain,
+            "Sleep & Circadian":       Moon,
+            "Metabolic & Weight":      Zap,
+            "Longevity & Anti-Aging":  Sparkles,
+            "Hormonal Optimization":   Droplets,
+            "Immune Support":          ShieldCheck,
+            "Research Supplies":       Beaker,
+            "Other Research Peptides": FlaskConical
+          }[category] || FlaskConical;
+
+          const isActive = activeCategory === category;
+          const shortLabel = category.split(' ')[0]; // first word as label
+
+          const handleQuickNav = () => {
+            const slug = category.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            const el = document.getElementById(`pathway-${slug}`);
+            setActiveCategory(category);
+            if (el) {
+              const isMobile = window.innerWidth <= 768;
+              const offset = isMobile ? 80 : 100;
+              const top = el.getBoundingClientRect().top + window.pageYOffset - offset;
+              window.scrollTo({ top, behavior: 'smooth' });
+            }
+          };
+
+          return (
+            <button
+              key={category}
+              className={`quick-nav-pill ${isActive ? 'active-pill' : ''}`}
+              onClick={handleQuickNav}
+              aria-label={category}
+              title={category}
+            >
+              <QIcon size={14} />
+              {shortLabel}
+            </button>
+          );
+        })}
+      </nav>
+    );
+
+    setHeader(headerQuickNav);
+    return () => clearHeader();
+  }, [productCategories, groupedProducts, isProfessional, activeCategory, setHeader, clearHeader]);
+
+  const breadcrumbItems = useMemo(() => [
+        { label: 'Catalog' }
+    ], []);
+
   return (
     <section id="products" className="section section-light template-root" style={{ paddingTop: 'clamp(2rem, 5vw, 4rem)' }}>
       <div className="container" style={{ position: 'relative' }}>
@@ -214,9 +359,11 @@ const Catalog = React.memo(function Catalog({
            transition: 'all 0.6s ease'
         }}>
 
+        <Breadcrumbs items={breadcrumbItems} />
+
         <div style={{ marginBottom: '2rem' }}>
           <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '0.5rem', textAlign: 'left', fontFamily: 'var(--font-heading)' }}>
-            Investigational Pathways
+            Research Pathways
           </h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Select a pathway to explore specialized research reagents.</p>
         </div>
@@ -319,7 +466,7 @@ const Catalog = React.memo(function Catalog({
             text-decoration: underline;
           }
 
-          /* ── FASE 2: Quick Nav ──────────────────────────────────── */
+          /* ── PHASE 2: Quick Nav ──────────────────────────────────── */
           .quick-nav {
             position: sticky;
             top: 64px;
@@ -398,7 +545,7 @@ const Catalog = React.memo(function Catalog({
             }
           }
 
-          /* FASE 3: Mobile card grid — 2 columns when space allows */
+          /* PHASE 3: Mobile card grid — 2 columns when space allows */
           .mobile-card-grid {
             padding: 1rem;
             display: grid;
@@ -411,7 +558,7 @@ const Catalog = React.memo(function Catalog({
             }
           }
 
-          /* FASE 4: Lazy row skeleton animation */
+          /* PHASE 4: Lazy row skeleton animation */
           @keyframes shimmer {
             0% { background-position: -600px 0; }
             100% { background-position: 600px 0; }
@@ -430,52 +577,8 @@ const Catalog = React.memo(function Catalog({
           }
         ` }} />
 
-        {/* ── FASE 2: Sticky Quick Navigation (mobile only) ──────── */}
-        <nav className="quick-nav" aria-label="Quick category navigation">
-          {productCategories.map((category) => {
-            const hasProducts = (groupedProducts[category] || []).length > 0;
-            if (!hasProducts && !isProfessional) return null;
+        {/* ── PHASE 2: Sticky Quick Navigation (moved to header) ──────── */}
 
-            const QIcon = {
-              "Healing & Recovery": Activity,
-              "Weight Management & Metabolic": Zap,
-              "Anti-Aging & Longevity": Sparkles,
-              "Cognitive & Neuro-Protection": Brain,
-              "Muscle Growth & Performance": Dumbbell,
-              "Hormonal Support": Droplets,
-              "Research Supplies": Beaker,
-              "Other Research Peptides": FlaskConical
-            }[category] || FlaskConical;
-
-            const isActive = activeCategory === category;
-            const shortLabel = category.split(' ')[0]; // first word as label
-
-            const handleQuickNav = () => {
-              const slug = category.toLowerCase().replace(/[^a-z0-9]/g, '-');
-              const el = document.getElementById(`pathway-${slug}`);
-              setActiveCategory(category);
-              if (el) {
-                const isMobile = window.innerWidth <= 768;
-                const offset = isMobile ? 120 : 130; // extra offset for sticky nav itself
-                const top = el.getBoundingClientRect().top + window.pageYOffset - offset;
-                window.scrollTo({ top, behavior: 'smooth' });
-              }
-            };
-
-            return (
-              <button
-                key={category}
-                className={`quick-nav-pill ${isActive ? 'active-pill' : ''}`}
-                onClick={handleQuickNav}
-                aria-label={category}
-                title={category}
-              >
-                <QIcon size={14} />
-                {shortLabel}
-              </button>
-            );
-          })}
-        </nav>
 
         <div className="accordion-container">
           {productCategories.map((category, idx) => {
@@ -484,13 +587,14 @@ const Catalog = React.memo(function Catalog({
             if (categoryProducts.length === 0 && !isProfessional) return null;
 
             const IconComp = {
-              "Healing & Recovery": Activity,
-              "Weight Management & Metabolic": Zap,
-              "Anti-Aging & Longevity": Sparkles,
-              "Cognitive & Neuro-Protection": Brain,
-              "Muscle Growth & Performance": Dumbbell,
-              "Hormonal Support": Droplets,
-              "Research Supplies": Beaker,
+              "Recovery & Repair":       Activity,
+              "Cognitive & Mood":        Brain,
+              "Sleep & Circadian":       Moon,
+              "Metabolic & Weight":      Zap,
+              "Longevity & Anti-Aging":  Sparkles,
+              "Hormonal Optimization":   Droplets,
+              "Immune Support":          ShieldCheck,
+              "Research Supplies":       Beaker,
               "Other Research Peptides": FlaskConical
             }[category] || FlaskConical;
 
@@ -541,7 +645,7 @@ const Catalog = React.memo(function Catalog({
                   }} size={20} />
                 </div>
 
-                {/* FASE 1: Renderizado condicional — el contenido solo se monta cuando isOpen === true */}
+                {/* PHASE 1: Conditional rendering — content only mounts when isOpen === true */}
                 {isOpen && (
                   <div className="accordion-content">
                     <div style={{ padding: '0 0.5rem 1.5rem 0.5rem' }}>
@@ -552,12 +656,12 @@ const Catalog = React.memo(function Catalog({
                             <tr style={{ borderBottom: '2px solid var(--border)' }}>
                               <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Research Peptide</th>
                               <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-muted)', width: '35%' }}>Description</th>
-                              <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Investigational Format</th>
+                              <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Available Format</th>
                               <th style={{ padding: '1rem', textAlign: 'center', fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Scientific Tools</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {/* FASE 4: Lazy rendering — rows only mount full content when visible */}
+                            {/* PHASE 4: Lazy rendering — rows only mount full content when visible */}
                             {categoryProducts.map((p, pIdx) => (
                               <LazyTableRow
                                 key={pIdx}
@@ -593,18 +697,7 @@ const Catalog = React.memo(function Catalog({
           })}
         </div>
 
-        <FAQModal 
-          isOpen={showFAQModal}
-          onClose={() => setShowFAQModal(false)}
-          faqItems={faqItems}
-          loading={faqLoading}
-          product={activeFAQProduct}
-          relatedProducts={products}
-          onProductClick={(p) => {
-            setShowFAQModal(false);
-            setTimeout(() => onSelectProduct(p.name), 50);
-          }}
-        />
+        {/* FAQModal removed per user request (ClinicAI handles FAQs) */}
 
         <PubMedPreviewPanel 
           isOpen={showPubMedPanel}

@@ -1,3 +1,4 @@
+ 
 import { PhoneCall, ArrowRight, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -36,7 +37,7 @@ export default function ContactCTA() {
             borderRadius: '20px', // Estilo Squircle más moderno
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto 2rem',
-            color: '#00A3E0',
+            color: 'var(--color-primary)',
             position: 'relative',
             zIndex: 1
           }}>

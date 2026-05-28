@@ -1,0 +1,570 @@
+{
+  "generated_at": "2026-05-17T10:43:15.664Z",
+  "protocol_templates": [],
+  "protocols": [
+    {
+      "id": "advanced-metabolic-longevity-16w",
+      "title": "Advanced Metabolic & Longevity Protocol",
+      "peptides": [
+        "retatrutide",
+        "mots-c",
+        "tesamorelin",
+        "ss-31",
+        "ghk-cu",
+        "aod-9604",
+        "nad"
+      ],
+      "peptideCount": 7,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "cog_001",
+      "title": "Semax & Selank Neurocognitive Protocol",
+      "peptides": [
+        "semax",
+        "selank"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "cog_002",
+      "title": "Semax & Pinealon Neuro-Executive Protocol",
+      "peptides": [
+        "semax",
+        "pinealon"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "cognitive-support-6w",
+      "title": "Semax & Selank Neurocognitive Protocol",
+      "peptides": [
+        "semax",
+        "selank"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "energy_001",
+      "title": "MOTS-c Mitochondrial Energy Protocol",
+      "peptides": [
+        "mots-c"
+      ],
+      "peptideCount": 1,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "energy_002",
+      "title": "SS-31 & NMN Bioenergetic Resilience Protocol",
+      "peptides": [
+        "ss-31",
+        "nmn",
+        "mots-c"
+      ],
+      "peptideCount": 3,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "focus-resilience-8w",
+      "title": "Semax & Pinealon Neuro-Executive Protocol",
+      "peptides": [
+        "semax",
+        "pinealon"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "gh-axis-support-12w",
+      "title": "Tesamorelin + Ipamorelin GH-Axis Protocol",
+      "peptides": [
+        "tesamorelin",
+        "ipamorelin"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "horm_001",
+      "title": "CJC-1295 / Ipamorelin GH Optimization Protocol",
+      "peptides": [
+        "cjc-1295-ipamorelin",
+        "tesamorelin"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "horm_002",
+      "title": "Tesamorelin + Ipamorelin GH-Axis Protocol",
+      "peptides": [
+        "tesamorelin",
+        "ipamorelin"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "hormonal-support-12w",
+      "title": "CJC-1295 / Ipamorelin GH Optimization Protocol",
+      "peptides": [
+        "cjc-1295-ipamorelin",
+        "tesamorelin"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "immune-kpv-thymosin-8w",
+      "title": "Thymosin Alpha-1 & KPV Anti-Inflammatory Protocol",
+      "peptides": [
+        "thymosin-alpha-1",
+        "kpv"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "immune-modulation-8w",
+      "title": "Thymosin Alpha-1 & TB-500 Immune Modulation Protocol",
+      "peptides": [
+        "thymosin-alpha-1",
+        "tb-500"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "immune_001",
+      "title": "Thymosin Alpha-1 & TB-500 Immune Modulation Protocol",
+      "peptides": [
+        "thymosin-alpha-1",
+        "tb-500"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "immune_002",
+      "title": "Thymosin Alpha-1 & KPV Anti-Inflammatory Protocol",
+      "peptides": [
+        "thymosin-alpha-1",
+        "kpv"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "injury-recovery-8w",
+      "title": "BPC-157 & TB-500 Tissue Repair Protocol",
+      "peptides": [
+        "bpc-157",
+        "tb-500"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "lon_001",
+      "title": "MOTS-c Longevity Foundation Protocol",
+      "peptides": [
+        "mots-c"
+      ],
+      "peptideCount": 1,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "lon_002",
+      "title": "Epithalon + MOTS-c Circadian Longevity Protocol",
+      "peptides": [
+        "epithalon",
+        "mots-c"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "longevity-circadian-mitochondrial-12w",
+      "title": "Epithalon + MOTS-c Circadian Longevity Protocol",
+      "peptides": [
+        "epithalon",
+        "mots-c"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "longevity-foundation-12w",
+      "title": "MOTS-c Longevity Foundation Protocol",
+      "peptides": [
+        "mots-c"
+      ],
+      "peptideCount": 1,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "lxv-neuro-restoration-12w",
+      "title": "BPC-157, SS-31 & Pinealon Neuro-Restoration Protocol",
+      "peptides": [
+        "bpc-157",
+        "ss-31",
+        "pinealon"
+      ],
+      "peptideCount": 3,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "met_001",
+      "title": "MOTS-c & AOD-9604 Metabolic Activation Protocol",
+      "peptides": [
+        "mots-c",
+        "aod-9604"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "met_002",
+      "title": "Retatrutide + MOTS-c Metabolic Intensification Protocol",
+      "peptides": [
+        "retatrutide",
+        "mots-c",
+        "ss-31"
+      ],
+      "peptideCount": 3,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "metabolic-optimization-10w",
+      "title": "MOTS-c & AOD-9604 Metabolic Activation Protocol",
+      "peptides": [
+        "mots-c",
+        "aod-9604"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "metabolic-retatrutide-motsc-12w",
+      "title": "Retatrutide + MOTS-c Metabolic Intensification Protocol",
+      "peptides": [
+        "retatrutide",
+        "mots-c",
+        "ss-31"
+      ],
+      "peptideCount": 3,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "mitochondrial-energy-10w",
+      "title": "MOTS-c Mitochondrial Energy Protocol",
+      "peptides": [
+        "mots-c"
+      ],
+      "peptideCount": 1,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "mitochondrial-resilience-10w",
+      "title": "SS-31 & NMN Bioenergetic Resilience Protocol",
+      "peptides": [
+        "ss-31",
+        "nmn",
+        "mots-c"
+      ],
+      "peptideCount": 3,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "neuro-musculoskeletal-repair-8w",
+      "title": "BPC-157, TB-500 & ARA-290 Neuro-Musculoskeletal Protocol",
+      "peptides": [
+        "bpc-157",
+        "tb-500",
+        "ara-290"
+      ],
+      "peptideCount": 3,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "neuro_001",
+      "title": "BPC-157, SS-31 & Pinealon Neuro-Restoration Protocol",
+      "peptides": [
+        "bpc-157",
+        "ss-31",
+        "pinealon"
+      ],
+      "peptideCount": 3,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "personalized-metabolic-weight-loss-12w",
+      "title": "Tirzepatide + AOD-9604 & MOTS-c Metabolic Protocol",
+      "peptides": [
+        "tirzepatide",
+        "bpc-157",
+        "aod-9604",
+        "mots-c"
+      ],
+      "peptideCount": 4,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "rec_001",
+      "title": "BPC-157 & TB-500 Tissue Repair Protocol",
+      "peptides": [
+        "bpc-157",
+        "tb-500"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "rec_002",
+      "title": "BPC-157, TB-500 & ARA-290 Neuro-Musculoskeletal Protocol",
+      "peptides": [
+        "bpc-157",
+        "tb-500",
+        "ara-290"
+      ],
+      "peptideCount": 3,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "sa_001",
+      "title": "Structured Skin & Aesthetics Protocol",
+      "peptides": [
+        "ghkcu",
+        "bpc157"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "skin-rejuvenation-12w",
+      "title": "GHK-Cu Collagen Rejuvenation Protocol",
+      "peptides": [
+        "ghk-cu"
+      ],
+      "peptideCount": 1,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "skin-repair-aging-10w",
+      "title": "GHK-Cu & Epithalon Cellular Repair Protocol",
+      "peptides": [
+        "ghk-cu",
+        "epithalon"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "skin_001",
+      "title": "GHK-Cu Collagen Rejuvenation Protocol",
+      "peptides": [
+        "ghk-cu"
+      ],
+      "peptideCount": 1,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "skin_002",
+      "title": "GHK-Cu & Epithalon Cellular Repair Protocol",
+      "peptides": [
+        "ghk-cu",
+        "epithalon"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "skin_003",
+      "title": "GHK-Cu + BPC-157 + TB-500 Skin Regeneration Protocol",
+      "peptides": [
+        "ghkcu",
+        "bpc157",
+        "tb500"
+      ],
+      "peptideCount": 3,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "sleep-circadian-6w",
+      "title": "DSIP & Epithalon Circadian Sleep Protocol",
+      "peptides": [
+        "dsip",
+        "epithalon"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "sleep-restoration-8w",
+      "title": "DSIP & Selank Sleep Restoration Protocol",
+      "peptides": [
+        "dsip",
+        "selank"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "sleep_001",
+      "title": "DSIP & Selank Sleep Restoration Protocol",
+      "peptides": [
+        "dsip",
+        "selank"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "sleep_002",
+      "title": "DSIP & Epithalon Circadian Sleep Protocol",
+      "peptides": [
+        "dsip",
+        "epithalon"
+      ],
+      "peptideCount": 2,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "weight-management-cagrisem-12w",
+      "title": "Semaglutide + Cagrilintide Dual-Agonist Protocol",
+      "peptides": [
+        "semaglutide",
+        "cagrilintide",
+        "aod-9604"
+      ],
+      "peptideCount": 3,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "weight-management-structured-12w",
+      "title": "Tirzepatide + MOTS-c Metabolic Protocol",
+      "peptides": [
+        "tirzepatide",
+        "mots-c",
+        "aod-9604"
+      ],
+      "peptideCount": 3,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "wm_001",
+      "title": "Tirzepatide + MOTS-c Metabolic Optimization Protocol",
+      "peptides": [
+        "tirzepatide",
+        "mots-c",
+        "aod-9604"
+      ],
+      "peptideCount": 3,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "wm_002",
+      "title": "Semaglutide + Cagrilintide Dual-Hormone Protocol",
+      "peptides": [
+        "semaglutide",
+        "cagrilintide",
+        "aod-9604"
+      ],
+      "peptideCount": 3,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "wm_003",
+      "title": "Advanced Metabolic & Longevity Protocol",
+      "peptides": [
+        "retatrutide",
+        "mots-c",
+        "tesamorelin",
+        "ss-31",
+        "ghk-cu",
+        "aod-9604",
+        "nad"
+      ],
+      "peptideCount": 7,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "wm_004",
+      "title": "Tirzepatide + AOD-9604 & MOTS-c Metabolic Protocol",
+      "peptides": [
+        "tirzepatide",
+        "bpc-157",
+        "aod-9604",
+        "mots-c"
+      ],
+      "peptideCount": 4,
+      "hasIssues": false,
+      "drugIssues": []
+    },
+    {
+      "id": "wm_005",
+      "title": "Advanced Weight Management & Metabolic Longevity Protocol",
+      "peptides": [
+        "selank",
+        "bpc-157",
+        "5-amino-1mq",
+        "tesamorelin",
+        "ipamorelin",
+        "mots-c"
+      ],
+      "peptideCount": 6,
+      "hasIssues": false,
+      "drugIssues": []
+    }
+  ]
+}

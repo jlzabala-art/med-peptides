@@ -1,3 +1,4 @@
+ 
 /**
  * SyringeVisualizer — High-Precision Edition
  * -------------------------------------------
@@ -14,30 +15,13 @@
  *   - Memoized tick array; ARIA value attributes
  */
 import { useMemo, memo } from 'react';
+import '../styles/syringe.css';
 
 const BARREL_W  = 52;
 const BARREL_H  = 172;
 const MAX_UNITS = 100;
 
-/* ─── keyframes injected once ──────────────────────────────────────────────── */
-if (typeof document !== 'undefined' && !document.getElementById('sv-styles')) {
-  const tag = document.createElement('style');
-  tag.id = 'sv-styles';
-  tag.textContent = `
-    @keyframes sv-pulse {
-      0%, 100% { opacity: 1; box-shadow: 0 0 22px 8px rgba(220,40,40,0.55); }
-      50%       { opacity: 0.82; box-shadow: 0 0 36px 14px rgba(220,40,40,0.85); }
-    }
-    @keyframes sv-warn-text {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.6; }
-    }
-    @media (max-width: 640px) {
-      .sv-tick-label { font-size: 11px !important; }
-    }
-  `;
-  document.head.appendChild(tag);
-}
+/* keyframes now in syringe.css */
 
 function SyringeVisualizer({ units }) {
   const numeric = Math.max(0, parseFloat(units) || 0);
@@ -64,6 +48,7 @@ function SyringeVisualizer({ units }) {
 
   return (
     <div
+      className="syringe-visualizer"
       style={s.wrapper}
       aria-label={`Syringe fill: ${clamped} units`}
       aria-valuenow={clamped}
@@ -72,7 +57,7 @@ function SyringeVisualizer({ units }) {
       role="meter"
     >
       {/* ── Top label ──────────────────────────────────────────────────────── */}
-      <div style={s.topLabel}>
+      <div className="syringe-top-label" style={s.topLabel}>
         {isOver
           ? <span style={s.overWarn}>⚠ Exceeds 100 U</span>
           : <span style={s.topVal}>{numeric.toFixed(1)} U</span>
@@ -93,7 +78,7 @@ function SyringeVisualizer({ units }) {
       </div>
 
       {/* ── Barrel ─────────────────────────────────────────────────────────── */}
-      <div style={s.barrel}>
+      <div className="syringe-barrel" style={s.barrel}>
 
         {/* Glass curvature gradient overlay */}
         <div style={s.glassOverlay} aria-hidden="true" />
@@ -101,7 +86,7 @@ function SyringeVisualizer({ units }) {
         {/* Graduation ticks */}
         {ticks.map((tick) => (
           <div key={tick} style={{ ...s.tickRow, bottom: `${tick}%` }}>
-            <span className="sv-tick-label" style={s.tickLabel}>{tick}</span>
+            <span className="syringe-tick-label" style={s.tickLabel}>{tick}</span>
             <div style={{
               ...s.tickLine,
               width: tick % 50 === 0 ? '14px' : tick % 10 === 0 ? '9px' : '6px',
@@ -129,8 +114,9 @@ function SyringeVisualizer({ units }) {
           <div style={s.highlight} aria-hidden="true" />
         </div>
 
-        {/* Dynamic guide line — desktop only (hidden via inline opacity on mobile) */}
+        {/* Dynamic guide line — desktop only (hidden via CSS on mobile) */}
         <div
+          className="syringe-guide-line"
           style={{
             ...s.guideLine,
             top: `${guideY}px`,
@@ -159,7 +145,7 @@ const s = {
     flexDirection: 'column',
     alignItems: 'center',
     userSelect: 'none',
-    touchAction: 'none',       // prevents accidental scroll on mobile touch
+    /* touchAction + gap now in .syringe-visualizer CSS class */
     gap: '4px',
   },
 
@@ -288,7 +274,7 @@ const s = {
     pointerEvents: 'none',
   },
   tickLabel: {
-    fontSize: '9px',           // overridden to 11px on mobile via injected CSS
+    /* fontSize + opacity now controlled by .syringe-tick-label CSS class */
     color: 'rgba(255,255,255,0.65)',
     fontVariantNumeric: 'tabular-nums',
     lineHeight: 1,

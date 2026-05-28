@@ -1,3 +1,4 @@
+ 
 import React from 'react';
 import { Beaker, ArrowRight } from 'lucide-react';
 
@@ -29,7 +30,7 @@ export default function CustomSynthesisBanner({ onNavigate, compact = false }) {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.4rem',
-            color: '#00A3E0',
+            color: 'var(--color-primary)',
             fontWeight: 800,
             textTransform: 'uppercase',
             fontSize: '0.7rem',
@@ -106,7 +107,7 @@ export default function CustomSynthesisBanner({ onNavigate, compact = false }) {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.75rem',
-              color: '#00A3E0',
+              color: 'var(--color-primary)',
               fontWeight: 800,
               textTransform: 'uppercase',
               letterSpacing: '2px',
@@ -129,7 +130,7 @@ export default function CustomSynthesisBanner({ onNavigate, compact = false }) {
               letterSpacing: '-0.04em',
               lineHeight: 1.05
             }}>
-              Customised <span style={{ color: '#00A3E0' }}>Synthesis</span>
+              Customised <span style={{ color: 'var(--color-primary)' }}>Synthesis</span>
             </h2>
 
             <p className="description" style={{

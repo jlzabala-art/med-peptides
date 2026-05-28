@@ -1,75 +1,187 @@
-import React, { useEffect } from 'react';
-import { Lock, ChevronRight, Eye, Database, Share2, ShieldCheck } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+ 
+import React, { useEffect, useState } from 'react';
+import { Shield, Lock, Eye, FileText, ChevronRight, Mail, HelpCircle, ArrowRight } from 'lucide-react';
 
-export default function PrivacyPolicy({ onBack }) {
-  const navigate = useNavigate();
-  const handleBack = onBack ?? (() => navigate(-1));
+const PrivacyPolicy = () => {
+  const [activeSection, setActiveSection] = useState(0);
 
-  useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const sections = [
     {
-      id: 'collection',
+      id: "collection",
+      title: "Information Collection",
       icon: <Eye size={24} />,
-      title: 'Information We Collect',
-      content: `We collect information you provide directly, including name, email address, shipping address, and payment details when you create an account or place an order. We also collect usage data such as pages visited, time spent, and device information to improve our platform.`,
+      content: (
+        <>
+          <p>We collect information necessary to facilitate research distribution and improve our logistics infrastructure. This includes institutional details, contact information for laboratory personnel, and technical data related to the procurement process.</p>
+          <p>Our systems automatically log technical identifiers such as IP addresses and laboratory session tokens to ensure the security of international compound transfers.</p>
+        </>
+      )
     },
     {
-      id: 'usage',
-      icon: <Database size={24} />,
-      title: 'How We Use Your Data',
-      content: `Your data is used exclusively to process orders, provide customer support, improve our services, and send relevant communications if you have opted in. We do not use your data for automated decision-making or profiling beyond what is necessary to operate our platform.`,
+      id: "utilization",
+      title: "Data Utilization",
+      icon: <Shield size={24} />,
+      content: (
+        <>
+          <p>Collected data is used exclusively for processing research orders, managing global supply chain logistics, and providing technical documentation. We do not engage in the sale of institutional or personal data to third-party marketing entities.</p>
+          <p>We analyze anonymized procurement patterns to optimize our direct factory-to-laboratory distribution network, ensuring the fastest possible delivery of research materials.</p>
+        </>
+      )
     },
     {
-      id: 'sharing',
-      icon: <Share2 size={24} />,
-      title: 'Data Sharing',
-      content: `We do not sell, rent, or lease your personal data to third parties. Information is shared only with essential service partners (e.g., payment processors, shipping carriers) strictly to fulfill your requests. All partners are contractually bound to data protection standards.`,
+      id: "security",
+      title: "Information Security",
+      icon: <Lock size={24} />,
+      content: (
+        <>
+          <p>Med-Peptides employs industry-standard encryption and security protocols to protect sensitive research procurement data. Access to laboratory records and distribution details is strictly controlled and monitored.</p>
+          <p>All laboratory-client communications are encrypted using advanced TLS protocols, and our internal databases are isolated from public networks.</p>
+        </>
+      )
     },
     {
-      id: 'rights',
-      icon: <ShieldCheck size={24} />,
-      title: 'Your Rights',
-      content: `You have the right to access, correct, or delete your personal data at any time. You may also request data portability or restrict processing. To exercise any of these rights, contact us at privacy@regenpept.com. We will respond within 30 days.`,
-    },
+      id: "partners",
+      title: "Third-Party Partners",
+      icon: <FileText size={24} />,
+      content: (
+        <>
+          <p>Logistics and laboratory data may be shared with our primary manufacturing partners and international shipping carriers only to the extent necessary to ensure successful distribution and regulatory compliance.</p>
+          <p>Every partner is bound by strict non-disclosure agreements (NDAs) that prohibit any secondary use of the institutional data provided.</p>
+        </>
+      )
+    }
   ];
 
+  const scrollToSection = (id, index) => {
+    setActiveSection(index);
+    const element = document.getElementById(id);
+    if (element) {
+      const offset = 120;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
-    <div className="view-container with-header-padding" style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-      <button
-        onClick={handleBack}
-        className="btn btn-secondary"
-        style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem' }}
-      >
-        <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} /> Back
-      </button>
-
-      <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-        <div style={{ display: 'inline-flex', padding: '1rem', backgroundColor: 'rgba(0,54,102,0.06)', borderRadius: '20px', marginBottom: '1.5rem' }}>
-          <Lock size={48} />
-        </div>
-        <h1 style={{ fontSize: 'clamp(1.8rem, 5vw, 2.8rem)', marginBottom: '1rem' }}>Privacy Policy</h1>
-        <p className="subtitle" style={{ marginBottom: 0 }}>
-          Your privacy matters. Here's how we collect, use, and protect your information.
-        </p>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        {sections.map(s => (
-          <div key={s.id} className="card" style={{ padding: '2rem 2.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-              {s.icon}
-              <h2 style={{ margin: 0, fontSize: '1.25rem' }}>{s.title}</h2>
+    <div className="legal-page page-shell">
+      {/* ── Hero Section ───────────────────────────────────────────── */}
+      <section className="legal-hero">
+        <div className="page-container">
+          <div className="legal-hero__content anim-fade-up">
+            <div className="legal-hero__eyebrow">
+              <Shield size={14} />
+              <span>Institutional Protocol</span>
             </div>
-            <p style={{ color: 'var(--text-muted)', lineHeight: 1.8, margin: 0 }}>{s.content}</p>
+            <h1 className="legal-hero__title font-heading">Privacy Policy</h1>
+            <p className="legal-hero__subtitle">
+              Our commitment to data integrity and researcher confidentiality in the global distribution of advanced molecular compounds.
+            </p>
           </div>
-        ))}
-      </div>
+        </div>
+      </section>
 
-      <div style={{ textAlign: 'center', marginTop: '3rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-        Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-      </div>
+      {/* ── Main Content ────────────────────────────────────────────── */}
+      <section className="page-section">
+        <div className="page-container">
+          <div className="legal-grid">
+            {/* Sidebar Nav */}
+            <aside className="legal-nav anim-slide-left">
+              <nav>
+                <ul className="legal-nav__list">
+                  {sections.map((section, idx) => (
+                    <li 
+                      key={section.id}
+                      className={`legal-nav__item ${activeSection === idx ? 'legal-nav__item--active' : ''}`}
+                      onClick={() => scrollToSection(section.id, idx)}
+                    >
+                      <span className="text-secondary">{React.cloneElement(section.icon, { size: 18 })}</span>
+                      {section.title}
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+
+              <div className="card card--flat mt-12" style={{ padding: '1.5rem', borderRadius: '20px' }}>
+                <h4 className="text-primary mb-3">Need Assistance?</h4>
+                <p className="text-muted text-xs mb-4">Contact our data protection officer for institutional inquiries.</p>
+                <a href="mailto:privacy@med-peptides.com" className="btn btn-secondary btn-s w-full">
+                  <Mail size={14} /> Contact DPO
+                </a>
+              </div>
+            </aside>
+
+            {/* Content Cards */}
+            <main className="legal-content anim-fade-up--delay-1">
+              <div className="legal-card mb-12" style={{ background: 'var(--gradient-soft)', border: '1px solid rgba(0, 54, 102, 0.05)' }}>
+                <h2 className="h3 text-primary mb-6">Statement of Intent</h2>
+                <p className="text-muted leading-relaxed mb-0">
+                  At Med-Peptides, we recognize that scientific inquiry requires absolute discretion and data integrity. This Privacy Policy outlines our protocols for handling institutional and individual information gathered through our distribution network. As a direct factory representative, we adhere to the highest standards of confidentiality to protect the intellectual property and privacy of our research partners.
+                </p>
+              </div>
+
+              {sections.map((section) => (
+                <article key={section.id} id={section.id} className="legal-card">
+                  <div className="legal-card__header">
+                    <div className="legal-card__icon">
+                      {section.icon}
+                    </div>
+                    <h3 className="legal-card__title h4 text-primary font-heading">
+                      {section.title}
+                    </h3>
+                  </div>
+                  <div className="legal-card__content">
+                    {section.content}
+                  </div>
+                </article>
+              ))}
+
+              {/* Cookie & Inquiry Cards */}
+              <div className="legal-info-row">
+                <div className="legal-info-box">
+                  <div className="legal-info-box__icon">
+                    <HelpCircle size={32} />
+                  </div>
+                  <h4 className="h4 text-primary">Cookie Protocol</h4>
+                  <p className="text-muted text-s">
+                    We use functional cookies to maintain your session and optimize the institutional procurement interface.
+                  </p>
+                  <button className="btn btn-outline btn-s">Manage Cookies</button>
+                </div>
+
+                <div className="legal-info-box">
+                  <div className="legal-info-box__icon">
+                    <FileText size={32} />
+                  </div>
+                  <h4 className="h4 text-primary">Data Requests</h4>
+                  <p className="text-muted text-s">
+                    Qualified researchers may request a summary of their laboratory data stored within our secure systems.
+                  </p>
+                  <button className="btn btn-primary btn-s">Submit Request</button>
+                </div>
+              </div>
+
+              <footer className="legal-footer">
+                <div className="legal-version-tag">Version 2.2.0 • Institutional Grade</div>
+                <p className="text-xs text-light mb-2">Effective Date: May 1, 2026</p>
+                <p className="text-xs text-light">
+                  Med-Peptides Research Distribution Network • Laboratory Confidentiality Division
+                </p>
+              </footer>
+            </main>
+          </div>
+        </div>
+      </section>
     </div>
   );
-}
+};
+
+export default PrivacyPolicy;

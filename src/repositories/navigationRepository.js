@@ -1,3 +1,4 @@
+ 
 /**
  * navigationRepository.js
  *
@@ -72,19 +73,19 @@ async function fetchNavigationMetadata() {
   const categories = uniqueSorted(categoriesRaw, 8).map(label => ({
     label,
     slug: toSlug(label),
-    path: `/catalog/category/${toSlug(label)}`,
+    path: `/collection/${toSlug(label)}`,
   }));
 
   const goals = uniqueSorted(goalsRaw, 8).map(label => ({
     label,
     slug: toSlug(label),
-    path: `/catalog/goal/${toSlug(label)}`,
+    path: `/collection/protocols?goal=${toSlug(label)}`,
   }));
 
   const conditions = uniqueSorted(conditionsRaw, 8).map(label => ({
     label,
     slug: toSlug(label),
-    path: `/catalog/condition/${toSlug(label)}`,
+    path: `/collection/protocols?search=${encodeURIComponent(label)}`,
   }));
 
   return { categories, goals, conditions };

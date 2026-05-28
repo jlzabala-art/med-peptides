@@ -1,0 +1,847 @@
+/* =====================================================
+   KEY PEPTIDES CATALOG — Light clinical theme
+   ===================================================== */
+
+/* ── Section wrapper ─────────────────────────────────── */
+.kp-section {
+  position: relative;
+  scroll-margin-top: 72px;
+  padding: clamp(3rem, 5vw, 6rem) 1.5rem;
+  background: var(--surface);
+}
+
+/* Ambient glow backgrounds */
+.kp-section::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  width: 50%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(0, 163, 224, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.kp-section::after {
+  content: '';
+  position: absolute;
+  bottom: -5%;
+  left: -5%;
+  width: 40%;
+  height: 50%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+@media (max-width: 768px) {
+  .kp-section {
+    scroll-margin-top: 64px;
+  }
+}
+
+/* ── Inner container ─────────────────────────────────── */
+.kp-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Header ──────────────────────────────────────────── */
+.kp-header {
+  text-align: center;
+  margin-bottom: 4.5rem;
+}
+
+.kp-eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--secondary, #00A3E0);
+  background: rgba(0, 163, 224, 0.08);
+  border: 1px solid rgba(0, 163, 224, 0.15);
+  padding: 0.4rem 1.2rem;
+  border-radius: 100px;
+  margin-bottom: 1.25rem;
+  backdrop-filter: blur(8px);
+}
+
+.kp-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.kp-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 900;
+  color: var(--primary);
+  margin: 0 0 1rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.kp-subtitle {
+  color: var(--text-muted, #64748b);
+  font-size: 1.15rem;
+  margin: 0;
+  max-width: 600px;
+  margin-inline: auto;
+  line-height: 1.6;
+}
+
+/* Unified count + CTA pill */
+.kp-cta-pill {
+  display: inline-flex;
+  align-items: center;
+  background: #fff;
+  border: 1.5px solid rgba(0, 163, 224, 0.2);
+  border-radius: 100px;
+  padding: 2px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.kp-cta-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 163, 224, 0.1);
+  border-color: var(--secondary);
+}
+
+.kp-cta-pill-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--secondary);
+  background: rgba(0, 163, 224, 0.05);
+  border-radius: 100px;
+}
+
+.kp-cta-pill-action {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.kp-cta-pill:hover .kp-cta-pill-action {
+  color: var(--secondary);
+}
+
+@media (max-width: 768px) {
+  .kp-cta-pill {
+    align-self: center;
+  }
+}
+
+/* Keep old view-all for legacy bottom link */
+.kp-view-all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  padding: 0.4rem 0;
+  text-decoration: none;
+  transition: opacity 0.15s ease, gap 0.15s ease;
+  white-space: nowrap;
+}
+.kp-view-all-link:hover {
+  opacity: 0.75;
+  gap: 0.55rem;
+}
+
+/* ── Featured Section (Most Used) ── */
+.kp-featured-section {
+  margin-bottom: 5rem;
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kp-featured-title {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.kp-featured-title::before {
+  content: '';
+  width: 6px;
+  height: 24px;
+  background: linear-gradient(to bottom, var(--secondary), #0ea5e9);
+  border-radius: 3px;
+}
+
+.kp-featured-divider {
+  margin-top: 4rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--border-light) 50%, transparent 100%);
+  opacity: 0.6;
+}
+
+@media (max-width: 768px) {
+  .kp-featured-section {
+    margin-bottom: 3.5rem;
+  }
+  .kp-featured-title {
+    font-size: 1.2rem;
+    justify-content: center;
+  }
+}
+
+/* ── Most Used — always-visible mobile block ──────────── */
+.kp-most-used-always {
+  margin-bottom: 2rem;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.kp-most-used-always-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 1rem;
+  padding: 0 0.25rem;
+}
+
+.kp-most-used-always .kp-featured-divider {
+  margin-top: 1.75rem;
+  margin-bottom: 0;
+}
+
+/* ── Filter chips — mobile: horizontal scroll ── */
+.kp-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 3.5rem;
+  padding: 0.5rem;
+}
+
+.kp-chip {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 100px;
+  padding: 0.6rem 1.4rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.kp-chip:hover {
+  border-color: var(--secondary);
+  color: var(--secondary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 163, 224, 0.08);
+}
+
+.kp-chip--active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
+}
+
+@media (max-width: 640px) {
+  .kp-filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding: 0.5rem 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-snap-type: x mandatory;
+  }
+  .kp-filters::-webkit-scrollbar {
+    display: none;
+  }
+  .kp-chip {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+}
+
+/* ── Mobile Accordion Layout ── */
+.kp-accordion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 2rem;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.kp-accordion-item {
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+  scroll-margin-top: 92px;
+}
+
+.kp-accordion-header {
+  width: 100%;
+  padding: 1.15rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s ease;
+}
+
+.kp-accordion-header:hover {
+  background: rgba(0, 150, 204, 0.03);
+}
+
+.kp-accordion-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 0.95rem;
+}
+
+.kp-accordion-count {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-left: 0.25rem;
+}
+
+.kp-accordion-chevron {
+  color: var(--text-light);
+  transition: transform 0.3s ease;
+}
+
+.kp-accordion-item--expanded {
+  border-color: var(--secondary);
+  box-shadow: var(--shadow-md);
+}
+
+.kp-accordion-item--expanded .kp-accordion-chevron {
+  transform: rotate(180deg);
+  color: var(--secondary);
+}
+
+.kp-accordion-content {
+  padding: 0 0.75rem 1.25rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+.kp-accordion-pagination {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-light);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Card grid ───────────────────────────────────────── */
+.kp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+@media (max-width: 900px) {
+  .kp-grid { gap: 1rem; }
+}
+
+@media (max-width: 768px) {
+  .kp-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    margin-left: -1.25rem;
+    margin-right: -1.25rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    padding-bottom: 1rem;
+    gap: 1rem;
+  }
+  .kp-grid::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ── Skeleton card ───────────────────────────────────── */
+.kp-skeleton-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .kp-skeleton-card {
+    flex: 0 0 calc(85% - 1rem);
+    min-width: 260px;
+    scroll-snap-align: center;
+  }
+}
+
+.kp-skeleton-line {
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 400% 100%;
+  animation: kp-shimmer 1.4s ease infinite;
+}
+
+@keyframes kp-shimmer {
+  0%   { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+/* ── Peptide card ────────────────────────────────────── */
+.kp-card {
+  background: var(--background);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 1.75rem;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 240px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  position: relative;
+  overflow: hidden;
+}
+
+.kp-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, var(--kp-accent, var(--secondary)) 0%, transparent 40%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.kp-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 16px 32px rgba(0, 54, 102, 0.08);
+  border-color: var(--secondary);
+}
+
+.kp-card:hover::after {
+  opacity: 0.08;
+}
+
+@media (max-width: 768px) {
+  .kp-card {
+    flex: 0 0 calc(85% - 1rem);
+    min-width: 260px;
+    scroll-snap-align: center;
+    padding: 1.25rem;
+    gap: 0.75rem;
+    min-height: 200px;
+  }
+}
+
+/* ── Card top row: icon + name + badge ──────────────── */
+.kp-card-top {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.kp-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.4s ease;
+}
+
+.kp-card:hover .kp-card-icon {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+.kp-card-name-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.kp-card-name {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--primary);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+@media (max-width: 480px) {
+  .kp-card-name { font-size: 1rem; }
+  .kp-card-icon { width: 38px; height: 38px; border-radius: 10px; }
+}
+
+/* Inline badge (Popular / New) */
+.kp-inline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 100px;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+}
+
+/* ── Clinical role ───────────────────────────────────── */
+.kp-card-role {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Dosage ── */
+.kp-dosage-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+.kp-dosage-info-label {
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  font-size: 0.65rem;
+}
+
+.kp-dosage-info-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* ── Tag chips ───────────────────────────────────────── */
+.kp-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.kp-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 100px;
+  padding: 0.25rem 0.7rem;
+  border: 1px solid transparent;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+/* ── Card CTA row ───────────────── */
+.kp-card-cta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.kp-card-cta,
+.kp-card-cta-secondary {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 100px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.kp-card-cta {
+  color: #fff;
+  background: var(--secondary);
+  border: 1px solid var(--secondary);
+  box-shadow: 0 4px 12px rgba(0, 163, 224, 0.2);
+}
+
+.kp-card:hover .kp-card-cta {
+  background: var(--primary);
+  border-color: var(--primary);
+  transform: scale(1.02);
+}
+
+.kp-card-cta-secondary {
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+.kp-card-cta-secondary:hover {
+  background: color-mix(in srgb, var(--secondary) 8%, transparent);
+}
+
+/* ── Mobile: stack full-width, equal importance ─── */
+@media (max-width: 600px) {
+  .kp-card-cta-row {
+    flex-direction: column;
+    gap: 0.45rem;
+    padding-top: 0.6rem;
+  }
+
+  .kp-card-cta,
+  .kp-card-cta-secondary {
+    width: 100%;
+    padding: 0.45rem 1rem;
+    font-size: 0.78rem;
+    justify-content: center;
+  }
+}
+
+
+/* ── Load more button ────────────────────────────────── */
+.kp-load-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 2.5rem;
+}
+
+.kp-load-btn {
+  background: var(--surface);
+  border: 1.5px solid var(--primary);
+  border-radius: 999px;
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.6rem 1.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-sans);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.kp-load-btn:hover {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* ── View All Peptides link ── */
+.kp-view-all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  padding: 0.4rem 0;
+  text-decoration: none;
+  transition: opacity 0.15s ease, gap 0.15s ease;
+  white-space: nowrap;
+}
+.kp-view-all-link:hover {
+  opacity: 0.75;
+  gap: 0.55rem;
+}
+
+/* ── Explore full catalog CTA ── */
+.kp-explore-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  padding: 0.35rem 0;
+  text-decoration: none;
+  transition: color 0.15s ease, gap 0.15s ease;
+  white-space: nowrap;
+}
+.kp-explore-link:hover {
+  color: var(--primary);
+  gap: 0.55rem;
+}
+
+/* ── Pagination styles ── */
+.pagination-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 3.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.progress-indicator {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Pagination button group (Prev + Next side-by-side) ── */
+.kp-pagination-btns {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.kp-prev-btn {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.kp-prev-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Empty state ─────────────────────────────────────── */
+.kp-empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1.25rem;
+  text-align: center;
+  background: var(--surface);
+  border: 2px dashed var(--border-light);
+  border-radius: var(--radius-lg);
+  margin-top: 1rem;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.kp-empty-icon {
+  color: var(--border);
+  margin-bottom: 1.5rem;
+  opacity: 0.5;
+}
+
+.kp-empty-text {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0 0 1.5rem;
+}
+
+.kp-reset-btn {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1.8rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.kp-reset-btn:hover {
+  background: var(--secondary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}

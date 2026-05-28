@@ -1,7 +1,9 @@
+ 
 import { useEffect } from 'react';
 
 const BASE_TITLE = 'Med-Peptides';
-const BASE_URL = 'https://med-peptides-app-27a3a.web.app';
+const BASE_URL = 'https://Med-Peptides.com';
+const DEFAULT_IMAGE = 'https://Med-Peptides.com/og-premium.png';
 
 /**
  * usePageMeta — Updates <title>, <meta description>, and <link canonical>
@@ -13,9 +15,9 @@ const BASE_URL = 'https://med-peptides-app-27a3a.web.app';
  * @param {string} [options.path]      - URL path for canonical (e.g. '/products')
  * @param {string} [options.image]     - Absolute OG image URL override
  */
-export function usePageMeta({ title, description, path = '', image } = {}) {
+export function usePageMeta({ title, description, path = '', image, structuredData } = {}) {
   useEffect(() => {
-    const fullTitle = title ? `${title} | ${BASE_TITLE}` : `${BASE_TITLE} | Premium Research Compounds & Analytical Materials`;
+    const fullTitle = title ? `${title} | ${BASE_TITLE}` : `${BASE_TITLE} | Premium Peptides, Supplements & Protocols`;
     const canonical = `${BASE_URL}${path}`;
 
     // --- title ---
@@ -34,28 +36,62 @@ export function usePageMeta({ title, description, path = '', image } = {}) {
     }
     canonicalEl.setAttribute('href', canonical);
 
-    // --- OG tags ---
+    // --- OG tags (upsert — create if not already in DOM) ---
     const setOg = (property, value) => {
-      const el = document.querySelector(`meta[property="${property}"]`);
-      if (el && value) el.setAttribute('content', value);
+      if (!value) return;
+      let el = document.querySelector(`meta[property="${property}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute('property', property);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', value);
     };
     setOg('og:title', fullTitle);
     setOg('og:description', description);
     setOg('og:url', canonical);
-    if (image) setOg('og:image', image);
+    setOg('og:image', image || DEFAULT_IMAGE);
+    setOg('og:type', 'website');
+    setOg('og:site_name', 'Med-Peptides');
 
-    // --- Twitter ---
+    // --- Twitter (upsert — create if not already in DOM) ---
     const setTw = (name, value) => {
-      const el = document.querySelector(`meta[property="${name}"]`);
-      if (el && value) el.setAttribute('content', value);
+      if (!value) return;
+      let el = document.querySelector(`meta[name="${name}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute('name', name);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', value);
     };
+    setTw('twitter:card', 'summary_large_image');
     setTw('twitter:title', fullTitle);
     setTw('twitter:description', description);
+    setTw('twitter:image', image || DEFAULT_IMAGE);
     setTw('twitter:url', canonical);
+
+    // --- JSON-LD (Structured Data) ---
+    let ldJsonEl = document.querySelector('script[id="dynamic-ld-json"]');
+    
+    if (structuredData) {
+      if (!ldJsonEl) {
+        ldJsonEl = document.createElement('script');
+        ldJsonEl.setAttribute('type', 'application/ld+json');
+        ldJsonEl.setAttribute('id', 'dynamic-ld-json');
+        document.head.appendChild(ldJsonEl);
+      }
+      ldJsonEl.textContent = JSON.stringify(structuredData);
+    } else if (ldJsonEl) {
+      // Remove it if no structured data is provided for this page
+      ldJsonEl.remove();
+    }
 
     // Cleanup: restore defaults on unmount
     return () => {
-      document.title = `${BASE_TITLE} | Premium Research Compounds & Analytical Materials`;
+      document.title = `${BASE_TITLE} | Premium Peptides, Supplements & Protocols`;
+      const dynamicLd = document.querySelector('script[id="dynamic-ld-json"]');
+      if (dynamicLd) dynamicLd.remove();
     };
-  }, [title, description, path, image]);
+  }, [title, description, path, image, JSON.stringify(structuredData)]);
 }

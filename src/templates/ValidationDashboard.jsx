@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Activity, ShieldCheck, AlertTriangle, CheckCircle2, XCircle, RefreshCw, ChevronRight, FileText, BarChart3, Search, Clock } from 'lucide-react';
@@ -85,8 +86,8 @@ export default function ValidationDashboard({ products }) {
         {results && !isRunning && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
             <StatCard label="Total Tests" value={results.totalTests} icon={<FileText size={20} />} />
-            <StatCard label="Passed" value={results.passed} icon={<CheckCircle2 size={20} color="#10b981" />} />
-            <StatCard label="Failed" value={results.failed} icon={<XCircle size={20} color="#ef4444" />} color={results.failed > 0 ? '#ef4444' : undefined} />
+            <StatCard label="Passed" value={results.passed} icon={<CheckCircle2 size={20} color="var(--color-success)" />} />
+            <StatCard label="Failed" value={results.failed} icon={<XCircle size={20} color="var(--color-danger)" />} color={results.failed > 0 ? 'var(--color-danger)' : undefined} />
             <StatCard label="Avg. Score" value={`${results.averageSystemScore} / 5`} icon={<BarChart3 size={20} color="var(--primary)" />} />
           </div>
         )}
@@ -145,7 +146,7 @@ export default function ValidationDashboard({ products }) {
                             <div style={{ 
                               height: '100%', 
                               width: `${(res.averageScore / 5) * 100}%`,
-                              backgroundColor: res.averageScore >= 4 ? '#10b981' : res.averageScore >= 3 ? '#f59e0b' : '#ef4444'
+                              backgroundColor: res.averageScore >= 4 ? 'var(--color-success)' : res.averageScore >= 3 ? '#f59e0b' : 'var(--color-danger)'
                             }}></div>
                           </div>
                           <span style={{ fontWeight: 600 }}>{res.averageScore}</span>
@@ -158,7 +159,7 @@ export default function ValidationDashboard({ products }) {
                               width: '12px', 
                               height: '12px', 
                               borderRadius: '2px', 
-                              backgroundColor: val >= 4 ? '#10b981' : val >= 3 ? '#f59e0b' : '#ef4444',
+                              backgroundColor: val >= 4 ? 'var(--color-success)' : val >= 3 ? '#f59e0b' : 'var(--color-danger)',
                               opacity: 0.8
                             }}></div>
                           ))}
@@ -166,11 +167,11 @@ export default function ValidationDashboard({ products }) {
                       </td>
                       <td style={{ padding: '1.2rem 1.5rem' }}>
                         {res.isFailed ? (
-                          <span style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.9rem', fontWeight: 600 }}>
+                          <span style={{ color: 'var(--color-danger)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.9rem', fontWeight: 600 }}>
                             <AlertTriangle size={16} /> FAILED
                           </span>
                         ) : (
-                          <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.9rem', fontWeight: 600 }}>
+                          <span style={{ color: 'var(--color-success)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.9rem', fontWeight: 600 }}>
                             <CheckCircle2 size={16} /> PASSED
                           </span>
                         )}
@@ -205,7 +206,7 @@ export default function ValidationDashboard({ products }) {
             <ShieldCheck size={48} style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }} />
             <h3>Clinician Sandbox Ready</h3>
             <p style={{ color: 'var(--text-muted)', maxWidth: '500px', margin: '1rem auto' }}>
-              The validation engine will automatically run 50 patient scenarios through the protocol builder to detect clinical contradictions, goal misalignment, and dosage errors.
+              The validation engine will automatically run 50 patient scenarios through the ClinicalAI engine to detect clinical contradictions, goal misalignment, and dosage errors.
             </p>
             <button onClick={handleRunTests} className="btn btn-secondary" style={{ marginTop: '1rem' }}>
               Initialize Engine

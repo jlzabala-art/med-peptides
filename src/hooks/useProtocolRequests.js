@@ -1,6 +1,7 @@
+ 
 import { useState, useEffect } from 'react';
 
-const STORAGE_KEY = 'regenpept_protocol_requests';
+const STORAGE_KEY = 'mp_protocol_requests';
 
 /**
  * Manages a separate list of protocol bundle requests, independent of the

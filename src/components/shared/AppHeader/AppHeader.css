@@ -1,0 +1,231 @@
+/* AppHeader.css */
+
+.app-header {
+  height: 64px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+}
+
+.app-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.app-header-hamburger {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  padding: 0.4rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.app-header-hamburger:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.app-header-title-group {
+  display: flex;
+  align-items: center;
+}
+
+.app-header-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-header-subtitle {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #64748b;
+  border-left: 1px solid #e2e8f0;
+  padding-left: 0.5rem;
+}
+
+.app-header-center {
+  flex: 1;
+  max-width: 600px;
+  margin: 0 2rem;
+  position: relative;
+}
+
+.app-header-search {
+  width: 100%;
+  padding: 0.6rem 1rem 0.6rem 2.5rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  font-size: 0.9rem;
+  color: #1e293b;
+  transition: all 0.2s ease;
+}
+
+.app-header-search:focus {
+  outline: none;
+  border-color: var(--primary, #0071bd);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 113, 189, 0.1);
+}
+
+.app-header-search-icon {
+  position: absolute;
+  left: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.app-header-shortcut {
+  position: absolute;
+  right: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  pointer-events: none;
+}
+
+.app-header-shortcut kbd {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 0.1rem 0.3rem;
+  font-size: 0.65rem;
+  font-family: monospace;
+  color: #64748b;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+}
+
+.app-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.app-header-action {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.app-header-action:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.app-header-badge {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.3rem;
+  width: 8px;
+  height: 8px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+}
+
+.cart-badge {
+  width: 16px;
+  height: 16px;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.app-header-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.app-header-profile:hover {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.app-header-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--primary, #0071bd);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.app-header-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header-user-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.app-header-user-role {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.2;
+  text-transform: capitalize;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .app-header-center {
+    display: none; /* Hide search on mobile for now, or replace with icon */
+  }
+  
+  .app-header-user-info {
+    display: none;
+  }
+  
+  .app-header {
+    padding: 0 1rem;
+  }
+}

@@ -1,0 +1,43 @@
+[
+  {
+    "pmid": "35625682",
+    "title": "PNC-27, a Chimeric p53-Penetratin Peptide Binds to HDM-2 in a p53 Peptide-like Structure, Induces Selective Membrane-Pore Formation and Leads to Cancer Cell Lysis.",
+    "authors": [
+      "Sarafraz-Yazdi E",
+      "Mumin S",
+      "Cheung D",
+      "Fridman D",
+      "Lin B",
+      "Wong L",
+      "Rosal R",
+      "Rudolph R",
+      "Frenkel M",
+      "Thadi A",
+      "Morano WF",
+      "Bowne WB",
+      "Pincus MR",
+      "Michl J"
+    ],
+    "journal": "Biomedicines",
+    "pubdate": "2022 Apr 20",
+    "doi": "10.3390/biomedicines10050945",
+    "abstract": "PNC-27, a 32-residue peptide that contains an HDM-2 binding domain and a cell-penetrating peptide (CPP) leader sequence kills cancer, but not normal, cells by binding to HDM-2 associated with the plasma membrane and induces the formation of pores causing tumor cell lysis and necrosis. Conformational energy calculations on the structure of PNC-27 bound to HDM-2 suggest that 1:1 complexes form between PNC-27 and HDM-2 with the leader sequence pointing away from the complex. Immuno-scanning electron microscopy was carried out with cancer cells treated with PNC-27 and decorated with an anti-PNC-27 antibody coupled to 6 nm gold particles and an anti-HDM-2 antibody linked to 15 nm gold particles. We found multiple 6 nm- and 15 nm-labeled gold particles in approximately 1:1 ratios in layered ring-shaped structures in the pores near the cell surface suggesting that these complexes are important to the pore structure. No pores formed in the control, PNC-27-treated untransformed fibroblasts. Based on the theoretical and immuno-EM studies, we propose that the pores are lined by PNC-27 bound to HDM-2 at the membrane surface with the PNC-27 leader sequence lining the pores or by PNC-27 bound to HDM-2."
+  },
+  {
+    "pmid": "38802154",
+    "title": "Anti-Cancer Peptide PNC-27 Kills Cancer Cells by Unique Interactions with Plasma Membrane-Bound hdm-2 and with Mitochondrial Membranes Causing Mitochondrial Disruption.",
+    "authors": [
+      "Krzesaj P",
+      "Adler V",
+      "Feinman RD",
+      "Miller A",
+      "Silberstein M",
+      "Yazdi E",
+      "Pincus MR"
+    ],
+    "journal": "Annals of clinical and laboratory science",
+    "pubdate": "2024 Mar",
+    "doi": null,
+    "abstract": "OBJECTIVE: We have previously shown that the anti-cancer peptide PNC-27 kills cancer cells by co-localizing with membrane-expressed HDM-2, resulting in transmembrane pore formation causing extrusion of intracellular contents. We have also observed cancer cell mitochondrial disruption in PNC-27-treated cancer cells. Our objectives are to determine: 1. if PNC-27 binds to the p53 binding site of HDM-2 (residues 1-109) in the cancer cell membrane and 2. if this peptide causes selective disruption of cancer cell mitochondria.\nMETHODS: For aim 1, we incubated MIA-PaCa-2 human pancreatic carcinoma cells with PNC-27 in the presence of a monoclonal antibody against the amino terminal p53 binding site of HDM-2 to determine if it, but not negative control immune serum, blocks PNC-27-induced tumor cell necrosis. For the second aim, we incubated these cells with PNC-27 in the presence of two specific dyes that highlight normal organelle function: mitotracker for mitochondria and lysotracker for lysosomes. We also performed immuno-electron microscopy (IEM) with gold-labeled anti-PNC-27 antibody on the mitochondria of these cells treated with PNC-27.\nRESULTS: Monoclonal antibody to the p53 binding site of HDM-2 blocks PNC-27-induced cancer cell necrosis, whereas negative control immune serum does not. The mitochondria of PNC-27-treated cancer cells fail to retain mitotracker dye while their lysosomes retain lysotracker dye. IEM of the mitochondria cancer cells reveals gold particles present on the mitochondrial membranes.\nCONCLUSIONS: PNC-27 binds to the p53 binding site of HDM-2 (residues 1-109) inducing transmembrane pore formation and cancer cell necrosis. Furthermore, this peptide enters cancer cells and binds to the membranes of mitochondria, resulting in their disruption."
+  }
+]

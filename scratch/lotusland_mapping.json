@@ -1,0 +1,3425 @@
+{
+  "5-AMINO 1 MQ": {
+    "id": "5-AMINO_1_MQ-50mg-tablet",
+    "category": "Weight Management & Metabolic",
+    "productType": "peptide",
+    "goals": [
+      "longevity_anti_aging",
+      "metabolic_weight"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "longevity_anti_aging",
+      "metabolic_weight"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure"
+    ],
+    "mechanisms": [
+      "Selective competitive inhibition of nicotinamide N-methyltransferase (NNMT) enzyme activity",
+      "Restoration of intracellular NAD+ pools via methyl cycle redirection",
+      "Indirect SIRT1 and SIRT3 deacetylase activation through NAD+ substrate availability",
+      "Downregulation of adipogenesis transcription factors in white adipose tissue"
+    ],
+    "semanticKeywords": [
+      "energy",
+      "metabolism",
+      "fat loss",
+      "cellular",
+      "weight",
+      "performance"
+    ],
+    "safetyNote": "For in vitro or animal research only. Not approved for human use. Handle with appropriate PPE. Potential mutagenic or teratogenic effects not fully evaluated. Dispose per institutional biohazard protocols.",
+    "synonyms": [
+      "5-amino-1-methylquinolinium",
+      "5-amino 1mq",
+      "5A1MQ"
+    ],
+    "desc": "A selective small-molecule inhibitor of nicotinamide N-methyltransferase (NNMT), an enzyme overexpressed in adipose tissue that diverts S-adenosylmethionine (SAM) from methyl cycle metabolism. NNMT inhibition elevates intracellular NAD+ and activates SIRT1/SIRT3 epigenetic regulation."
+  },
+  "AOD-9604": {
+    "id": "AOD-9604-5mg-vial",
+    "category": "Weight Management & Metabolic",
+    "productType": "peptide",
+    "goals": [
+      "metabolic_weight"
+    ],
+    "secondaryFactors": [
+      "metabolic_weight",
+      "recovery_repair"
+    ],
+    "secondaryDetails": [
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure",
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure"
+    ],
+    "mechanisms": [
+      "Selective beta-3 adrenergic receptor stimulation in adipocytes",
+      "Lipolytic activity without IGF-1 axis activation",
+      "Prevention of diet-induced insulin resistance",
+      "Stimulation of fat oxidation via fatty acid mobilization"
+    ],
+    "semanticKeywords": [
+      "fat burning",
+      "belly fat",
+      "lipolysis",
+      "weight loss",
+      "hgh",
+      "metabolic"
+    ],
+    "safetyNote": "Research peptide derived from HGH C-terminus. Does not activate IGF-1 axis. Generally well tolerated; injection site reactions possible. Not approved by FDA for therapeutic use.",
+    "synonyms": [
+      "aod9604",
+      "hgh fragment 177-191"
+    ],
+    "desc": "A modified fragment of the C-terminal region of Human Growth Hormone noted for lipolytic stimulation."
+  },
+  "ARA-290": {
+    "id": "ARA-290-16mg-vial",
+    "category": "Healing & Recovery",
+    "productType": "peptide",
+    "goals": [
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "cognitive_mood",
+      "immune_support",
+      "recovery_repair"
+    ],
+    "secondaryDetails": [
+      "bdnf_ngf_upregulation",
+      "neuroprotection",
+      "synaptic_plasticity",
+      "working_memory_enhancement",
+      "anxiety_reduction",
+      "stress_resilience",
+      "mood_stabilization",
+      "neurogenesis_support",
+      "executive_function",
+      "cerebral_blood_flow",
+      "t_cell_maturation",
+      "thymic_peptide_activity",
+      "innate_immunity_enhancement",
+      "chronic_inflammation_reduction",
+      "antimicrobial_signaling",
+      "immune_cell_proliferation",
+      "cytokine_regulation",
+      "autoimmune_modulation",
+      "post_viral_recovery",
+      "gut_associated_lymphoid_tissue",
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure"
+    ],
+    "mechanisms": [
+      "Non-hematopoietic erythropoietin receptor (EPOR/βcR) agonism",
+      "Peripheral neuroprotection via JAK2/STAT3 signaling",
+      "Anti-inflammatory cytokine modulation (TNF-α, IL-6 suppression)",
+      "Promotion of small fiber nerve regeneration"
+    ],
+    "semanticKeywords": [
+      "nerve pain",
+      "neuropathy",
+      "spine",
+      "burning pain",
+      "repair",
+      "neural"
+    ],
+    "safetyNote": "Investigational compound for neuropathic pain and inflammation. Well tolerated in Phase II trials. Avoid in active hematological malignancy (erythropoietin receptor activity).",
+    "synonyms": [
+      "cibinetide",
+      "ara290"
+    ],
+    "desc": "A non-erythropoietic peptide engineered to interact with the innate repair receptor, reducing inflammation and neurodegeneration."
+  },
+  "BPC-157": {
+    "id": "BPC-157-5mg-vial",
+    "category": "Healing & Recovery",
+    "productType": "peptide",
+    "goals": [
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "recovery_repair"
+    ],
+    "secondaryDetails": [
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure"
+    ],
+    "mechanisms": [
+      "Upregulation of growth hormone receptor expression in tendon fibroblasts",
+      "Nitric oxide (NO) pathway modulation promoting angiogenesis",
+      "FAK-paxillin pathway activation for wound healing",
+      "Cytoprotective gastric mucosa stabilization via PGE2 synthesis"
+    ],
+    "semanticKeywords": [
+      "injury",
+      "wound healing",
+      "gut",
+      "stomach",
+      "joints",
+      "tendons",
+      "ligaments",
+      "soft tissue"
+    ],
+    "safetyNote": "Research peptide with extensive animal data. No approved human clinical trials completed. Use with caution in patients with history of malignancy due to angiogenic properties.",
+    "synonyms": [
+      "body protection compound 157",
+      "pentadecapeptide",
+      "bpc157"
+    ],
+    "desc": "A pentadecapeptide with potent cytoprotective, angiogenic, and wound-healing properties under experimental conditions."
+  },
+  "BPC-157 + TB-500": {
+    "id": "BPC-157_TB-500-5-5mg-vial",
+    "category": "Healing & Recovery",
+    "productType": "peptide",
+    "goals": [
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "recovery_repair"
+    ],
+    "secondaryDetails": [
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure"
+    ],
+    "mechanisms": [
+      "Upregulation of growth hormone receptor expression in tendon fibroblasts",
+      "Nitric oxide (NO) pathway modulation promoting angiogenesis",
+      "FAK-paxillin pathway activation for wound healing",
+      "Cytoprotective gastric mucosa stabilization via PGE2 synthesis"
+    ],
+    "semanticKeywords": [
+      "injury",
+      "wound healing",
+      "gut",
+      "stomach",
+      "joints",
+      "tendons",
+      "ligaments",
+      "soft tissue"
+    ],
+    "safetyNote": "Research peptide with extensive animal data. No approved human clinical trials completed. Use with caution in patients with history of malignancy due to angiogenic properties.",
+    "synonyms": [
+      "body protection compound 157",
+      "pentadecapeptide",
+      "bpc157"
+    ],
+    "desc": "A pentadecapeptide with potent cytoprotective, angiogenic, and wound-healing properties under experimental conditions."
+  },
+  "BACTERIOSTATIC WATER": {
+    "id": "Bacteriostatic_Water-30ml-vial",
+    "category": "Research Supplies",
+    "productType": "professional_material",
+    "goals": [
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "longevity_anti_aging"
+    ],
+    "secondaryDetails": [
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression"
+    ],
+    "mechanisms": [
+      "Bacteriostatic preservation via benzyl alcohol (0.9% w/v)",
+      "Isotonic reconstitution medium for lyophilized peptides"
+    ],
+    "semanticKeywords": [
+      "water",
+      "mixing",
+      "reconstitution",
+      "solvent",
+      "bac water",
+      "supplies"
+    ],
+    "safetyNote": "Contains 0.9% benzyl alcohol. NOT for use in neonates or premature infants (gasping syndrome). Do not use beyond 28 days after first puncture. For multi-dose vial use only with compatible peptides.",
+    "synonyms": [
+      "bac water",
+      "bacteriostatic water"
+    ],
+    "desc": "Sterile water containing 0.9% benzyl alcohol. Essential for correctly reconstituting lyophilized peptides for long-term stability."
+  },
+  "CJC-1295 WITH DAC": {
+    "id": "CJC-1295_with_DAC-2mg-vial",
+    "category": "Muscle Growth & Performance",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "metabolic_weight",
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "longevity_anti_aging",
+      "metabolic_weight",
+      "recovery_repair",
+      "sleep_circadian"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure",
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure",
+      "sleep_onset_improvement",
+      "slow_wave_sleep_enhancement",
+      "circadian_rhythm_normalization",
+      "nocturnal_cortisol_reduction",
+      "rem_cycle_support",
+      "hpa_axis_balance",
+      "pineal_gland_support",
+      "melatonin_pathway_modulation",
+      "daytime_fatigue_reduction",
+      "restorative_sleep_architecture"
+    ],
+    "mechanisms": [
+      "GHRH receptor agonism with drug affinity complex (DAC) albumin binding",
+      "Sustained pulsatile GH secretion from anterior pituitary somatotrophs",
+      "IGF-1 axis upregulation for anabolic and lipolytic effects"
+    ],
+    "semanticKeywords": [
+      "muscle",
+      "growth hormone",
+      "gh",
+      "igf-1",
+      "fat loss",
+      "recovery",
+      "strength",
+      "dac",
+      "long acting"
+    ],
+    "safetyNote": "Long-acting GHRH analog. Monitor IGF-1 levels to avoid supraphysiologic GH elevation. Potential for water retention and carpal tunnel at high doses. Weekly dosing protocol; avoid stacking with other GHRH analogs.",
+    "synonyms": [
+      "cjc1295 with dac",
+      "cjc-1295-dac"
+    ],
+    "desc": "A long-acting GHRH analog paired with a Drug Affinity Complex to maximize half-life and stimulate continuous GH release."
+  },
+  "CJC-1295 WITHOUT DAC (MODIFIED GRF 1-29)": {
+    "id": "CJC-1295_without_DAC_(Modified_GRF_1-29)-2mg-vial",
+    "category": "Muscle Growth & Performance",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "metabolic_weight",
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "longevity_anti_aging",
+      "metabolic_weight",
+      "recovery_repair",
+      "sleep_circadian"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure",
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure",
+      "sleep_onset_improvement",
+      "slow_wave_sleep_enhancement",
+      "circadian_rhythm_normalization",
+      "nocturnal_cortisol_reduction",
+      "rem_cycle_support",
+      "hpa_axis_balance",
+      "pineal_gland_support",
+      "melatonin_pathway_modulation",
+      "daytime_fatigue_reduction",
+      "restorative_sleep_architecture"
+    ],
+    "mechanisms": [
+      "GHRH receptor agonism without DAC modification",
+      "Short-burst GH secretion mimicking physiological pulses",
+      "IGF-1 axis stimulation for tissue repair and fat metabolism"
+    ],
+    "semanticKeywords": [
+      "muscle",
+      "growth hormone",
+      "gh",
+      "igf-1",
+      "fat loss",
+      "recovery",
+      "strength"
+    ],
+    "safetyNote": "Short-acting GHRH analog. Requires pulsatile dosing (2–3× daily). Monitor IGF-1. Lower risk of supraphysiologic GH accumulation vs. DAC version. Injection site reactions common.",
+    "synonyms": [
+      "mod grf 1-29",
+      "cjc1295"
+    ],
+    "desc": "A synthetic GHRH analog that increases pulsatile growth hormone and IGF-1 secretions without altering cortisol levels."
+  },
+  "CJC-1295 WITHOUT DAC + IPAMORELIN": {
+    "id": "CJC-1295_without_DAC_Ipamorelin-5-5mg-vial",
+    "category": "Muscle Growth & Performance",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "metabolic_weight",
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "longevity_anti_aging",
+      "metabolic_weight",
+      "recovery_repair",
+      "sleep_circadian"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure",
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure",
+      "sleep_onset_improvement",
+      "slow_wave_sleep_enhancement",
+      "circadian_rhythm_normalization",
+      "nocturnal_cortisol_reduction",
+      "rem_cycle_support",
+      "hpa_axis_balance",
+      "pineal_gland_support",
+      "melatonin_pathway_modulation",
+      "daytime_fatigue_reduction",
+      "restorative_sleep_architecture"
+    ],
+    "mechanisms": [
+      "GHRH receptor agonism without DAC modification",
+      "Short-burst GH secretion mimicking physiological pulses",
+      "IGF-1 axis stimulation for tissue repair and fat metabolism"
+    ],
+    "semanticKeywords": [
+      "muscle",
+      "growth hormone",
+      "gh",
+      "igf-1",
+      "fat loss",
+      "recovery",
+      "strength"
+    ],
+    "safetyNote": "Short-acting GHRH analog. Requires pulsatile dosing (2–3× daily). Monitor IGF-1. Lower risk of supraphysiologic GH accumulation vs. DAC version. Injection site reactions common.",
+    "synonyms": [
+      "mod grf 1-29",
+      "cjc1295"
+    ],
+    "desc": "A synthetic GHRH analog that increases pulsatile growth hormone and IGF-1 secretions without altering cortisol levels."
+  },
+  "CAGRILINTIDE": {
+    "id": "Cagrilintide-5mg-vial",
+    "category": "Weight Management & Metabolic",
+    "productType": "peptide",
+    "goals": [
+      "metabolic_weight"
+    ],
+    "secondaryFactors": [
+      "metabolic_weight"
+    ],
+    "secondaryDetails": [
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure"
+    ],
+    "mechanisms": [
+      "Long-acting amylin receptor agonism (AMY1, AMY2, AMY3)",
+      "Central satiety signaling via area postrema and NTS",
+      "Synergistic GLP-1 pathway potentiation for weight reduction",
+      "Delayed gastric emptying and reduced caloric intake"
+    ],
+    "semanticKeywords": [
+      "appetite",
+      "hunger",
+      "fullness",
+      "satiety",
+      "diet",
+      "weight control"
+    ],
+    "safetyNote": "Long-acting amylin analog under clinical investigation (CagriSema trials). Risk of nausea and vomiting especially on dose escalation. Thyroid C-cell monitoring may be warranted. Not approved for commercial use.",
+    "synonyms": [
+      "cagrilintide"
+    ],
+    "desc": "A long-acting amylin analog investigated for its synergistic action in energy balance and satiation mechanisms."
+  },
+  "CARDIOGEN": {
+    "id": "Cardiogen-10mg-vial",
+    "category": "Other Research Peptides",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "longevity_anti_aging",
+      "metabolic_weight"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "longevity_anti_aging",
+      "metabolic_weight"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure"
+    ],
+    "mechanisms": [
+      "Cardioprotective gene expression regulation via epigenetic chromatin remodeling",
+      "Cardiomyocyte differentiation and repair signaling",
+      "Anti-apoptotic Bcl-2 pathway upregulation in cardiac tissue",
+      "Reduction of oxidative stress markers in myocardial cells"
+    ],
+    "semanticKeywords": [
+      "heart",
+      "cardio",
+      "circulation",
+      "cardiovascular",
+      "repair",
+      "bioregulator"
+    ],
+    "safetyNote": "Peptide bioregulator (Ala-Glu-Asp-Arg) targeting cardiac tissue. Limited peer-reviewed human data. Use under physician supervision. Generally well tolerated in available studies.",
+    "synonyms": [
+      "cardiogen"
+    ],
+    "desc": "A tetrapeptide clinically proven to stimulate cellular proliferation and reduce apoptosis within cardiovascular tissues."
+  },
+  "CARTALAX": {
+    "id": "Cartalax-10mg-vial",
+    "category": "Other Research Peptides",
+    "productType": "peptide",
+    "goals": [
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "recovery_repair"
+    ],
+    "secondaryDetails": [
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure"
+    ],
+    "mechanisms": [
+      "Chondrocyte proliferation and cartilage matrix synthesis promotion",
+      "TGF-β mediated collagen II and aggrecan expression upregulation",
+      "Anti-inflammatory modulation in synovial tissue",
+      "Epigenetic regulation of cartilage-specific gene expression"
+    ],
+    "semanticKeywords": [
+      "joints",
+      "cartilage",
+      "knees",
+      "back",
+      "bones",
+      "bioregulator"
+    ],
+    "safetyNote": "Peptide bioregulator (Ala-Glu-Asp-Gly) targeting cartilage. Limited human clinical data. Well tolerated in available studies. Use under physician supervision.",
+    "synonyms": [
+      "cartalax"
+    ],
+    "desc": "A synthetic dipeptide targeting the normalization of metabolic processes in bone and cartilaginous tissues."
+  },
+  "DSIP": {
+    "id": "DSIP-2mg-vial",
+    "category": "Cognitive & Neuro-Protection",
+    "productType": "peptide",
+    "goals": [
+      "cognitive_mood",
+      "hormonal_optimization",
+      "sleep_circadian"
+    ],
+    "secondaryFactors": [
+      "cognitive_mood",
+      "hormonal_optimization",
+      "sleep_circadian"
+    ],
+    "secondaryDetails": [
+      "bdnf_ngf_upregulation",
+      "neuroprotection",
+      "synaptic_plasticity",
+      "working_memory_enhancement",
+      "anxiety_reduction",
+      "stress_resilience",
+      "mood_stabilization",
+      "neurogenesis_support",
+      "executive_function",
+      "cerebral_blood_flow",
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "sleep_onset_improvement",
+      "slow_wave_sleep_enhancement",
+      "circadian_rhythm_normalization",
+      "nocturnal_cortisol_reduction",
+      "rem_cycle_support",
+      "hpa_axis_balance",
+      "pineal_gland_support",
+      "melatonin_pathway_modulation",
+      "daytime_fatigue_reduction",
+      "restorative_sleep_architecture"
+    ],
+    "mechanisms": [
+      "Hypothalamic sleep-wake cycle modulation via delta wave induction",
+      "Cortisol and ACTH release normalization under stress",
+      "Analgesic activity via endogenous opioid system modulation",
+      "Antioxidant and neuroprotective gene expression upregulation"
+    ],
+    "semanticKeywords": [
+      "sleep",
+      "insomnia",
+      "rest",
+      "deep sleep",
+      "delta waves",
+      "circadian",
+      "stress"
+    ],
+    "safetyNote": "Delta Sleep-Inducing Peptide. May enhance sedation; avoid concurrent CNS depressants. Research compound with limited human PK data. Avoid operating heavy machinery after administration.",
+    "synonyms": [
+      "delta sleep inducing peptide",
+      "dsip"
+    ],
+    "desc": "Delta Sleep-Inducing Peptide, a neuropeptide affecting central neuroendocrine regulations and circadian rhythms."
+  },
+  "EPITHALON": {
+    "id": "Epithalon-10mg-vial",
+    "category": "Anti-Aging & Longevity",
+    "productType": "peptide",
+    "goals": [
+      "longevity_anti_aging"
+    ],
+    "secondaryFactors": [
+      "immune_support",
+      "longevity_anti_aging",
+      "sleep_circadian"
+    ],
+    "secondaryDetails": [
+      "t_cell_maturation",
+      "thymic_peptide_activity",
+      "innate_immunity_enhancement",
+      "chronic_inflammation_reduction",
+      "antimicrobial_signaling",
+      "immune_cell_proliferation",
+      "cytokine_regulation",
+      "autoimmune_modulation",
+      "post_viral_recovery",
+      "gut_associated_lymphoid_tissue",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "sleep_onset_improvement",
+      "slow_wave_sleep_enhancement",
+      "circadian_rhythm_normalization",
+      "nocturnal_cortisol_reduction",
+      "rem_cycle_support",
+      "hpa_axis_balance",
+      "pineal_gland_support",
+      "melatonin_pathway_modulation",
+      "daytime_fatigue_reduction",
+      "restorative_sleep_architecture"
+    ],
+    "mechanisms": [
+      "Telomerase (hTERT) gene expression upregulation in somatic cells",
+      "Pineal gland melatonin secretion restoration",
+      "Anti-oxidant gene expression enhancement (SOD, catalase)",
+      "Cell cycle regulation via p53 pathway modulation"
+    ],
+    "semanticKeywords": [
+      "aging",
+      "rejuvenation",
+      "telomeres",
+      "cellular lifespan",
+      "pineal gland",
+      "life extension"
+    ],
+    "safetyNote": "Telomerase-activating tetrapeptide. Well tolerated in available studies. Theoretical concern with telomerase activation in oncological contexts. Long-term safety data limited.",
+    "synonyms": [
+      "epitalon",
+      "epithalamin"
+    ],
+    "desc": "A synthetic tetrapeptide proven to upregulate telomerase activity and extend cellular lifespan in in-vitro models."
+  },
+  "FST-344 (FOLLISTATIN)": {
+    "id": "FST-344_(Follistatin)-1mg-vial",
+    "category": "Muscle Growth & Performance",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "metabolic_weight",
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength"
+    ],
+    "mechanisms": [
+      "High-affinity activin and myostatin (GDF-8) binding and neutralization",
+      "Skeletal muscle hypertrophy via Smad2/3 signaling suppression",
+      "Follicle-stimulating hormone (FSH) bioavailability regulation"
+    ],
+    "semanticKeywords": [
+      "muscle growth",
+      "myostatin",
+      "huge",
+      "mass",
+      "follistatin",
+      "fst344"
+    ],
+    "safetyNote": "Myostatin inhibitor. Significant muscle hypertrophy potential. Long-term cardiovascular and oncological effects unknown. Strict medical supervision required. Not approved for therapeutic use.",
+    "synonyms": [
+      "follistatin 344",
+      "fst-344"
+    ],
+    "desc": "A potent autocrine glycoprotein that acts as an antagonist to myostatin, substantially accelerating muscle hypertrophy."
+  },
+  "GHK-CU (COPPER PEPTIDE)": {
+    "id": "GHK-Cu_(Copper_Peptide)-5mg-vial",
+    "category": "Anti-Aging & Longevity",
+    "productType": "peptide",
+    "goals": [
+      "longevity_anti_aging",
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "longevity_anti_aging",
+      "recovery_repair"
+    ],
+    "secondaryDetails": [
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure"
+    ],
+    "mechanisms": [
+      "Copper-mediated superoxide dismutase (SOD) and ceruloplasmin activation",
+      "TGF-β1 upregulation promoting collagen and elastin synthesis",
+      "Anti-inflammatory NFκB pathway downregulation",
+      "Stem cell chemoattraction and wound healing acceleration"
+    ],
+    "semanticKeywords": [
+      "pelo",
+      "piel",
+      "hair",
+      "skin",
+      "wrinkles",
+      "scarring",
+      "elasticity",
+      "scalp",
+      "alopecia",
+      "beauty"
+    ],
+    "safetyNote": "Topical and injectable copper peptide. Generally well tolerated. Avoid excessive systemic dosing due to copper accumulation risk. Topical formulations may cause transient erythema.",
+    "synonyms": [
+      "copper peptide",
+      "ghk",
+      "prezatide copper"
+    ],
+    "desc": "A naturally occurring copper complex involved in widespread remodeling, collagen stimulation, and anti-oxidant activity."
+  },
+  "GHRP-2": {
+    "id": "GHRP-2-5mg-vial",
+    "category": "Hormonal Support",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "metabolic_weight",
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "metabolic_weight",
+      "recovery_repair"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure",
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure"
+    ],
+    "mechanisms": [
+      "Ghrelin receptor (GHS-R1a) agonism in pituitary somatotrophs",
+      "Stimulation of endogenous GH pulse amplitude",
+      "Weak ghrelin-like appetite stimulation via hypothalamic NPY/AgRP neurons",
+      "Mild cortisol and prolactin co-secretion (GHS-R1a off-target)"
+    ],
+    "semanticKeywords": [
+      "gh",
+      "growth hormone",
+      "appetite",
+      "bulking",
+      "hunger",
+      "ghrp2"
+    ],
+    "safetyNote": "GH secretagogue. May transiently elevate cortisol and prolactin. Monitor blood glucose in diabetics. Avoid in active malignancy. Appetite stimulation is a common side effect.",
+    "synonyms": [
+      "pralmorelin",
+      "ghrp-2"
+    ],
+    "desc": "A hexapeptide acting as a strong growth hormone secretagogue and ghrelin receptor agonist."
+  },
+  "GLOW (BPC-157/TB-500/GHK-CU)": {
+    "id": "GLOW_(BPC-157-TB-500-GHK-Cu)-10-10-75mg-vial",
+    "category": "Healing & Recovery",
+    "productType": "peptide",
+    "goals": [
+      "longevity_anti_aging",
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "longevity_anti_aging",
+      "recovery_repair"
+    ],
+    "secondaryDetails": [
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure"
+    ],
+    "mechanisms": [
+      "Dermal collagen and elastin synthesis stimulation via TGF-β1",
+      "Copper-dependent SOD activation reducing oxidative skin damage",
+      "Epidermal stem cell chemoattraction for wound healing",
+      "NFκB anti-inflammatory signaling reduction in dermal fibroblasts"
+    ],
+    "semanticKeywords": [
+      "glow",
+      "beauty",
+      "skin",
+      "repair",
+      "complexion",
+      "shining",
+      "radiance"
+    ],
+    "safetyNote": "Combination regenerative peptide blend. Cumulative contraindications of component peptides apply. Angiogenic properties warrant caution in oncological history. Use under physician guidance.",
+    "synonyms": [
+      "glow blend",
+      "healing stack"
+    ],
+    "desc": "A proprietary experimental blend combining cytoprotective properties, angiogenic stimulation, and tissue remodeling mechanisms."
+  },
+  "GW-501516": {
+    "id": "GW-501516-10mg-vial",
+    "category": "Weight Management & Metabolic",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "metabolic_weight"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "metabolic_weight"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure"
+    ],
+    "mechanisms": [
+      "PPARδ (peroxisome proliferator-activated receptor delta) selective agonism",
+      "Fatty acid oxidation gene upregulation (CPT1, ABCA1) in skeletal muscle",
+      "Mitochondrial biogenesis enhancement increasing slow-twitch fiber endurance",
+      "HDL cholesterol elevation and triglyceride reduction via ABCA1 induction"
+    ],
+    "semanticKeywords": [
+      "cardarine",
+      "endurance",
+      "fat loss",
+      "metabolism",
+      "running",
+      "performance"
+    ],
+    "safetyNote": "PPAR-delta agonist (SARMs-adjacent). IMPORTANT: Preclinical studies showed rapid cancer progression across multiple species. Currently not recommended for human use by most regulatory bodies. Extreme caution required.",
+    "synonyms": [
+      "cardarine",
+      "gw501516"
+    ],
+    "desc": "A PPARδ receptor agonist evaluating alterations in fatty acid oxidation and exercise endurance mechanisms."
+  },
+  "HCG": {
+    "id": "HCG-5000iu-vial",
+    "category": "Hormonal Support",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength"
+    ],
+    "mechanisms": [
+      "LH receptor (LHCGR) agonism in Leydig cells stimulating testosterone synthesis",
+      "FSH receptor cross-reactivity at high doses",
+      "Corpus luteum maintenance via progesterone induction",
+      "Spermatogenesis support via intratesticular testosterone elevation"
+    ],
+    "semanticKeywords": [
+      "testosterone",
+      "fertility",
+      "pct",
+      "hormone health",
+      "hcg",
+      "libido"
+    ],
+    "safetyNote": "Gonadotropin hormone. Risk of ovarian hyperstimulation syndrome (OHSS) in women. May promote benign and malignant androgen-sensitive conditions. Monitor testosterone and estradiol levels.",
+    "synonyms": [
+      "human chorionic gonadotropin",
+      "hcg"
+    ],
+    "desc": "Human Chorionic Gonadotropin; extensively utilized to stimulate the Leydig cells in the synthesis of endogenous testosterone."
+  },
+  "HGH": {
+    "id": "HGH-10iu-vial",
+    "category": "Hormonal Support",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "longevity_anti_aging"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "longevity_anti_aging",
+      "metabolic_weight"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure"
+    ],
+    "mechanisms": [
+      "Direct GH receptor (GHR) activation triggering JAK2/STAT5b signaling",
+      "Hepatic IGF-1 synthesis induction for systemic anabolic effects",
+      "Lipolysis via hormone-sensitive lipase (HSL) upregulation",
+      "Protein synthesis enhancement via mTOR pathway activation"
+    ],
+    "semanticKeywords": [
+      "growth hormone",
+      "hgh",
+      "regeneration",
+      "vitality",
+      "body composition",
+      "aging"
+    ],
+    "safetyNote": "Recombinant human growth hormone. Requires prescription. Risk of insulin resistance, edema, carpal tunnel, and intracranial hypertension. Monitor IGF-1, glucose, and thyroid function regularly.",
+    "synonyms": [
+      "human growth hormone",
+      "somatropin"
+    ],
+    "desc": "Recombinant Human Growth Hormone essential for systemic cellular regeneration, growth, and metabolic regulation."
+  },
+  "HMG": {
+    "id": "HMG-75iu-vial",
+    "category": "Hormonal Support",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength"
+    ],
+    "mechanisms": [
+      "FSH receptor (FSHR) agonism stimulating follicular development and spermatogenesis",
+      "LH receptor (LHCGR) agonism triggering ovulation and testosterone synthesis",
+      "Synergistic gonadal stimulation for fertility protocols",
+      "Hypothalamic-pituitary-gonadal (HPG) axis downstream activation"
+    ],
+    "semanticKeywords": [
+      "fertility",
+      "pregnancy research",
+      "sperm count",
+      "follicle",
+      "hmg"
+    ],
+    "safetyNote": "Human menopausal gonadotropin. Risk of OHSS and multiple gestation in fertility protocols. Requires careful monitoring with ultrasound and hormonal assays.",
+    "synonyms": [
+      "human menopausal gonadotropin",
+      "hmg"
+    ],
+    "desc": "Human Menopausal Gonadotropin used in advanced fertility research to stimulate follicular growth and spermatogenesis."
+  },
+  "HEXARELIN": {
+    "id": "Hexarelin-5mg-vial",
+    "category": "Hormonal Support",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "metabolic_weight"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "metabolic_weight"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure"
+    ],
+    "mechanisms": [
+      "Potent GHS-R1a agonism producing strong GH pulse amplification",
+      "Cardioprotective action via CD36/ghrelin receptor in cardiomyocytes",
+      "Modest cortisol and prolactin co-secretion at high doses",
+      "IGF-1 axis activation for muscle hypertrophy and fat loss"
+    ],
+    "semanticKeywords": [
+      "gh pulse",
+      "strength",
+      "power",
+      "heart",
+      "strong gh",
+      "hexarelin"
+    ],
+    "safetyNote": "Potent GH secretagogue with cardiac GHS-R1b activity. May cause significant cortisol and prolactin elevation. Tachyphylaxis observed with continuous use. Desensitization risk higher than ipamorelin.",
+    "synonyms": [
+      "hexarelin"
+    ],
+    "desc": "One of the most potent fast-acting GH secretagogues."
+  },
+  "IGF-1 LR3": {
+    "id": "IGF-1_LR3-0.1mg-vial",
+    "category": "Muscle Growth & Performance",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "metabolic_weight"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "metabolic_weight"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure"
+    ],
+    "mechanisms": [
+      "Insulin-like growth factor receptor 1 (IGF-1R) agonism driving PI3K/AKT/mTOR anabolic cascade",
+      "Skeletal muscle satellite cell proliferation and differentiation",
+      "Anti-apoptotic signaling via Bcl-2/Bcl-xL upregulation",
+      "Reduced IGFBP binding compared to native IGF-1 extending bioactivity"
+    ],
+    "semanticKeywords": [
+      "muscle",
+      "growth",
+      "hyperplasia",
+      "strength",
+      "performance",
+      "anabolic",
+      "igf-1"
+    ],
+    "safetyNote": "Long-acting IGF-1 analog. Significant hypoglycemia risk — administer post-meal. Promotes cell proliferation; avoid in oncological history. Requires careful dosing titration.",
+    "synonyms": [
+      "igf-1 lr3",
+      "long r3 igf-1"
+    ],
+    "desc": "A highly engineered variant of Insulin-like Growth Factor-1 with an extended half-life dictating profound cellular hyperplasia."
+  },
+  "IPAMORELIN": {
+    "id": "Ipamorelin-5mg-vial",
+    "category": "Hormonal Support",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "longevity_anti_aging",
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "longevity_anti_aging",
+      "metabolic_weight",
+      "sleep_circadian"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure",
+      "sleep_onset_improvement",
+      "slow_wave_sleep_enhancement",
+      "circadian_rhythm_normalization",
+      "nocturnal_cortisol_reduction",
+      "rem_cycle_support",
+      "hpa_axis_balance",
+      "pineal_gland_support",
+      "melatonin_pathway_modulation",
+      "daytime_fatigue_reduction",
+      "restorative_sleep_architecture"
+    ],
+    "mechanisms": [
+      "Highly selective GHS-R1a agonism without cortisol or prolactin co-secretion",
+      "Pulsatile GH release from anterior pituitary somatotrophs",
+      "IGF-1 axis stimulation for muscle anabolism and fat metabolism",
+      "No desensitization of GH axis at therapeutic doses"
+    ],
+    "semanticKeywords": [
+      "gh",
+      "growth hormone",
+      "safe gh",
+      "no hunger",
+      "sleep",
+      "recovery",
+      "skin"
+    ],
+    "safetyNote": "Highly selective GH secretagogue. Minimal cortisol/prolactin co-secretion. Well tolerated for long-term cyclic use. Monitor IGF-1 periodically. Preferred GHS for safety profile.",
+    "synonyms": [
+      "ipamorelin"
+    ],
+    "desc": "A highly selective and potent GHRP that stimulates massive growth hormone release safely without spiking cortisol or prolactin."
+  },
+  "KLOW (BPC-157/TB-500/GHK-CU/KPV)": {
+    "id": "KLOW_(BPC-157-TB-500-GHK-Cu-KPV)-10-10-75-10mg-vial",
+    "category": "Healing & Recovery",
+    "productType": "peptide",
+    "goals": [
+      "immune_support",
+      "longevity_anti_aging",
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "immune_support",
+      "longevity_anti_aging",
+      "recovery_repair"
+    ],
+    "secondaryDetails": [
+      "t_cell_maturation",
+      "thymic_peptide_activity",
+      "innate_immunity_enhancement",
+      "chronic_inflammation_reduction",
+      "antimicrobial_signaling",
+      "immune_cell_proliferation",
+      "cytokine_regulation",
+      "autoimmune_modulation",
+      "post_viral_recovery",
+      "gut_associated_lymphoid_tissue",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure"
+    ],
+    "mechanisms": [
+      "MC1R-independent anti-inflammatory NFκB suppression in skin",
+      "IL-1β and TNF-α downregulation in dermal keratinocytes",
+      "Skin barrier integrity restoration",
+      "Low-dose anti-inflammatory modulation for sensitive skin applications"
+    ],
+    "semanticKeywords": [
+      "klow",
+      "mega repair",
+      "inflammation",
+      "acne repair",
+      "gut repair"
+    ],
+    "safetyNote": "Multi-peptide anti-inflammatory and regenerative blend. Cumulative contraindications of component peptides apply. Angiogenic properties warrant caution in oncological history.",
+    "synonyms": [
+      "klow blend",
+      "total healing stack"
+    ],
+    "desc": "A multifaceted blend incorporating anti-inflammatory KPV with tissue repair agents for comprehensive cellular research."
+  },
+  "KPV": {
+    "id": "KPV-5mg-vial",
+    "category": "Healing & Recovery",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "immune_support",
+      "longevity_anti_aging",
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "immune_support",
+      "longevity_anti_aging",
+      "recovery_repair"
+    ],
+    "secondaryDetails": [
+      "t_cell_maturation",
+      "thymic_peptide_activity",
+      "innate_immunity_enhancement",
+      "chronic_inflammation_reduction",
+      "antimicrobial_signaling",
+      "immune_cell_proliferation",
+      "cytokine_regulation",
+      "autoimmune_modulation",
+      "post_viral_recovery",
+      "gut_associated_lymphoid_tissue",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure"
+    ],
+    "mechanisms": [
+      "MC1R-independent anti-inflammatory signaling via NFκB suppression",
+      "IL-1β, TNF-α and IL-6 cytokine downregulation",
+      "Intestinal epithelial barrier integrity restoration",
+      "Melanocortin receptor partial agonism"
+    ],
+    "semanticKeywords": [
+      "acne",
+      "granos",
+      "pimples",
+      "skin inflammation",
+      "microbial",
+      "gut lining",
+      "leakygut"
+    ],
+    "safetyNote": "Alpha-MSH-derived anti-inflammatory tripeptide. Well tolerated. Limited human PK data. May modulate immune response; use caution in autoimmune protocols with concurrent immunosuppressants.",
+    "synonyms": [
+      "lys-pro-val",
+      "kpv peptide"
+    ],
+    "desc": "A tripeptide (Lys-Pro-Val) featuring strong antimicrobial and anti-inflammatory properties."
+  },
+  "KISSPEPTIN-10": {
+    "id": "Kisspeptin-10-5mg-vial",
+    "category": "Hormonal Support",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization"
+    ],
+    "secondaryFactors": [
+      "cognitive_mood",
+      "hormonal_optimization"
+    ],
+    "secondaryDetails": [
+      "bdnf_ngf_upregulation",
+      "neuroprotection",
+      "synaptic_plasticity",
+      "working_memory_enhancement",
+      "anxiety_reduction",
+      "stress_resilience",
+      "mood_stabilization",
+      "neurogenesis_support",
+      "executive_function",
+      "cerebral_blood_flow",
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength"
+    ],
+    "mechanisms": [
+      "GPR54 (KISS1R) agonism stimulating GnRH pulsatile release from hypothalamus",
+      "LH and FSH downstream secretion triggering gonadal steroid production",
+      "Reproductive axis gating: puberty onset and fertility maintenance",
+      "Tumor metastasis suppression via KISS1 gene pathway (metastin activity)"
+    ],
+    "semanticKeywords": [
+      "testosterone",
+      "libido",
+      "pct",
+      "sex drive",
+      "fertility",
+      "kisspeptin"
+    ],
+    "safetyNote": "HPG axis activator. Use in reproductively active individuals requires hormonal monitoring. Potential for premature puberty in pediatric populations. Not approved for therapeutic use.",
+    "synonyms": [
+      "kp-10",
+      "kisspeptin 10"
+    ],
+    "desc": "The active fragment of kisspeptin crucially stimulating the secretion of GnRH to reset the HPTA axis."
+  },
+  "MK-677 (IBUTAMOREN)": {
+    "id": "MK-677_(Ibutamoren)-10mg-vial",
+    "category": "Muscle Growth & Performance",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "metabolic_weight",
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "longevity_anti_aging",
+      "metabolic_weight",
+      "sleep_circadian"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure",
+      "sleep_onset_improvement",
+      "slow_wave_sleep_enhancement",
+      "circadian_rhythm_normalization",
+      "nocturnal_cortisol_reduction",
+      "rem_cycle_support",
+      "hpa_axis_balance",
+      "pineal_gland_support",
+      "melatonin_pathway_modulation",
+      "daytime_fatigue_reduction",
+      "restorative_sleep_architecture"
+    ],
+    "mechanisms": [
+      "Non-peptide GHS-R1a agonist mimicking ghrelin action",
+      "Sustained 24h GH and IGF-1 elevation via oral dosing",
+      "REM sleep architecture enhancement via GH pulse amplification",
+      "Appetite stimulation via hypothalamic NPY/AgRP pathway activation"
+    ],
+    "semanticKeywords": [
+      "hunger",
+      "appetite",
+      "gh",
+      "muscle",
+      "sleep",
+      "oral",
+      "ibutamoren",
+      "mk677"
+    ],
+    "safetyNote": "Oral GH secretagogue. May cause significant fluid retention, increased appetite, and insulin resistance. Monitor fasting glucose and IGF-1. Not approved for therapeutic use.",
+    "synonyms": [
+      "ibutamoren",
+      "mk-677"
+    ],
+    "desc": "An orally active, non-peptide secretagogue of the ghrelin receptor elevating GH and IGF-1 secretion."
+  },
+  "MOTS-C": {
+    "id": "MOTS-C-10mg-vial",
+    "category": "Weight Management & Metabolic",
+    "productType": "peptide",
+    "goals": [
+      "longevity_anti_aging",
+      "metabolic_weight"
+    ],
+    "secondaryFactors": [
+      "longevity_anti_aging",
+      "metabolic_weight"
+    ],
+    "secondaryDetails": [
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure"
+    ],
+    "mechanisms": [
+      "AMPK pathway activation improving glucose utilization",
+      "Mitochondrial biogenesis enhancement via PGC-1α upregulation",
+      "Retrograde mitochondria-to-nucleus signaling modulation",
+      "Folate cycle and de novo purine synthesis regulation"
+    ],
+    "semanticKeywords": [
+      "metabolism",
+      "fat loss",
+      "body composition",
+      "energy",
+      "mitochondria",
+      "optimization",
+      "longevity"
+    ],
+    "safetyNote": "Mitochondrial-derived peptide. Limited human safety data. Generally well tolerated in early research. Exercise-mimetic effects may potentiate hypoglycemia in diabetics on insulin.",
+    "synonyms": [
+      "metabolic peptide",
+      "longevity metabolism support"
+    ],
+    "desc": "A mitochondrial-derived peptide regulating metabolic homeostasis and preventing diet-induced obesity in models."
+  },
+  "MT2 (MELANOTAN II)": {
+    "id": "MT2_(Melanotan_II)-10mg-vial",
+    "category": "Other Research Peptides",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "longevity_anti_aging"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "longevity_anti_aging",
+      "metabolic_weight"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure"
+    ],
+    "mechanisms": [
+      "Non-selective melanocortin receptor (MC1R–MC5R) agonism",
+      "MC1R activation increasing eumelanin synthesis for UV-independent skin pigmentation",
+      "MC4R hypothalamic activation inducing sexual arousal and penile erection",
+      "Appetite suppression and lipolysis via MC3R/MC4R signaling"
+    ],
+    "semanticKeywords": [
+      "tan",
+      "skin color",
+      "melanotan",
+      "bronze",
+      "sunless tanning",
+      "aphrodisiac",
+      "sex drive"
+    ],
+    "safetyNote": "Melanotan II. Non-selective melanocortin agonist. Risk of nausea, spontaneous erections, and blood pressure changes. IMPORTANT: Associated with melanocyte activation — monitor nevi. Not FDA approved.",
+    "synonyms": [
+      "melanotan 2",
+      "mt-ii"
+    ],
+    "desc": "A synthetic analog of alpha-MSH inducing remarkable melanogenesis and demonstrating robust aphrodisiac properties."
+  },
+  "NAD+": {
+    "id": "NAD+-500mg-vial",
+    "category": "Anti-Aging & Longevity",
+    "productType": "peptide",
+    "goals": [
+      "longevity_anti_aging",
+      "metabolic_weight"
+    ],
+    "secondaryFactors": [
+      "cognitive_mood",
+      "longevity_anti_aging",
+      "metabolic_weight"
+    ],
+    "secondaryDetails": [
+      "bdnf_ngf_upregulation",
+      "neuroprotection",
+      "synaptic_plasticity",
+      "working_memory_enhancement",
+      "anxiety_reduction",
+      "stress_resilience",
+      "mood_stabilization",
+      "neurogenesis_support",
+      "executive_function",
+      "cerebral_blood_flow",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure"
+    ],
+    "mechanisms": [
+      "Sirtuin (SIRT1–7) deacetylase cosubstrate supporting epigenetic regulation",
+      "PARP-1 DNA repair pathway cosubstrate",
+      "Mitochondrial electron transport chain Complex I substrate",
+      "CD38/CD157 ectonucleotidase substrate for calcium signaling"
+    ],
+    "semanticKeywords": [
+      "energy",
+      "mitochondria",
+      "fatigue",
+      "aging",
+      "cellular health",
+      "repair",
+      "metabolism"
+    ],
+    "safetyNote": "IV/SC NAD+ infusion. IV administration may cause flushing, chest tightness, and nausea if infused too rapidly — must be given slowly. Research supports safety at therapeutic doses.",
+    "synonyms": [
+      "nicotinamide adenine dinucleotide"
+    ],
+    "desc": "A crucial cellular coenzyme found in all living cells, essential in metabolic red-ox reactions and sirtuin function."
+  },
+  "NMN": {
+    "id": "NMN-50mg-tablet",
+    "category": "Anti-Aging & Longevity",
+    "productType": "supplement",
+    "goals": [
+      "longevity_anti_aging",
+      "metabolic_weight"
+    ],
+    "secondaryFactors": [
+      "immune_support",
+      "longevity_anti_aging"
+    ],
+    "secondaryDetails": [
+      "t_cell_maturation",
+      "thymic_peptide_activity",
+      "innate_immunity_enhancement",
+      "chronic_inflammation_reduction",
+      "antimicrobial_signaling",
+      "immune_cell_proliferation",
+      "cytokine_regulation",
+      "autoimmune_modulation",
+      "post_viral_recovery",
+      "gut_associated_lymphoid_tissue",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression"
+    ],
+    "mechanisms": [
+      "NAD+ biosynthesis precursor via Preiss-Handler salvage pathway",
+      "Sirtuin (SIRT1/SIRT3) deacetylase activation supporting epigenetic anti-aging",
+      "PARP-1 DNA repair system cofactor replenishment",
+      "Mitochondrial Complex I substrate restoration improving cellular energy metabolism"
+    ],
+    "semanticKeywords": [
+      "aging",
+      "nad boost",
+      "precursor",
+      "energy",
+      "vitality",
+      "rejuvenation",
+      "skin aging"
+    ],
+    "safetyNote": "NAD+ precursor. Generally well tolerated orally. Theoretical concern about NAD+-dependent cancer cell proliferation. Limited long-term human safety data.",
+    "synonyms": [
+      "nicotinamide mononucleotide",
+      "nmn"
+    ],
+    "desc": "A direct precursor to NAD+, actively investigated for its capability to mitigate age-associated physiological decline."
+  },
+  "OXYTOCIN ACETATE": {
+    "id": "Oxytocin_Acetate-2mg-vial",
+    "category": "Hormonal Support",
+    "productType": "peptide",
+    "goals": [
+      "cognitive_mood",
+      "sleep_circadian"
+    ],
+    "secondaryFactors": [
+      "cognitive_mood",
+      "hormonal_optimization",
+      "sleep_circadian"
+    ],
+    "secondaryDetails": [
+      "bdnf_ngf_upregulation",
+      "neuroprotection",
+      "synaptic_plasticity",
+      "working_memory_enhancement",
+      "anxiety_reduction",
+      "stress_resilience",
+      "mood_stabilization",
+      "neurogenesis_support",
+      "executive_function",
+      "cerebral_blood_flow",
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "sleep_onset_improvement",
+      "slow_wave_sleep_enhancement",
+      "circadian_rhythm_normalization",
+      "nocturnal_cortisol_reduction",
+      "rem_cycle_support",
+      "hpa_axis_balance",
+      "pineal_gland_support",
+      "melatonin_pathway_modulation",
+      "daytime_fatigue_reduction",
+      "restorative_sleep_architecture"
+    ],
+    "mechanisms": [
+      "Oxytocin receptor (OXTR) agonism in limbic system modulating social bonding and trust",
+      "HPA axis cortisol blunting reducing anxiety and fear response",
+      "Uterine smooth muscle contraction stimulation (parturition/lactation)",
+      "Central dopaminergic reward pathway modulation enhancing prosocial behavior"
+    ],
+    "semanticKeywords": [
+      "love hormone",
+      "bonding",
+      "trust",
+      "social",
+      "stress",
+      "anxiety",
+      "orgasm",
+      "oxytocin"
+    ],
+    "safetyNote": "Synthetic oxytocin. Intranasal use for social cognition research. Avoid in cardiovascular disease. May cause uterine contractions. Psychiatric effects (anxiety, social behavior changes) reported with chronic use.",
+    "synonyms": [
+      "oxytocin",
+      "pitocin-like"
+    ],
+    "desc": "A neurohypophysial hormone mediating complex social, reproductive, and stress-regulating behaviors."
+  },
+  "PE-22 28": {
+    "id": "PE-22_28-5mg-vial",
+    "category": "Cognitive & Neuro-Protection",
+    "productType": "peptide",
+    "goals": [
+      "cognitive_mood"
+    ],
+    "secondaryFactors": [
+      "cognitive_mood"
+    ],
+    "secondaryDetails": [
+      "bdnf_ngf_upregulation",
+      "neuroprotection",
+      "synaptic_plasticity",
+      "working_memory_enhancement",
+      "anxiety_reduction",
+      "stress_resilience",
+      "mood_stabilization",
+      "neurogenesis_support",
+      "executive_function",
+      "cerebral_blood_flow"
+    ],
+    "mechanisms": [
+      "TREK-1 (K2P potassium channel) selective inhibition modulating neuronal excitability",
+      "Rapid-onset antidepressant effect via serotonin pathway enhancement",
+      "Hippocampal neurogenesis promotion",
+      "Anxiolytic signaling via HPA axis normalization"
+    ],
+    "semanticKeywords": [
+      "mood",
+      "depression",
+      "happiness",
+      "brain health",
+      "plasticity",
+      "motivation"
+    ],
+    "safetyNote": "BDNF-mimetic spadin analog targeting TREK-1 channels. Research compound with antidepressant-like activity in preclinical models. Limited human data. Use under psychiatric supervision.",
+    "synonyms": [
+      "pe22-28",
+      "spadin derivative"
+    ],
+    "desc": "A TREK-1 potassium channel antagonist under study for robust antidepressant-like mechanisms."
+  },
+  "PEG MGF": {
+    "id": "PEG_MGF-2mg-vial",
+    "category": "Muscle Growth & Performance",
+    "productType": "peptide",
+    "goals": [
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "recovery_repair"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure"
+    ],
+    "mechanisms": [
+      "IGF-1 receptor (IGF-1R) independent signaling via MGF E-peptide domain",
+      "Satellite cell (muscle stem cell) activation and proliferation",
+      "PEGylation extends circulatory half-life ~144x vs native MGF",
+      "Post-exercise muscle repair and hypertrophic signaling"
+    ],
+    "semanticKeywords": [
+      "localized muscle growth",
+      "recovery",
+      "muscle repair",
+      "mgf",
+      "pegylated"
+    ],
+    "safetyNote": "PEGylated mechano growth factor. Promotes local muscle repair and satellite cell activation. Long-term PEGylation immune response risk. Not for use in active cancer.",
+    "synonyms": [
+      "peg-mgf",
+      "mechano growth factor"
+    ],
+    "desc": "Pegylated Mechano Growth Factor, a slice variant of IGF-1 promoting localized stem cell proliferation strictly in muscle tissue."
+  },
+  "PNC-27": {
+    "id": "PNC-27-5mg-vial",
+    "category": "Other Research Peptides",
+    "productType": "peptide",
+    "goals": [
+      "longevity_anti_aging"
+    ],
+    "secondaryFactors": [
+      "longevity_anti_aging"
+    ],
+    "secondaryDetails": [
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression"
+    ],
+    "mechanisms": [
+      "Selective cancer cell membrane disruption via HDM-2 transmembrane receptor binding",
+      "p53-independent tumor cell apoptosis induction",
+      "Non-toxic to normal cells lacking transmembrane HDM-2 expression",
+      "Pore-forming necrotic mechanism in MDM2-overexpressing tumor cells"
+    ],
+    "semanticKeywords": [
+      "cancer",
+      "tumor",
+      "p53",
+      "oncology",
+      "necrosis",
+      "anti-cancer"
+    ],
+    "safetyNote": "p53-derived cancer-selective peptide. Research compound. Intended for oncological research contexts. Limited human safety data available.",
+    "synonyms": [
+      "pnc27"
+    ],
+    "desc": "An investigative anti-cancer peptide binding strongly to MDM2 in cellular membranes orchestrating rapid tumor cell necrosis."
+  },
+  "PT-141 (BREMELANOTIDE)": {
+    "id": "PT-141_(Bremelanotide)-10mg-vial",
+    "category": "Other Research Peptides",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization"
+    ],
+    "secondaryFactors": [
+      "cognitive_mood",
+      "hormonal_optimization",
+      "sleep_circadian"
+    ],
+    "secondaryDetails": [
+      "bdnf_ngf_upregulation",
+      "neuroprotection",
+      "synaptic_plasticity",
+      "working_memory_enhancement",
+      "anxiety_reduction",
+      "stress_resilience",
+      "mood_stabilization",
+      "neurogenesis_support",
+      "executive_function",
+      "cerebral_blood_flow",
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "sleep_onset_improvement",
+      "slow_wave_sleep_enhancement",
+      "circadian_rhythm_normalization",
+      "nocturnal_cortisol_reduction",
+      "rem_cycle_support",
+      "hpa_axis_balance",
+      "pineal_gland_support",
+      "melatonin_pathway_modulation",
+      "daytime_fatigue_reduction",
+      "restorative_sleep_architecture"
+    ],
+    "mechanisms": [
+      "Melanocortin MC4R agonism in hypothalamic nuclei mediating sexual arousal",
+      "Dopaminergic pathway modulation in mesolimbic reward system",
+      "Peripheral vasodilatation via MC3R activation",
+      "FDA-approved (Vyleesi) for hypoactive sexual desire disorder in premenopausal women"
+    ],
+    "semanticKeywords": [
+      "sex drive",
+      "erection",
+      "arousal",
+      "female sexual dysfunction",
+      "libido",
+      "pt141"
+    ],
+    "safetyNote": "FDA-approved (Vyleesi) for HSDD in premenopausal women. Risk of nausea (most common), transient hypertension, and hyperpigmentation with chronic use. Do not use within 8h of another dose.",
+    "synonyms": [
+      "bremelanotide",
+      "vyleesi-like"
+    ],
+    "desc": "A cyclic heptapeptide functioning as an agonist at melanocortin receptors heavily researched for sexual dysfunction."
+  },
+  "PINEALON": {
+    "id": "Pinealon-10mg-vial",
+    "category": "Cognitive & Neurological",
+    "productType": "peptide",
+    "goals": [
+      "cognitive_mood",
+      "longevity_anti_aging",
+      "sleep_circadian"
+    ],
+    "secondaryFactors": [
+      "cognitive_mood",
+      "sleep_circadian"
+    ],
+    "secondaryDetails": [
+      "bdnf_ngf_upregulation",
+      "neuroprotection",
+      "synaptic_plasticity",
+      "working_memory_enhancement",
+      "anxiety_reduction",
+      "stress_resilience",
+      "mood_stabilization",
+      "neurogenesis_support",
+      "executive_function",
+      "cerebral_blood_flow",
+      "sleep_onset_improvement",
+      "slow_wave_sleep_enhancement",
+      "circadian_rhythm_normalization",
+      "nocturnal_cortisol_reduction",
+      "rem_cycle_support",
+      "hpa_axis_balance",
+      "pineal_gland_support",
+      "melatonin_pathway_modulation",
+      "daytime_fatigue_reduction",
+      "restorative_sleep_architecture"
+    ],
+    "mechanisms": [
+      "Melatonin synthesis enhancement in pinealocytes",
+      "Antioxidant neuroprotection reducing oxidative stress",
+      "Circadian rhythm modulation via pineal-hypothalamic axis",
+      "Anti-apoptotic effects in neuronal tissue"
+    ],
+    "semanticKeywords": [
+      "sleep",
+      "neuroprotection",
+      "circadian",
+      "pineal"
+    ],
+    "safetyNote": "Generally well tolerated in research models. Limited human clinical data. Not FDA-approved.",
+    "synonyms": [],
+    "desc": "Tetrapeptide bioregulator derived from pineal gland tissue. Enhances melatonin synthesis, supports circadian rhythm regulation, and exerts neuroprotective effects via antioxidant activity."
+  },
+  "PRECISION INSULIN SYRINGES": {
+    "id": "Precision_Insulin_Syringes-Box_of_100",
+    "category": "Research Supplies",
+    "productType": "professional_material",
+    "goals": [
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "recovery_repair"
+    ],
+    "secondaryDetails": [
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure"
+    ],
+    "mechanisms": [
+      "Precision subcutaneous peptide delivery device",
+      "31G ultra-fine needle minimizing injection site discomfort",
+      "0.3 mL volume suitable for research peptide reconstitution doses"
+    ],
+    "semanticKeywords": [
+      "syringes",
+      "needles",
+      "dosing",
+      "injection",
+      "supplies",
+      "u100"
+    ],
+    "safetyNote": "Single-use sterile medical device. Never share needles. Dispose in approved sharps container. Verify insulin concentration (U-100 vs. U-40) before use to prevent dosing errors.",
+    "synonyms": [
+      "insulin syringes",
+      "needles"
+    ],
+    "desc": "31G x 8mm sterile U-100 syringes tailored for painless, extremely precise subcutaneous dosing under research conditions."
+  },
+  "PROSTAMAX": {
+    "id": "Prostamax-10mg-vial",
+    "category": "Other Research Peptides",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "immune_support",
+      "recovery_repair"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "t_cell_maturation",
+      "thymic_peptide_activity",
+      "innate_immunity_enhancement",
+      "chronic_inflammation_reduction",
+      "antimicrobial_signaling",
+      "immune_cell_proliferation",
+      "cytokine_regulation",
+      "autoimmune_modulation",
+      "post_viral_recovery",
+      "gut_associated_lymphoid_tissue",
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure"
+    ],
+    "mechanisms": [
+      "Prostate epithelial cell gene expression bioregulation via chromatin remodeling",
+      "Anti-inflammatory modulation in prostate stromal tissue",
+      "Cytoprotective signaling reducing oxidative stress in glandular cells",
+      "Hormonal balance support in androgen-sensitive prostate tissue"
+    ],
+    "semanticKeywords": [
+      "prostate",
+      "men's health",
+      "urinary",
+      "regeneration",
+      "bioregulator"
+    ],
+    "safetyNote": "Prostatic peptide bioregulator (Lys-Glu-Asp-Pro). Limited peer-reviewed human data. Use under urological physician supervision. Well tolerated in available studies.",
+    "synonyms": [
+      "prostamax"
+    ],
+    "desc": "A specialized bioregulator peptide targeting cellular regeneration precisely within prostate gland tissues."
+  },
+  "RETATRUTIDE": {
+    "id": "Retatrutide-20mg-vial",
+    "category": "Weight Management & Metabolic",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "metabolic_weight"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "immune_support",
+      "metabolic_weight"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "t_cell_maturation",
+      "thymic_peptide_activity",
+      "innate_immunity_enhancement",
+      "chronic_inflammation_reduction",
+      "antimicrobial_signaling",
+      "immune_cell_proliferation",
+      "cytokine_regulation",
+      "autoimmune_modulation",
+      "post_viral_recovery",
+      "gut_associated_lymphoid_tissue",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure"
+    ],
+    "mechanisms": [
+      "Selective triple agonism of GIP, GLP-1, and glucagon receptors (triagonist)",
+      "Superior weight reduction vs. dual agonists via complementary metabolic pathways",
+      "Hepatic glucagon receptor activation reducing liver fat",
+      "GLP-1 mediated incretin effect improving insulin secretion and satiety"
+    ],
+    "semanticKeywords": [
+      "fat loss",
+      "metabolism",
+      "obesity",
+      "triple agonist",
+      "weight control",
+      "cellular energy"
+    ],
+    "safetyNote": "Investigational triple agonist (Phase III). Most potent weight reduction compound in trials to date (~24% body weight). Nausea/vomiting significant on dose escalation. Thyroid C-cell monitoring warranted.",
+    "synonyms": [
+      "triple g",
+      "retatrutide"
+    ],
+    "desc": "A novel triple hormone receptor agonist (GIP, GLP-1, and Glucagon) exhibiting pronounced metabolic regulatory effects."
+  },
+  "SLU PP-332": {
+    "id": "SLU_PP-332-50mg-vial",
+    "category": "Weight Management & Metabolic",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "metabolic_weight"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "longevity_anti_aging",
+      "metabolic_weight"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure"
+    ],
+    "mechanisms": [
+      "Pan-ERR (estrogen-related receptor α/β/γ) selective agonism",
+      "Mitochondrial biogenesis and fatty acid oxidation gene transcription upregulation",
+      "Exercise-mimetic metabolic effects improving endurance capacity",
+      "PGC-1α co-activation driving oxidative phosphorylation gene expression"
+    ],
+    "semanticKeywords": [
+      "exercise in a pill",
+      "endurance",
+      "stamina",
+      "metabolism",
+      "fat burning",
+      "training mimetic"
+    ],
+    "safetyNote": "ERR agonist — exercise-mimetic research compound. Preclinical data only. Limited human safety data. Not approved for any therapeutic indication.",
+    "synonyms": [
+      "slu-pp-332",
+      "err agonist"
+    ],
+    "desc": "An estrogen-related receptor (ERR) agonist simulating structural metabolic adaptations similar to endurance training."
+  },
+  "SS-31": {
+    "id": "SS-31-5mg-vial",
+    "category": "Energy & Mitochondrial",
+    "productType": "peptide",
+    "goals": [
+      "cognitive_mood",
+      "longevity_anti_aging",
+      "metabolic_weight"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "immune_support",
+      "longevity_anti_aging",
+      "metabolic_weight"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "t_cell_maturation",
+      "thymic_peptide_activity",
+      "innate_immunity_enhancement",
+      "chronic_inflammation_reduction",
+      "antimicrobial_signaling",
+      "immune_cell_proliferation",
+      "cytokine_regulation",
+      "autoimmune_modulation",
+      "post_viral_recovery",
+      "gut_associated_lymphoid_tissue",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure"
+    ],
+    "mechanisms": [
+      "Selective mitochondrial inner membrane targeting",
+      "ROS scavenging via dimethyltyrosine antioxidant moiety",
+      "Cardiolipin stabilization restoring cristae architecture",
+      "ATP synthase efficiency restoration"
+    ],
+    "semanticKeywords": [
+      "energy",
+      "mitochondria",
+      "oxidative stress",
+      "neuroprotection"
+    ],
+    "safetyNote": "Favorable safety profile in Phase I/II human trials for heart failure and renal disease. Injection site reactions possible. Not FDA-approved for off-label use.",
+    "synonyms": [],
+    "desc": "Mitochondria-targeted tetrapeptide that reduces ROS generation, stabilizes mitochondrial cristae, and restores ATP synthesis. Powerful tool for mitochondrial dysfunction and oxidative stress."
+  },
+  "SELANK": {
+    "id": "Selank-5mg-vial",
+    "category": "Cognitive & Neuro-Protection",
+    "productType": "peptide",
+    "goals": [
+      "cognitive_mood"
+    ],
+    "secondaryFactors": [
+      "cognitive_mood",
+      "immune_support"
+    ],
+    "secondaryDetails": [
+      "bdnf_ngf_upregulation",
+      "neuroprotection",
+      "synaptic_plasticity",
+      "working_memory_enhancement",
+      "anxiety_reduction",
+      "stress_resilience",
+      "mood_stabilization",
+      "neurogenesis_support",
+      "executive_function",
+      "cerebral_blood_flow",
+      "t_cell_maturation",
+      "thymic_peptide_activity",
+      "innate_immunity_enhancement",
+      "chronic_inflammation_reduction",
+      "antimicrobial_signaling",
+      "immune_cell_proliferation",
+      "cytokine_regulation",
+      "autoimmune_modulation",
+      "post_viral_recovery",
+      "gut_associated_lymphoid_tissue"
+    ],
+    "mechanisms": [
+      "Tuftsin receptor modulation enhancing innate immune surveillance",
+      "GABAergic neurotransmission potentiation reducing anxiety",
+      "BDNF and NGF neurotrophin upregulation",
+      "Enkephalinase inhibition extending endogenous enkephalin activity"
+    ],
+    "semanticKeywords": [
+      "anxiety",
+      "stress",
+      "focus",
+      "brain health",
+      "calm",
+      "cognitive enhancement",
+      "mood"
+    ],
+    "safetyNote": "Anxiolytic tuftsin analog. Non-addictive with favorable safety profile. May potentiate sedatives. Intranasal preferred. Limited head-to-head data vs. conventional anxiolytics.",
+    "synonyms": [
+      "selank"
+    ],
+    "desc": "A synthetic heptapeptide derived from human tuftsin showcasing marked anxiolytic and nootropic potentials."
+  },
+  "SEMAGLUTIDE": {
+    "id": "Semaglutide-5mg-vial",
+    "category": "Weight Management & Metabolic",
+    "productType": "peptide",
+    "goals": [
+      "metabolic_weight"
+    ],
+    "secondaryFactors": [
+      "metabolic_weight"
+    ],
+    "secondaryDetails": [
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure"
+    ],
+    "mechanisms": [
+      "Selective long-acting GLP-1 receptor agonism (94% sequence homology to native GLP-1)",
+      "Glucose-dependent insulin secretion enhancement from pancreatic beta cells",
+      "Glucagon suppression during hyperglycemia",
+      "Central appetite suppression via hypothalamic GLP-1 receptors and vagal afferents"
+    ],
+    "semanticKeywords": [
+      "fat loss",
+      "weight control",
+      "ozempic",
+      "wegovy",
+      "appetite suppression",
+      "metabolic health"
+    ],
+    "safetyNote": "GLP-1 agonist (Ozempic/Wegovy). Risk of nausea, pancreatitis, and gallbladder disease. Thyroid C-cell hyperplasia in rodents — monitor in MTC risk patients. Requires gradual dose titration.",
+    "synonyms": [
+      "semaglutide",
+      "ozempic-like"
+    ],
+    "desc": "A selective GLP-1 receptor agonist with structural modifications to extend plasma half-life via albumin binding."
+  },
+  "SEMAX": {
+    "id": "Semax-5mg-vial",
+    "category": "Cognitive & Neuro-Protection",
+    "productType": "peptide",
+    "goals": [
+      "cognitive_mood"
+    ],
+    "secondaryFactors": [
+      "cognitive_mood"
+    ],
+    "secondaryDetails": [
+      "bdnf_ngf_upregulation",
+      "neuroprotection",
+      "synaptic_plasticity",
+      "working_memory_enhancement",
+      "anxiety_reduction",
+      "stress_resilience",
+      "mood_stabilization",
+      "neurogenesis_support",
+      "executive_function",
+      "cerebral_blood_flow"
+    ],
+    "mechanisms": [
+      "BDNF and NGF neurotrophin upregulation in prefrontal cortex and hippocampus",
+      "Dopaminergic and serotonergic neurotransmitter system modulation",
+      "Cholinergic pathway enhancement improving memory consolidation",
+      "Neuroprotective anti-inflammatory signaling via NFκB suppression"
+    ],
+    "semanticKeywords": [
+      "brain",
+      "focus",
+      "memory",
+      "intelligence",
+      "neuroprotection",
+      "mental energy",
+      "cognitive"
+    ],
+    "safetyNote": "ACTH(4-7)PGP analog. Nootropic and neuroprotective peptide. Generally well tolerated intranasally. May cause transient nasal irritation. Limited long-term human data.",
+    "synonyms": [
+      "semax"
+    ],
+    "desc": "An ACTH analog known for its neuroprotective, neuromodulatory and potent cognitive enhancement effects."
+  },
+  "SERMORELIN": {
+    "id": "Sermorelin-2mg-vial",
+    "category": "Hormonal Support",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "longevity_anti_aging",
+      "recovery_repair",
+      "sleep_circadian"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "longevity_anti_aging",
+      "metabolic_weight",
+      "sleep_circadian"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure",
+      "sleep_onset_improvement",
+      "slow_wave_sleep_enhancement",
+      "circadian_rhythm_normalization",
+      "nocturnal_cortisol_reduction",
+      "rem_cycle_support",
+      "hpa_axis_balance",
+      "pineal_gland_support",
+      "melatonin_pathway_modulation",
+      "daytime_fatigue_reduction",
+      "restorative_sleep_architecture"
+    ],
+    "mechanisms": [
+      "GHRH receptor (GHRHR) agonism stimulating pulsatile somatotroph GH release",
+      "Physiological GH axis stimulation without receptor downregulation at therapeutic doses",
+      "IGF-1 hepatic synthesis induction",
+      "Hypothalamic-pituitary feedback loop preservation"
+    ],
+    "semanticKeywords": [
+      "gh support",
+      "anti-aging",
+      "vitality",
+      "natural gh",
+      "sermorelin"
+    ],
+    "safetyNote": "GHRH analog. Physiological GH stimulation with lower risk vs. exogenous GH. Monitor IGF-1 levels. Injection site reactions common. Headache and flushing reported.",
+    "synonyms": [
+      "grf 1-29",
+      "sermorelin"
+    ],
+    "desc": "A 29-amino acid polypeptide representing the shortest functional fragment of endogenous GHRH."
+  },
+  "SNAP-8": {
+    "id": "Snap-8-10mg-vial",
+    "category": "Other Research Peptides",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "longevity_anti_aging"
+    ],
+    "secondaryFactors": [
+      "longevity_anti_aging"
+    ],
+    "secondaryDetails": [
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression"
+    ],
+    "mechanisms": [
+      "SNAP-25 protein competitive inhibition attenuating neuromuscular junction signaling",
+      "Reduction of acetylcholine vesicle release at facial neuromuscular synapses",
+      "Muscle contraction-induced wrinkle depth reduction (Botox-like topical effect)",
+      "Collagen type I synthesis stimulation in dermal fibroblasts"
+    ],
+    "semanticKeywords": [
+      "wrinkles",
+      "arrugas",
+      "botox-like",
+      "fine lines",
+      "expression lines",
+      "forehead",
+      "smooth skin"
+    ],
+    "safetyNote": "Acetyl octapeptide-3. Topical anti-wrinkle peptide (Argireline analog). For cosmetic/topical use only. Systemic injection not indicated. Generally well tolerated topically.",
+    "synonyms": [
+      "acetyl octapeptide-3",
+      "snap8"
+    ],
+    "desc": "An octapeptide acting as an elongation of Argireline, interfering with the SNARE complex to minimize topical wrinkle formation."
+  },
+  "TB-500": {
+    "id": "TB-500-5mg-vial",
+    "category": "Recovery & Repair",
+    "productType": "peptide",
+    "goals": [
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "immune_support",
+      "recovery_repair"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "t_cell_maturation",
+      "thymic_peptide_activity",
+      "innate_immunity_enhancement",
+      "chronic_inflammation_reduction",
+      "antimicrobial_signaling",
+      "immune_cell_proliferation",
+      "cytokine_regulation",
+      "autoimmune_modulation",
+      "post_viral_recovery",
+      "gut_associated_lymphoid_tissue",
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure"
+    ],
+    "mechanisms": [
+      "G-actin sequestration promoting cell migration and wound healing",
+      "Angiogenesis stimulation via VEGF upregulation",
+      "Anti-inflammatory via NF-κB pathway downregulation",
+      "Stem cell mobilization from bone marrow"
+    ],
+    "semanticKeywords": [
+      "recovery",
+      "tissue repair",
+      "angiogenesis",
+      "inflammation"
+    ],
+    "safetyNote": "Well tolerated in research. Minimal adverse effects reported. Theoretical cancer growth concern at high doses in active malignancy. Not FDA-approved.",
+    "synonyms": [],
+    "desc": "Standalone TB-500 (Thymosin Beta-4 synthetic fragment) vial for tissue repair, angiogenesis, and anti-inflammatory action. Distinct from combination products."
+  },
+  "TB-500 (THYMOSIN Β4)": {
+    "id": "TB-500_(Thymosin_β4)-2mg-vial",
+    "category": "Healing & Recovery",
+    "productType": "peptide",
+    "goals": [
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "immune_support",
+      "recovery_repair"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "t_cell_maturation",
+      "thymic_peptide_activity",
+      "innate_immunity_enhancement",
+      "chronic_inflammation_reduction",
+      "antimicrobial_signaling",
+      "immune_cell_proliferation",
+      "cytokine_regulation",
+      "autoimmune_modulation",
+      "post_viral_recovery",
+      "gut_associated_lymphoid_tissue",
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure"
+    ],
+    "mechanisms": [
+      "G-actin sequestration regulating actin cytoskeleton dynamics and cell migration",
+      "Angiogenesis promotion via endothelial VEGF-A and FGF upregulation",
+      "Anti-inflammatory modulation via NFκB and cyclooxygenase-2 suppression",
+      "Cardiomyocyte regeneration and cardiac stem cell activation"
+    ],
+    "semanticKeywords": [
+      "injury",
+      "wound healing",
+      "flexibility",
+      "inflammation",
+      "muscle tear",
+      "tendonitis",
+      "joint pain"
+    ],
+    "safetyNote": "Actin-sequestering peptide with angiogenic and anti-inflammatory properties. Animal studies generally safe. Monitor in patients with oncological history due to angiogenic activity. Well tolerated in human case reports.",
+    "synonyms": [
+      "thymosin beta 4",
+      "tb500",
+      "tb-500"
+    ],
+    "desc": "A synthetic version of the naturally occurring peptide present in all cellular components promoting endothelial cell differentiation and angiogenesis."
+  },
+  "TESAMORELIN": {
+    "id": "Tesamorelin-2mg-vial",
+    "category": "Hormonal & Growth",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization",
+      "metabolic_weight"
+    ],
+    "secondaryFactors": [
+      "cognitive_mood",
+      "metabolic_weight"
+    ],
+    "secondaryDetails": [
+      "bdnf_ngf_upregulation",
+      "neuroprotection",
+      "synaptic_plasticity",
+      "working_memory_enhancement",
+      "anxiety_reduction",
+      "stress_resilience",
+      "mood_stabilization",
+      "neurogenesis_support",
+      "executive_function",
+      "cerebral_blood_flow",
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure"
+    ],
+    "mechanisms": [
+      "GHRH receptor agonism stimulating pituitary GH release",
+      "Selective visceral adipose tissue reduction",
+      "IGF-1 elevation via hepatic GH signaling",
+      "Maintenance of pulsatile GH secretion pattern"
+    ],
+    "semanticKeywords": [
+      "growth hormone",
+      "fat loss",
+      "body composition",
+      "visceral fat"
+    ],
+    "safetyNote": "FDA-approved (Egrifta). Common adverse effects: injection site reactions, fluid retention, arthralgias. Monitor IGF-1 levels. Contraindicated in active malignancy.",
+    "synonyms": [],
+    "desc": "Synthetic GHRH analogue that stimulates growth hormone secretion with selectivity for visceral fat reduction. FDA-approved for HIV-associated lipodystrophy; used off-label for body composition optimization."
+  },
+  "TESTAGEN": {
+    "id": "Testagen-10mg-vial",
+    "category": "Other Research Peptides",
+    "productType": "peptide",
+    "goals": [
+      "hormonal_optimization"
+    ],
+    "secondaryFactors": [
+      "hormonal_optimization",
+      "longevity_anti_aging"
+    ],
+    "secondaryDetails": [
+      "gh_pulsatility",
+      "igf_1_support",
+      "testosterone_support",
+      "cortisol_regulation",
+      "muscle_hypertrophy",
+      "myostatin_inhibition",
+      "libido_enhancement",
+      "male_fertility_support",
+      "hpta_axis_support",
+      "endurance_and_strength",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression"
+    ],
+    "mechanisms": [
+      "Leydig cell gene expression bioregulation supporting testosterone biosynthesis",
+      "Sertoli cell function modulation supporting spermatogenesis",
+      "Testicular tissue-specific chromatin remodeling via epigenetic peptide bioregulator mechanism",
+      "HPG axis support at peripheral gonadal level"
+    ],
+    "semanticKeywords": [
+      "testicles",
+      "fertility",
+      "men's health",
+      "reproduction",
+      "bioregulator"
+    ],
+    "safetyNote": "Testicular peptide bioregulator (Lys-Asp-Glu). Limited human clinical data. Use under physician supervision. Well tolerated in available studies.",
+    "synonyms": [
+      "testagen"
+    ],
+    "desc": "A synthesized targeted peptide designed to correct morphological and functional parameters of the male reproductive system."
+  },
+  "THYMAGEN": {
+    "id": "Thymagen-10mg-vial",
+    "category": "Other Research Peptides",
+    "productType": "peptide",
+    "goals": [
+      "immune_support",
+      "recovery_repair"
+    ],
+    "secondaryFactors": [
+      "immune_support",
+      "longevity_anti_aging",
+      "recovery_repair"
+    ],
+    "secondaryDetails": [
+      "t_cell_maturation",
+      "thymic_peptide_activity",
+      "innate_immunity_enhancement",
+      "chronic_inflammation_reduction",
+      "antimicrobial_signaling",
+      "immune_cell_proliferation",
+      "cytokine_regulation",
+      "autoimmune_modulation",
+      "post_viral_recovery",
+      "gut_associated_lymphoid_tissue",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression",
+      "soft_tissue_healing",
+      "angiogenesis",
+      "collagen_synthesis",
+      "tendon_repair",
+      "muscle_fiber_regeneration",
+      "anti_inflammatory_signaling",
+      "nerve_repair",
+      "gut_barrier_integrity",
+      "joint_cartilage_support",
+      "wound_closure"
+    ],
+    "mechanisms": [
+      "Thymic peptide bioregulator enhancing T-lymphocyte differentiation",
+      "IL-2 and interferon-γ immunomodulatory cytokine upregulation",
+      "CD4+/CD8+ T-cell ratio normalization in immunocompromised states",
+      "Chromatin remodeling in thymocyte gene expression for immune maturation"
+    ],
+    "semanticKeywords": [
+      "immunity",
+      "balance",
+      "t-cells",
+      "lymphocytes",
+      "bioregulator"
+    ],
+    "safetyNote": "Thymic peptide bioregulator. Immune-modulating peptide. Use with caution in autoimmune conditions. Limited peer-reviewed data.",
+    "synonyms": [
+      "thymagen"
+    ],
+    "desc": "A dipeptide immuno-modulator aimed at restoring optimal physiological ratios among T-lymphocyte sub-populations."
+  },
+  "THYMOSIN ALPHA-1": {
+    "id": "Thymosin_Alpha1-6mg-vial",
+    "category": "Immune & Inflammatory",
+    "productType": "peptide",
+    "goals": [
+      "immune_support"
+    ],
+    "secondaryFactors": [
+      "cognitive_mood",
+      "longevity_anti_aging"
+    ],
+    "secondaryDetails": [
+      "bdnf_ngf_upregulation",
+      "neuroprotection",
+      "synaptic_plasticity",
+      "working_memory_enhancement",
+      "anxiety_reduction",
+      "stress_resilience",
+      "mood_stabilization",
+      "neurogenesis_support",
+      "executive_function",
+      "cerebral_blood_flow",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression"
+    ],
+    "mechanisms": [
+      "T-lymphocyte maturation and differentiation in thymus",
+      "Enhancement of NK cell cytotoxic activity",
+      "Interferon-α and IL-2 secretion stimulation",
+      "TLR9 agonist activity amplifying innate immune response"
+    ],
+    "semanticKeywords": [
+      "immune",
+      "T-cell",
+      "antiviral",
+      "thymus"
+    ],
+    "safetyNote": "Approved in 35+ countries (Zadaxin). Excellent safety profile. Injection site reactions possible. Generally safe for chronic use under physician supervision.",
+    "synonyms": [],
+    "desc": "28-amino acid peptide from thymic tissue that promotes T-cell maturation and differentiation, enhances innate and adaptive immune function, and exhibits antiviral properties."
+  },
+  "THYMOSIN ALPHA 1": {
+    "id": "Thymosin_Alpha_1-5mg-vial",
+    "category": "Other Research Peptides",
+    "productType": "peptide",
+    "goals": [
+      "immune_support"
+    ],
+    "secondaryFactors": [
+      "cognitive_mood",
+      "immune_support",
+      "longevity_anti_aging"
+    ],
+    "secondaryDetails": [
+      "bdnf_ngf_upregulation",
+      "neuroprotection",
+      "synaptic_plasticity",
+      "working_memory_enhancement",
+      "anxiety_reduction",
+      "stress_resilience",
+      "mood_stabilization",
+      "neurogenesis_support",
+      "executive_function",
+      "cerebral_blood_flow",
+      "t_cell_maturation",
+      "thymic_peptide_activity",
+      "innate_immunity_enhancement",
+      "chronic_inflammation_reduction",
+      "antimicrobial_signaling",
+      "immune_cell_proliferation",
+      "cytokine_regulation",
+      "autoimmune_modulation",
+      "post_viral_recovery",
+      "gut_associated_lymphoid_tissue",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression"
+    ],
+    "mechanisms": [
+      "TLR-2 and TLR-9 agonism activating innate antiviral and antifungal immunity",
+      "Dendritic cell maturation and antigen presentation enhancement",
+      "NK cell cytotoxic activity upregulation for tumor immunosurveillance",
+      "Th1 cytokine (IFN-γ, IL-2) polarization and regulatory T-cell balance modulation"
+    ],
+    "semanticKeywords": [
+      "immunity",
+      "virus",
+      "infection",
+      "defense",
+      "ta1",
+      "thymosin alpha",
+      "immune boost"
+    ],
+    "safetyNote": "FDA-approved in some countries for hepatitis and immune deficiency. Well-characterized safety profile. May enhance immune response — caution in autoimmune conditions. Generally safe and well tolerated.",
+    "synonyms": [
+      "ta1",
+      "zadaxin-like"
+    ],
+    "desc": "An endogenous modifier of immune response directly augmenting the operational efficiency of T-cell-mediated responses."
+  },
+  "THYMULIN": {
+    "id": "Thymulin-10mg-vial",
+    "category": "Other Research Peptides",
+    "productType": "peptide",
+    "goals": [
+      "immune_support"
+    ],
+    "secondaryFactors": [
+      "cognitive_mood",
+      "immune_support",
+      "longevity_anti_aging"
+    ],
+    "secondaryDetails": [
+      "bdnf_ngf_upregulation",
+      "neuroprotection",
+      "synaptic_plasticity",
+      "working_memory_enhancement",
+      "anxiety_reduction",
+      "stress_resilience",
+      "mood_stabilization",
+      "neurogenesis_support",
+      "executive_function",
+      "cerebral_blood_flow",
+      "t_cell_maturation",
+      "thymic_peptide_activity",
+      "innate_immunity_enhancement",
+      "chronic_inflammation_reduction",
+      "antimicrobial_signaling",
+      "immune_cell_proliferation",
+      "cytokine_regulation",
+      "autoimmune_modulation",
+      "post_viral_recovery",
+      "gut_associated_lymphoid_tissue",
+      "telomere_integrity",
+      "mitochondrial_biogenesis",
+      "nad_pathway_activation",
+      "oxidative_stress_reduction",
+      "cellular_senescence_inhibition",
+      "skin_collagen_density",
+      "dna_repair_upregulation",
+      "epigenetic_regulation",
+      "organ_protection",
+      "inflammatory_aging_suppression"
+    ],
+    "mechanisms": [
+      "Zinc-dependent thymic hormone active only when complexed with Zn2+",
+      "T-lymphocyte maturation and differentiation from bone marrow precursors",
+      "Suppressor and cytotoxic T-cell phenotype induction",
+      "Immunosenescence reversal via thymic function restoration in aged subjects"
+    ],
+    "semanticKeywords": [
+      "immunity",
+      "thymus",
+      "t-cells",
+      "defense",
+      "aging immune",
+      "bioregulator"
+    ],
+    "safetyNote": "Thymic nonapeptide requiring zinc co-factor for activity. Immune regulatory peptide. Limited human clinical data. Generally well tolerated.",
+    "synonyms": [
+      "thymic factor"
+    ],
+    "desc": "A nonapeptide requiring zinc for biological activity, involved fundamentally in T-cell differentiation and maturation."
+  },
+  "TIRZEPATIDE": {
+    "id": "Tirzepatide-60mg-vial",
+    "category": "Weight Management & Metabolic",
+    "productType": "peptide",
+    "goals": [
+      "metabolic_weight"
+    ],
+    "secondaryFactors": [
+      "metabolic_weight"
+    ],
+    "secondaryDetails": [
+      "insulin_sensitivity",
+      "glucose_metabolism",
+      "lipolysis",
+      "fat_oxidation",
+      "appetite_regulation",
+      "visceral_fat_reduction",
+      "glucagon_suppression",
+      "cholesterol_regulation",
+      "blood_sugar_stabilization",
+      "energy_expenditure"
+    ],
+    "mechanisms": [
+      "Selective dual GIP (GIPR) and GLP-1 receptor (GLP-1R) agonism (twincretin mechanism)",
+      "GIP receptor agonism potentiating insulin sensitivity in skeletal muscle and adipose tissue",
+      "GLP-1 receptor agonism providing incretin effect with glucose-dependent insulin secretion",
+      "Central hypothalamic appetite suppression via GLP-1R signaling on vagal afferents and area postrema",
+      "Glucagon suppression during hyperglycemic states reducing hepatic glucose output",
+      "Delayed gastric emptying reducing post-prandial glucose excursions",
+      "GIP-mediated reduction in hepatic fat via GIPR signaling on hepatocytes"
+    ],
+    "semanticKeywords": [
+      "fat loss",
+      "diabetes",
+      "blood sugar",
+      "appetite",
+      "obesity",
+      "metabolic syndrome",
+      "twincretin"
+    ],
+    "safetyNote": "FDA-approved prescription medication (Mounjaro® / Zepbound®). For research use only when obtained outside approved channels. Contraindicated in patients with personal/family history of medullary thyroid carcinoma or Multiple Endocrine Neoplasia syndrome type 2 (MEN 2). Boxed warning: thyroid C-cell tumors observed in rodents.",
+    "synonyms": [
+      "mounjaro",
+      "zepbound",
+      "ly3298176",
+      "twincretin"
+    ],
+    "desc": "A once-weekly synthetic dual GIP and GLP-1 receptor agonist (twincretin) developed by Eli Lilly. FDA-approved for T2DM (Mounjaro) and chronic weight management (Zepbound). Demonstrates superior glycemic and weight outcomes vs. GLP-1 monotherapy in the SURPASS trial series."
+  }
+}

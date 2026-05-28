@@ -1,3 +1,4 @@
+ 
 export const REGION_FLAGS = {
   ae: '🇦🇪',
   qa: '🇶🇦',

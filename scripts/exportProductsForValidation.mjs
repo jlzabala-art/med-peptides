@@ -26,7 +26,7 @@ const ROOT      = resolve(__dirname, '..');
 
 const PRETTY    = process.argv.includes('--pretty');
 const FLAT      = process.argv.includes('--flat');
-const PROJECT_ID = 'med-peptides-app';
+const PROJECT_ID = 'Med-Peptides-app';
 
 // ── Init firebase-admin ────────────────────────────────────────────────────────
 let adminApp;

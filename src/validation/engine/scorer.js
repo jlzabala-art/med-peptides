@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Validation Scorer
 // Translates the output of validation rules into a rigid 1-5 grading system
 
@@ -9,7 +10,7 @@ import {
   checkProductConsistency,
   checkCostConsistency,
   checkContradictions
-} from './rules';
+} from './rules.js';
 
 /**
  * 5 = Excellent (0 flags)

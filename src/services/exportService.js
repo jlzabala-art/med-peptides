@@ -1,6 +1,7 @@
-import { productRepository } from '../repositories/productRepository';
-import { protocolRepository } from '../repositories/protocolRepository';
-import { faqRepository } from '../repositories/faqRepository';
+ 
+import { productRepository } from '../repositories/productRepository.js';
+import { protocolRepository } from '../repositories/protocolRepository.js';
+import { faqRepository } from '../repositories/faqRepository.js';
 
 /**
  * Service to execute deep data exports.

@@ -1,3 +1,4 @@
+ 
 /**
  * productRepository.js
  *
@@ -29,11 +30,127 @@ import {
   orderBy,
 } from 'firebase/firestore';
 import { db } from '../firebase';
+// v2 canonical catalog — replaces legacy data/products.js enrichment
+import { catalog as localProducts } from '../data/v2/index.js';
+
+// Build a lookup map from normalised product name → local enrichment fields.
+// This is built once at module load time (O(n), tiny dataset).
+// Maps a v2 canonical product to the enrichment shape used by _resolveLocalEnrich.
+// v2 stores search fields in classification.* and science.*
+const _buildEnrichEntry = (p) => ({
+  goals:            p.classification?.goals            ?? p.goals            ?? [],
+  secondaryFactors: p.classification?.secondaryFactors ?? p.secondaryFactors  ?? [],
+  tags:             p.classification?.tags             ?? p.tags             ?? [],
+  mechanisms:       p.classification?.mechanisms       ?? p.mechanisms       ?? [],
+  semanticKeywords: p.classification?.semanticKeywords ?? p.semanticKeywords ?? [],
+  synonyms:         p.synonyms                        ?? [],
+  objective:        p.science?.objective               ?? p.objective        ?? '',
+  desc:             p.science?.desc                   ?? p.desc             ?? '',
+  searchAliases:    p.searchAliases                   ?? [],
+  scientificName:   p.science?.iupacName              ?? p.scientificName   ?? '',
+  displayName:      p.displayName                     || p.name             || '',
+  name:             p.name                            ?? '',
+  aiContent:        p.aiContent                       ?? null,
+  pharmacology:     p.pharmacology                    ?? null,
+});
+
+// Primary key: exact normalised name (e.g. "tb-500 (thymosin β4)")
+const _localEnrichmentByName = new Map(
+  localProducts.map((p) => [(p.name ?? '').toLowerCase().trim(), _buildEnrichEntry(p)])
+);
+
+// Secondary key: the "base" token before any parenthetical, normalised
+// e.g. "TB-500 (Thymosin β4)" → "tb-500"
+// This lets us match Firestore docs whose name is just the short form.
+const _localEnrichmentBySlug = new Map();
+for (const p of localProducts) {
+  const full = (p.name ?? '').toLowerCase().trim();
+  // Extract everything before the first '(' or other delimiter
+  const baseSlug = full.replace(/\s*[(/|].*$/, '').trim();
+  if (baseSlug && baseSlug !== full && !_localEnrichmentBySlug.has(baseSlug)) {
+    _localEnrichmentBySlug.set(baseSlug, _buildEnrichEntry(p));
+  }
+  // Also index by each alias so alias-named Firestore docs are found
+  for (const alias of (p.searchAliases ?? [])) {
+    const aliasKey = alias.toLowerCase().trim();
+    if (aliasKey && !_localEnrichmentBySlug.has(aliasKey)) {
+      _localEnrichmentBySlug.set(aliasKey, _buildEnrichEntry(p));
+    }
+  }
+}
+
+/**
+ * Resolve local enrichment for a Firestore product doc using multiple fallback
+ * strategies so that partial or differently-formatted names still match.
+ *
+ * Priority:
+ *   1. Exact name match
+ *   2. Base slug match (name before first parenthesis)
+ *   3. Alias index match
+ *   4. Prefix substring match (Firestore name starts with a local product name token)
+ */
+function _resolveLocalEnrich(firestoreName, firestoreId) {
+  const nameKey = (firestoreName ?? '').toLowerCase().trim();
+
+  // 1. Exact match
+  if (_localEnrichmentByName.has(nameKey)) return _localEnrichmentByName.get(nameKey);
+
+  // 2. Base-slug match (strip parenthetical from Firestore name too)
+  const baseKey = nameKey.replace(/\s*[(/|].*$/, '').trim();
+  if (baseKey && _localEnrichmentByName.has(baseKey)) return _localEnrichmentByName.get(baseKey);
+  if (baseKey && _localEnrichmentBySlug.has(baseKey)) return _localEnrichmentBySlug.get(baseKey);
+
+  // 3. Alias / secondary slug index
+  if (_localEnrichmentBySlug.has(nameKey)) return _localEnrichmentBySlug.get(nameKey);
+
+  // 4. Doc ID heuristic: Firestore IDs are often slug-like (e.g. "tb-500-2mg")
+  const idKey = (firestoreId ?? '').toLowerCase()
+    .replace(/-\d+(\.\d+)?(mg|mcg|iu|ml|g|kg|unit|vial|kit|pack|tab|cap|amp).*$/i, '')
+    .trim();
+  if (idKey && _localEnrichmentByName.has(idKey)) return _localEnrichmentByName.get(idKey);
+  if (idKey && _localEnrichmentBySlug.has(idKey)) return _localEnrichmentBySlug.get(idKey);
+
+  // 5. Partial prefix: any local product whose name starts with our key
+  for (const [localName, enrich] of _localEnrichmentByName) {
+    if (localName.startsWith(nameKey) || nameKey.startsWith(localName.replace(/\s*[(].*$/, '').trim())) {
+      return enrich;
+    }
+  }
+
+  // No match found — warn in dev so mismatches are easy to spot exactly once
+  if (import.meta.env.DEV && (firestoreName || firestoreId)) {
+    const warnKey = `${firestoreName}_${firestoreId}`;
+    if (!globalThis.__warnedMismatches) {
+      globalThis.__warnedMismatches = new Set();
+    }
+    if (!globalThis.__warnedMismatches.has(warnKey)) {
+      globalThis.__warnedMismatches.add(warnKey);
+      console.warn(
+        `[productRepository] No local enrichment found for Firestore product: name="${firestoreName}", id="${firestoreId}". ` +
+        `Search scoring will rely on Firestore fields only. Add an entry to src/data/products.js to fix.`
+      );
+    }
+  }
+
+  return {}; // no match
+}
 
 // ── Collection helpers ────────────────────────────────────────────────────────
 const productsCol  = ()          => collection(db, 'products');
 const variantsCol  = (productId) => collection(db, 'products', productId, 'variants');
 const suppliersCol = ()          => collection(db, 'suppliers');
+
+// ── Module-level cache ────────────────────────────────────────────────────────
+// Caches active products for 5 minutes to avoid repeated Firestore round-trips
+// on re-renders or navigation back to the home page.
+let _activeProductsCache = null;
+let _activeProductsCacheTime = 0;
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+export function invalidateProductsCache() {
+  _activeProductsCache = null;
+  _activeProductsCacheTime = 0;
+}
 
 // ── Product-level queries ─────────────────────────────────────────────────────
 
@@ -52,13 +169,44 @@ export async function getAllProducts() {
 }
 
 /**
- * Fetch only active products (status === 'active').
+ * Fetch only active products.
+ * - Returns from cache if data is < 5 minutes old.
+ * - Fetches the full collection and filters client-side so that:
+ *   (a) No composite Firestore index is required.
+ *   (b) Documents missing both `isActive` and `status` fields are treated as
+ *       active (permissive default) rather than silently excluded.
  */
 export async function getActiveProducts() {
+  // Return cached data if still fresh
+  if (_activeProductsCache && (Date.now() - _activeProductsCacheTime < CACHE_TTL_MS)) {
+    return _activeProductsCache;
+  }
+
   try {
-    const q = query(productsCol(), where('status', '==', 'active'));
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    // Full collection scan — safe for small/medium catalogs and avoids index deps.
+    const snap = await getDocs(productsCol());
+
+    const results = [];
+    for (const d of snap.docs) {
+      const data = d.data();
+
+      // Treat a document as "inactive" only when explicitly flagged:
+      //   isActive === false  OR  status === 'inactive' | 'draft' | 'archived'
+      // Documents that have neither field are considered active.
+      const explicitlyInactive =
+        data.isActive === false ||
+        (data.status && !['active', 'published'].includes(data.status));
+
+      if (!explicitlyInactive) {
+        results.push({ id: d.id, ...data });
+      }
+    }
+
+    // Cache the result
+    _activeProductsCache = results;
+    _activeProductsCacheTime = Date.now();
+
+    return results;
   } catch (err) {
     console.error('[productRepository] getActiveProducts:', err);
     throw err;
@@ -91,8 +239,21 @@ export async function getVariants(productId) {
     const snap = await getDocs(q);
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (err) {
+    // Firestore throws when `sortOrder` field doesn't exist on some docs
+    // (requires a composite index). Fall back to unordered fetch + client sort.
+    if (err?.code === 'failed-precondition' || err?.message?.includes('index')) {
+      console.warn(`[productRepository] getVariants(${productId}): index missing, falling back to client-side sort`);
+      try {
+        const snap = await getDocs(variantsCol(productId));
+        const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        return docs.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+      } catch (fallbackErr) {
+        console.error(`[productRepository] getVariants fallback(${productId}):`, fallbackErr);
+        return []; // never block the parent query
+      }
+    }
     console.error(`[productRepository] getVariants(${productId}):`, err);
-    throw err;
+    return []; // return empty array instead of throwing so getCatalog can continue
   }
 }
 
@@ -182,14 +343,14 @@ export async function getCatalog() {
       products.map(async (product) => {
         const subcollectionVariants = await getVariants(product.id);
 
-        // Build a synthetic variant for each subcollection entry, injecting
-        // the parent doc's dosage so the UI can display it on the button.
         const variants = subcollectionVariants.map((v) => ({
           ...v,
           _docId: product.id,
           // Prefer dosage already on the subcollection variant; fall back to
           // the parent doc's top-level dosage field.
           dosage: v.dosage || product.dosage || null,
+          supplier: v.supplier || product.supplier || null,
+          isProfessional: v.isProfessional !== undefined ? v.isProfessional : (product.isProfessional || false),
         }));
 
         return { ...product, variants };
@@ -202,7 +363,7 @@ export async function getCatalog() {
     const groups = new Map(); // name → { base product, variants[] }
 
     for (const product of enriched) {
-      const key = (product.name ?? product.id).trim();
+      const key = (product.name ?? product.id ?? '').trim() || product.id || `_unknown_${Math.random()}`;
 
       if (!groups.has(key)) {
         groups.set(key, { base: product, variants: [] });
@@ -230,7 +391,45 @@ export async function getCatalog() {
       });
 
       const defaultVariant = variants.find((v) => v.isDefault) ?? variants[0] ?? null;
-      catalog.push({ ...base, variants, defaultVariant });
+      // ── Merge local search enrichment ──────────────────────────────────
+      // Firestore product docs rarely carry goals/semanticKeywords/etc.
+      // We merge them from the local products.js master list using a multi-
+      // strategy lookup that handles name mismatches (e.g. "TB-500" in Firestore
+      // vs "TB-500 (Thymosin β4)" locally).
+      const localEnrich = _resolveLocalEnrich(base.name, base.id);
+
+      // If local enrichment resolved a name/displayName and Firestore lacks one,
+      // use it so the search engine always has something to score against.
+      const resolvedName        = base.name        || localEnrich.name        || base.id || '';
+      const resolvedDisplayName = base.displayName || localEnrich.displayName || resolvedName;
+
+      catalog.push({
+        ...base,
+        name:             resolvedName,
+        displayName:      resolvedDisplayName,
+        // ── Canonical Phase 5-7 fields — explicit so callers can rely on them ──
+        // productType is stamped by migrations and by supplementRepository; default 'peptide'
+        productType:      base.productType ?? 'peptide',
+        // aiContent: clinicalBrief, contraindications, synergies (Phase 10)
+        aiContent:        base.aiContent   || localEnrich.aiContent || null,
+        // pharmacology: halfLife, receptorTargets (Phase 10)
+        pharmacology:     base.pharmacology || localEnrich.pharmacology || null,
+        // typeData: type-specific metadata block (Phase 7)
+        typeData:         base.typeData    ?? null,
+        // ── Search-enrichment fields: local data wins if Firestore lacks them ──
+        goals:            base.goals?.length            ? base.goals            : localEnrich.goals            ?? [],
+        secondaryFactors: base.secondaryFactors?.length  ? base.secondaryFactors  : localEnrich.secondaryFactors  ?? [],
+        tags:             base.tags?.length             ? base.tags             : localEnrich.tags             ?? [],
+        mechanisms:       base.mechanisms?.length       ? base.mechanisms       : localEnrich.mechanisms       ?? [],
+        semanticKeywords: base.semanticKeywords?.length ? base.semanticKeywords : localEnrich.semanticKeywords ?? [],
+        synonyms:         base.synonyms?.length         ? base.synonyms         : localEnrich.synonyms         ?? [],
+        objective:        base.objective  || localEnrich.objective  || '',
+        desc:             base.desc       || localEnrich.desc       || '',
+        searchAliases:    base.searchAliases?.length    ? base.searchAliases    : localEnrich.searchAliases    ?? [],
+        scientificName:   base.scientificName || localEnrich.scientificName || '',
+        variants,
+        defaultVariant,
+      });
     }
 
     // Sort by category then displayName
@@ -241,7 +440,7 @@ export async function getCatalog() {
     });
   } catch (err) {
     console.error('[productRepository] getCatalog:', err);
-    throw err;
+    return []; // return empty array — never block the UI
   }
 }
 

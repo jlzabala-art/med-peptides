@@ -1,52 +1,53 @@
-import { getPubMedLiterature } from './pubmedService';
-import { protocolRepository } from '../repositories/protocolRepository';
-import { runClinicalValidation } from './validationEngine';
-import { resolveVariantPrice } from '../utils/resolvePrice';
-import { PRICING_TIER } from '../constants/productEnums';
+/* eslint-disable no-unused-vars */
+import { getPubMedLiterature } from './pubmedService.js';
+import { protocolRepository } from '../repositories/protocolRepository.js';
+import { runClinicalValidation } from './validationEngine.js';
+import { resolveVariantPrice } from '../utils/resolvePrice.js';
+import { PRICING_TIER } from '../constants/productEnums.js';
+import { parseDosageToMg } from '../utils/dosageUtils.js';
+import { getPeptidePK } from '../data/peptidePharmacokinetics.js';
 
-// Extracted from ProtocolBuilder.jsx
+// Extracted from ProtocolFinder.jsx
 export const GOAL_MAPPING = {
-  "Weight Management / Obesity": ["glp-1", "metabolic", "appetite", "fat loss", "weight-loss", "tirzepatide", "semaglutide"],
-  "Metabolic Health": ["insulin", "glucose", "metabolic", "mitochondrial", "tesofensine", "metformin"],
-  "Recovery / Injury": ["repair", "healing", "joint", "muscle", "bpc-157", "tb-500", "ghk-cu"],
-  "Cognitive Support": ["brain", "focus", "neuro", "nootropic", "cerebrolysin", "semax", "selank"],
-  "Sleep Support": ["rest", "circadian", "deep sleep", "delta-sleep", "dsip", "epitalon"],
-  "Hormonal Support": ["gh", "testosterone", "igf-1", "hgh", "ipamorelin", "tesamorelin", "cjc-1295"],
-  "Skin / Anti-Aging": ["collagen", "rejuvenation", "telomere", "ghk-cu", "epitalon", "foxo4-dri"],
-  "Immune / Inflammation": ["modulation", "cytokine", "systemic", "ta1", "thymosin alpha", "ll-37"],
-  "Energy / Mitochondrial": ["atp", "mitophagy", "stamina", "nad+", "mot-c", "ss-31"],
-  "Longevity": ["longevity", "aging", "lifespan", "telomeres", "senescence", "epithalon", "mitochondria"]
+  "Metabolic & Weight":      ["glp-1", "metabolic", "appetite", "fat loss", "weight-loss", "tirzepatide", "semaglutide", "insulin", "glucose", "mitochondrial", "tesofensine", "metformin", "atp", "mitophagy", "stamina", "nad+", "mot-c", "ss-31"],
+  "Recovery & Repair":       ["repair", "healing", "joint", "muscle", "bpc-157", "tb-500", "ghk-cu", "modulation", "cytokine", "systemic", "ta1", "thymosin alpha", "ll-37"],
+  "Cognitive & Mood":        ["brain", "focus", "neuro", "nootropic", "cerebrolysin", "semax", "selank"],
+  "Sleep & Circadian":       ["rest", "circadian", "deep sleep", "delta-sleep", "dsip", "epitalon", "melatonin", "sleep architecture"],
+  "Longevity & Anti-Aging":  ["longevity", "aging", "lifespan", "telomeres", "senescence", "epithalon", "mitochondria", "collagen", "rejuvenation", "telomere", "ghk-cu", "foxo4-dri"],
+  "Hormonal Optimization":   ["gh", "testosterone", "igf-1", "hgh", "ipamorelin", "tesamorelin", "cjc-1295", "gh axis"],
+  "Immune Support":          ["immune", "inflammation", "ta1", "thymosin alpha", "ll-37", "kpv"],
 };
 
 // Map primary conditions from UI to exact pre-calculated JSON templates
 export const TEMPLATE_MATCH_ENGINE = {
-  "Weight Management / Obesity": ["wm_001", "wm_002", "wm_003", "wm_004"],
-  "Metabolic Health": ["met_001", "met_002"],
-  "Recovery / Injury": ["rec_001", "rec_002", "neuro_001"],
-  "Cognitive Support": ["cog_001", "cog_002"],
-  "Sleep Support": ["sleep_001", "sleep_002"], 
-  "Hormonal Support": ["horm_001", "horm_002"], 
-  "Skin / Anti-Aging": ["skin_001", "skin_002"],
-  "Immune / Inflammation": ["immune_001", "immune_002"],
-  "Energy / Mitochondrial": ["energy_001", "energy_002"],
-  "Longevity": ["lon_001", "lon_002"]
+  "Metabolic & Weight":      ["wm_001", "wm_002", "wm_003", "wm_004", "met_001", "met_002", "energy_001", "energy_002"],
+  "Recovery & Repair":       ["rec_001", "rec_002", "neuro_001", "immune_001", "immune_002"],
+  "Cognitive & Mood":        ["cog_001", "cog_002"],
+  "Sleep & Circadian":       ["sleep_001", "sleep_002"],
+  "Longevity & Anti-Aging":  ["lon_001", "lon_002", "skin_001", "skin_002"],
+  "Hormonal Optimization":   ["horm_001", "horm_002"],
+  "Immune Support":          ["immune_001", "immune_002"],
 };
 
 export const MONITORING_TEMPLATES = {
-  "Weight Management / Obesity": [
+  "Metabolic & Weight": [
     { week: 0, labs: ["CMP", "Lipid Panel", "HbA1c", "Thyroid Panel"], note: "Baseline Metabolic Screening" },
     { week: 4, labs: ["CMP", "Glucose"], note: "Early Adaptation Check" },
     { week: 8, labs: ["CMP", "Lipid Panel"], note: "Mid-Protocol Assessment" },
     { week: 12, labs: ["CMP", "HbA1c", "Lipid Panel"], note: "Final Phase Verification" }
   ],
-  "Recovery / Injury": [
+  "Recovery & Repair": [
     { week: 0, labs: ["CBC", "CRP", "ESR"], note: "Baseline Inflammation Markers" },
     { week: 4, labs: ["CRP"], note: "Recovery Progress Check" },
     { week: 8, labs: ["CBC", "CRP"], note: "End-of-Protocol Verification" }
   ],
-  "Cognitive Support": [
+  "Cognitive & Mood": [
     { week: 0, labs: ["Vitamin B12", "Folate", "Thyroid Panel"], note: "Baseline Neurological Screening" },
     { week: 12, labs: ["Vitamin B12"], note: "Maintenance Check" }
+  ],
+  "Sleep & Circadian": [
+    { week: 0, labs: ["Cortisol (Morning)", "Melatonin (Salivary)"], note: "Baseline Circadian Assessment" },
+    { week: 8, labs: ["Cortisol (Evening)"], note: "Rhythm Reset Verification" }
   ],
   "DEFAULT": [
     { week: 0, labs: ["CMP", "CBC"], note: "Baseline Safety Labs" },
@@ -56,12 +57,12 @@ export const MONITORING_TEMPLATES = {
 };
 
 export const RISK_MANAGEMENT_TEMPLATES = {
-  "Weight Management / Obesity": {
+  "Metabolic & Weight": {
     commonSideEffects: ["Nausea", "Gastrointestinal discomfort", "Decreased appetite", "Mild fatigue"],
     escalationPauseRules: "If Grade 2 nausea persists for >48h, pause escalation for 1 week and maintain current dosage.",
     safetyWarnings: "Ensure adequate protein intake (1.2g/kg). Monitor for signs of hypoglycemia if combined with other secretagogues."
   },
-  "Recovery / Injury": {
+  "Recovery & Repair": {
     commonSideEffects: ["Site irritation", "Mild flushing", "Inflammation at injury site (transient)"],
     escalationPauseRules: "If systemic inflammation symptoms increase, reduce frequency by 50% for 3 days.",
     safetyWarnings: "Follow aseptic technique for all administrations. Avoid direct injection into joint space unless directed by physician."
@@ -75,28 +76,70 @@ export const RISK_MANAGEMENT_TEMPLATES = {
 
 // Retain for signature compatibility
 export const parseDosage = (dosageStr) => {
-  if (!dosageStr) return 5;
-  const match = dosageStr.match(/(\d+\.?\d*)\s*(mg|iu|mcg)/i);
-  if (!match) return 5;
-  let val = parseFloat(match[1]);
-  if (match[2].toLowerCase() === 'mcg') val = val / 1000;
-  return val;
+  return parseDosageToMg(dosageStr);
 };
 
 // Advanced Vial Calculation Logic
 // Used for validation and backward compatibility
-export const calculateVialsNeeded = (mgPerWeek, weeks, mgPerVial, stabilityDays = 30) => {
-  if (!mgPerWeek || !weeks || !mgPerVial) return 1;
-  const totalMgNeeded = mgPerWeek * weeks;
+export const calculateVialsNeeded = (mgPerWeek, weeks, mgPerVial, stabilityDays = 30, compoundName = '') => {
+  if (!mgPerWeek || !weeks || !mgPerVial) {
+    return {
+      totalMgNeeded: "0.00",
+      vialsRequired: 1,
+      vialsByStability: 1,
+      vialsByVolume: 1,
+      halfLifeHours: 24,
+      hubWasteAppliedPct: 5
+    };
+  }
+
+  // Sourced from peptide PK database to determine metabolic clearance rate and dead space loss
+  let pk = null;
+  if (compoundName) {
+    const nameLower = compoundName.toLowerCase();
+    if (nameLower.includes('bpc')) pk = getPeptidePK('bpc-157');
+    else if (nameLower.includes('tb')) pk = getPeptidePK('tb-500');
+    else if (nameLower.includes('tirz')) pk = getPeptidePK('tirzepatide');
+    else if (nameLower.includes('sema')) pk = getPeptidePK('semaglutide');
+    else if (nameLower.includes('reta')) pk = getPeptidePK('retatrutide');
+    else if (nameLower.includes('ipam')) pk = getPeptidePK('ipamorelin');
+    else if (nameLower.includes('cjc') && nameLower.includes('dac')) pk = getPeptidePK('cjc-1295-dac');
+    else if (nameLower.includes('cjc')) pk = getPeptidePK('cjc-1295-no-dac');
+    else if (nameLower.includes('ghk')) pk = getPeptidePK('ghk-cu');
+    else if (nameLower.includes('serm')) pk = getPeptidePK('sermorelin');
+    else if (nameLower.includes('epith')) pk = getPeptidePK('epithalon');
+    else if (nameLower.includes('sela')) pk = getPeptidePK('selank');
+    else if (nameLower.includes('semax')) pk = getPeptidePK('semax');
+    else if (nameLower.includes('aod')) pk = getPeptidePK('aod-9604');
+    else if (nameLower.includes('hgh')) pk = getPeptidePK('hgh');
+    else pk = getPeptidePK(compoundName);
+  }
+
+  // Determine Hub Waste Multiplier based on biological half-life clearance profiles:
+  // - Short half-life (< 12 hours) requires high-frequency dosing (e.g. daily) -> 15% syringe dead-space loss
+  // - Mid half-life (12-72 hours) requires multi-week dosing (e.g. 2-3x/week) -> 10% dead-space loss
+  // - Long half-life (> 72 hours) requires single weekly dosing -> 5% dead-space loss
+  const halfLifeHours = pk ? pk.halfLifeHours : 24;
+  let hubWasteFactor = 1.05; // 5% default
+  if (halfLifeHours <= 12) {
+    hubWasteFactor = 1.15; // 15% for rapid clearers requiring frequent shots
+  } else if (halfLifeHours <= 72) {
+    hubWasteFactor = 1.10; // 10% for medium-range clearers
+  }
+
+  const totalMgNeeded = mgPerWeek * weeks * hubWasteFactor;
   const vialsByVolume = Math.ceil(totalMgNeeded / mgPerVial);
   const stabilityWeeks = stabilityDays / 7;
   const vialsByStability = Math.ceil(weeks / stabilityWeeks);
   const actualVials = Math.max(vialsByVolume, vialsByStability);
+
   return {
     totalMgNeeded: totalMgNeeded.toFixed(2),
     vialsRequired: actualVials,
     vialsByStability,
-    vialsByVolume
+    vialsByVolume,
+    halfLifeHours,
+    hubWasteAppliedPct: Math.round((hubWasteFactor - 1) * 100)
   };
 };
 
@@ -123,7 +166,7 @@ export const calculateClinicalCost = (blueprint, products) => {
       if (!pricePerVial) return;
       const mgPerVialActual = productMatch ? parseDosage(productMatch.dosage) : 5;
       const weeklyDose = parseFloat(med.weeklyDose || med.weekly_dose || 0);
-      const calcInfo = calculateVialsNeeded(weeklyDose, phaseDur, mgPerVialActual);
+      const calcInfo = calculateVialsNeeded(weeklyDose, phaseDur, mgPerVialActual, 30, name);
       
       if (kitPrice && calcInfo.vialsRequired >= 10) {
         const kits = Math.floor(calcInfo.vialsRequired / 10);
@@ -202,18 +245,33 @@ const adaptTemplateForUI = (t, startDateStr = null, products = []) => {
       const { perUnit: drugPricePerVial = 0 } = drugVariant
         ? resolveVariantPrice(drugVariant, { tier: PRICING_TIER.RETAIL })
         : {};
-      const drugCost = (d.vials_required_for_phase || 0) * drugPricePerVial;
+
+      // Calculate actual dosage per vial and weekly dosage in mg
+      const mgPerVialActual = match ? parseDosage(match.dosage || match.name) : 5;
+      const weeklyDose = parseDosage(d.weekly_dose || d.per_administration_dose || "0");
+
+      // Compute actual vials using PK-informed half-life waste calculation
+      let vialsReq = d.vials_required_for_phase || 0;
+      if (weeklyDose > 0) {
+        const calcInfo = calculateVialsNeeded(weeklyDose, pDur, mgPerVialActual, 30, name);
+        vialsReq = calcInfo.vialsRequired;
+      } else {
+        vialsReq = Math.max(1, Math.ceil(vialsReq * (parseDosage("5mg") / mgPerVialActual))); // Rough heuristic
+      }
+
+      const drugCost = vialsReq * drugPricePerVial;
       phaseBreakdown.cost += drugCost;
       phaseBreakdown.vials.push({
         name,
-        qty: d.vials_required_for_phase || 0,
+        qty: vialsReq,
         cost: drugCost
       });
 
       return {
         ...d,
         product_id: match?.id || d.product_id || `prod_${d.product_slug}`,
-        product_title: match?.name || name
+        product_title: match?.name || name,
+        vials_required_for_phase: vialsReq
       };
     });
 
@@ -328,14 +386,7 @@ const adaptTemplateForUI = (t, startDateStr = null, products = []) => {
           }
       }
 
-      const weeklyDose = parseDosage(d.weekly_dose || d.per_administration_dose || "0");
-      let vialsReq = d.vials_required_for_phase || 0;
-      
-      if (weeklyDose > 0) {
-        vialsReq = Math.ceil((weeklyDose * weeks) / mgPerVialActual);
-      } else {
-        vialsReq = Math.max(1, Math.ceil(vialsReq * (parseDosage("5mg") / mgPerVialActual))); // Rough heuristic
-      }
+      const vialsReq = d.vials_required_for_phase || 1;
 
       if (!aggregateVialsMap[name]) {
         aggregateVialsMap[name] = { 

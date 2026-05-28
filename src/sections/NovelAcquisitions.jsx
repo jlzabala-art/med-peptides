@@ -1,3 +1,4 @@
+ 
 import { Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PeptideCard from '../components/common/PeptideCard';
@@ -44,7 +45,9 @@ export default function NovelAcquisitions({ onSelectProduct }) {
     if (onSelectProduct) {
       onSelectProduct(p.name);
     } else {
-      navigate(`/product/${p.slug}`);
+      // Derive name-based slug to match ProductTemplate's resolver (not Firestore doc ID)
+      const nameSlug = p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug;
+      navigate(`/product/${nameSlug}`);
     }
   };
 

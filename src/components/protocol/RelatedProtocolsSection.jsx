@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * RelatedProtocolsSection.jsx
  * Phase 9 — Dynamically matched related protocols using clinical similarity scoring.
@@ -54,7 +55,7 @@ const THEME_MAP = {
   },
 };
 
-function getTheme(id) {
+export function getTheme(id) {
   return THEME_MAP[id] || {
     gradient: 'linear-gradient(135deg,#003666 0%,#0071bd 100%)',
     glow: 'rgba(0,112,192,0.18)', accent: '#60a5fa', Icon: FlaskConical,
@@ -62,7 +63,7 @@ function getTheme(id) {
 }
 
 // ── Related Protocol Card ─────────────────────────────────────────────────
-function RelatedCard({ id, protocol, matchReason, onClick }) {
+export function RelatedCard({ id, protocol, matchReason, onClick }) {
   const [hovered, setHovered] = useState(false);
   const theme = getTheme(id);
   const { Icon } = theme;
@@ -152,9 +153,9 @@ function RelatedCard({ id, protocol, matchReason, onClick }) {
             lineHeight: 1.3,
             letterSpacing: '-0.01em',
           }}>
-            {protocol.title}
+            {protocol.title || protocol.name}
           </h3>
-          {protocol.summary?.goal && (
+          {(protocol.summary?.goal || protocol.shortDescription) && (
             <p style={{
               margin: '0.3rem 0 0',
               fontSize: '0.75rem',
@@ -165,7 +166,7 @@ function RelatedCard({ id, protocol, matchReason, onClick }) {
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
             }}>
-              {protocol.summary.goal}
+              {protocol.summary?.goal || protocol.shortDescription}
             </p>
           )}
         </div>

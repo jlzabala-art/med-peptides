@@ -1,0 +1,364 @@
+/* ═══════════════════════════════════════════════════════════════
+   HORMONE PELLETS COLLECTION PAGE
+   Tokens delegate to global clinical palette in tokens.css
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Page wrapper ───────────────────────────────────────────── */
+.pellets-page-wrapper {
+  background: var(--background, #F4F8FB);
+  min-height: 100vh;
+  color: var(--text-main, #0D1B2E);
+}
+
+/* ── Hero Banner ────────────────────────────────────────────── */
+.pellets-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--gradient-clinical, linear-gradient(160deg, #003666 0%, #0A4D8C 45%, #1565C0 100%));
+  padding: clamp(3rem, 6vw, 5rem) 0 clamp(2.5rem, 5vw, 4rem);
+  isolation: isolate;
+}
+
+.pellets-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 55% at 80% 50%, rgba(0, 150, 204, 0.22) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 40% at 20% 80%, rgba(21, 101, 192, 0.18) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* floating orb accents */
+.pellets-hero::after {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,150,204,0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pellets-hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 3rem);
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+}
+
+.pellets-hero-content {
+  flex: 1;
+}
+
+.pellets-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 1.25rem;
+}
+
+.pellets-hero-badge svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.85;
+}
+
+.pellets-hero-title {
+  font-family: var(--font-heading, 'Outfit', sans-serif);
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  color: #fff;
+  margin: 0 0 1rem;
+}
+
+.pellets-hero-title span {
+  background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 50%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pellets-hero-subtitle {
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+  color: rgba(255,255,255,0.75);
+  line-height: 1.65;
+  max-width: 540px;
+  margin: 0 0 2rem;
+}
+
+.pellets-hero-stats {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.pellets-hero-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pellets-hero-stat-value {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+
+.pellets-hero-stat-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.55);
+  font-weight: 600;
+}
+
+.pellets-hero-visual {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pellets-hero-icon-ring {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  animation: pellet-ring-pulse 3s ease-in-out infinite;
+}
+
+.pellets-hero-icon-ring::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+@keyframes pellet-ring-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,150,204,0); }
+  50%       { box-shadow: 0 0 0 20px rgba(0,150,204,0.08); }
+}
+
+/* ── Toolbar (search + filters) ─────────────────────────────── */
+.pellets-toolbar {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 1.5rem clamp(1.25rem, 4vw, 3rem);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.pellets-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.pellets-search-icon {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--secondary, #0096CC);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.pellets-search-input {
+  width: 100%;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #D8E6F0);
+  border-radius: 8px;
+  padding: 0.7rem 1rem 0.7rem 2.6rem;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pellets-search-input:focus {
+  outline: none;
+  border-color: var(--secondary, #0096CC);
+  box-shadow: 0 0 0 3px rgba(0,150,204,0.1);
+}
+
+.pellets-filter-chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pellets-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--border, #D8E6F0);
+  background: var(--surface, #fff);
+  color: var(--text-muted, #4A6080);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.pellets-chip:hover {
+  border-color: var(--secondary, #0096CC);
+  color: var(--primary, #003666);
+  background: var(--accent-soft, rgba(0,150,204,0.06));
+}
+
+.pellets-chip.active {
+  background: var(--primary, #003666);
+  color: #fff;
+  border-color: var(--primary, #003666);
+}
+
+/* ── Main content area ──────────────────────────────────────── */
+.pellets-content {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 3rem) 5rem;
+}
+
+/* ── Results bar ────────────────────────────────────────────── */
+.pellets-results-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.pellets-results-count {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.pellets-results-count strong {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+/* ── Grid ───────────────────────────────────────────────────── */
+.pellets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* ── Empty State ────────────────────────────────────────────── */
+.pellets-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+}
+
+.pellets-empty-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 1rem;
+  opacity: 0.35;
+}
+
+.pellets-empty h3 {
+  font-size: 1.1rem;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.pellets-empty p {
+  font-size: 0.9rem;
+}
+
+/* ── Loading skeleton ───────────────────────────────────────── */
+.pellets-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  gap: 0.75rem;
+}
+
+.pellets-skeleton-card {
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: linear-gradient(90deg, var(--section-alt) 25%, var(--border-light) 50%, var(--section-alt) 75%);
+  background-size: 800px 100%;
+  animation: pellets-shimmer 1.4s infinite linear;
+  height: 240px;
+}
+
+@keyframes pellets-shimmer {
+  from { background-position: -800px 0; }
+  to   { background-position:  800px 0; }
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .pellets-hero-inner {
+    flex-direction: column;
+    gap: 2rem;
+    text-align: center;
+  }
+  .pellets-hero-subtitle {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .pellets-hero-stats {
+    justify-content: center;
+  }
+  .pellets-hero-visual {
+    display: none;
+  }
+  .pellets-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .pellets-search-wrap {
+    min-width: 0;
+  }
+  .pellets-grid {
+    grid-template-columns: 1fr;
+  }
+}

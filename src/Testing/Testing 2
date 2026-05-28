@@ -1,16 +1,16 @@
 
 
-MASTER PROMPT — Automated Clinical Protocol Selection Test Suite (Protocol Builder 2.0)
+MASTER PROMPT — Automated Clinical Protocol Selection Test Suite (Protocol Finder 2.0)
 
-Project: ReGen PEPT — Protocol Builder 2.0
-Location: /protocol builder 2.0
+Project: Med-Peptides — Protocol Finder 2.0
+Location: /protocol finder 2.0
 Module: Protocol Selection Engine
 Target: All Clinical Protocols in Model 2.0
 Priority: HIGH — Protocol Routing Validation
 
 ⸻
 
-Implement an automated test framework that validates that each protocol defined in the Protocol Builder 2.0 library is correctly selected when appropriate patient input data is provided.
+Implement an automated test framework that validates that each protocol defined in the Protocol Finder 2.0 library is correctly selected when appropriate patient input data is provided.
 
 The objective of this system is to simulate real patient profiles and verify that the correct protocol is selected according to clinical logic, priority rules, and protocol routing hierarchy.
 
@@ -434,7 +434,7 @@ Safety logic is synchronized.
 GLP1 protocols appear correctly when required.
 Protocol routing becomes clinically reliable.
 
-This test suite becomes the permanent validation engine for Protocol Builder 2.0.
+This test suite becomes the permanent validation engine for Protocol Finder 2.0.
 
 ⸻
 

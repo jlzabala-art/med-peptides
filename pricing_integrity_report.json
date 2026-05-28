@@ -1,186 +1,394 @@
 {
-  "totalAudited": 101,
-  "validatedLegacyMatches": 70,
-  "mismatchedOverridesActive": 8,
+  "totalAudited": 57,
+  "validatedLegacyMatches": 0,
+  "mismatchedOverridesActive": 34,
   "discrepancies": [
     {
-      "name": "TB-500",
-      "strength": "2 mg",
-      "status": "MISSING_IN_WHOLESALE"
-    },
-    {
-      "name": "GLOW",
-      "strength": "10/10/75 mg",
-      "status": "MISSING_IN_WHOLESALE"
-    },
-    {
-      "name": "KLOW",
-      "strength": "10/10/75/10 mg",
+      "name": "BPC-157",
+      "strength": "5mg/vial",
       "status": "PRICE_MISMATCH",
-      "legacyVialPrice": 70,
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 27.5,
+      "difference": null
+    },
+    {
+      "name": "TB-500 (Thymosin β4)",
+      "strength": "2mg/vial",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "GLOW (BPC-157/TB-500/GHK-Cu)",
+      "strength": "10/10/75mg/vial",
+      "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "KLOW (BPC-157/TB-500/GHK-Cu/KPV)",
+      "strength": "10/10/75/10mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
       "wholesaleVialPrice": 154,
-      "difference": 84
+      "difference": null
     },
     {
       "name": "KPV",
-      "strength": "5 mg",
+      "strength": "5mg/vial",
       "status": "MISSING_IN_WHOLESALE"
     },
     {
       "name": "ARA-290",
-      "strength": "16 mg",
+      "strength": "16mg/vial",
       "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "Tirzepatide",
+      "strength": "10mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 66,
+      "difference": null
+    },
+    {
+      "name": "Tirzepatide",
+      "strength": "15mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 44,
+      "difference": null
+    },
+    {
+      "name": "Tirzepatide",
+      "strength": "30mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 154,
+      "difference": null
+    },
+    {
+      "name": "Retatrutide",
+      "strength": "10mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 99,
+      "difference": null
+    },
+    {
+      "name": "Semaglutide",
+      "strength": "5mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 41.8,
+      "difference": null
+    },
+    {
+      "name": "Cagrilintide",
+      "strength": "5mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 44,
+      "difference": null
+    },
+    {
+      "name": "AOD-9604",
+      "strength": "2mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 33,
+      "difference": null
     },
     {
       "name": "5-AMINO 1 MQ",
-      "strength": "50 mg/tablet",
+      "strength": "50mg/tablet",
       "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "MOTS-C",
+      "strength": "10mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 77,
+      "difference": null
     },
     {
       "name": "SLU PP-332",
-      "strength": "50 mg",
+      "strength": "50mg/vial",
       "status": "MISSING_IN_WHOLESALE"
     },
     {
-      "name": "NMN",
-      "strength": "50 mg/tablet",
+      "name": "GW-501516",
+      "strength": "10mg/vial",
       "status": "PRICE_MISMATCH",
-      "legacyVialPrice": 92,
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 88,
+      "difference": null
+    },
+    {
+      "name": "Epithalon",
+      "strength": "10mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 33,
+      "difference": null
+    },
+    {
+      "name": "GHK-Cu (Copper Peptide)",
+      "strength": "50mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 27.5,
+      "difference": null
+    },
+    {
+      "name": "NAD+",
+      "strength": "500mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 33,
+      "difference": null
+    },
+    {
+      "name": "NAD+",
+      "strength": "1000mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 55,
+      "difference": null
+    },
+    {
+      "name": "NMN",
+      "strength": "50mg/tablet",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
       "wholesaleVialPrice": 66,
-      "difference": 26
+      "difference": null
+    },
+    {
+      "name": "SS-31",
+      "strength": "10mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 77,
+      "difference": null
+    },
+    {
+      "name": "Selank",
+      "strength": "5mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 27.5,
+      "difference": null
     },
     {
       "name": "Semax",
-      "strength": "5 mg",
+      "strength": "5mg/vial",
       "status": "MISSING_IN_WHOLESALE"
     },
     {
       "name": "Pinealon",
-      "strength": "10 mg",
+      "strength": "10mg/vial",
       "status": "MISSING_IN_WHOLESALE"
     },
     {
       "name": "DSIP",
-      "strength": "2 mg",
+      "strength": "2mg/vial",
       "status": "MISSING_IN_WHOLESALE"
     },
     {
+      "name": "PE-22 28",
+      "strength": "10mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 33,
+      "difference": null
+    },
+    {
+      "name": "CJC-1295 without DAC (Modified GRF 1-29)",
+      "strength": "2mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 22,
+      "difference": null
+    },
+    {
+      "name": "CJC-1295 with DAC",
+      "strength": "2mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 33,
+      "difference": null
+    },
+    {
+      "name": "FST-344 (Follistatin)",
+      "strength": "1mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 99,
+      "difference": null
+    },
+    {
       "name": "IGF-1 LR3",
-      "strength": "0.1 mg",
+      "strength": "0.1mg/vial",
       "status": "MISSING_IN_WHOLESALE"
     },
     {
       "name": "PEG MGF",
-      "strength": "2 mg",
+      "strength": "2mg/vial",
       "status": "MISSING_IN_WHOLESALE"
     },
     {
-      "name": "MK-677",
-      "strength": "10 mg",
+      "name": "MK-677 (Ibutamoren)",
+      "strength": "10mg/vial",
       "status": "MISSING_IN_WHOLESALE"
     },
     {
       "name": "HGH",
       "strength": "10iu/vial",
       "status": "PRICE_MISMATCH",
-      "legacyVialPrice": 40,
+      "legacyVialPrice": null,
       "wholesaleVialPrice": 33,
-      "difference": 7
+      "difference": null
     },
     {
       "name": "HCG",
       "strength": "5000iu/vial",
       "status": "PRICE_MISMATCH",
-      "legacyVialPrice": 18,
+      "legacyVialPrice": null,
       "wholesaleVialPrice": 44,
-      "difference": 26
+      "difference": null
     },
     {
       "name": "HMG",
       "strength": "75iu/vial",
       "status": "PRICE_MISMATCH",
-      "legacyVialPrice": 30,
+      "legacyVialPrice": null,
       "wholesaleVialPrice": 33,
-      "difference": 3
+      "difference": null
     },
     {
       "name": "Ipamorelin",
-      "strength": "2 mg",
+      "strength": "2mg/vial",
       "status": "MISSING_IN_WHOLESALE"
     },
     {
+      "name": "GHRP-2",
+      "strength": "5mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 19.8,
+      "difference": null
+    },
+    {
+      "name": "Hexarelin",
+      "strength": "2mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 22,
+      "difference": null
+    },
+    {
       "name": "Sermorelin",
-      "strength": "2 mg",
+      "strength": "2mg/vial",
       "status": "MISSING_IN_WHOLESALE"
     },
     {
       "name": "Tesamorelin",
-      "strength": "2 mg",
+      "strength": "2mg/vial",
       "status": "MISSING_IN_WHOLESALE"
+    },
+    {
+      "name": "Kisspeptin-10",
+      "strength": "5mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 44,
+      "difference": null
+    },
+    {
+      "name": "Oxytocin Acetate",
+      "strength": "2mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 33,
+      "difference": null
+    },
+    {
+      "name": "MT2 (Melanotan II)",
+      "strength": "10mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 27.5,
+      "difference": null
+    },
+    {
+      "name": "PT-141 (Bremelanotide)",
+      "strength": "10mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 49.5,
+      "difference": null
     },
     {
       "name": "PNC-27",
-      "strength": "5 mg",
+      "strength": "5mg/vial",
       "status": "MISSING_IN_WHOLESALE"
     },
     {
+      "name": "Snap-8",
+      "strength": "10mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 33,
+      "difference": null
+    },
+    {
+      "name": "Thymulin",
+      "strength": "10mg/vial",
+      "status": "PRICE_MISMATCH",
+      "legacyVialPrice": null,
+      "wholesaleVialPrice": 44,
+      "difference": null
+    },
+    {
       "name": "Thymosin Alpha 1",
-      "strength": "5 mg",
+      "strength": "5mg/vial",
       "status": "MISSING_IN_WHOLESALE"
     },
     {
       "name": "Cartalax",
-      "strength": "10 mg",
+      "strength": "10mg/vial",
       "status": "MISSING_IN_WHOLESALE"
     },
     {
       "name": "Cardiogen",
-      "strength": "10 mg",
+      "strength": "10mg/vial",
       "status": "MISSING_IN_WHOLESALE"
     },
     {
       "name": "Thymagen",
-      "strength": "10 mg",
+      "strength": "10mg/vial",
       "status": "MISSING_IN_WHOLESALE"
     },
     {
       "name": "Prostamax",
-      "strength": "10 mg",
+      "strength": "10mg/vial",
       "status": "MISSING_IN_WHOLESALE"
     },
     {
       "name": "Testagen",
-      "strength": "10 mg",
+      "strength": "10mg/vial",
       "status": "MISSING_IN_WHOLESALE"
     },
     {
       "name": "Bacteriostatic Water",
       "strength": "30ml/vial",
       "status": "PRICE_MISMATCH",
-      "legacyVialPrice": 11,
+      "legacyVialPrice": null,
       "wholesaleVialPrice": 22,
-      "difference": 11
+      "difference": null
     },
     {
       "name": "Precision Insulin Syringes",
       "strength": "Box of 100",
       "status": "MISSING_IN_WHOLESALE"
-    },
-    {
-      "name": "BPC-157",
-      "strength": "10 mg",
-      "status": "PRICE_MISMATCH",
-      "legacyVialPrice": 154,
-      "wholesaleVialPrice": 44,
-      "difference": 110
-    },
-    {
-      "name": "KLOW (BPC-157/TB-500/GHK-Cu/KPV)",
-      "strength": "10 mg",
-      "status": "PRICE_MISMATCH",
-      "legacyVialPrice": 33,
-      "wholesaleVialPrice": 154,
-      "difference": 121
     }
   ]
 }

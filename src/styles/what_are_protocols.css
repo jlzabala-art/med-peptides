@@ -1,0 +1,227 @@
+/* ============================================================
+   WHAT ARE PROTOCOLS — Page Styles
+   Reuses ALL wap-* classes from what_are_peptides.css.
+   Only adds visuals unique to this page.
+   ============================================================ */
+@import './what_are_peptides.css';
+
+/* ── Page root wrapper ──────────────────────────────────────── */
+.wap-page {
+  min-height: 100vh;
+  background: var(--bg, #fff);
+}
+
+/* ── Step card examples list (Section 6) ────────────────────── */
+.wap-step-card__examples {
+  list-style: none;
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.wap-step-card__examples li {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--secondary);
+  background: rgba(0,150,204,0.08);
+  border: 1px solid rgba(0,150,204,0.15);
+  border-radius: 9999px;
+  padding: 0.2rem 0.6rem;
+}
+
+/* ── Phase flow diagram (Section 1) ────────────────────────── */
+.warp-phases {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+  margin: 2rem 0;
+}
+
+.warp-phase-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.warp-phase-dot {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--gradient-clinical);
+  color: white;
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  letter-spacing: 0.03em;
+  box-shadow: var(--shadow-sm);
+  padding: 0.25rem;
+  line-height: 1.2;
+}
+
+.warp-phase-label {
+  font-size: 0.68rem;
+  color: var(--text-light);
+  font-weight: 500;
+  text-align: center;
+}
+
+.warp-phase-arrow {
+  width: 32px;
+  height: 2px;
+  background: var(--border);
+  position: relative;
+  margin: 0 2px;
+  align-self: center;
+  margin-bottom: 22px;
+}
+
+.warp-phase-arrow::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid var(--border);
+  border-right: 2px solid var(--border);
+  transform: rotate(45deg);
+}
+
+/* ── Timeline (Section 3) ───────────────────────────────────── */
+.warp-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 2rem 0;
+  max-width: 560px;
+}
+
+.warp-timeline-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.warp-timeline-row + .warp-timeline-row {
+  margin-top: 0;
+}
+
+.warp-tl-weeks {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-light);
+  padding: 0.75rem 0;
+  text-align: right;
+  padding-right: 1rem;
+  border-right: 2px solid var(--border);
+}
+
+.warp-tl-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.1rem;
+  margin: 0.35rem 0;
+  transition: border-color 0.2s ease;
+}
+
+.warp-tl-card:hover {
+  border-color: rgba(0,150,204,0.35);
+}
+
+.warp-tl-card__phase {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.2rem;
+}
+
+.warp-tl-card__desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ── Protocol sample cards (Section 5) ─────────────────────── */
+.warp-protocol-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.75rem;
+  max-width: 600px;
+}
+
+.warp-protocol-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.warp-protocol-card:hover {
+  border-color: rgba(0,150,204,0.3);
+  box-shadow: var(--shadow-sm);
+}
+
+.warp-protocol-card__emoji {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 0.1rem;
+}
+
+.warp-protocol-card__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.3rem;
+}
+
+.warp-protocol-card__desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ── Dual CTA buttons ───────────────────────────────────────── */
+.warp-cta-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.wap-cta-btn--outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: transparent;
+  color: white;
+  padding: 0.9rem 2rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.975rem;
+  text-decoration: none;
+  transition: background 0.2s ease;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.5);
+  font-family: var(--font-sans);
+}
+
+.wap-cta-btn--outline:hover {
+  background: rgba(255,255,255,0.1);
+}

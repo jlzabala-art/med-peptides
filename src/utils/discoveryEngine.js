@@ -1,3 +1,4 @@
+ 
 /**
  * discoveryEngine.js
  * Deterministic matching engine for the Med-Peptides Discovery System.
@@ -64,7 +65,7 @@ export function searchFAQ(faqItems, query, isProfessional = false) {
   if (!query || !faqItems?.length) return [];
 
   const q = query.toLowerCase().trim();
-  const words = q.split(/\s+/);
+  const words = q.split(/\s+/).filter(word => word.length > 1);
 
   const visibleItems = faqItems.filter(
     (faq) => faq.active && (faq.visibility === 'public' || isProfessional)
@@ -72,23 +73,30 @@ export function searchFAQ(faqItems, query, isProfessional = false) {
 
   const scored = visibleItems.map((faq) => {
     let score = 0;
+    // Filter out null/undefined array items before joining to prevent i.trim TypeError
+    const safeJoin = (arr) => (arr || []).filter(Boolean).join(' ');
     const searchFields = [
-      faq.question || '',
-      faq.shortAnswer || '',
-      faq.answer || '',
-      ...(faq.tags || []),
-      ...(faq.seoKeywords || []),
-      ...(faq.relatedCatalogKeywords || []),
-    ].map((f) => f.toLowerCase());
+      { text: faq.question || '', weight: 10 },
+      { text: faq.shortAnswer || '', weight: 8 },
+      { text: faq.answer || '', weight: 5 },
+      { text: safeJoin(faq.tags), weight: 4 },
+      { text: safeJoin(faq.seoKeywords), weight: 3 },
+      { text: safeJoin(faq.relatedCatalogKeywords), weight: 3 },
+      { text: safeJoin(faq.relatedPeptideNames), weight: 6 },
+    ];
 
-    const combined = searchFields.join(' ');
-
-    // Exact phrase match — highest weight
-    if (combined.includes(q)) score += 10 * (faq.searchWeight || 1);
-
-    // Individual word matches
-    words.forEach((word) => {
-      if (combined.includes(word)) score += 2 * (faq.searchWeight || 1);
+    searchFields.forEach(({ text, weight }) => {
+      const lower = text.toLowerCase();
+      // Exact phrase match in this specific field
+      if (lower.includes(q)) {
+        score += weight * 5 * (faq.searchWeight || 1);
+      }
+      // Individual word matches
+      words.forEach((word) => {
+        if (lower.includes(word)) {
+          score += weight * (faq.searchWeight || 1);
+        }
+      });
     });
 
     return { ...faq, _score: score };

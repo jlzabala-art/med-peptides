@@ -1,0 +1,74 @@
+.home-section {
+  position: relative;
+  width: 100%;
+  padding-top: var(--section-spacing-y);
+  padding-bottom: var(--section-spacing-y);
+  transition: background-color 0.4s ease;
+}
+
+.home-section--no-padding {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.home-section__container {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.home-section__full {
+  width: 100%;
+}
+
+/* Variantes de Fondo */
+.home-section--default {
+  background-color: transparent;
+}
+
+.home-section--light {
+  background-color: var(--background);
+}
+
+.home-section--dark {
+  background-color: #020e1c;
+  background-image: 
+    radial-gradient(circle at 0% 0%, rgba(0, 54, 102, 0.5) 0%, transparent 40%),
+    radial-gradient(circle at 100% 100%, rgba(0, 150, 204, 0.15) 0%, transparent 40%);
+  color: white;
+}
+
+.home-section--dark h2,
+.home-section--dark h3 {
+  color: white;
+}
+
+.home-section--glass {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+/* Gradientes de transición (opcional) */
+.home-section--with-transition::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(to bottom, transparent, var(--background));
+  pointer-events: none;
+  z-index: 2;
+}
+
+@media (max-width: 768px) {
+  .home-section__container {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}

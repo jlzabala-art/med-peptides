@@ -1,6 +1,6 @@
 {
   "protocol_duration_weeks": 10,
-  "protocol_author_name": "ReGen PEPT Clinical Team",
+  "protocol_author_name": "Med-Peptides Clinical Team",
   "bundleVersion": "2.0",
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -76,7 +76,7 @@
     "resolved_monitoring": []
   },
   "protocol_author_notes": "Official curated protocol for general clinical use.",
-  "protocol_author_organization": "ReGen PEPT",
+  "protocol_author_organization": "Med-Peptides",
   "protocol_last_reviewed_at": "2026-03-29",
   "protocol_source_reference": "internal_guide",
   "expected_outcomes": {
@@ -112,11 +112,10 @@
         {
           "product_id": "prd_elamipretide",
           "product_title": "Elamipretide",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "dose_logic": {
-            "dose_unit": "protocol_defined",
+            "dose_unit": "mg",
             "administration_frequency": "daily",
-            "starting_intensity": "standard",
             "administration_days_default": [
               "Monday",
               "Tuesday",
@@ -126,12 +125,13 @@
               "Saturday",
               "Sunday"
             ],
-            "timing_hint": "consistent_daily_use"
+            "timing_hint": "consistent_daily_use",
+            "starting_weekly_dose": 0.5
           },
           "variantRef": {
             "type": "resolved",
             "productId": "prd_elamipretide",
-            "route": "SC"
+            "route": "subcutaneous"
           }
         },
         {
@@ -139,19 +139,19 @@
           "product_title": "MOTS-c",
           "route": "subcutaneous",
           "dose_logic": {
-            "dose_unit": "protocol_defined",
+            "dose_unit": "mg",
             "administration_frequency": "2x_week",
-            "starting_intensity": "optional_low",
             "administration_days_default": [
               "Tuesday",
               "Thursday"
             ],
-            "activation_condition": "if_metabolic_adaptation_needed"
+            "activation_condition": "if_metabolic_adaptation_needed",
+            "intensity_label": "optional_low"
           },
           "variantRef": {
             "type": "resolved",
             "productId": "prd_motsc",
-            "route": "SC"
+            "route": "subcutaneous"
           }
         }
       ],
@@ -177,11 +177,10 @@
         {
           "product_id": "prd_elamipretide",
           "product_title": "Elamipretide",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "dose_logic": {
-            "dose_unit": "protocol_defined",
+            "dose_unit": "mg",
             "administration_frequency": "daily",
-            "intensity": "standard_plus",
             "administration_days_default": [
               "Monday",
               "Tuesday",
@@ -190,12 +189,13 @@
               "Friday",
               "Saturday",
               "Sunday"
-            ]
+            ],
+            "starting_weekly_dose": 1
           },
           "variantRef": {
             "type": "resolved",
             "productId": "prd_elamipretide",
-            "route": "SC"
+            "route": "subcutaneous"
           }
         },
         {
@@ -203,20 +203,20 @@
           "product_title": "MOTS-c",
           "route": "subcutaneous",
           "dose_logic": {
-            "dose_unit": "protocol_defined",
+            "dose_unit": "mg",
             "administration_frequency": "3x_week",
-            "intensity": "conditional",
             "administration_days_default": [
               "Monday",
               "Wednesday",
               "Friday"
             ],
-            "activation_condition": "if_recovery_plateau"
+            "activation_condition": "if_recovery_plateau",
+            "intensity_label": "conditional"
           },
           "variantRef": {
             "type": "resolved",
             "productId": "prd_motsc",
-            "route": "SC"
+            "route": "subcutaneous"
           }
         }
       ],
@@ -241,23 +241,23 @@
         {
           "product_id": "prd_elamipretide",
           "product_title": "Elamipretide",
-          "route": "subcutaneous_or_protocol_defined",
+          "route": "subcutaneous",
           "dose_logic": {
-            "dose_unit": "protocol_defined",
+            "dose_unit": "mg",
             "administration_frequency": "5x_week",
-            "intensity": "maintenance",
             "administration_days_default": [
               "Monday",
               "Tuesday",
               "Wednesday",
               "Thursday",
               "Friday"
-            ]
+            ],
+            "starting_weekly_dose": 1
           },
           "variantRef": {
             "type": "resolved",
             "productId": "prd_elamipretide",
-            "route": "SC"
+            "route": "subcutaneous"
           }
         }
       ],
@@ -507,7 +507,7 @@
     ]
   },
   "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
-  "_importBundle": "ReGen PEPT Clinical Protocol Library · Updated 2026-04-26",
+  "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
   "_schemaGapFixed": {
     "_nanoseconds": 912000000,
     "_seconds": 1777190717
@@ -580,8 +580,8 @@
     "visibility": "public",
     "scientificName": "Energy · Mitochondrial Membrane Repair + Resilience via SS-31 + MOTS-C · 8 Weeks",
     "author": {
-      "organization": "ReGen PEPT",
-      "name": "ReGen PEPT Clinical Team",
+      "organization": "Med-Peptides",
+      "name": "Med-Peptides Clinical Team",
       "title": "Peptide Specialists"
     },
     "evidence_grade_note": "GRADE B: MOTS-c (Lee C, Cell Metab 2015); SS-31/Elamipretide MMPOWER-3 trial (Karaa 2018); NR human RCT data (Martens CR, Nat Commun 2018). Combined protocol evidence is extrapolated from individual components.",
@@ -625,7 +625,7 @@
     },
     "regulatory_note": "MOTS-c and SS-31: research peptides, not FDA-approved. NR (Nicotinamide Riboside): FDA GRAS-listed dietary supplement (Tru Niagen, BASIS). Available OTC. Use of peptide components requires physician oversight via compounding pharmacy. Updated 2026: Elamipretide (Forzinity) received FDA accelerated approval for Barth syndrome in patients weighing at least 30 kg. Its use for general mitochondrial resilience, chronic fatigue, long COVID fatigue, or athletic recovery remains off-label/research-oriented."
   },
-  "_patchBundle": "ReGen PEPT Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
   "canonical_enrichment": {
     "compatibleWith": "antigravity_v2_firebase_import",
     "auditFieldsCompleted": [

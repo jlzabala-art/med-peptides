@@ -1,0 +1,28 @@
+[
+  {
+    "pmid": "31758732",
+    "title": "Detection of black market follistatin 344.",
+    "authors": [
+      "Reichel C",
+      "Gmeiner G",
+      "Thevis M"
+    ],
+    "journal": "Drug testing and analysis",
+    "pubdate": "2019 Nov",
+    "doi": "10.1002/dta.2741",
+    "abstract": "Follistatin, a myostatin-inhibiting protein, is prohibited according to chapter S4 of the \"WADA 2019 List of Prohibited Substances and Methods\". While currently no approved pharmaceutical formulations of follistatin are available, follistatin can be bought on the black market. Most of the products are labeled \"follistatin 344\" (FS344), a few \"follistatin 315\". A study on FS344 black market products was performed and an electrophoretic detection method for serum and urine developed. While only nine of the 17 tested products actually contained follistatin, in some of the others growth promoting peptides were found (e.g. MGF, GHRP-2). Surprisingly, all nine products contained His-tagged FS344 and a high degree of its oligomers. The detection method is based on immunomagnetic purification followed by SDS-PAGE and Western blotting with a monoclonal anti-His antibody. Alternatively, a monoclonal anti-follistatin antibody can be used. For immunoprecipitation (IP), a polyclonal anti-follistatin antibody is applied. An evaluation of suitable antibodies for IP and immunoblotting is also presented. Furthermore, practically all currently available follistatin standards were investigated. The detection limit of the method for black market FS344 in urine is ca 0.1 ng/mL for 10 mL. For a sample volume of 100 \u03bcL, an LOD of 5 ng/mL could be achieved for serum. Due to the presence of His-tags an unambiguous differentiation from endogenous follistatin is possible."
+  },
+  {
+    "pmid": "37739334",
+    "title": "Follistatin and follistatin-like 3 in metabolic disorders.",
+    "authors": [
+      "Bielka W",
+      "Przezak A",
+      "Pawlik A"
+    ],
+    "journal": "Prostaglandins & other lipid mediators",
+    "pubdate": "2023 Dec",
+    "doi": "10.1016/j.prostaglandins.2023.106785",
+    "abstract": "Follistatin (FST) is a glycoprotein which main role is antagonizing activity of transforming growth factor \u03b2 superfamily members. Folistatin-related proteins such as follistatin-like 3 (FSTL3) also reveal these properties. The exact function of them has still not been established, but it can be bound to the pathogenesis of metabolic disorders. So far, there were performed a few studies about their role in type 2 diabetes, obesity or gestational diabetes and even less in type 1 diabetes. The outcomes are contradictory and do not allow to draw exact conclusions. In this article we summarize the available information about connections between follistatin, as well as follistatin-like 3, and metabolic disorders. We also emphasize the strong need of performing further research to explain their exact role, especially in the pathogenesis of diabetes and obesity."
+  }
+]

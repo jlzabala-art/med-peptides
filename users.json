@@ -1,0 +1,185 @@
+{"users": [
+{
+  "localId": "2cGrtl9bkcMcBajRtHAkmwPEa8U2",
+  "email": "wholesaler@regenpept.test",
+  "emailVerified": true,
+  "passwordHash": "uho0gH8mmamuxZ2mqShAPCEZBkAsRcRaJtoTJa6qrWetYtwkPJuFpOrKm9DXFTyslNCVKrc80npMhWY1SvtnJg==",
+  "salt": "brmG/uZjkDyMDw==",
+  "displayName": "Test Wholesaler",
+  "lastSignedInAt": "1779875742900",
+  "createdAt": "1779372270910",
+  "disabled": false,
+  "providerUserInfo": []
+},
+{
+  "localId": "3u17gXlStXYuNgLE62wpkLtLop23",
+  "email": "jose@mediluxeme.com",
+  "emailVerified": true,
+  "displayName": "Jose Luis Zabala",
+  "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocLHICJm4KjDUvoIbNayE6Dhkg6NXBwlVqiF0A7crT-LVaX5SfcR=s96-c",
+  "lastSignedInAt": "1779860111386",
+  "createdAt": "1774142547032",
+  "providerUserInfo": [
+    {
+      "providerId": "google.com",
+      "rawId": "104821595569033218009",
+      "email": "jose@mediluxeme.com",
+      "displayName": "Jose Luis Zabala",
+      "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocLHICJm4KjDUvoIbNayE6Dhkg6NXBwlVqiF0A7crT-LVaX5SfcR=s96-c"
+    }
+  ]
+},
+{
+  "localId": "754OYGgejoelucER7ReDaGUbAJu2",
+  "email": "doctor@regenpept.test",
+  "emailVerified": true,
+  "passwordHash": "+bIVtD45cQbsLxf8gwv/tgHb/AaDgHLHC+bRdFw0dBvPHRDjv7sq09zItcQ68ec9fFBZ1JmqwktCJRYo8XHTvA==",
+  "salt": "a+mmbhGUDgM1ZQ==",
+  "displayName": "Test Doctor",
+  "lastSignedInAt": "1779875731354",
+  "createdAt": "1779372269798",
+  "disabled": false,
+  "providerUserInfo": []
+},
+{
+  "localId": "7YKh5jkz91PyJi4cHBJVQWqOO0r1",
+  "email": "b2ctest.new2025@proton.me",
+  "emailVerified": false,
+  "passwordHash": "4R9a04GgO3l+MulHcOMNlnpWcDYmECh9KTwkqXa+A1ohF14Zylqw1R7AwzuT0runLtbb6g5O3AOyuT0R7oU90g==",
+  "salt": "6pwWmttW9+3JTA==",
+  "displayName": "Maria TestGuest",
+  "lastSignedInAt": "1779804239288",
+  "createdAt": "1779803090947",
+  "providerUserInfo": []
+},
+{
+  "localId": "DYEWKTyepuQBc1DubYr8bkep1n93",
+  "email": "clinic@regenpept.test",
+  "emailVerified": true,
+  "passwordHash": "/9F0YwHnO96DDhB9SvpN1Zt8EjNDWJ4gEU/OdRkjxh5SWyB2TZL0elDDtfa8oPMezo3MSaHzIon2WnBb1feuOA==",
+  "salt": "+UrFXV03mz8spQ==",
+  "displayName": "Test Clinic",
+  "createdAt": "1779372268475",
+  "disabled": false,
+  "providerUserInfo": []
+},
+{
+  "localId": "ETFxwrPYX6VjZQWNbXlLOQWO7UH2",
+  "email": "sales_agent@regenpept.test",
+  "emailVerified": true,
+  "passwordHash": "t6hzbjPthP4Rj1Ts8wNzfbfEch6vevr8IXPRVuxyTfzQHomiEHRdLyyB/TlOkA11EBUMCkZRWPYjcJZ7MzEqNA==",
+  "salt": "mTq4iDdJdpbe8A==",
+  "displayName": "Test Sales Agent",
+  "createdAt": "1779372272116",
+  "disabled": false,
+  "providerUserInfo": []
+},
+{
+  "localId": "MBXjS5DKyfNe06ZugTWNGZ31WRy1",
+  "email": "mobile.test.b2c@proton.me",
+  "emailVerified": false,
+  "passwordHash": "e/S7esTIGCU4BWJx/ZQ0ytkDHbOX9GSpKdlGv1Cgxm/bD7hEmsFltOtvsRCObJbCCBxgXUraFt0jWvj9O/TfHA==",
+  "salt": "chhDYp4djtn+vA==",
+  "displayName": "Mobile TestUser",
+  "lastSignedInAt": "1779805811930",
+  "createdAt": "1779805811930",
+  "providerUserInfo": []
+},
+{
+  "localId": "MMzDsh3ClefZVRA3HFZvF70B0JG3",
+  "email": "guest@regenpept.test",
+  "emailVerified": true,
+  "passwordHash": "t53wL2uU7n+qh3IF4D2SCtg6oJ0O6KGTXY14dHwntCfDywZ3QYe4/dKJZcZO0HRRmeAoUl5roZ9CzawGHC9LAA==",
+  "salt": "uuwlthTWwFMm9g==",
+  "displayName": "Test Guest",
+  "lastSignedInAt": "1779816233036",
+  "createdAt": "1779372276820",
+  "disabled": false,
+  "providerUserInfo": []
+},
+{
+  "localId": "MuOV2Fzw5QbS16fL5zv6P15HcKs2",
+  "email": "staff@regenpept.test",
+  "emailVerified": true,
+  "passwordHash": "7N4yuiOwoJdAnGRkBdlnHJxmtEGtScgkZI05v9Gh8Nn8LgX4N42UCaLgIEW2KKagZlfvCdOvC1qlwZjYl0GGIA==",
+  "salt": "8H1Fn6UbP3nsPA==",
+  "displayName": "Test Staff",
+  "createdAt": "1779372274550",
+  "disabled": false,
+  "providerUserInfo": []
+},
+{
+  "localId": "PUKamU3tKFOdRZjLtcC69pbnMbH2",
+  "email": "researcher@med-peptides.com",
+  "emailVerified": false,
+  "passwordHash": "sJf014Kel3eR+MePTBJpM7WyJfpxIzPsjevN9T5R+WyHP5E+EkfaDwOxqR6IeSH7AyLgZ1g1T+dstgl8FZLDBA==",
+  "salt": "Sxd2x1q6ZOAJtw==",
+  "displayName": "Test Researcher",
+  "lastSignedInAt": "1779037111553",
+  "createdAt": "1779037111553",
+  "providerUserInfo": []
+},
+{
+  "localId": "ZaM9lTSwmQRPCZRMKesQSbCGS5q1",
+  "email": "testguest2025@proton.me",
+  "emailVerified": false,
+  "passwordHash": "3G+zGk/GZ3X8siXU71K4OmLVMIyyhmlmNeZsJe2zT1Zx7fDUYUxxKcn6QPrQipD2Q08uzDBYRrvLUMRwelAAjg==",
+  "salt": "smbcs2LczWH4CA==",
+  "displayName": "Test GuestUser",
+  "lastSignedInAt": "1779802436319",
+  "createdAt": "1779802436319",
+  "providerUserInfo": []
+},
+{
+  "localId": "dsLuG1rZ3SZZDQauURJ42O9Y7Bv2",
+  "email": "test_researcher_123456@gmail.com",
+  "emailVerified": false,
+  "passwordHash": "Dc01c/YF2BHfUL8U9c3IuQSp/66rtJo0zkk9BeBdQ4d/pODlDnw3aoC/VdcRkI33vi+0AcPJVGqPaYtOuOyUsQ==",
+  "salt": "mVxauJ2EmAi4dg==",
+  "displayName": "Test Researcher",
+  "lastSignedInAt": "1779081928393",
+  "createdAt": "1779081928393",
+  "providerUserInfo": []
+},
+{
+  "localId": "eV8f8Hwlk7YoJkzhn1fCoQU85953",
+  "email": "jlzabala@gmail.com",
+  "emailVerified": true,
+  "displayName": "Jose Luis Zabala",
+  "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocKHMzxo2W6KqSFj_SV9NkBMK8ecPnCFl4xBvEDmp916k7lKLk5wgg=s96-c",
+  "lastSignedInAt": "1779170408011",
+  "createdAt": "1776720479618",
+  "providerUserInfo": [
+    {
+      "providerId": "google.com",
+      "rawId": "101901240824602582468",
+      "email": "jlzabala@gmail.com",
+      "displayName": "Jose Luis Zabala",
+      "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocKHMzxo2W6KqSFj_SV9NkBMK8ecPnCFl4xBvEDmp916k7lKLk5wgg=s96-c"
+    }
+  ]
+},
+{
+  "localId": "jvaUivJ4EDRYsm56FYUJiw31akI3",
+  "email": "admin@regenpept.test",
+  "emailVerified": true,
+  "passwordHash": "pinEw3+ei5+j+CYWLutFpz54Wi7HGDU7hpTSAMGDMPXyl0ZZ+1xr5csHmiJXSHVAip4ybtHPvrTyZrA4Byd9Pg==",
+  "salt": "VCla6E/JOJC/2Q==",
+  "displayName": "Test Admin",
+  "lastSignedInAt": "1779819048035",
+  "createdAt": "1779372267316",
+  "disabled": false,
+  "providerUserInfo": []
+},
+{
+  "localId": "uPg6CQPv11bN0uMTAPGooiH4ibn1",
+  "email": "patient@regenpept.test",
+  "emailVerified": true,
+  "passwordHash": "M1+crgkVE35frBCvK44fBOcOPtiW0kgIGR99dF02MMc5bazbbY+UAf3zcltSAfVc6CWSO0uyDDKfRdZ+2YgVXw==",
+  "salt": "v0TBSmEJR0A12w==",
+  "displayName": "Test Patient",
+  "lastSignedInAt": "1779819190073",
+  "createdAt": "1779372275819",
+  "disabled": false,
+  "providerUserInfo": []
+}]}

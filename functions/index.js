@@ -1,98 +1,58 @@
-const { onDocumentCreated } = require("firebase-functions/v2/firestore");
-const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
-const { getFirestore } = require("firebase-admin/firestore");
-const nodemailer = require("nodemailer");
-const { buildOrderEmail } = require("./emailTemplates/orderNotification");
-const { buildClientConfirmationEmail } = require("./emailTemplates/clientConfirmation");
+const { gmailUser, gmailAppPass, ga4PropertyId } = require("./src/config");
 
+// Initialize Firebase Admin
 initializeApp();
 
-// Gmail credentials — set with:
-//   firebase functions:secrets:set GMAIL_USER
-//   firebase functions:secrets:set GMAIL_APP_PASS
-const gmailUser = defineSecret("GMAIL_USER");
-const gmailAppPass = defineSecret("GMAIL_APP_PASS");
+// ── Triggers ─────────────────────────────────────────────────────────────────
+exports.onNewOrder    = require("./src/triggers/orders")(gmailUser, gmailAppPass);
+exports.onUserCreated = require("./src/triggers/users")(gmailUser, gmailAppPass);
 
-/**
- * Triggered whenever a new document is created in the `orders` collection.
- * 1. Fetches all admin users from Firestore and sends them an HTML order email.
- * 2. Sends a confirmation email to the customer who placed the order.
- */
-exports.onNewOrder = onDocumentCreated(
-  {
-    document: "orders/{orderId}",
-    secrets: [gmailUser, gmailAppPass],
-    region: "europe-west1",
-  },
-  async (event) => {
-    const snap = event.data;
-    if (!snap) {
-      console.error("No data in event snapshot.");
-      return;
-    }
+// ── Prescription triggers ─────────────────────────────────────────────────────
+const prescriptionTriggers = require("./src/triggers/prescriptions");
+exports.onOrderCreatedForRx   = prescriptionTriggers.onOrderCreatedForRx;   // Notifica al médico cuando el paciente hace checkout
+exports.onPrescriptionCreated = prescriptionTriggers.onPrescriptionCreated; // Sella precios desde catálogo (server-side)
 
-    const orderId = event.params.orderId;
-    const orderData = { id: orderId, ...snap.data() };
+// ── Refill Reminder trigger ───────────────────────────────────────────────────
+// Fires when order.status → 'delivered'. Creates a refill_reminders doc 30 days out.
+exports.onOrderDeliveredRefill = require("./src/triggers/refillReminder");  // Schedules 30-day refill reminder for patient
 
-    // 1. Find all admin emails from Firestore
-    const db = getFirestore();
-    const adminSnap = await db
-      .collection("users")
-      .where("role", "==", "admin")
-      .get();
 
-    // 2. Gmail SMTP transporter (requires App Password, not regular password)
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false, // STARTTLS
-      auth: {
-        user: gmailUser.value(),
-        pass: gmailAppPass.value(), // 16-char App Password from Google Account
-      },
-    });
+// ── HTTP Handlers ────────────────────────────────────────────────────────────
+exports.analyticsOverview = require("./src/http/analytics")(ga4PropertyId);
+exports.clinicalAiAssistant        = require("./src/http/ai");                // Agent 1 — RAG + router
+exports.prescriptionAiAssistant    = require("./src/http/ai_prescription");   // Agent 2 — Prescription intake
+exports.articleAiAssistant         = require("./src/http/ai_article");        // Agent 4 — Blog article analysis
+exports.safetyAiAssistant          = require("./src/http/ai_safety");         // Agent 5 — Compliance Guardrail
+exports.personalizationAiAssistant = require("./src/http/ai_personalization");// Agent 6 — Onboarding
+exports.doctorAiAssistant          = require("./src/http/ai_doctor");         // Agent 8 — Doctor Protocol Builder
+exports.financeAiAssistant         = require("./src/http/ai_finance");        // Agent 7 — Financial Intelligence (admin only)
+exports.newsletterAiAssistant      = require("./src/http/ai_newsletter");     // AgentNewsletterDigest — weekly personalized digest
+exports.newsletterSubscribe        = require("./src/http/newsletter_subscribe"); // Public — guest email capture
+exports.skuSyncAgent               = require("./src/http/ai_sku_sync");         // AgentSkuSync — Zoho↔Firebase SKU coordination (admin only)
+exports.refineSemanticAgent        = require("./src/http/ai_semantic_refine");   // AgentSemanticRefine — Semantic metadata builder (admin only)
+exports.catalogAiAssistant         = require("./src/http/ai_catalog_builder");   // AgentCatalogBuilder — Dynamic Catalog platform (Vertex AI)
 
-    const fromAddress = `"Med-Peptides" <${gmailUser.value()}>`;
-    const sendPromises = [];
+exports.acceptInvitation           = require("./src/http/acceptInvitation").acceptInvitation; // Secure invitation acceptance
+exports.generatePaymentLink        = require("./src/http/generatePaymentLink").generatePaymentLink; // Stripe Payment Links
 
-    // 3a. Send notification to every admin
-    if (!adminSnap.empty) {
-      const adminEmails = adminSnap.docs
-        .map((doc) => doc.data().email)
-        .filter(Boolean);
+// ── Zoho CRM Intelligence ────────────────────────────────────────────────────
+const { fetchZohoCRMIntelligence } = require("./src/zoho/fetchZohoCRMIntelligence");
+exports.fetchZohoCRMIntelligence = fetchZohoCRMIntelligence; // Zoho Books contacts + invoices → CRM cache (admin only)
 
-      if (adminEmails.length > 0) {
-        const { subject, html } = buildOrderEmail(orderData);
-        adminEmails.forEach((to) => {
-          sendPromises.push(
-            transporter.sendMail({ from: fromAddress, to, subject, html })
-          );
-        });
-        console.log(
-          `📧 Admin notification queued for: ${adminEmails.join(", ")}`
-        );
-      } else {
-        console.warn("Admin users found but none have an email field.");
-      }
-    } else {
-      console.warn("No admin users found. Skipping admin notification.");
-    }
+const { fetchZohoBiginWholesaler } = require("./src/zoho/fetchZohoBiginWholesaler");
+exports.fetchZohoBiginWholesaler = fetchZohoBiginWholesaler;
 
-    // 3b. Send confirmation email to the customer
-    const customerEmail = orderData.customer?.email;
-    if (customerEmail) {
-      const { subject, html } = buildClientConfirmationEmail(orderData);
-      sendPromises.push(
-        transporter.sendMail({ from: fromAddress, to: customerEmail, subject, html })
-      );
-      console.log(`📧 Client confirmation queued for: ${customerEmail}`);
-    } else {
-      console.warn("Order has no customer email. Skipping client confirmation.");
-    }
+const { searchZohoContactByEmail } = require("./src/zoho/searchZohoContactByEmail");
+exports.searchZohoContactByEmail = searchZohoContactByEmail;
 
-    // 4. Send all emails concurrently
-    await Promise.all(sendPromises);
-    console.log(`✅ All emails sent for order ${orderId}`);
-  }
-);
+const { zohoBooksWebhook } = require("./src/zoho/zohoBooksWebhook");
+exports.zohoBooksWebhook = zohoBooksWebhook;
+
+// ── Order / Prescription / Bulk Order System ──────────────────────────────────
+const { submitBulkOrder } = require("./src/http/submit_bulk_order");
+exports.submitBulkOrder = submitBulkOrder; // Wholesaler bulk order submission + aggregation (wholesaler only)
+
+// ── Scheduled Tasks ──────────────────────────────────────────────────────────
+exports.syncPeptideAnalytics = require("./src/scheduled/analytics_sync")(ga4PropertyId);
+exports.keepAliveZoho        = require("./src/scheduled/zohoKeepAlive");

@@ -1,7 +1,7 @@
 /**
  * auditSemanticFields.mjs
  *
- * Audits all products in Firestore (med-peptides-app) and reports
+ * Audits all products in Firestore (Med-Peptides-app) and reports
  * which semantic fields are missing or empty for each product.
  *
  * Fields checked (used by searchEngine.js for scoring):
@@ -16,20 +16,8 @@
  * Run: node scripts/auditSemanticFields.mjs
  */
 
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { db } from './lib/firebase-admin.mjs';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDOV2zFeLGtPsE_O2b-gR3NHZygPspiSws",
-  authDomain: "med-peptides-app-27a3a.firebaseapp.com",
-  projectId: "med-peptides-app",
-  storageBucket: "med-peptides-app.firebasestorage.app",
-  messagingSenderId: "514143707883",
-  appId: "1:514143707883:web:6c12470433ef6c992714ae"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
 // Fields to check and their search score weight
 const SEMANTIC_FIELDS = [
@@ -52,7 +40,7 @@ function isEmpty(val) {
 async function runAudit() {
   console.log('🔍 Fetching products from Firestore...\n');
 
-  const snap = await getDocs(collection(db, 'products'));
+  const snap = await db.collection('products').get();
   const products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
   console.log(`📦 Total products found: ${products.length}\n`);

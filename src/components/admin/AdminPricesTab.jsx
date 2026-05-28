@@ -1,0 +1,417 @@
+ 
+import React, { useState, useEffect } from 'react';
+import { collection, doc, getDocs, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { Percent, Search, Sliders, RefreshCw, CheckCircle, AlertCircle, HelpCircle } from 'lucide-react';
+import AppDataTable from '../ui/AppDataTable';
+
+export default function AdminPricesTab() {
+  const [products, setProducts] = useState([]);
+  const [discounts, setDiscounts] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [savingStatus, setSavingStatus] = useState({ type: null, target: null, status: null });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  useEffect(() => {
+    fetchPricingData();
+  }, []);
+
+  const fetchPricingData = async () => {
+    setLoading(true);
+    try {
+      // 1. Fetch products
+      const productsRef = collection(db, 'products');
+      const productsSnapshot = await getDocs(productsRef);
+      const productsList = [];
+      productsSnapshot.forEach(doc => {
+        productsList.push({ id: doc.id, ...doc.data() });
+      });
+
+      // 2. Fetch global settings for discounts
+      const globalRef = doc(db, 'settings', 'global');
+      const globalSnap = await getDoc(globalRef);
+      let loadedDiscounts = {};
+
+      if (globalSnap.exists()) {
+        loadedDiscounts = globalSnap.data().categoryDiscounts || {};
+      }
+
+      // Establish defaults (15%) for any categories that exist on products but not in settings
+      const uniqueCategories = [...new Set(productsList.map(p => p.category).filter(Boolean))];
+      let updatedDiscounts = { ...loadedDiscounts };
+      let neededSave = false;
+
+      uniqueCategories.forEach(cat => {
+        if (updatedDiscounts[cat] === undefined) {
+          updatedDiscounts[cat] = 15; // default 15% discount
+          neededSave = true;
+        }
+      });
+
+      if (neededSave) {
+        await setDoc(globalRef, { categoryDiscounts: updatedDiscounts }, { merge: true });
+      }
+
+      setProducts(productsList);
+      setDiscounts(updatedDiscounts);
+    } catch (err) {
+      console.error("Error loading pricing data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDiscountChange = async (category, valueString) => {
+    let discountVal = parseFloat(valueString);
+    if (isNaN(discountVal)) return;
+    if (discountVal < 0) discountVal = 0;
+    if (discountVal > 100) discountVal = 100;
+
+    // Check if changed
+    if (discounts[category] === discountVal) return;
+
+    setSavingStatus({ type: 'discount', target: category, status: 'saving' });
+
+    try {
+      const updatedDiscounts = {
+        ...discounts,
+        [category]: discountVal
+      };
+
+      // 1. Save global settings
+      const globalRef = doc(db, 'settings', 'global');
+      await setDoc(globalRef, { categoryDiscounts: updatedDiscounts }, { merge: true });
+
+      // 2. Recalculate and update pro prices for products in this category
+      const affectedProducts = products.filter(p => p.category === category);
+      
+      const updatePromises = affectedProducts.map(p => {
+        const guestVial = parseFloat(p.guestVialPrice) || 0;
+        const guestKit = parseFloat(p.guestKitPrice) || 0;
+        const proVial = parseFloat((guestVial * (1 - discountVal / 100)).toFixed(2));
+        const proKit = parseFloat((guestKit * (1 - discountVal / 100)).toFixed(2));
+        
+        const productRef = doc(db, 'products', p.id);
+        return updateDoc(productRef, {
+          proVialPrice: proVial,
+          proKitPrice: proKit,
+          updatedAt: new Date().toISOString()
+        });
+      });
+
+      await Promise.all(updatePromises);
+
+      // Update state
+      setDiscounts(updatedDiscounts);
+      setProducts(prevProducts => prevProducts.map(p => {
+        if (p.category === category) {
+          const guestVial = parseFloat(p.guestVialPrice) || 0;
+          const guestKit = parseFloat(p.guestKitPrice) || 0;
+          const proVial = parseFloat((guestVial * (1 - discountVal / 100)).toFixed(2));
+          const proKit = parseFloat((guestKit * (1 - discountVal / 100)).toFixed(2));
+          return {
+            ...p,
+            proVialPrice: proVial,
+            proKitPrice: proKit
+          };
+        }
+        return p;
+      }));
+
+      setSavingStatus({ type: 'discount', target: category, status: 'saved' });
+      setTimeout(() => setSavingStatus({ type: null, target: null, status: null }), 3000);
+    } catch (err) {
+      console.error("Error saving category discount:", err);
+      setSavingStatus({ type: 'discount', target: category, status: 'error' });
+    }
+  };
+
+  const handlePriceChange = async (productId, field, valueString) => {
+    let priceVal = parseFloat(valueString);
+    if (isNaN(priceVal)) return;
+    if (priceVal < 0) priceVal = 0;
+
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    // Check if changed
+    if (parseFloat(product[field]) === priceVal) return;
+
+    const targetKey = `${productId}-${field}`;
+    setSavingStatus({ type: 'product', target: targetKey, status: 'saving' });
+
+    try {
+      const categoryDiscount = discounts[product.category] ?? 15;
+      const updates = {
+        [field]: priceVal
+      };
+
+      // Recalculate Pro Price
+      if (field === 'guestVialPrice') {
+        updates.proVialPrice = parseFloat((priceVal * (1 - categoryDiscount / 100)).toFixed(2));
+      } else if (field === 'guestKitPrice') {
+        updates.proKitPrice = parseFloat((priceVal * (1 - categoryDiscount / 100)).toFixed(2));
+      }
+
+      const productRef = doc(db, 'products', productId);
+      await updateDoc(productRef, {
+        ...updates,
+        updatedAt: new Date().toISOString()
+      });
+
+      // Update state
+      setProducts(prevProducts => prevProducts.map(p => {
+        if (p.id === productId) {
+          return {
+            ...p,
+            ...updates
+          };
+        }
+        return p;
+      }));
+
+      setSavingStatus({ type: 'product', target: targetKey, status: 'saved' });
+      setTimeout(() => setSavingStatus({ type: null, target: null, status: null }), 3000);
+    } catch (err) {
+      console.error("Error saving product price:", err);
+      setSavingStatus({ type: 'product', target: targetKey, status: 'error' });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '6rem 0' }}>
+        <div style={{ width: '40px', height: '40px', border: '3px solid rgba(0, 54, 102, 0.1)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '1.5rem' }} />
+        <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Loading Pricing Architecture...</span>
+      </div>
+    );
+  }
+
+  // Get list of categories dynamically from products
+  const uniqueCategories = [...new Set(products.map(p => p.category).filter(Boolean))];
+
+  const filteredProducts = products.filter(p => {
+    const matchSearch = (p?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+                        (p?.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchCategory = selectedCategory === 'All' || p?.category === selectedCategory;
+    return matchSearch && matchCategory;
+  });
+
+  return (
+    <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
+      
+      {/* Description header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2.5rem' }}>
+        <div>
+          <h2 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)' }}>Pricing Matrix Control</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
+            Set category B2B discounts and adjust individual peptide guest pricing. Tier calculations update instantly.
+          </p>
+        </div>
+        <button 
+          onClick={fetchPricingData}
+          className="admin-quick-btn" 
+          style={{ padding: '0.6rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+        >
+          <RefreshCw size={14} /> Refresh Data
+        </button>
+      </div>
+
+      {/* 1. Global Category Wholesale Discounts */}
+      <div className="card" style={{ padding: '2rem', marginBottom: '2.5rem', border: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+          <Sliders size={20} color="var(--primary)" />
+          <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 850, color: 'var(--primary)' }}>Category B2B Discounts</h3>
+        </div>
+        
+        <AppDataTable
+          data={uniqueCategories.map(cat => ({ id: cat, category: cat, discount: discounts[cat] ?? 15 }))}
+          keyField="id"
+          columns={[
+            {
+              key: 'category',
+              header: 'Category',
+              sortValue: row => row.category,
+              render: row => (
+                <div>
+                  <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '0.95rem' }}>{row.category}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>B2B Professional Tier discount</div>
+                </div>
+              )
+            },
+            {
+              key: 'discount',
+              header: 'Discount (%)',
+              align: 'right',
+              sortValue: row => row.discount,
+              render: row => {
+                const cat = row.category;
+                const currentDiscount = row.discount;
+                const isSaving = savingStatus.type === 'discount' && savingStatus.target === cat && savingStatus.status === 'saving';
+                const isSaved = savingStatus.type === 'discount' && savingStatus.target === cat && savingStatus.status === 'saved';
+                const isError = savingStatus.type === 'discount' && savingStatus.target === cat && savingStatus.status === 'error';
+
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', fontWeight: 600 }}>
+                      {isSaving && <span style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><RefreshCw size={12} className="animate-spin" /> Saving...</span>}
+                      {isSaved && <span style={{ color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><CheckCircle size={12} /> Saved</span>}
+                      {isError && <span style={{ color: 'var(--error)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><AlertCircle size={12} /> Error</span>}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+                      <input 
+                        type="number" min="0" max="100" defaultValue={currentDiscount}
+                        onBlur={(e) => handleDiscountChange(cat, e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleDiscountChange(cat, e.target.value); }}
+                        style={{ width: '80px', padding: '0.5rem 1.8rem 0.5rem 0.75rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary)', textAlign: 'right' }}
+                      />
+                      <Percent size={14} style={{ position: 'absolute', right: '8px', color: 'var(--text-muted)' }} />
+                    </div>
+                  </div>
+                );
+              }
+            }
+          ]}
+        />
+      </div>
+
+      {/* 2. Products Pricing Matrix */}
+      <div className="card" style={{ padding: '0', border: '1px solid var(--border)', overflow: 'hidden' }}>
+        
+        {/* Filter controls bar */}
+        <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--border-light)', background: 'var(--surface-raised)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+            <Percent size={18} color="var(--primary)" />
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 850, color: 'var(--text-main)' }}>Interactive Pricing Matrix</h3>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: '200px' }}>
+              <div style={{ position: 'relative' }}>
+                <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <input
+                  type="text"
+                  placeholder="Search by SKU or name..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ width: '100%', padding: '0.5rem 1rem 0.5rem 2.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', fontSize: '0.85rem' }}
+                />
+              </div>
+            </div>
+
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              style={{ padding: '0.5rem 1.5rem 0.5rem 1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', backgroundColor: 'white', fontSize: '0.85rem', fontWeight: 650, color: 'var(--text-main)' }}
+            >
+              <option value="All">All Categories</option>
+              {uniqueCategories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Pricing Table */}
+        <AppDataTable
+          columns={[
+            {
+              key: 'product',
+              header: 'Product',
+              sortValue: p => p.name || '',
+              render: p => (
+                <div>
+                  <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '0.925rem' }}>{p.name}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: '0.1rem' }}>
+                    SKU: {p.sku || 'N/A'} | {p.dosage || 'No dosage'}
+                  </div>
+                </div>
+              )
+            },
+            {
+              key: 'category',
+              header: 'Category',
+              sortValue: p => p.category || '',
+              render: p => (
+                <span style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--accent-soft)', color: 'var(--primary)', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                  {p.category}
+                </span>
+              )
+            },
+            {
+              key: 'status',
+              header: 'Status',
+              align: 'right',
+              render: p => {
+                const vialKey = `${p.id}-guestVialPrice`;
+                const kitKey = `${p.id}-guestKitPrice`;
+                const isSaving = (savingStatus.type === 'product' && savingStatus.target === vialKey && savingStatus.status === 'saving') || 
+                                 (savingStatus.type === 'product' && savingStatus.target === kitKey && savingStatus.status === 'saving');
+                const isSaved = (savingStatus.type === 'product' && savingStatus.target === vialKey && savingStatus.status === 'saved') || 
+                                (savingStatus.type === 'product' && savingStatus.target === kitKey && savingStatus.status === 'saved');
+
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minHeight: '24px' }}>
+                    {isSaving && <RefreshCw size={14} className="animate-spin" color="var(--text-muted)" />}
+                    {isSaved && <CheckCircle size={14} color="var(--success)" />}
+                  </div>
+                );
+              }
+            }
+          ]}
+          data={filteredProducts}
+          keyField="id"
+          emptyTitle="No products found"
+          emptyDescription="Try adjusting the search criteria or category filter."
+          expandableRender={(p) => {
+            const categoryDiscount = discounts[p.category] ?? 15;
+            const vialKey = `${p.id}-guestVialPrice`;
+            const kitKey = `${p.id}-guestKitPrice`;
+
+            const isVialSaving = savingStatus.type === 'product' && savingStatus.target === vialKey && savingStatus.status === 'saving';
+            const isVialSaved = savingStatus.type === 'product' && savingStatus.target === vialKey && savingStatus.status === 'saved';
+            
+            const isKitSaving = savingStatus.type === 'product' && savingStatus.target === kitKey && savingStatus.status === 'saving';
+            const isKitSaved = savingStatus.type === 'product' && savingStatus.target === kitKey && savingStatus.status === 'saved';
+
+            return (
+              <div style={{ display: 'flex', gap: '2rem', padding: '1rem', background: 'white', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, minWidth: '200px' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>Guest Vial Price</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>$</span>
+                    <input
+                      type="number" step="0.01" min="0" defaultValue={p.guestVialPrice}
+                      onBlur={(e) => handlePriceChange(p.id, 'guestVialPrice', e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') handlePriceChange(p.id, 'guestVialPrice', e.target.value); }}
+                      style={{ width: '100px', padding: '0.4rem 0.5rem', border: isVialSaved ? '1px solid var(--success)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textAlign: 'right', fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)', backgroundColor: isVialSaving ? 'var(--surface-raised)' : 'white' }}
+                    />
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Pro Vial (Est): <span style={{ fontWeight: 800, color: 'var(--primary)' }}>${parseFloat(p.proVialPrice || 0).toFixed(2)}</span> (-{categoryDiscount}%)</div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, minWidth: '200px' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>Guest Kit Price</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>$</span>
+                    <input
+                      type="number" step="0.01" min="0" defaultValue={p.guestKitPrice}
+                      onBlur={(e) => handlePriceChange(p.id, 'guestKitPrice', e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') handlePriceChange(p.id, 'guestKitPrice', e.target.value); }}
+                      style={{ width: '100px', padding: '0.4rem 0.5rem', border: isKitSaved ? '1px solid var(--success)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textAlign: 'right', fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)', backgroundColor: isKitSaving ? 'var(--surface-raised)' : 'white' }}
+                    />
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Pro Kit (Est): <span style={{ fontWeight: 800, color: 'var(--secondary)' }}>${parseFloat(p.proKitPrice || 0).toFixed(2)}</span> (-{categoryDiscount}%)</div>
+                </div>
+              </div>
+            );
+          }}
+        />
+      </div>
+      <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.5, pointerEvents: 'none', zIndex: 100 }}>
+        Widget: AdminPricesTab
+      </div>
+    </div>
+  );
+}

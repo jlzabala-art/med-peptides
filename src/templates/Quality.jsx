@@ -1,5 +1,6 @@
+ 
 import { ShieldCheck, Target, Layers, FileText, Award, Microscope } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';
 
 const features = [
@@ -45,10 +46,44 @@ const TRUST_STATS = [
 ];
 
 export default function Quality() {
+  const structuredData = useMemo(() => ({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://Med-Peptides-app-27a3a.web.app/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Quality Standards",
+            "item": "https://Med-Peptides-app-27a3a.web.app/quality"
+          }
+        ]
+      },
+      {
+        "@type": "WebPage",
+        "name": "Peptide Quality & Analytical Standards",
+        "description": "Med-Peptides's rigorous quality control process, featuring HPLC and Mass Spectrometry verification for research-grade peptides.",
+        "mainEntity": {
+          "@type": "Service",
+          "name": "Peptide Quality Verification",
+          "description": "Comprehensive analytical testing including HPLC purity checks and Mass Spectrometry sequence verification."
+        }
+      }
+    ]
+  }), []);
+
   usePageMeta({
-    title: 'Quality & Analytical Standards',
+    title: 'Quality & Analytical Standards | HPLC & MS Verified Peptides',
     description: 'Every Med-Peptides batch is verified by HPLC and Mass Spectrometry. Discover our rigorous quality control process and compliance certifications.',
-    path: '/quality',
+    canonicalUrl: 'https://Med-Peptides-app-27a3a.web.app/quality',
+    structuredData
   });
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
@@ -89,9 +124,9 @@ export default function Quality() {
         .qp-hero h1 {
           font-family: var(--font-heading);
           font-size: clamp(1.9rem, 5.5vw, 3.5rem);
-          font-weight: 900;
-          letter-spacing: -0.03em;
-          color: var(--text-main);
+          font-weight: 850;
+          letter-spacing: -0.04em;
+          color: var(--primary);
           line-height: 1.1;
           margin-bottom: 1.25rem;
         }
@@ -273,9 +308,9 @@ export default function Quality() {
         .qp-transparency-inner h2 {
           font-family: var(--font-heading);
           font-size: clamp(1.6rem, 4vw, 2.6rem);
-          font-weight: 900;
+          font-weight: 850;
           letter-spacing: -0.03em;
-          color: var(--text-main);
+          color: var(--primary);
           margin-bottom: 1.25rem;
         }
         .qp-transparency-inner p {

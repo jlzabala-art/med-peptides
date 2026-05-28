@@ -16,21 +16,16 @@
  * Real:    node scripts/migrateFAQs.mjs
  */
 
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
-import { getFirestore }                  from 'firebase-admin/firestore';
+import { db } from './lib/firebase-admin.mjs';
 import { createRequire }                 from 'module';
 import { fileURLToPath }                 from 'url';
 import path                              from 'path';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require   = createRequire(import.meta.url);
-const svcAcct   = require(path.join(__dirname, '..', 'serviceAccountKey.json'));
 
 const DRY_RUN = process.argv.includes('--dry-run');
 if (DRY_RUN) console.log('🧪  DRY-RUN — no writes to Firestore\n');
-
-if (!getApps().length) initializeApp({ credential: cert(svcAcct) });
-const db = getFirestore();
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

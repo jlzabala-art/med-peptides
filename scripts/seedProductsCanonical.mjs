@@ -17,32 +17,12 @@
  *   Run `firebase login` or set GOOGLE_APPLICATION_CREDENTIALS env var before executing.
  */
 
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { db } from './lib/firebase-admin.mjs';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 const DRY_RUN = process.argv.includes('--dry-run');
-const PROJECT_ID = 'med-peptides-app';
-
-// ── Init firebase-admin ────────────────────────────────────────────────────
-// Priority: explicit service account key > Application Default Credentials
-let adminApp;
-if (getApps().length) {
-  adminApp = getApps()[0];
-} else {
-  const keyPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-  if (keyPath) {
-    console.log(`🔑 Using service account key: ${keyPath}`);
-    const serviceAccount = JSON.parse(readFileSync(resolve(keyPath), 'utf-8'));
-    adminApp = initializeApp({ credential: cert(serviceAccount), projectId: PROJECT_ID });
-  } else {
-    console.log('🔑 Using Application Default Credentials (ADC)...');
-    adminApp = initializeApp({ projectId: PROJECT_ID });
-  }
-}
-
-const db = getFirestore(adminApp);
+const PROJECT_ID = 'Med-Peptides-app';
 
 // ── Load products.js ─────────────────────────────────────────────────────────
 const productsFilePath = 'src/data/products.js';

@@ -1,13 +1,16 @@
+ 
 // Validation Engine Runner
 // Orchestrates the execution of all 50 test cases through the Protocol Engine and Scorer.
 
-import { generateProtocolData } from '../../services/protocolEngine';
-import { scoreProtocol } from './scorer';
-import { VALIDATION_TEST_CASES } from '../test_cases';
+import { generateProtocolData } from '../../services/protocolEngine.js';
+import { scoreProtocol } from './scorer.js';
+import { scoreAIResponse } from './scorer_ai.js';
+import { VALIDATION_TEST_CASES } from '../test_cases/index.js';
+import { CLINICAL_AI_TEST_CASES } from '../test_cases/clinicalAI_cases.js';
 
-export const runValidationSuite = async (productsDb, onProgress) => {
+export const runValidationSuite = async (productsDb, onProgress, mode = 'protocol', aiResponder = null) => {
   const results = [];
-  const testCases = VALIDATION_TEST_CASES;
+  const testCases = mode === 'ai' ? CLINICAL_AI_TEST_CASES : VALIDATION_TEST_CASES;
   let totalTests = testCases.length;
   let passed = 0;
   let failed = 0;
@@ -22,22 +25,28 @@ export const runValidationSuite = async (productsDb, onProgress) => {
     }
 
     try {
-      // Execute the headless generation engine (skip PubMed scrape for speed)
-      const generatedData = await generateProtocolData(testCase.patientContext, productsDb, true);
-      
-      // Score the result
-      const scoredResult = scoreProtocol(testCase, generatedData, productsDb);
+      let scoredResult;
+
+      if (mode === 'ai') {
+        if (!aiResponder) throw new Error("AI Responder required for AI mode");
+        const responseText = await aiResponder(testCase);
+        scoredResult = scoreAIResponse(testCase, responseText);
+      } else {
+        const generatedData = await generateProtocolData(testCase.patientContext, productsDb, true);
+        scoredResult = scoreProtocol(testCase, generatedData, productsDb);
+      }
       
       results.push(scoredResult);
 
       if (scoredResult.isFailed) {
         failed++;
-        allRedFlags.push(...scoredResult.redFlags.map(f => `[${testCase.id}] ${f}`));
+        const issues = scoredResult.redFlags || scoredResult.allFlags.filter(f => f.includes("CRITICAL") || f.includes("VIOLATION"));
+        allRedFlags.push(...issues.map(f => `[${testCase.id}] ${f}`));
       } else {
         passed++;
       }
       
-      totalScore += scoredResult.averageScore;
+      totalScore += scoredResult.averageScore || scoredResult.finalScore;
 
     } catch (err) {
       // Hard failure running the test

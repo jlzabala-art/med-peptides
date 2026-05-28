@@ -1,0 +1,40 @@
+[
+  {
+    "pmid": "40971681",
+    "title": "Elevated pre-eclampsia risk in lupus nephritis and antiphospholipid syndrome: a nationwide Spanish registry analysis.",
+    "authors": [
+      "Mart\u00edn-Portugu\u00e9s M",
+      "Esteban-Sampedro J",
+      "Mellor-Pita S",
+      "Tutor de Ureta P",
+      "Fern\u00e1ndez-Guiti\u00e1n R",
+      "Huerta A",
+      "Ruiz-Irastorza G",
+      "Due\u00f1a-Bartolome L",
+      "Royuela A",
+      "Ortega-de la Puente A",
+      "de la Cruz-Echeand\u00eda M",
+      "Moreno-Torres V"
+    ],
+    "journal": "Rheumatology (Oxford, England)",
+    "pubdate": "2026 Jan 08",
+    "doi": "10.1093/rheumatology/keaf484",
+    "abstract": "OBJECTIVE: Evaluate the association of APS and SLE, focusing on LN, with risk of pre-eclampsia (PE) and PE with severity criteria (PESC).\nMETHODS: Analysis of pregnant women admitted between 2016-2022, using data from the Spanish Hospital Discharge Database. Factors associated with PE and PESC, including early-onset PE, severe PE, eclampsia and HELLP syndrome were evaluated.\nRESULTS: Among 1\u2009973\u2009249 admissions, 1787 patients had SLE (9.1\u2030), with prior LN in 13.2%. SLE patients experienced higher PE (5.5% vs 2.1%) and PESC (2.1% vs 0.6%) rates; these rose further in SLE women with LN alone (PE: 10.3%, PESC: 4.2%) or with both LN and APS (PE: 22.7%, PESC: 9.1%) . Adjusted analyses showed PE and PESC were each associated with SLE (OR\u2009=\u20091.78, 95% CI 1.39-2.28; OR\u2009=\u20092.17, 95% CI 1.47-3.22), LN (OR\u2009=\u20091.94, 95% CI 1.18-3.19; OR\u2009=\u20092.45, 95% CI 1.18-5.09) and APS (OR\u2009=\u20091.53, 95% CI 1.28-1.84; OR\u2009=\u20091.91, 95% CI 1.44-2.54). Within SLE patients, baseline hypertension (OR\u2009=\u20094.27, 95% CI 2.45-7.44), LN (OR\u2009=\u20092.06, 95% CI 1.26-3.37) and APS (OR\u2009=\u20091.85, 95% CI 1.03-3.32) were linked to PE, while LN alone predicted PESC (OR\u2009=\u20092.88, 95% CI 1.41-5.91).\nCONCLUSION: The risk of PE and PESC that patients with SLE exhibit is further amplified in those with a history of LN or APS. Recognizing SLE, APS and especially LN is crucial for precise risk stratification and tailored management to improve maternal and fetal outcomes."
+  },
+  {
+    "pmid": "28955242",
+    "title": "Shortened Spadin Analogs Display Better TREK-1 Inhibition, ",
+    "authors": [
+      "Djillani A",
+      "Pietri M",
+      "Moreno S",
+      "Heurteaux C",
+      "Mazella J",
+      "Borsotto M"
+    ],
+    "journal": "Frontiers in pharmacology",
+    "pubdate": "2017",
+    "doi": "10.3389/fphar.2017.00643",
+    "abstract": "Depression is a devastating mental disorder that affects 20% of the population worldwide. Despite their proven efficacy, antidepressants present a delayed onset of action and serious adverse effects. Seven years ago, we described spadin (PE 12-28) as a promising endogenous peptide with antidepressant activity. Spadin specifically blocks the TREK-1 channel. Previously, we showed in vivo that, spadin activity disappeared beyond 7 h after administration. In order to improve in vivo spadin stability and bioavailability, we screened spadin analogs and derivatives. From the study of spadin blood degradation products, we designed a 7 amino-acid peptide, PE 22-28. In vitro studies on hTREK-1/HEK cells by using patch-clamp technique, showed that PE 22-28 displayed a better specificity and affinity for TREK-1 channel compared to spadin, IC50 of 0.12 nM vs. 40-60 nM for spadin. In the same conditions, we also pointed out that different modifications of its N or C-terminal ends maintained or abolished TREK-1 channel activity without affecting PE 22-28 affinity. In vivo, the antidepressant properties of PE 22-28 and its derivatives were demonstrated in behavioral models of depression, such as the forced swimming test. Mice treated with spadin-analogs showed a significant reduction of the immobility time. Moreover, in the novelty suppressed feeding test after a 4-day sub-chronic treatment PE 22-28 reduced significantly the latency to eat the food pellet. PE 22-28 and its analogs were able to induce neurogenesis after only a 4-day treatment with a prominent effect of the G/A-PE 22-28. On mouse cortical neurons, PE 22-28 and its derivatives enhanced synaptogenesis measured by the increase of PSD-95 expression level. Finally, the action duration of PE 22-28 and its analogs was largely improved in comparison with that of spadin, up to 23 h instead of 7 h. Taken together, our results demonstrated that PE 22-28 and its derivatives represent other promising molecules that could be an alternative to spadin in the treatment of depression."
+  }
+]

@@ -16,7 +16,7 @@ const filePath = resolve(__dirname, '../protocol-exports/enhanced_protocols_bund
 const bundle = JSON.parse(readFileSync(filePath, 'utf-8'));
 
 if (!getApps().length) {
-  initializeApp({ projectId: 'med-peptides-app' });
+  initializeApp({ projectId: 'Med-Peptides-app' });
 }
 
 const db = getFirestore();

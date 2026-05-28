@@ -1,3 +1,4 @@
+ 
 import { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { onSnapshot, doc } from 'firebase/firestore';
@@ -14,8 +15,11 @@ const DEFAULT_SETTINGS = {
     us:  { rate: 1, currency: 'USD', name: 'USA' },
     row: { rate: 1, currency: 'USD', name: 'Global' },
   },
-  shippingCosts:  { standard: 40, express: 80, courier: 60 },
-  deliveryTimes:  { standard: '5-7 days', express: '2-3 days', courier: 'next day' },
+  shipping: {
+    standard: 30,
+    express: 80
+  },
+  deliveryTimes:  { standard: '5-7 days', express: '2-3 days' },
 };
 
 /**
@@ -92,7 +96,7 @@ export function useAppSettings() {
 
         const countryName = data.country_name;
         const matched = Object.entries(settings.exchangeRates).find(
-          ([, val]) => val.name.toLowerCase() === countryName.toLowerCase()
+          ([, val]) => val?.name?.toLowerCase() === countryName?.toLowerCase()
         );
 
         setRegion(matched ? matched[0] : 'row');
