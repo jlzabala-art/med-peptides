@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Inbox, ArrowUp, Arro
 
 export default function AppDataTable({ 
   columns, 
-  data, 
+  data = [], 
   keyField = 'id',
   
   // Selection
@@ -41,9 +41,10 @@ export default function AppDataTable({
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   const sortedData = useMemo(() => {
-    if (!sortConfig.key) return data;
+    const safeData = data || [];
+    if (!sortConfig.key) return safeData;
     
-    let sortableItems = [...data];
+    let sortableItems = [...safeData];
     sortableItems.sort((a, b) => {
       const col = columns.find(c => c.key === sortConfig.key);
       

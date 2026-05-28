@@ -2,9 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { ShieldCheck, ArrowLeft, Settings, Search, Globe, Users, Database, Layers, PackageSearch, MailPlus, LayoutDashboard, ShoppingCart, Activity, FlaskConical } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, Settings, Search, Globe, Users, Database, Layers, PackageSearch, MailPlus, LayoutDashboard, ShoppingCart, Activity, FlaskConical, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import PortalLayout from '../components/ui/PortalLayout';
 
 const AdminUsersTab = React.lazy(() => import('../components/admin/AdminUsersTab'));
 const AdminProductsTab = React.lazy(() => import('../components/admin/AdminProductsTab'));
@@ -66,7 +67,6 @@ export default function RoleDashboard({ onBack }) {
   const [activeTab, setActiveTab] = useState('');
   const [viewConfig, setViewConfig] = useState(null);
   const [configLoading, setConfigLoading] = useState(true);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
   const roleKey = userProfile?.role?.toLowerCase() || 'guest';
 
@@ -87,24 +87,14 @@ export default function RoleDashboard({ onBack }) {
     variants: { component: AdminVariantsTab, label: 'Variants', icon: Layers },
   };
 
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 1024);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   async function fetchViewConfig(currentRoleKey) {
     try {
       setConfigLoading(true);
       
-      // Handle the _pending suffix cleanup if needed, though viewConfigs might map perfectly
       let searchKey = currentRoleKey;
       if (searchKey.endsWith('_pending')) {
-         // Optionally you can redirect pending users, but assuming they are allowed in readOnly mode:
          searchKey = searchKey.replace('_pending', ''); 
       }
-      // Or map specific frontend roles to the viewConfigs keys manually if they differ:
-      // if (searchKey === 'clinic') searchKey = 'clinic_view'; etc. (Ensure panel IDs match)
 
       const docRef = doc(db, 'viewConfigs', searchKey);
       const docSnap = await getDoc(docRef);
@@ -144,7 +134,6 @@ export default function RoleDashboard({ onBack }) {
     );
   }
 
-  // If user is not professional and not pending, they shouldn't be here
   if (!isProfessional && roleKey === 'guest') {
     return (
       <div style={{ textAlign: 'center', padding: '15vh 2rem', minHeight: '100vh', backgroundColor: '#f1f5f9' }}>
@@ -156,135 +145,73 @@ export default function RoleDashboard({ onBack }) {
     );
   }
 
-  if (isMobile) {
-    return (
-      <div style={{ padding: '1rem', backgroundColor: '#f1f5f9', minHeight: '100vh', textAlign: 'center' }}>
-        <ShieldCheck size={48} color="var(--primary)" style={{ margin: '2rem auto 1rem' }} />
-        <h2>Desktop Recommended</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>
-          Please use a laptop or desktop computer for the best experience in the professional portal.
-        </p>
-        <button className="btn btn-primary" onClick={onBack}>Return</button>
-      </div>
-    );
-  }
-
   const enabledTabsKeys = viewConfig?.tabs ? Object.keys(viewConfig.tabs) : [];
 
+  const sidebarNavGroups = [
+    {
+      id: 'workplace-modules',
+      label: 'Workplace Modules',
+      items: enabledTabsKeys.map(tabKey => {
+        const tabReg = TAB_REGISTRY[tabKey];
+        if (!tabReg) return null;
+        return {
+          id: tabKey,
+          label: tabReg.label,
+          icon: tabReg.icon
+        }
+      }).filter(Boolean)
+    }
+  ];
+
   return (
-    <div className="template-root" style={{ 
-      paddingTop: 'clamp(5rem, 10vw, 8rem)', 
-      minHeight: '100vh', 
-      backgroundColor: 'var(--surface)',
-      backgroundImage: 'radial-gradient(circle at top right, rgba(0, 54, 102, 0.03), transparent 400px)'
-    }}>
-      <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem', paddingBottom: '4rem' }}>
-        
-        {/* Header */}
-        <div style={{ marginBottom: '3rem' }}>
+    <PortalLayout 
+      sidebarNavGroups={sidebarNavGroups}
+      activeNavId={activeTab}
+      onNavigate={setActiveTab}
+      portalTitle={viewConfig?.name || 'Professional Workplace'}
+      roleContext={roleKey}
+      pageContext={{
+        activeTab: activeTab,
+        label: TAB_REGISTRY[activeTab]?.label || 'Dashboard'
+      }}
+      headerActions={
+        <>
           <button 
             onClick={onBack}
-            style={{ 
-              display: 'flex', alignItems: 'center', gap: '0.5rem', 
-              background: 'rgba(0,0,0,0.03)', border: 'none', color: 'var(--text-muted)',
-              cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700, 
-              padding: '0.5rem 1rem', borderRadius: '12px',
-              marginBottom: '2rem', transition: 'all 0.2s'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.06)'}
-            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.03)'}
+            style={{ background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'white' }}
+            title="Return Home"
           >
-            <ArrowLeft size={16} /> EXIT WORKPLACE
+            <ArrowLeft size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Home</span>
           </button>
-          
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem', marginBottom: '2.5rem' }}>
-            <div>
-              <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: 'clamp(2rem, 5vw, 2.75rem)', fontWeight: 900, color: 'var(--primary)', margin: 0, letterSpacing: '-0.02em' }}>
-                <ShieldCheck size={36} /> {viewConfig?.name || 'Professional Workplace'}
-              </h1>
-              <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500, marginTop: '0.5rem' }}>
-                Role: <span style={{ textTransform: 'capitalize' }}>{roleKey.replace('_', ' ')}</span>
-              </p>
+        </>
+      }
+    >
+      <div style={{ padding: '2rem' }}>
+        <React.Suspense fallback={<WorkplaceLoadingFallback />}>
+          {enabledTabsKeys.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '4rem', backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                <ShieldCheck size={48} color="var(--primary)" style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                <h3>No Modules Assigned</h3>
+                <p style={{ color: 'var(--text-muted)' }}>Your profile currently has no active modules assigned. Please contact the administrator.</p>
             </div>
-            
-            {enabledTabsKeys.length > 0 && (
-              <div style={{ 
-                display: 'flex', 
-                backgroundColor: 'white', 
-                padding: '0.4rem', 
-                borderRadius: '20px', 
-                boxShadow: 'var(--shadow-sm)', 
-                border: '1px solid var(--border)',
-                maxWidth: '100%',
-                overflowX: 'auto'
-              }}>
-                <nav style={{ display: 'flex', gap: '0.25rem', padding: '0 0.5rem' }}>
-                  {enabledTabsKeys.map(tabKey => {
-                    const tabReg = TAB_REGISTRY[tabKey];
-                    if (!tabReg) return null; // If admin configured a tab that doesn't exist in registry
-                    
-                    const Icon = tabReg.icon;
-                    return (
-                      <button 
-                        key={tabKey}
-                        onClick={() => setActiveTab(tabKey)}
-                        style={{ 
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          backgroundColor: activeTab === tabKey ? 'var(--primary)' : 'transparent', 
-                          color: activeTab === tabKey ? 'white' : 'var(--text-main)', 
-                          border: 'none',
-                          borderRadius: '14px',
-                          padding: '0.6rem 1rem',
-                          fontSize: '0.85rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          whiteSpace: 'nowrap',
-                          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                        }}
-                      >
-                        <Icon size={16} />
-                        {tabReg.label}
-                      </button>
-                    )
-                  })}
-                </nav>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Dynamic Tab Rendering */}
-        <div style={{ minHeight: '500px' }}>
-          <React.Suspense fallback={<WorkplaceLoadingFallback />}>
-            {enabledTabsKeys.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '4rem', backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                 <ShieldCheck size={48} color="var(--primary)" style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                 <h3>No Modules Assigned</h3>
-                 <p style={{ color: 'var(--text-muted)' }}>Your profile currently has no active modules assigned. Please contact the administrator.</p>
-              </div>
-            ) : (
-              // Render ONLY the active tab, passing its dynamic configuration as props
-              (() => {
-                const tabConfig = viewConfig.tabs[activeTab];
-                const tabReg = TAB_REGISTRY[activeTab];
-                if (!tabReg || !tabConfig) return null;
-                
-                const Component = tabReg.component;
-                return (
-                  <Component 
-                    {...tabConfig} 
-                    userId={user.uid} 
-                    doctorId={user.uid}
-                  />
-                );
-              })()
-            )}
-          </React.Suspense>
-        </div>
-
+          ) : (
+            (() => {
+              const tabConfig = viewConfig.tabs[activeTab];
+              const tabReg = TAB_REGISTRY[activeTab];
+              if (!tabReg || !tabConfig) return null;
+              
+              const Component = tabReg.component;
+              return (
+                <Component 
+                  {...tabConfig} 
+                  userId={user.uid} 
+                  doctorId={user.uid}
+                />
+              );
+            })()
+          )}
+        </React.Suspense>
       </div>
-    </div>
+    </PortalLayout>
   );
 }

@@ -443,11 +443,25 @@ export function useClinicalAI({
       messageText = suggestion;
     }
 
-    if (!messageText.trim() || isLoading || isTyping) return;
+    let finalMessageText = messageText.trim();
+    if (!finalMessageText || isLoading || isTyping) return;
+
+    if (contextMode === 'admin') {
+      const lower = finalMessageText.toLowerCase();
+      if (lower === '/hoy' || lower.startsWith('/hoy ')) {
+        finalMessageText = "Genera un reporte financiero del día de hoy y formatea la respuesta usando el widget de finanzas.";
+        if (!displayText) displayText = "/hoy";
+      } else if (lower === '/pedidos' || lower.startsWith('/pedidos ')) {
+        finalMessageText = "Muéstrame un resumen de los pedidos pendientes de aprobación.";
+        if (!displayText) displayText = "/pedidos";
+      }
+    }
+
+    messageText = finalMessageText;
 
     const userMsg = { 
       role: 'user', 
-      content: messageText, 
+      content: finalMessageText, 
       displayText: displayText || null, 
       timestamp: new Date() 
     };

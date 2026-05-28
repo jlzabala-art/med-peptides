@@ -252,12 +252,19 @@ async function callGemini(contents, systemInstruction, modelName = "gemini-2.5-f
     const data = await response.json();
     if (!data.candidates?.[0]?.content?.parts?.[0]?.text) throw new Error("Invalid response format from Gemini API");
 
+    let resultText = data.candidates[0].content.parts[0].text;
+
     // Track usage asynchronously if agentKey provided
     if (agentKey && agentKey !== "unknown" && data.usageMetadata) {
       logAgentUsage(agentKey, modelName, data.usageMetadata).catch(e => structuredLogger.warn(`[logAgentUsage] failed: ${e.message}`));
+      
+      if (agentKey === "admin") {
+        const cost = estimateCost(modelName, data.usageMetadata);
+        resultText += `\n\n*(📊 Tokens de esta consulta: ${data.usageMetadata.totalTokenCount} | Coste est.: $${cost.toFixed(5)})*`;
+      }
     }
 
-    return data.candidates[0].content.parts[0].text;
+    return resultText;
   } catch (directErr) {
     structuredLogger.warn(`[callGemini] Direct call failed, trying proxy: ${directErr.message}`);
     try {

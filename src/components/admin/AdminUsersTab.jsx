@@ -2654,8 +2654,6 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
         users={filteredUsersList}
         readOnly={readOnly}
         onRefresh={fetchUsers}
-        onAssignDoctor={handleAssignDoctorClick}
-        onDeleteUser={handleDeleteUserClick}
         defaultRole={defaultRole}
       />
     

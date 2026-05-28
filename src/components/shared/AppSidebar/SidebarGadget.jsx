@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DndContext, DragOverlay, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragOverlay, closestCorners, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../../firebase';
@@ -16,25 +16,54 @@ export default function SidebarGadget(props) {
   // Storage key for user preferences
   const prefsDocRef = user ? doc(db, 'users', user.uid, 'preferences', 'sidebar') : null;
 
+  const rehydrateGroups = (savedGroups, originalGroups) => {
+    const allItems = new Map();
+    originalGroups.forEach(g => {
+      if (g.items) {
+        g.items.forEach(i => allItems.set(i.id, i));
+      }
+    });
+
+    return savedGroups.map(savedGroup => {
+      const origGroup = originalGroups.find(g => g.id === savedGroup.id) || 
+                        (savedGroup.id === 'favorites' ? { id: 'favorites', label: 'Favorites', emoji: '⭐' } : savedGroup);
+      
+      const hydratedItems = (savedGroup.items || [])
+        .map(savedItem => allItems.get(savedItem.id) || null)
+        .filter(Boolean);
+
+      return {
+        ...origGroup,
+        id: savedGroup.id,
+        items: hydratedItems
+      };
+    });
+  };
+
   useEffect(() => {
     async function loadPreferences() {
+      // Storage key for user preferences
+      const currentPrefsDocRef = user ? doc(db, 'users', user.uid, 'preferences', 'sidebar') : null;
+
       // First try localStorage for immediate local feedback
       const localPrefs = localStorage.getItem('sidebar_groups_prefs');
       if (localPrefs) {
         try {
-          setSidebarGroups(JSON.parse(localPrefs));
+          const parsed = JSON.parse(localPrefs);
+          setSidebarGroups(rehydrateGroups(parsed, props.groups));
         } catch(e) {}
       }
 
-      if (!prefsDocRef) {
+      if (!currentPrefsDocRef) {
         if (!localPrefs) injectFavoritesGroup(props.groups);
         return;
       }
       
       try {
-        const snap = await getDoc(prefsDocRef);
+        const snap = await getDoc(currentPrefsDocRef);
         if (snap.exists() && snap.data().groups) {
-          setSidebarGroups(snap.data().groups);
+          const rehydrated = rehydrateGroups(snap.data().groups, props.groups);
+          setSidebarGroups(rehydrated);
           localStorage.setItem('sidebar_groups_prefs', JSON.stringify(snap.data().groups));
         } else if (!localPrefs) {
           // Ensure "Favorites" exists
@@ -46,7 +75,7 @@ export default function SidebarGadget(props) {
       }
     }
     loadPreferences();
-  }, [user, props.groups, prefsDocRef]);
+  }, [user, props.groups]);
 
   const injectFavoritesGroup = (initialGroups) => {
     const hasFavs = initialGroups.some(g => g.id === 'favorites');
@@ -61,7 +90,8 @@ export default function SidebarGadget(props) {
   };
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
@@ -102,12 +132,12 @@ export default function SidebarGadget(props) {
         const overItemIndex = prev[overGroupIndex].items.findIndex(i => i.id === overId);
 
         if (activeGroupIndex !== overGroupIndex) {
-          const newGroups = JSON.parse(JSON.stringify(prev));
+          const newGroups = prev.map(g => ({ ...g, items: [...(g.items || [])] }));
           const [movedItem] = newGroups[activeGroupIndex].items.splice(activeItemIndex, 1);
           newGroups[overGroupIndex].items.splice(overItemIndex, 0, movedItem);
           return newGroups;
         } else {
-          const newGroups = JSON.parse(JSON.stringify(prev));
+          const newGroups = prev.map(g => ({ ...g, items: [...(g.items || [])] }));
           newGroups[activeGroupIndex].items = arrayMove(newGroups[activeGroupIndex].items, activeItemIndex, overItemIndex);
           return newGroups;
         }
@@ -119,9 +149,13 @@ export default function SidebarGadget(props) {
         if (overGroupIndex === -1) return prev;
 
         if (activeGroupIndex !== overGroupIndex) {
-          const newGroups = JSON.parse(JSON.stringify(prev));
-          const [movedItem] = newGroups[activeGroupIndex].items.splice(activeItemIndex, 1);
-          newGroups[overGroupIndex].items.push(movedItem);
+          const newGroups = prev.map(g => ({ ...g, items: [...(g.items || [])] }));
+          const activeItems = newGroups[activeGroupIndex].items;
+          const overItems = newGroups[overGroupIndex].items;
+          
+          const [movedItem] = activeItems.splice(activeItemIndex, 1);
+          const overIndexWithFallback = overItemIndex >= 0 ? overItemIndex : overItems.length + 1;
+          overItems.splice(overIndexWithFallback, 0, movedItem);
           return newGroups;
         }
       }
@@ -135,12 +169,19 @@ export default function SidebarGadget(props) {
   };
 
   const savePreferences = async () => {
+    const serializedGroups = sidebarGroups.map(g => ({
+      id: g.id,
+      label: g.label,
+      emoji: g.emoji,
+      items: (g.items || []).map(i => ({ id: i.id, label: i.label, path: i.path }))
+    }));
+
     // Save to localStorage for immediate local persistence
-    localStorage.setItem('sidebar_groups_prefs', JSON.stringify(sidebarGroups));
+    localStorage.setItem('sidebar_groups_prefs', JSON.stringify(serializedGroups));
 
     if (prefsDocRef) {
       try {
-        await setDoc(prefsDocRef, { groups: sidebarGroups }, { merge: true });
+        await setDoc(prefsDocRef, { groups: serializedGroups }, { merge: true });
         setIsEditing(false);
       } catch (e) {
         console.error("Failed to save sidebar preferences", e);
@@ -149,6 +190,42 @@ export default function SidebarGadget(props) {
     } else {
       setIsEditing(false);
     }
+  };
+
+  const handleToggleFavorite = (itemId, e) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    
+    // Find the item globally from props.groups
+    let targetItem = null;
+    for (const g of props.groups) {
+      if (g.items) {
+        const found = g.items.find(i => i.id === itemId);
+        if (found) {
+          targetItem = found;
+          break;
+        }
+      }
+    }
+    
+    if (!targetItem) return;
+
+    setSidebarGroups(prev => {
+      const newGroups = prev.map(g => ({ ...g, items: [...(g.items || [])] }));
+      const favGroup = newGroups.find(g => g.id === 'favorites');
+      
+      if (!favGroup) return prev; // Safety check
+      
+      const isFav = favGroup.items.some(i => i.id === itemId);
+      if (isFav) {
+        favGroup.items = favGroup.items.filter(i => i.id !== itemId);
+      } else {
+        favGroup.items.push(targetItem);
+      }
+      return newGroups;
+    });
   };
 
   const toggleEditMode = () => {
@@ -168,6 +245,7 @@ export default function SidebarGadget(props) {
         {...props} 
         groups={sidebarGroups} 
         isEditing={isEditing}
+        onToggleFavorite={handleToggleFavorite}
         footer={{
           label: isEditing ? "Save Menu" : "Customize Menu",
           icon: isEditing ? Save : Settings,

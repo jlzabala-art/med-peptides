@@ -2,6 +2,7 @@
 
 const createAgent = require("../agents/createAgent");
 const { callGemini, structuredLogger } = require("./ai_utils");
+const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 
 const AGENT_ID   = "catalog-builder-agent-001";
 const AGENT_NAME = "AgentCatalogBuilder";
@@ -159,6 +160,116 @@ If the user asks about a product not in the catalog, politely reply that it is n
   }
 }
 
+/**
+ * AI Catalog Build and Explain (NEW)
+ * Creates a catalog based on a prompt, explains the strategy/margins, and saves it to Firestore.
+ */
+async function buildAndExplain(ctx, body, dynamicConfig = {}) {
+  const { query: userPrompt, products = [], protocols = [], ownerId, ownerType } = body;
+  
+  // Create a structured product list with COGS for margin calculation
+  const productContext = products.map(p => ({
+    id: p.id,
+    name: p.displayName || p.name,
+    category: p.category,
+    cost_cogs: p.pricing?.cogs || p.cogs || 15, // Real costs if available
+    retail_price: p.pricing?.retail || p.retail || 100,
+    goals: p.goals || [],
+    equipment_included: p.equipmentIncluded || "Vial, bacteriostatic water, and sterile syringes"
+  }));
+
+  const prompt = `You are an elite B2B medical merchandising and commercial publishing AI.
+The user wants to create a new B2B catalog. 
+
+USER REQUEST: "${userPrompt}"
+
+AVAILABLE PRODUCTS (Includes cost/COGS for margin calculations):
+${JSON.stringify(productContext)}
+
+AVAILABLE PROTOCOLS:
+${JSON.stringify(protocols.map(p => ({ id: p.id, name: p.name, goal: p.goal })))}
+
+TASK:
+1. Select the most appropriate products and protocols that match the user request.
+2. Determine the target audience (doctors, patients, or wholesalers).
+3. Generate a catchy catalog title and a unique URL slug (lowercase, dashes only).
+4. Act as an expert commercial and clinical advisor: In the "explanation" field, write a CONCISE and direct message to the user including ONLY:
+   - The selected products.
+   - Brief clinical info and dosages.
+   - The prices.
+   - End the explanation by saying you have created the catalog and provide the final link formatted EXACTLY as: [Catalog Link](/catalog/{suggestedSlug})
+   DO NOT include long justifications, target profiles, or extensive business case details. Keep it very short.
+5. EXTREMELY IMPORTANT: You must populate "selectedProductIds" with the array of product IDs you have chosen. You must also populate "suggestedTitle" and "suggestedSlug". If you do not provide these, the system will fail.
+
+Return ONLY a valid JSON object matching the schema below. Output raw JSON without markdown code blocks.
+
+SCHEMA:
+{
+  "suggestedTitle": "String",
+  "suggestedSlug": "String",
+  "audience": "doctors|patients|wholesalers",
+  "selectedProductIds": ["id1", "id2"],
+  "selectedProtocolIds": ["id1"],
+  "explanation": "Detailed professional message explaining strategy, profile, products, margins, inclusions, and providing the final link."
+}`;
+
+  try {
+    const model = dynamicConfig.model || "gemini-2.5-flash";
+    const raw = await callGemini(
+      [{ role: "user", parts: [{ text: prompt }] }],
+      "You are a structured clinical merchandising catalog generator. Output only raw JSON.",
+      model, "application/json", 8192, "catalog_builder" // Increased tokens to 8192
+    );
+
+    const jsonText = raw.replace(/^```json\s*/i, "").replace(/\s*```$/i, "").trim();
+    
+    let result;
+    try {
+      result = JSON.parse(jsonText);
+    } catch (parseErr) {
+      structuredLogger.error({ event: "catalog_build_parse_error", error: parseErr.message, rawLength: raw.length, rawString: raw });
+      throw new Error("Failed to parse AI response. " + parseErr.message);
+    }
+
+    // Save to Firestore
+    const db = getFirestore();
+    const newCatalogRef = db.collection("catalogs").doc();
+    const catalogData = {
+      id: newCatalogRef.id,
+      ownerId: ownerId || "admin",
+      ownerType: ownerType || "admin",
+      status: "DRAFT", // Approved by user: initially DRAFT
+      title: result.suggestedTitle,
+      slug: result.suggestedSlug,
+      audience: result.audience,
+      goal: "custom", 
+      sections: [
+        {
+          title: "Featured Selection",
+          description: "Curated products and protocols based on AI recommendations.",
+          products: result.selectedProductIds || [],
+          protocols: result.selectedProtocolIds || []
+        }
+      ],
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp()
+    };
+    
+    await newCatalogRef.set(catalogData);
+
+    return {
+      reply: result.explanation,
+      catalogId: newCatalogRef.id,
+      catalogSlug: result.suggestedSlug,
+      catalogData: catalogData
+    };
+
+  } catch (err) {
+    structuredLogger.error({ event: "catalog_build_gemini_error", error: err.message });
+    throw err;
+  }
+}
+
 module.exports = createAgent({
   agentId:         AGENT_ID,
   agentName:       AGENT_NAME,
@@ -199,6 +310,16 @@ module.exports = createAgent({
       return {
         reply: chatResult.reply,
         extras: { chatResult }
+      };
+    } else if (mode === "build_and_explain") {
+      const buildResult = await buildAndExplain(ctx, body, dynamicConfig);
+      return {
+        reply: buildResult.reply,
+        extras: { 
+          catalogId: buildResult.catalogId,
+          catalogSlug: buildResult.catalogSlug,
+          catalogData: buildResult.catalogData
+        }
       };
     }
 

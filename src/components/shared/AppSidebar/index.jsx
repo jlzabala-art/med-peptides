@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Menu, ChevronDown, LogOut, GripVertical } from 'lucide-react';
+import { Menu, ChevronDown, LogOut, GripVertical, Star } from 'lucide-react';
 import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import './AppSidebar.css';
 
 // ─── Sortable Group Wrapper ────────────────────────────────────────────────
-function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, handleItemClick, isEditing, isMobile }) {
+function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, handleItemClick, isEditing, isMobile, onToggleFavorite, isFavoritesGroup }) {
   const {
     attributes,
     listeners,
@@ -72,6 +72,8 @@ function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, 
               handleItemClick={handleItemClick}
               expanded={expanded}
               isEditing={isEditing}
+              onToggleFavorite={onToggleFavorite}
+              isFavorite={isFavoritesGroup}
             />
           ))}
         </SortableContext>
@@ -88,7 +90,7 @@ function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, 
 }
 
 // ─── Sortable Item Wrapper ─────────────────────────────────────────────────
-function SortableSidebarItem({ item, isActive, handleItemClick, expanded, isEditing }) {
+function SortableSidebarItem({ item, isActive, handleItemClick, expanded, isEditing, onToggleFavorite, isFavorite }) {
   const {
     attributes,
     listeners,
@@ -139,6 +141,31 @@ function SortableSidebarItem({ item, isActive, handleItemClick, expanded, isEdit
           <span className="sb-item-badge">{item.badge > 99 ? '99+' : item.badge}</span>
         )}
       </button>
+      
+      {/* Pin to Favorites Button */}
+      {onToggleFavorite && (isEditing || expanded) && (
+        <button
+          className="sb-item-pin-btn"
+          onClick={(e) => onToggleFavorite(item.id, e)}
+          title={isFavorite ? "Remove from Favorites" : "Pin to Favorites"}
+          style={{
+            position: 'absolute',
+            right: '8px',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '4px',
+            color: isFavorite ? '#f59e0b' : 'var(--text-muted)',
+            opacity: isEditing || isFavorite ? 1 : 0,
+            transition: 'opacity 0.2s, transform 0.2s, color 0.2s',
+            zIndex: 10,
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = '#f59e0b'; e.currentTarget.style.transform = 'scale(1.1)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = isFavorite ? '#f59e0b' : 'var(--text-muted)'; e.currentTarget.style.transform = 'scale(1)'; }}
+        >
+          <Star size={14} fill={isFavorite ? '#f59e0b' : 'none'} />
+        </button>
+      )}
     </div>
   );
 }
@@ -155,7 +182,8 @@ export default function AppSidebar({
   isOpen,
   onClose,
   isMobile,
-  isEditing = false // Injected by SidebarGadget wrapper
+  isEditing = false, // Injected by SidebarGadget wrapper
+  onToggleFavorite
 }) {
   const [expanded, setExpanded] = useState(() => {
     try { return JSON.parse(localStorage.getItem(`${storageKey}:expanded`) ?? 'true'); }
@@ -256,6 +284,8 @@ export default function AppSidebar({
                   handleItemClick={handleItemClick}
                   isEditing={isEditing}
                   isMobile={isMobile}
+                  onToggleFavorite={onToggleFavorite}
+                  isFavoritesGroup={group.id === 'favorites'}
                 />
                 {gi < groups.length - 1 && <div className="sb-divider" />}
               </React.Fragment>

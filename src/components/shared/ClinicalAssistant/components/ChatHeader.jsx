@@ -22,7 +22,7 @@ export default function ChatHeader({
 }) {
   const themeAccent = contextMode === 'admin' ? '#1a73e8' : contextMode === 'doctor' ? '#0f9d58' : '#4285f4';
   const themeBgActive = contextMode === 'admin' ? '#e8f0fe' : contextMode === 'doctor' ? '#e6f4ea' : '#e8f0fe';
-  const headerTitle = contextMode === 'admin' ? 'Admin Assistant' : contextMode === 'doctor' ? 'Clinical Advisor' : 'Research Assistant';
+  const headerTitle = contextMode === 'admin' ? 'ClinicAI' : contextMode === 'doctor' ? 'Clinical Advisor' : 'Research Assistant';
   const statusLabel = contextMode === 'admin' ? 'System Link Active' : contextMode === 'doctor' ? 'Clinical Link Active' : 'Neural Link Active';
 
   return (
@@ -39,7 +39,8 @@ export default function ChatHeader({
     }}>
       <button 
         onClick={onToggleHistory}
-        title={isHistoryOpen ? "Hide sidebar" : "Show sidebar"}
+        title={isHistoryOpen ? "Ocultar panel lateral de historial" : "Mostrar historial de chats"}
+        data-tooltip={isHistoryOpen ? "Ocultar panel lateral de historial" : "Mostrar historial de chats"}
         style={{
           width: '32px',
           height: '32px',
@@ -79,7 +80,7 @@ export default function ChatHeader({
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis'
-            }}>
+            }} title={`Asistente de IA: ${headerTitle}`}>
               {headerTitle}
             </h3>
             {contextMode !== 'doctor' && !isMobile && (
@@ -97,14 +98,14 @@ export default function ChatHeader({
                 textTransform: 'uppercase',
                 letterSpacing: '0.03em',
                 flexShrink: 0
-              }}>
+              }} title="El sistema puede analizar recetas médicas en esta sesión.">
                 <span style={{ fontSize: '0.72rem' }}>📋</span>
                 <span>Prescription Scan Ready</span>
               </div>
             )}
           </div>
         )}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: contextMode === 'admin' ? 0 : '0.1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: contextMode === 'admin' ? '0' : '0.1rem' }}>
           <div style={{ 
             width: '5px',
             height: '5px',
@@ -124,7 +125,7 @@ export default function ChatHeader({
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis'
-          }}>
+          }} title={`Estado de conexión: ${statusLabel}`}>
             {statusLabel}
           </span>
           {!isRegistered && (
@@ -151,7 +152,8 @@ export default function ChatHeader({
           <>
             <button
               onClick={onToggleBeginner}
-              title={isBeginnerMode ? "Switch to Expert Mode" : "Switch to Beginner Mode"}
+              title={isBeginnerMode ? "Cambiar a modo experto (rápido)" : "Cambiar a modo principiante (explicado)"}
+              data-tooltip={isBeginnerMode ? "Cambiar a modo experto (rápido)" : "Cambiar a modo principiante (explicado)"}
               style={{
                 width: '32px', height: '32px', borderRadius: '10px',
                 border: '1px solid #e2e8f0',
@@ -177,7 +179,8 @@ export default function ChatHeader({
             
             <button
               onClick={() => generateClinicalBriefPDF(messages)}
-              title="Export PDF"
+              title="Exportar chat a PDF"
+              data-tooltip="Exportar chat a PDF"
               style={{
                 width: '32px', height: '32px', borderRadius: '10px',
                 border: isMobile ? 'none' : '1px solid #e2e8f0', 
@@ -196,7 +199,8 @@ export default function ChatHeader({
 
             <button
               onClick={onClear}
-              title="Clear chat"
+              title="Borrar chat actual"
+              data-tooltip="Borrar chat actual"
               style={{
                 width: '32px', height: '32px', borderRadius: '10px',
                 border: isMobile ? '1px solid rgba(255,255,255,0.25)' : '1px solid #fee2e2',
@@ -216,7 +220,8 @@ export default function ChatHeader({
         )}
         <button
           onClick={onClose}
-          title="Close assistant"
+          title="Cerrar asistente"
+          data-tooltip="Cerrar asistente"
           style={{
             width: '32px', height: '32px', borderRadius: '10px',
             border: isMobile ? 'none' : '1px solid #e2e8f0', 

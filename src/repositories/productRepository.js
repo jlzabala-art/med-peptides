@@ -125,10 +125,10 @@ function _resolveLocalEnrich(firestoreName, firestoreId) {
     }
     if (!globalThis.__warnedMismatches.has(warnKey)) {
       globalThis.__warnedMismatches.add(warnKey);
-      console.warn(
-        `[productRepository] No local enrichment found for Firestore product: name="${firestoreName}", id="${firestoreId}". ` +
-        `Search scoring will rely on Firestore fields only. Add an entry to src/data/products.js to fix.`
-      );
+      // console.warn(
+      //   `[productRepository] No local enrichment found for Firestore product: name="${firestoreName}", id="${firestoreId}". ` +
+      //   `Search scoring will rely on Firestore fields only. Add an entry to src/data/products.js to fix.`
+      // );
     }
   }
 

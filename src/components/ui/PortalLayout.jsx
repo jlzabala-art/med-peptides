@@ -124,6 +124,7 @@ export default function PortalLayout({
           onClose={() => setSidebarOpen(false)}
           isMobile={isMobile}
           header={{ title: '', subtitle: '' }} // Let PortalLayout topbar handle branding
+          prefsKey={`${roleContext}_sidebar`}
         />
 
         {/* CENTER CONTENT */}

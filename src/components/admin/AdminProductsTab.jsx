@@ -22,6 +22,7 @@ import AppFilterBar from '../ui/AppFilterBar';
 import AppEntityCell from '../ui/AppEntityCell';
 import { useToast } from '../../hooks/useToast';
 import AdminSupplyNotifierWidget from './gadgets/AdminSupplyNotifierWidget';
+import InlineEditField from '../ui/InlineEditField';
 
 export default function AdminProductsTab({
   readOnly = false,
@@ -445,13 +446,11 @@ export default function AdminProductsTab({
             {readOnly ? (
               <span className="mono-data">{p.sku || 'N/A'}</span>
             ) : (
-              <input
-                type="text"
-                defaultValue={p.sku || ''}
-                onBlur={(e) => handleUpdateProduct(p.id, { sku: e.target.value })}
+              <InlineEditField
+                value={p.sku || ''}
+                onSave={(val) => handleUpdateProduct(p.id, { sku: val })}
                 placeholder="SKU (optional)"
-                className="mono-data"
-                style={inputStyle}
+                inputStyle={{ fontFamily: 'var(--font-mono)' }}
               />
             )}
           </div>
@@ -468,16 +467,14 @@ export default function AdminProductsTab({
                 {p.stock}
               </span>
             ) : (
-              <input
+              <InlineEditField
                 type="number"
-                defaultValue={p.stock}
-                onBlur={(e) => handleUpdateProduct(p.id, { stock: parseInt(e.target.value) || 0 })}
-                className="mono-data"
-                style={{
-                  ...inputStyle,
+                value={p.stock}
+                onSave={(val) => handleUpdateProduct(p.id, { stock: parseInt(val) || 0 })}
+                inputStyle={{ 
+                  fontFamily: 'var(--font-mono)',
                   fontWeight: 700,
                   color: p.stock < 20 ? 'var(--error)' : p.stock < 50 ? '#f59e0b' : 'inherit',
-                  border: p.stock < 20 ? '2px solid var(--error)' : '1px solid var(--border)',
                 }}
               />
             )}
@@ -488,17 +485,12 @@ export default function AdminProductsTab({
             {readOnly ? (
               <span>{p.warehouse || 'Poland'}</span>
             ) : (
-              <select
+              <InlineEditField
+                type="select"
                 value={p.warehouse || 'Poland'}
-                onChange={(e) => handleUpdateProduct(p.id, { warehouse: e.target.value })}
-                style={inputStyle}
-              >
-                <option value="Poland">Poland</option>
-                <option value="UK">UK</option>
-                <option value="HK">HK</option>
-                <option value="USA">USA</option>
-                <option value="Greece">Greece</option>
-              </select>
+                options={['Poland', 'UK', 'HK', 'USA', 'Greece']}
+                onSave={(val) => handleUpdateProduct(p.id, { warehouse: val })}
+              />
             )}
           </div>
 
@@ -508,18 +500,19 @@ export default function AdminProductsTab({
               {readOnly ? (
                 <span>{p.supplier || 'N/A'}</span>
               ) : (
-                <select
+                <InlineEditField
+                  type="select"
                   value={p.supplier || ''}
-                  onChange={(e) => handleUpdateProduct(p.id, { supplier: e.target.value })}
-                  style={inputStyle}
-                >
-                  <option value="">Select...</option>
-                  <option value="Lotusland">Lotusland</option>
-                  <option value="NPLAB">NPLAB</option>
-                  <option value="Eterna">Eterna</option>
-                  <option value="Regpept">Regpept</option>
-                  <option value="Other">Other</option>
-                </select>
+                  options={[
+                    { value: '', label: 'Select...' },
+                    { value: 'Lotusland', label: 'Lotusland' },
+                    { value: 'NPLAB', label: 'NPLAB' },
+                    { value: 'Eterna', label: 'Eterna' },
+                    { value: 'Regpept', label: 'Regpept' },
+                    { value: 'Other', label: 'Other' },
+                  ]}
+                  onSave={(val) => handleUpdateProduct(p.id, { supplier: val })}
+                />
               )}
             </div>
           )}

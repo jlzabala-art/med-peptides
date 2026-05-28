@@ -274,17 +274,33 @@ export default function AdminInvitationsTab() {
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
         searchPlaceholder="Search invitations by name or email..."
-        primaryFilters={[
-          { id: 'all', label: 'All Roles', active: roleFilter === 'all' },
-          { id: 'admin', label: 'Admin', active: roleFilter === 'admin' },
-          { id: 'clinic', label: 'Clinic', active: roleFilter === 'clinic' },
-          { id: 'doctor', label: 'Practitioner', active: roleFilter === 'doctor' },
-          { id: 'wholesaler', label: 'Wholesaler', active: roleFilter === 'wholesaler' },
-          { id: 'sales_agent', label: 'Sales Agent', active: roleFilter === 'sales_agent' },
-          { id: 'staff', label: 'Clinic Staff', active: roleFilter === 'staff' },
-          { id: 'patient', label: 'Patient', active: roleFilter === 'patient' },
-        ]}
-        onPrimaryFilterChange={setRoleFilter}
+        secondaryActions={
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            style={{
+              height: '32px',
+              padding: '0 12px',
+              borderRadius: '16px',
+              border: '1px solid var(--border)',
+              backgroundColor: 'white',
+              color: 'var(--text-main)',
+              fontSize: '13px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+          >
+            <option value="all">All Roles</option>
+            <option value="admin">Admin</option>
+            <option value="clinic">Clinic</option>
+            <option value="doctor">Practitioner</option>
+            <option value="wholesaler">Wholesaler</option>
+            <option value="sales_agent">Sales Agent</option>
+            <option value="staff">Clinic Staff</option>
+            <option value="patient">Patient</option>
+          </select>
+        }
       />
 
       {/* Main Table */}

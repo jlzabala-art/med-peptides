@@ -993,6 +993,7 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
             onClick={() => onSend()}
             disabled={!input.trim() || isLoading}
             className="ca-send-btn"
+            title="Send message"
             style={{
               width: '34px',
               height: '34px',

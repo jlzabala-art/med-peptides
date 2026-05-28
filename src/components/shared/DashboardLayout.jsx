@@ -38,6 +38,7 @@ export default function DashboardLayout({
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
         isMobile={isMobile}
+        prefsKey={`${roleContext}_sidebar`}
       />
 
       {/* Main Content Area Wrapper */}

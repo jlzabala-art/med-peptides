@@ -1,16 +1,17 @@
-/* eslint-disable no-unused-vars */
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { usePatientAIProfile } from '../hooks/usePatientAIProfile';
 import RefillReminderBanner from '../components/shared/RefillReminderBanner';
 import {
   ChevronRight, Sparkles, Bot, Clock, Target, ArrowRight,
-  Package, CheckCircle2, Truck, AlertCircle, Box, Beaker, FileText, TrendingUp
+  Package, CheckCircle2, Truck, AlertCircle, Box, Beaker, FileText, TrendingUp,
+  LayoutDashboard, ClipboardList
 } from 'lucide-react';
 import PatientPrescriptionPanel from '../components/patient/PatientPrescriptionPanel';
 import { collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
+import PortalLayout from '../components/ui/PortalLayout';
 
 // ── Goal → peptide metadata ───────────────────────────────────────────────────
 const GOAL_PEPTIDE_MAP = {
@@ -25,7 +26,6 @@ const GOAL_PEPTIDE_MAP = {
   'sleep':       { label: 'Sleep Quality',    peptides: ['DSIP', 'Selank', 'Epitalon'] },
 };
 
-// ── Trending (static seed) ──
 const TRENDING_COMPOUNDS = [
   { name: 'BPC-157',     slug: 'bpc-157',     category: 'Recovery',  trend: '+18%' },
   { name: 'Semaglutide', slug: 'semaglutide', category: 'Metabolic', trend: '+34%' },
@@ -41,7 +41,6 @@ function openAI(q = '') {
   }));
 }
 
-// ── Technical Panel Container ───────────────────────────────────────────────
 function TechnicalPanel({ title, icon: Icon, action, onAction, children }) {
   return (
     <div style={{ backgroundColor: 'var(--color-bg-surface)', border: '1px solid #dadce0', borderRadius: '4px', marginBottom: '1.5rem', overflow: 'hidden' }}>
@@ -62,10 +61,153 @@ function TechnicalPanel({ title, icon: Icon, action, onAction, children }) {
   );
 }
 
+// ── NAV GROUPS ─────────────────────────────────────────────────────────────
+const PATIENT_NAV_GROUPS = [
+  {
+    id: 'overview',
+    label: 'Overview',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    ],
+  },
+  {
+    id: 'clinical',
+    label: 'Clinical',
+    items: [
+      { id: 'prescriptions', label: 'My Prescriptions', icon: ClipboardList },
+    ],
+  },
+  {
+    id: 'orders',
+    label: 'Orders & Fulfillment',
+    items: [
+      { id: 'my-orders', label: 'My Orders', icon: Package },
+    ],
+  }
+];
+
+function PatientDashboardTab({ uid, activeOrders, aiSuggestion, interests, allGoalKeys, recently }) {
+  const navigate = useNavigate();
+  return (
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 1.5rem 4rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        
+        {/* Active Orders */}
+        {activeOrders.length > 0 && (
+          <TechnicalPanel title="Active Orders & Shipments" icon={Package} action="View all" onAction={() => navigate('/account')}>
+            {activeOrders.map((order, idx) => {
+              const status = (order.status || 'pending').toLowerCase();
+              const isDelivered = ['delivered', 'completed'].includes(status);
+              const isShipped   = status === 'shipped';
+              return (
+                <div key={order.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', borderBottom: idx !== activeOrders.length - 1 ? '1px solid #e2e8f0' : 'none', backgroundColor: 'var(--color-bg-surface)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    {isDelivered ? <CheckCircle2 size={16} color="#166534" /> : isShipped ? <Truck size={16} color="var(--color-primary-hover)" /> : <Box size={16} color="#b45309" />}
+                    <div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0f172a' }}>{order.orderId || order.id?.slice(0,8)}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>{isDelivered ? 'Delivered' : isShipped ? 'Shipped' : 'Pending fulfillment'}</div>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: isDelivered ? '#166534' : isShipped ? 'var(--color-primary-hover)' : '#b45309', backgroundColor: isDelivered ? '#dcfce7' : isShipped ? '#dbeafe' : '#fef3c7', padding: '0.15rem 0.5rem', borderRadius: '4px' }}>
+                    {status.toUpperCase()}
+                  </span>
+                </div>
+              );
+            })}
+          </TechnicalPanel>
+        )}
+
+        <RefillReminderBanner role="patient" onNavigate={() => navigate('/account')} />
+
+        {/* AI Insights - Flattened */}
+        <TechnicalPanel title="Clinical AI Insights" icon={Bot} action="Open Assistant" onAction={() => openAI()}>
+          <div style={{ padding: '1rem', backgroundColor: 'var(--color-bg-app)', borderBottom: '1px solid #e2e8f0' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>RECOMMENDED ACTION</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.85rem', color: '#0f172a' }}>{aiSuggestion}</span>
+              <button onClick={() => openAI(aiSuggestion)} style={{ backgroundColor: 'var(--color-bg-surface)', border: '1px solid #cbd5e1', padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', color: 'var(--color-text-primary)' }}>Ask AI</button>
+            </div>
+          </div>
+          
+          {interests.length > 0 && (
+            <div style={{ padding: '0' }}>
+              <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f1f5f9', fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-secondary)' }}>
+                TRACKED COMPOUNDS
+              </div>
+              {interests.slice(0, 5).map((item, idx) => (
+                <div key={item.slug} onClick={() => navigate(`/products/${item.slug}`)} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1rem', borderBottom: idx !== 4 ? '1px solid #e2e8f0' : 'none', cursor: 'pointer', backgroundColor: 'var(--color-bg-surface)' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--color-bg-app)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)'}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <Beaker size={14} color="var(--color-text-secondary)" />
+                    <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#0f172a' }}>{item.name}</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)' }}>{item.category}</span>
+                  </div>
+                  <ChevronRight size={14} color="var(--color-border)" />
+                </div>
+              ))}
+            </div>
+          )}
+        </TechnicalPanel>
+
+        {/* Objectives */}
+        {allGoalKeys.length > 0 && (
+          <TechnicalPanel title="Clinical Objectives" icon={Target} action="View Catalog" onAction={() => navigate('/catalog')}>
+            {allGoalKeys.map((goalKey, idx) => {
+              const g = GOAL_PEPTIDE_MAP[goalKey];
+              return (
+                <div key={goalKey} style={{ padding: '0.75rem 1rem', borderBottom: idx !== allGoalKeys.length - 1 ? '1px solid #e2e8f0' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0f172a' }}>{g.label}</div>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    {g.peptides.slice(0, 3).map(p => (
+                      <span key={p} style={{ fontSize: '0.7rem', backgroundColor: '#f1f5f9', color: 'var(--color-text-secondary)', padding: '0.15rem 0.5rem', borderRadius: '4px', border: '1px solid #e2e8f0' }}>{p}</span>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </TechnicalPanel>
+        )}
+
+        {recently.length > 0 && (
+          <TechnicalPanel title="Recent Activity" icon={Clock}>
+            {recently.map((item, idx) => (
+              <div key={idx} onClick={() => navigate(`/products/${item.slug || item.id || ''}`)} style={{ padding: '0.75rem 1rem', borderBottom: idx !== recently.length - 1 ? '1px solid #e2e8f0' : 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--color-bg-app)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                <div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 500, color: '#0f172a' }}>{item.name || item.displayName}</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>{item.category}</div>
+                </div>
+                <ChevronRight size={14} color="var(--color-border)" />
+              </div>
+            ))}
+          </TechnicalPanel>
+        )}
+
+        <TechnicalPanel title="Market Trends" icon={TrendingUp}>
+          {TRENDING_COMPOUNDS.map((item, idx) => (
+            <div key={item.slug} onClick={() => navigate(`/products/${item.slug}`)} style={{ padding: '0.75rem 1rem', borderBottom: idx !== TRENDING_COMPOUNDS.length - 1 ? '1px solid #e2e8f0' : 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--color-bg-app)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+              <div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 500, color: '#0f172a' }}>{item.name}</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>{item.category}</div>
+              </div>
+              <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#166534', backgroundColor: '#dcfce7', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                {item.trend}
+              </span>
+            </div>
+          ))}
+        </TechnicalPanel>
+
+      </div>
+    </div>
+  );
+}
+
 export default function PatientHome() {
   const { user, userProfile } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const uid = user?.uid;
+
+  const queryParams = new URLSearchParams(location.search);
+  const activeTab = queryParams.get('t') || 'dashboard';
 
   const name = userProfile?.firstName || userProfile?.name?.split(' ')[0] || 'Patient';
   const goals = useMemo(() => Array.isArray(userProfile?.goals) ? userProfile.goals : [], [userProfile]);
@@ -105,132 +247,61 @@ export default function PatientHome() {
     return 'How should I begin with research peptides?';
   }, [interests, allGoalKeys]);
 
+  const handleNavigate = (tabId) => {
+    if (tabId === 'my-orders') {
+      navigate('/account');
+    } else {
+      navigate(`?t=${tabId}`);
+    }
+  };
+
+  const renderActiveTab = () => {
+    switch (activeTab) {
+      case 'prescriptions':
+        return (
+          <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 1.5rem 4rem' }}>
+            <PatientPrescriptionPanel patientUid={uid} />
+          </div>
+        );
+      case 'dashboard':
+      default:
+        return (
+          <PatientDashboardTab 
+            uid={uid} 
+            activeOrders={activeOrders} 
+            aiSuggestion={aiSuggestion} 
+            interests={interests} 
+            allGoalKeys={allGoalKeys} 
+            recently={recently} 
+          />
+        );
+    }
+  };
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa', paddingBottom: '4rem' }}>
-      
-      {/* Header - GCP Style */}
-      <div style={{ backgroundColor: 'var(--color-bg-surface)', borderBottom: '1px solid #dadce0', padding: '1rem 1.5rem', marginBottom: '1.5rem' }}>
-        <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', fontWeight: 600, color: '#0f172a' }}>Patient Portal</h1>
-        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span>Welcome back, <strong>{name}</strong></span>
-          {hasProfile && (
-            <span style={{ backgroundColor: '#dcfce7', color: '#166534', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, border: '1px solid #bbf7d0' }}>
-              AI PROFILE ACTIVE
-            </span>
-          )}
-        </div>
+    <PortalLayout
+      portalTitle="Patient Portal"
+      roleContext="patient"
+      sidebarNavGroups={PATIENT_NAV_GROUPS}
+      activeNavId={activeTab}
+      onNavigate={handleNavigate}
+      headerActions={
+        hasProfile && (
+          <span style={{ backgroundColor: '#dcfce7', color: '#166534', padding: '4px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, border: '1px solid #bbf7d0' }}>
+            AI PROFILE ACTIVE
+          </span>
+        )
+      }
+    >
+      <div style={{ padding: '1.5rem', backgroundColor: '#f8f9fa', minHeight: '100%' }}>
+        <h1 style={{ margin: '0 0 0.25rem 0', fontSize: '1.4rem', fontWeight: 600, color: '#0f172a' }}>
+          {activeTab === 'prescriptions' ? 'My Prescriptions' : `Welcome back, ${name}`}
+        </h1>
+        <p style={{ margin: '0 0 2rem 0', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
+          {activeTab === 'prescriptions' ? 'Manage your active recommendations and protocols.' : 'Overview of your active treatments and insights.'}
+        </p>
+        {renderActiveTab()}
       </div>
-
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 2rem' }}>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
-          {/* Active Orders */}
-          {activeOrders.length > 0 && (
-            <TechnicalPanel title="Active Orders & Shipments" icon={Package} action="View all" onAction={() => navigate('/account')}>
-              {activeOrders.map((order, idx) => {
-                const status = (order.status || 'pending').toLowerCase();
-                const isDelivered = ['delivered', 'completed'].includes(status);
-                const isShipped   = status === 'shipped';
-                return (
-                  <div key={order.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', borderBottom: idx !== activeOrders.length - 1 ? '1px solid #e2e8f0' : 'none', backgroundColor: 'var(--color-bg-surface)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      {isDelivered ? <CheckCircle2 size={16} color="#166534" /> : isShipped ? <Truck size={16} color="var(--color-primary-hover)" /> : <Box size={16} color="#b45309" />}
-                      <div>
-                        <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0f172a' }}>{order.orderId || order.id?.slice(0,8)}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>{isDelivered ? 'Delivered' : isShipped ? 'Shipped' : 'Pending fulfillment'}</div>
-                      </div>
-                    </div>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: isDelivered ? '#166534' : isShipped ? 'var(--color-primary-hover)' : '#b45309', backgroundColor: isDelivered ? '#dcfce7' : isShipped ? '#dbeafe' : '#fef3c7', padding: '0.15rem 0.5rem', borderRadius: '4px' }}>
-                      {status.toUpperCase()}
-                    </span>
-                  </div>
-                );
-              })}
-            </TechnicalPanel>
-          )}
-
-          <RefillReminderBanner role="patient" onNavigate={() => navigate('/account')} />
-          <PatientPrescriptionPanel patientUid={uid} />
-
-          {/* AI Insights - Flattened */}
-          <TechnicalPanel title="Clinical AI Insights" icon={Bot} action="Open Assistant" onAction={() => openAI()}>
-            <div style={{ padding: '1rem', backgroundColor: 'var(--color-bg-app)', borderBottom: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>RECOMMENDED ACTION</div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.85rem', color: '#0f172a' }}>{aiSuggestion}</span>
-                <button onClick={() => openAI(aiSuggestion)} style={{ backgroundColor: 'var(--color-bg-surface)', border: '1px solid #cbd5e1', padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', color: 'var(--color-text-primary)' }}>Ask AI</button>
-              </div>
-            </div>
-            
-            {interests.length > 0 && (
-              <div style={{ padding: '0' }}>
-                <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f1f5f9', fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-secondary)' }}>
-                  TRACKED COMPOUNDS
-                </div>
-                {interests.slice(0, 5).map((item, idx) => (
-                  <div key={item.slug} onClick={() => navigate(`/products/${item.slug}`)} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1rem', borderBottom: idx !== 4 ? '1px solid #e2e8f0' : 'none', cursor: 'pointer', backgroundColor: 'var(--color-bg-surface)' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--color-bg-app)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)'}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <Beaker size={14} color="var(--color-text-secondary)" />
-                      <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#0f172a' }}>{item.name}</span>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)' }}>{item.category}</span>
-                    </div>
-                    <ChevronRight size={14} color="var(--color-border)" />
-                  </div>
-                ))}
-              </div>
-            )}
-          </TechnicalPanel>
-
-          {/* Objectives */}
-          {allGoalKeys.length > 0 && (
-            <TechnicalPanel title="Clinical Objectives" icon={Target} action="View Catalog" onAction={() => navigate('/catalog')}>
-              {allGoalKeys.map((goalKey, idx) => {
-                const g = GOAL_PEPTIDE_MAP[goalKey];
-                return (
-                  <div key={goalKey} style={{ padding: '0.75rem 1rem', borderBottom: idx !== allGoalKeys.length - 1 ? '1px solid #e2e8f0' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0f172a' }}>{g.label}</div>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      {g.peptides.slice(0, 3).map(p => (
-                        <span key={p} style={{ fontSize: '0.7rem', backgroundColor: '#f1f5f9', color: 'var(--color-text-secondary)', padding: '0.15rem 0.5rem', borderRadius: '4px', border: '1px solid #e2e8f0' }}>{p}</span>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </TechnicalPanel>
-          )}
-
-          {recently.length > 0 && (
-            <TechnicalPanel title="Recent Activity" icon={Clock}>
-              {recently.map((item, idx) => (
-                <div key={idx} onClick={() => navigate(`/products/${item.slug || item.id || ''}`)} style={{ padding: '0.75rem 1rem', borderBottom: idx !== recently.length - 1 ? '1px solid #e2e8f0' : 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--color-bg-app)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                  <div>
-                    <div style={{ fontSize: '0.8rem', fontWeight: 500, color: '#0f172a' }}>{item.name || item.displayName}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>{item.category}</div>
-                  </div>
-                  <ChevronRight size={14} color="var(--color-border)" />
-                </div>
-              ))}
-            </TechnicalPanel>
-          )}
-
-          <TechnicalPanel title="Market Trends" icon={TrendingUp}>
-            {TRENDING_COMPOUNDS.map((item, idx) => (
-              <div key={item.slug} onClick={() => navigate(`/products/${item.slug}`)} style={{ padding: '0.75rem 1rem', borderBottom: idx !== TRENDING_COMPOUNDS.length - 1 ? '1px solid #e2e8f0' : 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--color-bg-app)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                <div>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 500, color: '#0f172a' }}>{item.name}</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>{item.category}</div>
-                </div>
-                <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#166534', backgroundColor: '#dcfce7', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
-                  {item.trend}
-                </span>
-              </div>
-            ))}
-          </TechnicalPanel>
-
-        </div>
-      </div>
-    </div>
+    </PortalLayout>
   );
 }

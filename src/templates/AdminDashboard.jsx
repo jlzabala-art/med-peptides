@@ -10,7 +10,8 @@ import {
   PackageSearch, LayoutDashboard, Bot, Link2, BarChart3,
   ChevronRight, ChevronDown, ClipboardList, Zap, Globe, Wrench,
   FlaskConical, Box, Tag, DollarSign, FileText, Eye, EyeOff, Mail,
-  Activity, BookOpen, Cpu, LogOut, Menu, X, Building2, TrendingUp
+  Activity, BookOpen, Cpu, LogOut, Menu, X, Building2, TrendingUp,
+  Building, Stethoscope, HeartPulse, UserPlus, Lock, Briefcase, LayoutTemplate, Network, ScrollText
 } from 'lucide-react';
 import PortalLayout from '../components/ui/PortalLayout';
 
@@ -52,7 +53,7 @@ const CatalogCreatorFlow = React.lazy(() => import('../components/wholesaler/Cat
 const EmailCampaignBuilder = React.lazy(() => import('../components/wholesaler/EmailCampaignBuilder'));
 
 // icon alias (lucide doesn't export MailPlus2 — must be before NAV_GROUPS)
-function MailPlus2(props) { return <Users {...props} />; }
+function MailPlus2(props) { return <UserPlus {...props} />; }
 
 // ── Intent-based navigation groups ────────────────────────────────────────────
 const NAV_GROUPS = [
@@ -60,18 +61,18 @@ const NAV_GROUPS = [
     id: 'overview',
     label: 'Overview',
     items: [
-      { id: 'dashboard', label: 'Dashboard KPIs', icon: LayoutDashboard },
+      { id: 'dashboard',        label: 'Dashboard KPIs',      icon: LayoutDashboard },
     ],
   },
   {
     id: 'sales-operations',
     label: 'Sales & Operations',
     items: [
-      { id: 'leads',            label: 'Leads',               icon: ClipboardList },
+      { id: 'leads',            label: 'Leads',               icon: Users },
       { id: 'orders',           label: 'Orders',              icon: PackageSearch },
-      { id: 'bulk-orders',      label: 'Bulk Orders',         icon: Layers },
+      { id: 'bulk-orders',      label: 'Bulk Orders',         icon: Box },
       { id: 'analytics',        label: 'Analytics',           icon: BarChart3 },
-      { id: 'account-managers', label: 'Account Managers',    icon: Users },
+      { id: 'account-managers', label: 'Account Managers',    icon: ShieldCheck },
     ],
   },
   {
@@ -80,8 +81,8 @@ const NAV_GROUPS = [
     items: [
       { id: 'email-campaigns',  label: 'Email Campaigns',     icon: Mail },
       { id: 'email-templates',  label: 'Email Templates',     icon: FileText },
-      { id: 'catalogs',         label: 'Catalogs',            icon: BookOpen },
       { id: 'branding',         label: 'Branding',            icon: Eye },
+      { id: 'catalogs',         label: 'Catalogs',            icon: BookOpen },
     ],
   },
   {
@@ -91,7 +92,7 @@ const NAV_GROUPS = [
       { id: 'wholesellers',       label: 'Wholesellers',        icon: Building2 },
       { id: 'geography-areas',    label: 'Geography Areas',     icon: Globe },
       { id: 'territory-rules',    label: 'Territory Rules',     icon: ShieldCheck },
-      { id: 'access-levels',      label: 'Access Levels',       icon: ShieldCheck },
+      { id: 'access-levels',      label: 'Access Levels',       icon: Lock },
       { id: 'pricing-visibility', label: 'Pricing Visibility',  icon: EyeOff },
     ],
   },
@@ -108,10 +109,10 @@ const NAV_GROUPS = [
     id: 'users-clinics',
     label: 'Users & Clinics',
     items: [
-      { id: 'clinics',          label: 'Clinics',              icon: Building2 },
-      { id: 'doctors',          label: 'Doctors',              icon: Users },
-      { id: 'patients',         label: 'Patients',             icon: Users },
-      { id: 'invitations',      label: 'Invitations',          icon: MailPlus2 },
+      { id: 'clinics',          label: 'Clinics',              icon: Building },
+      { id: 'doctors',          label: 'Doctors',              icon: Stethoscope },
+      { id: 'patients',         label: 'Patients',             icon: HeartPulse },
+      { id: 'invitations',      label: 'Invitations',          icon: UserPlus },
     ],
   },
   {
@@ -124,7 +125,7 @@ const NAV_GROUPS = [
       { id: 'catalog-builder',   label: 'Catalog Builder',     icon: Wrench },
       { id: 'prescription-agent',label: 'Prescription Agent',  icon: Zap },
       { id: 'semantic',          label: 'AI Semantics',        icon: Cpu },
-      { id: 'ai-logs',           label: 'AI Logs',             icon: BookOpen },
+      { id: 'ai-logs',           label: 'AI Logs',             icon: ScrollText },
     ],
   },
   {
@@ -132,7 +133,7 @@ const NAV_GROUPS = [
     label: 'Integrations',
     items: [
       { id: 'sku-sync',         label: 'Zoho Books',       icon: Link2 },
-      { id: 'crm-intelligence', label: 'Zoho Bigin',       icon: Building2 },
+      { id: 'crm-intelligence', label: 'Zoho Bigin',       icon: Briefcase },
     ],
   },
   {
@@ -142,8 +143,8 @@ const NAV_GROUPS = [
       { id: 'settings',        label: 'General Settings',  icon: Settings },
       { id: 'prices',          label: 'Prices',            icon: Tag },
       { id: 'costs',           label: 'Costs',             icon: DollarSign },
-      { id: 'relationships',   label: 'Relationships',     icon: Globe },
-      { id: 'home-layout',     label: 'Home Layout',       icon: Eye },
+      { id: 'relationships',   label: 'Relationships',     icon: Network },
+      { id: 'home-layout',     label: 'Home Layout',       icon: LayoutTemplate },
       { id: 'views',           label: 'Views',             icon: Layers },
       { id: 'blueprints',      label: 'Blueprints',        icon: Database },
       { id: 'gadget-repository',label: 'Gadget Repository',icon: Layers },

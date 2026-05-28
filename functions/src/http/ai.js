@@ -69,7 +69,9 @@ module.exports = onRequest(
       // Limits: unauthenticated → 5 queries/24h | professional/registered → 50/24h
       // Dev bypass: send header X-Dev-Bypass: true to skip limits during testing
       const isDevBypass = req.headers['x-dev-bypass'] === 'true';
-      if (!isDevBypass) {
+      const isAdminUser = reqContext?.instructions?.includes("ADMIN MODE ACTIVE") || reqContext?.user_profile?.role === 'admin';
+
+      if (!isDevBypass && !isAdminUser) {
         try {
           // Determine if user is authenticated (uid embedded in sessionId or passed via context)
           const isAuthenticated = !!(reqContext?.user_profile?.uid || sessionId.startsWith('uid_'));
@@ -1348,19 +1350,30 @@ ${JSON.stringify(clinicalRules || {})}
           for (const turn of history) {
             if (turn.role && turn.content) {
               const geminiRole = turn.role === 'assistant' ? 'model' : 'user';
-              contents.push({
-                role: geminiRole,
-                parts: [{ text: turn.content }]
-              });
+              
+              if (contents.length > 0 && contents[contents.length - 1].role === geminiRole) {
+                // Merge consecutive same roles to prevent Gemini API 400 Bad Request
+                contents[contents.length - 1].parts[0].text += `\\n\\n${turn.content}`;
+              } else {
+                contents.push({
+                  role: geminiRole,
+                  parts: [{ text: turn.content }]
+                });
+              }
             }
           }
         }
 
         // Add final user prompt containing the RAG context
-        contents.push({
-          role: 'user',
-          parts: [{ text: `${catalogContext}\nUser Query: "${message}"` }]
-        });
+        const finalPromptText = `${catalogContext}\\nUser Query: "${message}"`;
+        if (contents.length > 0 && contents[contents.length - 1].role === 'user') {
+          contents[contents.length - 1].parts[0].text += `\\n\\n${finalPromptText}`;
+        } else {
+          contents.push({
+            role: 'user',
+            parts: [{ text: finalPromptText }]
+          });
+        }
 
         let reply;
         const vertexAgentId = clinicAIConfig?.agentId || process.env.VERTEX_AGENT_ID;
@@ -1393,7 +1406,7 @@ ${JSON.stringify(clinicalRules || {})}
         // Native Gemini overrides for pure Gemini agents (e.g. Admin)
         else if (vertexAgentId === "gemini-native") {
           try {
-            reply = await timedCall('rag_gemini_native', () => callGemini(contents, systemInstruction));
+            reply = await timedCall('rag_gemini_native', () => callGemini(contents, systemInstruction, "gemini-2.5-flash", "text/plain", null, isAdminMode ? "admin" : "unknown"));
             structuredLogger.info(`[clinicalAiAssistant] Successfully called pure Native Gemini Agent`);
           } catch (agentErr) {
             structuredLogger.error(`[clinicalAiAssistant] Native Gemini Agent failed:`, agentErr.message);
@@ -1412,7 +1425,7 @@ ${JSON.stringify(clinicalRules || {})}
               reply = await timedCall('rag_cloudAgent_fallback', () => callCloudAgent(contents, systemInstruction));
             } catch (agentErr) {
               structuredLogger.warn(`[clinicalAiAssistant] Cloud Agent proxy failed, falling back to direct Gemini API:`, agentErr.message);
-              reply = await timedCall('rag_gemini_fallback', () => callGemini(contents, systemInstruction));
+              reply = await timedCall('rag_gemini_fallback', () => callGemini(contents, systemInstruction, "gemini-2.5-flash", "text/plain", null, isAdminMode ? "admin" : "unknown"));
             }
           }
         } else {
@@ -1421,7 +1434,7 @@ ${JSON.stringify(clinicalRules || {})}
             structuredLogger.info(`[clinicalAiAssistant] Successfully called Cloud Agent proxy directly`);
           } catch (agentErr) {
             structuredLogger.warn(`[clinicalAiAssistant] Cloud Agent proxy failed, falling back to direct Gemini API:`, agentErr.message);
-            reply = await timedCall('rag_gemini_direct', () => callGemini(contents, systemInstruction));
+            reply = await timedCall('rag_gemini_direct', () => callGemini(contents, systemInstruction, "gemini-2.5-flash", "text/plain", null, isAdminMode ? "admin" : "unknown"));
           }
         }
 
@@ -1493,7 +1506,7 @@ Return ONLY valid JSON.
         }
 
         // Ensure disclaimer is present for clinical/research modes
-        if (contextMode !== 'admin') {
+        if (!isAdminMode) {
           if (!finalReply.toLowerCase().includes("always review") && !finalReply.toLowerCase().includes("safety profile")) {
             finalReply += "\n\nAlways review the full safety profile before commencing research.";
           }
@@ -1508,7 +1521,18 @@ Return ONLY valid JSON.
           });
         } catch (e) {}
 
-        res.status(200).json({ reply: finalReply, suggestions: suggestions.slice(0, 4) });
+        let formatted = null;
+        if (isAdminMode) {
+          const { formatResponse } = require("./ai_formatter");
+          formatted = await formatResponse(finalReply, { formatType: "rag_response", role: "admin" });
+        }
+
+        const responsePayload = { reply: finalReply, suggestions: suggestions.slice(0, 4) };
+        if (formatted) {
+          responsePayload.formatted = formatted;
+        }
+
+        res.status(200).json(responsePayload);
       } catch (err) {
         structuredLogger.error(err, "[clinicalAiAssistant] Gemini RAG Error:");
 

@@ -1,11 +1,11 @@
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
-import { collection, query, where, getCountFromServer, getDocs, doc, getDoc } from 'firebase/firestore';
-import { Calendar as CalIcon, MessageSquare, Plus, Activity, Clock, FileText, Bot, HeartPulse, Stethoscope, ChevronRight, CheckCircle2, UserPlus, RefreshCw } from 'lucide-react';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { Stethoscope, Activity, FileText, Bot, HeartPulse, ChevronRight, CheckCircle2, UserPlus, RefreshCw, Zap, ArrowRight, FlaskConical, Calendar, LayoutDashboard, Users, LogOut } from 'lucide-react';
 import { GcpCard, GcpButton } from '../components/ui';
-import DoctorNav from '../components/doctor/DoctorNav';
+import PortalLayout from '../components/ui/PortalLayout';
+import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 
 // ── Agents relevant to doctors ───────────────────────────────────────────────
 const CLINICAL_AGENTS = [
@@ -149,14 +149,41 @@ function KpiCard({ label, value, icon: Icon, color, sub }) {
   );
 }
 
+const DOCTOR_NAV_GROUPS = [
+  {
+    id: 'overview',
+    label: 'Overview',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    ],
+  },
+  {
+    id: 'patients',
+    label: 'Patient Care',
+    items: [
+      { id: 'my-patients', label: 'My Patients', icon: Users },
+      { id: 'appointments', label: 'Appointments', icon: Calendar },
+    ],
+  },
+  {
+    id: 'clinical',
+    label: 'Clinical Tools',
+    items: [
+      { id: 'protocols', label: 'Protocols', icon: FileText },
+      { id: 'labs', label: 'Lab Results', icon: FlaskConical },
+    ],
+  }
+];
+
 // ── Main component ─────────────────────────────────────────────────────────
 export default function DoctorHome() {
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, logout } = useAuth();
   const doctorId   = user?.uid;
   const doctorName = userProfile?.firstName
     ? `Dr. ${userProfile.firstName}`
     : user?.displayName?.split(' ')[0] || 'Dr.';
 
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [metrics, setMetrics]       = useState({ patients: 0, protocols: 0, pendingLabs: 2, appointments: 3 });
   const [agentStatuses, setAgentStatuses] = useState(
     Object.fromEntries(CLINICAL_AGENTS.map(a => [a.key, a.key === 'clinical_data' ? 'pending' : 'active']))
@@ -230,148 +257,146 @@ export default function DoctorHome() {
     if (activeInput.trim()) openClinicalAI(activeInput);
   };
 
-  return (
-    <div style={{ backgroundColor: '#f1f5f9', minHeight: '100vh' }}>
-      <DoctorNav menuKey="dashboard" />
+  const handleLogout = () => {
+    logout?.();
+    window.location.href = '/';
+  };
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '2rem 1.5rem 4rem', paddingTop: '80px' }}>
-
-        {/* ── Welcome + Status Bar ── */}
-        <div style={{ marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-            flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
-            <div>
-              <h1 style={{ fontSize: 'clamp(1.6rem,4vw,2.2rem)', fontWeight: 900, color: '#0f172a',
-                margin: '0 0 0.35rem', letterSpacing: '-0.025em', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <Stethoscope size={28} color="var(--primary)" />
-                Welcome, {doctorName}
-              </h1>
-              <p style={{ margin: 0, color: 'var(--color-text-secondary)', fontSize: '1rem', fontWeight: 500 }}>
-                Your clinical intelligence hub. AI Agents ready to assist you.
-              </p>
+  const renderDashboard = () => (
+    <div style={{ maxWidth: 1200, margin: '0 auto', paddingBottom: '4rem' }}>
+      {/* ── Welcome + Status Bar ── */}
+      <div style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
+          flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+          <div>
+            <h1 style={{ fontSize: 'clamp(1.6rem,4vw,2.2rem)', fontWeight: 900, color: '#0f172a',
+              margin: '0 0 0.35rem', letterSpacing: '-0.025em', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <Stethoscope size={28} color="var(--color-primary)" />
+              Welcome, {doctorName}
+            </h1>
+            <p style={{ margin: 0, color: 'var(--color-text-secondary)', fontSize: '1rem', fontWeight: 500 }}>
+              Your clinical intelligence hub. AI Agents ready to assist you.
+            </p>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            {/* Time Filter */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#5f6368' }}>TIME RANGE</label>
+              <select 
+                value={timeFilter} 
+                onChange={(e) => setTimeFilter(e.target.value)}
+                style={{ padding: '0.45rem', borderRadius: '4px', border: '1px solid #dadce0', fontSize: '0.8rem', backgroundColor: '#f8f9fa', outline: 'none' }}
+              >
+                <option value="1d">Today</option>
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last Month</option>
+                <option value="90d">Last 3 Months</option>
+                <option value="all">All Time</option>
+              </select>
             </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              {/* Time Filter */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#5f6368' }}>TIME RANGE</label>
-                <select 
-                  value={timeFilter} 
-                  onChange={(e) => setTimeFilter(e.target.value)}
-                  style={{ padding: '0.45rem', borderRadius: '4px', border: '1px solid #dadce0', fontSize: '0.8rem', backgroundColor: '#f8f9fa', outline: 'none' }}
-                >
-                  <option value="1d">Today</option>
-                  <option value="7d">Last 7 Days</option>
-                  <option value="30d">Last Month</option>
-                  <option value="90d">Last 3 Months</option>
-                  <option value="all">All Time</option>
-                </select>
-              </div>
 
-              {/* Agent live badge */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.6rem 1.1rem', borderRadius: '999px',
-                background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
-                <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--color-success)',
-                  animation: 'dotPulse 2s infinite' }} />
-                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--color-success)' }}>
-                  {activeCount} active agent{activeCount !== 1 ? 's' : ''}
-                </span>
-              </div>
+            {/* Agent live badge */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem',
+              padding: '0.6rem 1.1rem', borderRadius: '999px',
+              background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--color-success)',
+                animation: 'dotPulse 2s infinite' }} />
+              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--color-success)' }}>
+                {activeCount} active agent{activeCount !== 1 ? 's' : ''}
+              </span>
             </div>
           </div>
-
-          {/* Quick AI input bar */}
-          <form onSubmit={handleQuickAI} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center',
-            background: 'var(--color-bg-surface)', borderRadius: '14px', padding: '0.75rem 1rem',
-            border: '1px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
-            <Bot size={18} color="#8b5cf6" style={{ flexShrink: 0 }} />
-            <input
-              value={activeInput}
-              onChange={e => setActiveInput(e.target.value)}
-              placeholder="Ask the clinical AI... e.g. 'Analyze these biomarkers: IGF-1 380, GH 5.2'"
-              style={{ flex: 1, border: 'none', outline: 'none', fontSize: '0.88rem', color: '#0f172a',
-                background: 'transparent', fontWeight: 500 }}
-            />
-            {/* Quick action pills */}
-            <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
-              {QUICK_ACTIONS.map(qa => (
-                <button key={qa.label} type="button"
-                  onClick={() => openClinicalAI(qa.prompt, qa.label)}
-                  title={qa.label}
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.25rem',
-                    padding: '0.35rem 0.65rem', borderRadius: '7px', border: 'none', cursor: 'pointer',
-                    background: `${qa.color}10`, color: qa.color, fontSize: '0.68rem', fontWeight: 700,
-                    whiteSpace: 'nowrap', transition: 'background 0.15s' }}
-                  onMouseEnter={e => e.currentTarget.style.background = `${qa.color}20`}
-                  onMouseLeave={e => e.currentTarget.style.background = `${qa.color}10`}
-                >
-                  <span>{qa.icon}</span>
-                  <span className="rp-desktop-only">{qa.label}</span>
-                </button>
-              ))}
-            </div>
-            <button type="submit" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem',
-              padding: '0.55rem 1.1rem', borderRadius: '9px', border: 'none', cursor: 'pointer',
-              background: 'linear-gradient(135deg, #8b5cf6, #3b82f6)',
-              color: 'var(--color-bg-surface)', fontWeight: 800, fontSize: '0.8rem', flexShrink: 0 }}>
-              Ask
-            </button>
-          </form>
         </div>
 
-        {/* ── KPI Row ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '1rem', marginBottom: '2rem' }}>
-          <KpiCard label="Active Patients"  value={metrics.patients}     icon={Users}       color="var(--color-primary)" sub="In follow-up" />
-          <KpiCard label="Appointments Today" value={metrics.appointments} icon={Activity}    color="#0284c7" sub="Today's schedule" />
-          <KpiCard label="Pending Labs"      value={metrics.pendingLabs}  icon={FlaskConical} color="var(--color-warning)" sub="Need review" />
-          <KpiCard label="Active Protocols"  value={metrics.protocols}    icon={FileText}    color="var(--color-success)" sub="Issued" />
-        </div>
-
-        {/* ── Agent Mission Control ── */}
-        <div style={{ marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            marginBottom: '1.1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <div style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(139,92,246,0.1)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Bot size={16} color="#8b5cf6" />
-              </div>
-              <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: 'var(--color-text-primary)', letterSpacing: '-0.01em' }}>
-                AI Clinical Agents
-              </h2>
-            </div>
-            <button onClick={() => openClinicalAI()} style={{
-              display: 'flex', alignItems: 'center', gap: '0.4rem',
-              padding: '0.5rem 1rem', borderRadius: '8px', border: 'none',
-              background: 'linear-gradient(135deg, #8b5cf6, #3b82f6)',
-              color: 'var(--color-bg-surface)', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
-            }}>
-              <Zap size={13} /> Open full assistant
-            </button>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-            {CLINICAL_AGENTS.map(agent => (
-              <AgentCard key={agent.key} agent={agent} status={agentStatuses[agent.key]} />
+        {/* Quick AI input bar */}
+        <form onSubmit={handleQuickAI} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center',
+          background: 'var(--color-bg-surface)', borderRadius: '14px', padding: '0.75rem 1rem',
+          border: '1px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
+          <Bot size={18} color="#8b5cf6" style={{ flexShrink: 0 }} />
+          <input
+            value={activeInput}
+            onChange={e => setActiveInput(e.target.value)}
+            placeholder="Ask the clinical AI... e.g. 'Analyze these biomarkers: IGF-1 380, GH 5.2'"
+            style={{ flex: 1, border: 'none', outline: 'none', fontSize: '0.88rem', color: '#0f172a',
+              background: 'transparent', fontWeight: 500 }}
+          />
+          {/* Quick action pills */}
+          <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
+            {QUICK_ACTIONS.map(qa => (
+              <button key={qa.label} type="button"
+                onClick={() => openClinicalAI(qa.prompt, qa.label)}
+                title={qa.label}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.25rem',
+                  padding: '0.35rem 0.65rem', borderRadius: '7px', border: 'none', cursor: 'pointer',
+                  background: `${qa.color}10`, color: qa.color, fontSize: '0.68rem', fontWeight: 700,
+                  whiteSpace: 'nowrap', transition: 'background 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.background = `${qa.color}20`}
+                onMouseLeave={e => e.currentTarget.style.background = `${qa.color}10`}
+              >
+                <span>{qa.icon}</span>
+                <span className="rp-desktop-only">{qa.label}</span>
+              </button>
             ))}
           </div>
-
-          {/* Routing note */}
-          <div style={{ marginTop: '1rem', padding: '0.9rem 1.1rem', borderRadius: '12px',
-            background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.15)',
-            fontSize: '0.77rem', color: 'var(--color-text-secondary)', lineHeight: 1.6,
-            display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <span style={{ fontSize: '1rem' }}>🔀</span>
-            <span>
-              <strong style={{ color: 'var(--color-text-primary)' }}>Automatic routing:</strong> the system detects the query type
-              and routes it to the optimal agent. You can manually activate each agent by clicking its card.
-            </span>
-          </div>
-        </div>
-
+          <button type="submit" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem',
+            padding: '0.55rem 1.1rem', borderRadius: '9px', border: 'none', cursor: 'pointer',
+            background: 'linear-gradient(135deg, #8b5cf6, #3b82f6)',
+            color: 'var(--color-bg-surface)', fontWeight: 800, fontSize: '0.8rem', flexShrink: 0 }}>
+            Ask
+          </button>
+        </form>
       </div>
 
+      {/* ── KPI Row ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '1rem', marginBottom: '2rem' }}>
+        <KpiCard label="Active Patients"  value={metrics.patients}     icon={Users}       color="var(--color-primary)" sub="In follow-up" />
+        <KpiCard label="Appointments Today" value={metrics.appointments} icon={Activity}    color="#0284c7" sub="Today's schedule" />
+        <KpiCard label="Pending Labs"      value={metrics.pendingLabs}  icon={FlaskConical} color="var(--color-warning)" sub="Need review" />
+        <KpiCard label="Active Protocols"  value={metrics.protocols}    icon={FileText}    color="var(--color-success)" sub="Issued" />
+      </div>
+
+      {/* ── Agent Mission Control ── */}
+      <div style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          marginBottom: '1.1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <div style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(139,92,246,0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Bot size={16} color="#8b5cf6" />
+            </div>
+            <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: 'var(--color-text-primary)', letterSpacing: '-0.01em' }}>
+              AI Clinical Agents
+            </h2>
+          </div>
+          <button onClick={() => openClinicalAI()} style={{
+            display: 'flex', alignItems: 'center', gap: '0.4rem',
+            padding: '0.5rem 1rem', borderRadius: '8px', border: 'none',
+            background: 'linear-gradient(135deg, #8b5cf6, #3b82f6)',
+            color: 'var(--color-bg-surface)', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
+          }}>
+            <Zap size={13} /> Open full assistant
+          </button>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+          {CLINICAL_AGENTS.map(agent => (
+            <AgentCard key={agent.key} agent={agent} status={agentStatuses[agent.key]} />
+          ))}
+        </div>
+
+        {/* Routing note */}
+        <div style={{ marginTop: '1rem', padding: '0.9rem 1.1rem', borderRadius: '12px',
+          background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.15)',
+          fontSize: '0.77rem', color: 'var(--color-text-secondary)', lineHeight: 1.6,
+          display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <span style={{ fontSize: '1rem' }}>🔀</span>
+          <span>
+            <strong style={{ color: 'var(--color-text-primary)' }}>Automatic routing:</strong> the system detects the query type
+            and routes it to the optimal agent. You can manually activate each agent by clicking its card.
+          </span>
+        </div>
+      </div>
       <style>{`
         @keyframes dotPulse {
           0%   { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
@@ -380,5 +405,49 @@ export default function DoctorHome() {
         }
       `}</style>
     </div>
+  );
+
+  const renderTab = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return renderDashboard();
+      default:
+        return (
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
+            <h2 style={{ marginBottom: '1rem' }}>Coming Soon</h2>
+            <p>This module is under development.</p>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <PortalLayout
+      sidebarNavGroups={DOCTOR_NAV_GROUPS}
+      activeNavId={activeTab}
+      onNavigate={setActiveTab}
+      portalTitle="Physician Portal"
+      roleContext="doctor"
+      pageContext={{
+        activeTab: activeTab,
+        label: DOCTOR_NAV_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label || 'Dashboard',
+        group: DOCTOR_NAV_GROUPS.find(g => g.items.some(i => i.id === activeTab))?.label || 'Overview'
+      }}
+      headerActions={
+        <button 
+          onClick={handleLogout} 
+          style={{ background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+          title="Logout"
+        >
+          <LogOut size={18} color="var(--color-text-secondary)" />
+        </button>
+      }
+    >
+      <div style={{ padding: '2rem' }}>
+        <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
+          {renderTab()}
+        </AdminTabErrorBoundary>
+      </div>
+    </PortalLayout>
   );
 }

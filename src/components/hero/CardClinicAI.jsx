@@ -46,7 +46,7 @@ export default function CardClinicAI({ onAsk }) {
         />
       </div>
 
-      <button className="card-cta" onClick={() => handleSubmit()}>
+      <button className="card-cta" onClick={() => handleSubmit()} title="Ask ClinicAI">
         Ask <ArrowRight size={16} />
       </button>
       <small className="card-helper">Personalized guidance</small>
@@ -58,6 +58,7 @@ export default function CardClinicAI({ onAsk }) {
               key={prompt}
               className="suggestion-item"
               onClick={() => handleSubmit(prompt)}
+              title={prompt}
             >
               <Bot size={12} style={{ marginRight: '4px' }} />
               {prompt}

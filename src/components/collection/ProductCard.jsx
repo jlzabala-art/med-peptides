@@ -143,6 +143,7 @@ export default function ProductCard({
             style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', fontSize: '0.72rem', flex: 1, padding: '0.45rem' }}
             onClick={handleOpenAI}
             aria-label={`Ask ClinicAI about ${title}`}
+            title={`Ask ClinicAI about ${title}`}
           >
             <Bot size={12} strokeWidth={2.5} /> ClinicAI
           </button>
