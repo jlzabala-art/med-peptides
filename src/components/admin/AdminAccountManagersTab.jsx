@@ -1,0 +1,223 @@
+import React, { useState, useEffect } from 'react';
+import { collection, query, where, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import AppDataTable from '../ui/AppDataTable';
+import AppFilterBar from '../ui/AppFilterBar';
+import AppEntityCell from '../ui/AppEntityCell';
+import { Users, Building2, UserCircle, Briefcase, Mail, Phone, Plus, X } from 'lucide-react';
+import CreateUserModal from './CreateUserModal'; // Using the standard creation drawer
+
+export default function AdminAccountManagersTab() {
+  const [managers, setManagers] = useState([]);
+  const [wholesellers, setWholesellers] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  
+  useEffect(() => { 
+    fetchData(); 
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      // Fetch account managers
+      const q = query(collection(db, 'users'), where('role', '==', 'account_manager'));
+      const snap = await getDocs(q);
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setManagers(list);
+
+      // Fetch wholeseller names for mapping
+      const wsSnap = await getDocs(collection(db, 'wholesellers'));
+      const wsMap = {};
+      wsSnap.docs.forEach(d => {
+        wsMap[d.id] = d.data().companyName || d.data().name || 'Unnamed Org';
+      });
+      setWholesellers(wsMap);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const columns = [
+    {
+      header: 'Manager Name',
+      key: 'name',
+      render: (row) => (
+        <AppEntityCell
+          title={row.displayName || row.name || row.email}
+          subtitle={<><span style={{ opacity: 0.5 }}>↳</span> {row.email}</>}
+          icon={row.photoURL ? <img src={row.photoURL} alt="" style={{ width: '100%', height: '100%', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} /> : <UserCircle size={20} />}
+        />
+      )
+    },
+    { 
+      header: 'Organization', 
+      key: 'wholesellerId', 
+      render: (row) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Building2 size={14} color="var(--text-muted)" />
+          <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>
+            {row.wholesellerId ? (wholesellers[row.wholesellerId] || 'Unknown Org') : 'Unassigned'}
+          </span>
+        </div>
+      )
+    },
+    { header: 'Status', key: 'status', render: (row) => (
+        <span className={`status-badge status-${row.disabled ? 'inactive' : 'active'}`}>
+          {row.disabled ? 'Suspended' : 'Active'}
+        </span>
+      )
+    }
+  ];
+
+  const handleUpdate = async (id, data) => {
+    try {
+      await updateDoc(doc(db, 'users', id), data);
+      setManagers(prev => prev.map(m => m.id === id ? { ...m, ...data } : m));
+    } catch (err) {
+      console.error('Update failed', err);
+    }
+  };
+
+  const renderExpandedRow = (row) => {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '1.5rem', 
+        borderLeft: '3px solid var(--primary)', 
+        paddingLeft: '1.25rem' 
+      }}>
+        <ManagerDetailPanel manager={row} wholesellers={wholesellers} onUpdate={handleUpdate} />
+      </div>
+    );
+  };
+
+  const filtered = managers.filter(m => {
+    if (searchTerm && !(m.displayName || m.email || '').toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    return true;
+  });
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', height: '100%' }}>
+      <AppFilterBar 
+        searchPlaceholder="Search account managers..."
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        actions={
+          <button className="btn btn-primary" onClick={() => setIsCreateOpen(true)}>
+            <Plus size={16} /> New Account Manager
+          </button>
+        }
+      />
+      <div style={{ flex: 1, minHeight: 0 }}>
+         <AppDataTable 
+           data={filtered}
+           columns={columns}
+           keyField="id"
+           loading={loading}
+           expandable={true}
+           renderExpandedRow={renderExpandedRow}
+         />
+      </div>
+
+      {isCreateOpen && (
+        <CreateUserModal 
+          onClose={() => setIsCreateOpen(false)}
+          onSuccess={() => { setIsCreateOpen(false); fetchData(); }}
+          defaultRole="account_manager"
+        />
+      )}
+    </div>
+  );
+}
+
+function ManagerDetailPanel({ manager, wholesellers, onUpdate }) {
+  const [activeTab, setActiveTab] = useState('profile');
+
+  const tabs = [
+    { id: 'profile', label: 'Operational Profile', icon: Briefcase },
+    { id: 'contact', label: 'Contact & Routing', icon: Phone }
+  ];
+
+  const orgOptions = Object.entries(wholesellers).map(([id, name]) => ({ id, name }));
+
+  return (
+    <div style={{ backgroundColor: 'var(--color-bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '0', display: 'flex', minHeight: '300px', overflow: 'hidden' }}>
+      <div style={{ width: '200px', borderRight: '1px solid var(--border)', padding: '1rem 0' }}>
+        {tabs.map(t => (
+          <button 
+            key={t.id}
+            onClick={() => setActiveTab(t.id)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%', padding: '0.75rem 1.5rem',
+              backgroundColor: activeTab === t.id ? 'var(--color-bg-elevated)' : 'transparent',
+              borderLeft: activeTab === t.id ? '3px solid var(--primary)' : '3px solid transparent',
+              color: activeTab === t.id ? 'var(--primary)' : 'var(--text-secondary)',
+              border: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', cursor: 'pointer', textAlign: 'left', fontSize: '0.9rem', fontWeight: 500
+            }}
+          >
+            <t.icon size={16} /> {t.label}
+          </button>
+        ))}
+      </div>
+      
+      <div style={{ flex: 1, padding: '2rem' }}>
+        {activeTab === 'profile' && (
+          <div style={{ maxWidth: '600px' }}>
+            <h4 style={{ marginBottom: '1.5rem', color: 'var(--text-primary)', fontSize: '1.1rem' }}>Operational Assignments</h4>
+            <div style={{ display: 'grid', gap: '1.5rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>Parent Wholeseller Organization</label>
+                <select 
+                  defaultValue={manager.wholesellerId || ''} 
+                  onChange={e => onUpdate(manager.id, { wholesellerId: e.target.value })}
+                  style={{ width: '100%', maxWidth: '400px', padding: '0.6rem', border: '1px solid var(--border)', borderRadius: '4px', background: 'var(--color-bg-elevated)', color: 'var(--text-primary)' }} 
+                >
+                  <option value="">-- Unassigned --</option>
+                  {orgOptions.map(org => (
+                    <option key={org.id} value={org.id}>{org.name}</option>
+                  ))}
+                </select>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                  This limits the Account Manager's operational visibility to only clinics, doctors, and orders belonging to this Wholeseller.
+                </p>
+              </div>
+              <div style={{ marginTop: '1rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={!manager.disabled} 
+                    onChange={e => onUpdate(manager.id, { disabled: !e.target.checked })}
+                    style={{ width: '18px', height: '18px' }}
+                  />
+                  <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>Account Active</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'contact' && (
+          <div style={{ maxWidth: '600px' }}>
+             <h4 style={{ marginBottom: '1.5rem', color: 'var(--text-primary)', fontSize: '1.1rem' }}>Contact Info</h4>
+             <div style={{ display: 'grid', gap: '1.5rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>Phone Number</label>
+                <input 
+                  type="text" 
+                  defaultValue={manager.phone || ''} 
+                  onBlur={e => onUpdate(manager.id, { phone: e.target.value })}
+                  style={{ width: '100%', maxWidth: '400px', padding: '0.6rem', border: '1px solid var(--border)', borderRadius: '4px', background: 'transparent', color: 'var(--text-primary)' }} 
+                />
+              </div>
+             </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

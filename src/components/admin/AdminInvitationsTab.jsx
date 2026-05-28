@@ -10,6 +10,7 @@ import AppEntityCell from '../ui/AppEntityCell';
 import AppStatusChip from '../ui/AppStatusChip';
 import AppActionGroup from '../ui/AppActionGroup';
 import AppFilterBar from '../ui/AppFilterBar';
+import { useToast } from '../../hooks/useToast';
 
 
 const EMAILJS_SERVICE_ID = "service_vstbe8f"; 
@@ -17,6 +18,7 @@ const EMAILJS_TEMPLATE_ID = "template_7unfks8";
 const EMAILJS_PUBLIC_KEY = "rO_f_X4uBvFf3u_3u";
 
 export default function AdminInvitationsTab() {
+  const { toast } = useToast();
   const [invitations, setInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -69,12 +71,12 @@ export default function AdminInvitationsTab() {
   const handleSendInvitation = async () => {
     const { name, email, message } = inviteForm;
     if (!name || !email) {
-      alert("Please enter at least the name and email address.");
+      toast.warning("Please enter at least the name and email address.");
       return;
     }
 
     if (!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID) {
-      alert("EmailJS configuration pending.");
+      toast.warning("EmailJS configuration pending.");
       return;
     }
 
@@ -107,7 +109,7 @@ export default function AdminInvitationsTab() {
       await fetchInvitations();
     } catch (err) {
       console.error('Invitation error:', err);
-      alert('Error sending invitation. Please check the console.');
+      toast.error('Error sending invitation. Please check the console.');
     } finally {
       setSendingInvite(false);
     }
@@ -135,10 +137,10 @@ export default function AdminInvitationsTab() {
         invitedAt: new Date()
       });
       await fetchInvitations();
-      alert(`✅ Invitation resent to ${inv.email}`);
+      toast.success(`Invitation resent to ${inv.email}`);
     } catch (err) {
       console.error('Resend error:', err);
-      alert('Error resending invitation.');
+      toast.error('Error resending invitation.');
     }
   };
 
@@ -358,68 +360,64 @@ export default function AdminInvitationsTab() {
                 to { transform: translateX(0); }
               }
             `}</style>
-            <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'white' }}>
+            <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--color-bg-surface)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <MailPlus size={20} color="var(--primary)" />
-                <h2 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--text-main)' }}>Send Invitation</h2>
+                <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 500, color: 'var(--text-primary)' }}>Grant Access</h2>
               </div>
               <button onClick={() => setShowInviteModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
                 <X size={24} />
               </button>
             </div>
-            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div>
-                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.82rem', marginBottom: '0.4rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Full Name</label>
-                <input
-                  type="text"
-                  placeholder="Dr. Jane Smith"
-                  value={inviteForm.name}
-                  onChange={e => setInviteForm(p => ({ ...p, name: e.target.value }))}
-                  style={{ width: '100%', padding: '0.7rem 1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', fontSize: '0.95rem', boxSizing: 'border-box' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.82rem', marginBottom: '0.4rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email Address</label>
-                <input
-                  type="email"
-                  placeholder="jane@clinic.com"
-                  value={inviteForm.email}
-                  onChange={e => setInviteForm(p => ({ ...p, email: e.target.value }))}
-                  style={{ width: '100%', padding: '0.7rem 1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', fontSize: '0.95rem', boxSizing: 'border-box' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.82rem', marginBottom: '0.4rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Personal Message (optional)</label>
-                <textarea
-                  rows={3}
-                  placeholder="Hi Jane, we'd love to have you join our professional platform..."
-                  value={inviteForm.message}
-                  onChange={e => setInviteForm(p => ({ ...p, message: e.target.value }))}
-                  style={{ width: '100%', padding: '0.7rem 1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', fontSize: '0.95rem', resize: 'vertical', boxSizing: 'border-box' }}
-                />
-              </div>
+            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', flex: 1, overflowY: 'auto' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>
+                Add new principals to the ReGen PEPT platform by providing their email and assigning roles.
+              </p>
               
               <div>
-                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.82rem', marginBottom: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Assign Roles</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  {AVAILABLE_ROLES.map(role => {
+                <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>New principals *</label>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <input
+                    type="email"
+                    placeholder="Email address (e.g., jane@clinic.com)"
+                    value={inviteForm.email}
+                    onChange={e => setInviteForm(p => ({ ...p, email: e.target.value }))}
+                    style={{ flex: 1, padding: '0.6rem 0.75rem', borderRadius: '4px', border: '1px solid var(--border)', fontSize: '0.9rem', outline: 'none', backgroundColor: 'transparent', color: 'var(--text-primary)' }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Full Name (optional)"
+                    value={inviteForm.name}
+                    onChange={e => setInviteForm(p => ({ ...p, name: e.target.value }))}
+                    style={{ flex: 1, padding: '0.6rem 0.75rem', borderRadius: '4px', border: '1px solid var(--border)', fontSize: '0.9rem', outline: 'none', backgroundColor: 'transparent', color: 'var(--text-primary)' }}
+                  />
+                </div>
+              </div>
+
+              <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '0.5rem 0' }} />
+
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>Assign roles</label>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                  Select the roles you want to assign. This controls their access level across the platform.
+                </p>
+                
+                <div style={{ border: '1px solid var(--border)', borderRadius: '4px', overflow: 'hidden' }}>
+                  {AVAILABLE_ROLES.map((role, idx) => {
                     const isSelected = inviteForm.roles.includes(role.id);
                     return (
                       <label 
                         key={role.id} 
                         style={{ 
-                          display: 'inline-flex', alignItems: 'center', gap: '0.35rem', 
-                          padding: '0.4rem 0.75rem', borderRadius: '20px', 
-                          border: `1px solid ${isSelected ? '#1a73e8' : 'var(--border)'}`,
-                          backgroundColor: isSelected ? 'rgba(26,115,232,0.05)' : 'transparent',
-                          color: isSelected ? '#1a73e8' : 'var(--text-muted)',
-                          fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer',
-                          transition: 'all 0.2s ease'
+                          display: 'flex', alignItems: 'center', gap: '1rem', 
+                          padding: '0.75rem 1rem', 
+                          borderBottom: idx === AVAILABLE_ROLES.length - 1 ? 'none' : '1px solid var(--border)',
+                          backgroundColor: isSelected ? 'var(--color-bg-elevated)' : 'transparent',
+                          cursor: 'pointer', margin: 0,
+                          transition: 'background-color 0.15s ease'
                         }}
                       >
                         <input 
                           type="checkbox" 
-                          style={{ display: 'none' }}
                           checked={isSelected}
                           onChange={(e) => {
                             setInviteForm(p => {
@@ -429,41 +427,61 @@ export default function AdminInvitationsTab() {
                               return { ...p, roles: newRoles };
                             });
                           }}
+                          style={{ width: '16px', height: '16px', accentColor: 'var(--primary)', cursor: 'pointer' }}
                         />
-                        {role.label}
+                        <span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-primary)' }}>{role.label}</span>
                       </label>
                     );
                   })}
                 </div>
               </div>
+
+              <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '0.5rem 0' }} />
+
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>Notify new principals</label>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>An email will be sent with an invitation link.</p>
+                <textarea
+                  rows={3}
+                  placeholder="Optional: Add a custom welcome message..."
+                  value={inviteForm.message}
+                  onChange={e => setInviteForm(p => ({ ...p, message: e.target.value }))}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--border)', fontSize: '0.9rem', resize: 'vertical', boxSizing: 'border-box', backgroundColor: 'transparent', color: 'var(--text-primary)' }}
+                />
+              </div>
+              
             </div>
-            <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border)', backgroundColor: 'var(--color-bg-app)', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-              <button 
-                onClick={() => setShowInviteModal(false)}
-                className="gcp-btn-secondary"
-                style={{ fontSize: '0.9rem' }}
-              >
-                Cancel
-              </button>
+            <div style={{ padding: '1.25rem 1.5rem', borderTop: '1px solid var(--border)', backgroundColor: 'var(--color-bg-surface)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <button 
                 onClick={() => setPreviewEmail({
                   email: inviteForm.email || 'jane@clinic.com',
                   fullName: inviteForm.name || 'Jane Smith',
-                  roles: inviteForm.roles
+                  roles: inviteForm.roles,
+                  message: inviteForm.message
                 })}
-                className="gcp-btn-secondary"
-                style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                className="btn btn-outline"
+                style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem' }}
               >
-                <Eye size={16} /> Preview
+                <Eye size={16} /> Preview Email
               </button>
-              <button
-                onClick={handleSendInvitation}
-                disabled={sendingInvite}
-                className="btn btn-primary"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', opacity: sendingInvite ? 0.7 : 1 }}
-              >
-                {sendingInvite ? 'Sending...' : <><Send size={16} /> Send</>}
-              </button>
+              
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <button 
+                  onClick={() => setShowInviteModal(false)}
+                  className="btn btn-outline"
+                  style={{ fontSize: '0.85rem', padding: '0.5rem 1rem', border: 'none' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSendInvitation}
+                  disabled={sendingInvite}
+                  className="btn btn-primary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', opacity: sendingInvite ? 0.7 : 1, padding: '0.5rem 1.5rem' }}
+                >
+                  {sendingInvite ? 'Sending...' : 'Send Invitation'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

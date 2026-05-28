@@ -4,8 +4,10 @@ import { collection, query, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import AppDataTable from '../ui/AppDataTable';
 import AppFilterBar from '../ui/AppFilterBar';
+import { useToast } from '../../hooks/useToast';
 
 export default function AdminCostsTab({ readOnly = false }) {
+  const { toast } = useToast();
   const [products, setProducts] = useState([]);
   const [settings, setSettings] = useState({ exchangeRates: { euro: 0.92 } });
   const [costCurrency, setCostCurrency] = useState('usd');
@@ -47,7 +49,7 @@ export default function AdminCostsTab({ readOnly = false }) {
       setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
     } catch (err) {
       console.error("Error updating product cost:", err);
-      alert("Failed to update cost.");
+      toast.error("Failed to update cost.");
     }
   };
 

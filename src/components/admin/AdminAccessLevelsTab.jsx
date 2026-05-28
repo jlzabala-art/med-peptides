@@ -219,7 +219,7 @@ export default function AdminAccessLevelsTab() {
             sortKey: 'role',
             sortValue: (row) => row.name.toLowerCase(),
             render: (row) => (
-              <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{row.name}</span>
+              <AppEntityCell title={row.name} />
             )
           },
           // Description moved to expanded view to enforce 3-column paradigm.

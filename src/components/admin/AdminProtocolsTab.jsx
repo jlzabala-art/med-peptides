@@ -14,6 +14,7 @@ import {
   Plus, X, AlertTriangle, FlaskConical, Package, Clock, User,
   GripVertical, Edit3
 } from 'lucide-react';
+import { useToast } from '../../hooks/useToast';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const STATUS_OPTIONS = ['draft', 'active', 'archived'];
@@ -250,6 +251,7 @@ function PhaseEditor({ phases, products: catalogProducts, onChange }) {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function AdminProtocolsTab() {
+  const { toast } = useToast();
   const [protocols, setProtocols]     = useState([]);
   const [loading, setLoading]         = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -351,7 +353,7 @@ export default function AdminProtocolsTab() {
       setTimeout(() => setSaved(prev => { const n = { ...prev }; delete n[id]; return n; }), 2000);
       setEdits(prev => { const n = { ...prev }; delete n[id]; return n; });
     } catch (err) {
-      alert('Save failed: ' + err.message);
+      toast.error('Save failed: ' + err.message);
     } finally {
       setSaving(prev => ({ ...prev, [id]: false }));
     }
@@ -365,7 +367,7 @@ export default function AdminProtocolsTab() {
       await deleteDoc(doc(db, 'protocols', id));
       setProtocols(prev => prev.filter(p => p.id !== id));
     } catch (err) {
-      alert('Delete failed: ' + err.message);
+      toast.error('Delete failed: ' + err.message);
     } finally {
       setDeleting(null);
     }

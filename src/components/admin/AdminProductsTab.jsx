@@ -8,6 +8,8 @@ import AppDataTable from '../ui/AppDataTable';
 import AppActionGroup from '../ui/AppActionGroup';
 import AppStatusToggle from '../ui/AppStatusToggle';
 import AppFilterBar from '../ui/AppFilterBar';
+import AppEntityCell from '../ui/AppEntityCell';
+import { useToast } from '../../hooks/useToast';
 
 export default function AdminProductsTab({ 
   readOnly = false, 
@@ -16,6 +18,7 @@ export default function AdminProductsTab({
   isWholesaler = false
 }) {
   const { isAdmin } = useAuth();
+  const { toast } = useToast();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,7 +61,7 @@ export default function AdminProductsTab({
   const handleMigrate = async () => {
     if (readOnly) return;
     setMigrating(true);
-    alert("Migration already completed. Products live in Firestore.");
+    toast.info("Migration already completed. Products live in Firestore.");
     setMigrating(false);
   };
 
@@ -72,9 +75,10 @@ export default function AdminProductsTab({
         updatedAt: new Date().toISOString()
       });
       setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+      toast.success("Product updated successfully");
     } catch (err) {
       console.error("Error updating product:", err);
-      alert("Failed to update product.");
+      toast.error("Failed to update product.");
     } finally {
       setSavingProduct(null);
     }
@@ -173,11 +177,11 @@ export default function AdminProductsTab({
           const productRef = doc(db, 'products', id);
           await updateDoc(productRef, updates);
         }
-        alert("Import complete! Refreshing catalog...");
+        toast.success("Import complete! Refreshing catalog...");
         fetchProducts();
       } catch (err) {
         console.error("Import error:", err);
-        alert("Error importing CSV. Ensure the format is correct.");
+        toast.error("Error importing CSV. Ensure the format is correct.");
       } finally {
         setImporting(false);
       }
@@ -188,7 +192,7 @@ export default function AdminProductsTab({
   const handleBulkAdjust = async () => {
     if (readOnly) return;
     if (!bulkValue || isNaN(bulkValue)) {
-      alert("Please enter a valid number.");
+      toast.warning("Please enter a valid number.");
       return;
     }
 
@@ -198,7 +202,7 @@ export default function AdminProductsTab({
     );
 
     if (affectedProducts.length === 0) {
-      alert("No products found in the selected category/selection.");
+      toast.warning("No products found in the selected category/selection.");
       return;
     }
 
@@ -232,14 +236,14 @@ export default function AdminProductsTab({
           updatedAt: new Date().toISOString()
         });
       }
-      alert("Bulk adjustment complete!");
+      toast.success("Bulk adjustment complete!");
       fetchProducts();
       setBulkMode(null);
       setBulkValue('');
       setSelectedProductIds([]);
     } catch (err) {
       console.error("Bulk adjust error:", err);
-      alert("Error applying bulk adjustments.");
+      toast.error("Error applying bulk adjustments.");
     } finally {
       setLoading(false);
     }
@@ -251,9 +255,10 @@ export default function AdminProductsTab({
     try {
       await deleteDoc(doc(db, 'products', id));
       setProducts(prev => prev.filter(p => p.id !== id));
+      toast.success("Product deleted.");
     } catch (err) {
       console.error("Error deleting product:", err);
-      alert("Failed to delete product.");
+      toast.error("Failed to delete product.");
     }
   };
 
@@ -271,10 +276,10 @@ export default function AdminProductsTab({
       sortKey: 'product',
       sortValue: (p) => p.name.toLowerCase(),
       render: (p) => (
-        <div>
-          <div style={{ fontWeight: 600, color: 'var(--primary)' }}>{p.name}</div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{p.category} | {p.dosage}</div>
-        </div>
+        <AppEntityCell
+          title={p.name}
+          subtitle={<><span style={{ opacity: 0.5 }}>↳</span> {p.category} | {p.dosage}</>}
+        />
       )
     },
     {
@@ -318,9 +323,18 @@ export default function AdminProductsTab({
     const labelStyle = { display: 'block', fontWeight: 700, fontSize: '0.82rem', marginBottom: '0.4rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' };
     
     return (
-      <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', backgroundColor: 'var(--color-bg-surface)' }}>
-        <div>
-          <label style={labelStyle}>SKU</label>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        justifyContent: 'flex-start', 
+        alignItems: 'flex-start', 
+        gap: '1.5rem', 
+        borderLeft: '3px solid var(--primary)', 
+        paddingLeft: '1.25rem' 
+      }}>
+        <div style={{ width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div>
+            <label style={labelStyle}>SKU</label>
           {readOnly ? (
             <span className="mono-data">{p.sku || 'N/A'}</span>
           ) : (
@@ -402,6 +416,7 @@ export default function AdminProductsTab({
             </div>
           </div>
         )}
+        </div>
       </div>
     );
   };
@@ -483,7 +498,8 @@ export default function AdminProductsTab({
                 <input type="file" accept=".csv" onChange={handleImportCSV} style={{ display: 'none' }} disabled={importing} />
               </label>
             </div>
-          )
+            )}
+          </div>
         }
       />
 

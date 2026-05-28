@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Globe, Truck, HardDrive, Trash2 } from 'lucide-react';
+import { Globe, Truck, HardDrive, Trash2, GitCommit } from 'lucide-react';
 import AppDataTable from '../ui/AppDataTable';
 
 export default function AdminSettingsTab({ readOnly = false }) {
@@ -12,10 +12,24 @@ export default function AdminSettingsTab({ readOnly = false }) {
     deliveryTimes: { standard: '5-7 days', express: '2-3 days', courier: 'next day' }
   });
   const [loading, setLoading] = useState(true);
+  const [backups, setBackups] = useState([]);
 
   useEffect(() => {
     fetchSettings();
+    fetchBackups();
   }, []);
+
+  const fetchBackups = async () => {
+    try {
+      const response = await fetch('/backups.json?t=' + new Date().getTime());
+      if (response.ok) {
+        const data = await response.json();
+        setBackups(data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch backups:', e);
+    }
+  };
 
   const fetchSettings = async () => {
     try {
@@ -170,6 +184,25 @@ export default function AdminSettingsTab({ readOnly = false }) {
     }
   ];
 
+  const backupColumns = [
+    {
+      header: 'Commit',
+      key: 'hash',
+      width: '100px',
+      render: (row) => <span className="mono-data" style={{ fontWeight: 600, color: 'var(--primary)' }}>{row.hash}</span>
+    },
+    {
+      header: 'Date',
+      key: 'date',
+      render: (row) => <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{new Date(row.date).toLocaleString()}</span>
+    },
+    {
+      header: 'Message',
+      key: 'message',
+      render: (row) => <span>{row.message}</span>
+    }
+  ];
+
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))', gap: '2rem', marginBottom: '4rem' }}>
       
@@ -244,6 +277,29 @@ export default function AdminSettingsTab({ readOnly = false }) {
             <Trash2 size={16} /> Clear App Cache &amp; Reload
           </button>
         </div>
+
+        {/* Backups Table */}
+        <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-bg-surface)', padding: '1.5rem' }}>
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.25rem', marginBottom: '1rem', borderBottom: '2px solid var(--primary-light)', paddingBottom: '0.75rem' }}>
+            <GitCommit size={24} color="var(--primary)" />
+            Automated System Backups
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+            Local snapshot backups via Git. Automatically running every 3 hours. Showing the last 5 commits.
+          </p>
+          <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+            {backups.length > 0 ? (
+              <AppDataTable 
+                columns={backupColumns}
+                data={backups}
+                keyField="hash"
+              />
+            ) : (
+              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No backups available. Auto backup script may not be running.</div>
+            )}
+          </div>
+        </div>
+
       </div>
 
     </div>

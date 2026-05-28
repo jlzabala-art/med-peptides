@@ -13,9 +13,9 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import {
-  ChevronDown, ChevronRight, Save, Check, AlertTriangle,
   RefreshCw, EyeOff, Eye, Package, DollarSign, Hash
 } from 'lucide-react';
+import { useToast } from '../../hooks/useToast';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -34,6 +34,7 @@ const pi = (v, fallback = 0) => {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function AdminVariantsTab() {
+  const { toast } = useToast();
   const [productGroups, setProductGroups] = useState([]);   // [{ product, variants }]
   const [loading, setLoading]       = useState(true);
   const [expanded, setExpanded]     = useState({});          // productId → bool
@@ -156,7 +157,7 @@ export default function AdminVariantsTab() {
       setEdits(prev => { const n = { ...prev }; delete n[k]; return n; });
     } catch (err) {
       console.error('[AdminVariantsTab] handleSave:', err);
-      alert(`Failed to save variant ${variantId}: ${err.message}`);
+      toast.error(`Failed to save variant ${variantId}: ${err.message}`);
     } finally {
       setSaving(prev => ({ ...prev, [k]: false }));
     }

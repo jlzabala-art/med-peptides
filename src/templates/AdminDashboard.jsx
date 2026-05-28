@@ -9,13 +9,15 @@ import {
   ShieldCheck, ArrowLeft, Settings, Users, Database, Layers,
   PackageSearch, LayoutDashboard, Bot, Link2, BarChart3,
   ChevronRight, ChevronDown, ClipboardList, Zap, Globe, Wrench,
-  FlaskConical, Box, Tag, DollarSign, FileText, Eye, Mail,
+  FlaskConical, Box, Tag, DollarSign, FileText, Eye, EyeOff, Mail,
   Activity, BookOpen, Cpu, LogOut, Menu, X, Building2, TrendingUp
 } from 'lucide-react';
 import PortalLayout from '../components/ui/PortalLayout';
 
 // ── Lazy tab components ────────────────────────────────────────────────────────
 const AdminUsersTab        = React.lazy(() => import('../components/admin/AdminUsersTab'));
+const AdminWholesellersTab = React.lazy(() => import('../components/admin/AdminWholesellersTab'));
+const AdminAccountManagersTab = React.lazy(() => import('../components/admin/AdminAccountManagersTab'));
 const AdminProductsTab     = React.lazy(() => import('../components/admin/AdminProductsTab'));
 const AdminSettingsTab     = React.lazy(() => import('../components/admin/AdminSettingsTab'));
 const AdminInvitationsTab  = React.lazy(() => import('../components/admin/AdminInvitationsTab'));
@@ -44,6 +46,7 @@ const AdminBulkOrdersTab   = React.lazy(() => import('../components/admin/AdminB
 const AdminFinanceWidget   = React.lazy(() => import('../components/admin/gadgets/AdminFinanceWidget'));
 const AdminEmailTemplatesTab = React.lazy(() => import('../components/admin/AdminEmailTemplatesTab'));
 const AdminProductSyncWidget = React.lazy(() => import('../components/admin/gadgets/AdminProductSyncWidget'));
+const AdminGadgetRepositoryTab = React.lazy(() => import('../components/admin/AdminGadgetRepositoryTab'));
 const CatalogList = React.lazy(() => import('../components/wholesaler/CatalogList'));
 const CatalogCreatorFlow = React.lazy(() => import('../components/wholesaler/CatalogCreatorFlow'));
 const EmailCampaignBuilder = React.lazy(() => import('../components/wholesaler/EmailCampaignBuilder'));
@@ -61,59 +64,67 @@ const NAV_GROUPS = [
     ],
   },
   {
-    id: 'users',
-    label: 'Users',
+    id: 'wholeseller-management',
+    label: 'Wholeseller Management',
     items: [
-      { id: 'patients',     label: 'Patients',             icon: Users },
-      { id: 'wholesalers',  label: 'Wholesalers',          icon: Building2 },
-      { id: 'doctors',      label: 'Physicians & Clinics', icon: Users },
-      { id: 'invitations',  label: 'Invitations',          icon: MailPlus2 },
-      { id: 'access-levels',label: 'Access Levels',        icon: ShieldCheck },
+      { id: 'wholesellers',       label: 'Wholesellers',        icon: Building2 },
+      { id: 'geography-areas',    label: 'Geography Areas',     icon: Globe },
+      { id: 'territory-rules',    label: 'Territory Rules',     icon: ShieldCheck },
+      { id: 'access-levels',      label: 'Access Levels',       icon: ShieldCheck },
+      { id: 'branding',           label: 'Branding',            icon: Eye },
+      { id: 'pricing-visibility', label: 'Pricing Visibility',  icon: EyeOff },
+    ],
+  },
+  {
+    id: 'people',
+    label: 'People',
+    items: [
+      { id: 'account-managers', label: 'Account Managers',     icon: Users },
+      { id: 'clinics',          label: 'Clinics',              icon: Building2 },
+      { id: 'doctors',          label: 'Doctors',              icon: Users },
+      { id: 'patients',         label: 'Patients',             icon: Users },
+      { id: 'invitations',      label: 'Invitations',          icon: MailPlus2 },
     ],
   },
   {
     id: 'catalog',
     label: 'Catalog',
     items: [
-      { id: 'products', label: 'Products',  icon: Box },
-      { id: 'variants', label: 'Variants',  icon: FlaskConical },
-      { id: 'prices',   label: 'Prices',   icon: Tag },
-      { id: 'costs',    label: 'Costs',    icon: DollarSign },
-      { id: 'protocols',label: 'Protocols', icon: FileText },
-      { id: 'catalogs', label: 'Catalogs',   icon: FileText },
+      { id: 'products',        label: 'Products',        icon: Box },
+      { id: 'variants',        label: 'Variants',        icon: FlaskConical },
+      { id: 'protocols',       label: 'Protocols',       icon: FileText },
+      { id: 'catalogs',        label: 'Catalogs',        icon: FileText },
       { id: 'email-campaigns', label: 'Email Campaigns', icon: Mail },
     ],
   },
   {
-    id: 'orders',
-    label: 'Orders',
+    id: 'commercial',
+    label: 'Commercial',
     items: [
-      { id: 'orders',       label: 'Order Queue',    icon: ClipboardList },
-      { id: 'bulk-orders',  label: 'Bulk Orders B2B', icon: Layers },
+      { id: 'leads',        label: 'Leads',          icon: ClipboardList },
+      { id: 'orders',       label: 'Orders',         icon: ClipboardList },
+      { id: 'bulk-orders',  label: 'Bulk Orders',    icon: Layers },
+      { id: 'analytics',    label: 'Analytics',      icon: BarChart3 },
     ],
   },
   {
-    id: 'agents',
-    label: 'AI Agents',
+    id: 'ai-system',
+    label: 'AI System',
     badge: 'LIVE',
     badgeColor: 'var(--color-success)',
     items: [
-      { id: 'ai-agents',   label: 'Cloud Agents',    icon: Bot },
-      { id: 'ai-tools',    label: 'Toolkit & Skills', icon: Wrench },
-      { id: 'clinical-ai', label: 'Clinical AI',     icon: Zap },
-      { id: 'cloud-storage', label: 'Knowledge Base', icon: Database },
-      { id: 'ai-logs',     label: 'AI History',      icon: BookOpen },
+      { id: 'clinical-ai',       label: 'ClinicAI',            icon: Bot },
+      { id: 'catalog-builder',   label: 'Catalog Builder',     icon: Wrench },
+      { id: 'prescription-agent',label: 'Prescription Agent',  icon: Zap },
+      { id: 'ai-logs',           label: 'AI Logs',             icon: BookOpen },
     ],
   },
   {
     id: 'integrations',
     label: 'Integrations',
-    badge: 'NEW',
-    badgeColor: '#6366f1',
     items: [
       { id: 'sku-sync',         label: 'Zoho Books',       icon: Link2 },
       { id: 'crm-intelligence', label: 'Zoho Bigin',       icon: Building2 },
-      { id: 'zoho-campaigns',   label: 'Zoho Campaigns',   icon: Mail },
     ],
   },
   {
@@ -121,24 +132,18 @@ const NAV_GROUPS = [
     label: 'Configuration',
     items: [
       { id: 'settings',        label: 'General Settings',  icon: Settings },
+      { id: 'prices',          label: 'Prices',            icon: Tag },
+      { id: 'costs',           label: 'Costs',             icon: DollarSign },
       { id: 'semantic',        label: 'AI Semantics',      icon: Cpu },
       { id: 'relationships',   label: 'Relationships',     icon: Globe },
       { id: 'home-layout',     label: 'Home Layout',       icon: Eye },
       { id: 'views',           label: 'Views',             icon: Layers },
       { id: 'blueprints',      label: 'Blueprints',        icon: Database },
+      { id: 'gadget-repository',label: 'Gadget Repository',icon: Layers },
       { id: 'email-templates', label: 'Email Templates',   icon: Mail },
       { id: 'deploy',          label: 'Deploy & Hosting',  icon: Globe },
     ],
-  },
-  {
-    id: 'analytics',
-    label: 'Analytics',
-    items: [
-      { id: 'analytics',   label: 'Growth Metrics',       icon: BarChart3 },
-      { id: 'growth',      label: 'Growth Signals',       icon: TrendingUp },
-      { id: 'commissions', label: 'Commissions & Payouts', icon: DollarSign },
-    ],
-  },
+  }
 ];
 
 // Tab→group lookup
@@ -170,7 +175,9 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
       {tab === 'dashboard' && (
         <AdminMetricsDashboard />
       )}
-      {tab === 'wholesalers'   && <AdminUsersTab defaultRole="wholesaler" readOnly={false} canApprove={true} />}
+      {tab === 'wholesellers'  && <AdminWholesellersTab />}
+      {tab === 'account-managers' && <AdminAccountManagersTab />}
+      {tab === 'clinics'       && <AdminPlaceholderTab title="Clinics" description="Manage physical clinic locations and metadata." tags={['Network', 'Clinics']} color="var(--color-primary)" />}
       {tab === 'doctors'       && <AdminUsersTab defaultRole="doctor" readOnly={false} canApprove={true} />}
       {tab === 'patients'      && <AdminUsersTab defaultRole="patient" readOnly={false} canApprove={true} />}
       {tab === 'users'         && <AdminUsersTab readOnly={false} canApprove={true} />}
@@ -186,11 +193,14 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
       {tab === 'bulk-orders'   && <AdminBulkOrdersTab />}
       {tab === 'access-levels' && <AdminAccessLevelsTab />}
       {tab === 'clinical-ai'   && <AdminClinicalAITab />}
-      { tab === 'analytics'     && <AdminAnalyticsTab /> }
-      { tab === 'ai-logs'       && <AdminClinicalLogsTab /> }
-      { tab === 'ai-agents'     && <AdminAIAgentsTab /> }
-      { tab === 'ai-tools'      && <AdminAIToolsTab /> }
-      { tab === 'cloud-storage' && <AdminStorageTab /> }
+      {tab === 'prescription-agent' && <AdminPlaceholderTab title="Prescription Agent" description="Manage logic for AI prescription recommendations." tags={['AI', 'Medical']} color="var(--color-primary)" />}
+      {tab === 'analytics'     && <AdminAnalyticsTab /> }
+      {tab === 'ai-logs'       && <AdminClinicalLogsTab /> }
+      {tab === 'geography-areas'    && <AdminPlaceholderTab title="Geography Areas" description="Manage international deployment areas and borders." tags={['Regions', 'Geography']} color="var(--color-primary)" />}
+      {tab === 'territory-rules'    && <AdminPlaceholderTab title="Territory Rules" description="Configure exclusivity rules and protected categories." tags={['Rules', 'Protection']} color="var(--color-primary)" />}
+      {tab === 'branding'           && <AdminPlaceholderTab title="Wholeseller Branding" description="Configure white-label subdomains and assets." tags={['Brand', 'White-label']} color="var(--color-primary)" />}
+      {tab === 'pricing-visibility' && <AdminPlaceholderTab title="Pricing Visibility" description="Configure regional pricing walls and product visibility." tags={['Pricing', 'Access']} color="var(--color-primary)" />}
+      {tab === 'leads'              && <AdminPlaceholderTab title="Lead Management" description="Global B2B/B2C lead routing and ownership rules." tags={['Sales', 'Leads']} color="var(--color-primary)" />}
       {tab === 'home-layout'   && <AdminHomeLayoutTab />}
       {tab === 'protocols'     && <AdminProtocolsTab />}
       {tab === 'blueprints'    && <AdminBlueprintsTab />}
@@ -199,38 +209,12 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
       {tab === 'catalog-builder'  && <CatalogCreatorFlow ownerId="admin" ownerType="admin" editingCatalog={catalogToEdit} onBack={() => { setCatalogToEdit(null); setActiveTab('catalogs'); }} />}
       {tab === 'email-campaigns'  && <EmailCampaignBuilder ownerId="admin" ownerType="admin" onBack={() => setActiveTab('catalogs')} />}
       {tab === 'email-templates'   && <AdminEmailTemplatesTab />}
+      {tab === 'gadget-repository' && <AdminGadgetRepositoryTab />}
       {tab === 'sku-sync'           && <AdminSkuMappingTab />}
       {tab === 'crm-intelligence'   && (
         <div style={{ padding: '0.5rem 0' }}>
           <AdminZohoCRMWidget fullHeight={false} />
         </div>
-      )}
-      {tab === 'zoho-campaigns'     && (
-        <AdminPlaceholderTab
-          title="Zoho Campaigns"
-          description="Design, monitor, and automate email campaigns, clinical newsletters, and patient retention workflows synced with Zoho Books and Bigin segments."
-          features={[
-            'Bi-directional contact list synchronization',
-            'Campaign performance dashboard',
-            'Clinical newsletter automations',
-            'Segmentation based on user order history'
-          ]}
-          tags={['Integrations', 'Marketing', 'E-mail']}
-          color="var(--color-primary)"
-          priority="soon"
-        />
-      )}
-      {tab === 'commissions'   && (
-        <AdminPlaceholderTab title="Commissions & Payouts"
-          description="Configure sales representative credentials, commission rules, and track payout logs."
-          features={['Automated payout calculations', 'Commission rules editor', 'Sales rep assignment', 'Historical payout logs']}
-          tags={['B2B Operations', 'Sales Rules', 'Payouts']} color="var(--color-primary)" priority="soon" />
-      )}
-      {tab === 'growth' && (
-        <AdminPlaceholderTab title="Growth Signals"
-          description="Analyze onboarding velocity, wholesale client pipelines, conversion funnels, and churn alerts."
-          features={['Wholesale pipeline health', 'Patient onboarding speed', 'Revenue forecasting', 'Churn risk flags']}
-          tags={['Analytics', 'Growth', 'Signals']} color="var(--color-primary)" priority="soon" />
       )}
       {tab === 'deploy' && (
         <AdminPlaceholderTab title="Deploy & Hosting"

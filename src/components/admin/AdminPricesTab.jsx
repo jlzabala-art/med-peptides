@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { collection, doc, getDocs, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Percent, Search, Sliders, RefreshCw, CheckCircle, AlertCircle, HelpCircle } from 'lucide-react';
+import { Percent, Search, Sliders, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
 import AppDataTable from '../ui/AppDataTable';
+import AppEntityCell from '../ui/AppEntityCell';
 
 export default function AdminPricesTab() {
   const [products, setProducts] = useState([]);
@@ -318,25 +319,17 @@ export default function AdminPricesTab() {
           columns={[
             {
               key: 'product',
-              header: 'Product',
+              header: 'Product / Category',
               sortValue: p => p.name || '',
               render: p => (
-                <div>
-                  <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '0.925rem' }}>{p.name}</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: '0.1rem' }}>
-                    SKU: {p.sku || 'N/A'} | {p.dosage || 'No dosage'}
-                  </div>
-                </div>
-              )
-            },
-            {
-              key: 'category',
-              header: 'Category',
-              sortValue: p => p.category || '',
-              render: p => (
-                <span style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--accent-soft)', color: 'var(--primary)', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                  {p.category}
-                </span>
+                <AppEntityCell
+                  title={p.name}
+                  subtitle={
+                    <>
+                      <span style={{ opacity: 0.5 }}>↳</span> {p.category} | SKU: {p.sku || 'N/A'} | {p.dosage || 'No dosage'}
+                    </>
+                  }
+                />
               )
             },
             {
@@ -376,33 +369,43 @@ export default function AdminPricesTab() {
             const isKitSaved = savingStatus.type === 'product' && savingStatus.target === kitKey && savingStatus.status === 'saved';
 
             return (
-              <div style={{ display: 'flex', gap: '2rem', padding: '1rem', background: 'white', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, minWidth: '200px' }}>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>Guest Vial Price</label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>$</span>
-                    <input
-                      type="number" step="0.01" min="0" defaultValue={p.guestVialPrice}
-                      onBlur={(e) => handlePriceChange(p.id, 'guestVialPrice', e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') handlePriceChange(p.id, 'guestVialPrice', e.target.value); }}
-                      style={{ width: '100px', padding: '0.4rem 0.5rem', border: isVialSaved ? '1px solid var(--success)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textAlign: 'right', fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)', backgroundColor: isVialSaving ? 'var(--surface-raised)' : 'white' }}
-                    />
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                justifyContent: 'flex-start', 
+                alignItems: 'flex-start', 
+                gap: '1.5rem', 
+                borderLeft: '3px solid var(--primary)', 
+                paddingLeft: '1.25rem' 
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', maxWidth: '400px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>Guest Vial Price</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>$</span>
+                      <input
+                        type="number" step="0.01" min="0" defaultValue={p.guestVialPrice}
+                        onBlur={(e) => handlePriceChange(p.id, 'guestVialPrice', e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handlePriceChange(p.id, 'guestVialPrice', e.target.value); }}
+                        style={{ width: '120px', padding: '0.4rem 0.5rem', border: isVialSaved ? '1px solid var(--success)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textAlign: 'right', fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)', backgroundColor: isVialSaving ? 'var(--surface-raised)' : 'transparent' }}
+                      />
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Pro Vial (Est): <span style={{ fontWeight: 800, color: 'var(--primary)' }}>${parseFloat(p.proVialPrice || 0).toFixed(2)}</span> (-{categoryDiscount}%)</div>
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Pro Vial (Est): <span style={{ fontWeight: 800, color: 'var(--primary)' }}>${parseFloat(p.proVialPrice || 0).toFixed(2)}</span> (-{categoryDiscount}%)</div>
-                </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, minWidth: '200px' }}>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>Guest Kit Price</label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>$</span>
-                    <input
-                      type="number" step="0.01" min="0" defaultValue={p.guestKitPrice}
-                      onBlur={(e) => handlePriceChange(p.id, 'guestKitPrice', e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') handlePriceChange(p.id, 'guestKitPrice', e.target.value); }}
-                      style={{ width: '100px', padding: '0.4rem 0.5rem', border: isKitSaved ? '1px solid var(--success)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textAlign: 'right', fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)', backgroundColor: isKitSaving ? 'var(--surface-raised)' : 'white' }}
-                    />
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>Guest Kit Price</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>$</span>
+                      <input
+                        type="number" step="0.01" min="0" defaultValue={p.guestKitPrice}
+                        onBlur={(e) => handlePriceChange(p.id, 'guestKitPrice', e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handlePriceChange(p.id, 'guestKitPrice', e.target.value); }}
+                        style={{ width: '120px', padding: '0.4rem 0.5rem', border: isKitSaved ? '1px solid var(--success)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textAlign: 'right', fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)', backgroundColor: isKitSaving ? 'var(--surface-raised)' : 'transparent' }}
+                      />
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Pro Kit (Est): <span style={{ fontWeight: 800, color: 'var(--secondary)' }}>${parseFloat(p.proKitPrice || 0).toFixed(2)}</span> (-{categoryDiscount}%)</div>
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Pro Kit (Est): <span style={{ fontWeight: 800, color: 'var(--secondary)' }}>${parseFloat(p.proKitPrice || 0).toFixed(2)}</span> (-{categoryDiscount}%)</div>
                 </div>
               </div>
             );
