@@ -2651,7 +2651,7 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
       )}
 
       <AdminUsersTable
-        users={filteredUsers}
+        users={filteredUsersList}
         readOnly={readOnly}
         onRefresh={fetchUsers}
         onAssignDoctor={handleAssignDoctorClick}

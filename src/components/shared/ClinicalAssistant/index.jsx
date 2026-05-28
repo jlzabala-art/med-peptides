@@ -231,7 +231,10 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
           {/* New Chat Button */}
           <div style={{ padding: '0.85rem' }}>
             <button
-              onClick={createNewSession}
+              onClick={() => {
+                createNewSession();
+                if (setIsOpen) setIsOpen(false);
+              }}
               style={{
                 width: '100%',
                 padding: '0.65rem 0.85rem',
@@ -260,7 +263,7 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
               }}
             >
               <Plus size={16} />
-              <span>New {contextMode === 'admin' ? 'Admin' : contextMode === 'doctor' ? 'Clinical' : 'Research'} Chat</span>
+              <span>New Chat</span>
             </button>
           </div>
 

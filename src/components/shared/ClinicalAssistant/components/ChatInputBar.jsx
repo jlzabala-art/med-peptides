@@ -349,7 +349,7 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
   };
 
   return (
-    <div className="ca-input-bar-container" style={{ padding: '1.25rem', borderTop: '1px solid #f1f5f9', backgroundColor: 'white', position: 'relative' }}>
+    <div className="ca-input-bar-container" style={{ padding: '0.75rem 0', borderTop: '1px solid #f1f5f9', backgroundColor: 'white', position: 'relative' }}>
       <AnimatePresence>
         {showAutocomplete && (
           <motion.div
@@ -920,61 +920,48 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
  
       <div className="ca-input-bar-row" style={{ 
         display: 'flex', 
-        alignItems: 'center', 
-        gap: '0.75rem', 
+        alignItems: 'flex-end', 
+        gap: '0.5rem', 
         backgroundColor: 'var(--color-bg-app)', 
-        padding: '0.4rem 0.6rem 0.4rem 1rem', 
-        borderRadius: '24px',
+        padding: '0.4rem 0.6rem', 
+        borderRadius: '4px',
         border: `1px solid ${isFocused ? themeAccent : 'var(--color-border)'}`,
-        boxShadow: isFocused ? `0 0 0 3px ${themeAccent}1A, inset 0 2px 4px rgba(0,0,0,0.02)` : 'inset 0 2px 4px rgba(0,0,0,0.02)',
+        boxShadow: isFocused ? `0 0 0 1px ${themeAccent}` : 'inset 0 1px 2px rgba(0,0,0,0.02)',
         transition: 'all 0.2s',
-        minHeight: '48px'
+        minHeight: '40px'
       }}>
-        {/* Far Left Premium Prescription Scan Button */}
+        {/* Simple Attachment Button */}
         <button
           onClick={handleFileClick}
           disabled={isAnalyzing || isLoading}
           className="ca-scan-btn"
           style={{
-            width: '34px',
-            height: '34px',
+            width: '32px',
+            height: '32px',
             borderRadius: '50%',
-            background: themeScanBg,
-            color: 'white',
+            background: 'transparent',
+            color: 'var(--color-text-tertiary)',
             border: 'none',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             transition: 'all 0.2s',
-            flexShrink: 0,
-            boxShadow: themeScanShadow,
-            position: 'relative'
+            flexShrink: 0
           }}
-          title="Import & Scan Prescription (PDF or Image) / Cargar Receta"
+          title="Attach document or image"
           onMouseEnter={e => {
-            e.currentTarget.style.transform = 'scale(1.06)';
-            e.currentTarget.style.filter = 'brightness(1.05)';
+            e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)';
+            e.currentTarget.style.color = themeAccent;
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.transform = 'none';
-            e.currentTarget.style.filter = 'none';
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.color = 'var(--color-text-tertiary)';
           }}
         >
-          <ClipboardList size={16} style={{ flexShrink: 0 }} />
-          {/* Pulsing indicator */}
-          <span style={{
-            position: 'absolute',
-            top: '-1px',
-            right: '-1px',
-            width: '9px',
-            height: '9px',
-            borderRadius: '50%',
-            backgroundColor: 'var(--color-danger)',
-            border: '2px solid white',
-            boxShadow: '0 0 6px rgba(239,68,68,0.6)'
-          }} />
+          <Paperclip size={18} />
         </button>
+
         <textarea 
           placeholder={placeholder}
           value={input}
@@ -996,51 +983,23 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
             maxHeight: '120px',
             fontWeight: 500,
             overflowY: 'auto',
-            alignSelf: 'center'
+            alignSelf: 'center',
+            minWidth: 0
           }}
         />
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
-          {voiceSupported && (
-            <button
-              onClick={isListening ? stopListening : startListening}
-              className="ca-voice-btn"
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '12px',
-                background: isListening ? '#ff4757' : 'transparent',
-                color: isListening ? 'white' : themeAccent,
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                animation: isListening ? 'pulse 1.5s infinite' : 'none',
-                transition: 'all 0.2s',
-                flexShrink: 0
-              }}
-              onMouseEnter={e => {
-                if (!isListening) e.currentTarget.style.backgroundColor = `${themeAccent}0D`;
-              }}
-              onMouseLeave={e => {
-                if (!isListening) e.currentTarget.style.backgroundColor = 'transparent';
-              }}
-            >
-              {isListening ? <MicOff size={16} style={{ flexShrink: 0 }} /> : <Mic size={16} style={{ flexShrink: 0 }} />}
-            </button>
-          )}
- 
+        <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
           <button 
             onClick={() => onSend()}
             disabled={!input.trim() || isLoading}
             className="ca-send-btn"
             style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '12px',
-              backgroundColor: (!input.trim() || isLoading) ? 'var(--color-border)' : themeAccent,
-              border: 'none',
+              width: '34px',
+              height: '34px',
+              borderRadius: '50%',
+              backgroundColor: (!input.trim() || isLoading) ? 'var(--color-bg-surface)' : themeAccent,
+              color: (!input.trim() || isLoading) ? 'var(--color-text-tertiary)' : 'white',
+              border: (!input.trim() || isLoading) ? '1px solid var(--color-border)' : 'none',
               cursor: (!input.trim() || isLoading) ? 'default' : 'pointer',
               display: 'flex',
               alignItems: 'center',

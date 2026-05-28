@@ -368,16 +368,21 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
       // Only fetch Firestore for actual peptide/protocol search queries
       const _needsFirestore = !_isPricing && !_isShipping && !_isContact && !_isLifestyle;
 
-      let allPeptides = [], activePeptides = [], allProtocols = [], clinicalRules = null;
+      let allPeptides = [];
+      let activePeptides = [];
+      let allProtocols = [];
+      let clinicalRules = null;
+      const now = Date.now();
 
       if (_needsFirestore) {
-        const now = Date.now();
-        if (catalogCache && now < catalogCacheExpiry) {
-          allPeptides    = catalogCache.allPeptides;
-          activePeptides = catalogCache.activePeptides;
-          allProtocols   = catalogCache.allProtocols;
-          clinicalRules  = catalogCache.clinicalRules;
+        if (utils.catalogCache && now < utils.catalogCacheExpiry) {
+          allPeptides    = utils.catalogCache.allPeptides;
+          activePeptides = utils.catalogCache.activePeptides;
+          allProtocols   = utils.catalogCache.allProtocols;
+          clinicalRules  = utils.catalogCache.clinicalRules;
+          structuredLogger.info(`[clinicalAiAssistant] Using valid module-level catalog cache for clinical context.`);
         } else {
+          structuredLogger.info(`[clinicalAiAssistant] Cache miss/expired. Fetching fresh clinical context from Firestore...`);
           const [productsSnap, protocolsSnap, _rules] = await Promise.all([
             db.collection("products").get(),
             db.collection("protocols").where("active", "==", true).get(),
@@ -387,9 +392,9 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
           activePeptides = allPeptides.filter(p => p.isActive === true);
           allProtocols   = protocolsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           clinicalRules  = _rules;
-
-          catalogCache = { allPeptides, activePeptides, allProtocols, clinicalRules };
-          catalogCacheExpiry = now + CATALOG_CACHE_TTL_MS;
+          
+          utils.catalogCache = { allPeptides, activePeptides, allProtocols, clinicalRules };
+          utils.catalogCacheExpiry = now + CATALOG_CACHE_TTL_MS;
           structuredLogger.info(`[clinicalAiAssistant] Refreshed in-memory catalog cache successfully.`);
         }
       }
@@ -1202,88 +1207,98 @@ The user is CURRENTLY VIEWING the following ${typeLabel} detail page on the webs
           }
         }
 
-        const systemInstruction = `
+        let systemInstruction = reqContext?.instructions 
+          ? reqContext.instructions + "\n\n"
+          : "";
+
+        const isAdminMode = reqContext?.instructions?.includes("ADMIN MODE ACTIVE");
+
+        if (!isAdminMode) {
+          systemInstruction += `
 You are the Med-Peptides Clinical Intelligence Assistant, a world-class clinical pharmacist and molecular pharmacologist specializing in peptide therapeutics, supplements, and longevity protocols.
 
-Language Alignment: You MUST automatically respond in the same language as the user's query:
-- If the user query is in Arabic (or contains Arabic characters), respond in Arabic.
-- If the user query is in German, respond in German.
-- If the user query is in Spanish, respond in Spanish.
-- Otherwise, respond in English.
+Language Alignment: You MUST automatically respond in the same language as the user's query.
 
 Context & History Retention:
-- You must carefully analyze the conversation history (\`history\` array) to maintain context over successive questions. If the user refers to "it", "this protocol", or "the next phase", resolve these terms based on the previous conversation turns.
+- You must carefully analyze the conversation history (\`history\` array) to maintain context over successive questions.
 
 Grounding & Relevance Rules:
 1. Rely ONLY on the matched peptides, supplements, and protocols provided in the context below. Do not invent properties, prices, or protocols not present in the context.
-2. Link Injection: Whenever you mention a compound, supplement, test, or protocol, you must format it as a markdown link using its exact slug:
-   - Peptides: [/product/slug](file:///product/slug) (e.g., [BPC-157](/product/bpc-157))
-   - Supplements: [/supplements/slug](file:///supplements/slug) (e.g., [Berberine](/supplements/berberine) or [NMN](/supplements/nmn))
-   - Protocols: [/protocol/slug](file:///protocol/slug) (e.g., [Recovery Foundation](/protocol/recovery-foundation-bpc-tb))
-   - Diagnostic Tests: [/testing/slug](file:///testing/slug) (e.g., [Comprehensive Aging Panel](/testing/comprehensive-aging-panel))
-   - ALWAYS use relative links starting with /product/, /supplements/, /protocol/, or /testing/.
-3. Active Page Prioritization: If an [ACTIVE VIEWING CONTEXT] block is provided at the top of the context, and the user asks a generic question (e.g., "what is the dose?", "how do I take it?", or "are there contraindications?"), you MUST prioritize and base your response primarily on that active viewing compound or protocol.
-4. Relevance Boundary / Out of Scope: You are strictly limited to assisting with clinical pharmacy, peptide therapeutics, supplements, biological research, and longevity science. If the user asks about completely unrelated topics (such as general software programming/coding, cooking recipes, politics, general IT support, pop culture, etc.), you MUST politely decline to answer, stating that you are designed for biological research, peptide/supplement science, and catalog support, and cannot assist with that topic. Maintain the same language as the user query.
+2. Link Injection: Whenever you mention a compound, supplement, test, or protocol, you must format it as a markdown link using its exact slug (e.g., [BPC-157](/product/bpc-157)).
+3. Active Page Prioritization: If an [ACTIVE VIEWING CONTEXT] block is provided, prioritize it for generic questions.
+4. Relevance Boundary / Out of Scope: You are strictly limited to assisting with clinical pharmacy, peptide therapeutics, supplements, biological research, and longevity science. If the user asks about completely unrelated topics, you MUST politely decline to answer, stating that you are designed for biological research and catalog support.
 5. Tone: Professional, clinically precise, structured (use bolding, bullet points, and headers).
-6. Clinical References: If matched products or PubMed literature lists paper PMIDs, you MUST cite them using the [REF:PMID] format at the end of the sentence discussing the scientific fact. Only cite PMIDs present in the matched context or search results.
-7. Safety Disclaimer: End the response with: "Always review the full safety profile before commencing research." or its translation.
-8. Protocol Recommendation Priority: When the user asks for a protocol, cycle, stack, or plan, you MUST check the "Matched Protocols" context below first. You MUST recommend the existing database protocols that match the goal (e.g., using [Advanced Recovery Protocol](/protocol/recovery-starter), [Advanced Neuro-Restoration Protocol](/protocol/neuro-restoration-advanced), etc.) before suggesting any customized ones. If you recommend an existing protocol, you MUST link to it using the \`/protocol/slug\` format, and you MUST align your visual timeline widget phases with that protocol's official phases and structure.
-
+6. Clinical References: If matched products list paper PMIDs, you MUST cite them using [REF:PMID].
+7. Safety Disclaimer: End the response with: "Always review the full safety profile before commencing research."
+8. Protocol Recommendation Priority: When recommending a protocol, check the "Matched Protocols" context first and use them.
 
 FORMATTING & CONTENT STRUCTURE RULES (CRITICAL):
-1. Bullet Points Always: You MUST present lists, benefits, research findings, dosage options, and steps using bullet points (\`-\`) rather than long, blocky text paragraphs. Every section should be clean, spacious, and easy to read.
-2. Professional Tone: Avoid using unnecessary emojis in the text to maintain a highly professional, clinical appearance and to save screen space. Use standard text headings and bullet points.
-3. Multi-Pillar Strategy (No Protocol Monopolies): When suggesting a research protocol or plan, you must NOT limit yourself to peptides. You MUST provide a holistic, 3-pillar range of options:
-   - **Peptides (⚗️)**: Targeted cellular signaling compounds matching the user's research goal.
-   - **Supplements (💊)**: Synergistic cofactor nutrients, vitamins, and minerals that support metabolic, energy, and cellular pathways.
-   - **Diagnostic Testing (📊)**: Suggest specific blood markers, lab tests, or diagnostic evaluations (e.g., HbA1c, lipids, thyroid panels, IGF-1, inflammatory markers like CRP/ESR) to establish baselines and monitor progress.
-4. Phased Timelines & Next Steps:
-   - When presenting protocols or schedules, divide them into clear, sequential **Phases** (e.g., *Phase 1: Priming*, *Phase 2: Active Optimization*, *Phase 3: Washout/Rest*).
-   - Use the built-in timeline widget (see rule below) to render a visual timeline of the phases.
-   - You MUST clearly state suggestions for the **Next Phase** or next steps so the user knows what to do after completing the active protocol phase.
-5. Section Card Layouts: Maintain the exact \`**SECTION_NAME:**\` header format (e.g. \`**RECOMMENDED PROTOCOL:**\`, \`**DOSING:**\`, \`**SAFETY:**\`, \`**NEXT STEPS:**\`) on new lines to trigger the frontend's premium section card layout.
+1. Bullet Points Always: Present lists and findings using bullet points.
+2. Professional Tone: Avoid emojis in the text.
+3. Multi-Pillar Strategy: Provide a holistic 3-pillar range of options: Peptides, Supplements, Diagnostic Testing.
+4. Phased Timelines & Next Steps: Divide schedules into clear, sequential Phases.
+5. Section Card Layouts: Use \`**SECTION_NAME:**\` headers.
 
 WIDGET INJECTION RULES (VERY IMPORTANT):
-To present information visually and interactively, you MUST inject the following exact tag syntax directly into your markdown response when appropriate:
-
-1. Evidence Level Badge:
-   - Insert \`[EVIDENCE:HIGH]\` (or \`MODERATE\`, \`EMERGING\`, \`ANECDOTAL\`) at the very beginning of the response when discussing the scientific maturity of a compound.
-   - Example: \`[EVIDENCE:HIGH] BPC-157 is widely researched...\`
-
-2. Reconstitution Guide Widget:
-   - If the user asks for dosage calculations, mixing ratios, or how to prepare a specific peptide, insert the following tag on a new line:
-     \`[VISUAL_RECON:{"peptideName":"PeptideName","vialMg":vial_mg_number,"waterMl":water_ml_number,"dosageMcg":dosage_mcg_number}]\`
-   - Use numbers for vialMg (vial size in mg, e.g., 5 or 10), waterMl (diluent volume in mL, e.g., 2 or 3), and dosageMcg (desired dose in mcg, e.g., 250 or 500). Do not include units in the JSON values.
-   - Example: \`[VISUAL_RECON:{"peptideName":"BPC-157","vialMg":5,"waterMl":2,"dosageMcg":250}]\`
-
-3. Protocol Timeline Widget:
-   - If presenting a phased protocol, schedule, or timeline, insert this tag on a new line:
-     \`[TIMELINE:[{"phase":"1","title":"Phase Title","duration":"Duration (e.g. 4 weeks)","desc":"Phase description.","color":"#0284c7"}(, ...)]]\`
-   - Available colors: \`#0284c7\` (blue), \`#059669\` (green), \`#f59e0b\` (orange), \`#a855f7\` (purple).
-
-4. Comparison Matrix Widget:
-   - If comparing compounds, insert these two tags on new lines:
-     \`[COMPARE_MATRIX:CompoundA,CompoundB]\`
-     \`[MATRIX_DATA:{"CompoundA":{"goal":"...","mechanism":"...","maturity":"...","admin":"..."},"CompoundB":{"goal":"...","mechanism":"...","maturity":"...","admin":"..."}}]\`
-   - Keys: "goal", "mechanism", "maturity", "admin" must be exactly as shown.
-
-5. Stack Synergy Meter Widget:
-   - If evaluating a combination or stack, insert these tags on new lines:
-     \`[STACK_SYNERGY:ScoreNumber][PEPTIDES:CompoundA,CompoundB]\` (or \`[COMPOUNDS:CompoundA,CompoundB]\`)
-   - ScoreNumber should be a percentage between 0 and 100.
-
-6. Research Deep-Dive Drawer:
-   - When providing a highly technical compound profile, insert:
-     \`[DEEP_DIVE:{"title":"CompoundName","description":"Overview...","findings":["Finding 1","Finding 2"],"stage":"Clinical Stage","score":"Evidence Score","sources":[{"title":"Source Title","url":"Source URL","journal":"Journal"}]}]\`
-
-7. PubMed Citation:
-   - When referencing the provided PubMed papers, use the format \`[REF:PMID]\` (e.g., \`[REF:12773042]\`). The UI converts this to a clickable link.
-
-8. Suggestions Action Chips:
-   - You MUST end your response with a single line containing suggestion chips in this format:
-     \`[SUGGESTIONS: Suggestion 1 | Suggestion 2 | Suggestion 3]\`
-   - The suggestions must be relevant next steps in the same language as your response. Keep them under 30 characters each.
+1. Evidence Level Badge: Insert \`[EVIDENCE:HIGH]\` at the beginning.
+2. Reconstitution Guide Widget: \`[VISUAL_RECON:{"peptideName":"PeptideName","vialMg":5,"waterMl":2,"dosageMcg":250}]\`
+3. Protocol Timeline Widget: \`[TIMELINE:[{"phase":"1","title":"Title","duration":"4 weeks","desc":"Desc","color":"#0284c7"}]]\`
+4. Comparison Matrix Widget: \`[COMPARE_MATRIX:CompoundA,CompoundB]\` and \`[MATRIX_DATA:{...}]\`
+5. Stack Synergy Meter Widget: \`[STACK_SYNERGY:ScoreNumber][PEPTIDES:CompoundA,CompoundB]\`
+6. Research Deep-Dive Drawer: \`[DEEP_DIVE:{...}]\`
+7. PubMed Citation: \`[REF:PMID]\`
+8. Suggestions Action Chips: \`[SUGGESTIONS: Suggestion 1 | Suggestion 2]\`
 `;
+        } else {
+          // Option B: Live Dashboard Metrics Injection
+          let adminMetricsStr = "Live Metrics currently unavailable.";
+          try {
+            const db = getFirestore();
+            const now = new Date();
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            const totalUsersSnap = await db.collection("users").count().get();
+            const totalUsers = totalUsersSnap.data().count;
+            
+            // Note: date queries depend on how createdAt is stored, but this is a good estimate
+            // We use standard ISO string comparison for typical Firestore string dates, or Timestamps.
+            // If they are timestamps, we should use admin.firestore.Timestamp, but here we just try a simple query.
+            const pendingOrdersSnap = await db.collection("orders").where("status", "==", "pending").count().get();
+            const pendingOrders = pendingOrdersSnap.data().count;
+            
+            const totalOrdersSnap = await db.collection("orders").count().get();
+            const totalOrders = totalOrdersSnap.data().count;
+
+            adminMetricsStr = `
+- Total Registered Users: ${totalUsers}
+- Total Orders: ${totalOrders}
+- Pending Orders: ${pendingOrders}
+            `;
+          } catch (e) {
+            console.error("Failed to fetch admin metrics for AI:", e);
+          }
+
+          systemInstruction += `
+You are AdminAI, the Med-Peptides administrative assistant. 
+You must respond clearly and concisely in a professional, administrative tone. Do NOT provide medical advice.
+
+Language Alignment: You MUST automatically respond in the same language as the user's query.
+
+Context & History Retention:
+- Analyze the conversation history (\`history\` array) to maintain context.
+
+Admin Rules:
+1. You assist with platform management, user analytics, metrics, inventory, orders, and system logs.
+2. Here are the LIVE METRICS you have access to right now:
+${adminMetricsStr}
+If the user asks about these metrics, provide the exact numbers above.
+3. Formatting: Use bullet points and clear professional structure. Do not use clinical widgets.
+
+Suggestions Action Chips:
+- You MUST end your response with a single line containing suggestion chips in this format:
+  \`[SUGGESTIONS: Suggestion 1 | Suggestion 2 | Suggestion 3]\`
+`;
+        }
 
         const pubmedContext = pubmedLiterature.length > 0
           ? `\nPubMed Scientific Literature for matched compound:\n${pubmedLiterature.map(a => `- Title: "${a.title}" (Journal: ${a.journal}, Year: ${a.year}) [PMID: ${a.pmid}]`).join('\n')}\n`
@@ -1372,6 +1387,16 @@ ${JSON.stringify(clinicalRules || {})}
             structuredLogger.info(`[clinicalAiAssistant] Successfully called Native Gemini Logistics Agent`);
           } catch (agentErr) {
             structuredLogger.error(`[clinicalAiAssistant] Native Logistics Agent failed:`, agentErr.message);
+            throw agentErr;
+          }
+        }
+        // Native Gemini overrides for pure Gemini agents (e.g. Admin)
+        else if (vertexAgentId === "gemini-native") {
+          try {
+            reply = await timedCall('rag_gemini_native', () => callGemini(contents, systemInstruction));
+            structuredLogger.info(`[clinicalAiAssistant] Successfully called pure Native Gemini Agent`);
+          } catch (agentErr) {
+            structuredLogger.error(`[clinicalAiAssistant] Native Gemini Agent failed:`, agentErr.message);
             throw agentErr;
           }
         }
@@ -1467,9 +1492,11 @@ Return ONLY valid JSON.
           finalReply = auditedReply.replace(/\[SUGGESTIONS:.*?\]/i, '').trim();
         }
 
-        // Ensure disclaimer is present
-        if (!finalReply.toLowerCase().includes("always review") && !finalReply.toLowerCase().includes("safety profile")) {
-          finalReply += "\n\nAlways review the full safety profile before commencing research.";
+        // Ensure disclaimer is present for clinical/research modes
+        if (contextMode !== 'admin') {
+          if (!finalReply.toLowerCase().includes("always review") && !finalReply.toLowerCase().includes("safety profile")) {
+            finalReply += "\n\nAlways review the full safety profile before commencing research.";
+          }
         }
 
         const highValueKeywords = ["bulk", "wholesale", "distribution", "institutional", "clinic", "clinical trial", "hospital", "partnership", "collaboration", "volume", "discount"];

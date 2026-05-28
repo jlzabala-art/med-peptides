@@ -105,18 +105,7 @@ export default function ChatMessageItem({ msg, idx, onProductClick, InstantResul
       className={`ca-message-item-wrapper ${msg.role === 'user' ? 'ca-user-message' : ''}`}
       style={wrapperStyle}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', alignItems: 'center' }}>
-        <div style={{
-          width: '36px', height: '36px', borderRadius: '12px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          backgroundColor: avatarBg,
-          color: avatarColor,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.05)', flexShrink: 0,
-          border: '1px solid rgba(0,0,0,0.05)'
-        }}>
-          {msg.role === 'user' ? <User size={18} /> : <Bot size={18} />}
-        </div>
-      </div>
+
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', alignItems: 'flex-start', flex: 1, minWidth: 0 }}>
         {isAssistant && metadata.evidenceLevel && (

@@ -569,7 +569,10 @@ export function useClinicalAI({
         query_type: classifyResult.query_type,
         intent: detectedIntent,
         layer: responseLayer,
-        clinicAIConfig: CLINIC_AI,
+        clinicAIConfig: {
+          ...CLINIC_AI,
+          ...(contextMode === 'admin' ? { agentId: 'gemini-native' } : {})
+        },
         context: {
           active_entities_data: classifyResult.detected_entities.map(hit => {
             const full = products.find(p => p.name === hit.name || p.displayName === hit.name);
@@ -1107,6 +1110,7 @@ Before beginning, establish a clean and sterile working environment. Gather all 
     maxFreeQueries,
     autocompleteCandidates: useMemo(() => {
       const candidates = [];
+      if (contextMode === 'admin') return candidates; // Disable peptide autocomplete in admin mode
       if (Array.isArray(products)) {
         products.forEach(p => {
           if (p) {
