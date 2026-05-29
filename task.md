@@ -12,3 +12,12 @@
 - [x] Implement backend query endpoint or tool for attention items
 - [x] Add real attention notification dropdown in `PortalLayout.jsx` topbar
 - [x] Verify build & test functionality
+- [x] Refactor `PatientHome.jsx` to use `DashboardEngine`
+- [x] Refactor `DoctorHome.jsx` to integrate Atlas Health and Mensajes
+- [x] Refactor `WholesalerHome.jsx` to integrate Atlas Health and Mensajes
+- [x] Ensure `PharmacyHome.jsx` accurately utilizes `DashboardEngine`
+- [x] Document the B2B Supply Chain hierarchy (Supplier vs Wholesaler vs Compounding Pharmacy) in `implementation_plan.md`
+
+### Global App Enhancements
+- [x] Replace all remaining "med-peptides" text with "Atlas Health" (index.html, manifest, robots, App.jsx)
+- [x] Fix `AppSidebar` customization logic so that favorited items visually show their active "pinned" star icon regardless of which group they are rendered in.ity

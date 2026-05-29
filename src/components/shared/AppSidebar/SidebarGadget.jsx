@@ -111,9 +111,20 @@ export default function SidebarGadget(props) {
   const injectFavoritesGroup = (initialGroups) => {
     const hasFavs = initialGroups.some(g => g.id === 'favorites');
     if (!hasFavs) {
+      let messagesItem = null;
+      initialGroups.forEach(g => {
+        const found = (g.items || []).find(i => i.id === 'messages' || i.id === 'Mensajes');
+        if (found) messagesItem = { ...found };
+      });
+      
+      const newGroups = initialGroups.map(g => ({
+        ...g,
+        items: (g.items || []).filter(i => i.id !== 'messages' && i.id !== 'Mensajes')
+      }));
+      
       setSidebarGroups([
-        { id: 'favorites', label: 'Favorites', emoji: '⭐', items: [] },
-        ...initialGroups
+        { id: 'favorites', label: 'Favorites', emoji: '⭐', items: messagesItem ? [messagesItem] : [] },
+        ...newGroups
       ]);
     } else {
       setSidebarGroups(initialGroups);
@@ -193,8 +204,7 @@ export default function SidebarGadget(props) {
           const overItems = newGroups[overGroupIndex].items;
           
           const [movedItem] = activeItems.splice(activeItemIndex, 1);
-          const overIndexWithFallback = overItemIndex >= 0 ? overItemIndex : overItems.length + 1;
-          overItems.splice(overIndexWithFallback, 0, movedItem);
+          overItems.push(movedItem);
           return newGroups;
         }
       }
@@ -308,6 +318,16 @@ export default function SidebarGadget(props) {
     setIsEditing(false);
   };
 
+  const displayGroups = sidebarGroups.map(group => ({
+    ...group,
+    items: (group.items || []).map(item => {
+      if (item.id === 'messages' || item.id === 'Mensajes') {
+        return { ...item, pulse: true };
+      }
+      return item;
+    })
+  }));
+
   return (
     <DndContext 
       sensors={sensors} 
@@ -318,7 +338,7 @@ export default function SidebarGadget(props) {
     >
       <AppSidebar 
         {...props} 
-        groups={sidebarGroups} 
+        groups={displayGroups} 
         isEditing={isEditing}
         onToggleFavorite={handleToggleFavorite}
         footer={{

@@ -8,7 +8,7 @@ export function getInternalPath(url) {
   if (url.startsWith('/')) return url;
   try {
     const parsed = new URL(url, window.location.origin);
-    const domains = ['med-peptides.com', 'www.med-peptides.com', window.location.hostname];
+    const domains = ['atlas-health.com', 'www.atlas-health.com', window.location.hostname];
     if (domains.includes(parsed.hostname)) {
       return parsed.pathname + parsed.search + parsed.hash;
     }

@@ -6,6 +6,60 @@ import { db } from '../../firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import CommandPalette from '../CommandPalette';
 
+// ── Atlas AI — Suggested Prompts per Role ──────────────────────────────────────
+const ROLE_SUGGESTED_PROMPTS = {
+  admin: [
+    { label: '📊 Show platform KPIs' },
+    { label: '🔍 Usuarios pendientes de verificación' },
+    { label: '📦 Pedidos sin procesar hoy' },
+    { label: '⚠️ Alertas de stock bajo' },
+  ],
+  doctor: [
+    { label: '💉 Protocolo para pérdida de peso' },
+    { label: '🔬 Evidencia clínica BPC-157' },
+    { label: '💊 Interacciones: Semaglutide + Metformina' },
+    { label: '📋 Redactar nota clínica' },
+    { label: '⚖️ Dosis ajustada por peso para Tirzepatide' },
+  ],
+  patient: [
+    { label: '💬 Explícame mi protocolo actual' },
+    { label: '📅 ¿Qué esperar en semana 2 con BPC-157?' },
+    { label: '🩺 Tuve rojez en el sitio — ¿es normal?' },
+    { label: '⏰ Recordatorio de adherencia' },
+    { label: '📈 ¿Cómo mido mi progreso?' },
+  ],
+  wholesaler: [
+    { label: '📦 ¿Qué péptidos tienen más demanda?' },
+    { label: '💰 Optimizar márgenes con estos costos' },
+    { label: '🗺️ Análisis de territorio para Madrid' },
+    { label: '📜 Regulación Semaglutide en España' },
+    { label: '🤝 Presentación para nueva clínica' },
+  ],
+  compounding_pharmacy: [
+    { label: '⚗️ Formulación BPC-157 200mcg/ml × 5ml' },
+    { label: '🛒 Sourcing API CJC-1295 con DAC' },
+    { label: '🧊 Estabilidad Semax a 4°C vs -20°C' },
+    { label: '✅ ¿Cumple mi proceso con GMP España?' },
+    { label: '💵 Precio de formulación desde API a €X/g' },
+  ],
+  supplier: [
+    { label: '📄 Generar ficha técnica de API' },
+    { label: '📊 Forecast demanda Q3' },
+    { label: '🤝 Propuesta B2B para nuevo wholesaler' },
+    { label: '📋 Documentación para exportar a México' },
+    { label: '🔬 Interpretar Certificate of Analysis' },
+  ],
+};
+
+const ROLE_AGENT_TYPE = {
+  admin: 'admin_operations',
+  doctor: 'clinical_decision',
+  patient: 'wellness_companion',
+  wholesaler: 'b2b_optimizer',
+  compounding_pharmacy: 'formulation_expert',
+  supplier: 'api_catalog_expert',
+};
+
 /**
  * PortalLayout - The universal layout wrapper for all private portals
  * Mimics Google Cloud Console layout (Left Sidebar + Topbar + Main Area + Right AI Drawer)
@@ -387,7 +441,9 @@ export default function PortalLayout({
                 isOpen={true} 
                 setIsOpen={() => setAiOpen(false)} 
                 pageContext={enrichedContext ? { ...pageContext, ...enrichedContext } : pageContext} 
-                contextMode={roleContext} 
+                contextMode={roleContext}
+                agentType={ROLE_AGENT_TYPE[roleContext] || 'default'}
+                suggestedPrompts={ROLE_SUGGESTED_PROMPTS[roleContext] || []}
               />
             </div>
           </aside>

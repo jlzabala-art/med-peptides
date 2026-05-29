@@ -2,7 +2,7 @@
 /**
  * ai_sku_sync.js — AgentSkuSync
  *
- * AI-powered product matching between Firebase (med-peptides) and Zoho Books
+ * AI-powered product matching between Firebase (atlas-health) and Zoho Books
  * (MEDILUXE HEALTH SOLUTIONS, org 662274409).
  *
  * Built on createAgent() factory — admin only.

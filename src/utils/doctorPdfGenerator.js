@@ -1204,7 +1204,7 @@ export function generateDoctorPdf(protocol) {
 
   // ── Filename & download ─────────────────────────────────────────────────
   const slug = protocol.protocol_slug || protocol.protocol_id || 'protocol';
-  const filename = `med-peptides-${slug}-doctor-review.pdf`;
+  const filename = `atlas-health-${slug}-doctor-review.pdf`;
   doc.save(filename);
 }
 

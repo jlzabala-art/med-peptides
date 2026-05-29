@@ -5,7 +5,7 @@ import { CSS } from '@dnd-kit/utilities';
 import './AppSidebar.css';
 
 // ─── Sortable Group Wrapper ────────────────────────────────────────────────
-function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, handleItemClick, isEditing, isMobile, onToggleFavorite, isFavoritesGroup }) {
+function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, handleItemClick, isEditing, isMobile, onToggleFavorite, isFavoritesGroup, favoritesSet }) {
   const {
     attributes,
     listeners,
@@ -82,7 +82,7 @@ function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, 
               expanded={expanded}
               isEditing={isEditing}
               onToggleFavorite={onToggleFavorite}
-              isFavorite={isFavoritesGroup}
+              isFavorite={favoritesSet ? favoritesSet.has(item.id) : isFavoritesGroup}
             />
           ))}
         </SortableContext>
@@ -135,7 +135,7 @@ function SortableSidebarItem({ item, isActive, handleItemClick, expanded, isEdit
         </div>
       )}
       <button
-        className={`sb-item${isActive ? ' active' : ''}`}
+        className={`sb-item${isActive ? ' active' : ''}${item.pulse ? ' pulse' : ''}`}
         onClick={() => !isEditing && handleItemClick(item.id)}
         data-tooltip={!expanded ? item.label : undefined}
         title={!expanded ? item.label : undefined}
@@ -286,6 +286,10 @@ export default function AppSidebar({
     if (isMobile) onClose?.();
   }, [onNavigate, isMobile, onClose]);
 
+  const favoritesSet = React.useMemo(() => {
+    return new Set(groups.find(g => g.id === 'favorites')?.items?.map(i => i.id) || []);
+  }, [groups]);
+
   const sidebarClasses = [
     'app-sidebar',
     !expanded && !isMobile ? 'collapsed' : '',
@@ -345,6 +349,7 @@ export default function AppSidebar({
                   isMobile={isMobile}
                   onToggleFavorite={onToggleFavorite}
                   isFavoritesGroup={group.id === 'favorites'}
+                  favoritesSet={favoritesSet}
                 />
                 {gi < groups.length - 1 && <div className="sb-divider" />}
               </React.Fragment>

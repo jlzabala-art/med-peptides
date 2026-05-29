@@ -33,9 +33,9 @@ import {
 
 // ── Endpoints ───────────────────────────────────────────────────────────────
 const CRM_CF_URL =
-  'https://europe-west1-med-peptides-app.cloudfunctions.net/fetchZohoCRMIntelligence';
+  'https://europe-west1-atlas-health-app.cloudfunctions.net/fetchZohoCRMIntelligence';
 const SEARCH_CF_URL =
-  'https://europe-west1-med-peptides-app.cloudfunctions.net/searchZohoContactByEmail';
+  'https://europe-west1-atlas-health-app.cloudfunctions.net/searchZohoContactByEmail';
 
 const AED_USD_RATE = 3.67;
 

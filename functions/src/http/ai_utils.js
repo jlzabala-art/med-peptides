@@ -171,7 +171,7 @@ async function callVertexAgent(message, sessionId, role, contextData, overrideAg
   const AGENT_SECRET_KEY   = AGENT_SECRET_KEY_SECRET.value();
   const AGENT_PROXY_HEADER = AGENT_PROXY_HEADER_SECRET.value();
 
-  const projectId = process.env.VERTEX_PROJECT_ID || process.env.GCP_PROJECT || process.env.GCLOUD_PROJECT || "med-peptides-app";
+  const projectId = process.env.VERTEX_PROJECT_ID || process.env.GCP_PROJECT || process.env.GCLOUD_PROJECT || "atlas-health-app";
   const agentId   = overrideAgentId || process.env.VERTEX_AGENT_ID;
 
   if (!agentId) throw new Error("VERTEX_AGENT_ID environment variable is not configured");

@@ -63,7 +63,7 @@ function buildWelcomeCustomerHtml({ firstName = 'Researcher' } = {}) {
         <li>Track your orders from your dashboard</li>
         <li>Manage your delivery and billing information</li>
       </ul>
-      <a href="https://med-peptides.com" class="btn">Go to Catalog →</a>
+      <a href="https://atlas-health.com" class="btn">Go to Catalog →</a>
       <p>If you have any questions, reply to this email or contact us via WhatsApp.</p>
       <p>Best regards,<br>The Atlas Health Team</p>
     </div>
@@ -150,7 +150,7 @@ function buildOrderNotificationHtml(order) {
   <tr><td><strong>Payment</strong></td><td>${order.paymentMethod || '—'}</td></tr>
   <tr><td><strong>Total</strong></td><td>€${(order.total || 0).toFixed(2)}</td></tr></table>
   <h3>Items</h3><ul>${itemList}</ul>
-  <a href="https://med-peptides.com/admin?t=orders&orderId=${orderId}" class="btn">View Order in Admin →</a>
+  <a href="https://atlas-health.com/admin?t=orders&orderId=${orderId}" class="btn">View Order in Admin →</a>
   </body></html>`;
 }
 
@@ -210,7 +210,7 @@ export const EMAIL_TEMPLATE_REGISTRY = [
     getHtml: () => getApprovalEmailHtml({
       fullName: SAMPLE_USER.fullName,
       role: SAMPLE_USER.role,
-      loginUrl: 'https://med-peptides.com',
+      loginUrl: 'https://atlas-health.com',
     }),
   },
   {
@@ -235,7 +235,7 @@ export const EMAIL_TEMPLATE_REGISTRY = [
       toName: 'Ana Martínez',
       fromName: 'Dr. Carlos Vega',
       customMessage: 'Ana, I have prepared a protocol for you. Please register using this link so we can manage your treatment together.',
-      registerUrl: 'https://med-peptides.com/register?ref=doctor123',
+      registerUrl: 'https://atlas-health.com/register?ref=doctor123',
     }),
   },
 ];

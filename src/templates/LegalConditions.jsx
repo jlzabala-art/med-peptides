@@ -115,7 +115,7 @@ const LegalConditions = ({ onBack }) => {
               <div className="card card--flat mt-12" style={{ padding: '1.5rem', borderRadius: '20px' }}>
                 <h4 className="text-primary mb-3">Questions?</h4>
                 <p className="text-muted text-xs mb-4">Our legal and compliance team is here to help clarify any of our policies.</p>
-                <a href="mailto:compliance@med-peptides.com" className="btn btn-primary btn-s w-full">
+                <a href="mailto:compliance@atlas-health.com" className="btn btn-primary btn-s w-full">
                   <Mail size={14} /> Email Compliance
                 </a>
               </div>

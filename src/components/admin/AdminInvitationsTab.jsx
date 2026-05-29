@@ -125,8 +125,8 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
           to_name: name,
           custom_message:
             message.trim() || 'You have been invited to join the ReGen PEPT professional platform.',
-          invite_link: `https://med-peptides-app-27a3a.web.app/?ref=invite&id=${docRef.id}`,
-          reply_to: 'business@med-peptides.com',
+          invite_link: `https://atlas-health-app-27a3a.web.app/?ref=invite&id=${docRef.id}`,
+          reply_to: 'business@atlas-health.com',
         },
         EMAILJS_PUBLIC_KEY
       );
@@ -154,8 +154,8 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
           to_name: inv.name,
           custom_message:
             inv.message || 'You have been invited to join the ReGen PEPT professional platform.',
-          invite_link: `https://med-peptides-app-27a3a.web.app/?ref=invite&id=${inv.id}`,
-          reply_to: 'business@med-peptides.com',
+          invite_link: `https://atlas-health-app-27a3a.web.app/?ref=invite&id=${inv.id}`,
+          reply_to: 'business@atlas-health.com',
         },
         EMAILJS_PUBLIC_KEY
       );

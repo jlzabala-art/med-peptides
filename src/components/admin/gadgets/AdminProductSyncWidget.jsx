@@ -41,7 +41,7 @@ import {
 } from 'lucide-react';
 
 // ── Cloud Function endpoint ───────────────────────────────────────────────────
-const SKU_SYNC_URL = 'https://europe-west1-med-peptides-app.cloudfunctions.net/skuSyncAgent';
+const SKU_SYNC_URL = 'https://europe-west1-atlas-health-app.cloudfunctions.net/skuSyncAgent';
 
 // ── Status badge ──────────────────────────────────────────────────────────────
 function StatusBadge({ status }) {

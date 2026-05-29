@@ -46,6 +46,7 @@ import { BULK_STATUS, BULK_STATUS_META } from '../../config/prescriptionConfig';
 import AdminBulkOrderBuilder from './AdminBulkOrderBuilder';
 import B2BOrderApprovalsWidget from './gadgets/B2BOrderApprovalsWidget';
 import GlobalLogisticsQueueWidget from './gadgets/GlobalLogisticsQueueWidget';
+import ConversationThread from '../messaging/ConversationThread';
 
 // ── Status badge ──────────────────────────────────────────────────────────────
 function BulkBadge({ status }) {
@@ -139,7 +140,7 @@ function SourceBreakdown({ sources }) {
 }
 
 // ── Aggregated items panel ────────────────────────────────────────────────────
-function AggregatedItemsPanel({ items }) {
+function AggregatedItemsPanel({ items, isEditable, onUpdateItemQuantity }) {
   const [openItems, setOpenItems] = useState(new Set());
   const toggle = (id) =>
     setOpenItems((prev) => {
@@ -175,22 +176,51 @@ function AggregatedItemsPanel({ items }) {
               >
                 {item.name || item.id}
               </span>
-              <span
-                style={{
-                  fontWeight: 900,
-                  fontSize: '0.95rem',
-                  color: 'var(--color-primary)',
-                  minWidth: 28,
-                  textAlign: 'right',
-                }}
-              >
-                {item.quantity}
-              </span>
-              <span
-                style={{ fontSize: '0.67rem', color: 'var(--color-text-tertiary)', minWidth: 32 }}
-              >
-                {item.unit}
-              </span>
+              {isEditable ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginLeft: 'auto' }}>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onUpdateItemQuantity(i, item.quantity - 1); }}
+                    style={{ padding: '0.2rem 0.5rem', background: '#e2e8f0', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                  >-</button>
+                  <span
+                    style={{
+                      fontWeight: 900,
+                      fontSize: '0.95rem',
+                      color: 'var(--color-primary)',
+                      minWidth: 28,
+                      textAlign: 'center',
+                    }}
+                  >
+                    {item.quantity}
+                  </span>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onUpdateItemQuantity(i, item.quantity + 1); }}
+                    style={{ padding: '0.2rem 0.5rem', background: '#e2e8f0', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                  >+</button>
+                  <span style={{ fontSize: '0.67rem', color: 'var(--color-text-tertiary)', minWidth: 32 }}>
+                    {item.unit}
+                  </span>
+                </div>
+              ) : (
+                <>
+                  <span
+                    style={{
+                      fontWeight: 900,
+                      fontSize: '0.95rem',
+                      color: 'var(--color-primary)',
+                      minWidth: 28,
+                      textAlign: 'right',
+                    }}
+                  >
+                    {item.quantity}
+                  </span>
+                  <span
+                    style={{ fontSize: '0.67rem', color: 'var(--color-text-tertiary)', minWidth: 32 }}
+                  >
+                    {item.unit}
+                  </span>
+                </>
+              )}
               {item.sources?.length > 0 && (
                 <button
                   onClick={() => toggle(key)}
@@ -231,6 +261,12 @@ function BulkActions({ order, onUpdate }) {
   const [acting, setActing] = useState(false);
 
   const next = {
+    draft: {
+      label: 'Enviar (Submit)',
+      nextStatus: 'submitted',
+      icon: CheckCircle2,
+      color: '#6366f1',
+    },
     submitted: {
       label: 'Confirmar pedido',
       nextStatus: 'confirmed',
@@ -340,7 +376,7 @@ function BulkOrderCard({ order, onUpdate }) {
           alignItems: 'center',
           gap: '0.75rem',
           cursor: 'pointer',
-          background: isNew ? 'rgba(99,102,241,0.02)' : 'var(--color-bg-surface)',
+          background: isNew ? 'rgba(99,102,241,0.02)' : order.status === 'draft' ? '#fafafa' : 'var(--color-bg-surface)',
         }}
         onClick={() => setOpen((v) => !v)}
       >
@@ -414,7 +450,23 @@ function BulkOrderCard({ order, onUpdate }) {
             <div style={{ marginBottom: '1rem' }}>
               <div style={sLabel}>📦 Ítems agregados</div>
               <div style={{ marginTop: '0.5rem' }}>
-                <AggregatedItemsPanel items={order.aggregated_items} />
+                <AggregatedItemsPanel 
+                  items={order.aggregated_items} 
+                  isEditable={order.status === 'draft'}
+                  onUpdateItemQuantity={async (idx, newQty) => {
+                    if (newQty < 0) return;
+                    const updatedItems = [...order.aggregated_items];
+                    if (newQty === 0) {
+                      updatedItems.splice(idx, 1);
+                    } else {
+                      updatedItems[idx] = { ...updatedItems[idx], quantity: newQty };
+                    }
+                    await updateDoc(doc(db, 'bulk_orders', order.id), {
+                      aggregated_items: updatedItems,
+                      updatedAt: serverTimestamp()
+                    });
+                  }}
+                />
               </div>
             </div>
           )}
@@ -472,9 +524,23 @@ function BulkOrderCard({ order, onUpdate }) {
           </div>
 
           {/* Actions */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
             <BulkActions order={order} onUpdate={onUpdate} />
           </div>
+
+          {/* Contextual Chat */}
+          {order.status !== 'draft' && (
+            <div style={{ marginTop: '1.5rem', height: '400px', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
+              <div style={sLabel}>💬 Chat del Pedido</div>
+              <div style={{ marginTop: '0.5rem', height: 'calc(100% - 1.5rem)' }}>
+                <ConversationThread 
+                  conversationId={`order_${order.id}`} 
+                  conversationType="order_support" 
+                  referenceId={order.id} 
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -679,6 +745,7 @@ export default function AdminBulkOrdersTab() {
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
         {[
           { key: 'all', label: `Todos (${stats.total})`, color: 'var(--color-primary)' },
+          { key: 'draft', label: `Borradores (${orders.filter(o => o.status === 'draft').length})`, color: 'var(--color-text-tertiary)' },
           { key: 'submitted', label: `Pendiente (${stats.submitted})`, color: '#6366f1' },
           {
             key: 'confirmed',

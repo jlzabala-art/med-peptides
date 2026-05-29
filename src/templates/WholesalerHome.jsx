@@ -13,7 +13,7 @@ import {
   LogOut, ChevronRight, ArrowRight, Clock, CheckCircle2,
   AlertCircle, Truck, Box, BarChart3, Laptop, Bell,
   ClipboardList, Building2, Zap, Users, Plus, Trash2, FileText, Download, ChevronUp, ChevronDown,
-  MapPin, Paintbrush, Globe
+  MapPin, Paintbrush, Globe, MessageSquare, Brain
 } from 'lucide-react';
 import PortalLayout from '../components/ui/PortalLayout';
 
@@ -64,6 +64,8 @@ const WHOLESALER_NAV_GROUPS = [
     items: [
       { id: 'rx-inbox',    label: 'Rx Inbox',    icon: ClipboardList },
       { id: 'bulk-orders', label: 'Bulk Orders', icon: Layers },
+      { id: 'messages', label: 'Mensajes', icon: MessageSquare },
+      { id: 'clinical-ai', label: 'Atlas Health', icon: Brain },
     ],
   },
   {

@@ -132,7 +132,7 @@ module.exports = onRequest(
               suggestions: isAuthenticated
                 ? [
                     { label: "💬 Contactar por WhatsApp", action: "URL", payload: "https://wa.me/971564179256" },
-                    { label: "✉️ Soporte por Email", action: "URL", payload: "mailto:support@med-peptides.com" },
+                    { label: "✉️ Soporte por Email", action: "URL", payload: "mailto:support@atlas-health.com" },
                     { label: "🛍️ Ver Catálogo", action: "NAVIGATE", payload: "/catalog" }
                   ]
                 : [
@@ -1045,7 +1045,7 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
           suggestions = [
             { label: `🛍️ Ver Catálogo`, action: "NAVIGATE", payload: `/catalog` },
             { label: `💬 Cotización por WhatsApp`, action: "URL", payload: `https://wa.me/971564179256?text=Hola,%20me%20gustaria%20solicitar%20una%20cotizacion%20de%20precios.` },
-            { label: `✉️ Correo de Suministro`, action: "URL", payload: `mailto:support@med-peptides.com?subject=Solicitud%20de%20Cotizacion%20Institucional` }
+            { label: `✉️ Correo de Suministro`, action: "URL", payload: `mailto:support@atlas-health.com?subject=Solicitud%20de%20Cotizacion%20Institucional` }
           ];
         } else {
           replyParts = [
@@ -1065,14 +1065,14 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
             `### 📋 Sourcing & Coordination Options`,
             `To see retail prices, visit our catalog. To request a custom wholesale quote or set up a professional research account, please contact our logistics and sales desk directly:`,
             `- **WhatsApp / Phone:** \`+971 56 417 9256\` (WhatsApp Business Desk)`,
-            `- **Email:** \`support@med-peptides.com\``,
+            `- **Email:** \`support@atlas-health.com\``,
             "",
             `Always review the full safety profile before commencing research.`
           ];
           suggestions = [
             { label: `🛍️ View Catalog`, action: "NAVIGATE", payload: `/catalog` },
             { label: `💬 WhatsApp Sales Quote`, action: "URL", payload: `https://wa.me/971564179256?text=Hi,%20I'd%20like%20to%20request%20a%20pricing%20quote.` },
-            { label: `✉️ Email Institutional Sourcing`, action: "URL", payload: `mailto:support@med-peptides.com?subject=Institutional%20Sourcing%20Quote%20Request` }
+            { label: `✉️ Email Institutional Sourcing`, action: "URL", payload: `mailto:support@atlas-health.com?subject=Institutional%20Sourcing%20Quote%20Request` }
           ];
         }
 
@@ -1102,7 +1102,7 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
             "",
             `### ✉️ Correo Electrónico de Suministro Profesional`,
             `Para cuentas institucionales, facturación, contratos de investigación personalizados o logística por volumen, escriba a nuestra oficina de administración:`,
-            `- **Correo Electrónico:** \`support@med-peptides.com\``,
+            `- **Correo Electrónico:** \`support@atlas-health.com\``,
             "",
             `### 📍 Catálogo y Academia`,
             `Siga explorando nuestros recursos clínicos automatizados:`,
@@ -1113,7 +1113,7 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
           ];
           suggestions = [
             { label: `💬 Chatear por WhatsApp`, action: "URL", payload: `https://wa.me/971564179256` },
-            { label: `✉️ Enviar Correo`, action: "URL", payload: `mailto:support@med-peptides.com` },
+            { label: `✉️ Enviar Correo`, action: "URL", payload: `mailto:support@atlas-health.com` },
             { label: `🛍️ Ver Catálogo`, action: "NAVIGATE", payload: `/catalog` }
           ];
         } else {
@@ -1129,7 +1129,7 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
             "",
             `### ✉️ Professional Email Sourcing`,
             `For institutional accounts, billing, customized research agreements, or bulk logistics, email our administration desk:`,
-            `- **Email:** \`support@med-peptides.com\``,
+            `- **Email:** \`support@atlas-health.com\``,
             "",
             `### 📍 Catalog & Academy`,
             `Feel free to continue exploring our automated clinical resources:`,
@@ -1140,7 +1140,7 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
           ];
           suggestions = [
             { label: `💬 Chat on WhatsApp`, action: "URL", payload: `https://wa.me/971564179256` },
-            { label: `✉️ Email Support`, action: "URL", payload: `mailto:support@med-peptides.com` },
+            { label: `✉️ Email Support`, action: "URL", payload: `mailto:support@atlas-health.com` },
             { label: `🛍️ View Catalog`, action: "NAVIGATE", payload: `/catalog` }
           ];
         }

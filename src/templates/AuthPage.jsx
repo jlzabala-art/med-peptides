@@ -17,6 +17,9 @@ export default function AuthPage({ onBack }) {
     : null;
   const { user, userProfile, isProfessional, isProfessionalPending, isPhysician, isAdmin, activeRole, login, register, logout, resetPassword, loginWithGoogle, loading } = useAuth();
   const { prefs, hasCompleted } = useGuestPreferences();
+  
+  // Detect admin from email hardlist (in case profile hasn't loaded yet)
+  const isAdminByEmail = ADMIN_EMAILS.includes(user?.email?.toLowerCase());
   const [tab, setTab] = useState(() => {
     const t = searchParams.get('tab');
     const type = searchParams.get('type');
@@ -256,6 +259,15 @@ export default function AuthPage({ onBack }) {
 
   // If user is logged in, show profile status (Centered layout)
   if (user) {
+    // Admin users: redirect immediately without showing the Basic Account card
+    const isAdminNow = isAdmin || isAdminByEmail || userProfile?.role === 'admin';
+    if (isAdminNow) {
+      // Do immediate redirect
+      const target = redirectTo || '/admin';
+      navigate(target, { replace: true });
+      return null;
+    }
+    
     if (loading) {
       return (
         <div className="template-root" style={{ paddingTop: 'clamp(2rem, 8vw, 6rem)', minHeight: '100vh', backgroundColor: 'var(--surface)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

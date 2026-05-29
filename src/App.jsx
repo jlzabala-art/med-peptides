@@ -54,10 +54,13 @@ const AccountManagerDashboard = lazy(() => import('./templates/AccountManagerDas
 const DoctorHome = lazy(() => import('./templates/DoctorHome'));
 const DoctorDashboard = lazy(() => import('./templates/DoctorDashboard'));
 const WholesalerRoutes = lazy(() => import('./routes/WholesalerRoutes'));
+const SupplierRoutes = lazy(() => import('./routes/SupplierRoutes'));
 const WholesalerHome = lazy(() => import('./templates/WholesalerHome'));
 const PublicCatalogView = lazy(() => import('./templates/PublicCatalogView'));
 const CatalogEmailTracker = lazy(() => import('./templates/CatalogEmailTracker'));
 const ClinicHome = lazy(() => import('./templates/ClinicHome'));
+const PharmacyHome = lazy(() => import('./templates/PharmacyHome'));
+const SupplierHome = lazy(() => import('./templates/SupplierHome'));
 const PatientHome = lazy(() => import('./templates/PatientHome'));
 const PatientAppointments = lazy(() => import('./templates/PatientAppointments'));
 const DoctorPatients = lazy(() => import('./templates/DoctorPatients'));
@@ -1140,7 +1143,8 @@ function App() {
             <Route path="/partner/:tenantSlug/catalog/:catalogSlug" element={<PublicCatalogView />} />
             <Route path="/catalog/track/:eventId" element={<CatalogEmailTracker />} />
             <Route path="/clinic-dashboard/*" element={activeRole === 'clinic' || activeRole === 'admin' ? <ClinicHome /> : <Navigate to="/paciente" replace />} />
-
+            <Route path="/pharmacy-dashboard/*" element={activeRole === 'compounding_pharmacy' || activeRole === 'admin' ? <PharmacyHome /> : <Navigate to="/paciente" replace />} />
+            <Route path="/supplier-dashboard/*" element={activeRole === 'supplier' || activeRole === 'admin' ? <SupplierRoutes /> : <Navigate to="/paciente" replace />} />
             {/* --- PUBLIC SHOP LAYOUT (continued for Settings & Redirects - Standard) --- */}
             <Route element={
               <ShopLayout 

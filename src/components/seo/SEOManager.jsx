@@ -131,7 +131,7 @@ const SEOManager = ({
       "description": "Premium Research Peptides & Clinical Protocols",
       "contactPoint": {
         "@type": "ContactPoint",
-        "email": "business@med-peptides.com",
+        "email": "business@atlas-health.com",
         "contactType": "customer service"
       }
     }, 'org');

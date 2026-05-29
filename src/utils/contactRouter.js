@@ -48,7 +48,7 @@ export async function resolveCatalogContact(catalog, userProfile = null) {
 
   // Fallback 2: Global admin contact
   return {
-    email: 'support@med-peptides.com',
+    email: 'support@atlas-health.com',
     phone: '+18005550199',
     whatsAppLink: 'https://wa.me/18005550199',
     ownerName: 'Atlas Health Support'

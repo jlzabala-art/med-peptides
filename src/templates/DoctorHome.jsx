@@ -6,6 +6,10 @@ import { Stethoscope, Activity, FileText, Bot, HeartPulse, ChevronRight, CheckCi
 import { GcpCard, GcpButton } from '../components/ui';
 import PortalLayout from '../components/ui/PortalLayout';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
+import { MessageSquare, Brain } from 'lucide-react';
+
+const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
+const ClinicalAIWidget = React.lazy(() => import('../components/admin/ClinicalAIWidget'));
 
 // ── Agents relevant to doctors ───────────────────────────────────────────────
 const CLINICAL_AGENTS = [
@@ -163,6 +167,8 @@ const DOCTOR_NAV_GROUPS = [
     items: [
       { id: 'my-patients', label: 'My Patients', icon: Users },
       { id: 'appointments', label: 'Appointments', icon: Calendar },
+      { id: 'messages', label: 'Mensajes', icon: MessageSquare },
+      { id: 'clinical-ai', label: 'Atlas Health', icon: Brain },
     ],
   },
   {
@@ -411,6 +417,22 @@ export default function DoctorHome() {
     switch (activeTab) {
       case 'dashboard':
         return renderDashboard();
+      case 'messages':
+        return (
+          <div style={{ height: 'calc(100vh - 80px)', margin: '-2rem' }}>
+            <React.Suspense fallback={<div>Loading messaging...</div>}>
+              <MessagingWidget />
+            </React.Suspense>
+          </div>
+        );
+      case 'clinical-ai':
+        return (
+          <div style={{ height: 'calc(100vh - 80px)', margin: '-2rem' }}>
+            <React.Suspense fallback={<div>Loading Atlas Health AI...</div>}>
+              <ClinicalAIWidget />
+            </React.Suspense>
+          </div>
+        );
       default:
         return (
           <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>

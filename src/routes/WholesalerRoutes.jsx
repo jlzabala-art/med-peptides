@@ -9,8 +9,11 @@ import WholesalerHome, {
   WholesalerBulkTab,
   PlaceholderTab
 } from '../templates/WholesalerHome';
+import DashboardEngine from '../engine/DashboardEngine';
 
 const AdminMetricsDashboard = React.lazy(() => import('../components/admin/AdminMetricsDashboard'));
+const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
+const ClinicalAIWidget = React.lazy(() => import('../components/admin/ClinicalAIWidget'));
 const GeographyAreasTab = React.lazy(() => import('../components/wholesaler/GeographyAreasTab'));
 const BrandingTab = React.lazy(() => import('../components/wholesaler/BrandingTab'));
 const DomainsTab = React.lazy(() => import('../components/wholesaler/DomainsTab'));
@@ -30,7 +33,7 @@ export default function WholesalerRoutes() {
       <Route element={<WholesalerHome />}>
         <Route index element={
           <AdminTabErrorBoundary tabId="overview" tabLabel="Overview">
-            <WholesalerOverviewTab uid={uid} onNavigate={(id) => navigate(`/wholesaler/${id === 'overview' ? '' : id}`)} />
+            <DashboardEngine role="wholesaler" dataContext={{ uid }} />
           </AdminTabErrorBoundary>
         } />
         <Route path="rx-inbox" element={
@@ -41,6 +44,20 @@ export default function WholesalerRoutes() {
         <Route path="bulk-orders" element={
           <AdminTabErrorBoundary tabId="bulk-orders" tabLabel="Bulk Orders">
             <WholesalerBulkTab />
+          </AdminTabErrorBoundary>
+        } />
+        <Route path="messages" element={
+          <AdminTabErrorBoundary tabId="messages" tabLabel="Mensajes">
+            <React.Suspense fallback={<div>Loading messaging...</div>}>
+              <MessagingWidget />
+            </React.Suspense>
+          </AdminTabErrorBoundary>
+        } />
+        <Route path="clinical-ai" element={
+          <AdminTabErrorBoundary tabId="clinical-ai" tabLabel="Atlas Health">
+            <React.Suspense fallback={<div>Loading Atlas Health AI...</div>}>
+              <ClinicalAIWidget />
+            </React.Suspense>
           </AdminTabErrorBoundary>
         } />
         <Route path="geography" element={

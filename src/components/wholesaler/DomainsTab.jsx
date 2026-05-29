@@ -30,7 +30,7 @@ export default function DomainsTab() {
         if (snap.exists()) {
           const data = snap.data();
           setDomainInfo({
-            subdomainUrl: data.domain?.url || `${data.slug || tenantId}.med-peptides.com`,
+            subdomainUrl: data.domain?.url || `${data.slug || tenantId}.atlas-health.com`,
             customDomain: data.domain?.customDomain || '',
             customDomainStatus: data.domain?.customDomainStatus || (data.domain?.customDomain ? 'pending_dns' : 'none'),
           });
@@ -229,7 +229,7 @@ export default function DomainsTab() {
                   <td style={{ padding: '10px 12px', fontFamily: 'monospace' }}>
                     {domainInfo.customDomain.includes('.') ? domainInfo.customDomain.split('.')[0] : '@'}
                   </td>
-                  <td style={{ padding: '10px 12px', fontFamily: 'monospace' }}>cname.med-peptides.com.</td>
+                  <td style={{ padding: '10px 12px', fontFamily: 'monospace' }}>cname.atlas-health.com.</td>
                   <td style={{ padding: '10px 12px' }}>Automatic (3600)</td>
                 </tr>
               </tbody>

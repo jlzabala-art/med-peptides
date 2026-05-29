@@ -113,7 +113,7 @@ const TermsOfUse = ({ onBack }) => {
               <div className="card card--flat mt-12" style={{ padding: '1.5rem', borderRadius: '20px' }}>
                 <h4 className="text-primary mb-3">Institutional Access</h4>
                 <p className="text-muted text-xs mb-4">For bulk procurement or partnership agreements, please contact our logistics team.</p>
-                <a href="mailto:logistics@med-peptides.com" className="btn btn-secondary btn-s w-full">
+                <a href="mailto:logistics@atlas-health.com" className="btn btn-secondary btn-s w-full">
                   <Mail size={14} /> Contact Logistics
                 </a>
               </div>

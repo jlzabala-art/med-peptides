@@ -9,9 +9,9 @@
   --sb-easing:         cubic-bezier(0.4, 0, 0.2, 1);
   --sb-duration:       220ms;
 
-  --sb-bg:             #ffffff;
-  --sb-header-bg:      #ffffff;
-  --sb-footer-bg:      #ffffff;
+  --sb-bg:             rgba(255, 255, 255, 0.65);
+  --sb-header-bg:      rgba(255, 255, 255, 0.4);
+  --sb-footer-bg:      rgba(255, 255, 255, 0.4);
   --sb-active-bg:      #e8f0fe;
   --sb-active-border:  #1a73e8;
   --sb-hover-bg:       #f1f3f4;
@@ -27,7 +27,10 @@
 .app-sidebar {
   display: flex;
   flex-direction: column;
-  background: var(--sb-bg);
+  background: var(--sb-bg) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-right: 1px solid rgba(255, 255, 255, 0.5);
   height: 100%;
   width: var(--sb-w-full);
   min-width: var(--sb-w-full);
@@ -142,6 +145,7 @@
   position: relative;
 }
 .sb-group-header:hover { background: var(--sb-hover-bg); color: var(--sb-text); }
+/* sb-group-header also needs overflow visible for tooltip */
 
 .sb-group-emoji {
   display: flex;
@@ -194,11 +198,15 @@
   font-weight: 500;
   border-radius: 0;
   white-space: nowrap;
-  overflow: hidden;
+  overflow: visible;  /* MUST be visible for tooltip ::after to show */
   position: relative;
   border-left: 3px solid transparent;
   transition: background 150ms, color 150ms, border-color 150ms;
+  /* Clip visual to bounds, but let ::after overflow */
+  clip-path: none;
 }
+/* text content overflow: clip without overflow:hidden */
+.sb-item > .sb-item-label { overflow: hidden; text-overflow: ellipsis; }
 .sb-item:hover { background: var(--sb-hover-bg); color: var(--sb-text); }
 
 .sb-item.active {
@@ -248,21 +256,34 @@
 .sb-item[data-tooltip]:hover::after,
 .sb-group-header[data-tooltip]:hover::after {
   content: attr(data-tooltip);
-  position: absolute;
-  left: calc(var(--sb-w-mini) + 8px);
-  top: 50%;
-  transform: translateY(-50%);
-  background: #ffffff;
-  color: #202124;
+  position: fixed;  /* fixed avoids any parent overflow clipping */
+  left: var(--sb-w-mini, 52px);
+  /* vertical centering done via JS would be ideal, fallback to auto */
+  margin-top: -14px;
+  background: #1e293b;
+  color: #f8fafc;
   font-size: 12px;
   font-weight: 500;
-  padding: 5px 10px;
+  padding: 5px 12px;
   border-radius: 6px;
   white-space: nowrap;
   pointer-events: none;
-  z-index: 9999;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  border: 1px solid #dadce0;
+  z-index: 99999;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.08);
+  letter-spacing: 0.01em;
+}
+/* Arrow */
+.sb-item[data-tooltip]:hover::before,
+.sb-group-header[data-tooltip]:hover::before {
+  content: '';
+  position: fixed;
+  left: calc(var(--sb-w-mini, 52px) - 5px);
+  margin-top: -5px;
+  border: 5px solid transparent;
+  border-right-color: #1e293b;
+  pointer-events: none;
+  z-index: 99999;
 }
 
 /* ── Divider ─────────────────────────────────────────────────────────────────── */

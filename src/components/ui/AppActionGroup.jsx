@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Eye, Edit, Link, DollarSign, Mail, Archive, Trash2, CheckCircle, XCircle, MoreHorizontal, EyeOff, Download } from 'lucide-react';
+import { Eye, Edit, Link, DollarSign, Mail, Archive, Trash2, CheckCircle, XCircle, MoreHorizontal, EyeOff, Download, Package, ClipboardList, Bot } from 'lucide-react';
 
 const ACTION_CONFIG = {
   view: { icon: Eye, label: 'View', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-primary)' },
@@ -13,7 +13,11 @@ const ACTION_CONFIG = {
   hide: { icon: EyeOff, label: 'Hide', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-warning)' },
   show: { icon: Eye, label: 'Show', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-success)' },
   download: { icon: Download, label: 'Download', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-primary)' },
+  inventory: { icon: Package, label: 'Inventory', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-primary)' },
+  protocols: { icon: ClipboardList, label: 'Protocols', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-primary)' },
+  ai: { icon: Bot, label: 'AI Consult', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-primary)' },
   delete: { icon: Trash2, label: 'Delete', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-danger)' },
+  contact: { icon: Mail, label: 'Contact', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-primary)' },
 };
 
 export default function AppActionGroup({ actions, maxVisible = 2 }) {

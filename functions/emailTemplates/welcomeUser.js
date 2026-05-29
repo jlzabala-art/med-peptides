@@ -39,7 +39,7 @@ function buildWelcomeEmail(userData) {
             <li>Manage your delivery information.</li>
           </ul>
           <p>We are committed to supporting your research with the highest quality peptides and logistical excellence.</p>
-          <a href="https://med-peptides-app-27a3a.web.app/login" class="button">Access Your Dashboard</a>
+          <a href="https://atlas-health-app-27a3a.web.app/login" class="button">Access Your Dashboard</a>
           <p>If you have any questions, feel free to reply to this email or contact us via WhatsApp.</p>
           <p>Best regards,<br>The Atlas Health Team</p>
         </div>

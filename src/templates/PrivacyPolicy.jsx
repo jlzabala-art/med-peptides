@@ -113,7 +113,7 @@ const PrivacyPolicy = () => {
               <div className="card card--flat mt-12" style={{ padding: '1.5rem', borderRadius: '20px' }}>
                 <h4 className="text-primary mb-3">Need Assistance?</h4>
                 <p className="text-muted text-xs mb-4">Contact our data protection officer for institutional inquiries.</p>
-                <a href="mailto:privacy@med-peptides.com" className="btn btn-secondary btn-s w-full">
+                <a href="mailto:privacy@atlas-health.com" className="btn btn-secondary btn-s w-full">
                   <Mail size={14} /> Contact DPO
                 </a>
               </div>

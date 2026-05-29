@@ -781,7 +781,7 @@ export const generateClinicalProtocol = async (rawProtocol, options = {}) => {
  */
 export const getProtocolFilename = (protocol) => {
   const safeTitle = (protocol.protocol_title || 'protocol').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-  return `med-peptides-protocol-${safeTitle}.pdf`;
+  return `atlas-health-protocol-${safeTitle}.pdf`;
 };
 
 /**

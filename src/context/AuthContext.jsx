@@ -180,6 +180,9 @@ export function AuthProvider({ children }) {
     if (stored) {
       const canKeep = baseRole === 'admin' ||
                       (baseRole === 'clinic' && ['clinic', 'doctor', 'staff', 'guest'].includes(stored)) ||
+                      (baseRole === 'compounding_pharmacy' && ['compounding_pharmacy', 'clinic', 'doctor', 'staff', 'guest'].includes(stored)) ||
+                      (baseRole === 'wholesaler' && ['wholesaler', 'guest'].includes(stored)) ||
+                      (baseRole === 'supplier' && ['supplier', 'guest'].includes(stored)) ||
                       (stored === baseRole);
       if (canKeep) return stored;
     }
@@ -188,7 +191,10 @@ export function AuthProvider({ children }) {
 
   const switchActiveRole = (newRole) => {
     const allowed = baseRole === 'admin' ||
-                    (baseRole === 'clinic' && ['clinic', 'doctor', 'staff', 'guest'].includes(newRole));
+                    (baseRole === 'clinic' && ['clinic', 'doctor', 'staff', 'guest'].includes(newRole)) ||
+                    (baseRole === 'compounding_pharmacy' && ['compounding_pharmacy', 'clinic', 'doctor', 'staff', 'guest'].includes(newRole)) ||
+                    (baseRole === 'wholesaler' && ['wholesaler', 'guest'].includes(newRole)) ||
+                    (baseRole === 'supplier' && ['supplier', 'guest'].includes(newRole));
     if (allowed) {
       setManualActiveRole(newRole);
       sessionStorage.setItem('activeRole', newRole);
@@ -206,7 +212,7 @@ export function AuthProvider({ children }) {
   }, [activeRole, rolePermissions, userProfile?.permissionsOverride]);
 
   const isVerified = userProfile?.approved === true || userProfile?.isVerified === true;
-  const allowedRoles = ['verified_medical', 'clinic', 'staff', 'pharmacy', 'distributor', 'researcher', 'professional', 'doctor', 'wholesaler'];
+  const allowedRoles = ['verified_medical', 'clinic', 'staff', 'pharmacy', 'distributor', 'researcher', 'professional', 'doctor', 'wholesaler', 'compounding_pharmacy', 'supplier'];
   const userRole = activeRole;
   
   // ── B2B Portal Role Helpers ───────────────────────────────────────────────

@@ -6,14 +6,14 @@ import { getAnalytics } from 'firebase/analytics';
 import { getFunctions } from 'firebase/functions';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PROYECTO FIREBASE OFICIAL: med-peptides-app  (med-peptides.com)
+// PROYECTO FIREBASE OFICIAL: atlas-health-app  (atlas-health.com)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const firebaseConfig = {
   apiKey: "AIzaSyDOV2zFeLGtPsE_O2b-gR3NHZygPspiSws",
-  authDomain: "med-peptides-app-27a3a.firebaseapp.com",
-  projectId: "med-peptides-app",
-  storageBucket: "med-peptides-app.firebasestorage.app",
+  authDomain: "atlas-health-app-27a3a.firebaseapp.com",
+  projectId: "atlas-health-app",
+  storageBucket: "atlas-health-app.firebasestorage.app",
   messagingSenderId: "514143707883",
   appId: "1:514143707883:web:6c12470433ef6c992714ae",
   measurementId: "G-LYMXGY71FJ"

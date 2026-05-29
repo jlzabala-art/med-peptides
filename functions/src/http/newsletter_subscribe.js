@@ -78,7 +78,7 @@ function buildWelcomeEmail(preferences, unsubscribeToken) {
     ? `<p style="margin:0 0 16px;color:#64748b;font-size:14px;">Your experience level: <strong>${level.charAt(0).toUpperCase() + level.slice(1)}</strong> — we'll calibrate the depth of content accordingly.</p>`
     : "";
 
-  const unsubUrl = `https://med-peptides.com/unsubscribe?token=${unsubscribeToken}`;
+  const unsubUrl = `https://atlas-health.com/unsubscribe?token=${unsubscribeToken}`;
 
   const html = `
 <!DOCTYPE html>
@@ -117,7 +117,7 @@ function buildWelcomeEmail(preferences, unsubscribeToken) {
 
       <!-- CTA -->
       <div style="text-align:center;margin:24px 0;">
-        <a href="https://med-peptides.com"
+        <a href="https://atlas-health.com"
            style="display:inline-block;background:linear-gradient(135deg,#6366f1,#818cf8);color:white;padding:13px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;letter-spacing:0.01em;">
           Explore the Research Platform →
         </a>
@@ -131,7 +131,7 @@ function buildWelcomeEmail(preferences, unsubscribeToken) {
     <!-- Footer -->
     <div style="background:#f8fafc;padding:16px 32px;border-top:1px solid #e2e8f0;text-align:center;">
       <p style="margin:0;color:#94a3b8;font-size:11px;line-height:1.8;">
-        Atlas Health Research Platform · research@med-peptides.com<br>
+        Atlas Health Research Platform · research@atlas-health.com<br>
         <a href="${unsubUrl}" style="color:#94a3b8;text-decoration:underline;">Unsubscribe</a>
         · For educational and research purposes only.
       </p>

@@ -22,7 +22,7 @@ const AdminBlueprintsTab   = React.lazy(() => import('../components/admin/AdminB
 const AdminMetricsDashboard= React.lazy(() => import('../components/admin/AdminMetricsDashboard'));
 const OrdersTab            = React.lazy(() => import('../components/admin/OrdersTab'));
 const AdminAccessLevelsTab = React.lazy(() => import('../components/admin/AdminAccessLevelsTab'));
-const AdminClinicalAITab   = React.lazy(() => import('../components/admin/AdminClinicalAITab'));
+const ClinicalAIWidget   = React.lazy(() => import('../components/admin/ClinicalAIWidget'));
 const AdminAnalyticsTab    = React.lazy(() => import('../components/admin/AdminAnalyticsTab'));
 const AdminClinicalLogsTab = React.lazy(() => import('../components/admin/AdminClinicalLogsTab'));
 const AdminHomeLayoutTab   = React.lazy(() => import('../components/admin/AdminHomeLayoutTab'));
@@ -44,6 +44,7 @@ const CouponsManager = React.lazy(() => import('../components/marketing/CouponsM
 const ReferralTracking = React.lazy(() => import('../components/marketing/ReferralTracking'));
 const CoBranding = React.lazy(() => import('../components/marketing/CoBranding'));
 const DripMarketing = React.lazy(() => import('../components/marketing/DripMarketing'));
+const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
 
 export default function AdminRoutes() {
   const [catalogToEdit, setCatalogToEdit] = useState(null);
@@ -73,7 +74,7 @@ export default function AdminRoutes() {
         <Route path="orders" element={<AdminTabErrorBoundary tabId="orders" tabLabel="Orders"><OrdersTab readOnly={false} /></AdminTabErrorBoundary>} />
         <Route path="bulk-orders" element={<AdminTabErrorBoundary tabId="bulk-orders" tabLabel="Bulk Orders"><AdminBulkOrdersTab /></AdminTabErrorBoundary>} />
         <Route path="access-levels" element={<AdminTabErrorBoundary tabId="access-levels" tabLabel="Access Levels"><AdminAccessLevelsTab /></AdminTabErrorBoundary>} />
-        <Route path="clinical-ai" element={<AdminTabErrorBoundary tabId="clinical-ai" tabLabel="Clinical AI"><AdminClinicalAITab /></AdminTabErrorBoundary>} />
+        <Route path="clinical-ai" element={<AdminTabErrorBoundary tabId="clinical-ai" tabLabel="Clinical AI"><ClinicalAIWidget /></AdminTabErrorBoundary>} />
         <Route path="prescription-agent" element={<AdminTabErrorBoundary tabId="prescription-agent" tabLabel="Prescription Agent"><AdminPlaceholderTab title="Prescription Agent" description="Manage logic for AI prescription recommendations." tags={['AI', 'Medical']} color="var(--color-primary)" /></AdminTabErrorBoundary>} />
         <Route path="analytics" element={<AdminTabErrorBoundary tabId="analytics" tabLabel="Analytics"><AdminAnalyticsTab /></AdminTabErrorBoundary>} />
         <Route path="ai-logs" element={<AdminTabErrorBoundary tabId="ai-logs" tabLabel="AI Logs"><AdminClinicalLogsTab /></AdminTabErrorBoundary>} />
@@ -85,6 +86,7 @@ export default function AdminRoutes() {
         <Route path="drip-marketing" element={<AdminTabErrorBoundary tabId="drip-marketing" tabLabel="Drip Marketing"><DripMarketing ownerId="admin" ownerType="admin" /></AdminTabErrorBoundary>} />
         <Route path="pricing-visibility" element={<AdminTabErrorBoundary tabId="pricing-visibility" tabLabel="Pricing Visibility"><AdminPlaceholderTab title="Pricing Visibility" description="Configure regional pricing walls and product visibility." tags={['Pricing', 'Access']} color="var(--color-primary)" /></AdminTabErrorBoundary>} />
         <Route path="leads" element={<AdminTabErrorBoundary tabId="leads" tabLabel="Leads"><AdminLeadsTab /></AdminTabErrorBoundary>} />
+        <Route path="messages" element={<AdminTabErrorBoundary tabId="messages" tabLabel="Mensajes"><MessagingWidget role="admin" ownerId="admin" /></AdminTabErrorBoundary>} />
         <Route path="home-layout" element={<AdminTabErrorBoundary tabId="home-layout" tabLabel="Home Layout"><AdminHomeLayoutTab /></AdminTabErrorBoundary>} />
         <Route path="protocols" element={<AdminTabErrorBoundary tabId="protocols" tabLabel="Protocols"><AdminProtocolsTab /></AdminTabErrorBoundary>} />
         <Route path="blueprints" element={<AdminTabErrorBoundary tabId="blueprints" tabLabel="Blueprints"><AdminBlueprintsTab /></AdminTabErrorBoundary>} />

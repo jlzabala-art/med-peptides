@@ -200,7 +200,7 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
       setZohoFinancialError(null);
       try {
         const response = await fetch(
-          'https://europe-west1-med-peptides-app.cloudfunctions.net/fetchZohoBiginWholesaler',
+          'https://europe-west1-atlas-health-app.cloudfunctions.net/fetchZohoBiginWholesaler',
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -240,7 +240,7 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
     setZohoError(null);
     try {
       const response = await fetch(
-        'https://europe-west1-med-peptides-app.cloudfunctions.net/fetchZohoBiginWholesaler',
+        'https://europe-west1-atlas-health-app.cloudfunctions.net/fetchZohoBiginWholesaler',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -607,7 +607,7 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
       const templateParams = {
         to_email: user.email,
         to_name: user.fullName || user.displayName || 'Researcher',
-        reply_to: 'business@med-peptides.com',
+        reply_to: 'business@atlas-health.com',
         email_body_html: getApprovalEmailHtml(user.fullName || user.displayName),
       };
 
@@ -660,7 +660,7 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
             </div>
             <p>If you'd like to be connected with a supervising doctor or clinic, simply reply to this email, and our support team will assist you.</p>
             <div style="text-align: center; margin-top: 25px;">
-              <a href="https://med-peptides.com" style="display: inline-block; padding: 12px 24px; background-color: #1a73e8; color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold;">Browse Catalog</a>
+              <a href="https://atlas-health.com" style="display: inline-block; padding: 12px 24px; background-color: #1a73e8; color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold;">Browse Catalog</a>
             </div>
           </div>
           <div style="text-align: center; padding: 15px; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; margin-top: 20px;">
@@ -672,7 +672,7 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
       const templateParams = {
         to_email: user.email,
         to_name: user.fullName || user.displayName || 'Researcher',
-        reply_to: 'business@med-peptides.com',
+        reply_to: 'business@atlas-health.com',
         email_body_html: welcomeBody,
       };
 

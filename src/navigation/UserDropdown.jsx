@@ -120,7 +120,7 @@ export default function UserDropdown({ user, userProfile: propUserProfile, isPro
 
   // ── Authenticated ──────────────────────────────────────────────────────────
   const isImpersonating = activeRole !== baseRole;
-  const menuRoleKey = activeRole === 'admin' ? 'admin' : ['clinic', 'doctor', 'wholesaler', 'staff'].includes(activeRole) ? 'professional' : 'guest';
+  const menuRoleKey = activeRole === 'admin' ? 'admin' : ['clinic', 'doctor', 'wholesaler', 'compounding_pharmacy', 'supplier', 'staff'].includes(activeRole) ? 'professional' : 'guest';
   
   const items       = USER_MENU[menuRoleKey] ?? USER_MENU.guest;
   const adminItems  = items.filter((i) => i.section === 'admin');
@@ -135,7 +135,7 @@ export default function UserDropdown({ user, userProfile: propUserProfile, isPro
     ? `View: ${activeRole.toUpperCase()} (Context)`
     : baseRole === 'admin'
     ? 'Admin Account'
-    : ['clinic', 'doctor', 'wholesaler', 'staff'].includes(baseRole)
+    : ['clinic', 'doctor', 'wholesaler', 'compounding_pharmacy', 'supplier', 'staff'].includes(baseRole)
     ? 'Professional Account'
     : 'Guest Account';
 
@@ -147,14 +147,14 @@ export default function UserDropdown({ user, userProfile: propUserProfile, isPro
         role="navigation"
         aria-label="User account menu"
         className="dropdown-panel"
-        style={{ right: 0, width: ['admin', 'clinic', 'doctor'].includes(baseRole) ? '310px' : '280px' }}
+        style={{ right: 0, width: ['admin', 'clinic', 'doctor', 'compounding_pharmacy', 'supplier', 'wholesaler'].includes(baseRole) ? '310px' : '280px' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="user-profile-header">
           <span className="user-profile-name">{displayName}</span>
           <span className="user-profile-role" style={{
-            color: isImpersonating ? 'var(--color-warning)' : baseRole === 'admin' ? 'var(--color-danger)' : ['clinic', 'doctor', 'wholesaler', 'staff'].includes(baseRole) ? 'var(--color-success)' : 'var(--color-text-secondary)',
+            color: isImpersonating ? 'var(--color-warning)' : baseRole === 'admin' ? 'var(--color-danger)' : ['clinic', 'doctor', 'wholesaler', 'compounding_pharmacy', 'supplier', 'staff'].includes(baseRole) ? 'var(--color-success)' : 'var(--color-text-secondary)',
             fontWeight: 700,
             fontSize: '0.75rem'
           }}>{roleLabel}</span>
@@ -253,14 +253,16 @@ export default function UserDropdown({ user, userProfile: propUserProfile, isPro
             </>
           )}
 
-          {['admin', 'clinic', 'doctor'].includes(baseRole) && (() => {
+          {['admin', 'clinic', 'doctor', 'compounding_pharmacy', 'wholesaler', 'supplier'].includes(baseRole) && (() => {
             let options = [];
             if (baseRole === 'admin') {
-              options = ['admin', 'clinic', 'doctor', 'wholesaler', 'sales_agent', 'staff', 'patient', 'guest'];
-            } else if (baseRole === 'clinic') {
-              options = ['clinic', 'doctor', 'staff', 'patient', 'guest'];
+              options = ['admin', 'supplier', 'wholesaler', 'compounding_pharmacy', 'clinic', 'doctor', 'sales_agent', 'staff', 'patient', 'guest'];
+            } else if (baseRole === 'clinic' || baseRole === 'compounding_pharmacy') {
+              options = [baseRole, 'clinic', 'doctor', 'staff', 'patient', 'guest'];
             } else if (baseRole === 'doctor') {
               options = ['doctor', 'staff', 'patient', 'guest'];
+            } else if (baseRole === 'wholesaler' || baseRole === 'supplier') {
+              options = [baseRole, 'guest'];
             }
 
             const ROLE_SWITCH_METADATA = {
@@ -295,6 +297,22 @@ export default function UserDropdown({ user, userProfile: propUserProfile, isPro
                 bgLight: 'rgba(99, 102, 241, 0.05)',
                 borderLight: 'rgba(99, 102, 241, 0.12)',
                 borderActive: '#6366f1',
+              },
+              supplier: {
+                label: 'Supplier View',
+                icon: <Globe size={13} />,
+                color: '#2563eb',
+                bgLight: 'rgba(37, 99, 235, 0.05)',
+                borderLight: 'rgba(37, 99, 235, 0.12)',
+                borderActive: '#2563eb',
+              },
+              compounding_pharmacy: {
+                label: 'Compounding View',
+                icon: <FlaskConical size={13} />,
+                color: '#d946ef',
+                bgLight: 'rgba(217, 70, 239, 0.05)',
+                borderLight: 'rgba(217, 70, 239, 0.12)',
+                borderActive: '#d946ef',
               },
               sales_agent: {
                 label: 'Agent View',

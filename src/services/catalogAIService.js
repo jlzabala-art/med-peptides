@@ -5,7 +5,7 @@
  * Catalog Builder Agent (AgentCatalogBuilder).
  */
 
-const BASE_URL = import.meta.env.VITE_FUNCTIONS_BASE_URL || 'https://europe-west1-med-peptides-app.cloudfunctions.net';
+const BASE_URL = import.meta.env.VITE_FUNCTIONS_BASE_URL || 'https://europe-west1-atlas-health-app.cloudfunctions.net';
 
 /**
  * Generate AI-optimized catalog copy, structure, sections, and marketing angles

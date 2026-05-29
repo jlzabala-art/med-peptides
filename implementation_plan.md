@@ -115,6 +115,62 @@ To ensure the new paginated and filtered tables perform optimally at scale, we m
 > - Are there any specific filters or advanced search behaviors you want natively integrated into `AppDataTable` (e.g., date range pickers), or should complex filters be handled via custom render props?
 > - Do you want to enforce server-side pagination for ALL tables, or is client-side pagination acceptable for smaller datasets (e.g., AdminSettingsTab)?
 
+# Supply Chain & Portal Architecture (B2B/B2C)
+
+This plan outlines the system integration for the complex B2B supply chain, including Suppliers, Wholesalers, Compounding Pharmacies, and Clinics.
+
+## Open Questions
+- **Supplier APIs**: Will suppliers upload their API catalog via CSV/Excel, or integrate via an external ERP/API?
+- **Pharmacy Catalog separation**: Since a Compounding Pharmacy acts as a buyer (purchasing raw APIs) and a supplier (selling formulations to Clinics), should they have two separate catalogs in Firestore (`api_catalog` vs `formulation_catalog`)?
+
+## B2B Ecosystem Hierarchy
+
+### 1. Suppliers (Fabricantes / Distribuidores API)
+- **Role**: `supplier`
+- **Function**: Sell raw APIs and materials to Wholesalers and Compounding Pharmacies.
+- **Portal**: `SupplierHome` (New Portal using `DashboardEngine`)
+  - Can manage raw API catalogs.
+  - Can fulfill bulk B2B orders from Wholesalers/Pharmacies.
+
+### 2. Wholesalers (Distribuidores / Franquiciados)
+- **Role**: `wholesaler`
+- **Function**: Buy in bulk from Suppliers; sell finished goods to Clinics and occasionally directly to Patients or Pharmacies.
+- **Portal**: `WholesalerHome` (Migrated to `DashboardEngine`)
+  - Downstream: Catalogs for Clinics, Rx Inbox for fulfillment.
+  - Upstream: Procurement from Suppliers.
+
+### 3. Compounding Pharmacies (Farmacias de Formulación Magistral)
+- **Role**: `compounding_pharmacy`
+- **Function (DUAL)**:
+  - **As Buyer (Upstream)**: Buy APIs and supplies from Suppliers/Wholesalers.
+  - **As Seller (Downstream)**: Sell bespoke formulations and peptides to Clinics and Wholesalers.
+- **Portal**: `PharmacyHome` (Migrated to `DashboardEngine`)
+  - **Upstream Hub**: API purchasing, lab supply orders.
+  - **Downstream Hub**: Formulations management, order fulfillment from Clinics.
+  - Has a separate portal because the UX needs to dynamically switch between "Buying" (APIs) and "Selling" (Formulations).
+
+### 4. Clinics (Clínicas)
+- **Role**: `clinic`
+- **Function**: Buy formulations from Compounding Pharmacies and finished goods from Wholesalers.
+- **Portal**: `ClinicHome` (Uses `DashboardEngine`)
+  - Central procurement from both Wholesalers and Pharmacies.
+
+## Proposed Changes
+
+### Portal Integration (DashboardEngine)
+#### [MODIFY] [DoctorHome.jsx](file:///Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/templates/DoctorHome.jsx)
+#### [MODIFY] [WholesalerHome.jsx](file:///Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/templates/WholesalerHome.jsx)
+#### [MODIFY] [PharmacyHome.jsx](file:///Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/templates/PharmacyHome.jsx)
+- Integrated `DashboardEngine` for consistent widget-based UI.
+- Embedded `MessagingWidget` ("Mensajes") and `ClinicalAIWidget` ("Atlas Health") as top-level tools available across all admin/professional portals, maximizing reuse of the Admin Portal's resources.
+
+### Sidebar Customization Fixes
+#### [MODIFY] [AppSidebar/index.jsx](file:///Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/components/shared/AppSidebar/index.jsx)
+- Fixed bug where pinned/favorite items did not visually highlight outside of the Favorites group.
+
+### Branding Updates
+- Removed all legacy "med-peptides" mentions from `index.html`, `manifest.json`, `robots.txt`, and `App.jsx`, standardizing on **Atlas Health**.
+
 - Update Firebase security rules to grant doctors read/write access only to their own data.
 - Add unit tests for role‑based rendering.
 

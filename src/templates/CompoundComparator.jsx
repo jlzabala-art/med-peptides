@@ -11,7 +11,7 @@ export default function CompoundComparator() {
     "@type": "ProductGroup",
     "name": "Research Peptide Comparison",
     "description": "Side-by-side technical comparison of high-purity research peptides.",
-    "url": "https://med-peptides.com/compare"
+    "url": "https://atlas-health.com/compare"
   }), []);
 
   usePageMeta({

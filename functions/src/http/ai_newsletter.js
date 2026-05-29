@@ -85,7 +85,7 @@ Return ONLY valid JSON.`;
 function buildDigestHtml(content, preferences, unsubscribeToken) {
   const goal  = preferences?.goal || "longevity";
   const meta  = GOAL_META[goal] || GOAL_META.longevity;
-  const unsubUrl = `https://med-peptides.com/unsubscribe?token=${unsubscribeToken}`;
+  const unsubUrl = `https://atlas-health.com/unsubscribe?token=${unsubscribeToken}`;
   const GOAL_COLOR = {
     recovery: "#22d3ee", longevity: "#34d399", cognitive: "#f59e0b",
     sleep: "#818cf8", metabolic: "#a78bfa", performance: "#f97316", hormonal: "#ec4899",
@@ -135,11 +135,11 @@ function buildDigestHtml(content, preferences, unsubscribeToken) {
       </div>
     </div>
     <div style="background:#fff;padding:0 32px 28px;text-align:center;">
-      <a href="https://med-peptides.com" style="display:inline-block;background:linear-gradient(135deg,#6366f1,#818cf8);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">Explore Research Platform →</a>
+      <a href="https://atlas-health.com" style="display:inline-block;background:linear-gradient(135deg,#6366f1,#818cf8);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">Explore Research Platform →</a>
     </div>
     <div style="background:#f8fafc;padding:16px 32px;border-top:1px solid #e2e8f0;text-align:center;">
       <p style="margin:0;color:#94a3b8;font-size:11px;line-height:1.8;">
-        Atlas Health Research Platform · research@med-peptides.com<br>
+        Atlas Health Research Platform · research@atlas-health.com<br>
         For educational and research purposes only. Not medical advice.<br>
         <a href="${unsubUrl}" style="color:#94a3b8;">Unsubscribe</a>
       </p>

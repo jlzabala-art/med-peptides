@@ -339,7 +339,7 @@ export default function CreateUserModal({
                     color: 'var(--color-text-primary)',
                   }}
                 >
-                  {defaultRole === 'doctor' ? 'Clinic / Practice Name' : 'Company Name'}
+                  {defaultRole === 'doctor' ? 'Clinic / Practice Name' : defaultRole === 'compounding_pharmacy' ? 'Pharmacy Name' : 'Company Name'}
                 </label>
                 <div style={{ position: 'relative' }}>
                   <Building2
@@ -367,6 +367,8 @@ export default function CreateUserModal({
                     placeholder={
                       defaultRole === 'doctor'
                         ? 'e.g. Regenerative Med Clinic'
+                        : defaultRole === 'compounding_pharmacy'
+                        ? 'e.g. Wellness Compounding Rx'
                         : 'e.g. Pharma Distribution LLC'
                     }
                   />

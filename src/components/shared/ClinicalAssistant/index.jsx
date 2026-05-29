@@ -24,7 +24,7 @@ import ChatSuggestions from './components/ChatSuggestions';
 import SessionHistoryDrawer from './components/SessionHistoryDrawer';
 import ResearchDetailDrawer from './components/ResearchDetailDrawer';
 
-export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false, pageContext = null, contextMode = 'clinical', agentType = 'default' }) {
+export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false, pageContext = null, contextMode = 'clinical', agentType = 'default', suggestedPrompts = [] }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, userProfile } = useAuth();
@@ -64,6 +64,19 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
   const [deepDiveData, setDeepDiveData] = useState(null);
   const [isDeepDiveOpen, setIsDeepDiveOpen] = useState(false);
   const [comparisonSelection, setComparisonSelection] = useState([]);
+  const [isPulsing, setIsPulsing] = useState(false);
+
+  useEffect(() => {
+    if (!isPulsing) return;
+    const handleClick = (e) => {
+      // Si el clic no es dentro del contenedor de ChatInputBar o de un elemento del assistant
+      if (!e.target.closest('.clinical-assistant-container')) {
+        setIsPulsing(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [isPulsing]);
 
   const handleCompare = (compoundName) => {
     setComparisonSelection(prev => {
@@ -189,6 +202,14 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
               }
             ];
           });
+          
+          setIsPulsing(true);
+          // Focus input after a short delay
+          setTimeout(() => {
+            const inputEl = document.querySelector('.clinical-assistant-container input[type="text"], .clinical-assistant-container textarea');
+            if (inputEl) inputEl.focus();
+          }, 400);
+
         }, 100);
       }
     };
@@ -225,7 +246,7 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
   }, [isLoading, isMobile]);
 
   const renderChatContent = () => (
-    <div className="clinical-assistant-container" style={{ 
+    <div className={`clinical-assistant-container${isPulsing ? ' atlas-pulsing' : ''}`} style={{ 
       display: 'flex', 
       flexDirection: 'row', 
       height: '100%', 
@@ -509,6 +530,46 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
             themeBgActive={themeBgActive}
           />
         )}
+
+        {/* Role-specific starter prompts (shown only when chat is empty) */}
+        {messages.length === 0 && suggestedPrompts.length > 0 && !isLoading && (
+          <div style={{ padding: '1rem 1.25rem 0.5rem', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem', opacity: 0.7 }}>
+              Sugerencias para tu portal
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+              {suggestedPrompts.map((p, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleSend(p.label)}
+                  style={{
+                    padding: '0.4rem 0.8rem',
+                    borderRadius: '999px',
+                    backgroundColor: 'rgba(0,0,0,0.03)',
+                    border: `1.5px solid ${themeAccent}33`,
+                    color: themeAccent,
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.18s',
+                    whiteSpace: 'nowrap',
+                    lineHeight: 1.3
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.backgroundColor = `${themeAccent}15`;
+                    e.currentTarget.style.borderColor = themeAccent;
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)';
+                    e.currentTarget.style.borderColor = `${themeAccent}33`;
+                  }}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <ChatMessageList 
           messages={messages}
           isLoading={isLoading}
@@ -616,6 +677,16 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
 
   return (
     <>
+      <style>{`
+        @keyframes siriPulseEdge {
+          0% { box-shadow: 0 0 10px rgba(79, 70, 229, 0.3), inset 0 0 10px rgba(79, 70, 229, 0.3); border: 2px solid rgba(79, 70, 229, 0.5); }
+          50% { box-shadow: 0 0 40px rgba(79, 70, 229, 0.9), inset 0 0 20px rgba(79, 70, 229, 0.6); border: 2px solid rgba(79, 70, 229, 1); }
+          100% { box-shadow: 0 0 10px rgba(79, 70, 229, 0.3), inset 0 0 10px rgba(79, 70, 229, 0.3); border: 2px solid rgba(79, 70, 229, 0.5); }
+        }
+        .pulse-active {
+          animation: siriPulseEdge 2s infinite ease-in-out;
+        }
+      `}</style>
       <AnimatePresence>
         {isOpen && (
           <>
@@ -653,6 +724,7 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
                 overflow: 'hidden',
                 borderLeft: '1px solid rgba(0,0,0,0.08)'
               }}
+              className={isPulsing ? 'pulse-active' : ''}
             >
               {renderChatContent()}
             </motion.div>

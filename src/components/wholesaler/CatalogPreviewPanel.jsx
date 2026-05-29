@@ -580,7 +580,7 @@ export default function CatalogPreviewPanel({ catalog, products = [], protocols 
         </a>
         <div style={{ marginTop: '1rem', fontSize: '0.85rem', color: '#5f6368', display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Phone size={14}/> +1 (800) 555-0199</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Mail size={14}/> partners@med-peptides.com</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Mail size={14}/> partners@atlas-health.com</span>
         </div>
       </section>
 

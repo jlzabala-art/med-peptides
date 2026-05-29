@@ -18,7 +18,7 @@ import { Mail, Sparkles, Check, ChevronRight, Brain, Zap, FlaskConical, Moon, Re
 import useGuestPreferences, { GOAL_META } from '../hooks/useGuestPreferences';
 
 // ── Cloud Function URL ────────────────────────────────────────────────────────
-const SUBSCRIBE_URL = `${import.meta.env.VITE_FUNCTIONS_BASE_URL || 'https://europe-west1-med-peptides-app.cloudfunctions.net'}/newsletterSubscribe`;
+const SUBSCRIBE_URL = `${import.meta.env.VITE_FUNCTIONS_BASE_URL || 'https://europe-west1-atlas-health-app.cloudfunctions.net'}/newsletterSubscribe`;
 
 // ── Goal-specific copy ────────────────────────────────────────────────────────
 const GOAL_COPY = {

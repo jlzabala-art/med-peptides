@@ -272,7 +272,7 @@
       "performance"
     ],
     "updatedAt": "2026-03-16T23:57:40.692Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "molecular_formula": "C10H10N2",
     "_variantsMigrated": true,
     "contraindications": [
@@ -825,7 +825,7 @@
       "HGH Fragment"
     ],
     "updatedAt": "2026-03-16T23:57:40.399Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -1286,7 +1286,7 @@
       "Inflammation"
     ],
     "updatedAt": "2026-03-16T23:57:38.306Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -2001,7 +2001,7 @@
       "Anti-inflammatory"
     ],
     "updatedAt": "2026-03-16T23:57:36.059Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -2471,7 +2471,7 @@
       "Long-Acting"
     ],
     "updatedAt": "2026-03-16T23:57:45.557Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -2738,7 +2738,7 @@
       "Performance"
     ],
     "updatedAt": "2026-03-16T23:57:45.277Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -3541,7 +3541,7 @@
       "Amylin Analog"
     ],
     "updatedAt": "2026-03-16T23:57:40.102Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -3760,7 +3760,7 @@
       "Bioregulator"
     ],
     "updatedAt": "2026-03-16T23:57:52.147Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -3999,7 +3999,7 @@
       "Bioregulator"
     ],
     "updatedAt": "2026-03-16T23:57:51.796Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -4215,7 +4215,7 @@
       "Sleep",
       "Stress"
     ],
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -4459,7 +4459,7 @@
       "Telomerase"
     ],
     "updatedAt": "2026-03-16T23:57:41.970Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -4704,7 +4704,7 @@
       "Myostatin Inhibitor"
     ],
     "updatedAt": "2026-03-16T23:57:45.869Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -5180,7 +5180,7 @@
       "Anti-Aging"
     ],
     "updatedAt": "2026-03-16T23:57:42.230Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -5665,7 +5665,7 @@
       "Metabolism"
     ],
     "updatedAt": "2026-03-16T23:57:48.400Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -5912,7 +5912,7 @@
       "Premium Blend"
     ],
     "updatedAt": "2026-03-16T23:57:37.292Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -6148,7 +6148,7 @@
       "Endurance"
     ],
     "updatedAt": "2026-03-16T23:57:41.689Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -6606,7 +6606,7 @@
       "Testosterone"
     ],
     "updatedAt": "2026-03-16T23:57:47.435Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -6829,7 +6829,7 @@
       "Anti-Aging"
     ],
     "updatedAt": "2026-03-16T23:57:47.167Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -7077,7 +7077,7 @@
       "Fertility"
     ],
     "updatedAt": "2026-03-16T23:57:47.702Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -7296,7 +7296,7 @@
       "Potent"
     ],
     "updatedAt": "2026-03-16T23:57:48.655Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -7767,7 +7767,7 @@
       "Performance"
     ],
     "updatedAt": "2026-03-16T23:57:46.213Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -8237,7 +8237,7 @@
       "Anti-Aging"
     ],
     "updatedAt": "2026-03-16T23:57:48.003Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -8743,7 +8743,7 @@
       "Full Stack"
     ],
     "updatedAt": "2026-03-16T23:57:37.681Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -8989,7 +8989,7 @@
       "Antimicrobial"
     ],
     "updatedAt": "2026-03-16T23:57:37.995Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -9234,7 +9234,7 @@
       "Libido"
     ],
     "updatedAt": "2026-03-16T23:57:49.479Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -9467,7 +9467,7 @@
       "Oral"
     ],
     "updatedAt": "2026-03-16T23:57:46.874Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -9730,7 +9730,7 @@
       "longevity"
     ],
     "updatedAt": "2026-03-16T23:57:41.065Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -9963,7 +9963,7 @@
       "Aphrodisiac"
     ],
     "updatedAt": "2026-03-16T23:57:50.069Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -10212,7 +10212,7 @@
       "High Dosage"
     ],
     "updatedAt": "2026-03-16T23:57:42.912Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -10460,7 +10460,7 @@
       "Metabolism"
     ],
     "updatedAt": "2026-03-16T23:57:42.538Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -10711,7 +10711,7 @@
       "Stress"
     ],
     "updatedAt": "2026-03-16T23:57:49.776Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -10956,7 +10956,7 @@
       "TREK-1"
     ],
     "updatedAt": "2026-03-16T23:57:44.986Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -11617,7 +11617,7 @@
       "IGF-1 Variant"
     ],
     "updatedAt": "2026-03-16T23:57:46.570Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -11849,7 +11849,7 @@
       "Selective"
     ],
     "updatedAt": "2026-03-16T23:57:50.611Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -12064,7 +12064,7 @@
       "Research"
     ],
     "updatedAt": "2026-03-16T23:57:50.353Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -12497,7 +12497,7 @@
       "Bioregulator"
     ],
     "updatedAt": "2026-03-16T23:57:52.749Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -13447,7 +13447,7 @@
       "ERR Agonist"
     ],
     "updatedAt": "2026-03-16T23:57:41.377Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -13688,7 +13688,7 @@
       "Anti-Aging"
     ],
     "updatedAt": "2026-03-16T23:57:43.536Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -14364,7 +14364,7 @@
       "Anti-Anxiety"
     ],
     "updatedAt": "2026-03-16T23:57:43.845Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -15057,7 +15057,7 @@
       "GLP-1"
     ],
     "updatedAt": "2026-03-16T23:57:39.837Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -15473,7 +15473,7 @@
       "Nootropic"
     ],
     "updatedAt": "2026-03-16T23:57:44.104Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -15694,7 +15694,7 @@
       "Anti-Aging"
     ],
     "updatedAt": "2026-03-16T23:57:48.926Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -15951,7 +15951,7 @@
       "Anti-Aging"
     ],
     "updatedAt": "2026-03-16T23:57:50.868Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -16380,7 +16380,7 @@
       "Performance"
     ],
     "updatedAt": "2026-03-16T23:57:36.923Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -16827,7 +16827,7 @@
       "Bioregulator"
     ],
     "updatedAt": "2026-03-16T23:57:53.152Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -17052,7 +17052,7 @@
       "Bioregulator"
     ],
     "updatedAt": "2026-03-16T23:57:52.458Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -17472,7 +17472,7 @@
       "Defense"
     ],
     "updatedAt": "2026-03-16T23:57:51.414Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -17716,7 +17716,7 @@
       "Bioregulator"
     ],
     "updatedAt": "2026-03-16T23:57:51.136Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "_migratedAt": {
       "_seconds": 1776682872,
@@ -17939,7 +17939,7 @@
     "stock": 100,
     "desc": "A dual GIP and GLP-1 receptor agonist fundamentally altering energy metabolism and insulin secretion profiles.",
     "updatedAt": "2026-03-16T23:57:38.591Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "scientificName": "LY3298176; Tirzepatide",
     "displayName": "Tirzepatide",
@@ -18187,7 +18187,7 @@
     "stock": 100,
     "desc": "A dual GIP and GLP-1 receptor agonist fundamentally altering energy metabolism and insulin secretion profiles.",
     "updatedAt": "2026-03-16T23:57:38.966Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "scientificName": "LY3298176; Tirzepatide",
     "displayName": "Tirzepatide",
@@ -18435,7 +18435,7 @@
     "stock": 100,
     "desc": "A dual GIP and GLP-1 receptor agonist fundamentally altering energy metabolism and insulin secretion profiles.",
     "updatedAt": "2026-03-16T23:57:39.266Z",
-    "_migratedFrom": "med-peptides-web-app",
+    "_migratedFrom": "atlas-health-web-app",
     "_variantsMigrated": true,
     "scientificName": "LY3298176; Tirzepatide",
     "displayName": "Tirzepatide",

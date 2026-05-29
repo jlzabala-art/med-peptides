@@ -506,7 +506,7 @@ Rules:
 - Do NOT mention: purchase history, browsing behavior, personal data, what we know about them
 - Tone: helpful reminder — NOT sales pressure
 - ONE clear CTA button: <a href="{cta_url}" style="background:#6366f1;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin:16px 0">{cta_text}</a>
-- Footer: <div style="color:#888;font-size:11px;margin-top:32px;border-top:1px solid #eee;padding-top:16px">Atlas Health Research Platform | research@med-peptides.com | <a href="{unsubscribe_url}" style="color:#888">Unsubscribe</a></div>
+- Footer: <div style="color:#888;font-size:11px;margin-top:32px;border-top:1px solid #eee;padding-top:16px">Atlas Health Research Platform | research@atlas-health.com | <a href="{unsubscribe_url}" style="color:#888">Unsubscribe</a></div>
 - Return ONLY the HTML — no markdown, no explanation`;
 
 const EMAIL_HTML_PROMPT_ES = `Genera el body HTML de un email profesional para una plataforma de investigación.
@@ -518,7 +518,7 @@ Reglas:
 - NO mencionar: historial de compras, comportamiento de navegación, datos personales
 - Tono: recordatorio amable — SIN presión comercial
 - UN único botón CTA: <a href="{cta_url}" style="background:#6366f1;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin:16px 0">{cta_text}</a>
-- Footer: <div style="color:#888;font-size:11px;margin-top:32px;border-top:1px solid #eee;padding-top:16px">Atlas Health Research Platform | research@med-peptides.com | <a href="{unsubscribe_url}" style="color:#888">Cancelar suscripción</a></div>
+- Footer: <div style="color:#888;font-size:11px;margin-top:32px;border-top:1px solid #eee;padding-top:16px">Atlas Health Research Platform | research@atlas-health.com | <a href="{unsubscribe_url}" style="color:#888">Cancelar suscripción</a></div>
 - Devuelve SOLO el HTML — sin markdown ni explicaciones`;
 
 async function renderEmail(bodyText, options = {}) {
@@ -551,7 +551,7 @@ async function renderEmail(bodyText, options = {}) {
           <a href="${ctaUrl}" style="background:#6366f1;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin:16px 0">${ctaText}</a>
         </div>
         <div style="color:#888;font-size:11px;padding:16px 24px;border-top:1px solid #eee">
-          Atlas Health Research Platform | research@med-peptides.com
+          Atlas Health Research Platform | research@atlas-health.com
         </div>
       </div>`,
       textBody: bodyText,

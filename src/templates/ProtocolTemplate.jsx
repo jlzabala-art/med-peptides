@@ -929,7 +929,7 @@ export default function ProtocolTemplate({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `med-peptides-${slug}-schedule.ics`;
+      a.download = `atlas-health-${slug}-schedule.ics`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -1023,7 +1023,7 @@ export default function ProtocolTemplate({
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `med-peptides-patient-guide-${slug}.pdf`;
+          a.download = `atlas-health-patient-guide-${slug}.pdf`;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);

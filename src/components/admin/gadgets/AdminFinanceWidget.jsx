@@ -26,7 +26,7 @@ import {
 
 // ── CF endpoint (same region as other agents) ─────────────────────────────────
 const FINANCE_CF_URL =
-  'https://europe-west1-med-peptides-app.cloudfunctions.net/financeAiAssistant';
+  'https://europe-west1-atlas-health-app.cloudfunctions.net/financeAiAssistant';
 
 // Preset query that triggers the structured snapshot response
 const SNAPSHOT_QUERY =

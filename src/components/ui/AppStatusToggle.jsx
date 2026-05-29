@@ -1,7 +1,7 @@
 import React from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
-export default function AppStatusToggle({ isActive, onToggle, activeLabel = 'Active', inactiveLabel = 'Hidden' }) {
+export default function AppStatusToggle({ isActive, isLocked = false, onToggle, activeLabel = 'Active', inactiveLabel = 'Hidden', lockedLabel = 'Disabled' }) {
   // If isActive is strictly false, it's hidden. Otherwise (true or undefined), it's active.
   const isHidden = isActive === false;
   
@@ -9,14 +9,14 @@ export default function AppStatusToggle({ isActive, onToggle, activeLabel = 'Act
     <button 
       onClick={(e) => { 
         e.stopPropagation(); 
-        onToggle(isHidden); // If currently hidden, toggle means we want to set it to true (active)
+        if (!isLocked) onToggle(isHidden); 
       }}
-      title={`Click to ${isHidden ? 'show' : 'hide'}`}
+      title={isLocked ? 'Locked by Administrator' : `Click to ${isHidden ? 'show' : 'hide'}`}
       style={{ 
-        background: isHidden ? 'var(--color-bg-hover)' : 'var(--color-success-bg)', 
-        border: `1px solid ${isHidden ? 'var(--color-border)' : 'rgba(16,185,129,0.3)'}`, 
-        cursor: 'pointer', 
-        color: isHidden ? 'var(--color-text-secondary)' : 'var(--color-success)',
+        background: isLocked ? '#f1f5f9' : isHidden ? 'var(--color-bg-hover)' : 'var(--color-success-bg)', 
+        border: `1px solid ${isLocked ? '#cbd5e1' : isHidden ? 'var(--color-border)' : 'rgba(16,185,129,0.3)'}`, 
+        cursor: isLocked ? 'not-allowed' : 'pointer', 
+        color: isLocked ? '#64748b' : isHidden ? 'var(--color-text-secondary)' : 'var(--color-success)',
         display: 'inline-flex', 
         alignItems: 'center', 
         gap: '0.4rem', 
@@ -34,7 +34,7 @@ export default function AppStatusToggle({ isActive, onToggle, activeLabel = 'Act
         e.currentTarget.style.filter = 'none';
       }}
     >
-      {isHidden ? <><EyeOff size={14} /> {inactiveLabel}</> : <><Eye size={14} /> {activeLabel}</>}
+      {isLocked ? <><EyeOff size={14} /> {lockedLabel}</> : isHidden ? <><EyeOff size={14} /> {inactiveLabel}</> : <><Eye size={14} /> {activeLabel}</>}
     </button>
   );
 }

@@ -24,7 +24,8 @@ import {
   ClipboardList,
   Bot,
   ShoppingCart,
-  MessageSquare
+  MessageSquare,
+  DollarSign
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import AppDataTable from '../ui/AppDataTable';
@@ -36,6 +37,16 @@ import { useToast } from '../../hooks/useToast';
 import { catalogRepository } from '../../repositories/catalogRepository';
 import AdminSupplyNotifierWidget from './gadgets/AdminSupplyNotifierWidget';
 import InlineEditField from '../ui/InlineEditField';
+import BulkOrderSelectionModal from './BulkOrders/BulkOrderSelectionModal';
+
+// ─── TooltipWrapper Component ───────────────────────────────────────────────────
+function TooltipWrapper({ text, children }) {
+  return (
+    <div title={text} style={{ display: 'inline-flex' }}>
+      {children}
+    </div>
+  );
+}
 
 // ─── ProductMicrosite Component ────────────────────────────────────────────────
 function ProductMicrosite({ product, onUpdateProduct }) {
@@ -154,17 +165,7 @@ function ProductMicrosite({ product, onUpdateProduct }) {
       overflow: 'hidden',
       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
     }}>
-      {/* B2B Action Bar */}
-      <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-        <button 
-          onClick={() => alert('Próximamente: Añadir a Bulk Order')}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
-          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#059669'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#10b981'; }}
-        >
-          <ShoppingCart size={16} /> Incluir en Bulk Order
-        </button>
-      </div>
+
 
 
 
@@ -320,7 +321,7 @@ export default function AdminProductsTab({
   allowedCategories = ['All'],
   isWholesaler = false,
 }) {
-  const { isAdmin, user } = useAuth();
+  const { isAdmin, user, userRole } = useAuth();
   const { toast } = useToast();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -342,6 +343,10 @@ export default function AdminProductsTab({
   const [catalogSelectMode, setCatalogSelectMode] = useState(false);
   const [myCatalogs, setMyCatalogs] = useState([]);
   const [loadingCatalogs, setLoadingCatalogs] = useState(false);
+
+  // Bulk Orders Modal State
+  const [isBulkOrderModalOpen, setIsBulkOrderModalOpen] = useState(false);
+  const [productsToBulkOrder, setProductsToBulkOrder] = useState([]);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -697,12 +702,36 @@ export default function AdminProductsTab({
       header: 'Status',
       width: '80px',
       sortKey: 'status',
-      sortValue: (p) => (p.isActive !== false ? 1 : 0),
       render: (p) => {
+        let isLocked = false;
+        let isLocallyActive = p.isActive !== false;
+        
+        if (!isAdmin && user) {
+          if (p.isActive === false) {
+            isLocked = true;
+            isLocallyActive = false;
+          } else {
+            const localOverrides = p.localOverrides || {};
+            if (localOverrides[user.uid] === false) {
+              isLocallyActive = false;
+            }
+          }
+        }
+        
+        const handleToggle = (willBeActive) => {
+          if (isAdmin) {
+            handleUpdateProduct(p.id, { isActive: willBeActive });
+          } else {
+            if (!user) return;
+            handleUpdateProduct(p.id, { [`localOverrides.${user.uid}`]: willBeActive });
+          }
+        };
+
         return (
           <AppStatusToggle
-            isActive={p.isActive !== false}
-            onToggle={(willBeActive) => handleUpdateProduct(p.id, { isActive: willBeActive })}
+            isActive={isLocallyActive}
+            isLocked={isLocked}
+            onToggle={handleToggle}
           />
         );
       },
@@ -716,74 +745,58 @@ export default function AdminProductsTab({
       align: 'right',
       width: '180px',
       render: (p) => {
-        const actions = [];
-        actions.push({ type: 'delete', onClick: () => handleDeleteProduct(p.id) });
-        return (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
-          >
-            {savingProduct === p.id && (
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Saving...</span>
-            )}
-            
-            <button 
-              title="Gestión Inventario"
-              onClick={(e) => { e.stopPropagation(); navigate(`/admin/sku-sync?sku=${encodeURIComponent(p.sku || '')}`); }}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: '4px' }}
-              onMouseEnter={(e) => e.currentTarget.style.color = '#3b82f6'}
-              onMouseLeave={(e) => e.currentTarget.style.color = '#475569'}
-            >
-              <Package size={16} />
-            </button>
-            <button 
-              title="Consulta Precios"
-              onClick={(e) => { e.stopPropagation(); navigate(`/admin/prices?sku=${encodeURIComponent(p.sku || '')}`); }}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: '4px' }}
-              onMouseEnter={(e) => e.currentTarget.style.color = '#10b981'}
-              onMouseLeave={(e) => e.currentTarget.style.color = '#475569'}
-            >
-              <DollarSign size={16} />
-            </button>
-            <button 
-              title="Protocolos Relacionados"
-              onClick={(e) => { e.stopPropagation(); navigate(`/admin/protocols`); }}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: '4px' }}
-              onMouseEnter={(e) => e.currentTarget.style.color = '#f59e0b'}
-              onMouseLeave={(e) => e.currentTarget.style.color = '#475569'}
-            >
-              <ClipboardList size={16} />
-            </button>
-            <button 
-              title="Consulta Clínica AI"
-              onClick={(e) => { 
-                e.stopPropagation();
-                window.dispatchEvent(new CustomEvent('OPEN_ATLAS_CLINICAL_MODE', { 
-                  detail: { product: p.name, sku: p.sku } 
-                }));
-              }}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#4f46e5', padding: '4px' }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              <Bot size={16} />
-            </button>
-            
-            <div style={{ width: '1px', height: '16px', backgroundColor: '#e2e8f0', margin: '0 4px' }} />
-            
-            <AppActionGroup actions={actions} />
-          </div>
-        );
+  const actions = [
+    { type: 'inventory', onClick: () => {
+      navigate(`/admin/sku-sync?sku=${encodeURIComponent(p.sku || '')}`);
+    } },
+    { type: 'pricing', onClick: () => {
+      navigate(`/admin/prices?sku=${encodeURIComponent(p.sku || '')}`);
+    } },
+    { type: 'protocols', onClick: () => {
+      navigate(`/admin/protocols`);
+    } },
+    { type: 'ai', onClick: () => {
+      window.dispatchEvent(new CustomEvent('OPEN_ATLAS_CLINICAL_MODE', {
+        detail: { product: p.name, sku: p.sku }
+      }));
+    } },
+    { type: 'delete', onClick: () => handleDeleteProduct(p.id) }
+  ];
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      {savingProduct === p.id && (
+        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Saving...</span>
+      )}
+      <AppActionGroup actions={actions} />
+    </div>
+  );
       },
     });
   }
 
-  const renderExpandedRow = (p) => {
-    return <ProductMicrosite product={p} onUpdateProduct={handleUpdateProduct} />;
+  const handleAddToBulkOrder = async (selectedIds) => {
+    const selectedProducts = products.filter(p => selectedIds.includes(p.id));
+    setProductsToBulkOrder(selectedProducts);
+    setIsBulkOrderModalOpen(true);
+  };
+
+  const handleDeactivateSelected = async (selectedIds) => {
+    try {
+      const promises = selectedIds.map(id => {
+        const ref = doc(db, 'products', id);
+        return updateDoc(ref, { isActive: false });
+      });
+      await Promise.all(promises);
+      addToast(`Se han desactivado ${selectedIds.length} productos.`, 'success');
+      setSelectedProductIds([]);
+      fetchProducts();
+    } catch (error) {
+      addToast('Error al desactivar productos: ' + error.message, 'error');
+    }
+  };
+
+  const renderExpandedRow = (product) => {
+    return <ProductMicrosite product={product} onUpdateProduct={handleUpdateProduct} />;
   };
 
   const filteredProducts = products.filter((p) => {
@@ -1297,7 +1310,7 @@ export default function AdminProductsTab({
             renderBatchActions={(selected) => (
               <>
                 <button
-                  onClick={handleExportCSV}
+                  onClick={() => handleAddToBulkOrder(selected)}
                   className="btn btn-primary"
                   style={{
                     display: 'flex',
@@ -1305,6 +1318,38 @@ export default function AdminProductsTab({
                     gap: '0.5rem',
                     fontSize: '0.8rem',
                     padding: '0.4rem 0.8rem',
+                    backgroundColor: '#10b981',
+                    borderColor: '#10b981'
+                  }}
+                >
+                  <ShoppingCart size={14} /> Add to Bulk Order
+                </button>
+                <button
+                  onClick={() => handleDeactivateSelected(selected)}
+                  className="btn btn-outline"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontSize: '0.8rem',
+                    padding: '0.4rem 0.8rem',
+                    color: '#ef4444',
+                    borderColor: '#ef4444',
+                    background: '#fef2f2'
+                  }}
+                >
+                  <XCircle size={14} /> Deactivate
+                </button>
+                <button
+                  onClick={handleExportCSV}
+                  className="btn btn-outline"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontSize: '0.8rem',
+                    padding: '0.4rem 0.8rem',
+                    background: 'white',
                   }}
                 >
                   <Download size={14} /> Export Selected
@@ -1351,6 +1396,15 @@ export default function AdminProductsTab({
         Widget: AdminProductsTab | Props: none
       </div>
     
-</div>
+      {/* Modals */}
+      <BulkOrderSelectionModal 
+        isOpen={isBulkOrderModalOpen}
+        onClose={() => {
+          setIsBulkOrderModalOpen(false);
+          setSelectedProductIds([]);
+        }}
+        selectedProducts={productsToBulkOrder}
+      />
+    </div>
   );
 }

@@ -5,6 +5,10 @@ import PortalLayout from '../components/ui/PortalLayout';
 import DashboardEngine from '../engine/DashboardEngine';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { MessageSquare, Brain } from 'lucide-react';
+
+const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
+const ClinicalAIWidget = React.lazy(() => import('../components/admin/ClinicalAIWidget'));
 
 const CLINIC_NAV_GROUPS = [
   {
@@ -12,6 +16,8 @@ const CLINIC_NAV_GROUPS = [
     label: 'Overview',
     items: [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { id: 'messages', label: 'Mensajes', icon: MessageSquare },
+      { id: 'clinical-ai', label: 'Atlas Health', icon: Brain },
     ],
   },
   {
@@ -118,6 +124,16 @@ export default function ClinicHome() {
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
           <Routes>
             <Route index element={<ClinicDashboardTab userProfile={userProfile} />} />
+            <Route path="messages" element={
+              <React.Suspense fallback={<div>Cargando Mensajes...</div>}>
+                <MessagingWidget role="clinic" />
+              </React.Suspense>
+            } />
+            <Route path="clinical-ai" element={
+              <React.Suspense fallback={<div>Cargando Atlas Health...</div>}>
+                <ClinicalAIWidget />
+              </React.Suspense>
+            } />
             <Route path="*" element={<PlaceholderTab />} />
           </Routes>
         </AdminTabErrorBoundary>

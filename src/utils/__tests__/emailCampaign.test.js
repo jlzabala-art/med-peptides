@@ -58,13 +58,13 @@ describe('Catalog Email Delivery System Schemas & Compiler', () => {
     const html = renderCatalogEmailHtml({
       catalog: mockCatalog,
       campaign: mockCampaign,
-      trackingUrl: 'https://med-peptides.com/catalog/track/camp-123'
+      trackingUrl: 'https://atlas-health.com/catalog/track/camp-123'
     });
 
     expect(html).toContain('Longevity Compounds');
     expect(html).toContain('Personalized Clinical Selection');
     expect(html).toContain('Dr. Watson');
-    expect(html).toContain('https://med-peptides.com/catalog/track/camp-123');
+    expect(html).toContain('https://atlas-health.com/catalog/track/camp-123');
     expect(html).toContain('#1a73e8'); // GCP blue variable check
   });
 });

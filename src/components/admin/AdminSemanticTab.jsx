@@ -84,7 +84,7 @@ export default function AdminSemanticTab({ readOnly = false }) {
     const token = await getToken();
     const baseUrl =
       import.meta.env.VITE_FUNCTIONS_BASE_URL ||
-      'https://europe-west1-med-peptides-app.cloudfunctions.net';
+      'https://europe-west1-atlas-health-app.cloudfunctions.net';
     const resp = await fetch(`${baseUrl}/refineSemanticAgent`, {
       method: 'POST',
       headers: {

@@ -33,7 +33,7 @@ const AdminBlueprintsTab   = React.lazy(() => import('../components/admin/AdminB
 const AdminMetricsDashboard= React.lazy(() => import('../components/admin/AdminMetricsDashboard'));
 const OrdersTab            = React.lazy(() => import('../components/admin/OrdersTab'));
 const AdminAccessLevelsTab = React.lazy(() => import('../components/admin/AdminAccessLevelsTab'));
-const AdminClinicalAITab   = React.lazy(() => import('../components/admin/AdminClinicalAITab'));
+const ClinicalAIWidget     = React.lazy(() => import('../components/admin/ClinicalAIWidget'));
 const AdminAnalyticsTab    = React.lazy(() => import('../components/admin/AdminAnalyticsTab'));
 const AdminClinicalLogsTab = React.lazy(() => import('../components/admin/AdminClinicalLogsTab'));
 const AdminHomeLayoutTab   = React.lazy(() => import('../components/admin/AdminHomeLayoutTab'));
@@ -63,6 +63,7 @@ const NAV_GROUPS = [
     label: 'Overview',
     items: [
       { id: 'dashboard',        label: 'Dashboard KPIs',      icon: LayoutDashboard },
+      { id: 'messages',         label: 'Mensajes',            icon: MessageSquare, pulse: true },
     ],
   },
   {
@@ -118,7 +119,6 @@ const NAV_GROUPS = [
       { id: 'doctors',          label: 'Doctors',              icon: Stethoscope },
       { id: 'patients',         label: 'Patients',             icon: HeartPulse },
       { id: 'invitations',      label: 'Invitations',          icon: UserPlus },
-      { id: 'messages',         label: 'Mensajes',             icon: MessageSquare },
     ],
   },
   {
@@ -206,7 +206,7 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
       {tab === 'orders'        && <OrdersTab readOnly={false} />}
       {tab === 'bulk-orders'   && <AdminBulkOrdersTab />}
       {tab === 'access-levels' && <AdminAccessLevelsTab />}
-      {tab === 'clinical-ai'   && <AdminClinicalAITab />}
+      {tab === 'clinical-ai'   && <ClinicalAIWidget />}
       {tab === 'prescription-agent' && <AdminPlaceholderTab title="Prescription Agent" description="Manage logic for AI prescription recommendations." tags={['AI', 'Medical']} color="var(--color-primary)" />}
       {tab === 'analytics'     && <AdminAnalyticsTab /> }
       {tab === 'ai-logs'       && <AdminClinicalLogsTab /> }

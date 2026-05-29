@@ -154,8 +154,8 @@ export default function FAQDiscoveryView({ onBack, onSelectProduct, products = [
       {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://med-peptides.com/" },
-          { "@type": "ListItem", "position": 2, "name": "Research FAQ", "item": "https://med-peptides.com/faq" }
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://atlas-health.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Research FAQ", "item": "https://atlas-health.com/faq" }
         ]
       },
       {
@@ -172,7 +172,7 @@ export default function FAQDiscoveryView({ onBack, onSelectProduct, products = [
   usePageMeta({
     title: "Research FAQ & Peptide Knowledge Base | Atlas Health",
     description: "Explore our comprehensive research peptide FAQ. Learn about handling, storage, and the science behind high-purity research peptides.",
-    canonicalUrl: "https://med-peptides.com/faq",
+    canonicalUrl: "https://atlas-health.com/faq",
     structuredData
   });
 

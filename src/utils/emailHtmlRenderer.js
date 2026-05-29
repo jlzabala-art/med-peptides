@@ -11,7 +11,7 @@ export function renderCatalogEmailHtml({ catalog, campaign, trackingUrl }) {
   const primaryColor = catalog?.branding?.primaryColor || '#1a73e8';
   const logoUrl = catalog?.branding?.logoUrl || '';
   const companyName = catalog?.branding?.companyName || 'Atlas Health Partner';
-  const emailContact = catalog?.branding?.contactEmail || 'support@med-peptides.com';
+  const emailContact = catalog?.branding?.contactEmail || 'support@atlas-health.com';
   const phoneContact = catalog?.branding?.contactPhone || '';
 
   // Personalized text blocks
