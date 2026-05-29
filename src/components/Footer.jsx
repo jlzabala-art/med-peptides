@@ -19,7 +19,7 @@ const Footer = () => {
       <div className="container section-padding">
         <div className="footer-grid">
           <div className="footer-brand">
-            <Link to="/" className="nav-logo h3 mb-m block">Med-Peptides</Link>
+            <Link to="/" className="nav-logo h3 mb-m block">Atlas Health</Link>
             <p className="p-m text-secondary mb-l">
               {tagline}
             </p>

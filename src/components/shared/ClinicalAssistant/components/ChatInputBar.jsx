@@ -124,7 +124,9 @@ export default function ChatInputBar({
   messages = [],
   suggestions = [],
   isTyping = false,
-  contextMode = 'clinical'
+  contextMode = 'clinical',
+  onUploadPrice,
+  onUploadStock
 }) {
   const { isProfessional } = useAuth();
   const [showAutocomplete, setShowAutocomplete] = useState(false);
@@ -410,6 +412,30 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
         ref={fileInputRef}
         onChange={handleFileUpload}
         accept=".pdf,.txt,.csv,image/png,image/jpeg,image/jpg,image/webp"
+        style={{ display: 'none' }}
+      />
+      <input 
+        type="file" 
+        id="price-upload-input"
+        onChange={(e) => {
+          if (e.target.files[0] && onUploadPrice) {
+            onUploadPrice(e.target.files[0]);
+          }
+          e.target.value = '';
+        }}
+        accept=".pdf,.csv,.xlsx,.xls"
+        style={{ display: 'none' }}
+      />
+      <input 
+        type="file" 
+        id="stock-upload-input"
+        onChange={(e) => {
+          if (e.target.files[0] && onUploadStock) {
+            onUploadStock(e.target.files[0]);
+          }
+          e.target.value = '';
+        }}
+        accept=".pdf,.csv,.xlsx,.xls"
         style={{ display: 'none' }}
       />
  
@@ -931,6 +957,40 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
         minHeight: '40px'
       }}>
         {/* Simple Attachment Button */}
+        {contextMode === 'admin' && (
+          <>
+            <button
+              onClick={() => document.getElementById('price-upload-input').click()}
+              disabled={isAnalyzing || isLoading}
+              className="ca-scan-btn"
+              style={{
+                width: '32px', height: '32px', borderRadius: '50%', background: 'transparent',
+                color: 'var(--color-text-tertiary)', border: 'none', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', flexShrink: 0
+              }}
+              title="Upload Supplier Price Catalog (PDF/CSV)"
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)'; e.currentTarget.style.color = '#10b981'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--color-text-tertiary)'; }}
+            >
+              <FileText size={18} />
+            </button>
+            <button
+              onClick={() => document.getElementById('stock-upload-input').click()}
+              disabled={isAnalyzing || isLoading}
+              className="ca-scan-btn"
+              style={{
+                width: '32px', height: '32px', borderRadius: '50%', background: 'transparent',
+                color: 'var(--color-text-tertiary)', border: 'none', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', flexShrink: 0
+              }}
+              title="Upload Stock File (PDF/CSV)"
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)'; e.currentTarget.style.color = '#f59e0b'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--color-text-tertiary)'; }}
+            >
+              <ClipboardList size={18} />
+            </button>
+          </>
+        )}
         <button
           onClick={handleFileClick}
           disabled={isAnalyzing || isLoading}

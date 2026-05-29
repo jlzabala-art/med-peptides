@@ -9,8 +9,11 @@ import ProtocolTimeline from './ProtocolTimeline';
 import VisualReconWidget from './VisualReconWidget';
 import FormattedResponse from './FormattedResponse';
 import AgentBadge from './AgentBadge';
+import PendingActionCard from './PendingActionCard';
+import PriceImportTable from './PriceImportTable';
+import StockImportTable from './StockImportTable';
 
-export default function ChatMessageItem({ msg, idx, onProductClick, InstantResultsTabs, navigate, setIsOpen, onSend, onRate, onDeepDive, contextMode = 'patient' }) {
+export default function ChatMessageItem({ msg, idx, onProductClick, InstantResultsTabs, navigate, setIsOpen, onSend, onRate, onDeepDive, contextMode = 'patient', onConfirmAction }) {
   const [copyIdx, setCopyIdx] = useState(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const isAssistant = msg.role === 'assistant';
@@ -315,6 +318,46 @@ export default function ChatMessageItem({ msg, idx, onProductClick, InstantResul
             vialMg={metadata.visualRecon.vialMg}
             waterMl={metadata.visualRecon.waterMl}
             dosageMcg={metadata.visualRecon.dosageMcg}
+          />
+        )}
+
+        {/* ── AdminAI Pending Action Card ───────────────────────────── */}
+        {isAssistant && msg.pendingAction && onConfirmAction && !msg._pendingCancelled && (
+          <PendingActionCard
+            pendingAction={msg.pendingAction}
+            onConfirm={onConfirmAction}
+            onCancel={() => {
+              msg._pendingCancelled = true;
+              if (typeof onSend === 'function') onSend(''); // trigger re-render
+            }}
+          />
+        )}
+
+        {/* ── AdminAI Price Import Table ───────────────────────────── */}
+        {isAssistant && msg.queryType === 'price_import_pdf' && msg.comparisonData && onConfirmAction && (
+          <PriceImportTable 
+            data={msg.comparisonData} 
+            onConfirmBatch={(updates) => {
+              onConfirmAction({
+                fn: 'batch_update_product_price',
+                args: { updates },
+                previewText: `Batch updating ${updates.length} prices.`
+              });
+            }} 
+          />
+        )}
+
+        {/* ── AdminAI Stock Import Table ───────────────────────────── */}
+        {isAssistant && msg.queryType === 'stock_import' && msg.comparisonData && onConfirmAction && (
+          <StockImportTable 
+            data={msg.comparisonData} 
+            onConfirmBatch={(updates) => {
+              onConfirmAction({
+                fn: 'batch_update_product_stock',
+                args: { updates },
+                previewText: `Batch updating ${updates.length} stock levels.`
+              });
+            }} 
           />
         )}
 

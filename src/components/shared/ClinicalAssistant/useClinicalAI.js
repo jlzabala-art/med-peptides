@@ -638,7 +638,7 @@ export function useClinicalAI({
           },
           instructions: contextMode === 'admin' ? `
 --- ADMIN MODE ACTIVE ---
-You are "AdminAI", an expert Platform Operations Assistant for Med-Peptides. Help the administrator manage users, analyze business metrics, and audit the system. DO NOT provide medical or research advice.
+You are "Atlas AI", the Med-Peptides administrative assistant. Help the administrator manage users, analyze business metrics, and audit the system. DO NOT provide medical or research advice.
 Current Tab: ${externalPageContext?.label || externalPageContext?.activeTab || 'Admin Portal'}.
 ` : `
 ${buildClinicalAITrainingBlock(detectedIntent, userCtx?.role || 'patient')}
@@ -683,6 +683,7 @@ IMPORTANT: The patient retains full purchasing autonomy. Never instruct them wha
       const agentName      = data.agentName || 'AgentRAG';  // ← agent identity
       const usageData      = data.usage || null;            // ← token/cost info
       const adminNavLinks  = data.admin_nav_links || [];    // ← contextual admin routes
+      const pendingAction  = data.pending_action || null;   // ← AdminAI write proposal
 
 
       const proactiveCards = searchProducts(messageText, products, protocolIndex).filter(p => (p.searchScore || 0) > 4).slice(0, 3);
@@ -707,6 +708,7 @@ IMPORTANT: The patient retains full purchasing autonomy. Never instruct them wha
         agentName,                   // ← agent identity for AgentBadge
         usage: usageData,            // ← token count + estimated cost
         adminNavLinks,               // ← contextual admin navigation links
+        pendingAction,               // ← AdminAI write proposal (null for normal msgs)
         preRankedProducts: proactiveCards,
         preRankedProtocols: proactiveProtocols,
         timestamp: new Date()
@@ -1098,6 +1100,116 @@ Before beginning, establish a clean and sterile working environment. Gather all 
 
   handleSendRef.current = handleSend;
 
+  const processAdminUpload = async (file, queryType, initialMessage) => {
+    setIsLoading(true);
+    setMessages(prev => [
+      ...prev,
+      { role: 'user', content: initialMessage, timestamp: new Date() }
+    ]);
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const base64 = btoa(
+        new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+      );
+      
+      const body = JSON.stringify({
+        message: initialMessage,
+        sessionId,
+        query_type: queryType,
+        clinicAIConfig: { agentId: 'gemini-native' },
+        pdfBase64: base64,
+        context: {
+          instructions: `--- ADMIN MODE ACTIVE ---\nYou are "AdminAI", analyzing an uploaded document for ${queryType}.`,
+          user_profile: userCtx ? { uid: userCtx.uid, role: 'admin' } : null,
+        },
+        history: messages.slice(-5),
+      });
+
+      const resp = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+      });
+
+      const data = await resp.json();
+      
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: data.reply || `Analysis complete for ${file.name}.`,
+          fullContent: data.reply || `Analysis complete for ${file.name}.`,
+          timestamp: new Date(),
+          queryType: data.queryType || queryType,
+          comparisonData: data.comparisonData || data.comparison || null,
+        },
+      ]);
+    } catch (err) {
+      setMessages(prev => [
+        ...prev,
+        { role: 'assistant', content: `❌ Error uploading file: ${err.message}`, timestamp: new Date(), isError: true },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUploadPrice = useCallback((file) => {
+    processAdminUpload(file, 'price_import_pdf', `📄 Analyzing supplier price catalog: ${file.name}`);
+  }, [sessionId, userCtx, messages]);
+
+  const handleUploadStock = useCallback((file) => {
+    processAdminUpload(file, 'stock_import', `📦 Analyzing stock update file: ${file.name}`);
+  }, [sessionId, userCtx, messages]);
+
+  // ── AdminAI: confirm a pending write action ──────────────────────────────
+  const handleConfirmAction = useCallback(async (pendingAction) => {
+    if (!pendingAction) return;
+    setIsLoading(true);
+    try {
+      const body = JSON.stringify({
+        message: `Confirming action: ${pendingAction.fn}`,
+        sessionId,
+        clinicAIConfig: { agentId: 'gemini-native' },
+        execute_pending: pendingAction,
+        context: {
+          instructions: `--- ADMIN MODE ACTIVE ---\nYou are "AdminAI", executing a confirmed admin write action.`,
+          user_profile: userCtx ? { uid: userCtx.uid, role: 'admin' } : null,
+        },
+        history: [],
+      });
+      const resp = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+      });
+      const data = await resp.json();
+      const confirmReply = data.reply || '✅ Acción ejecutada correctamente.';
+      const auditId = data.auditId || null;
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: confirmReply + (auditId ? `\n\n*Audit ID: \`${auditId}\`*` : ''),
+          fullContent: confirmReply + (auditId ? `\n\n*Audit ID: \`${auditId}\`*` : ''),
+          timestamp: new Date(),
+          adminNavLinks: data.admin_nav_links || [],
+        },
+      ]);
+      setSuggestions(data.suggestions || [
+        { label: '📋 Ver Audit Log', action: 'NAVIGATE', payload: '/admin/audit' },
+        { label: '💰 Costes & Márgenes', action: 'NAVIGATE', payload: '/admin/costs' },
+      ]);
+    } catch (err) {
+      setMessages(prev => [
+        ...prev,
+        { role: 'assistant', content: `❌ Error al ejecutar la acción: ${err.message}`, timestamp: new Date(), isError: true },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [sessionId, userCtx]);
+
   return {
     messages,
     setMessages,
@@ -1112,6 +1224,9 @@ Before beginning, establish a clean and sterile working environment. Gather all 
     clearSession,
     exportSession,
     handleSend,
+    handleConfirmAction,
+    handleUploadPrice,
+    handleUploadStock,
     rateMessage,
     scrollRef,
     messagesEndRef,

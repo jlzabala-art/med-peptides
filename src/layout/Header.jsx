@@ -393,10 +393,10 @@ function Header(props) {
 
 
 
-            {/* ClinicAI Google Cloud Style Button */}
+            {/* Atlas AI Google Cloud Style Button */}
             <button 
               onClick={() => setActiveModal('ai')}
-              aria-label="Open ClinicAI"
+              aria-label="Open Atlas AI"
               style={{
                 background: 'rgba(66, 133, 244, 0.1)',
                 border: '1px solid rgba(66, 133, 244, 0.3)',
@@ -421,7 +421,7 @@ function Header(props) {
               }}
             >
               <Sparkles size={18} fill="#4285F4" />
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>ClinicAI</span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>Atlas AI</span>
             </button>
 
             {/* Search button — desktop AND mobile header */}

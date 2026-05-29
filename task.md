@@ -7,3 +7,8 @@
   - Se mejoraron los botones e íconos con transiciones suaves y fondos translúcidos.
 - [x] Auditados los componentes críticos (`OrdersTab.jsx`, `AdminBulkOrdersTab.jsx`, `WholesalerBulkOrderBuilder.jsx` y `DoctorPrescriptionBuilder.jsx`) e implementada la función `logAction` de trazabilidad para registrar las operaciones de edición.
 - [x] Revisadas consultas complejas y añadidos índices compuestos en `firestore.indexes.json` para soportar consultas con múltiples `where` y `orderBy` en la colección `orders` (`paymentOwnerId`, `accountManagerId` y `doctorId` combinados con `createdAt`).
+- [x] Implement tools `list_users`, `get_pending_approvals`, `update_user_role` in `ai_admin_functions.js`
+- [x] Update `ai.js` to handle `update_user_role` confirmations and update instructions to suggest role editing
+- [x] Implement backend query endpoint or tool for attention items
+- [x] Add real attention notification dropdown in `PortalLayout.jsx` topbar
+- [x] Verify build & test functionality

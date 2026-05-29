@@ -6,7 +6,7 @@
  *  - Secret references (for use in onRequest secrets: [])
  *  - retryAsync, timedCall, sanitizeMessage
  *  - Circuit breaker: isProxyCircuitOpen, recordProxyFailure, recordProxySuccess
- *  - callCloudAgent, callGemini, callVertexAgent
+ *  - callCloudAgent, callGemini, callGeminiWithTools, callVertexAgent
  *  - searchPubMed, detectUserLevel
  *  - catalogCache, CATALOG_CACHE_TTL_MS
  *  - AGENT_REGISTRY, resolveAgent  (Phase 5 multi-agent router)
@@ -276,6 +276,63 @@ async function callGemini(contents, systemInstruction, modelName = "gemini-2.5-f
   }
 }
 
+/**
+ * callGeminiWithTools — Gemini API call with Function Calling tool declarations.
+ *
+ * Returns one of:
+ *   { type: "text", text: "..." }              — normal text response
+ *   { type: "functionCall", name, args }        — Gemini wants to call a tool
+ *
+ * @param {Array}  contents          Gemini conversation turns
+ * @param {string} systemInstruction System prompt
+ * @param {Array}  tools             Gemini tool declarations array
+ * @param {string} [modelName]
+ */
+async function callGeminiWithTools(contents, systemInstruction, tools, modelName = "gemini-2.5-flash") {
+  const key = GEMINI_API_KEY_SECRET.value();
+  if (!key) throw new Error("GEMINI_API_KEY secret is missing or empty");
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${key}`;
+
+  const payload = {
+    contents,
+    systemInstruction: { parts: [{ text: systemInstruction }] },
+    tools,
+    generationConfig: { temperature: 0.2 },
+  };
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Gemini API (tools) Error (status ${response.status}): ${errText}`);
+  }
+
+  const data = await response.json();
+  const part = data.candidates?.[0]?.content?.parts?.[0];
+  if (!part) throw new Error("Empty response from Gemini (tools mode)");
+
+  // Gemini responded with a functionCall request
+  if (part.functionCall) {
+    return {
+      type: "functionCall",
+      name: part.functionCall.name,
+      args: part.functionCall.args || {},
+    };
+  }
+
+  // Normal text response
+  if (part.text) {
+    return { type: "text", text: part.text };
+  }
+
+  throw new Error("Gemini returned neither text nor functionCall");
+}
+
 // ── Agent Usage Tracking ─────────────────────────────────────────────────────
 function estimateCost(model, usageMetadata) {
   if (!usageMetadata) return 0;
@@ -416,6 +473,7 @@ module.exports = {
   // AI calls
   callCloudAgent,
   callGemini,
+  callGeminiWithTools,
   callVertexAgent,
   // Data
   searchPubMed,

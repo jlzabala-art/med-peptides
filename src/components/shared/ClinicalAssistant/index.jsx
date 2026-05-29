@@ -143,7 +143,10 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
     emailSession,
     queriesToday,
     maxFreeQueries,
-    autocompleteCandidates
+    autocompleteCandidates,
+    handleConfirmAction,
+    handleUploadPrice,
+    handleUploadStock
   } = useClinicalAI({
     products,
     protocolIndex,
@@ -491,6 +494,7 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
           onRate={rateMessage}
           onDeepDive={toggleDeepDive}
           contextMode={contextMode}
+          onConfirmAction={handleConfirmAction}
         />
 
         <AnimatePresence>
@@ -555,6 +559,8 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
             suggestions={suggestions}
             isTyping={isTyping}
             contextMode={contextMode}
+            onUploadPrice={handleUploadPrice}
+            onUploadStock={handleUploadStock}
           />
         </div>
         

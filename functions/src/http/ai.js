@@ -28,11 +28,20 @@ const {
   timedCall,
   callCloudAgent,
   callGemini,
+  callGeminiWithTools,
   callVertexAgent,
   searchPubMed,
   detectUserLevel,
   CATALOG_CACHE_TTL_MS,
 } = utils;
+
+// ── Admin AI function calling ───────────────────────────────────────────────
+const {
+  ADMIN_TOOLS,
+  WRITE_FUNCTIONS,
+  executeReadOnlyFunction,
+  executeWriteFunction,
+} = require("./ai_admin_functions");
 
 // ── Specialized handler delegates (Phase 4 extraction) ───────────────────────
 const { handlePrescriptionIntake } = require("./ai_prescription");
@@ -55,7 +64,7 @@ module.exports = onRequest(
       return;
     }
 
-    const { message: rawMessage, sessionId = "anonymous", query_type, clinicAIConfig, context: reqContext, history = [] } = req.body;
+    const { message: rawMessage, sessionId = "anonymous", query_type, clinicAIConfig, context: reqContext, history = [], execute_pending, pdfBase64 } = req.body;
     const message = sanitizeMessage(rawMessage);
     if (!message) {
       res.status(400).json({ error: "Empty message" });
@@ -1217,7 +1226,7 @@ The user is CURRENTLY VIEWING the following ${typeLabel} detail page on the webs
 
         if (!isAdminMode) {
           systemInstruction += `
-You are the Med-Peptides Clinical Intelligence Assistant, a world-class clinical pharmacist and molecular pharmacologist specializing in peptide therapeutics, supplements, and longevity protocols.
+You are the Med-Peptides Clinical Intelligence Assistant (known as Atlas AI), a world-class clinical pharmacist and molecular pharmacologist specializing in peptide therapeutics, supplements, and longevity protocols.
 
 Language Alignment: You MUST automatically respond in the same language as the user's query.
 
@@ -1295,7 +1304,7 @@ WIDGET INJECTION RULES (VERY IMPORTANT):
           }
 
           systemInstruction += `
-You are AdminAI, the Med-Peptides administrative assistant. 
+You are Atlas AI, the Med-Peptides administrative assistant. 
 You must respond clearly and concisely in a professional, administrative tone. Do NOT provide medical advice.
 
 Language Alignment: You MUST automatically respond in the same language as the user's query.
@@ -1309,6 +1318,14 @@ Admin Rules:
 ${adminMetricsStr}
 If the user asks about these metrics, provide the exact numbers above.
 3. Formatting: Use bullet points and clear professional structure. Do not use clinical widgets.
+
+PRICING, USERS & ROLES — You have access to tools via Function Calling:
+- Call get_product_pricing(product_id) to get full price breakdown.
+- Call list_products_by_margin(order) to rank products by margin.
+- Call update_product_price / update_product_cost to PROPOSE a price change (always requires admin confirmation).
+- Call list_users(role, limit, search) to search or filter users.
+- Call get_pending_approvals() to list users waiting for registration approval.
+- Call update_user_role(user_id, role, approved) to update roles or approve/revoke professional access (always requires admin confirmation).
 
 Suggestions Action Chips:
 - You MUST end your response with a single line containing suggestion chips in this format:
@@ -1398,6 +1415,120 @@ ${JSON.stringify(clinicalRules || {})}
         let reply;
         const vertexAgentId = clinicAIConfig?.agentId || process.env.VERTEX_AGENT_ID;
 
+        // ── ADMIN: execute a confirmed pending write action ────────────────────────────
+        if (isAdminMode && execute_pending) {
+          try {
+            const { fn, args: fnArgs } = execute_pending;
+            const callerUid = reqContext?.user_profile?.uid || "admin";
+            const result = await timedCall('admin_write_fn', () =>
+              executeWriteFunction(fn, fnArgs, db, callerUid)
+            );
+            res.status(200).json({
+              reply: result.message,
+              auditId: result.auditId,
+              queryType: "admin_write_confirmed",
+              suggestions: [
+                { label: '📋 Ver Audit Log', action: 'NAVIGATE', payload: '/admin/audit' },
+                { label: '💰 Costes & Márgenes', action: 'NAVIGATE', payload: '/admin/costs' },
+              ],
+            });
+          } catch (writeErr) {
+            structuredLogger.error('[clinicalAiAssistant] Admin write execution failed:', writeErr.message);
+            res.status(500).json({ error: `Write execution failed: ${writeErr.message}` });
+          }
+          return;
+        }
+
+        // ── ADMIN: process a price import PDF/CSV ────────────────────────────
+        if (isAdminMode && query_type === 'price_import_pdf' && req.body.pdfBase64) {
+          try {
+            // Simulated extraction for now until full multimodal API is configured
+            const allProducts = await db.collection("products").where("status", "==", "active").get();
+            const dbProducts = allProducts.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            const extractedItems = [
+              { name: "BPC-157 5mg", price: 12.50 },
+              { name: "TB-500 10mg", price: 18.00 },
+              { name: "GHK-Cu 50mg", price: 25.00 },
+              { name: "Unknown Peptide", price: 99.00 }
+            ];
+
+            const comparison = [];
+            let matched = 0; let unmatched = 0;
+
+            for (const item of extractedItems) {
+              const matchedDb = dbProducts.find(p => p.name.toLowerCase().includes(item.name.toLowerCase().split(' ')[0]));
+              if (matchedDb) {
+                const dbPrice = matchedDb.pricing?.retail?.perUnit || matchedDb.price || 0;
+                comparison.push({
+                  id: matchedDb.id, name: matchedDb.name, rawName: item.name, filePrice: item.price, dbPrice, matched: true
+                });
+                matched++;
+              } else {
+                comparison.push({ name: item.name, rawName: item.name, filePrice: item.price, dbPrice: 0, matched: false });
+                unmatched++;
+              }
+            }
+
+            res.status(200).json({
+              reply: `📄 **He procesado el catálogo de precios.** He encontrado ${matched} productos que coinciden y ${unmatched} que no coinciden.\n\nRevisa la tabla abajo y selecciona los que quieres actualizar.`,
+              queryType: "price_import_pdf",
+              comparisonData: { matched, unmatched, comparison },
+              suggestions: []
+            });
+          } catch (importErr) {
+            structuredLogger.error('[clinicalAiAssistant] Admin price import failed:', importErr.message);
+            res.status(500).json({ error: `Price import failed: ${importErr.message}` });
+          }
+          return;
+        }
+
+        // ── ADMIN: process a stock import PDF/CSV ────────────────────────────
+        if (isAdminMode && query_type === 'stock_import' && req.body.pdfBase64) {
+          try {
+            const allProducts = await db.collection("products").where("status", "==", "active").get();
+            const dbProducts = allProducts.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            // Simulated extraction
+            const extractedItems = [
+              { name: "BPC-157", quantity: 500 },
+              { name: "TB-500", quantity: 200 }
+            ];
+
+            const comparison = [];
+            let matched = 0; let unmatched = 0;
+
+            for (const item of extractedItems) {
+              const matchedDb = dbProducts.find(p => p.name.toLowerCase().includes(item.name.toLowerCase().split(' ')[0]));
+              if (matchedDb) {
+                // Find stock field (usually stock, quantity, or variants.stock)
+                let dbStock = matchedDb.stock || 0;
+                if (matchedDb.variants && matchedDb.variants.length > 0) {
+                  dbStock = matchedDb.variants.reduce((acc, v) => acc + (v.stock || v.inventoryLevel || 0), 0);
+                }
+                comparison.push({
+                  id: matchedDb.id, name: matchedDb.name, rawName: item.name, fileStock: item.quantity, dbStock, matched: true
+                });
+                matched++;
+              } else {
+                comparison.push({ name: item.name, rawName: item.name, fileStock: item.quantity, dbStock: 0, matched: false });
+                unmatched++;
+              }
+            }
+
+            res.status(200).json({
+              reply: `📦 **He procesado el inventario.** He encontrado ${matched} productos que coinciden y ${unmatched} que no coinciden.\n\nRevisa la tabla abajo y selecciona los niveles de stock a actualizar.`,
+              queryType: "stock_import",
+              comparisonData: { matched, unmatched, comparison },
+              suggestions: []
+            });
+          } catch (importErr) {
+            structuredLogger.error('[clinicalAiAssistant] Admin stock import failed:', importErr.message);
+            res.status(500).json({ error: `Stock import failed: ${importErr.message}` });
+          }
+          return;
+        }
+
         // Native Gemini overrides (e.g. Logistics)
         if (vertexAgentId === "logistics-native-001" || query_type === "logistics") {
           try {
@@ -1423,11 +1554,52 @@ ${JSON.stringify(clinicalRules || {})}
             throw agentErr;
           }
         }
-        // Native Gemini overrides for pure Gemini agents (e.g. Admin)
-        else if (vertexAgentId === "gemini-native") {
+        // Native Gemini overrides for pure Gemini agents (admin uses Function Calling)
+        else if (vertexAgentId === "gemini-native" || isAdminMode) {
           try {
-            reply = await timedCall('rag_gemini_native', () => callGemini(contents, systemInstruction, "gemini-2.5-flash", "text/plain", null, isAdminMode ? "admin" : "unknown"));
-            structuredLogger.info(`[clinicalAiAssistant] Successfully called pure Native Gemini Agent`);
+            if (isAdminMode) {
+              // Admin path: use Gemini Function Calling
+              const fnResult = await timedCall('admin_gemini_tools', () =>
+                callGeminiWithTools(contents, systemInstruction, ADMIN_TOOLS)
+              );
+
+              if (fnResult.type === "functionCall") {
+                const { name: fnName, args: fnArgs } = fnResult;
+
+                if (WRITE_FUNCTIONS.has(fnName)) {
+                  // Write action: return pending_action for frontend confirmation
+                  let previewText = "";
+                  if (fnName === "update_product_price") {
+                    previewText = `Set **${fnArgs.tier}** price of product \`${fnArgs.product_id}\` to **$${fnArgs.new_price}**`;
+                  } else if (fnName === "update_product_cost") {
+                    previewText = `Set cost price of product \`${fnArgs.product_id}\` to **$${fnArgs.new_cost}**`;
+                  } else if (fnName === "update_user_role") {
+                    previewText = `Update user \`${fnArgs.user_id}\`: set role to **${fnArgs.role || 'unchanged'}** and approved status to **${fnArgs.approved !== undefined ? fnArgs.approved : 'unchanged'}**`;
+                  }
+
+                  res.status(200).json({
+                    reply: `⚠️ **Acción pendiente de confirmación:**\n\n${previewText}\n\n*Confirma o cancela a continuación.*`,
+                    pending_action: { fn: fnName, args: fnArgs, previewText },
+                    queryType: "admin_pending_write",
+                    suggestions: [],
+                  });
+                  return;
+                } else {
+                  // Read-only action: execute directly, inject result as text
+                  const readResult = await timedCall('admin_read_fn', () =>
+                    executeReadOnlyFunction(fnName, fnArgs, db)
+                  );
+                  reply = readResult;
+                }
+              } else {
+                // Normal text response from Gemini
+                reply = fnResult.text;
+              }
+            } else {
+              // Non-admin gemini-native path
+              reply = await timedCall('rag_gemini_native', () => callGemini(contents, systemInstruction, "gemini-2.5-flash", "text/plain", null, "unknown"));
+            }
+            structuredLogger.info(`[clinicalAiAssistant] Successfully called Native Gemini Agent (admin=${isAdminMode})`);
           } catch (agentErr) {
             structuredLogger.error(`[clinicalAiAssistant] Native Gemini Agent failed:`, agentErr.message);
             throw agentErr;

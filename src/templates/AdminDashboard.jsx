@@ -125,7 +125,7 @@ const NAV_GROUPS = [
     badge: 'LIVE',
     badgeColor: 'var(--color-success)',
     items: [
-      { id: 'clinical-ai',       label: 'ClinicAI',            icon: Bot },
+      { id: 'clinical-ai',       label: 'Atlas AI',            icon: Bot },
       { id: 'catalog-builder',   label: 'Catalog Builder',     icon: Wrench },
       { id: 'prescription-agent',label: 'Prescription Agent',  icon: Zap },
       { id: 'semantic',          label: 'AI Semantics',        icon: Cpu },

@@ -20,7 +20,8 @@ export default function ChatMessageList({
   onSend,
   onRate,
   onDeepDive,
-  contextMode = 'patient'
+  contextMode = 'patient',
+  onConfirmAction
 }) {
   const [hasSeenIntro, setHasSeenIntro] = useState(() => {
     return typeof window !== 'undefined' && localStorage.getItem('clinicalAI_hasSeenIntro') === 'true';
@@ -88,6 +89,7 @@ export default function ChatMessageList({
             onRate={onRate}
             onDeepDive={onDeepDive}
             contextMode={contextMode}
+            onConfirmAction={onConfirmAction}
           />
         ))}
 

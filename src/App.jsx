@@ -737,9 +737,9 @@ function App() {
   // Global Title Management (SEO)
   useEffect(() => {
     if (location.pathname === '/') {
-      document.title = "Med-Peptides | Premium Research Peptides";
+      document.title = "Atlas Health | Premium Cellular Health & Longevity";
     } else if (location.pathname === '/privacy') {
-      document.title = "Privacy Policy | Med-Peptides";
+      document.title = "Privacy Policy | Atlas Health";
     }
   }, [location.pathname]);
 
@@ -955,7 +955,7 @@ function App() {
         <div style={{ textAlign: 'center' }}>
           <div className="spinner" style={{ margin: '0 auto 1.5rem auto' }}></div>
           <div style={{ fontSize: '1.2rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            Med-Peptides
+            Atlas Health
           </div>
           <button 
             onClick={() => setLoadingTimeout(true)}

@@ -22,7 +22,7 @@ export default function ChatHeader({
 }) {
   const themeAccent = contextMode === 'admin' ? '#1a73e8' : contextMode === 'doctor' ? '#0f9d58' : '#4285f4';
   const themeBgActive = contextMode === 'admin' ? '#e8f0fe' : contextMode === 'doctor' ? '#e6f4ea' : '#e8f0fe';
-  const headerTitle = contextMode === 'admin' ? 'ClinicAI' : contextMode === 'doctor' ? 'Clinical Advisor' : 'Research Assistant';
+  const headerTitle = contextMode === 'admin' ? 'Atlas AI (Admin)' : contextMode === 'doctor' ? 'Clinical Advisor' : 'Atlas AI';
   const statusLabel = contextMode === 'admin' ? 'System Link Active' : contextMode === 'doctor' ? 'Clinical Link Active' : 'Neural Link Active';
 
   return (
