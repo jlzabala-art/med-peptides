@@ -5,13 +5,20 @@ import { protocolRepository } from '../../repositories/protocolRepository';
 import { emptyCatalog, CATALOG_STATUS } from '../../schemas/catalogSchema';
 import CatalogPreviewPanel from './CatalogPreviewPanel';
 import { getAuth } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { useAuth } from '../../context/AuthContext';
 import { 
   ArrowLeft, Save, Bot, Sparkles, Check, 
   Trash2, Plus, Layout, Search, X, Send, ShoppingCart, Lightbulb, History, ChevronDown, ChevronRight
 } from 'lucide-react';
 import { renderAIMarkdown } from '../shared/ClinicalAssistant/utils/markdownRenderer';
+import FormattedResponse from '../shared/ClinicalAssistant/components/FormattedResponse';
 
 export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog = null, onBack }) {
+  const { userProfile } = useAuth();
+  const tenantId = userProfile?.assignedTenantId || userProfile?.tenantId || ownerId;
+
   const [catalog, setCatalog] = useState(editingCatalog ? { ...editingCatalog } : emptyCatalog({ ownerId, ownerType }));
   
   // Database options
@@ -38,12 +45,28 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
   useEffect(() => {
     async function loadData() {
       try {
-        const [prodList, protoList] = await Promise.all([
+        const promises = [
           productRepository.getCatalog(),
           protocolRepository.getProtocolTemplates()
-        ]);
-        setAllProducts(prodList);
-        setAllProtocols(protoList);
+        ];
+        
+        if (ownerType === 'wholesaler' && tenantId) {
+          promises.push(getDoc(doc(db, 'tenants', tenantId)));
+        }
+
+        const results = await Promise.all(promises);
+        setAllProducts(results[0]);
+        setAllProtocols(results[1]);
+
+        if (results[2] && results[2].exists() && !editingCatalog) {
+          const tenantData = results[2].data();
+          if (tenantData.branding) {
+            setCatalog(prev => ({
+              ...prev,
+              branding: tenantData.branding
+            }));
+          }
+        }
       } catch (e) {
         console.error('Error fetching catalog assets:', e);
       } finally {
@@ -100,12 +123,14 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       
-      if (data.reply) {
+      if (data.formatted) {
+        setChatHistory(prev => [...prev, { role: 'ai', content: data.formatted }]);
+      } else if (data.reply) {
         setChatHistory(prev => [...prev, { role: 'ai', content: data.reply }]);
       }
       
-      if (data.extras && data.extras.catalogData) {
-        setCatalog(data.extras.catalogData);
+      if (data.catalogData) {
+        setCatalog(data.catalogData);
       }
       
     } catch (e) {
@@ -148,7 +173,12 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
         status: publish ? CATALOG_STATUS.PUBLISHED : CATALOG_STATUS.DRAFT
       };
       await catalogRepository.saveCatalog(finalCatalog);
-      alert(publish ? 'Catalog published successfully!' : 'Catalog saved as draft.');
+      
+      if (publish) {
+        alert('Catalog published successfully!\nYou can share the link: https://regenpept-web.web.app/catalog/' + finalCatalog.slug);
+      } else {
+        alert('Catalog saved as draft.');
+      }
       onBack();
     } catch (e) {
       alert(`Save error: ${e.message}`);
@@ -191,7 +221,13 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
             <div key={i} style={msg.role === 'ai' ? aiBubbleWrapperStyle : userBubbleWrapperStyle}>
               {msg.role === 'ai' && <Bot size={20} color="#1a73e8" style={{ marginTop: '4px', flexShrink: 0 }} />}
               <div style={msg.role === 'ai' ? aiMessageStyle : userMessageStyle}>
-                {msg.role === 'ai' ? renderAIMarkdown(msg.content) : msg.content}
+                {msg.role === 'ai' ? (
+                  typeof msg.content === 'object' ? (
+                    <FormattedResponse formatted={msg.content} />
+                  ) : (
+                    renderAIMarkdown(msg.content)
+                  )
+                ) : msg.content}
               </div>
             </div>
           ))}
@@ -361,31 +397,88 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
-            <h4 style={sectionHeaderStyle}>Selected Products ({selectedProductsInFlow.length})</h4>
+            <h4 style={sectionHeaderStyle}>Items in Catalog ({selectedProductsInFlow.length + selectedProtocolsInFlow.length})</h4>
             <button onClick={() => setShowSearchModal(true)} style={actionButtonStyleSmall}>
               <Plus size={14} /> Add Product
             </button>
           </div>
 
-          {selectedProductsInFlow.length === 0 ? (
-            <div style={emptyCartStyle}>No products selected. Ask the AI or add manually.</div>
+          {selectedProductsInFlow.length === 0 && selectedProtocolsInFlow.length === 0 ? (
+            <div style={emptyCartStyle}>No items selected. Ask the AI or add manually.</div>
           ) : (
             <div style={cartListStyle}>
-              {selectedProductsInFlow.map(id => {
-                const p = allProducts.find(x => x.id === id);
-                if (!p) return null;
-                return (
-                  <div key={id} style={cartItemStyle}>
-                    <div>
-                      <strong>{p.displayName || p.name}</strong>
-                      <div style={{ fontSize: '0.75rem', color: '#5f6368' }}>{p.category}</div>
+              {(() => {
+                const grouped = {};
+                // Group protocols under 'PROTOCOLOS'
+                if (selectedProtocolsInFlow.length > 0) {
+                  grouped['PROTOCOLOS'] = selectedProtocolsInFlow.map(id => {
+                    const proto = allProtocols.find(x => x.id === id || x.protocol_id === id || x.slug === id);
+                    if (!proto) return null;
+                    
+                    let desc = 'Clinical protocol';
+                    if (proto.products && Array.isArray(proto.products) && proto.products.length > 0) {
+                      desc = `Includes: ${proto.products.join(', ')}`;
+                    } else if (proto.phases && proto.phases.length > 0) {
+                      desc = `${proto.phases.length} phase protocol`;
+                    }
+                    
+                    return {
+                      id: proto.id || proto.protocol_id || proto.slug,
+                      name: proto.name || proto.protocol_id || proto.slug,
+                      type: 'protocol',
+                      desc: desc,
+                      original: proto
+                    };
+                  }).filter(Boolean);
+                }
+
+                // Group products
+                selectedProductsInFlow.forEach(id => {
+                  const p = allProducts.find(x => x.id === id || x.slug === id);
+                  if (!p) return;
+                  const cat = (p.category || p.productType || 'OTROS').toUpperCase();
+                  if (!grouped[cat]) grouped[cat] = [];
+                  grouped[cat].push({
+                    id: p.id || p.slug,
+                    name: p.displayName || p.name,
+                    type: 'product',
+                    desc: p.objective || p.category || p.productType || 'N/A',
+                    original: p
+                  });
+                });
+
+                // Sort categories: PEPTIDE, PROTOCOLOS, SUPPLEMENT, TESTING, then others
+                const order = ['PEPTIDE', 'PROTOCOLOS', 'SUPPLEMENT', 'TESTING'];
+                const sortedKeys = Object.keys(grouped).sort((a, b) => {
+                  const idxA = order.indexOf(a);
+                  const idxB = order.indexOf(b);
+                  if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                  if (idxA !== -1) return -1;
+                  if (idxB !== -1) return 1;
+                  return a.localeCompare(b);
+                });
+
+                return sortedKeys.map(cat => (
+                  <div key={cat} style={{ marginBottom: '1rem' }}>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '0.5rem', borderBottom: '1px solid #dadce0', paddingBottom: '4px' }}>
+                      {cat}
                     </div>
-                    <button onClick={() => handleProductToggle(id)} style={removeBtnStyle}>
-                      <Trash2 size={16} />
-                    </button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      {grouped[cat].map(item => (
+                        <div key={item.id} style={cartItemStyle}>
+                          <div>
+                            <strong>{item.name}</strong>
+                            <div style={{ fontSize: '0.75rem', color: '#5f6368' }}>{item.desc}</div>
+                          </div>
+                          <button onClick={() => item.type === 'protocol' ? handleProtocolToggle(item.id) : handleProductToggle(item.id)} style={removeBtnStyle}>
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                );
-              })}
+                ));
+              })()}
             </div>
           )}
 

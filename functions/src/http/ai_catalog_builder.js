@@ -193,13 +193,17 @@ TASK:
 1. Select the most appropriate products and protocols that match the user request.
 2. Determine the target audience (doctors, patients, or wholesalers).
 3. Generate a catchy catalog title and a unique URL slug (lowercase, dashes only).
-4. Act as an expert commercial and clinical advisor: In the "explanation" field, write a CONCISE and direct message to the user including ONLY:
-   - The selected products.
-   - Brief clinical info and dosages.
-   - The prices.
-   - End the explanation by saying you have created the catalog and provide the final link formatted EXACTLY as: [Catalog Link](/catalog/{suggestedSlug})
-   DO NOT include long justifications, target profiles, or extensive business case details. Keep it very short.
-5. EXTREMELY IMPORTANT: You must populate "selectedProductIds" with the array of product IDs you have chosen. You must also populate "suggestedTitle" and "suggestedSlug". If you do not provide these, the system will fail.
+4. Act as an expert commercial and clinical advisor: generate a "formatted" response object compatible with our FormattedResponse UI component.
+   - Include a "headline" for the message.
+   - Add an "intro_card" section explaining the strategy.
+   - Add a "product_card" section for each selected product, detailing clinical info, dosages, and prices.
+   - End with a final instruction saying you have created the catalog and provide the final link formatted EXACTLY as: [Catalog Link](/catalog/{suggestedSlug})
+5. Provide professional metadata to make the catalog look premium:
+   - "heroTitle": A strong marketing title for the top of the page.
+   - "heroSubtitle": A compelling clinical or business subtitle.
+   - "heroDescription": A 2-3 sentence overview of why this catalog is valuable.
+   - "faq": An array of 2-3 frequently asked questions and answers relevant to this specific catalog.
+6. EXTREMELY IMPORTANT: You must populate "selectedProductIds" with the array of product IDs you have chosen. You must also populate "suggestedTitle" and "suggestedSlug". If you do not provide these, the system will fail.
 
 Return ONLY a valid JSON object matching the schema below. Output raw JSON without markdown code blocks.
 
@@ -208,9 +212,21 @@ SCHEMA:
   "suggestedTitle": "String",
   "suggestedSlug": "String",
   "audience": "doctors|patients|wholesalers",
+  "heroTitle": "String",
+  "heroSubtitle": "String",
+  "heroDescription": "String",
+  "faq": [
+    { "q": "Question here", "a": "Answer here" }
+  ],
   "selectedProductIds": ["id1", "id2"],
   "selectedProtocolIds": ["id1"],
-  "explanation": "Detailed professional message explaining strategy, profile, products, margins, inclusions, and providing the final link."
+  "formatted": {
+    "headline": "Catalog Strategy",
+    "sections": [
+      { "type": "intro_card", "text": "Detailed professional message explaining strategy, margins, and inclusions. Ending with [Catalog Link](/catalog/{suggestedSlug})" },
+      { "type": "product_card", "name": "Product Name", "description": "Clinical details, dosages, and pricing.", "badge": "Core" }
+    ]
+  }
 }`;
 
   try {
@@ -241,7 +257,20 @@ SCHEMA:
       status: "DRAFT", // Approved by user: initially DRAFT
       title: result.suggestedTitle,
       slug: result.suggestedSlug,
-      audience: result.audience,
+      audience: result.audience || "general",
+      territory: "US",
+      pricingVisible: false,
+      pricingTier: null,
+      heroTitle: result.heroTitle || result.suggestedTitle,
+      heroSubtitle: result.heroSubtitle || "",
+      heroDescription: result.heroDescription || "",
+      faq: result.faq || [],
+      upsells: [],
+      crossSellRecommendations: [],
+      disclaimer: "For educational and clinical research purposes only. This information has not been evaluated by the FDA.",
+      branding: null,
+      views: 0,
+      leadCaptureCount: 0,
       goal: "custom", 
       sections: [
         {
@@ -258,7 +287,8 @@ SCHEMA:
     await newCatalogRef.set(catalogData);
 
     return {
-      reply: result.explanation,
+      reply: "Catalog built successfully.",
+      formatted: result.formatted,
       catalogId: newCatalogRef.id,
       catalogSlug: result.suggestedSlug,
       catalogData: catalogData

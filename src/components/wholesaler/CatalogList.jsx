@@ -15,6 +15,7 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
   const [selectedCatalogLeads, setSelectedCatalogLeads] = useState(null);
   const [leadsList, setLeadsList] = useState([]);
   const [leadsLoading, setLeadsLoading] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
 
   useEffect(() => {
     loadCatalogs();
@@ -55,6 +56,19 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
     } catch (e) {
       alert(`Error duplicating catalog: ${e.message}`);
     }
+  };
+
+  const handleCopyLink = (catalog) => {
+    const fullUrl = `${window.location.origin}/catalog/${catalog.slug}`;
+    navigator.clipboard.writeText(fullUrl);
+    setCopiedId(catalog.id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleShareCRM = (catalog) => {
+    // Basic share implementation (Option C / mailto approach) until full Bigin sync is finalized
+    const fullUrl = `${window.location.origin}/catalog/${catalog.slug}?utm_source=bigin_share`;
+    window.open(`mailto:?subject=Tu Catálogo Clínico de RegenPept&body=Hola,%0A%0AAquí tienes el enlace al catálogo clínico personalizado:%0A${fullUrl}`);
   };
 
   const handleDelete = async (id) => {
@@ -205,9 +219,18 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
                       </div>
                     </td>
                     <td style={tdStyle}>
-                      <a href={publicUrl} target="_blank" rel="noopener noreferrer" style={linkStyle}>
-                        {catalog.slug} <ExternalLink size={12} />
-                      </a>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <a href={publicUrl} target="_blank" rel="noopener noreferrer" style={linkStyle} title="Open in new tab">
+                          {catalog.slug} <ExternalLink size={12} />
+                        </a>
+                        <button 
+                          onClick={() => handleCopyLink(catalog)} 
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: copiedId === catalog.id ? '#137333' : '#5f6368' }}
+                          title="Copy Link"
+                        >
+                          {copiedId === catalog.id ? <Check size={14} /> : <Copy size={14} />}
+                        </button>
+                      </div>
                     </td>
                     <td style={tdStyle}>
                       <span style={badgeStyle}>{catalog.audience}</span>
@@ -234,6 +257,13 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
                     <td style={tdStyle}>{new Date(catalog.updatedAt).toLocaleDateString()}</td>
                     <td style={{ ...tdStyle, textAlign: 'right' }}>
                       <div style={actionButtonsGroupStyle}>
+                        <button 
+                          onClick={() => handleShareCRM(catalog)} 
+                          title="Share to Bigin CRM / Email" 
+                          style={{ ...actionButtonStyle, color: '#1a73e8' }}
+                        >
+                          <Send size={14} />
+                        </button>
                         <button 
                           onClick={() => onSelectCatalogToEdit(catalog)} 
                           title="Edit Catalog" 

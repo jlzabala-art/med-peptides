@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Mail, Phone, MessageCircle, FileText, Check, HelpCircle, Shield, AlertTriangle } from 'lucide-react';
+import { Mail, Phone, MessageCircle, FileText, Check, HelpCircle, Shield, AlertTriangle, Search, Calendar } from 'lucide-react';
 
 export default function CatalogPreviewPanel({ catalog, products = [], protocols = [], recipientName = '', clinicName = '' }) {
   const [activeFaq, setActiveFaq] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Helper to find full product info from id
   const getProductInfo = (id) => {
@@ -125,6 +126,25 @@ export default function CatalogPreviewPanel({ catalog, products = [], protocols 
         )}
       </section>
 
+      {/* Search Bar */}
+      <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', backgroundColor: '#fff', border: '1px solid #dadce0',
+          borderRadius: '24px', padding: '8px 16px', width: '100%', maxWidth: '400px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+        }}>
+          <Search size={18} color="#5f6368" />
+          <input 
+            type="text" 
+            placeholder="Search products..." 
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            style={{
+              border: 'none', outline: 'none', padding: '4px 8px', width: '100%', fontSize: '0.9rem', color: '#202124'
+            }}
+          />
+        </div>
+      </div>
+
       {/* Dynamic Theme-Based Sections */}
       {catalog?.sections?.map((section, idx) => (
         <section key={idx} style={{ marginBottom: '3rem' }}>
@@ -154,6 +174,11 @@ export default function CatalogPreviewPanel({ catalog, products = [], protocols 
               {section.products.map(prodId => {
                 const prod = getProductInfo(prodId);
                 if (!prod) return null;
+                const matchesSearch = !searchQuery || 
+                  (prod.displayName || prod.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  (prod.desc || '').toLowerCase().includes(searchQuery.toLowerCase());
+                if (!matchesSearch) return null;
+
                 return (
                   <div key={prodId} style={{
                     background: 'var(--color-bg-surface)',
@@ -218,17 +243,11 @@ export default function CatalogPreviewPanel({ catalog, products = [], protocols 
                       alignItems: 'center'
                     }}>
                       <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#3c4043' }}>
-                        {catalog.pricingVisible ? (
-                          <span style={{ color: '#137333', fontSize: '0.95rem', fontWeight: 700 }}>
-                            {prod.defaultVariant?.pricing?.retailPrice?.base?.kitUSD 
-                              ? `$${prod.defaultVariant.pricing.retailPrice.base.kitUSD}`
-                              : 'Contact for Pricing'}
-                          </span>
-                        ) : (
-                          <span style={{ color: '#5f6368', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Shield size={12} /> Restricted
-                          </span>
-                        )}
+                        <span style={{ color: '#137333', fontSize: '0.95rem', fontWeight: 700 }}>
+                          {prod.defaultVariant?.pricing?.retailPrice?.base?.kitUSD 
+                            ? `$${prod.defaultVariant.pricing.retailPrice.base.kitUSD}`
+                            : 'Contact for Pricing'}
+                        </span>
                       </div>
                       <span style={{ fontSize: '0.72rem', color: '#5f6368' }}>
                         {prod.defaultVariant?.route?.replace('_', ' ') || 'Injectable Vial'}
@@ -393,6 +412,50 @@ export default function CatalogPreviewPanel({ catalog, products = [], protocols 
           )}
         </section>
       )}
+
+      {/* Contact Integration */}
+      <section style={{
+        marginTop: '3rem',
+        marginBottom: '2rem',
+        padding: '2rem',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '8px',
+        border: `1px solid ${primaryColor}`,
+        textAlign: 'center'
+      }}>
+        <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.25rem', fontWeight: 700, color: '#202124' }}>
+          Ready to enhance your clinical offerings?
+        </h3>
+        <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.95rem', color: '#5f6368' }}>
+          Schedule a video consultation with our clinical experts to discuss custom protocols.
+        </p>
+        <a 
+          href="https://us.bigin.online/org900319019/bookings/mhs" 
+          target="_blank" 
+          rel="noreferrer"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            backgroundColor: primaryColor,
+            color: '#fff',
+            padding: '12px 24px',
+            borderRadius: '24px',
+            textDecoration: 'none',
+            fontWeight: 600,
+            fontSize: '1rem',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            transition: 'transform 0.2s'
+          }}
+        >
+          <Calendar size={18} />
+          Schedule a Consultation
+        </a>
+        <div style={{ marginTop: '1rem', fontSize: '0.85rem', color: '#5f6368', display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Phone size={14}/> +1 (800) 555-0199</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Mail size={14}/> partners@med-peptides.com</span>
+        </div>
+      </section>
 
       {/* Clinical Disclaimer */}
       {catalog?.disclaimer && (
