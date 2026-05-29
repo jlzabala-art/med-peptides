@@ -1,6 +1,6 @@
 {
   "protocol_duration_weeks": 10,
-  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_name": "Atlas Health Clinical Team",
   "bundleVersion": "2.0",
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -76,7 +76,7 @@
     "resolved_monitoring": []
   },
   "protocol_author_notes": "Official curated protocol for general clinical use.",
-  "protocol_author_organization": "Med-Peptides",
+  "protocol_author_organization": "Atlas Health",
   "protocol_last_reviewed_at": "2026-03-29",
   "protocol_source_reference": "internal_guide",
   "expected_outcomes": {
@@ -484,7 +484,7 @@
     ]
   },
   "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
-  "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
+  "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
   "_schemaGapFixed": {
     "_nanoseconds": 922000000,
     "_seconds": 1777190716
@@ -556,8 +556,8 @@
     "visibility": "public",
     "scientificName": "Energy · Mitochondrial Bioenergetics Restoration via AMPK + OXPHOS · 8 Weeks",
     "author": {
-      "organization": "Med-Peptides",
-      "name": "Med-Peptides Clinical Team",
+      "organization": "Atlas Health",
+      "name": "Atlas Health Clinical Team",
       "title": "Peptide Specialists"
     },
     "evidence_grade_note": "GRADE B: MOTS-c Phase I human data (Lee C, Cell Metab 2015); SS-31/Elamipretide Phase II data in heart failure and aging (NEJM 2023 RESTORE trial). Strong mechanistic basis; limited large RCT data for fatigue indication specifically.",
@@ -601,7 +601,7 @@
     },
     "regulatory_note": "MOTS-c: Research peptide, not FDA-approved. Available via compounding pharmacies under physician supervision. SS-31/Elamipretide: investigational drug (Stealth BioTherapeutics); compassionate use or research protocols only in the US. Updated 2026: Elamipretide is no longer purely investigational in all contexts; the FDA granted accelerated approval for elamipretide (Forzinity) for Barth syndrome in patients weighing at least 30 kg. Use for fatigue, mitochondrial optimization, performance, or post-viral fatigue remains off-label/research-oriented and requires physician oversight."
   },
-  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
   "canonical_enrichment": {
     "compatibleWith": "antigravity_v2_firebase_import",
     "auditFieldsCompleted": [

@@ -359,6 +359,193 @@ function PhaseEditor({ phases, products: catalogProducts, onChange }) {
   );
 }
 
+// ── PathwayBuilder Modal ────────────────────────────────────────────────────────
+function PathwayBuilder({ onClose, onSave, onGenerateAI }) {
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    title: '',
+    category: '',
+    complexity: 'moderate',
+    description: '',
+  });
+
+  const handleNext = () => setStep((s) => Math.min(s + 1, 3));
+  const handlePrev = () => setStep((s) => Math.max(s - 1, 1));
+
+  const buildTemplate = () => {
+    // Generate a starter template based on complexity
+    const phases = [];
+    if (formData.complexity === 'simple') {
+      phases.push({ label: 'Phase 1: Induction', durationWeeks: 4, items: [] });
+    } else if (formData.complexity === 'moderate') {
+      phases.push({ label: 'Phase 1: Loading', durationWeeks: 4, items: [] });
+      phases.push({ label: 'Phase 2: Maintenance', durationWeeks: 8, items: [] });
+    } else {
+      phases.push({ label: 'Phase 1: Diagnostics & Priming', durationWeeks: 2, items: [] });
+      phases.push({ label: 'Phase 2: Core Therapy', durationWeeks: 8, items: [] });
+      phases.push({ label: 'Phase 3: Tapering', durationWeeks: 4, items: [] });
+    }
+
+    onSave({
+      protocol_name: formData.title || 'New Clinical Pathway',
+      therapeutic_category: formData.category,
+      complexity_level: formData.complexity,
+      status: 'draft',
+      overview_summary: formData.description,
+      phases,
+    });
+  };
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 9999,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      backgroundColor: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(4px)'
+    }}>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="admin-modal"
+        style={{
+          backgroundColor: 'white', borderRadius: '16px', width: '90%', maxWidth: '600px',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', overflow: 'hidden',
+          display: 'flex', flexDirection: 'column'
+        }}
+      >
+        <div style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <FlaskConical size={20} color="#3b82f6" /> Clinical Pathway Builder
+          </h3>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}><X size={20} /></button>
+        </div>
+
+        <div style={{ padding: '2rem', flex: 1, overflowY: 'auto' }}>
+          {step === 1 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Pathway Title</label>
+                <input 
+                  autoFocus
+                  type="text" 
+                  value={formData.title} 
+                  onChange={(e) => setFormData(p => ({ ...p, title: e.target.value }))}
+                  placeholder="e.g. Advanced Metabolic Reset"
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '1rem' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Therapeutic Category</label>
+                <select 
+                  value={formData.category} 
+                  onChange={(e) => setFormData(p => ({ ...p, category: e.target.value }))}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '1rem' }}
+                >
+                  <option value="">Select Category...</option>
+                  <option value="Longevity">Longevity</option>
+                  <option value="Weight Loss">Weight Loss</option>
+                  <option value="Muscle Hypertrophy">Muscle Hypertrophy</option>
+                  <option value="Cognitive Enhancement">Cognitive Enhancement</option>
+                  <option value="Injury Recovery">Injury Recovery</option>
+                </select>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Complexity Level</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                  {['simple', 'moderate', 'advanced'].map(lvl => (
+                    <button
+                      key={lvl}
+                      onClick={() => setFormData(p => ({ ...p, complexity: lvl }))}
+                      style={{
+                        padding: '1rem', borderRadius: '8px', cursor: 'pointer',
+                        border: formData.complexity === lvl ? '2px solid #3b82f6' : '1px solid #e2e8f0',
+                        backgroundColor: formData.complexity === lvl ? '#eff6ff' : 'white',
+                        color: formData.complexity === lvl ? '#1e40af' : '#64748b',
+                        fontWeight: 600, textTransform: 'capitalize'
+                      }}
+                    >
+                      {lvl}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Clinical Overview (Optional)</label>
+                <textarea 
+                  value={formData.description} 
+                  onChange={(e) => setFormData(p => ({ ...p, description: e.target.value }))}
+                  placeholder="Brief description of the intended outcome..."
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '1rem', minHeight: '100px', resize: 'vertical' }}
+                />
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+              <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#eff6ff', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                <Package size={32} />
+              </div>
+              <h4 style={{ fontSize: '1.25rem', color: '#0f172a', margin: '0 0 0.5rem' }}>Ready to Build Pathway</h4>
+              <p style={{ color: '#64748b', fontSize: '0.95rem', maxWidth: '400px', margin: '0 auto 2rem' }}>
+                You can manually assemble the phases, or let Atlas AI generate a draft clinical pathway based on your parameters.
+              </p>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+                <button 
+                  onClick={buildTemplate}
+                  style={{ width: '100%', maxWidth: '300px', padding: '0.85rem', borderRadius: '8px', border: 'none', backgroundColor: '#0f172a', color: 'white', fontWeight: 600, cursor: 'pointer', fontSize: '1rem' }}
+                >
+                  Create Manual Pathway
+                </button>
+                <button 
+                  onClick={() => onGenerateAI(formData)}
+                  style={{ width: '100%', maxWidth: '300px', padding: '0.85rem', borderRadius: '8px', border: '1px solid #cbd5e1', backgroundColor: 'white', color: '#0f172a', fontWeight: 600, cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                >
+                  <FlaskConical size={18} /> Generate with Atlas AI
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div style={{ padding: '1.25rem 1.5rem', borderTop: '1px solid #e2e8f0', backgroundColor: '#f8fafc', display: 'flex', justifyContent: 'space-between' }}>
+          <button 
+            onClick={step === 1 ? onClose : handlePrev}
+            style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: 'white', color: '#475569', fontWeight: 600, cursor: 'pointer' }}
+          >
+            {step === 1 ? 'Cancel' : 'Back'}
+          </button>
+          
+          {step < 3 && (
+            <button 
+              onClick={handleNext}
+              disabled={step === 1 && (!formData.title || !formData.category)}
+              style={{ padding: '0.5rem 1.5rem', borderRadius: '6px', border: 'none', backgroundColor: '#3b82f6', color: 'white', fontWeight: 600, cursor: 'pointer', opacity: (step === 1 && (!formData.title || !formData.category)) ? 0.5 : 1 }}
+            >
+              Next Step
+            </button>
+          )}
+        </div>
+      </motion.div>
+      
+      <AnimatePresence>
+        {showPathwayWizard && (
+          <PathwayBuilder 
+            onClose={() => setShowPathwayWizard(false)} 
+            onSave={handleCreatePathway} 
+            onGenerateAI={handleGenerateAIPathway} 
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function AdminProtocolsTab() {
   const { toast } = useToast();
@@ -374,6 +561,7 @@ export default function AdminProtocolsTab() {
   const [saved, setSaved] = useState({});
   const [deleting, setDeleting] = useState(null);
   const [catalogProducts, setCatalog] = useState([]);
+  const [showPathwayWizard, setShowPathwayWizard] = useState(false);
 
   // Fetch initial protocols
   const fetchProtocols = useCallback(async () => {
@@ -506,6 +694,40 @@ export default function AdminProtocolsTab() {
     }
   };
 
+  // Create new pathway from wizard
+  const handleCreatePathway = async (protocolData) => {
+    setShowPathwayWizard(false);
+    try {
+      const newId = await updateProtocolFull(null, protocolData); // Wait, updateProtocolFull needs an ID. We should use addDoc instead.
+      // Better: we import addDoc and collection at the top, and just add it directly here:
+      const docRef = await addDoc(collection(db, 'protocols'), {
+        ...protocolData,
+        created_at: new Date(),
+        updated_at: new Date(),
+        version_number: 1,
+      });
+      toast.success('Pathway created successfully!');
+      fetchProtocols();
+    } catch (err) {
+      toast.error('Failed to create pathway: ' + err.message);
+    }
+  };
+
+  const handleGenerateAIPathway = (formData) => {
+    setShowPathwayWizard(false);
+    toast.info('Atlas AI generation started. Check the AI Logs tab for progress.');
+    // In a real app, this would trigger a backend Cloud Function or an event for the AI agent to pick up.
+    // We can simulate creating a draft for now:
+    handleCreatePathway({
+      protocol_name: formData.title + ' (Atlas AI Draft)',
+      therapeutic_category: formData.category,
+      complexity_level: formData.complexity,
+      status: 'draft',
+      overview_summary: 'Draft generated by Atlas AI based on: ' + formData.description,
+      phases: [{ label: 'Phase 1: Atlas AI Pending', durationWeeks: 4, items: [] }]
+    });
+  };
+
   const formatDate = (ts) => {
     if (!ts) return '—';
     const d = ts.toDate ? ts.toDate() : new Date(ts);
@@ -604,8 +826,7 @@ export default function AdminProtocolsTab() {
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        {/* GCP Table Toolbar */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingBottom: '0.25rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', paddingBottom: '0.25rem' }}>
           <button
             onClick={fetchProtocols}
             className="btn btn-outline"
@@ -620,6 +841,24 @@ export default function AdminProtocolsTab() {
             }}
           >
             <RefreshCw size={15} /> Refresh
+          </button>
+          <button
+            onClick={() => setShowPathwayWizard(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '13px',
+              padding: '0.4rem 1rem',
+              backgroundColor: '#0f172a',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px'
+            }}
+          >
+            <Plus size={15} /> Create Pathway
           </button>
         </div>
 

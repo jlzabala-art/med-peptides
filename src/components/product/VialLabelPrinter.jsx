@@ -20,7 +20,7 @@ export default function VialLabelPrinter({ product, selectedVariant, onClose }) 
   const storageTemp   = product.storage_conditions?.dry || '−20°C to −80°C';
   const mw            = product.molecular_weight ? `MW: ${product.molecular_weight} Da` : null;
   const lot           = `LOT-${new Date().getFullYear()}-${(product.id || product.name || '').slice(0, 4).toUpperCase()}`;
-  const productUrl    = `https://Med-Peptides-app-27a3a.web.app/product/${product.slug || product.name?.toLowerCase().replace(/\s+/g, '-')}`;
+  const productUrl    = `https://Atlas Health-app-27a3a.web.app/product/${product.slug || product.name?.toLowerCase().replace(/\s+/g, '-')}`;
 
   const handlePrint = () => {
     const printStyle = `

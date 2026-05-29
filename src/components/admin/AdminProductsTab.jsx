@@ -1,4 +1,6 @@
 /* eslint-disable no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
@@ -14,7 +16,9 @@ import {
   Eye,
   Trash2,
   BookOpen,
-  Plus
+  Plus,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import AppDataTable from '../ui/AppDataTable';
@@ -23,9 +27,283 @@ import AppStatusToggle from '../ui/AppStatusToggle';
 import AppFilterBar from '../ui/AppFilterBar';
 import AppEntityCell from '../ui/AppEntityCell';
 import { useToast } from '../../hooks/useToast';
+import { catalogRepository } from '../../repositories/catalogRepository';
 import AdminSupplyNotifierWidget from './gadgets/AdminSupplyNotifierWidget';
 import InlineEditField from '../ui/InlineEditField';
-import { catalogRepository } from '../../repositories/catalogRepository';
+
+// ── ProductMicrosite Component ────────────────────────────────────────────────
+function ProductMicrosite({ product, onUpdateProduct }) {
+  const [summary, setSummary] = useState(product.clinical_summary || '');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLog, setChatLog] = useState([
+    { role: 'ai', text: `Hello! I'm Atlas AI. I've loaded the data for ${product.name}. What would you like to know about its clinical applications or interactions?` }
+  ]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [expandedAccordion, setExpandedAccordion] = useState('clinical'); // 'clinical', 'inventory', 'ai'
+
+  useEffect(() => {
+    if (!product.materia_medica && !product.clinical_summary) {
+      setIsGenerating(true);
+      const timer = setTimeout(() => {
+        const mockSummary = `**${product.name}** is typically categorized under ${product.category}. \n\n### Mechanism of Action\nData not available. Please wait for the auto-enrichment script to process this product.\n\n### Clinical Applications\n- N/A\n\n### Contraindications\n- N/A`;
+        setSummary(mockSummary);
+        setIsGenerating(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [product]);
+
+  const handleSendChat = (e) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+    
+    const newLog = [...chatLog, { role: 'user', text: chatInput }];
+    setChatLog(newLog);
+    setChatInput('');
+    setIsTyping(true);
+
+    setTimeout(() => {
+      setChatLog([...newLog, { 
+        role: 'ai', 
+        text: `Based on the clinical profile of ${product.name}, I am analyzing the provided Materia Medica. (This is a placeholder for the actual ClinicDAG LLM integration which will be hooked up shortly).` 
+      }]);
+      setIsTyping(false);
+    }, 1200);
+  };
+
+  const materia = product.materia_medica;
+
+  const AccordionHeader = ({ title, id }) => {
+    const isExpanded = expandedAccordion === id;
+    return (
+      <button 
+        type="button"
+        onClick={() => setExpandedAccordion(isExpanded ? null : id)}
+        aria-expanded={isExpanded}
+        aria-controls={`accordion-content-${id}`}
+        style={{ 
+          width: '100%',
+          padding: '1.25rem 1.5rem', 
+          backgroundColor: isExpanded ? '#f8fafc' : '#ffffff', 
+          borderBottom: '1px solid #e2e8f0',
+          cursor: 'pointer',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontWeight: 600,
+          color: isExpanded ? '#0f172a' : '#475569',
+          transition: 'all 0.2s ease',
+          outline: 'none',
+          border: 'none',
+          textAlign: 'left'
+        }}
+        onFocus={(e) => e.target.style.boxShadow = 'inset 0 0 0 2px #3b82f6'}
+        onBlur={(e) => e.target.style.boxShadow = 'none'}
+        onMouseEnter={(e) => { if (!isExpanded) e.target.style.backgroundColor = '#f8fafc'; }}
+        onMouseLeave={(e) => { if (!isExpanded) e.target.style.backgroundColor = '#ffffff'; }}
+      >
+        <span style={{ fontSize: '0.95rem' }}>{title}</span>
+        <span style={{ color: '#94a3b8', display: 'flex', alignItems: 'center' }}>
+          {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+        </span>
+      </button>
+    );
+  };
+
+  return (
+    <div style={{
+      backgroundColor: '#ffffff',
+      borderRadius: '8px',
+      border: '1px solid #e2e8f0',
+      margin: '0.5rem 0',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+    }}>
+      {/* Header */}
+      <div style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <span style={{ backgroundColor: '#e0e7ff', color: '#4f46e5', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              {product.category || 'Peptide'}
+            </span>
+            <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>{product.dosage || 'Standard'}</span>
+          </div>
+          <h3 style={{ margin: 0, fontSize: '1.5rem', color: '#0f172a', fontWeight: 800 }}>{product.name}</h3>
+        </div>
+        <a href={`/catalog/product/${product.id}`} target="_blank" rel="noopener noreferrer" style={{ padding: '0.5rem 1rem', backgroundColor: '#3b82f6', color: 'white', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none' }}>
+          View Store Page
+        </a>
+      </div>
+
+      {/* Accordion 1: Clinical Information */}
+      <AccordionHeader title="Información Clínica (Materia Medica)" id="clinical" />
+      <div 
+        id="accordion-content-clinical"
+        style={{ 
+          display: expandedAccordion === 'clinical' ? 'block' : 'none',
+          padding: '1.5rem', 
+          borderBottom: '1px solid #e2e8f0',
+          animation: 'fadeIn 0.3s ease-in-out'
+        }}
+      >
+        {isGenerating ? (
+          <div style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
+            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '1rem', height: '1rem', borderWidth: '0.15em' }}></span>
+            Checking AI Data...
+          </div>
+        ) : materia ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontSize: '0.95rem', color: '#334155', lineHeight: 1.6 }}>
+            <div>
+              <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mechanism of Action</h4>
+              <p style={{ margin: 0 }}>{materia.mechanism_of_action}</p>
+            </div>
+            
+            <div>
+              <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Clinical Applications</h4>
+              <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
+                {materia.clinical_applications?.map((app, idx) => (
+                  <li key={idx} style={{ marginBottom: '0.25rem' }}>{app}</li>
+                ))}
+              </ul>
+            </div>
+
+            {materia.contraindications && materia.contraindications.length > 0 && (
+              <div>
+                <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Contraindications & Interactions</h4>
+                <ul style={{ margin: 0, paddingLeft: '1.25rem', color: '#b91c1c' }}>
+                  {materia.contraindications.map((ci, idx) => (
+                    <li key={idx} style={{ marginBottom: '0.25rem' }}>{ci}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {materia.references && materia.references.length > 0 && (
+              <div>
+                <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Scientific References</h4>
+                <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.85rem' }}>
+                  {materia.references.map((ref, idx) => (
+                    <li key={idx} style={{ marginBottom: '0.25rem' }}>
+                      <a href={ref.url} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'none', transition: 'color 0.2s', ':hover': { color: '#2563eb' } }}>
+                        {ref.title || 'View Study'}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div style={{ fontSize: '0.95rem', color: '#334155', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+            {summary}
+          </div>
+        )}
+      </div>
+
+      {/* Accordion 2: Non-Clinical Information */}
+      <AccordionHeader title="Información No Clínica (Inventario)" id="inventory" />
+      <div 
+        id="accordion-content-inventory"
+        style={{ 
+          display: expandedAccordion === 'inventory' ? 'block' : 'none',
+          padding: '1.5rem', 
+          backgroundColor: '#f8fafc', 
+          borderBottom: '1px solid #e2e8f0',
+          animation: 'fadeIn 0.3s ease-in-out'
+        }}
+      >
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <span style={{ fontSize: '0.85rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>SKU</span>
+            <span style={{ fontSize: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 600, color: '#0f172a' }}>{product.sku || 'N/A'}</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <span style={{ fontSize: '0.85rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Warehouse</span>
+            <span style={{ fontSize: '1rem', fontWeight: 500, color: '#0f172a' }}>{product.warehouse || 'Poland'}</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <span style={{ fontSize: '0.85rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Supplier</span>
+            <span style={{ fontSize: '1rem', fontWeight: 500, color: '#0f172a' }}>{product.supplier || 'N/A'}</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <span style={{ fontSize: '0.85rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Stock Status</span>
+            <span style={{ 
+              fontSize: '1rem', fontWeight: 700, 
+              color: product.stock < 20 ? 'var(--error)' : product.stock < 50 ? '#f59e0b' : '#10b981' 
+            }}>
+              {product.stock} units
+            </span>
+          </div>
+        </div>
+        <div style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: '#e0e7ff', borderRadius: '8px', border: '1px solid #c7d2fe' }}>
+          <p style={{ margin: 0, fontSize: '0.8rem', color: '#4338ca', lineHeight: 1.4 }}>
+            To modify stock levels, supplier details, or SKU, please navigate to the Inventory Management screen.
+          </p>
+        </div>
+      </div>
+
+      {/* Accordion 3: AI Access */}
+      <AccordionHeader title="Acceso al AI (ClinicDAG Asistente)" id="ai" />
+      <div 
+        id="accordion-content-ai"
+        style={{ 
+          display: expandedAccordion === 'ai' ? 'flex' : 'none',
+          flexDirection: 'column',
+          backgroundColor: '#f8fafc', 
+          borderBottom: '1px solid #e2e8f0',
+          animation: 'fadeIn 0.3s ease-in-out'
+        }}
+      >
+          <div style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }}></div>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0f172a' }}>Atlas AI Q&A</span>
+          </div>
+          <div style={{ padding: '1.5rem', maxHeight: '250px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {chatLog.map((msg, i) => (
+              <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                <span style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '0.25rem', fontWeight: 600, textTransform: 'uppercase' }}>
+                  {msg.role === 'user' ? 'You' : 'Atlas AI'}
+                </span>
+                <div style={{
+                  backgroundColor: msg.role === 'user' ? '#0f172a' : '#f1f5f9',
+                  color: msg.role === 'user' ? 'white' : '#334155',
+                  padding: '0.75rem 1rem',
+                  borderRadius: '8px',
+                  borderBottomRightRadius: msg.role === 'user' ? 0 : '8px',
+                  borderBottomLeftRadius: msg.role === 'ai' ? 0 : '8px',
+                  fontSize: '0.85rem',
+                  maxWidth: '85%',
+                  lineHeight: 1.5
+                }}>
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+            {isTyping && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem', color: '#94a3b8', fontSize: '0.8rem' }}>
+                Atlas AI is typing...
+              </div>
+            )}
+          </div>
+          <form onSubmit={handleSendChat} style={{ display: 'flex', borderTop: '1px solid #e2e8f0' }}>
+            <input 
+              type="text" 
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              placeholder="Pregunta algo sobre el perfil clínico..."
+              style={{ flex: 1, padding: '1rem 1.5rem', border: 'none', backgroundColor: 'transparent', outline: 'none', fontSize: '0.9rem', color: '#0f172a' }}
+            />
+            <button type="submit" disabled={!chatInput.trim() || isTyping} style={{ padding: '0 1.5rem', backgroundColor: 'transparent', border: 'none', color: '#3b82f6', fontWeight: 600, cursor: 'pointer', opacity: (!chatInput.trim() || isTyping) ? 0.5 : 1 }}>
+              Send
+            </button>
+          </form>
+        </div>
+    </div>
+  );
+}
 
 export default function AdminProductsTab({
   readOnly = false,
@@ -451,162 +729,7 @@ export default function AdminProductsTab({
   }
 
   const renderExpandedRow = (p) => {
-    const inputStyle = {
-      padding: '0.5rem 0.75rem',
-      border: '1px solid var(--border)',
-      borderRadius: '4px',
-      fontSize: '0.85rem',
-      width: '100%',
-      boxSizing: 'border-box',
-      backgroundColor: 'var(--bg-card)',
-      color: 'var(--text-main)',
-    };
-    const labelStyle = {
-      display: 'block',
-      fontWeight: 500,
-      fontSize: '0.8rem',
-      marginBottom: '0.25rem',
-      color: 'var(--text-main)',
-    };
-
-    return (
-      <div
-        style={{
-          backgroundColor: 'var(--color-bg-subtle, #f8fafc)',
-          borderRadius: 'var(--radius-lg, 8px)',
-          border: '1px solid var(--border)',
-          padding: '1.5rem',
-          margin: '0.5rem 0',
-          boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)',
-        }}
-      >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-            gap: '1.5rem',
-          }}
-        >
-          <div>
-            <label style={labelStyle}>SKU</label>
-            {readOnly ? (
-              <span className="mono-data" style={{ padding: '0.5rem 0', display: 'block' }}>{p.sku || 'N/A'}</span>
-            ) : (
-              <InlineEditField
-                value={p.sku || ''}
-                onSave={(val) => handleUpdateProduct(p.id, { sku: val })}
-                placeholder="SKU (optional)"
-                inputStyle={{ fontFamily: 'var(--font-mono)' }}
-              />
-            )}
-          </div>
-
-          <div>
-            <label style={labelStyle}>Stock</label>
-            {readOnly ? (
-              <span
-                style={{
-                  padding: '0.5rem 0',
-                  display: 'block',
-                  fontWeight: 700,
-                  color: p.stock < 20 ? 'var(--error)' : p.stock < 50 ? '#f59e0b' : 'inherit',
-                }}
-              >
-                {p.stock}
-              </span>
-            ) : (
-              <InlineEditField
-                type="number"
-                value={p.stock}
-                onSave={(val) => handleUpdateProduct(p.id, { stock: parseInt(val) || 0 })}
-                inputStyle={{ 
-                  fontFamily: 'var(--font-mono)',
-                  fontWeight: 700,
-                  color: p.stock < 20 ? 'var(--error)' : p.stock < 50 ? '#f59e0b' : 'inherit',
-                }}
-              />
-            )}
-          </div>
-
-          <div>
-            <label style={labelStyle}>Warehouse</label>
-            {readOnly ? (
-              <span style={{ padding: '0.5rem 0', display: 'block' }}>{p.warehouse || 'Poland'}</span>
-            ) : (
-              <InlineEditField
-                type="select"
-                value={p.warehouse || 'Poland'}
-                options={['Poland', 'UK', 'HK', 'USA', 'Greece']}
-                onSave={(val) => handleUpdateProduct(p.id, { warehouse: val })}
-              />
-            )}
-          </div>
-
-          {!hideCosts && isAdmin && (
-            <div>
-              <label style={labelStyle}>Supplier (optional)</label>
-              {readOnly ? (
-                <span style={{ padding: '0.5rem 0', display: 'block', color: 'var(--text-muted)' }}>{p.supplier || 'N/A'}</span>
-              ) : (
-                <InlineEditField
-                  type="select"
-                  value={p.supplier || ''}
-                  options={[
-                    { value: '', label: 'Select...' },
-                    { value: 'Lotusland', label: 'Lotusland' },
-                    { value: 'NPLAB', label: 'NPLAB' },
-                    { value: 'Eterna', label: 'Eterna' },
-                    { value: 'Regpept', label: 'Regpept' },
-                    { value: 'Other', label: 'Other' },
-                  ]}
-                  onSave={(val) => handleUpdateProduct(p.id, { supplier: val })}
-                />
-              )}
-            </div>
-          )}
-
-          {isWholesaler && (
-            <div>
-              <label style={labelStyle}>Prices (B2B)</label>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.5rem',
-                  padding: '0.5rem',
-                  backgroundColor: 'white',
-                  border: '1px solid var(--border)',
-                  borderRadius: '4px',
-                }}
-              >
-                <div
-                  style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}
-                >
-                  <span style={{ color: 'var(--text-muted)' }}>Vial:</span>
-                  <span className="mono-data" style={{ fontWeight: 600 }}>
-                    ${p.proVialPrice?.toFixed(2) || '0.00'}
-                  </span>
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    fontSize: '0.85rem',
-                    borderTop: '1px solid var(--border-light, #e2e8f0)',
-                    paddingTop: '0.5rem',
-                  }}
-                >
-                  <span style={{ color: 'var(--text-muted)' }}>Kit (10):</span>
-                  <span className="mono-data" style={{ fontWeight: 700, color: 'var(--primary)' }}>
-                    ${p.proKitPrice?.toFixed(2) || '0.00'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
+    return <ProductMicrosite product={p} onUpdateProduct={handleUpdateProduct} />;
   };
 
   const filteredProducts = products.filter((p) => {

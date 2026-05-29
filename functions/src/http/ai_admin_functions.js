@@ -219,13 +219,133 @@ const ADMIN_TOOLS = [
             },
             required: ["entity_type", "entity_id"]
           }
+        },
+        {
+          name: "query_inactive_users",
+          description: "Searches for users who have been inactive for a specified number of days.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              days: { type: "INTEGER", description: "Number of days of inactivity (default 30)." }
+            }
+          }
+        },
+        {
+          name: "list_wholesalers",
+          description: "Lists wholesalers, optionally filtering by approved status.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              status: { type: "STRING", enum: ["approved", "pending", "all"], description: "Filter by status." }
+            }
+          }
+        },
+        {
+          name: "suspend_user",
+          description: "Proposes suspending a user. REQUIRES admin confirmation before execution. Writes to audit_log.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              user_id: { type: "STRING", description: "The user's document ID or email." },
+              reason: { type: "STRING", description: "Reason for suspension." }
+            },
+            required: ["user_id", "reason"]
+          }
+        },
+        {
+          name: "get_product_inventory",
+          description: "Provides a breakdown of product stock. Can filter by low stock.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              low_stock_only: { type: "BOOLEAN", description: "If true, only returns products with stock <= 10." }
+            }
+          }
+        },
+        {
+          name: "get_sales_report",
+          description: "Generates a sales report for a specific timeframe (today, week, month).",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              timeframe: { type: "STRING", enum: ["today", "week", "month", "all"], description: "Timeframe for the report." }
+            },
+            required: ["timeframe"]
+          }
+        },
+        {
+          name: "get_pending_orders",
+          description: "Lists orders that have not been shipped or processed yet.",
+          parameters: {
+            type: "OBJECT",
+            properties: {}
+          }
+        },
+        {
+          name: "update_order_status",
+          description: "Proposes changing an order's status (e.g. to shipped or cancelled). REQUIRES admin confirmation.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              order_id: { type: "STRING", description: "The ID of the order." },
+              new_status: { type: "STRING", enum: ["processing", "shipped", "delivered", "cancelled"], description: "The new status." }
+            },
+            required: ["order_id", "new_status"]
+          }
+        },
+        {
+          name: "analyze_order_risk",
+          description: "Analyzes an order for fraud or business risk based on value, account age, and item quantities.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              order_id: { type: "STRING", description: "The ID of the order to analyze." }
+            },
+            required: ["order_id"]
+          }
+        },
+        {
+          name: "forecast_inventory_needs",
+          description: "Calculates sales velocity over the last 30 days to predict which products will run out of stock in the given timeframe.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              days_ahead: { type: "INTEGER", description: "Number of days ahead to forecast (default 30)." }
+            }
+          }
+        },
+        {
+          name: "create_discount_campaign",
+          description: "Creates a discount code. REQUIRES admin confirmation.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              code_name: { type: "STRING", description: "The promo code string (e.g. BLACKFRIDAY15)." },
+              discount_type: { type: "STRING", enum: ["percentage", "fixed"], description: "Type of discount." },
+              amount: { type: "NUMBER", description: "The discount amount (e.g. 15 for 15%)." },
+              days_valid: { type: "INTEGER", description: "How many days the code is valid for." }
+            },
+            required: ["code_name", "discount_type", "amount", "days_valid"]
+          }
+        },
+        {
+          name: "draft_segment_email",
+          description: "Drafts a marketing or retention email for a specific user segment.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              segment: { type: "STRING", enum: ["inactive", "vip", "abandoned_cart", "all"], description: "The user segment to target." },
+              goal: { type: "STRING", description: "The goal of the email (e.g. 'offer 10% discount', 'announce new product')." }
+            },
+            required: ["segment", "goal"]
+          }
         }
       ]
     }
 ];
 
 // Functions that write to Firestore and need confirmation
-const WRITE_FUNCTIONS = new Set(["update_product_price", "update_product_cost", "update_user_role", "batch_update_product_price", "batch_update_product_stock", "update_regional_price", "update_geographic_restriction"]);
+const WRITE_FUNCTIONS = new Set(["update_product_price", "update_product_cost", "update_user_role", "batch_update_product_price", "batch_update_product_stock", "update_regional_price", "update_geographic_restriction", "suspend_user", "update_order_status", "create_discount_campaign"]);
 
 // ── Read-only function executor ───────────────────────────────────────────────
 
@@ -412,6 +532,205 @@ async function executeReadOnlyFunction(fn, args, db) {
       } else {
         return "Entity type not supported for summary yet.";
       }
+    }
+
+    case "query_inactive_users": {
+      const { days = 30 } = args;
+      const snap = await db.collection("users").get();
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - Number(days));
+      const cutoffTime = cutoff.getTime();
+      
+      let inactive = [];
+      snap.forEach(doc => {
+        const u = doc.data();
+        let lastActivity = u.lastLogin ? (u.lastLogin.seconds ? u.lastLogin.seconds * 1000 : u.lastLogin) : 
+                           (u.createdAt ? (u.createdAt.seconds ? u.createdAt.seconds * 1000 : u.createdAt) : 0);
+        if (lastActivity && lastActivity < cutoffTime) {
+          inactive.push({ id: doc.id, name: u.fullName || u.displayName || "Unknown", email: u.email, role: u.role, lastActivity: new Date(lastActivity).toLocaleDateString() });
+        }
+      });
+      if (inactive.length === 0) return `No users found who have been inactive for more than ${days} days.`;
+      
+      const header = `**Inactive Users (>${days} days) [${inactive.length} found]:**\n\n`;
+      const list = inactive.slice(0, 20).map((u, i) => `${i + 1}. **${u.name}** (${u.email}) — Role: ${u.role || 'N/A'} | Last Active: ${u.lastActivity}`).join("\n");
+      return header + list + (inactive.length > 20 ? `\n...and ${inactive.length - 20} more.` : '');
+    }
+
+    case "list_wholesalers": {
+      const { status = "all" } = args;
+      let query = db.collection("users").where("role", "==", "wholesaler");
+      if (status === "approved") query = query.where("approved", "==", true);
+      if (status === "pending") query = query.where("approved", "==", false);
+      const snap = await query.get();
+      if (snap.empty) return `No wholesalers found with status: ${status}.`;
+      
+      const list = [];
+      snap.forEach(doc => {
+        const u = doc.data();
+        list.push(`- **${u.fullName || u.displayName || u.email}** (ID: \`${doc.id}\`) — Approved: ${u.approved ? 'Yes' : 'No'}`);
+      });
+      return `**Wholesalers (${status}):**\n\n` + list.join("\n");
+    }
+
+    case "get_product_inventory": {
+      const { low_stock_only } = args;
+      const snap = await db.collection("products").get();
+      let products = [];
+      snap.forEach(doc => {
+        const p = doc.data();
+        if (p.status === 'active') {
+          const stock = typeof p.stock === 'number' ? p.stock : 0;
+          products.push({ name: p.displayName || p.name || doc.id, stock });
+        }
+      });
+      if (low_stock_only) {
+        products = products.filter(p => p.stock <= 10);
+      }
+      products.sort((a, b) => a.stock - b.stock);
+      
+      if (products.length === 0) return low_stock_only ? "No active products are low on stock." : "No active products found.";
+      const header = low_stock_only ? "**Low Stock Alert (<= 10):**\n\n" : "**Full Inventory:**\n\n";
+      const list = products.slice(0, 30).map((p, i) => `${i + 1}. **${p.name}** — Stock: ${p.stock}`).join("\n");
+      return header + list;
+    }
+
+    case "get_sales_report": {
+      const { timeframe } = args;
+      const snap = await db.collection("orders").get();
+      let totalSales = 0;
+      let orderCount = 0;
+      const now = new Date();
+      let cutoff = new Date(0);
+      if (timeframe === "today") {
+        cutoff.setHours(0,0,0,0);
+      } else if (timeframe === "week") {
+        cutoff.setDate(now.getDate() - 7);
+      } else if (timeframe === "month") {
+        cutoff.setMonth(now.getMonth() - 1);
+      }
+      
+      const cutoffTime = cutoff.getTime();
+      
+      snap.forEach(doc => {
+        const o = doc.data();
+        let orderDate = o.createdAt ? (o.createdAt.seconds ? o.createdAt.seconds * 1000 : o.createdAt) : 0;
+        if (orderDate >= cutoffTime && o.status !== 'cancelled') {
+          totalSales += Number(o.total) || 0;
+          orderCount++;
+        }
+      });
+      
+      return `**Sales Report (${timeframe}):**\n- Total Valid Orders: ${orderCount}\n- Revenue: $${totalSales.toFixed(2)}`;
+    }
+
+    case "get_pending_orders": {
+      // Firebase "in" array length limit is 10, ["pending", "processing"] is 2
+      const snap = await db.collection("orders").where("status", "in", ["pending", "processing"]).get();
+      if (snap.empty) return "No pending or processing orders found.";
+      
+      let list = [];
+      snap.forEach(doc => {
+        const o = doc.data();
+        const date = o.createdAt ? new Date(o.createdAt.seconds ? o.createdAt.seconds * 1000 : o.createdAt).toLocaleDateString() : "Unknown";
+        list.push(`- **Order #${doc.id.slice(0,6)}** (${date}) — $${o.total || 0} — Status: *${o.status}* — Customer: ${o.userEmail || o.customerName || 'Unknown'}`);
+      });
+      return `**Pending Orders (${snap.size}):**\n\n` + list.slice(0, 15).join("\n") + (snap.size > 15 ? `\n\n...and ${snap.size - 15} more.` : '');
+    }
+
+    case "analyze_order_risk": {
+      const { order_id } = args;
+      const docRef = db.collection("orders").doc(order_id);
+      const snap = await docRef.get();
+      if (!snap.exists) return `Order #${order_id} not found.`;
+      
+      const o = snap.data();
+      let riskScore = 0;
+      let flags = [];
+      
+      if (Number(o.total) > 500) { riskScore += 30; flags.push("High order value (>$500)"); }
+      if (Number(o.total) > 1000) { riskScore += 20; flags.push("Extremely high order value (>$1000)"); }
+      
+      // Analyze user
+      if (o.userId) {
+        const userSnap = await db.collection("users").doc(o.userId).get();
+        if (userSnap.exists) {
+          const u = userSnap.data();
+          const createdDaysAgo = u.createdAt ? (Date.now() - (u.createdAt.seconds ? u.createdAt.seconds * 1000 : u.createdAt)) / (1000 * 60 * 60 * 24) : 999;
+          if (createdDaysAgo < 3) { riskScore += 40; flags.push("Account created less than 3 days ago"); }
+        }
+      } else {
+        riskScore += 20; flags.push("Guest checkout / No user ID linked");
+      }
+      
+      if (o.items && Array.isArray(o.items)) {
+        for (const item of o.items) {
+          if (item.quantity > 5) { riskScore += 15; flags.push(`High quantity of single item: ${item.name || item.id} (x${item.quantity})`); }
+        }
+      }
+      
+      let riskLevel = "LOW";
+      if (riskScore > 40) riskLevel = "MEDIUM";
+      if (riskScore >= 70) riskLevel = "HIGH";
+      
+      return `**Risk Analysis for Order #${order_id.slice(0,6)}**\n- **Risk Level:** ${riskLevel} (Score: ${riskScore}/100)\n- **Flags Detected:**\n${flags.length > 0 ? flags.map(f => `  - ⚠️ ${f}`).join("\n") : "  - ✅ No suspicious flags detected."}\n- **Total Amount:** $${o.total || 0}\n- **Status:** ${o.status}`;
+    }
+
+    case "forecast_inventory_needs": {
+      const { days_ahead = 30 } = args;
+      const now = Date.now();
+      const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+      const ordersSnap = await db.collection("orders").where("createdAt", ">=", thirtyDaysAgo).get();
+      
+      const salesMap = {};
+      ordersSnap.forEach(doc => {
+        const o = doc.data();
+        if (o.status !== "cancelled" && o.items) {
+          o.items.forEach(item => {
+            const pid = item.productId || item.id || item.name;
+            if (!salesMap[pid]) salesMap[pid] = 0;
+            salesMap[pid] += (item.quantity || 1);
+          });
+        }
+      });
+      
+      const productsSnap = await db.collection("products").where("status", "==", "active").get();
+      const forecast = [];
+      productsSnap.forEach(doc => {
+        const p = doc.data();
+        const pid = doc.id;
+        const name = p.name || p.displayName;
+        const stock = typeof p.stock === 'number' ? p.stock : 0;
+        
+        const monthlySales = salesMap[pid] || salesMap[name] || 0;
+        const dailyVelocity = monthlySales / 30;
+        const projectedNeed = Math.ceil(dailyVelocity * days_ahead);
+        
+        if (stock < projectedNeed && dailyVelocity > 0) {
+          forecast.push({
+            name, stock, velocity: dailyVelocity.toFixed(1), need: projectedNeed, deficit: projectedNeed - stock
+          });
+        }
+      });
+      
+      forecast.sort((a,b) => b.deficit - a.deficit);
+      if (forecast.length === 0) return `Inventory Forecast (${days_ahead} days): All active products have sufficient stock based on recent sales velocity.`;
+      
+      const list = forecast.slice(0, 15).map(f => `- **${f.name}**: Stock: ${f.stock} | Expected Need: ${f.need} | Deficit: 🔻 ${f.deficit} (Velocity: ${f.velocity}/day)`).join("\n");
+      return `**Inventory Restock Forecast (${days_ahead} days ahead):**\n\n${list}\n\n*Suggestion: Contact laboratory suppliers to replenish these deficits.*`;
+    }
+
+    case "draft_segment_email": {
+      const { segment, goal } = args;
+      let intro = "";
+      if (segment === "inactive") intro = "Subject: We've missed you at Atlas Health\n\nDear [Name],\nIt's been a while since your last visit. We noticed you haven't been active lately.";
+      else if (segment === "vip") intro = "Subject: Exclusive VIP Access at Atlas Health\n\nDear [Name],\nAs one of our top institutional partners, we value your continued trust.";
+      else if (segment === "abandoned_cart") intro = "Subject: Did you forget something? (Atlas Health)\n\nDear [Name],\nWe saved your cart for you. Your research materials are waiting.";
+      else intro = "Subject: Updates from Atlas Health\n\nDear [Name],\nWe have some exciting news to share.";
+      
+      const body = `We are writing to you today because ${goal}.\n\nAtlas Health is committed to providing the highest purity peptides and clinical supplements for your research and longevity needs.\n\nBest regards,\nThe Atlas Health Team\nhttps://atlas-health.com`;
+      
+      return `**Email Draft Generated for segment [${segment.toUpperCase()}]:**\n\n\`\`\`text\n${intro}\n\n${body}\n\`\`\`\n\n*Note: This is a draft. You can copy this into your email marketing tool (e.g. Mailchimp, SendGrid) to dispatch.*`;
     }
 
     default:
@@ -688,6 +1007,74 @@ async function executeWriteFunction(fn, args, db, callerUid) {
         executed_by: callerUid || "admin", executed_at: timestamp, source: "AdminAI"
       });
       return { success: true, message: `✅ Geographic restriction for ${region} set to ${restricted ? 'BLOCKED' : 'ALLOWED'}`, auditId: auditRef.id };
+    }
+
+    case "suspend_user": {
+      const { user_id, reason } = args;
+      let docRef = db.collection("users").doc(user_id);
+      let snap = await docRef.get();
+      if (!snap.exists) {
+        const byEmail = await db.collection("users").where("email", "==", user_id).limit(1).get();
+        if (!byEmail.empty) {
+          docRef = byEmail.docs[0].ref;
+          snap = byEmail.docs[0];
+        } else {
+          throw new Error(`User "${user_id}" not found.`);
+        }
+      }
+      const u = snap.data();
+      const userName = u.fullName || u.email || user_id;
+      
+      await docRef.update({ 
+        suspended: true, 
+        approved: false, 
+        suspensionReason: reason, 
+        updatedAt: timestamp 
+      });
+      
+      const auditRef = await db.collection("audit_log").add({
+        action: "suspend_user", user_id: docRef.id, reason, executed_by: callerUid || "admin", executed_at: timestamp, source: "AdminAI"
+      });
+      return { success: true, message: `✅ User **${userName}** has been suspended. Reason: ${reason}`, auditId: auditRef.id };
+    }
+
+    case "update_order_status": {
+      const { order_id, new_status } = args;
+      let docRef = db.collection("orders").doc(order_id);
+      let snap = await docRef.get();
+      if (!snap.exists) {
+        throw new Error(`Order "${order_id}" not found. Please provide the exact full ID.`);
+      }
+      const oldStatus = snap.data().status;
+      await docRef.update({ status: new_status, updatedAt: timestamp });
+      
+      const auditRef = await db.collection("audit_log").add({
+        action: "update_order_status", order_id, old_status: oldStatus, new_status, executed_by: callerUid || "admin", executed_at: timestamp, source: "AdminAI"
+      });
+      return { success: true, message: `✅ Order **#${order_id.slice(0,6)}** status updated: ${oldStatus} -> ${new_status}`, auditId: auditRef.id };
+    }
+
+    case "create_discount_campaign": {
+      const { code_name, discount_type, amount, days_valid } = args;
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + Number(days_valid));
+      
+      const promoData = {
+        code: code_name.toUpperCase(),
+        type: discount_type,
+        value: Number(amount),
+        active: true,
+        expiresAt: expiresAt,
+        createdAt: timestamp,
+        createdBy: callerUid || "admin"
+      };
+      
+      await db.collection("promotions").doc(code_name.toUpperCase()).set(promoData);
+      
+      const auditRef = await db.collection("audit_log").add({
+        action: "create_discount", code: promoData.code, type: promoData.type, value: promoData.value, executed_by: callerUid || "admin", executed_at: timestamp, source: "AdminAI"
+      });
+      return { success: true, message: `✅ Discount Code **${promoData.code}** created! It grants a ${promoData.type === 'percentage' ? promoData.value + '%' : '$' + promoData.value} discount and expires in ${days_valid} days.`, auditId: auditRef.id };
     }
 
     default:

@@ -11,7 +11,7 @@ import { trackFormEngagement } from '../hooks/useAnalytics';
 export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, region }) {
   usePageMeta({
     title: 'Contact Us',
-    description: 'Get in touch with the Med-Peptides team for product inquiries, order support, wholesale requests, or professional collaboration.',
+    description: 'Get in touch with the Atlas Health team for product inquiries, order support, wholesale requests, or professional collaboration.',
     path: '/contact',
   });
 
@@ -188,10 +188,10 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
   }, [user, userProfile, userType]);
 
   // We rely on Formspree for actual email delivery securely without a backend
-  // The user specifies they want the email to go to business@Med-Peptides.com
+  // The user specifies they want the email to go to business@Atlas Health.com
   // Normally you'd create a specific hash. In this demo setting, we'll use a mailto action or direct form action
   // if they have a formspree/other endpoint. Given no API keys, we'll use a direct mailto as fallback, 
-  // OR simulated submission that says "Emails to business@Med-Peptides.com" since we can't register an endpoint for them automatically.
+  // OR simulated submission that says "Emails to business@Atlas Health.com" since we can't register an endpoint for them automatically.
   // Actually, standard HTML form to formsubmit.co is free and requires no registration.
 
   const handleSubmit = (e) => {
@@ -217,7 +217,7 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
       user_type: userType || 'none'
     });
 
-    fetch('https://formsubmit.co/ajax/business@Med-Peptides.com', {
+    fetch('https://formsubmit.co/ajax/business@Atlas Health.com', {
         method: 'POST',
         headers: {
             'Accept': 'application/json'
@@ -241,7 +241,7 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
             window.open(`https://wa.me/971553561058?text=${text}`, '_blank');
           } else if (pendingQuote.type === 'Email') {
             const body = encodeURIComponent(`Sample Order Summary:\n${pendingQuote.summary}\n\nI have just submitted the contact form with my official details.`);
-            window.location.href = `mailto:business@Med-Peptides.com?subject=Official Quote Request&body=${body}`;
+            window.location.href = `mailto:business@Atlas Health.com?subject=Official Quote Request&body=${body}`;
           }
           setPendingQuote(null);
         }
@@ -281,7 +281,7 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
           {/* Left Panel - Structured Information */}
           <div style={{ order: isMobile ? 1 : 0 }}>
             <div style={{ marginBottom: '3rem' }}>
-              <span className="badge" style={{ marginBottom: '1rem' }}>Partner with Med-Peptides</span>
+              <span className="badge" style={{ marginBottom: '1rem' }}>Partner with Atlas Health</span>
               <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', fontWeight: 800, color: 'var(--primary)', lineHeight: 1.2 }}>
                 Institutional & <span style={{ color: 'var(--secondary)' }}>Clinical</span> Inquiries
               </h1>
@@ -347,7 +347,7 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
                 </div>
                 <div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Email Inquiry</div>
-                  <div style={{ fontWeight: 600 }}>business@Med-Peptides.com</div>
+                  <div style={{ fontWeight: 600 }}>business@Atlas Health.com</div>
                 </div>
               </div>
               <div
@@ -439,7 +439,7 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
               </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
-                <input type="hidden" name="_subject" value={`New Inquiry (${topic}) from Med-Peptides Website`} />
+                <input type="hidden" name="_subject" value={`New Inquiry (${topic}) from Atlas Health Website`} />
                 
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.9rem' }}>Full Name *</label>

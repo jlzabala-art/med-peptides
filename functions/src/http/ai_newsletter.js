@@ -40,7 +40,7 @@ function buildDigestPrompt(preferences) {
     advanced:     "High scientific depth. Include mechanistic details, receptor pathways, half-lives.",
   }[level] || "Moderate depth.";
 
-  return `You are AgentNewsletterDigest — an expert medical research content writer for Med-Peptides Research Platform.
+  return `You are AgentNewsletterDigest — an expert medical research content writer for Atlas Health Research Platform.
 
 SUBSCRIBER PROFILE:
 - Research goal: ${meta.label} (${meta.emoji})
@@ -100,7 +100,7 @@ function buildDigestHtml(content, preferences, unsubscribeToken) {
       <div style="display:flex;align-items:center;gap:12px;">
         <span style="font-size:24px;">${meta.emoji}</span>
         <div>
-          <div style="color:#6366f1;font-size:16px;font-weight:700;">Med-Peptides Research</div>
+          <div style="color:#6366f1;font-size:16px;font-weight:700;">Atlas Health Research</div>
           <div style="color:rgba(255,255,255,0.4);font-size:11px;letter-spacing:0.05em;text-transform:uppercase;">${meta.label} Weekly Digest</div>
         </div>
       </div>
@@ -139,7 +139,7 @@ function buildDigestHtml(content, preferences, unsubscribeToken) {
     </div>
     <div style="background:#f8fafc;padding:16px 32px;border-top:1px solid #e2e8f0;text-align:center;">
       <p style="margin:0;color:#94a3b8;font-size:11px;line-height:1.8;">
-        Med-Peptides Research Platform · research@med-peptides.com<br>
+        Atlas Health Research Platform · research@med-peptides.com<br>
         For educational and research purposes only. Not medical advice.<br>
         <a href="${unsubUrl}" style="color:#94a3b8;">Unsubscribe</a>
       </p>
@@ -194,7 +194,7 @@ module.exports = createAgent({
           auth: { user: gmailUser, pass: gmailAppPass },
         });
         await transporter.sendMail({
-          from: `"Med-Peptides Research" <${gmailUser}>`,
+          from: `"Atlas Health Research" <${gmailUser}>`,
           to: email, subject: content.subject, html: htmlBody,
         });
         if (subscriberId) {
@@ -215,6 +215,6 @@ module.exports = createAgent({
   // Fallback: return static template digest subject so scheduler doesn't crash
   fallback: async (ctx) => ({
     reply: "Digest generation temporarily unavailable.",
-    extras: { subject: "Your Weekly Med-Peptides Research Digest", htmlBody: "", degraded: true },
+    extras: { subject: "Your Weekly Atlas Health Research Digest", htmlBody: "", degraded: true },
   }),
 });

@@ -82,7 +82,7 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
   const handleShareCRM = (catalog) => {
     // Basic share implementation (Option C / mailto approach) until full Bigin sync is finalized
     const fullUrl = `${window.location.origin}/catalog/${catalog.slug}?utm_source=bigin_share`;
-    window.open(`mailto:?subject=Tu Catálogo Clínico de RegenPept&body=Hola,%0A%0AAquí tienes el enlace al catálogo clínico personalizado:%0A${fullUrl}`);
+    window.open(`mailto:?subject=Tu Catálogo Clínico de Atlas Health&body=Hola,%0A%0AAquí tienes el enlace al catálogo clínico personalizado:%0A${fullUrl}`);
   };
 
   const handleDelete = async (id) => {

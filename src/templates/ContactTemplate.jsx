@@ -31,29 +31,29 @@ const ContactTemplate = memo(({
             "@type": "ListItem",
             "position": 1,
             "name": "Home",
-            "item": "https://Med-Peptides-app-27a3a.web.app/"
+            "item": "https://Atlas Health-app-27a3a.web.app/"
           },
           {
             "@type": "ListItem",
             "position": 2,
             "name": "Contact Us",
-            "item": "https://Med-Peptides-app-27a3a.web.app/contact"
+            "item": "https://Atlas Health-app-27a3a.web.app/contact"
           }
         ]
       },
       {
         "@type": "ContactPage",
-        "name": "Contact Med-Peptides",
+        "name": "Contact Atlas Health",
         "description": "Contact our team for research support, institutional inquiries, and order assistance.",
-        "url": "https://Med-Peptides-app-27a3a.web.app/contact"
+        "url": "https://Atlas Health-app-27a3a.web.app/contact"
       }
     ]
   }), []);
 
   usePageMeta({
-    title: 'Contact Us | Research Support & Inquiries | Med-Peptides',
-    description: 'Get in touch with Med-Peptides for technical support, institutional inquiries, or order assistance regarding our research-grade peptides.',
-    canonicalUrl: 'https://Med-Peptides-app-27a3a.web.app/contact',
+    title: 'Contact Us | Research Support & Inquiries | Atlas Health',
+    description: 'Get in touch with Atlas Health for technical support, institutional inquiries, or order assistance regarding our research-grade peptides.',
+    canonicalUrl: 'https://Atlas Health-app-27a3a.web.app/contact',
     structuredData
   });
 

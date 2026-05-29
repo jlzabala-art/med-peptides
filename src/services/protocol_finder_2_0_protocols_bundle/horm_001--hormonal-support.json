@@ -11,7 +11,7 @@
     "complexity_level": "standard",
     "visibility": "public",
     "source_type": "curated_library",
-    "source_reference": "Med-Peptides_Hormonal_Protocols_2026",
+    "source_reference": "Atlas Health_Hormonal_Protocols_2026",
     "marker_alignment": {
       "hormonal_objective": {
         "gh_axis": {
@@ -29,8 +29,8 @@
       }
     },
     "author": {
-      "name": "Med-Peptides Clinical Team",
-      "organization": "Med-Peptides",
+      "name": "Atlas Health Clinical Team",
+      "organization": "Atlas Health",
       "title": "Peptide Specialists"
     },
     "review": {

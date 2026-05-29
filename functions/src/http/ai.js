@@ -181,7 +181,7 @@ module.exports = onRequest(
           }).join('\n');
 
           const systemInstruction = `
-You are the Med-Peptides Prescription Ingestion Agent.
+You are the Atlas Health Prescription Ingestion Agent.
 Your job is to analyze the medical prescription text provided by the user, match items against the available catalog of commercial products, and classify the remaining items as custom compounded formulations.
 
 The available catalog products are:
@@ -657,7 +657,7 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
           reply: [
             `# 🗂️ Goals vs. Categories — What's the Difference?`,
             ``,
-            `Understanding the distinction between **Research Goals** and **Product Categories** helps you navigate the Med-Peptides catalog more effectively.`,
+            `Understanding the distinction between **Research Goals** and **Product Categories** helps you navigate the Atlas Health catalog more effectively.`,
             ``,
             `### 🎯 Research Goals`,
             `Goals represent the **desired biological outcome** you are researching:`,
@@ -825,7 +825,7 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
       if (isIntroGoal) {
         const reply = [
           '# 🌟 Welcome to Your Clinical Research Journey!',
-          'Welcome! I am the **Med-Peptides Clinical Intelligence Assistant**. My purpose is to guide you through advanced cellular research, explaining peptide mechanisms, technical reconstitution protocols, and clinical literature in an accessible, structured format.',
+          'Welcome! I am the **Atlas Health Clinical Intelligence Assistant**. My purpose is to guide you through advanced cellular research, explaining peptide mechanisms, technical reconstitution protocols, and clinical literature in an accessible, structured format.',
           '',
           'Our research architecture is integrated around **8 Canonical Optimization Paths** designed to target specific biological goals. Click on any path or explore them below:',
           '',
@@ -1026,7 +1026,7 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
           replyParts = [
             `# 💵 Consultas de Precios, Pedidos al por Mayor y Suministro`,
             "",
-            `En Med-Peptides, mantenemos una estricta integridad de precios y niveles de descuento personalizados para investigadores clínicos, laboratorios y clínicas:`,
+            `En Atlas Health, mantenemos una estricta integridad de precios y niveles de descuento personalizados para investigadores clínicos, laboratorios y clínicas:`,
             "",
             `### 🛍️ Precios al por Menor`,
             `Para formatos de investigación estándar (viales, aguas estériles, jeringas), puede consultar los precios actuales, niveles activos y configurar su carrito de compras directamente en nuestro [Catálogo de Productos](/catalog).`,
@@ -1051,7 +1051,7 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
           replyParts = [
             `# 💵 Pricing, Bulk, & Sourcing Inquiries`,
             "",
-            `At Med-Peptides, we maintain strict pricing integrity and customized bulk tiers for clinical researchers, labs, and clinics:`,
+            `At Atlas Health, we maintain strict pricing integrity and customized bulk tiers for clinical researchers, labs, and clinics:`,
             "",
             `### 🛍️ Retail Pricing`,
             `For standard research sizes (vials, sterile waters, syringes), you can find current pricing, active tiers, and shopping cart configuration directly on our [Product Catalog](/catalog).`,
@@ -1226,7 +1226,7 @@ The user is CURRENTLY VIEWING the following ${typeLabel} detail page on the webs
 
         if (!isAdminMode) {
           systemInstruction += `
-You are the Med-Peptides Clinical Intelligence Assistant (known as Atlas AI), a world-class clinical pharmacist and molecular pharmacologist specializing in peptide therapeutics, supplements, and longevity protocols.
+You are the Atlas Health Clinical Intelligence Assistant (known as Atlas AI), a world-class clinical pharmacist and molecular pharmacologist specializing in peptide therapeutics, supplements, and longevity protocols.
 
 Language Alignment: You MUST automatically respond in the same language as the user's query.
 
@@ -1304,7 +1304,7 @@ WIDGET INJECTION RULES (VERY IMPORTANT):
           }
 
           systemInstruction += `
-You are Atlas AI, the Med-Peptides administrative assistant. 
+You are Atlas AI, the Atlas Health administrative assistant. 
 You must respond clearly and concisely in a professional, administrative tone. Do NOT provide medical advice.
 
 Language Alignment: You MUST automatically respond in the same language as the user's query.
@@ -1534,7 +1534,7 @@ ${JSON.stringify(clinicalRules || {})}
           try {
             // Fetch dynamic model and prompt
             let customModel = "gemini-2.0-flash-lite";
-            let customPrompt = `You are the Med-Peptides Logistics & Sourcing Agent. You handle queries about shipping, delivery times, wholesale pricing, sterile transit protocols, and customs. Be concise, polite, and use bullet points.`;
+            let customPrompt = `You are the Atlas Health Logistics & Sourcing Agent. You handle queries about shipping, delivery times, wholesale pricing, sterile transit protocols, and customs. Be concise, polite, and use bullet points.`;
             
             try {
               const snap = await getFirestore().collection("ai_config").doc("agents").get();
@@ -1575,6 +1575,10 @@ ${JSON.stringify(clinicalRules || {})}
                     previewText = `Set cost price of product \`${fnArgs.product_id}\` to **$${fnArgs.new_cost}**`;
                   } else if (fnName === "update_user_role") {
                     previewText = `Update user \`${fnArgs.user_id}\`: set role to **${fnArgs.role || 'unchanged'}** and approved status to **${fnArgs.approved !== undefined ? fnArgs.approved : 'unchanged'}**`;
+                  } else if (fnName === "suspend_user") {
+                    previewText = `**SUSPEND** user \`${fnArgs.user_id}\`. Reason: ${fnArgs.reason}`;
+                  } else if (fnName === "update_order_status") {
+                    previewText = `Update order \`#${fnArgs.order_id}\` to status: **${fnArgs.new_status}**`;
                   }
 
                   res.status(200).json({

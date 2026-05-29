@@ -19,7 +19,7 @@ export default function CatalogPreviewPanel({ catalog, products = [], protocols 
   const primaryColor = catalog?.branding?.primaryColor || '#1a73e8'; // Google Blue default
   const secondaryColor = catalog?.branding?.secondaryColor || '#185abc';
   const logoUrl = catalog?.branding?.logoUrl || '';
-  const companyName = catalog?.branding?.companyName || 'Med-Peptides Franchise';
+  const companyName = catalog?.branding?.companyName || 'Atlas Health Franchise';
 
   const previewStyle = {
     fontFamily: catalog?.branding?.fontFamily || "'Inter', sans-serif",
@@ -32,7 +32,7 @@ export default function CatalogPreviewPanel({ catalog, products = [], protocols 
   };
 
   return (
-    <div style={previewStyle}>
+    <div id="catalog-preview-printable" style={previewStyle}>
       {/* Dynamic Personalization Header Banner */}
       {(recipientName || clinicName) && (
         <div style={{
@@ -273,6 +273,26 @@ export default function CatalogPreviewPanel({ catalog, products = [], protocols 
                       {prod.desc || prod.science?.desc || 'Clinical reference details pending review.'}
                     </div>
 
+                    {/* Custom Annotation Note */}
+                    {catalog?.annotations?.[prodId] && (
+                      <div style={{
+                        marginTop: '0.75rem',
+                        padding: '0.75rem 1rem',
+                        backgroundColor: `${primaryColor}0a`,
+                        borderLeft: `3px solid ${primaryColor}`,
+                        borderRadius: '4px',
+                        fontSize: '0.8rem',
+                        color: '#3c4043',
+                        lineHeight: 1.5,
+                        textAlign: 'left'
+                      }}>
+                        <strong style={{ color: primaryColor, display: 'block', marginBottom: '2px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Clinical Note:
+                        </strong>
+                        {catalog.annotations[prodId]}
+                      </div>
+                    )}
+
                     {onAdd && (
                       <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
                         <button
@@ -347,6 +367,26 @@ export default function CatalogPreviewPanel({ catalog, products = [], protocols 
                             {phase.name || `Phase ${pIdx + 1}`}
                           </span>
                         ))}
+                      </div>
+                    )}
+
+                    {/* Custom Annotation Note */}
+                    {catalog?.annotations?.[protoId] && (
+                      <div style={{
+                        marginTop: '0.75rem',
+                        padding: '0.75rem 1rem',
+                        backgroundColor: `${primaryColor}0a`,
+                        borderLeft: `3px solid ${primaryColor}`,
+                        borderRadius: '4px',
+                        fontSize: '0.8rem',
+                        color: '#3c4043',
+                        lineHeight: 1.5,
+                        textAlign: 'left'
+                      }}>
+                        <strong style={{ color: primaryColor, display: 'block', marginBottom: '2px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Clinical Note:
+                        </strong>
+                        {catalog.annotations[protoId]}
                       </div>
                     )}
                     

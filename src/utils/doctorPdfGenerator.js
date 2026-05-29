@@ -1098,7 +1098,7 @@ function renderDocumentationAndProvenance(doc, protocol, y) {
 
   const version   = meta.version       || protocol.version       || 'N/A';
   const lastRev   = meta.last_reviewed || protocol.last_reviewed || 'N/A';
-  const createdBy = meta.created_by    || protocol.created_by    || 'Med-Peptides Clinical Team';
+  const createdBy = meta.created_by    || protocol.created_by    || 'Atlas Health Clinical Team';
   const genDate   = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   // Shaded provenance block
@@ -1149,7 +1149,7 @@ function drawFooter(doc, pageNumber, totalPages, protocolId) {
   doc.setFontSize(7);
   setColor(doc, COLORS.midGray);
 
-  doc.text('Med-Peptides — Confidential | For Physician Review Only', PAGE.margin, y);
+  doc.text('Atlas Health — Confidential | For Physician Review Only', PAGE.margin, y);
   doc.text(`${protocolId || ''} | Page ${pageNumber} of ${totalPages}`, PAGE.width - PAGE.marginRight, y, { align: 'right' });
 }
 

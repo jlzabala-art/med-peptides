@@ -16,7 +16,7 @@ const TermsOfUse = ({ onBack }) => {
       icon: <FileText size={24} />,
       content: (
         <>
-          <p>All products listed on Med-Peptides are intended exclusively for laboratory research purposes. They are not for human or animal consumption, nor are they approved for diagnostic or therapeutic use.</p>
+          <p>All products listed on Atlas Health are intended exclusively for laboratory research purposes. They are not for human or animal consumption, nor are they approved for diagnostic or therapeutic use.</p>
           <p>By purchasing, you confirm that you are a qualified researcher operating within a controlled environment and that you possess the necessary expertise to handle advanced chemical compounds.</p>
         </>
       )
@@ -49,7 +49,7 @@ const TermsOfUse = ({ onBack }) => {
       icon: <AlertCircle size={24} />,
       content: (
         <>
-          <p>Products are provided "as is" for research purposes. Med-Peptides makes no warranties, express or implied, regarding the fitness of products for any particular purpose.</p>
+          <p>Products are provided "as is" for research purposes. Atlas Health makes no warranties, express or implied, regarding the fitness of products for any particular purpose.</p>
           <p>We are not liable for any direct, indirect, incidental, or consequential damages arising from the use or misuse of our products or information provided through our platform.</p>
         </>
       )
@@ -124,7 +124,7 @@ const TermsOfUse = ({ onBack }) => {
               <div className="legal-card mb-12" style={{ background: 'var(--gradient-soft)', border: '1px solid rgba(0, 54, 102, 0.05)' }}>
                 <h2 className="h3 text-primary mb-6">Terms of Engagement</h2>
                 <p className="text-muted leading-relaxed mb-0">
-                  Med-Peptides provides a secure interface for the procurement of research-grade molecular compounds and access to advanced clinical protocols. By utilizing our platform, you agree to adhere to the standards set forth in this document, which are designed to ensure the safety, integrity, and scientific accuracy of the research conducted using our materials.
+                  Atlas Health provides a secure interface for the procurement of research-grade molecular compounds and access to advanced clinical protocols. By utilizing our platform, you agree to adhere to the standards set forth in this document, which are designed to ensure the safety, integrity, and scientific accuracy of the research conducted using our materials.
                 </p>
               </div>
 
@@ -149,7 +149,7 @@ const TermsOfUse = ({ onBack }) => {
                 <div className="legal-version-tag">Version 3.5.2 • Professional Access</div>
                 <p className="text-xs text-light mb-2">Effective Date: May 1, 2026</p>
                 <p className="text-xs text-light">
-                  Med-Peptides Platform Operations • Research Compliance Division
+                  Atlas Health Platform Operations • Research Compliance Division
                 </p>
               </footer>
             </main>

@@ -16,7 +16,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Do the courses offer official certification?',
-    a: 'Yes. All completed courses award an Official Certificate from Med-Peptides / Renewal EU, recognized in multiple European and Latin American medical jurisdictions.',
+    a: 'Yes. All completed courses award an Official Certificate from Atlas Health / Renewal EU, recognized in multiple European and Latin American medical jurisdictions.',
   },
   {
     q: 'Can I access clinical protocols directly from the Academy?',
@@ -28,7 +28,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Are there prerequisites for enrollment?',
-    a: 'A professional degree in health sciences (medicine, pharmacy, advanced nursing, or others) is required, along with completing the Med-Peptides professional verification process.',
+    a: 'A professional degree in health sciences (medicine, pharmacy, advanced nursing, or others) is required, along with completing the Atlas Health professional verification process.',
   },
 ];
 

@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 const sourceDir = '/Users/joseluiszabala/.gemini/antigravity/brain/2112460a-7b2f-4b1a-ac12-05d5a91fcddc/';
-const destDir = '/Users/joseluiszabala/Documents/Antigravity/Med-Peptides-web/public/assets/vials/';
+const destDir = '/Users/joseluiszabala/Documents/Antigravity/Atlas Health-web/public/assets/vials/';
 
 const mapping = {
     'aod9604_vial_premium_1777365547550.png': 'aod9604.png',

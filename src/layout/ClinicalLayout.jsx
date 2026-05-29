@@ -48,7 +48,7 @@ export default function ClinicalLayout() {
             <HeartPulse size={24} />
           </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: '1.2rem', color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.1 }}>Med-Peptides</div>
+            <div style={{ fontWeight: 800, fontSize: '1.2rem', color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.1 }}>Atlas Health</div>
             <div style={{ fontWeight: 600, fontSize: '0.7rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Clinical Portal
             </div>
@@ -123,7 +123,7 @@ export default function ClinicalLayout() {
       
       {/* Minimal Footer */}
       <footer style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-tertiary)', fontSize: '0.8rem', borderTop: '1px solid #e2e8f0' }}>
-        &copy; {new Date().getFullYear()} Med-Peptides Clinical Systems. Confidencialidad médico-paciente garantizada.
+        &copy; {new Date().getFullYear()} Atlas Health Clinical Systems. Confidencialidad médico-paciente garantizada.
       </footer>
     </div>
   );

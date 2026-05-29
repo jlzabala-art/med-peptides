@@ -1,6 +1,6 @@
 {
   "protocol_duration_weeks": 10,
-  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_name": "Atlas Health Clinical Team",
   "bundleVersion": "2.0",
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -76,7 +76,7 @@
     "resolved_monitoring": []
   },
   "protocol_author_notes": "Official curated protocol for general clinical use.",
-  "protocol_author_organization": "Med-Peptides",
+  "protocol_author_organization": "Atlas Health",
   "protocol_last_reviewed_at": "2026-03-29",
   "protocol_source_reference": "internal_guide",
   "expected_outcomes": {
@@ -507,7 +507,7 @@
     ]
   },
   "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
-  "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
+  "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
   "_schemaGapFixed": {
     "_nanoseconds": 912000000,
     "_seconds": 1777190717
@@ -580,8 +580,8 @@
     "visibility": "public",
     "scientificName": "Energy · Mitochondrial Membrane Repair + Resilience via SS-31 + MOTS-C · 8 Weeks",
     "author": {
-      "organization": "Med-Peptides",
-      "name": "Med-Peptides Clinical Team",
+      "organization": "Atlas Health",
+      "name": "Atlas Health Clinical Team",
       "title": "Peptide Specialists"
     },
     "evidence_grade_note": "GRADE B: MOTS-c (Lee C, Cell Metab 2015); SS-31/Elamipretide MMPOWER-3 trial (Karaa 2018); NR human RCT data (Martens CR, Nat Commun 2018). Combined protocol evidence is extrapolated from individual components.",
@@ -625,7 +625,7 @@
     },
     "regulatory_note": "MOTS-c and SS-31: research peptides, not FDA-approved. NR (Nicotinamide Riboside): FDA GRAS-listed dietary supplement (Tru Niagen, BASIS). Available OTC. Use of peptide components requires physician oversight via compounding pharmacy. Updated 2026: Elamipretide (Forzinity) received FDA accelerated approval for Barth syndrome in patients weighing at least 30 kg. Its use for general mitochondrial resilience, chronic fatigue, long COVID fatigue, or athletic recovery remains off-label/research-oriented."
   },
-  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
   "canonical_enrichment": {
     "compatibleWith": "antigravity_v2_firebase_import",
     "auditFieldsCompleted": [

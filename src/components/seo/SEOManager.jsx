@@ -15,8 +15,8 @@ const SEOManager = ({
 }) => {
   useEffect(() => {
     // 1. Manage Meta Description
-    let description = "Med-Peptides offers premium research peptides and advanced clinical protocols for institutional and laboratory research.";
-    let title = "Med-Peptides | Premium Research Peptides & Clinical Protocols";
+    let description = "Atlas Health offers premium research peptides and advanced clinical protocols for institutional and laboratory research.";
+    let title = "Atlas Health | Premium Research Peptides & Clinical Protocols";
     let image = `${window.location.origin}/og-image.png`; // Fallback image
     let url = window.location.href;
     let type = "website";
@@ -57,15 +57,15 @@ const SEOManager = ({
     }
 
     if (selectedProduct) {
-      title = `${selectedProduct.name} | High-Purity Research Peptide | Med-Peptides`;
-      description = `High-purity ${selectedProduct.name} research peptide. Analysis: ${selectedProduct.purity || '99%+'}. Molecular weight: ${selectedProduct.molecular_weight || 'N/A'}. Available for institutional research at Med-Peptides.`;
+      title = `${selectedProduct.name} | High-Purity Research Peptide | Atlas Health`;
+      description = `High-purity ${selectedProduct.name} research peptide. Analysis: ${selectedProduct.purity || '99%+'}. Molecular weight: ${selectedProduct.molecular_weight || 'N/A'}. Available for institutional research at Atlas Health.`;
       image = selectedProduct.image_url || image;
       type = "product";
     } else if (selectedCategory) {
-      title = `${selectedCategory} Peptides | Institutional Research Collection | Med-Peptides`;
+      title = `${selectedCategory} Peptides | Institutional Research Collection | Atlas Health`;
       description = `Explore our ${selectedCategory} research peptide collection. Institutional-grade compounds for advanced laboratory studies.`;
     } else if (selectedObjective) {
-      title = `${selectedObjective} Protocols | Advanced Research BLUEPRINTS | Med-Peptides`;
+      title = `${selectedObjective} Protocols | Advanced Research BLUEPRINTS | Atlas Health`;
       description = `Research protocols and pathways for ${selectedObjective}. Advanced clinical blueprints for institutional investigation.`;
     }
 
@@ -98,7 +98,7 @@ const SEOManager = ({
     updateMetaTag('og:image', image);
     updateMetaTag('og:url', url);
     updateMetaTag('og:type', type);
-    updateMetaTag('og:site_name', 'Med-Peptides');
+    updateMetaTag('og:site_name', 'Atlas Health');
 
     // 3. Twitter Card Tags
     updateMetaTag('twitter:card', 'summary_large_image', 'name');
@@ -125,7 +125,7 @@ const SEOManager = ({
     addSchema({
       "@context": "https://schema.org",
       "@type": "Organization",
-      "name": "Med-Peptides",
+      "name": "Atlas Health",
       "url": window.location.origin,
       "logo": `${window.location.origin}/logo.png`,
       "description": "Premium Research Peptides & Clinical Protocols",
@@ -144,7 +144,7 @@ const SEOManager = ({
         "name": selectedProduct.name,
         "description": selectedProduct.description || description,
         "image": selectedProduct.image_url,
-        "brand": { "@type": "Brand", "name": "Med-Peptides" },
+        "brand": { "@type": "Brand", "name": "Atlas Health" },
         "offers": {
           "@type": "Offer",
           "availability": "https://schema.org/InStock",

@@ -15,7 +15,7 @@ export default function CompoundComparator() {
   }), []);
 
   usePageMeta({
-    title: 'Research Peptide Comparator | Med-Peptides',
+    title: 'Research Peptide Comparator | Atlas Health',
     description: 'Compare side-by-side mechanism of action, CAS numbers, and research objectives for high-purity peptides.',
     path: '/compare',
     structuredData

@@ -1,6 +1,6 @@
 {
   "protocol_duration_weeks": 8,
-  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_name": "Atlas Health Clinical Team",
   "bundleVersion": "2.0",
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -76,7 +76,7 @@
     "resolved_monitoring": []
   },
   "protocol_author_notes": "Official curated protocol for general clinical use.",
-  "protocol_author_organization": "Med-Peptides",
+  "protocol_author_organization": "Atlas Health",
   "protocol_last_reviewed_at": "2026-03-29",
   "protocol_source_reference": "internal_guide",
   "expected_outcomes": {
@@ -521,7 +521,7 @@
     ]
   },
   "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
-  "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
+  "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
   "_schemaGapFixed": {
     "_nanoseconds": 978000000,
     "_seconds": 1777190715
@@ -597,8 +597,8 @@
     "primary_goal": "Cognitive Support",
     "visibility": "public",
     "author": {
-      "organization": "Med-Peptides",
-      "name": "Med-Peptides Clinical Team",
+      "organization": "Atlas Health",
+      "name": "Atlas Health Clinical Team",
       "title": "Peptide Specialists"
     },
     "evidence_grade_note": "Multiple Russian Phase II/III RCTs demonstrating anxiolytic efficacy (Zozulya 2014, Semenova 2010). HAM-A validated outcomes. Grade C per GRADE due to regional publication bias and limited Western replication.",
@@ -645,7 +645,7 @@
     "regulatory_note": "Not FDA-approved. Available via 503A compounding pharmacies in the US under physician supervision. Selank holds approved prescription status in Russia for generalized anxiety disorder. Not EMA-approved. Use constitutes off-label research peptide administration.",
     "duration_weeks": 8
   },
-  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
   "canonical_enrichment": {
     "compatibleWith": "antigravity_v2_firebase_import",
     "auditFieldsCompleted": [

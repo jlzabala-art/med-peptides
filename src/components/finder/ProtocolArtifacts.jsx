@@ -17,7 +17,7 @@ const ArtifactHeader = ({ title, id, type, date, duration }) => (
         <div style={{ width: '40px', height: '40px', background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justify: 'center', color: 'white' }}>
           <ShieldAlert size={24} />
         </div>
-        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '-0.02em' }}>Med-Peptides Clinical</div>
+        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '-0.02em' }}>Atlas Health Clinical</div>
       </div>
       <div style={{ textAlign: 'right' }}>
         <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>Document Type</div>
@@ -457,7 +457,7 @@ export const ArtifactPreviewOverlay = ({ type, data, onClose }) => {
                       <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--color-text-primary)', lineHeight: 1.5 }}>
                         BEGIN:VCALENDAR<br />
                         VERSION:2.0<br />
-                        PRODID:-//Med-Peptides//Clinical Calendar v5.2//EN<br />
+                        PRODID:-//Atlas Health//Clinical Calendar v5.2//EN<br />
                         CALSCALE:GREGORIAN<br />
                         METHOD:PUBLISH<br />
                         X-WR-CALNAME:Dosing Schedule - {data.protocol_title || 'Custom Protocol'}<br />

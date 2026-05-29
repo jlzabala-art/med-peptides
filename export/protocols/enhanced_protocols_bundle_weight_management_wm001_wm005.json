@@ -528,8 +528,8 @@
         "complexity_level": "standard",
         "visibility": "public",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "review": {
@@ -575,7 +575,7 @@
         "evidence_grade_note": "Strong clinical evidence exists for tirzepatide in obesity and metabolic disease. Adjunct peptide components have lower, mostly translational evidence; therefore the combined protocol is graded A- rather than A."
       },
       "protocol_review_status": "approved",
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "protocol_source_type": "curated_library",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -592,7 +592,7 @@
       "protocol_author_title": "Peptide Specialists",
       "confidence_score": 93,
       "protocol_author_notes": "Official curated protocol for general clinical use.",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "expected_outcomes": {
         "qualitative": [
@@ -864,13 +864,13 @@
           "scientificName": "Semaglutide + Cagrilintide GLP-1 & Long-Acting Amylin Dual-Hormone Protocol",
           "description": "12-week dual-hormone weight-loss protocol pairing semaglutide GLP-1 agonism with cagrilintide amylin receptor activation for sustained appetite suppression and adiposity reduction."
         },
-        "protocol_author_name": "Med-Peptides Clinical Team",
+        "protocol_author_name": "Atlas Health Clinical Team",
         "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
         "protocol_is_physician_authored": false,
         "protocol_source_version": "v5.0",
         "complexity_level": "advanced",
         "protocol_author_notes": "Official curated protocol for general clinical use.",
-        "protocol_author_organization": "Med-Peptides",
+        "protocol_author_organization": "Atlas Health",
         "protocol_last_reviewed_at": "2026-03-29",
         "protocol_source_reference": "internal_guide",
         "protocol_slug": "weight-management-cagrisem-12w",

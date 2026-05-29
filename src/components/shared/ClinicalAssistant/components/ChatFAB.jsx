@@ -86,7 +86,7 @@ export default function ChatFAB({ isOpen, setIsOpen, hasNewActivity, isProductPa
             style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}
           >
             <span style={{ fontSize: '0.82rem', fontWeight: 800, letterSpacing: '0.01em', lineHeight: 1.2, whiteSpace: 'nowrap' }}>
-              Ask Med-Peptides AI
+              Ask Atlas Health AI
             </span>
             <span style={{ fontSize: '0.62rem', opacity: 0.7, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
               Neural Link Active

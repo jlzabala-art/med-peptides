@@ -171,7 +171,7 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
     if (!supplement) {
       return {
         title: 'Loading Supplement',
-        description: 'Discover premium research-grade supplements on Med-Peptides.',
+        description: 'Discover premium research-grade supplements on Atlas Health.',
         path: `/supplements/${slug}`,
       };
     }
@@ -192,11 +192,11 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
         category: supplement.category,
         brand: {
           '@type': 'Brand',
-          name: 'Med-Peptides'
+          name: 'Atlas Health'
         },
         offers: {
           '@type': 'Offer',
-          url: `https://Med-Peptides-app-27a3a.web.app${canonicalPath}`,
+          url: `https://Atlas Health-app-27a3a.web.app${canonicalPath}`,
           priceCurrency: 'USD',
           price: supplement.variants?.[0]?.pricing?.retail?.perUnit || supplement.pricing?.retail?.perUnit || '0.00',
           availability: 'https://schema.org/InStock',

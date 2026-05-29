@@ -43,10 +43,10 @@
             "mapValue": {
               "fields": {
                 "name": {
-                  "stringValue": "Med-Peptides Clinical Team"
+                  "stringValue": "Atlas Health Clinical Team"
                 },
                 "organization": {
-                  "stringValue": "Med-Peptides"
+                  "stringValue": "Atlas Health"
                 },
                 "title": {
                   "stringValue": "Peptide Specialists"

@@ -253,7 +253,7 @@ export default function ObjectiveDetailView({
         <div>
           <h4 style={{ color: 'var(--text-main)', marginBottom: '0.75rem', fontSize: '1.2rem', fontWeight: 800 }}>Clinical Integrity Statement</h4>
           <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6, margin: 0 }}>
-            Med-Peptides implements standard laboratory controls for ISO-certified research reagents. Compounds listed under <strong>{objectiveId}</strong> are intended for controlled laboratory study and in-vitro applications only. Full Certificates of Analysis (CoA) are available for all scientific protocols.
+            Atlas Health implements standard laboratory controls for ISO-certified research reagents. Compounds listed under <strong>{objectiveId}</strong> are intended for controlled laboratory study and in-vitro applications only. Full Certificates of Analysis (CoA) are available for all scientific protocols.
           </p>
         </div>
       </div>

@@ -131,7 +131,7 @@ export default function CoBranding({ ownerId, ownerType }) {
                 <ImageIcon size={24} color="var(--text-muted)" />
               </div>
               <h4 style={{ margin: '0 0 0.25rem', fontSize: '1rem' }}>{profileText}</h4>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Partnered with Med-Peptides</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Partnered with Atlas Health</div>
             </div>
 
             <button style={{ 
@@ -149,7 +149,7 @@ export default function CoBranding({ ownerId, ownerType }) {
             </button>
             
             <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              Powered by RegenPept Infrastructure
+              Powered by Atlas Health Infrastructure
             </div>
           </div>
         </div>

@@ -230,7 +230,7 @@ export default function DoctorDashboard() {
 
   const headerProps = {
     title: currentTab?.label || 'Dashboard',
-    subtitle: `${doctorName} · Med-Peptides Physician Portal`,
+    subtitle: `${doctorName} · Atlas Health Physician Portal`,
     onSearchClick: () => {}
   };
 

@@ -7,13 +7,13 @@ export async function generateClinicalBriefPDF(messages = []) {
   let y = 20;
 
   // Header
-  doc.setFillColor(0, 75, 135); // Med-Peptides Blue
+  doc.setFillColor(0, 75, 135); // Atlas Health Blue
   doc.rect(0, 0, pageWidth, 40, 'F');
   
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(22);
   doc.setFont("helvetica", "bold");
-  doc.text("Med-Peptides", 20, 25);
+  doc.text("Atlas Health", 20, 25);
   
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
@@ -59,5 +59,5 @@ export async function generateClinicalBriefPDF(messages = []) {
   doc.setTextColor(150, 150, 150);
   doc.text("Disclaimer: For laboratory research use only. Not for human consumption.", pageWidth / 2, 285, { align: "center" });
 
-  doc.save(`Med-Peptides_Brief_${new Date().toISOString().slice(0, 10)}.pdf`);
+  doc.save(`Atlas Health_Brief_${new Date().toISOString().slice(0, 10)}.pdf`);
 }

@@ -559,7 +559,7 @@ export default function WholesalerBulkOrderBuilder() {
               Bulk Order enviado correctamente al Admin
             </div>
             <div style={{ fontSize: '0.72rem', color: '#818cf8' }}>
-              El equipo de Med-Peptides ha sido notificado y procesará tu pedido.
+              El equipo de Atlas Health ha sido notificado y procesará tu pedido.
             </div>
           </div>
         </div>

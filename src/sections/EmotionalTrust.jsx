@@ -78,7 +78,7 @@ export default function EmotionalTrust() {
           </div>
           <blockquote style={quoteStyle}>
             "The combination of verified CoAs, clear reconstitution guides, and
-            structured protocols makes Med-Peptides the go-to supplier for our
+            structured protocols makes Atlas Health the go-to supplier for our
             research team. The documentation quality is exceptional."
           </blockquote>
           <cite style={citeStyle}>— Independent Research Laboratory, EU</cite>

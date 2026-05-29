@@ -68,7 +68,7 @@ function buildWelcomeEmail(preferences, unsubscribeToken) {
 
   const subject = goalLabel
     ? `Welcome to your ${goalLabel} Research Digest 🎉`
-    : "Welcome to Med-Peptides Weekly Research Digest 🎉";
+    : "Welcome to Atlas Health Weekly Research Digest 🎉";
 
   const personalizedIntro = goalLabel
     ? `We've set up your personalized <strong>${goalLabel}</strong> research digest. Every Monday you'll receive curated insights, protocol updates, and research summaries tailored to your goals.`
@@ -90,7 +90,7 @@ function buildWelcomeEmail(preferences, unsubscribeToken) {
     <!-- Header -->
     <div style="background:linear-gradient(135deg,#0f0f1a,#0d1629);padding:28px 32px;text-align:center;">
       <div style="font-size:28px;margin-bottom:8px;">${goalEmoji}</div>
-      <span style="color:#6366f1;font-size:18px;font-weight:700;letter-spacing:-0.3px;">Med-Peptides Research</span>
+      <span style="color:#6366f1;font-size:18px;font-weight:700;letter-spacing:-0.3px;">Atlas Health Research</span>
       <div style="color:rgba(255,255,255,0.4);font-size:11px;margin-top:4px;letter-spacing:0.05em;text-transform:uppercase;">Weekly Research Digest</div>
     </div>
 
@@ -131,7 +131,7 @@ function buildWelcomeEmail(preferences, unsubscribeToken) {
     <!-- Footer -->
     <div style="background:#f8fafc;padding:16px 32px;border-top:1px solid #e2e8f0;text-align:center;">
       <p style="margin:0;color:#94a3b8;font-size:11px;line-height:1.8;">
-        Med-Peptides Research Platform · research@med-peptides.com<br>
+        Atlas Health Research Platform · research@med-peptides.com<br>
         <a href="${unsubUrl}" style="color:#94a3b8;text-decoration:underline;">Unsubscribe</a>
         · For educational and research purposes only.
       </p>
@@ -230,8 +230,8 @@ const handler = onRequest(
             data: [{
               Last_Name: normalizedEmail.split('@')[0], // Last Name is mandatory in Zoho Contacts
               Email: normalizedEmail,
-              Description: `Subscribed via Med-Peptides Newsletter. Preferred Goal: ${preferences.goal || 'default'}. Level: ${preferences.level || 'default'}.`,
-              Tag: [{ name: "Med-Peptides Mailing" }]
+              Description: `Subscribed via Atlas Health Newsletter. Preferred Goal: ${preferences.goal || 'default'}. Level: ${preferences.level || 'default'}.`,
+              Tag: [{ name: "Atlas Health Mailing" }]
             }]
           };
 
@@ -272,7 +272,7 @@ const handler = onRequest(
         const { subject, html } = buildWelcomeEmail(preferences, unsubscribeToken);
 
         await transporter.sendMail({
-          from:    `"Med-Peptides Research" <${gmailUser}>`,
+          from:    `"Atlas Health Research" <${gmailUser}>`,
           to:      normalizedEmail,
           subject,
           html,

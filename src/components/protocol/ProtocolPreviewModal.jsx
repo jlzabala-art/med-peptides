@@ -38,8 +38,8 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
   const evidenceGrade    = meta.evidence_grade || '—';
   const complexity       = meta.complexity_level || protocol?.complexity_level || '—';
   const version          = protocol?.protocol_version || meta.version || '—';
-  const author           = protocol?.protocol_author_name || 'Med-Peptides Clinical Team';
-  const authorOrg        = protocol?.protocol_author_organization || 'Med-Peptides';
+  const author           = protocol?.protocol_author_name || 'Atlas Health Clinical Team';
+  const authorOrg        = protocol?.protocol_author_organization || 'Atlas Health';
   const shortCode        = meta.shortCode || protocol?.protocol_id || '';
   const reviewStatus     = (protocol?.protocol_review_status || protocol?.status || 'pending').toUpperCase();
   const clinicalSummary  = meta.clinical_summary || meta.description || protocol?.overview_summary || '';
@@ -171,7 +171,7 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
         fontSize: '0.52rem', fontWeight: 600, color: 'rgba(255,255,255,0.35)',
         padding: '0.45rem 0.7rem', letterSpacing: '0.06em',
         fontFamily: 'monospace',
-      }}>Med-Peptides</span>
+      }}>Atlas Health</span>
     </div>
   );
 
@@ -1195,17 +1195,17 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
             {/* Disclaimer paragraph */}
             <div style={{ background: 'var(--color-bg-app)', border: '1px solid #e2e8f0', borderLeft: '3px solid #003666', borderRadius: 4, padding: '0.85rem 1rem' }}>
               <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-secondary)', lineHeight: 1.65 }}>
-                <strong style={{ color: 'var(--color-primary)', fontWeight: 700 }}>DISCLAIMER:</strong> This protocol document has been compiled by Med-Peptides for informational and educational purposes only.
+                <strong style={{ color: 'var(--color-primary)', fontWeight: 700 }}>DISCLAIMER:</strong> This protocol document has been compiled by Atlas Health for informational and educational purposes only.
                 All compounds referenced are intended for <strong>Laboratory Research Use Only (RUO)</strong> and are not approved for human use by the FDA, EMA, or any other regulatory authority.
                 This document does not constitute medical advice. Always consult a qualified healthcare professional before initiating any therapeutic regimen.
-                Med-Peptides assumes no liability for the use or misuse of the information herein.
+                Atlas Health assumes no liability for the use or misuse of the information herein.
               </p>
             </div>
 
             {/* Document ID bar */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid #f0f4f8' }}>
               <span style={{ fontSize: '0.6rem', color: 'var(--color-border)', letterSpacing: '0.05em' }}>
-                © {new Date().getFullYear()} Med-Peptides · Clinical Protocol System · Doc: {shortCode || name} · Generated: {today}
+                © {new Date().getFullYear()} Atlas Health · Clinical Protocol System · Doc: {shortCode || name} · Generated: {today}
               </span>
               <span style={{ fontSize: '0.58rem', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-bg-surface)', background: 'var(--color-danger)', borderRadius: 3, padding: '0.2rem 0.55rem' }}>
                 RUO

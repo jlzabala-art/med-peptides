@@ -6,7 +6,7 @@
 function buildWelcomeEmail(userData) {
   const name = userData.firstName || "Researcher";
   
-  const subject = `Welcome to Med-Peptides, ${name}!`;
+  const subject = `Welcome to Atlas Health, ${name}!`;
 
   const html = `
     <!DOCTYPE html>
@@ -27,11 +27,11 @@ function buildWelcomeEmail(userData) {
     <body>
       <div class="container">
         <div class="header">
-          <h1>Welcome to Med-Peptides</h1>
+          <h1>Welcome to Atlas Health</h1>
         </div>
         <div class="content">
           <p>Hello ${name},</p>
-          <p>Thank you for registering with Med-Peptides. Your account has been successfully created and is currently <strong>pending professional verification</strong>.</p>
+          <p>Thank you for registering with Atlas Health. Your account has been successfully created and is currently <strong>pending professional verification</strong>.</p>
           <p>As a registered member, you can now:</p>
           <ul>
             <li>Track your research inquiries and orders.</li>
@@ -41,10 +41,10 @@ function buildWelcomeEmail(userData) {
           <p>We are committed to supporting your research with the highest quality peptides and logistical excellence.</p>
           <a href="https://med-peptides-app-27a3a.web.app/login" class="button">Access Your Dashboard</a>
           <p>If you have any questions, feel free to reply to this email or contact us via WhatsApp.</p>
-          <p>Best regards,<br>The Med-Peptides Team</p>
+          <p>Best regards,<br>The Atlas Health Team</p>
         </div>
         <div class="footer">
-          <p>&copy; ${new Date().getFullYear()} Med-Peptides. For research use only.</p>
+          <p>&copy; ${new Date().getFullYear()} Atlas Health. For research use only.</p>
         </div>
       </div>
     </body>

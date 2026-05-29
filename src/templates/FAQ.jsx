@@ -6,8 +6,8 @@ import { useHeaderHeight } from '../hooks/useHeaderHeight';
 
 const faqData = [
   {
-    question: "Where is Med-Peptides based?",
-    answer: "Med-Peptides is proudly based in the USA. All of our operations, including fulfillment and customer support, are conducted domestically to ensure the highest standards of service and reliability."
+    question: "Where is Atlas Health based?",
+    answer: "Atlas Health is proudly based in the USA. All of our operations, including fulfillment and customer support, are conducted domestically to ensure the highest standards of service and reliability."
   },
   {
     question: "Do you provide third-party testing for your products?",
@@ -325,7 +325,7 @@ const FAQ_CTA_BTN_STYLE = { backgroundColor: 'white', color: 'var(--primary)', p
 export default function FAQ({ onBack }) {
   usePageMeta({
     title: 'Frequently Asked Questions',
-    description: 'Find answers to common questions about research peptides, purity standards, shipping, and how to order from Med-Peptides.',
+    description: 'Find answers to common questions about research peptides, purity standards, shipping, and how to order from Atlas Health.',
     path: '/faq',
   });
 

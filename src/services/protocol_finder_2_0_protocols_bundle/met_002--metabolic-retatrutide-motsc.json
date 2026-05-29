@@ -1,7 +1,7 @@
 {
   "id": "met_002",
   "protocol_duration_weeks": 12,
-  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_name": "Atlas Health Clinical Team",
   "bundleVersion": "2.0",
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -82,7 +82,7 @@
   },
   "protocol_author_notes": "Official curated protocol for general clinical use.",
   "_schemaVersion": "antigravity_v2",
-  "protocol_author_organization": "Med-Peptides",
+  "protocol_author_organization": "Atlas Health",
   "protocol_last_reviewed_at": "2026-03-29",
   "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
   "protocol_source_reference": "internal_guide",
@@ -175,7 +175,7 @@
   ],
   "protocol_is_curated": true,
   "number_of_phases": 3,
-  "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+  "_importBundle": "Atlas Health Core Clinical Protocol Library",
   "primary_goal": "Metabolic Health",
   "risk_class": "high_complexity",
   "protocol_review_status": "approved",
@@ -344,7 +344,7 @@
     "_seconds": 1777189743
   },
   "_patchSchema": "antigravity_v2",
-  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
   "expected_outcomes": {
     "qualitative": [
       "Substantial body-weight reduction in high-BMI patients when managed under clinical-trial-level supervision",

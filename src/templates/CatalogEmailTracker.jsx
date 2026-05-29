@@ -40,7 +40,7 @@ export default function CatalogEmailTracker() {
       }
       
       // Fallback
-      setStatus('Redirecting to Med-Peptides catalog...');
+      setStatus('Redirecting to Atlas Health catalog...');
       setTimeout(() => navigate('/'), 1500);
     }
 

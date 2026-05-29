@@ -7,7 +7,7 @@ import { initializeApp, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
 if (!getApps().length) {
-  initializeApp({ projectId: 'Med-Peptides-app' });
+  initializeApp({ projectId: 'Atlas Health-app' });
 }
 
 const db = getFirestore();

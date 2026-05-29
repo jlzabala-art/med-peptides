@@ -1187,7 +1187,7 @@ export default function ProtocolTemplate({
       descParts.join(' — ');
 
     // ── JSON-LD: MedicalGuideline & WebPage structured data graph ────────────
-    const pageUrl = `https://Med-Peptides.com/protocol/${slug}`;
+    const pageUrl = `https://Atlas Health.com/protocol/${slug}`;
     const conditionSchema = {
       "@type": "MedicalCondition",
       "name": humanize(protocol.metadata?.primary_goal || protocol.primary_goal || slug)
@@ -1209,9 +1209,9 @@ export default function ProtocolTemplate({
           'description': desc.slice(0, 160),
           'isPartOf': {
             '@type': 'WebSite',
-            '@id': 'https://Med-Peptides.com#website',
-            'name': 'Med-Peptides',
-            'url': 'https://Med-Peptides.com'
+            '@id': 'https://Atlas Health.com#website',
+            'name': 'Atlas Health',
+            'url': 'https://Atlas Health.com'
           },
           'about': [conditionSchema, ...drugSchemas]
         },
@@ -1234,8 +1234,8 @@ export default function ProtocolTemplate({
             : undefined,
           'publisher': {
             '@type': 'Organization',
-            'name': 'Med-Peptides',
-            'url': 'https://Med-Peptides.com',
+            'name': 'Atlas Health',
+            'url': 'https://Atlas Health.com',
           }
         }
       ]

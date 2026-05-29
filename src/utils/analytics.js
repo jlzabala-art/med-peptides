@@ -1,7 +1,7 @@
  
 /**
  * analytics.js
- * Centralised GA4 event helpers for Med-Peptides.
+ * Centralised GA4 event helpers for Atlas Health.
  *
  * Uses window.gtag loaded by the inline script in index.html.
  * All calls are no-ops when gtag is not present (e.g. tests, ad-blockers).

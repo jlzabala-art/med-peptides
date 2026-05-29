@@ -625,7 +625,7 @@ export default function ProtocolFinder({ onOpenSearch, protocolIndex = [] }) {
             <span>Secure Clinical Selection</span>
           </div>
           <p className="footer-text">
-            Med-Peptides Selection Engine uses proprietary mapping to align biological goals with verified research protocols.
+            Atlas Health Selection Engine uses proprietary mapping to align biological goals with verified research protocols.
           </p>
         </footer>
       </div>

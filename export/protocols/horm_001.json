@@ -1,6 +1,6 @@
 {
   "protocol_duration_weeks": 12,
-  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_name": "Atlas Health Clinical Team",
   "bundleVersion": "2.0",
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -78,7 +78,7 @@
     "resolved_monitoring": []
   },
   "protocol_author_notes": "Official curated protocol for general clinical use.",
-  "protocol_author_organization": "Med-Peptides",
+  "protocol_author_organization": "Atlas Health",
   "protocol_last_reviewed_at": "2026-03-29",
   "protocol_source_reference": "internal_guide",
   "expected_outcomes": {
@@ -486,7 +486,7 @@
     ]
   },
   "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
-  "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
+  "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
   "_schemaGapFixed": {
     "_nanoseconds": 670000000,
     "_seconds": 1777190718
@@ -545,8 +545,8 @@
     "visibility": "public",
     "scientificName": "CJC-1295 / Ipamorelin GHRH & Ghrelin-Mimetic GH Secretagogue Optimization Protocol",
     "author": {
-      "organization": "Med-Peptides",
-      "name": "Med-Peptides Clinical Team",
+      "organization": "Atlas Health",
+      "name": "Atlas Health Clinical Team",
       "title": "Peptide Specialists"
     },
     "evidence_grade_note": "GRADE B: Ipamorelin Phase I/II data (Raun K, Eur J Endocrinol 1998); CJC-1295 Phase II human PK/PD data (Teichman SL, J Clin Endocrinol Metab 2006). IGF-1 endpoints well-validated. Limited long-term RCT data for body composition endpoints.",
@@ -590,7 +590,7 @@
     },
     "regulatory_note": "Ipamorelin and CJC-1295: Not FDA-approved for weight management, anti-aging, or body composition. FDA issued warning letters against compounding of these peptides in 2024 (Category 2 bulk substances). Available via 503A compounding pharmacies under physician supervision in jurisdictions where permitted. Not WADA-prohibited if used therapeutically."
   },
-  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
   "canonical_enrichment": {
     "compatibleWith": "antigravity_v2_firebase_import",
     "auditFieldsCompleted": [

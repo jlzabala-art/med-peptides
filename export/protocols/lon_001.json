@@ -1,6 +1,6 @@
 {
   "protocol_duration_weeks": 12,
-  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_name": "Atlas Health Clinical Team",
   "bundleVersion": "2.0",
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -76,7 +76,7 @@
   },
   "protocol_author_notes": "Official curated protocol for general clinical use.",
   "_schemaVersion": "antigravity_v2",
-  "protocol_author_organization": "Med-Peptides",
+  "protocol_author_organization": "Atlas Health",
   "protocol_last_reviewed_at": "2026-03-29",
   "protocol_source_reference": "internal_guide",
   "expected_outcomes": {
@@ -354,7 +354,7 @@
     "source_refs": [],
     "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
   },
-  "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+  "_importBundle": "Atlas Health Core Clinical Protocol Library",
   "_syncSource": "export/protocols/lon_001.json",
   "metadata": {
     "longDescription": "MOTS-c (mitochondrial open reading frame of the 12S rRNA-c) is an endogenous mitochondria-derived peptide encoded within the mitochondrial genome — the first peptide shown to be transcribed from mitochondrial rRNA rather than nuclear DNA (Lee C et al., Cell Metab 2015). MOTS-c circulates systemically and translocates to the nucleus under metabolic stress, where it activates AMPK (AMP-activated protein kinase), regulates the folate–methionine cycle, and modulates gene expression related to metabolic homeostasis, antioxidant defense, and insulin sensitivity. Circulating MOTS-c levels decline significantly with age, linking its reduction to age-associated metabolic decline (Reynolds JC et al., Nat Aging 2021). This 12-week foundation protocol delivers sustained MOTS-c supplementation across two phases — activation and maintenance — targeting the mitochondrial and metabolic hallmarks of aging as defined by López-Otín et al. (Cell 2023).",
@@ -465,7 +465,7 @@
   "_patchedAt": {
     "schema_gap_fix": "2026-04-26T12:37:11Z"
   },
-  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
   "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
   "variant_rules": {
     "tempo": {

@@ -16,7 +16,7 @@ const LegalConditions = ({ onBack }) => {
       icon: <Scale size={24} />,
       content: (
         <>
-          <p>By accessing and using Med-Peptides.com, you agree to comply with and be bound by the following terms and conditions. These terms constitute a legally binding agreement between you and Med-Peptides.</p>
+          <p>By accessing and using Atlas Health.com, you agree to comply with and be bound by the following terms and conditions. These terms constitute a legally binding agreement between you and Atlas Health.</p>
           <p><strong>RESEARCH USE ONLY:</strong> All products listed on this website are intended for laboratory research purposes only. They are not for human or animal consumption, nor are they intended for diagnostic or therapeutic use.</p>
           <p><strong>AGE RESTRICTION:</strong> You must be at least 21 years of age to purchase products from this site. We reserve the right to verify credentials and refuse or cancel any order at our discretion.</p>
         </>
@@ -28,7 +28,7 @@ const LegalConditions = ({ onBack }) => {
       icon: <Gavel size={24} />,
       content: (
         <>
-          <p>Med-Peptides operates in strict accordance with international standards for the distribution of research compounds. It is the responsibility of the purchasing institution to ensure that the use of these compounds complies with all local regulations and safety protocols.</p>
+          <p>Atlas Health operates in strict accordance with international standards for the distribution of research compounds. It is the responsibility of the purchasing institution to ensure that the use of these compounds complies with all local regulations and safety protocols.</p>
           <p>Our compounds are manufactured to meet precise molecular specifications, ensuring consistent data reproduction across laboratory environments.</p>
         </>
       )
@@ -40,7 +40,7 @@ const LegalConditions = ({ onBack }) => {
       content: (
         <>
           <p>We strive for efficient and secure delivery of your research materials. Orders are typically processed within 24-48 hours. Local UAE delivery is usually next-day, while international shipping varies by destination.</p>
-          <p><strong>CUSTOMS:</strong> It is the researcher's responsibility to ensure compliance with local import regulations. Med-Peptides is not responsible for seizures or delays at customs.</p>
+          <p><strong>CUSTOMS:</strong> It is the researcher's responsibility to ensure compliance with local import regulations. Atlas Health is not responsible for seizures or delays at customs.</p>
         </>
       )
     },
@@ -50,8 +50,8 @@ const LegalConditions = ({ onBack }) => {
       icon: <AlertCircle size={24} />,
       content: (
         <>
-          <p className="text-error" style={{ fontWeight: 700 }}>IMPORTANT: The products sold by Med-Peptides are NOT medicines, drugs, or supplements.</p>
-          <p>They have not been approved by the FDA or any other regulatory body for the treatment of any medical condition. Med-Peptides makes no claims regarding the therapeutic efficacy of its products.</p>
+          <p className="text-error" style={{ fontWeight: 700 }}>IMPORTANT: The products sold by Atlas Health are NOT medicines, drugs, or supplements.</p>
+          <p>They have not been approved by the FDA or any other regulatory body for the treatment of any medical condition. Atlas Health makes no claims regarding the therapeutic efficacy of its products.</p>
           <p>Handling of these substances should only be performed by qualified professionals in a controlled laboratory environment.</p>
         </>
       )
@@ -126,7 +126,7 @@ const LegalConditions = ({ onBack }) => {
               <div className="legal-card mb-12" style={{ background: 'var(--gradient-soft)', border: '1px solid rgba(0, 54, 102, 0.05)' }}>
                 <h2 className="h3 text-primary mb-6">Governing Framework</h2>
                 <p className="text-muted leading-relaxed mb-0">
-                  This document outlines the legal requirements and operational constraints governing the distribution and use of Med-Peptides compounds. By engaging with our platform, institutional partners and individual researchers acknowledge the research-only nature of our products and commit to maintaining the highest standards of laboratory safety and regulatory adherence.
+                  This document outlines the legal requirements and operational constraints governing the distribution and use of Atlas Health compounds. By engaging with our platform, institutional partners and individual researchers acknowledge the research-only nature of our products and commit to maintaining the highest standards of laboratory safety and regulatory adherence.
                 </p>
               </div>
 
@@ -151,7 +151,7 @@ const LegalConditions = ({ onBack }) => {
                 <div className="legal-version-tag">Version 4.1.0 • Verified Protocol</div>
                 <p className="text-xs text-light mb-2">Last Updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
                 <p className="text-xs text-light">
-                  Med-Peptides International Distribution • Legal Compliance Division
+                  Atlas Health International Distribution • Legal Compliance Division
                 </p>
               </footer>
             </main>

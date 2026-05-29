@@ -428,7 +428,7 @@
     ],
     "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
   },
-  "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+  "_importBundle": "Atlas Health Core Clinical Protocol Library",
   "_syncSource": "export/protocols/neuro_001.json",
   "metadata": {
     "longDescription": "This protocol targets central and peripheral neurological recovery via three synergistic mechanisms. BPC-157 (pentadecapeptide) exerts neuroprotective and neurotrophic effects through upregulation of VEGF, NO synthesis, and modulation of dopaminergic and serotonergic pathways (Sikiric P et al., Curr Pharm Des 2018). SS-31 (elamipretide, D-Arg-Dmt-Lys-Phe-NH₂) is a mitochondria-targeting peptide that concentrates in the inner mitochondrial membrane via electrostatic interaction with cardiolipin, inhibiting cytochrome c peroxidase activity, reducing reactive oxygen species, and restoring ATP production in damaged neurons (Szeto HH, Biochim Biophys Acta 2014). Pinealon (Glu-Asp-Arg) is a short peptide bioregulator derived from the pineal gland that has demonstrated neuroprotective and epigenetic effects on neuronal gene expression, cognitive function, and circadian regulation in preclinical and Russian clinical studies (Khavinson VKh et al., Neurosci Behav Physiol 2002). Indicated for post-concussion syndrome, neurodegeneration, cognitive decline, and neurorecovery post-stroke.",
@@ -537,7 +537,7 @@
   "_patchedAt": {
     "schema_gap_fix": "2026-04-26T12:37:11Z"
   },
-  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
   "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
   "variant_rules": {
     "tempo": {

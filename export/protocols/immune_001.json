@@ -1,6 +1,6 @@
 {
   "protocol_duration_weeks": 8,
-  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_name": "Atlas Health Clinical Team",
   "bundleVersion": "2.0",
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -77,7 +77,7 @@
   },
   "protocol_author_notes": "Official curated protocol for general clinical use.",
   "_schemaVersion": "antigravity_v2",
-  "protocol_author_organization": "Med-Peptides",
+  "protocol_author_organization": "Atlas Health",
   "protocol_last_reviewed_at": "2026-03-29",
   "protocol_source_reference": "internal_guide",
   "expected_outcomes": {
@@ -378,7 +378,7 @@
     "source_refs": [],
     "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
   },
-  "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+  "_importBundle": "Atlas Health Core Clinical Protocol Library",
   "_syncSource": "export/protocols/immune_001.json",
   "metadata": {
     "longDescription": "Thymosin Alpha-1 (Tα1; Zadaxin) is a 28-amino acid peptide endogenously produced by thymic epithelial cells and the first thymic hormone to be fully sequenced. It promotes T-cell differentiation and maturation, augments NK cell activity, stimulates dendritic cell function, activates Toll-like receptors 2 and 9 (innate immunity), and modulates cytokine balance toward Th1-type responses (Goldstein AL & Goldstein A, Expert Opin Biol Ther 2009; King R & Tuthill C, Prog Mol Biol Transl Sci 2014). Tα1 is clinically approved in 35+ countries for hepatitis B, hepatitis C, and oncology supportive care. TB-500 (synthetic Thymosin β4 fragment) provides complementary immune modulation by suppressing pro-inflammatory cytokines (IL-1β, TNF-α), promoting regulatory T-cell function, and accelerating tissue repair via angiogenesis and actin remodeling (Goldstein AL et al., Ann N Y Acad Sci 2012). The 8-week dual-phase protocol delivers combined immunomodulation in weeks 1–4, transitioning to Tα1 maintenance for sustained immune calibration.",
@@ -484,7 +484,7 @@
   "_patchedAt": {
     "schema_gap_fix": "2026-04-26T12:37:11Z"
   },
-  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
   "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
   "variant_rules": {
     "tempo": {

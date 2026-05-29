@@ -11532,7 +11532,7 @@
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/components/finder/ProtocolArtifacts.jsx",
     "line": 20,
-    "snippet": "<div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '-0.02em' }}>Med-Peptides Clinical</div>"
+    "snippet": "<div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '-0.02em' }}>Atlas Health Clinical</div>"
   },
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/components/finder/ProtocolArtifacts.jsx",
@@ -16872,7 +16872,7 @@
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/components/protocol/ProtocolPreviewModal.jsx",
     "line": 1198,
-    "snippet": "<strong style={{ color: '#003666', fontWeight: 700 }}>DISCLAIMER:</strong> This protocol document has been compiled by Med-Peptides for informational and educational purposes only."
+    "snippet": "<strong style={{ color: '#003666', fontWeight: 700 }}>DISCLAIMER:</strong> This protocol document has been compiled by Atlas Health for informational and educational purposes only."
   },
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/components/protocol/ProtocolPreviewModal.jsx",
@@ -19602,7 +19602,7 @@
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/layout/AccessCatalogOverlay.jsx",
     "line": 170,
-    "snippet": "<img src=\"/logo.png\" alt=\"Med-Peptides Logo\" style={{ width: '60px', height: '60px', borderRadius: '16px' }} />"
+    "snippet": "<img src=\"/logo.png\" alt=\"Atlas Health Logo\" style={{ width: '60px', height: '60px', borderRadius: '16px' }} />"
   },
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/layout/AccessCatalogOverlay.jsx",
@@ -19707,7 +19707,7 @@
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/layout/AdminLayout.jsx",
     "line": 52,
-    "snippet": "<h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary)', margin: 0 }}>Med-Peptides</h2>"
+    "snippet": "<h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary)', margin: 0 }}>Atlas Health</h2>"
   },
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/layout/AdminLayout.jsx",
@@ -19807,7 +19807,7 @@
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/layout/ClinicalLayout.jsx",
     "line": 51,
-    "snippet": "<div style={{ fontWeight: 800, fontSize: '1.2rem', color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.1 }}>Med-Peptides</div>"
+    "snippet": "<div style={{ fontWeight: 800, fontSize: '1.2rem', color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.1 }}>Atlas Health</div>"
   },
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/layout/ClinicalLayout.jsx",
@@ -27397,7 +27397,7 @@
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/templates/Checkout.jsx",
     "line": 1386,
-    "snippet": "<strong style={{ color: '#0f172a', fontSize: '0.85rem' }}>Med-Peptides International</strong>"
+    "snippet": "<strong style={{ color: '#0f172a', fontSize: '0.85rem' }}>Atlas Health International</strong>"
   },
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/templates/Checkout.jsx",
@@ -28612,7 +28612,7 @@
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/templates/Contact.jsx",
     "line": 267,
-    "snippet": "<span className=\"badge\" style={{ marginBottom: '1rem' }}>Partner with Med-Peptides</span>"
+    "snippet": "<span className=\"badge\" style={{ marginBottom: '1rem' }}>Partner with Atlas Health</span>"
   },
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/templates/Contact.jsx",
@@ -28687,7 +28687,7 @@
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/templates/Contact.jsx",
     "line": 333,
-    "snippet": "<div style={{ fontWeight: 600 }}>business@Med-Peptides.com</div>"
+    "snippet": "<div style={{ fontWeight: 600 }}>business@Atlas Health.com</div>"
   },
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/templates/Contact.jsx",
@@ -29797,7 +29797,7 @@
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/templates/LegalConditions.jsx",
     "line": 53,
-    "snippet": "<p className=\"text-error\" style={{ fontWeight: 700 }}>IMPORTANT: The products sold by Med-Peptides are NOT medicines, drugs, or supplements.</p>"
+    "snippet": "<p className=\"text-error\" style={{ fontWeight: 700 }}>IMPORTANT: The products sold by Atlas Health are NOT medicines, drugs, or supplements.</p>"
   },
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/templates/LegalConditions.jsx",
@@ -29817,7 +29817,7 @@
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/templates/LogoShowcase.jsx",
     "line": 8,
-    "snippet": "<h1 style={{ marginBottom: '2rem' }}>Med-Peptides Logo Showcase (SVG)</h1>"
+    "snippet": "<h1 style={{ marginBottom: '2rem' }}>Atlas Health Logo Showcase (SVG)</h1>"
   },
   {
     "file": "/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/templates/LogoShowcase.jsx",

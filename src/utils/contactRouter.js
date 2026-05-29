@@ -51,6 +51,6 @@ export async function resolveCatalogContact(catalog, userProfile = null) {
     email: 'support@med-peptides.com',
     phone: '+18005550199',
     whatsAppLink: 'https://wa.me/18005550199',
-    ownerName: 'Med-Peptides Support'
+    ownerName: 'Atlas Health Support'
   };
 }

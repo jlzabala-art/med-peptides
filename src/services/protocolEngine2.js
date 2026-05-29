@@ -5,7 +5,7 @@ import { resolveVariantPrice } from '../utils/resolvePrice.js';
 import { PRICING_TIER } from '../constants/productEnums.js';
 
 /**
- * Med-Peptides - Clinical Protocol Engine 2.0
+ * Atlas Health - Clinical Protocol Engine 2.0
  * Adaptive, protocol-driven generation for clinical protocols.
  * 
  * This engine replaces the static phase-reading logic with dynamic

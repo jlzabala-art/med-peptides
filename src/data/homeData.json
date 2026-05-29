@@ -45,7 +45,7 @@
   "startHere": {
     "badge": "Internal Expertise",
     "title": "The Scientific {gradient:Internal Bridge}",
-    "description": "Med-Peptides operates as an internal scientific bridge between high-tech manufacturing and clinical research. We prioritize technical integrity over simple logistics, managing a rigorous multi-step internal workflow to validate the molecular integrity of every compound.",
+    "description": "Atlas Health operates as an internal scientific bridge between high-tech manufacturing and clinical research. We prioritize technical integrity over simple logistics, managing a rigorous multi-step internal workflow to validate the molecular integrity of every compound.",
     "cta": "Our Process",
     "ctaLink": "/about"
   },
@@ -129,7 +129,7 @@
     "subtitle": "Essential information regarding our technical protocols and scientific oversight.",
     "faqs": [
       {
-        "question": "What is Med-Peptides's primary role?",
+        "question": "What is Atlas Health's primary role?",
         "answer": "We act as a technical representative for primary manufacturing labs, providing scientific oversight and internal process management to ensure researchers receive verified compounds."
       },
       {
@@ -172,6 +172,6 @@
       { "label": "Research Guidelines", "url": "/guidelines" },
       { "label": "Contact Support", "url": "/contact" }
     ],
-    "copyright": "© 2026 Med-Peptides. Scientific Integrity & Technical Governance. All rights reserved."
+    "copyright": "© 2026 Atlas Health. Scientific Integrity & Technical Governance. All rights reserved."
   }
 }

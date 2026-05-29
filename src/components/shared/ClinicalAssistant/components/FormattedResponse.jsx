@@ -400,6 +400,22 @@ function InfoBox({ section }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Section: pharmacology_stats
+// ─────────────────────────────────────────────────────────────────────────────
+function PharmacologyStats({ section }) {
+  return (
+    <motion.div {...fadeUp} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.75rem' }}>
+      {(section.stats || []).map((stat, i) => (
+        <div key={i} style={{ padding: '0.75rem', backgroundColor: T.card, borderRadius: T.radius, border: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', gap: '0.3rem', alignItems: 'center', textAlign: 'center' }}>
+          <span style={{ fontSize: '0.65rem', color: T.neutral, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 800 }}>{stat.label}</span>
+          <span style={{ fontSize: '0.9rem', fontWeight: 800, color: T.primary }}>{stat.value}</span>
+        </div>
+      ))}
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Section: text_block
 // ─────────────────────────────────────────────────────────────────────────────
 function TextBlock({ section }) {
@@ -491,6 +507,7 @@ export default function FormattedResponse({ formatted, onProductClick }) {
           case 'warning_box':       return <WarningBox         key={key} section={section} />;
           case 'info_box':          return <InfoBox            key={key} section={section} />;
           case 'text_block':        return <TextBlock          key={key} section={section} />;
+          case 'pharmacology_stats':return <PharmacologyStats  key={key} section={section} />;
           default:                  return null;
         }
       })}

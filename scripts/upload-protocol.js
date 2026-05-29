@@ -30,7 +30,7 @@ if (!getApps().length) {
     credential: cert(process.env.GOOGLE_APPLICATION_CREDENTIALS
       ? undefined // cert() with no arg uses GOOGLE_APPLICATION_CREDENTIALS env var
       : undefined),
-    projectId: 'Med-Peptides-app',
+    projectId: 'Atlas Health-app',
   });
 }
 

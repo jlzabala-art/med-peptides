@@ -3,7 +3,7 @@
     "id": "cog_001",
     "protocol_duration_weeks": 6,
     "bundleVersion": "2.0",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_is_physician_authored": false,
     "seeded_at": "2026-04-25T06:10:36.132Z",
     "protocol_source_version": "v5.0",
@@ -260,7 +260,7 @@
     },
     "_syncedAt": "2026-04-26T12:46:25.512Z",
     "updated_at": "2026-05-04T14:35:44.631Z",
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "recommended_supplements": [
       "lion-s-mane-mushroom",
       "ginkgo-biloba",
@@ -295,12 +295,12 @@
       "scientificName": "Semax & Selank ACTH/MSH-Derived Nootropic & Anxiolytic Protocol",
       "description": "6-week intranasal neurocognitive protocol combining Semax BDNF/ACTH analog nootropism with Selank anxiolytic tuftsin-derived GABAergic modulation for focus, memory, and stress resilience."
     },
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "protocol_version": "v6.1",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible"
     ],
-    "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
     "protocol_title": "Semax & Selank Neurocognitive Protocol",
     "category": "Cognitive Support",
     "syncedAt": "2026-05-16T14:32:31.842Z",
@@ -322,7 +322,7 @@
       ],
       "allow_extension": false
     },
-    "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
+    "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
     "_patchedAt": {
       "schema_gap_fix": "2026-04-26T12:37:11Z"
     },
@@ -543,7 +543,7 @@
     "id": "cog_002",
     "protocol_duration_weeks": 8,
     "bundleVersion": "2.0",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_is_physician_authored": false,
     "seeded_at": "2026-04-25T06:10:36.133Z",
     "protocol_source_version": "v5.0",
@@ -894,18 +894,18 @@
       "contraindication_summary": "Contraindicated in active epilepsy or uncontrolled seizure disorders (Semax lowers seizure threshold at supratherapeutic doses). Avoid in uncontrolled psychosis or schizophrenia spectrum disorders. Not for use in pregnancy or breastfeeding. Severe hepatic impairment is a relative contraindication due to limited metabolic safety data. Use with caution in patients on CNS stimulants, MAOIs, or serotonergic agents. No FDA-approved interaction database available; physician supervision required."
     },
     "updated_at": "2026-05-04T14:35:44.633Z",
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "recommended_supplements": [
       "lion-s-mane-mushroom",
       "ginkgo-biloba",
       "acetyl-carnitine"
     ],
     "primary_goal": "Cognitive Support",
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible"
     ],
-    "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
     "protocol_title": "Semax & Pinealon Neuro-Executive Protocol",
     "category": "Cognitive Support",
     "syncedAt": "2026-05-16T14:32:33.635Z",
@@ -921,7 +921,7 @@
       ],
       "base_duration_weeks": 8
     },
-    "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
+    "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
     "metadata": {
       "longDescription": "This protocol pairs Semax (ACTH-derived nootropic; see cog_001) with Pinealon (Glu-Asp-Arg), a tripeptide bioregulator isolated from pineal gland extract. Pinealon penetrates the blood-brain barrier and interacts with neuronal DNA regulatory elements, modulating gene expression involved in antioxidant defense, circadian signaling, and neuronal survival (Khavinson VKh et al., Neurosci Behav Physiol 2002; Khavinson V et al., Adv Gerontol 2013). Preclinical and Russian clinical data demonstrate Pinealon-mediated neuroprotection in hypoxia, ischemia, and age-related neurodegeneration models. By combining Semax (acute BDNF/NGF upregulation, improved cerebral blood flow) with Pinealon (epigenetic neuroprotection, gene-level antioxidant activity), this protocol targets both functional cognitive enhancement and structural neuroprotection — particularly relevant for aging populations, early cognitive decline, and post-ischemic recovery.",
       "primary_goal": "Cognitive Support",
@@ -1242,7 +1242,7 @@
     "id": "energy_001",
     "protocol_duration_weeks": 10,
     "bundleVersion": "2.0",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_is_physician_authored": false,
     "seeded_at": "2026-04-25T06:10:36.133Z",
     "protocol_source_version": "v5.0",
@@ -1605,7 +1605,7 @@
       "contraindication_summary": "Contraindicated in active malignancy due to mitochondrial AMPK pathway interactions that may theoretically influence cancer cell metabolism. Avoid in severe primary mitochondrial disease requiring specialist management. Not for use in pregnancy or breastfeeding (no safety data). Known hypersensitivity to MOTS-c or SS-31 is an absolute contraindication. Use with caution in patients on metformin (AMPK overlap), immunosuppressants, or cardiac medications. Patients with post-viral fatigue syndromes should begin at reduced dose with careful physician monitoring."
     },
     "updated_at": "2026-05-04T14:35:44.634Z",
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "recommended_supplements": [
       "co-q10",
       "nmn",
@@ -1613,11 +1613,11 @@
       "b-complex"
     ],
     "primary_goal": "Energy / Mitochondrial",
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible"
     ],
-    "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
     "protocol_title": "MOTS-c Mitochondrial Energy Protocol",
     "category": "Energy & Metabolism",
     "syncedAt": "2026-05-16T14:32:32.915Z",
@@ -1633,7 +1633,7 @@
       ],
       "base_duration_weeks": 10
     },
-    "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
+    "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
     "phase_blueprints": [
       {
         "phase_key": "activation",
@@ -1886,7 +1886,7 @@
     "id": "energy_002",
     "protocol_duration_weeks": 10,
     "bundleVersion": "2.0",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_is_physician_authored": false,
     "seeded_at": "2026-04-25T06:10:36.134Z",
     "protocol_source_version": "v5.0",
@@ -2245,7 +2245,7 @@
       "contraindication_summary": "Contraindicated in active malignancy (SS-31 mitochondrial rescue and NMN NAD+ repletion may provide metabolic substrate to rapidly dividing cells — requires oncologist clearance). Avoid in pregnancy or breastfeeding (no safety data). Severe hepatic or renal impairment: exercise caution with NMN metabolism. Known hypersensitivity to any protocol compound is an absolute contraindication. NMN may interact with NAD+ precursor metabolism pathways — monitor in patients on warfarin or chemotherapy. Physician supervision required throughout protocol."
     },
     "updated_at": "2026-05-04T14:35:44.634Z",
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "recommended_supplements": [
       "co-q10",
       "nmn",
@@ -2253,11 +2253,11 @@
       "b-complex"
     ],
     "primary_goal": "Energy / Mitochondrial",
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible"
     ],
-    "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
     "protocol_title": "SS-31 & NMN Bioenergetic Resilience Protocol",
     "category": "Energy & Metabolism",
     "syncedAt": "2026-05-16T14:32:34.964Z",
@@ -2273,7 +2273,7 @@
       ],
       "base_duration_weeks": 10
     },
-    "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
+    "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
     "phase_blueprints": [
       {
         "phase_key": "repair",
@@ -2556,7 +2556,7 @@
     "id": "horm_001",
     "protocol_duration_weeks": 12,
     "bundleVersion": "2.0",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_is_physician_authored": false,
     "seeded_at": "2026-04-25T06:10:36.132Z",
     "protocol_source_version": "v5.0",
@@ -2973,7 +2973,7 @@
       "contraindication_summary": "Absolute contraindications: active malignancy or history of hormone-sensitive cancer (GH axis stimulation may promote tumor proliferation); pituitary adenoma or active pituitary pathology; uncontrolled diabetes mellitus (GH raises insulin resistance — monitor fasting glucose and HbA1c); untreated severe obstructive sleep apnea (GH pulses worsen OSA); pregnancy or breastfeeding. Relative contraindications: pre-existing carpal tunnel syndrome (fluid retention may exacerbate); active thyroid dysfunction (correct before initiating); concomitant exogenous GH or IGF-1 therapy. Monitor IGF-1 levels at baseline, week 6, and week 12. Physician supervision mandatory throughout."
     },
     "updated_at": "2026-05-04T14:35:44.634Z",
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "recommended_supplements": [
       "zinc-citrate",
       "vit-d3",
@@ -3008,11 +3008,11 @@
       "scientificName": "CJC-1295 / Ipamorelin GHRH & Ghrelin-Mimetic GH Secretagogue Optimization Protocol",
       "description": "12-week GH axis optimization protocol combining CJC-1295 GHRH analogue sustained release with Ipamorelin selective ghrelin-mimetic secretagogue for pulsatile physiological GH restoration."
     },
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible"
     ],
-    "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
     "protocol_title": "CJC-1295 / Ipamorelin GH Optimization Protocol",
     "category": "Hormonal Support",
     "syncedAt": "2026-05-16T14:32:32.374Z",
@@ -3028,7 +3028,7 @@
       ],
       "base_duration_weeks": 12
     },
-    "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
+    "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
     "phase_blueprints": [
       {
         "clinical_events": [
@@ -3271,7 +3271,7 @@
     "id": "horm_002",
     "protocol_duration_weeks": 12,
     "bundleVersion": "2.0",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_is_physician_authored": false,
     "seeded_at": "2026-04-25T06:10:36.133Z",
     "protocol_source_version": "v5.0",
@@ -3612,14 +3612,14 @@
     },
     "_syncedAt": "2026-04-26T12:46:28.640Z",
     "updated_at": "2026-05-04T14:35:44.635Z",
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "recommended_supplements": [
       "zinc-citrate",
       "vit-d3",
       "ashwagandha"
     ],
     "primary_goal": "Hormonal Support",
-    "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+    "_importBundle": "Atlas Health Core Clinical Protocol Library",
     "metadata": {
       "longDescription": "Tesamorelin (TransCon hGH; Egrifta) is an FDA-approved synthetic GHRH analogue (GHRH 1-44 with trans-3-hexenoic acid modification) validated in Phase 3 RCTs for reducing visceral adipose tissue (VAT) in HIV-associated lipodystrophy and studied for metabolic benefits in non-HIV populations (Falutz J et al., NEJM 2007; Stanley TL et al., J Clin Endocrinol Metab 2012). Tesamorelin acts on pituitary GHRH receptors to amplify endogenous GH pulse amplitude while preserving the physiological feedback regulation of the GH axis — unlike exogenous GH administration, which suppresses endogenous production. Ipamorelin (selective GHSR agonist; see horm_001) is combined to add discrete pulsatile GH peaks beyond the tonic effect of tesamorelin, enhancing total GH bioavailability while maintaining physiological rhythmicity. This protocol is particularly suited for adults with abdominal adiposity, low IGF-1, age-related GH decline (somatopause), or metabolic syndrome with a visceral fat component.",
       "primary_goal": "Hormonal Support",
@@ -3648,11 +3648,11 @@
       "scientificName": "Tesamorelin + Ipamorelin GHRH-Axis Visceral Adiposity & GH Restoration Protocol",
       "description": "12-week GH-axis protocol pairing FDA-approved Tesamorelin GHRH analogue with Ipamorelin ghrelin-mimetic for clinically validated visceral fat reduction and pulsatile GH restoration."
     },
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible"
     ],
-    "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
     "protocol_title": "Tesamorelin + Ipamorelin GH-Axis Protocol",
     "category": "Hormonal Support",
     "syncedAt": "2026-05-16T14:32:34.200Z",
@@ -3988,7 +3988,7 @@
     "id": "immune_001",
     "protocol_duration_weeks": 8,
     "bundleVersion": "2.0",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_is_physician_authored": false,
     "seeded_at": "2026-04-25T06:10:36.132Z",
     "protocol_source_version": "v5.0",
@@ -4224,7 +4224,7 @@
     },
     "_syncedAt": "2026-04-26T12:46:29.224Z",
     "updated_at": "2026-05-04T14:35:44.635Z",
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "recommended_supplements": [
       "nmn",
       "resveratrol",
@@ -4232,7 +4232,7 @@
       "quercetin"
     ],
     "primary_goal": "Immune / Inflammation",
-    "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+    "_importBundle": "Atlas Health Core Clinical Protocol Library",
     "metadata": {
       "longDescription": "Thymosin Alpha-1 (Tα1; Zadaxin) is a 28-amino acid peptide endogenously produced by thymic epithelial cells and the first thymic hormone to be fully sequenced. It promotes T-cell differentiation and maturation, augments NK cell activity, stimulates dendritic cell function, activates Toll-like receptors 2 and 9 (innate immunity), and modulates cytokine balance toward Th1-type responses (Goldstein AL & Goldstein A, Expert Opin Biol Ther 2009; King R & Tuthill C, Prog Mol Biol Transl Sci 2014). Tα1 is clinically approved in 35+ countries for hepatitis B, hepatitis C, and oncology supportive care. TB-500 (synthetic Thymosin β4 fragment) provides complementary immune modulation by suppressing pro-inflammatory cytokines (IL-1β, TNF-α), promoting regulatory T-cell function, and accelerating tissue repair via angiogenesis and actin remodeling (Goldstein AL et al., Ann N Y Acad Sci 2012). The 8-week dual-phase protocol delivers combined immunomodulation in weeks 1–4, transitioning to Tα1 maintenance for sustained immune calibration.",
       "primary_goal": "Immune / Inflammation",
@@ -4261,12 +4261,12 @@
       "scientificName": "Thymosin Alpha-1 & Thymosin β4 (TB-500) Thymic T-Cell & Innate Immune Modulation Protocol",
       "description": "8-week dual-thymosin immunomodulation protocol combining Thymosin Alpha-1 T-cell maturation and toll-like receptor activation with TB-500 anti-inflammatory angiogenesis for comprehensive immune recalibration."
     },
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "protocol_version": "v6.1",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible"
     ],
-    "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
     "protocol_title": "Thymosin Alpha-1 & TB-500 Immune Modulation Protocol",
     "category": "Immune & Inflammation",
     "syncedAt": "2026-05-16T14:32:32.730Z",
@@ -4604,7 +4604,7 @@
     "id": "immune_002",
     "protocol_duration_weeks": 8,
     "bundleVersion": "2.0",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_is_physician_authored": false,
     "seeded_at": "2026-04-25T06:10:36.133Z",
     "protocol_source_version": "v5.0",
@@ -4841,7 +4841,7 @@
     },
     "_syncedAt": "2026-04-26T12:46:29.477Z",
     "updated_at": "2026-05-04T14:35:44.635Z",
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "recommended_supplements": [
       "nmn",
       "resveratrol",
@@ -4849,7 +4849,7 @@
       "quercetin"
     ],
     "primary_goal": "Immune / Inflammation",
-    "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+    "_importBundle": "Atlas Health Core Clinical Protocol Library",
     "metadata": {
       "longDescription": "This protocol pairs Thymosin Alpha-1 (systemic T-cell and innate immune modulation; see immune_001) with KPV (Lys-Pro-Val), a tripeptide derived from the C-terminus of α-melanocyte-stimulating hormone (α-MSH). KPV exerts potent anti-inflammatory effects by inhibiting NF-κB nuclear translocation, reducing production of IL-1β, IL-6, TNF-α, and interferon-γ, and suppressing mast cell degranulation (Dalmasso G et al., Gastroenterology 2008; Catania A et al., Endocr Rev 2004). KPV has demonstrated efficacy in murine models of colitis, intestinal inflammation, and dermatitis, and penetrates epithelial barriers due to its small size, making it especially suitable for gut-associated inflammatory conditions. Combined with Tα1 (which restores Th1/Th2 balance and regulatory T-cell function), this protocol provides both upstream immune calibration and downstream cytokine suppression — a complementary dual strategy for conditions including IBD, systemic inflammation, mast-cell activation syndrome (MCAS), and autoimmune disorders.",
       "primary_goal": "Immune / Inflammation",
@@ -4878,12 +4878,12 @@
       "scientificName": "Thymosin Alpha-1 & KPV Anti-Inflammatory Mast-Cell & NF-κB Inhibition Protocol",
       "description": "10-week immune protocol combining Thymosin Alpha-1 T-cell immunomodulation with KPV α-MSH-derived anti-inflammatory NF-κB inhibition for gut inflammation, mast-cell hyperactivation, and autoimmune modulation."
     },
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "protocol_version": "v6.1",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible"
     ],
-    "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
     "protocol_title": "Thymosin Alpha-1 & KPV Anti-Inflammatory Protocol",
     "category": "Immune & Inflammation",
     "syncedAt": "2026-05-16T14:32:34.578Z",
@@ -5253,7 +5253,7 @@
     "id": "lon_001",
     "protocol_duration_weeks": 12,
     "bundleVersion": "2.0",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_is_physician_authored": false,
     "seeded_at": "2026-04-25T06:10:36.132Z",
     "protocol_source_version": "v5.0",
@@ -5496,7 +5496,7 @@
     },
     "_syncedAt": "2026-04-26T12:46:30.063Z",
     "updated_at": "2026-05-04T14:35:44.635Z",
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "recommended_supplements": [
       "nmn",
       "resveratrol",
@@ -5504,7 +5504,7 @@
       "quercetin"
     ],
     "primary_goal": "Longevity",
-    "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+    "_importBundle": "Atlas Health Core Clinical Protocol Library",
     "metadata": {
       "longDescription": "MOTS-c (mitochondrial open reading frame of the 12S rRNA-c) is an endogenous mitochondria-derived peptide encoded within the mitochondrial genome — the first peptide shown to be transcribed from mitochondrial rRNA rather than nuclear DNA (Lee C et al., Cell Metab 2015). MOTS-c circulates systemically and translocates to the nucleus under metabolic stress, where it activates AMPK (AMP-activated protein kinase), regulates the folate–methionine cycle, and modulates gene expression related to metabolic homeostasis, antioxidant defense, and insulin sensitivity. Circulating MOTS-c levels decline significantly with age, linking its reduction to age-associated metabolic decline (Reynolds JC et al., Nat Aging 2021). This 12-week foundation protocol delivers sustained MOTS-c supplementation across two phases — activation and maintenance — targeting the mitochondrial and metabolic hallmarks of aging as defined by López-Otín et al. (Cell 2023).",
       "primary_goal": "Longevity",
@@ -5533,12 +5533,12 @@
       "scientificName": "MOTS-c Mitokine AMPK-Activating Longevity Foundation Protocol",
       "description": "12-week longevity protocol using MOTS-c mitochondria-derived peptide to activate AMPK, improve insulin sensitivity, and support cellular hallmarks of healthy aging."
     },
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "protocol_version": "v6.1",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible"
     ],
-    "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
     "protocol_title": "MOTS-c Longevity Foundation Protocol",
     "category": "Longevity",
     "syncedAt": "2026-05-16T14:32:32.012Z",
@@ -5848,7 +5848,7 @@
     "id": "lon_002",
     "protocol_duration_weeks": 12,
     "bundleVersion": "2.0",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_is_physician_authored": false,
     "seeded_at": "2026-04-25T06:10:36.133Z",
     "protocol_source_version": "v5.0",
@@ -6160,7 +6160,7 @@
     },
     "_syncedAt": "2026-04-26T12:46:30.345Z",
     "updated_at": "2026-05-04T14:35:44.635Z",
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "recommended_supplements": [
       "nmn",
       "resveratrol",
@@ -6168,7 +6168,7 @@
       "quercetin"
     ],
     "primary_goal": "Longevity",
-    "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+    "_importBundle": "Atlas Health Core Clinical Protocol Library",
     "metadata": {
       "longDescription": "Epithalon (Epitalon; Ala-Glu-Asp-Gly) is a synthetic tetrapeptide bioregulator developed by the St. Petersburg Institute of Bioregulation and Gerontology. It stimulates telomerase (TERT) activity in somatic cells, elongates telomeres in aged cell cultures, and has demonstrated life-extension effects in multiple animal models (Khavinson VKh et al., Bull Exp Biol Med 2003; Anisimov VN et al., Mech Ageing Dev 2003). Epithalon also modulates pineal melatonin secretion and normalises circadian gene expression (BMAL1, CLOCK), improving circadian amplitude — a key driver of healthy aging (Khavinson V et al., Adv Gerontol 2012). Combined with MOTS-c (mitochondrial AMPK activation, metabolic homeostasis, see lon_001), this protocol targets two independent pillars of the hallmarks of aging: replicative senescence/telomere shortening and mitochondrial dysfunction. The dual-phase structure allows maximal combined loading in weeks 1–6, followed by MOTS-c maintenance to sustain metabolic gains through week 12.",
       "primary_goal": "Longevity",
@@ -6197,11 +6197,11 @@
       "scientificName": "Epithalon (Epitalon) + MOTS-c Telomere & Mitokine Circadian Longevity Protocol",
       "description": "12-week longevity protocol combining Epithalon telomerase activation with MOTS-c mitochondrial AMPK signaling to target telomere attrition and metabolic aging hallmarks simultaneously."
     },
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible"
     ],
-    "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
     "protocol_title": "Epithalon + MOTS-c Circadian Longevity Protocol",
     "category": "Longevity",
     "syncedAt": "2026-05-16T14:32:33.820Z",
@@ -6513,7 +6513,7 @@
     "id": "met_001",
     "protocol_duration_weeks": 10,
     "bundleVersion": "2.0",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_is_physician_authored": false,
     "seeded_at": "2026-04-25T06:10:36.131Z",
     "protocol_source_version": "v5.0",
@@ -6864,14 +6864,14 @@
     },
     "_syncedAt": "2026-04-26T12:46:30.857Z",
     "updated_at": "2026-05-04T14:35:44.636Z",
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "recommended_supplements": [
       "berberine",
       "nmn",
       "resveratrol"
     ],
     "primary_goal": "Metabolic Health",
-    "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+    "_importBundle": "Atlas Health Core Clinical Protocol Library",
     "metadata": {
       "longDescription": "MOTS-c (mitochondrial open reading frame of the 12S rRNA-c) is an endogenous mitochondria-derived peptide that translocates to the nucleus under metabolic stress, activating AMPK and the AICAR pathway to improve insulin sensitivity and glucose homeostasis (Lee C et al., Cell Metab 2015; Reynolds JC et al., Nat Aging 2021). AOD-9604, the C-terminal fragment of human growth hormone (hGH 176–191), promotes lipolysis via β-adrenergic receptor pathways without inducing IGF-1 or insulin resistance (Ng FM et al., Biochem Mol Biol Int 1997). Combined, this 10-week protocol targets adipose reduction and metabolic flexibility in individuals with metabolic syndrome, pre-diabetes, or dyslipidaemia. The two-phase structure begins with full dual-compound activation then transitions to MOTS-c maintenance for sustained mitochondrial benefit.",
       "primary_goal": "Metabolic Health",
@@ -6900,11 +6900,11 @@
       "scientificName": "MOTS-c & AOD-9604 AMPK-Driven Metabolic Activation Protocol",
       "description": "10-week metabolic health protocol combining MOTS-c mitochondrial AMPK activation with AOD-9604 selective lipolysis to restore insulin sensitivity and reduce adiposity."
     },
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible"
     ],
-    "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
     "protocol_title": "MOTS-c & AOD-9604 Metabolic Activation Protocol",
     "category": "Metabolic Health",
     "syncedAt": "2026-05-16T14:32:31.492Z",
@@ -7202,7 +7202,7 @@
     "id": "met_002",
     "protocol_duration_weeks": 12,
     "bundleVersion": "2.0",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_is_physician_authored": false,
     "seeded_at": "2026-04-25T06:10:36.133Z",
     "protocol_source_version": "v5.0",
@@ -7484,7 +7484,7 @@
       "berberine"
     ],
     "primary_goal": "Metabolic Health",
-    "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+    "_importBundle": "Atlas Health Core Clinical Protocol Library",
     "metadata": {
       "longDescription": "Retatrutide is a first-in-class triple agonist targeting GLP-1, GIP, and glucagon receptors (GcgR), achieving weight reductions of up to 24% in Phase 2 trials — superior to dual agonists (Jastreboff AM et al., NEJM 2023). The addition of glucagon receptor agonism increases hepatic glucose output acutely but primarily drives energy expenditure through thermogenesis and increased fat oxidation, complementing the appetite suppression of the GLP-1 component. MOTS-c is layered to reinforce peripheral insulin sensitivity, AMPK activation, and mitochondrial biogenesis, offsetting any GcgR-mediated glycaemic variability. This advanced 12-week protocol, structured across three escalating phases, is intended for patients with significant obesity (BMI ≥ 35) or cardiometabolic disease requiring intensive intervention.",
       "primary_goal": "Metabolic Health",
@@ -7513,12 +7513,12 @@
       "scientificName": "Retatrutide + MOTS-c GLP-1/GIP/Glucagon Triple-Agonist Metabolic Intensification Protocol",
       "description": "12-week advanced metabolic protocol combining retatrutide triple-receptor agonism with MOTS-c mitokine support for profound body-composition shift and glucose regulation."
     },
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible"
     ],
-    "protocol_author_organization": "Med-Peptides",
-    "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+    "protocol_author_organization": "Atlas Health",
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
     "category": "Metabolic Health",
     "syncedAt": "2026-05-16T14:32:33.276Z",
     "generator_rules": {
@@ -8223,7 +8223,7 @@
       "omega-3-forte"
     ],
     "primary_goal": "Recovery / Injury",
-    "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+    "_importBundle": "Atlas Health Core Clinical Protocol Library",
     "metadata": {
       "longDescription": "This protocol targets central and peripheral neurological recovery via three synergistic mechanisms. BPC-157 (pentadecapeptide) exerts neuroprotective and neurotrophic effects through upregulation of VEGF, NO synthesis, and modulation of dopaminergic and serotonergic pathways (Sikiric P et al., Curr Pharm Des 2018). SS-31 (elamipretide, D-Arg-Dmt-Lys-Phe-NH₂) is a mitochondria-targeting peptide that concentrates in the inner mitochondrial membrane via electrostatic interaction with cardiolipin, inhibiting cytochrome c peroxidase activity, reducing reactive oxygen species, and restoring ATP production in damaged neurons (Szeto HH, Biochim Biophys Acta 2014). Pinealon (Glu-Asp-Arg) is a short peptide bioregulator derived from the pineal gland that has demonstrated neuroprotective and epigenetic effects on neuronal gene expression, cognitive function, and circadian regulation in preclinical and Russian clinical studies (Khavinson VKh et al., Neurosci Behav Physiol 2002). Indicated for post-concussion syndrome, neurodegeneration, cognitive decline, and neurorecovery post-stroke.",
       "primary_goal": "Recovery / Injury",
@@ -8256,7 +8256,7 @@
       "phases.drugs.weekly_dose: CALCULATED where possible",
       "expected_outcomes: INJECTED for category \"Recovery & Neurology\""
     ],
-    "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
     "category": "Recovery & Neurology",
     "syncedAt": "2026-05-16T14:32:35.148Z",
     "generator_rules": {
@@ -8653,7 +8653,7 @@
     "protocol_last_reviewed_at": "2026-03-29",
     "protocol_review_status": "approved",
     "protocol_slug": "injury-recovery-8w",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_source_type": "curated_library",
     "protocol_source_version": "v5.0",
     "protocol_author_notes": "Official curated protocol for general clinical use.",
@@ -8821,14 +8821,14 @@
     },
     "_syncedAt": "2026-04-26T12:46:32.830Z",
     "updated_at": "2026-05-04T15:06:50.086Z",
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "recommended_supplements": [
       "curcumin",
       "boswellia",
       "omega-3-forte",
       "bromelain"
     ],
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible",
       "expected_outcomes: INJECTED for category \"Recovery & Tissue Repair\""
@@ -9175,7 +9175,7 @@
       "total_vials_required": 20
     },
     "protocol_author_notes": "Official curated protocol for general clinical use.",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_source_reference": "internal_guide",
     "overview_summary": "Two-phase recovery protocol combining BPC-157 and TB-500 with ARA-290 support where tissue repair and neuropathic recovery overlap.",
     "protocol_title": "BPC-157, TB-500 & ARA-290 Neuro-Musculoskeletal Protocol",
@@ -9343,13 +9343,13 @@
     },
     "_syncedAt": "2026-04-26T12:46:33.076Z",
     "updated_at": "2026-05-04T15:06:50.087Z",
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "recommended_supplements": [
       "curcumin",
       "boswellia",
       "omega-3-forte"
     ],
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible",
       "expected_outcomes: INJECTED for category \"Recovery & Neurology\""
@@ -9996,8 +9996,8 @@
       ],
       "scientificName": "GHK-Cu Copper Peptide ECM Remodeling & Optional BPC-157 Localized Tissue Support Protocol",
       "author": {
-        "organization": "Med-Peptides",
-        "name": "Med-Peptides Clinical Team",
+        "organization": "Atlas Health",
+        "name": "Atlas Health Clinical Team",
         "title": "Peptide Specialists"
       },
       "description": "12-week staged skin and aesthetics protocol using GHK-Cu for barrier support and dermal matrix remodeling, with optional localized BPC-157 for tissue repair support.",
@@ -10307,7 +10307,7 @@
     "protocol_slug": "skin-rejuvenation-12w",
     "protocol_source_type": "curated_library",
     "protocol_author_notes": "Official curated protocol for general clinical use.",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_source_reference": "internal_guide",
     "overview_summary": "Protocol focused on collagen activation and skin tissue rejuvenation.",
     "protocol_title": "GHK-Cu Collagen Rejuvenation Protocol",
@@ -10461,12 +10461,12 @@
       "resveratrol",
       "quercetin"
     ],
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible",
       "expected_outcomes: INJECTED for category \"Skin & Aesthetics\""
     ],
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "category": "Skin & Aesthetics",
     "syncedAt": "2026-05-16T14:32:32.558Z",
     "generator_rules": {
@@ -10788,7 +10788,7 @@
     "protocol_last_reviewed_at": "2026-03-29",
     "protocol_review_status": "approved",
     "protocol_slug": "skin-repair-aging-10w",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_source_reference": "internal_guide",
     "protocol_source_type": "curated_library",
     "protocol_source_version": "v5.0",
@@ -10949,12 +10949,12 @@
       "resveratrol",
       "quercetin"
     ],
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible",
       "expected_outcomes: INJECTED for category \"Skin & Aesthetics\""
     ],
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "category": "Skin & Aesthetics",
     "syncedAt": "2026-05-16T14:32:34.376Z",
     "generator_rules": {
@@ -11851,7 +11851,7 @@
     "protocol_review_status": "approved",
     "protocol_slug": "sleep-restoration-8w",
     "protocol_source_type": "curated_library",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "overview_summary": "Protocol designed to improve sleep architecture, reduce stress activation, and support circadian recovery.",
     "protocol_source_version": "v5.0",
     "economics": {
@@ -12012,13 +12012,13 @@
     "_patchSchema": "antigravity_v2",
     "_syncedAt": "2026-04-26T12:46:36.931Z",
     "updated_at": "2026-05-04T15:06:50.088Z",
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "recommended_supplements": [
       "magnesium-threonate",
       "ashwagandha",
       "melatonin"
     ],
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible",
       "expected_outcomes: INJECTED for category \"Sleep & Recovery\""
@@ -12367,7 +12367,7 @@
     "protocol_review_status": "approved",
     "protocol_slug": "sleep-circadian-6w",
     "protocol_source_type": "curated_library",
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "overview_summary": "Six-week sleep-support protocol centered on DSIP with Epithalon added to reinforce circadian and nocturnal rhythm support.",
     "protocol_source_version": "v5.0",
     "complexity_level": "simple",
@@ -12525,13 +12525,13 @@
     "_patchSchema": "antigravity_v2",
     "_syncedAt": "2026-04-26T12:46:37.159Z",
     "updated_at": "2026-05-04T15:06:50.088Z",
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "recommended_supplements": [
       "magnesium-threonate",
       "l-theanine",
       "ashwagandha"
     ],
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible",
       "expected_outcomes: INJECTED for category \"Sleep & Recovery\""
@@ -12874,7 +12874,7 @@
     "protocol_id": "wm_001",
     "protocol_is_curated": true,
     "washout_recommended_weeks": 4,
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_is_physician_authored": false,
     "seeded_at": "2026-04-25T06:10:36.124Z",
     "protocol_source_version": "v5.0",
@@ -13217,12 +13217,12 @@
       "magnesium-glycinate",
       "b-complex"
     ],
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible",
       "expected_outcomes: INJECTED for category \"Weight Management\""
     ],
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "category": "Weight Management",
     "syncedAt": "2026-05-16T14:32:31.302Z",
     "clinical_disclaimer": "For use by qualified healthcare professionals only. Requires clinical evaluation, monitoring, and adherence to local regulatory standards.",
@@ -13590,7 +13590,7 @@
     "protocol_is_curated": true,
     "protocol_version": "v6.0",
     "washout_recommended_weeks": 4,
-    "protocol_source_document": "Med-Peptides_Clinical_Guidelines_2026.pdf",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
     "protocol_is_physician_authored": false,
     "seeded_at": "2026-04-25T06:10:36.133Z",
     "protocol_source_version": "v5.0",
@@ -13774,7 +13774,7 @@
     },
     "_syncedAt": "2026-04-26T12:46:38.765Z",
     "updated_at": "2026-05-04T14:35:44.637Z",
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "recommended_supplements": [
       "berberine",
       "magnesium-glycinate"
@@ -13783,7 +13783,7 @@
       "total_protocol_cost_estimate": 520,
       "total_vials_required": 9
     },
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "_enrichment_notes": [
       "phases.drugs.weekly_dose: CALCULATED where possible"
     ],
@@ -16312,9 +16312,9 @@
       "allow_extension": false
     },
     "primary_goal": "Weight Management / Metabolic Longevity",
-    "protocol_author_name": "Med-Peptides Clinical Team",
+    "protocol_author_name": "Atlas Health Clinical Team",
     "bundleVersion": "2.0",
-    "protocol_author_organization": "Med-Peptides",
+    "protocol_author_organization": "Atlas Health",
     "variant_rules": {
       "age_variants": {
         "18-35": {

@@ -23,7 +23,7 @@ function buildFinanceSystemPrompt(currency, eurRate) {
     ? `All monetary values are in EUR (rate: 1 USD = ${eurRate} EUR). When asked for totals or margins, use EUR figures.`
     : "All monetary values are in USD.";
 
-  return `You are AgentFinance — a financial intelligence agent for Med-Peptides Research Platform (admin use only).
+  return `You are AgentFinance — a financial intelligence agent for Atlas Health Research Platform (admin use only).
 
 You have access to the full product portfolio pricing data including:
 - guest_${currency}: Public retail price

@@ -5,7 +5,7 @@ import BrandLogo from '../components/common/BrandLogo';
 export default function LogoShowcase() {
   return (
     <div style={{ padding: '4rem', fontFamily: 'sans-serif' }}>
-      <h1 style={{ marginBottom: '2rem' }}>Med-Peptides Logo Showcase (SVG)</h1>
+      <h1 style={{ marginBottom: '2rem' }}>Atlas Health Logo Showcase (SVG)</h1>
       
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
         

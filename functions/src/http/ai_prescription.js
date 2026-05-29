@@ -64,7 +64,7 @@ async function handlePrescriptionIntake({ message, sessionId }, db, res) {
     ).join("\n");
 
     const systemInstruction = `
-You are the Med-Peptides Prescription Ingestion Agent.
+You are the Atlas Health Prescription Ingestion Agent.
 Your job is to analyze the medical prescription text provided by the user, match items against the available catalog of commercial products, and classify the remaining items as custom compounded formulations.
 
 The available catalog products are:

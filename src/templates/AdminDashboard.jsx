@@ -39,6 +39,7 @@ const AdminClinicalLogsTab = React.lazy(() => import('../components/admin/AdminC
 const AdminHomeLayoutTab   = React.lazy(() => import('../components/admin/AdminHomeLayoutTab'));
 const AdminPlaceholderTab  = React.lazy(() => import('../components/admin/AdminPlaceholderTab'));
 const AdminAIAgentsTab     = React.lazy(() => import('../components/admin/AdminAIAgentsTab'));
+const AdminAuditLogsTab    = React.lazy(() => import('../components/admin/AdminAuditLogsTab'));
 const AdminStorageTab      = React.lazy(() => import('../components/admin/AdminStorageTab'));
 const AdminAIToolsTab      = React.lazy(() => import('../components/admin/AdminAIToolsTab'));
 const AdminSkuMappingTab   = React.lazy(() => import('../components/admin/SkuMappingTab/AdminSkuMappingTab'));
@@ -130,6 +131,7 @@ const NAV_GROUPS = [
       { id: 'prescription-agent',label: 'Prescription Agent',  icon: Zap },
       { id: 'semantic',          label: 'AI Semantics',        icon: Cpu },
       { id: 'ai-logs',           label: 'AI Logs',             icon: ScrollText },
+      { id: 'audit-logs',        label: 'Audit Logs',          icon: ShieldCheck },
     ],
   },
   {
@@ -207,6 +209,7 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
       {tab === 'prescription-agent' && <AdminPlaceholderTab title="Prescription Agent" description="Manage logic for AI prescription recommendations." tags={['AI', 'Medical']} color="var(--color-primary)" />}
       {tab === 'analytics'     && <AdminAnalyticsTab /> }
       {tab === 'ai-logs'       && <AdminClinicalLogsTab /> }
+      {tab === 'audit-logs'    && <AdminAuditLogsTab /> }
       {tab === 'geography-areas'    && <AdminPlaceholderTab title="Geography Areas" description="Manage international deployment areas and borders." tags={['Regions', 'Geography']} color="var(--color-primary)" />}
       {tab === 'territory-rules'    && <AdminPlaceholderTab title="Territory Rules" description="Configure exclusivity rules and protected categories." tags={['Rules', 'Protection']} color="var(--color-primary)" />}
       {tab === 'branding'           && <AdminPlaceholderTab title="Wholeseller Branding" description="Configure white-label subdomains and assets." tags={['Brand', 'White-label']} color="var(--color-primary)" />}

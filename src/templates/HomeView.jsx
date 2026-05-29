@@ -42,19 +42,19 @@ export default function HomeView({
   const structuredData = useMemo(() => ({
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "Med-Peptides",
-    "url": "https://Med-Peptides.com/",
+    "name": "Atlas Health",
+    "url": "https://Atlas Health.com/",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://Med-Peptides.com/search?q={search_term_string}",
+      "target": "https://Atlas Health.com/search?q={search_term_string}",
       "query-input": "required name=search_term_string"
     }
   }), []);
 
   usePageMeta({
-    title: 'Med-Peptides | Premium Research Peptides & Research Protocols',
-    description: 'Med-Peptides provides high-purity research peptides and advanced research protocols for scientific professionals. Global logistics and verified analytical standards.',
-    canonicalUrl: 'https://Med-Peptides.com/',
+    title: 'Atlas Health | Premium Research Peptides & Research Protocols',
+    description: 'Atlas Health provides high-purity research peptides and advanced research protocols for scientific professionals. Global logistics and verified analytical standards.',
+    canonicalUrl: 'https://Atlas Health.com/',
     structuredData
   });
 

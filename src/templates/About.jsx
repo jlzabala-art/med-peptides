@@ -77,20 +77,20 @@ const SectionHeader = ({ title, subtitle, badge }) => (
 
 const About = () => {
   usePageMeta({
-    title: 'About Med-Peptides | Sourcing Quality & Trust | Med-Peptides',
-    description: 'Learn about Med-Peptides, the global standard for high-purity research peptides. Batch verified, documented quality, globally coordinated operations in US, EU, HK, and UAE.',
-    canonicalUrl: 'https://Med-Peptides-app-27a3a.web.app/about',
+    title: 'About Atlas Health | Sourcing Quality & Trust | Atlas Health',
+    description: 'Learn about Atlas Health, the global standard for high-purity research peptides. Batch verified, documented quality, globally coordinated operations in US, EU, HK, and UAE.',
+    canonicalUrl: 'https://Atlas Health-app-27a3a.web.app/about',
     structuredData: {
       '@context': 'https://schema.org',
       '@type': 'AboutPage',
-      name: 'About Med-Peptides',
+      name: 'About Atlas Health',
       description: 'The global standard for institutional-grade research peptides sourcing and fulfillment.',
       publisher: {
         '@type': 'Organization',
-        name: 'Med-Peptides',
+        name: 'Atlas Health',
         logo: {
           '@type': 'ImageObject',
-          url: 'https://Med-Peptides-app-27a3a.web.app/images/logo.png'
+          url: 'https://Atlas Health-app-27a3a.web.app/images/logo.png'
         }
       }
     }
@@ -140,7 +140,7 @@ const About = () => {
               transition={{ delay: 0.2 }}
               className="about-hero__body"
             >
-              Headquartered in the <strong>United Arab Emirates</strong>, Med-Peptides is an institutional-grade sourcing partner. We provide globally coordinated fulfillment across the <strong>US</strong>, <strong>Europe</strong>, and <strong>Hong Kong</strong> — ensuring researchers receive documented, verified compounds with absolute reliability.
+              Headquartered in the <strong>United Arab Emirates</strong>, Atlas Health is an institutional-grade sourcing partner. We provide globally coordinated fulfillment across the <strong>US</strong>, <strong>Europe</strong>, and <strong>Hong Kong</strong> — ensuring researchers receive documented, verified compounds with absolute reliability.
             </motion.p>
 
             <motion.div
@@ -185,7 +185,7 @@ const About = () => {
             <div className="about-hero__img-frame">
               <img
                 src="/images/about_hero_logistics_global.png"
-                alt="Med-Peptides International Logistics Operations"
+                alt="Atlas Health International Logistics Operations"
                 loading="eager"
               />
               <div className="about-hero__img-overlay" />
@@ -265,7 +265,7 @@ const About = () => {
             </div>
             <h2 className="about-stats__heading">Two Years of Verified Continuity</h2>
             <p className="about-stats__body">
-              Med-Peptides has established itself as the baseline for reliability in the research space. We focus on long-term supplier stability and documented chain-of-custody, ensuring your research is never compromised by supply volatility.
+              Atlas Health has established itself as the baseline for reliability in the research space. We focus on long-term supplier stability and documented chain-of-custody, ensuring your research is never compromised by supply volatility.
             </p>
             <div className="about-stats__grid">
               {[
@@ -413,7 +413,7 @@ const About = () => {
           <div className="about-doc__text-col">
             <h3 className="text-2xl font-bold mb-6">Documentation Transparency</h3>
             <p className="about-doc__body">
-              Med-Peptides maintains a centralized documentation hub for all distributed compounds. This ensures that researchers have immediate access to the technical data required for their protocols.
+              Atlas Health maintains a centralized documentation hub for all distributed compounds. This ensures that researchers have immediate access to the technical data required for their protocols.
             </p>
             <div className="mt-8">
               <img 
@@ -439,7 +439,7 @@ const About = () => {
           >
             <img
               src="/images/about_logistics_symbolic.png" 
-              alt="Med-Peptides UAE Strategic Logistics Hub Symbolic Representation"
+              alt="Atlas Health UAE Strategic Logistics Hub Symbolic Representation"
               loading="lazy"
             />
             <div className="about-mission__overlay" />
@@ -463,7 +463,7 @@ const About = () => {
               UAE-headquartered, with warehousing and fulfillment infrastructure across four international regions.
             </p>
             <p className="about-mission__body">
-              This multi-region structure allows Med-Peptides to optimize delivery routes, reduce transit times, and serve research partners in the Americas, Europe, and Asia-Pacific with consistent operational reliability.
+              This multi-region structure allows Atlas Health to optimize delivery routes, reduce transit times, and serve research partners in the Americas, Europe, and Asia-Pacific with consistent operational reliability.
             </p>
             <div className="about-mission__checklist">
               {[

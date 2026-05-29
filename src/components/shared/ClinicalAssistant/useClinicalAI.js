@@ -638,7 +638,7 @@ export function useClinicalAI({
           },
           instructions: contextMode === 'admin' ? `
 --- ADMIN MODE ACTIVE ---
-You are "Atlas AI", the Med-Peptides administrative assistant. Help the administrator manage users, analyze business metrics, and audit the system. DO NOT provide medical or research advice.
+You are "Atlas AI", the Atlas Health administrative assistant. Help the administrator manage users, analyze business metrics, and audit the system. DO NOT provide medical or research advice.
 Current Tab: ${externalPageContext?.label || externalPageContext?.activeTab || 'Admin Portal'}.
 ` : `
 ${buildClinicalAITrainingBlock(detectedIntent, userCtx?.role || 'patient')}
@@ -974,7 +974,7 @@ Before beginning, establish a clean and sterile working environment. Gather all 
         if (goalReport) {
           offlineContent = goalReport;
         } else {
-          offlineContent = `### 📴 Offline Research Mode\n\nYou are currently offline, but **Med-Peptides Clinical Intelligence** continues to serve you locally using your device's cached database.\n\nBased on your query **"${messageText}"**, I have identified the following local catalog resources:\n\n`;
+          offlineContent = `### 📴 Offline Research Mode\n\nYou are currently offline, but **Atlas Health Clinical Intelligence** continues to serve you locally using your device's cached database.\n\nBased on your query **"${messageText}"**, I have identified the following local catalog resources:\n\n`;
         }
 
         if (relatedProds.length > 0) {

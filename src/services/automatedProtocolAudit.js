@@ -1,6 +1,6 @@
 /* eslint-disable no-undef, no-unused-vars */
 /**
- * Med-Peptides — Automated Clinical Protocol Selection Test Suite (Testing 2)
+ * Atlas Health — Automated Clinical Protocol Selection Test Suite (Testing 2)
  * Runs the full ProtocolEngine2 internal pipeline with local bundle, bypassing Firebase.
  */
 import { ProtocolEngine2 } from './protocolEngine2.js';
@@ -191,7 +191,7 @@ function validateTimeline(timeline) {
 // ─────────────────────────────────────────────
 async function runAudit() {
   console.log("\n╔══════════════════════════════════════════════════════╗");
-  console.log("║  Med-Peptides — Clinical Protocol Audit Suite v2.0    ║");
+  console.log("║  Atlas Health — Clinical Protocol Audit Suite v2.0    ║");
   console.log("╚══════════════════════════════════════════════════════╝\n");
 
   const log = {

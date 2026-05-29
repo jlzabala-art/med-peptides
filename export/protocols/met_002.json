@@ -1,6 +1,6 @@
 {
   "protocol_duration_weeks": 12,
-  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_name": "Atlas Health Clinical Team",
   "bundleVersion": "2.0",
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -81,7 +81,7 @@
   },
   "protocol_author_notes": "Official curated protocol for general clinical use.",
   "_schemaVersion": "antigravity_v2",
-  "protocol_author_organization": "Med-Peptides",
+  "protocol_author_organization": "Atlas Health",
   "protocol_last_reviewed_at": "2026-03-29",
   "protocol_source_reference": "internal_guide",
   "protocol_slug": "metabolic-retatrutide-motsc-12w",
@@ -421,7 +421,7 @@
     ],
     "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
   },
-  "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+  "_importBundle": "Atlas Health Core Clinical Protocol Library",
   "_syncSource": "export/protocols/met_002.json",
   "metadata": {
     "longDescription": "Retatrutide is a first-in-class triple agonist targeting GLP-1, GIP, and glucagon receptors (GcgR), achieving weight reductions of up to 24% in Phase 2 trials — superior to dual agonists (Jastreboff AM et al., NEJM 2023). The addition of glucagon receptor agonism increases hepatic glucose output acutely but primarily drives energy expenditure through thermogenesis and increased fat oxidation, complementing the appetite suppression of the GLP-1 component. MOTS-c is layered to reinforce peripheral insulin sensitivity, AMPK activation, and mitochondrial biogenesis, offsetting any GcgR-mediated glycaemic variability. This advanced 12-week protocol, structured across three escalating phases, is intended for patients with significant obesity (BMI ≥ 35) or cardiometabolic disease requiring intensive intervention.",
@@ -539,7 +539,7 @@
   "_patchedAt": {
     "schema_gap_fix": "2026-04-26T12:37:11Z"
   },
-  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
   "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
   "variant_rules": {
     "tempo": {

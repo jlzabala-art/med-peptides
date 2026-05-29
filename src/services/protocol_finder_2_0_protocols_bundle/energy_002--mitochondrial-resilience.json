@@ -11,10 +11,10 @@
     "complexity_level": "standard",
     "visibility": "public",
     "source_type": "curated_library",
-    "source_reference": "Med-Peptides_ENERGY_002_Protocol_2026",
+    "source_reference": "Atlas Health_ENERGY_002_Protocol_2026",
     "author": {
-      "name": "Med-Peptides Clinical Team",
-      "organization": "Med-Peptides",
+      "name": "Atlas Health Clinical Team",
+      "organization": "Atlas Health",
       "title": "Peptide Specialists"
     },
     "review": {

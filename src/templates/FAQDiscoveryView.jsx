@@ -19,7 +19,7 @@ import {
 
 // Legacy FAQs as fallback / baseline to ensure "everything" is searchable
 const LEGACY_FAQS = [
-  { question: "Where is Med-Peptides based?", answer: "Med-Peptides is proudly based in the USA. All of our operations, including fulfillment and customer support, are conducted domestically to ensure the highest standards of service and reliability.", categoryId: "general", visibility: "public", active: true },
+  { question: "Where is Atlas Health based?", answer: "Atlas Health is proudly based in the USA. All of our operations, including fulfillment and customer support, are conducted domestically to ensure the highest standards of service and reliability.", categoryId: "general", visibility: "public", active: true },
   { question: "Do you provide third-party testing for your products?", answer: "Absolutely. Quality and transparency are our core values. Every single batch of our peptides undergoes rigorous third-party testing for identity, purity, and concentration. HPLC and Mass Spectrometry (MS) reports are available for all products to verify their quality.", categoryId: "quality_handling", visibility: "public", active: true },
   { question: "What are peptides?", answer: "Peptides are short chains of amino acids linked by peptide bonds. They act as biological signaling molecules and are involved in numerous physiological processes including cellular communication, metabolic regulation, tissue repair, immune modulation, and hormonal signaling.", categoryId: "general", visibility: "public", active: true },
   { question: "What is the typical purity of peptide products?", answer: "High-quality research peptides are typically manufactured with a purity level of ≥98–99%, confirmed by analytical techniques such as HPLC and Mass Spectrometry (MS). Each production batch should be accompanied by a CoA.", categoryId: "quality_handling", visibility: "public", active: true },
@@ -170,7 +170,7 @@ export default function FAQDiscoveryView({ onBack, onSelectProduct, products = [
   }), [faqItems]);
 
   usePageMeta({
-    title: "Research FAQ & Peptide Knowledge Base | Med-Peptides",
+    title: "Research FAQ & Peptide Knowledge Base | Atlas Health",
     description: "Explore our comprehensive research peptide FAQ. Learn about handling, storage, and the science behind high-purity research peptides.",
     canonicalUrl: "https://med-peptides.com/faq",
     structuredData

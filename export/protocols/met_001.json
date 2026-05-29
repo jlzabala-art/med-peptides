@@ -1,6 +1,6 @@
 {
   "protocol_duration_weeks": 10,
-  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_name": "Atlas Health Clinical Team",
   "bundleVersion": "2.0",
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -99,7 +99,7 @@
   },
   "protocol_author_notes": "Official curated protocol for general clinical use.",
   "_schemaVersion": "antigravity_v2",
-  "protocol_author_organization": "Med-Peptides",
+  "protocol_author_organization": "Atlas Health",
   "protocol_last_reviewed_at": "2026-03-29",
   "protocol_source_reference": "internal_guide",
   "expected_outcomes": {
@@ -540,7 +540,7 @@
     ],
     "generatedAt": "2026-04-26T09:05:00+02:00"
   },
-  "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+  "_importBundle": "Atlas Health Core Clinical Protocol Library",
   "_syncSource": "export/protocols/met_001.json",
   "metadata": {
     "longDescription": "MOTS-c (mitochondrial open reading frame of the 12S rRNA-c) is an endogenous mitochondria-derived peptide that translocates to the nucleus under metabolic stress, activating AMPK and the AICAR pathway to improve insulin sensitivity and glucose homeostasis (Lee C et al., Cell Metab 2015; Reynolds JC et al., Nat Aging 2021). AOD-9604, the C-terminal fragment of human growth hormone (hGH 176–191), promotes lipolysis via β-adrenergic receptor pathways without inducing IGF-1 or insulin resistance (Ng FM et al., Biochem Mol Biol Int 1997). Combined, this 10-week protocol targets adipose reduction and metabolic flexibility in individuals with metabolic syndrome, pre-diabetes, or dyslipidaemia. The two-phase structure begins with full dual-compound activation then transitions to MOTS-c maintenance for sustained mitochondrial benefit.",
@@ -572,8 +572,8 @@
     "visibility": "public",
     "scientificName": "MOTS-c & AOD-9604 AMPK-Driven Metabolic Activation Protocol",
     "author": {
-      "organization": "Med-Peptides",
-      "name": "Med-Peptides Clinical Team",
+      "organization": "Atlas Health",
+      "name": "Atlas Health Clinical Team",
       "title": "Peptide Specialists"
     },
     "evidence_grade_note": "GRADE B: AOD-9604 Phase II trials (Metabolic Pharmaceuticals 2004); MOTS-c preclinical and early Phase I data (Lee C et al., Cell Metab 2015). Robust mechanistic evidence; limited large RCT data for peptide components.",
@@ -622,7 +622,7 @@
     "_nanoseconds": 792000000,
     "_seconds": 1777190725
   },
-  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
   "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
   "safety_profile": {
     "drug_interactions": [

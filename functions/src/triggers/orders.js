@@ -36,7 +36,7 @@ module.exports = (gmailUser, gmailAppPass) => onDocumentCreated(
       },
     });
 
-    const fromAddress = `"Med-Peptides" <${gmailUser.value()}>`;
+    const fromAddress = `"Atlas Health" <${gmailUser.value()}>`;
     const sendPromises = [];
 
     if (!adminSnap.empty) {

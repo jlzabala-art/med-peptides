@@ -99,7 +99,7 @@ export default function GeographyAreasTab() {
       <div style={{ padding: '2rem', textAlign: 'center' }}>
         <ShieldAlert size={40} style={{ color: 'var(--color-text-tertiary)', margin: '0 auto 1rem' }} />
         <h3 style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>No Franchise Tenant Assigned</h3>
-        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Please contact Med-Peptides support to link your account.</p>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Please contact Atlas Health support to link your account.</p>
       </div>
     );
   }
@@ -139,7 +139,7 @@ export default function GeographyAreasTab() {
             </div>
             <div style={{ marginTop: '1.5rem', borderTop: '1px solid #e2e8f0', paddingTop: '1rem', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
               <Lock size={12} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} />
-              Territory assignment is locked and managed exclusively by Med-Peptides platform administrators.
+              Territory assignment is locked and managed exclusively by Atlas Health platform administrators.
             </div>
           </div>
         </div>

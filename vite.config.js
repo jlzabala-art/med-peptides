@@ -44,8 +44,8 @@ export default defineConfig({
         ],
       },
       manifest: {
-        name: 'Med-Peptides',
-        short_name: 'Med-Peptides',
+        name: 'Atlas Health',
+        short_name: 'Atlas Health',
         description: 'Premium Research Peptides & Analytical Materials',
         start_url: '/',
         scope: '/',

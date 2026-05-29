@@ -39,7 +39,7 @@ function exportPDF({ mg, ml, dose, units }) {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text('Med-Peptides', 14, 12);
+  doc.text('Atlas Health', 14, 12);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.text('Research Report', 14, 20);
@@ -118,7 +118,7 @@ function exportPDF({ mg, ml, dose, units }) {
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  doc.text('Med-Peptides — Research Report  |  Med-Peptides.com', 14, FOOTER_Y + 5.5);
+  doc.text('Atlas Health — Research Report  |  Atlas Health.com', 14, FOOTER_Y + 5.5);
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(7);
   doc.setTextColor(180, 205, 230);
@@ -127,7 +127,7 @@ function exportPDF({ mg, ml, dose, units }) {
     105, FOOTER_Y + 11, { align: 'center' }
   );
 
-  doc.save(`Med-Peptides_Reconstitution_${Date.now()}.pdf`);
+  doc.save(`Atlas Health_Reconstitution_${Date.now()}.pdf`);
 }
 
 /* ─── Shared style tokens (must live before the component for minifier safety) ── */

@@ -2,7 +2,7 @@
 /**
  * WhyChooseMedPeptides — Phase 3
  * ─────────────────────────────────────────────────────────────────────────────
- * "Why Choose Med-Peptides" trust & transparency section.
+ * "Why Choose Atlas Health" trust & transparency section.
  * Placed below the search/category section.
  *
  * Design constraints:
@@ -100,7 +100,7 @@ export default function WhyChooseMedPeptides() {
           Built on trust
         </span>
         <h2 id="wcmp-heading" className="section-title">
-          Why Choose Med-Peptides
+          Why Choose Atlas Health
         </h2>
         <p className="section-subtitle">
           Quality and traceability at every step — from synthesis to your research.

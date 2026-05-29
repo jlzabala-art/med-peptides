@@ -89,7 +89,7 @@ async function upsertUser({ email, password, displayName, role, extra }) {
 
 async function main() {
   console.log('\n──────────────────────────────────────────');
-  console.log(' Med-Peptides QA — Test Account Setup');
+  console.log(' Atlas Health QA — Test Account Setup');
   console.log('──────────────────────────────────────────\n');
 
   const uids = {};

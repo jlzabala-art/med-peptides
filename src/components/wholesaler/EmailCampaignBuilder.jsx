@@ -126,7 +126,7 @@ Do NOT wrap in markdown code blocks. Output raw JSON.`;
     try {
       const finalCampaign = {
         ...campaign,
-        tenantId: selectedCatalog?.branding?.companyName || 'Med-Peptides',
+        tenantId: selectedCatalog?.branding?.companyName || 'Atlas Health',
         status: sendNow ? CAMPAIGN_STATUS.SENT : CAMPAIGN_STATUS.DRAFT,
         sentAt: sendNow ? new Date().toISOString() : null
       };

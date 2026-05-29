@@ -1,7 +1,7 @@
 
 import fs from 'fs';
 
-const content = fs.readFileSync('/Users/joseluiszabala/Documents/Antigravity/Med-Peptides-web/src/data/products.js.backup', 'utf-8');
+const content = fs.readFileSync('/Users/joseluiszabala/Documents/Antigravity/Atlas Health-web/src/data/products.js.backup', 'utf-8');
 
 // Match the array content
 const productsMatch = content.match(/export const products = (\[[\s\S]*?\]);/);

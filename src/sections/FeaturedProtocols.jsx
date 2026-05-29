@@ -431,7 +431,7 @@ export default function FeaturedProtocols({ searchQuery = '' }) {
   const sectionRef  = useRef(null);
   const sidebarRef  = useRef(null);
   const [activeFilter, setFilter] = useState(() => {
-    const stored = localStorage.getItem('Med-Peptides_sidebar_filter');
+    const stored = localStorage.getItem('Atlas Health_sidebar_filter');
     // Validate stored value is still in the current filter list
     return stored && PROTOCOL_FILTERS.includes(stored) ? stored : 'Weight';
   });
@@ -467,13 +467,13 @@ export default function FeaturedProtocols({ searchQuery = '' }) {
     if (!sidebar) return;
 
     // Restore saved scroll position
-    const savedScroll = localStorage.getItem('Med-Peptides_sidebar_scroll');
+    const savedScroll = localStorage.getItem('Atlas Health_sidebar_scroll');
     if (savedScroll !== null) {
       sidebar.scrollTop = parseInt(savedScroll, 10);
     }
 
     const handleScroll = () => {
-      localStorage.setItem('Med-Peptides_sidebar_scroll', sidebar.scrollTop);
+      localStorage.setItem('Atlas Health_sidebar_scroll', sidebar.scrollTop);
     };
 
     sidebar.addEventListener('scroll', handleScroll, { passive: true });
@@ -482,7 +482,7 @@ export default function FeaturedProtocols({ searchQuery = '' }) {
 
   /* ── Persist active filter ───────────────────────────────────── */
   useEffect(() => {
-    localStorage.setItem('Med-Peptides_sidebar_filter', activeFilter);
+    localStorage.setItem('Atlas Health_sidebar_filter', activeFilter);
   }, [activeFilter]);
 
   useEffect(() => { setPage(0); }, [activeFilter, searchQuery]);
@@ -546,7 +546,7 @@ export default function FeaturedProtocols({ searchQuery = '' }) {
   useEffect(() => {
     if (loading || !featured.length) return;
     
-    const lastId = localStorage.getItem('Med-Peptides_last_protocol_id');
+    const lastId = localStorage.getItem('Atlas Health_last_protocol_id');
     if (lastId) {
       setResumedId(lastId);
       const index = featured.findIndex(p => p.id === lastId);
@@ -624,7 +624,7 @@ export default function FeaturedProtocols({ searchQuery = '' }) {
     if (protocol) {
       trackProtocolView(protocol.title, id, protocol.category, source);
     }
-    localStorage.setItem('Med-Peptides_last_protocol_id', id);
+    localStorage.setItem('Atlas Health_last_protocol_id', id);
     const targetSlug = protocol?.slug || protocol?.id || id;
     navigate(`/protocol/${targetSlug}`);
   };

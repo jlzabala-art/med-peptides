@@ -56,20 +56,20 @@ export default function Quality() {
             "@type": "ListItem",
             "position": 1,
             "name": "Home",
-            "item": "https://Med-Peptides-app-27a3a.web.app/"
+            "item": "https://Atlas Health-app-27a3a.web.app/"
           },
           {
             "@type": "ListItem",
             "position": 2,
             "name": "Quality Standards",
-            "item": "https://Med-Peptides-app-27a3a.web.app/quality"
+            "item": "https://Atlas Health-app-27a3a.web.app/quality"
           }
         ]
       },
       {
         "@type": "WebPage",
         "name": "Peptide Quality & Analytical Standards",
-        "description": "Med-Peptides's rigorous quality control process, featuring HPLC and Mass Spectrometry verification for research-grade peptides.",
+        "description": "Atlas Health's rigorous quality control process, featuring HPLC and Mass Spectrometry verification for research-grade peptides.",
         "mainEntity": {
           "@type": "Service",
           "name": "Peptide Quality Verification",
@@ -81,8 +81,8 @@ export default function Quality() {
 
   usePageMeta({
     title: 'Quality & Analytical Standards | HPLC & MS Verified Peptides',
-    description: 'Every Med-Peptides batch is verified by HPLC and Mass Spectrometry. Discover our rigorous quality control process and compliance certifications.',
-    canonicalUrl: 'https://Med-Peptides-app-27a3a.web.app/quality',
+    description: 'Every Atlas Health batch is verified by HPLC and Mass Spectrometry. Discover our rigorous quality control process and compliance certifications.',
+    canonicalUrl: 'https://Atlas Health-app-27a3a.web.app/quality',
     structuredData
   });
 

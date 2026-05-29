@@ -11,7 +11,7 @@
   "protocols": {
     "cog_001": {
       "protocol_duration_weeks": 6,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -25,7 +25,7 @@
       },
       "complexity_level": "simple",
       "protocol_author_notes": "Official curated protocol for general clinical use.",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "expected_outcomes": {
@@ -240,7 +240,7 @@
         ]
       },
       "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
-      "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
+      "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
       "clinical_evidence_update_2026": {
         "evidence_limitations": [
           "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
@@ -380,8 +380,8 @@
         "primary_goal": "Cognitive Support",
         "visibility": "public",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "evidence_grade_note": "Strong preclinical evidence and multiple Russian Phase II/III clinical trials. Limited large-scale Western RCTs. Grade C per GRADE criteria due to regional publication bias.",
@@ -430,7 +430,7 @@
       "_patchedAt": {
         "schema_gap_fix": "2026-04-26T12:37:11Z"
       },
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "overview_summary": "Semax & Selank Neurocognitive Protocol",
       "variant_rules": {
         "tempo": {
@@ -531,7 +531,7 @@
     },
     "cog_002": {
       "protocol_duration_weeks": 8,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -607,7 +607,7 @@
         "resolved_monitoring": []
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "expected_outcomes": {
@@ -1030,7 +1030,7 @@
         ]
       },
       "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
-      "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
+      "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
       "_schemaGapFixed": {
         "_nanoseconds": 978000000,
         "_seconds": 1777190715
@@ -1106,8 +1106,8 @@
         "primary_goal": "Cognitive Support",
         "visibility": "public",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "evidence_grade_note": "Multiple Russian Phase II/III RCTs demonstrating anxiolytic efficacy (Zozulya 2014, Semenova 2010). HAM-A validated outcomes. Grade C per GRADE due to regional publication bias and limited Western replication.",
@@ -1153,7 +1153,7 @@
         },
         "regulatory_note": "Not FDA-approved. Available via 503A compounding pharmacies in the US under physician supervision. Selank holds approved prescription status in Russia for generalized anxiety disorder. Not EMA-approved. Use constitutes off-label research peptide administration."
       },
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "canonical_enrichment": {
         "compatibleWith": "antigravity_v2_firebase_import",
         "auditFieldsCompleted": [
@@ -1257,7 +1257,7 @@
     },
     "energy_001": {
       "protocol_duration_weeks": 10,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -1333,7 +1333,7 @@
         "resolved_monitoring": []
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "expected_outcomes": {
@@ -1741,7 +1741,7 @@
         ]
       },
       "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
-      "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
+      "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
       "_schemaGapFixed": {
         "_nanoseconds": 922000000,
         "_seconds": 1777190716
@@ -1813,8 +1813,8 @@
         "visibility": "public",
         "scientificName": "Energy · Mitochondrial Bioenergetics Restoration via AMPK + OXPHOS · 8 Weeks",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "evidence_grade_note": "GRADE B: MOTS-c Phase I human data (Lee C, Cell Metab 2015); SS-31/Elamipretide Phase II data in heart failure and aging (NEJM 2023 RESTORE trial). Strong mechanistic basis; limited large RCT data for fatigue indication specifically.",
@@ -1858,7 +1858,7 @@
         },
         "regulatory_note": "MOTS-c: Research peptide, not FDA-approved. Available via compounding pharmacies under physician supervision. SS-31/Elamipretide: investigational drug (Stealth BioTherapeutics); compassionate use or research protocols only in the US. Updated 2026: Elamipretide is no longer purely investigational in all contexts; the FDA granted accelerated approval for elamipretide (Forzinity) for Barth syndrome in patients weighing at least 30 kg. Use for fatigue, mitochondrial optimization, performance, or post-viral fatigue remains off-label/research-oriented and requires physician oversight."
       },
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "canonical_enrichment": {
         "compatibleWith": "antigravity_v2_firebase_import",
         "auditFieldsCompleted": [
@@ -1963,7 +1963,7 @@
     },
     "energy_002": {
       "protocol_duration_weeks": 10,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -2039,7 +2039,7 @@
         "resolved_monitoring": []
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "expected_outcomes": {
@@ -2470,7 +2470,7 @@
         ]
       },
       "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
-      "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
+      "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
       "_schemaGapFixed": {
         "_nanoseconds": 912000000,
         "_seconds": 1777190717
@@ -2543,8 +2543,8 @@
         "visibility": "public",
         "scientificName": "Energy · Mitochondrial Membrane Repair + Resilience via SS-31 + MOTS-C · 8 Weeks",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "evidence_grade_note": "GRADE B: MOTS-c (Lee C, Cell Metab 2015); SS-31/Elamipretide MMPOWER-3 trial (Karaa 2018); NR human RCT data (Martens CR, Nat Commun 2018). Combined protocol evidence is extrapolated from individual components.",
@@ -2588,7 +2588,7 @@
         },
         "regulatory_note": "MOTS-c and SS-31: research peptides, not FDA-approved. NR (Nicotinamide Riboside): FDA GRAS-listed dietary supplement (Tru Niagen, BASIS). Available OTC. Use of peptide components requires physician oversight via compounding pharmacy. Updated 2026: Elamipretide (Forzinity) received FDA accelerated approval for Barth syndrome in patients weighing at least 30 kg. Its use for general mitochondrial resilience, chronic fatigue, long COVID fatigue, or athletic recovery remains off-label/research-oriented."
       },
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "canonical_enrichment": {
         "compatibleWith": "antigravity_v2_firebase_import",
         "auditFieldsCompleted": [
@@ -2694,7 +2694,7 @@
     },
     "horm_001": {
       "protocol_duration_weeks": 12,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -2772,7 +2772,7 @@
         "resolved_monitoring": []
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "expected_outcomes": {
@@ -3180,7 +3180,7 @@
         ]
       },
       "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
-      "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
+      "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
       "_schemaGapFixed": {
         "_nanoseconds": 670000000,
         "_seconds": 1777190718
@@ -3239,8 +3239,8 @@
         "visibility": "public",
         "scientificName": "CJC-1295 / Ipamorelin GHRH & Ghrelin-Mimetic GH Secretagogue Optimization Protocol",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "evidence_grade_note": "GRADE B: Ipamorelin Phase I/II data (Raun K, Eur J Endocrinol 1998); CJC-1295 Phase II human PK/PD data (Teichman SL, J Clin Endocrinol Metab 2006). IGF-1 endpoints well-validated. Limited long-term RCT data for body composition endpoints.",
@@ -3284,7 +3284,7 @@
         },
         "regulatory_note": "Ipamorelin and CJC-1295: Not FDA-approved for weight management, anti-aging, or body composition. FDA issued warning letters against compounding of these peptides in 2024 (Category 2 bulk substances). Available via 503A compounding pharmacies under physician supervision in jurisdictions where permitted. Not WADA-prohibited if used therapeutically."
       },
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "canonical_enrichment": {
         "compatibleWith": "antigravity_v2_firebase_import",
         "auditFieldsCompleted": [
@@ -3434,7 +3434,7 @@
     },
     "horm_002": {
       "protocol_duration_weeks": 12,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -3516,7 +3516,7 @@
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
       "_schemaVersion": "antigravity_v2",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "expected_outcomes": {
@@ -4003,7 +4003,7 @@
         ],
         "generatedAt": "2026-04-26T09:05:00+02:00"
       },
-      "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+      "_importBundle": "Atlas Health Core Clinical Protocol Library",
       "_syncSource": "export/protocols/horm_002.json",
       "metadata": {
         "longDescription": "Tesamorelin (TransCon hGH; Egrifta) is an FDA-approved synthetic GHRH analogue (GHRH 1-44 with trans-3-hexenoic acid modification) validated in Phase 3 RCTs for reducing visceral adipose tissue (VAT) in HIV-associated lipodystrophy and studied for metabolic benefits in non-HIV populations (Falutz J et al., NEJM 2007; Stanley TL et al., J Clin Endocrinol Metab 2012). Tesamorelin acts on pituitary GHRH receptors to amplify endogenous GH pulse amplitude while preserving the physiological feedback regulation of the GH axis — unlike exogenous GH administration, which suppresses endogenous production. Ipamorelin (selective GHSR agonist; see horm_001) is combined to add discrete pulsatile GH peaks beyond the tonic effect of tesamorelin, enhancing total GH bioavailability while maintaining physiological rhythmicity. This protocol is particularly suited for adults with abdominal adiposity, low IGF-1, age-related GH decline (somatopause), or metabolic syndrome with a visceral fat component.",
@@ -4035,8 +4035,8 @@
         "visibility": "public",
         "scientificName": "Tesamorelin + Ipamorelin GHRH-Axis Visceral Adiposity & GH Restoration Protocol",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "evidence_grade_note": "GRADE A- due to FDA approval of Tesamorelin (Egrifta) for HIV-lipodystrophy visceral fat reduction (Falutz J, NEJM 2010). Ipamorelin/CJC-1295 component remains GRADE B (Phase II data). Combined protocol is clinical extrapolation.",
@@ -4085,7 +4085,7 @@
         "_nanoseconds": 447000000,
         "_seconds": 1777190719
       },
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
       "safety_profile": {
         "drug_interactions": [
@@ -4157,7 +4157,7 @@
     },
     "immune_001": {
       "protocol_duration_weeks": 8,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -4234,7 +4234,7 @@
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
       "_schemaVersion": "antigravity_v2",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "expected_outcomes": {
@@ -4535,7 +4535,7 @@
         "source_refs": [],
         "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
       },
-      "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+      "_importBundle": "Atlas Health Core Clinical Protocol Library",
       "_syncSource": "export/protocols/immune_001.json",
       "metadata": {
         "longDescription": "Thymosin Alpha-1 (Tα1; Zadaxin) is a 28-amino acid peptide endogenously produced by thymic epithelial cells and the first thymic hormone to be fully sequenced. It promotes T-cell differentiation and maturation, augments NK cell activity, stimulates dendritic cell function, activates Toll-like receptors 2 and 9 (innate immunity), and modulates cytokine balance toward Th1-type responses (Goldstein AL & Goldstein A, Expert Opin Biol Ther 2009; King R & Tuthill C, Prog Mol Biol Transl Sci 2014). Tα1 is clinically approved in 35+ countries for hepatitis B, hepatitis C, and oncology supportive care. TB-500 (synthetic Thymosin β4 fragment) provides complementary immune modulation by suppressing pro-inflammatory cytokines (IL-1β, TNF-α), promoting regulatory T-cell function, and accelerating tissue repair via angiogenesis and actin remodeling (Goldstein AL et al., Ann N Y Acad Sci 2012). The 8-week dual-phase protocol delivers combined immunomodulation in weeks 1–4, transitioning to Tα1 maintenance for sustained immune calibration.",
@@ -4641,7 +4641,7 @@
       "_patchedAt": {
         "schema_gap_fix": "2026-04-26T12:37:11Z"
       },
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
       "variant_rules": {
         "tempo": {
@@ -4692,7 +4692,7 @@
     },
     "immune_002": {
       "protocol_duration_weeks": 8,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -4769,7 +4769,7 @@
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
       "_schemaVersion": "antigravity_v2",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "expected_outcomes": {
@@ -5100,7 +5100,7 @@
         "source_refs": [],
         "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
       },
-      "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+      "_importBundle": "Atlas Health Core Clinical Protocol Library",
       "_syncSource": "export/protocols/immune_002.json",
       "metadata": {
         "longDescription": "This protocol pairs Thymosin Alpha-1 (systemic T-cell and innate immune modulation; see immune_001) with KPV (Lys-Pro-Val), a tripeptide derived from the C-terminus of α-melanocyte-stimulating hormone (α-MSH). KPV exerts potent anti-inflammatory effects by inhibiting NF-κB nuclear translocation, reducing production of IL-1β, IL-6, TNF-α, and interferon-γ, and suppressing mast cell degranulation (Dalmasso G et al., Gastroenterology 2008; Catania A et al., Endocr Rev 2004). KPV has demonstrated efficacy in murine models of colitis, intestinal inflammation, and dermatitis, and penetrates epithelial barriers due to its small size, making it especially suitable for gut-associated inflammatory conditions. Combined with Tα1 (which restores Th1/Th2 balance and regulatory T-cell function), this protocol provides both upstream immune calibration and downstream cytokine suppression — a complementary dual strategy for conditions including IBD, systemic inflammation, mast-cell activation syndrome (MCAS), and autoimmune disorders.",
@@ -5207,7 +5207,7 @@
       "_patchedAt": {
         "schema_gap_fix": "2026-04-26T12:37:11Z"
       },
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
       "variant_rules": {
         "tempo": {
@@ -5258,7 +5258,7 @@
     },
     "lon_001": {
       "protocol_duration_weeks": 12,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -5334,7 +5334,7 @@
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
       "_schemaVersion": "antigravity_v2",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "expected_outcomes": {
@@ -5612,7 +5612,7 @@
         "source_refs": [],
         "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
       },
-      "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+      "_importBundle": "Atlas Health Core Clinical Protocol Library",
       "_syncSource": "export/protocols/lon_001.json",
       "metadata": {
         "longDescription": "MOTS-c (mitochondrial open reading frame of the 12S rRNA-c) is an endogenous mitochondria-derived peptide encoded within the mitochondrial genome — the first peptide shown to be transcribed from mitochondrial rRNA rather than nuclear DNA (Lee C et al., Cell Metab 2015). MOTS-c circulates systemically and translocates to the nucleus under metabolic stress, where it activates AMPK (AMP-activated protein kinase), regulates the folate–methionine cycle, and modulates gene expression related to metabolic homeostasis, antioxidant defense, and insulin sensitivity. Circulating MOTS-c levels decline significantly with age, linking its reduction to age-associated metabolic decline (Reynolds JC et al., Nat Aging 2021). This 12-week foundation protocol delivers sustained MOTS-c supplementation across two phases — activation and maintenance — targeting the mitochondrial and metabolic hallmarks of aging as defined by López-Otín et al. (Cell 2023).",
@@ -5723,7 +5723,7 @@
       "_patchedAt": {
         "schema_gap_fix": "2026-04-26T12:37:11Z"
       },
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
       "variant_rules": {
         "tempo": {
@@ -5776,7 +5776,7 @@
     },
     "lon_002": {
       "protocol_duration_weeks": 12,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -5857,7 +5857,7 @@
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
       "_schemaVersion": "antigravity_v2",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "expected_outcomes": {
@@ -6308,7 +6308,7 @@
         ],
         "generatedAt": "2026-04-26T09:05:00+02:00"
       },
-      "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+      "_importBundle": "Atlas Health Core Clinical Protocol Library",
       "_syncSource": "export/protocols/lon_002.json",
       "metadata": {
         "longDescription": "Epithalon (Epitalon; Ala-Glu-Asp-Gly) is a synthetic tetrapeptide bioregulator developed by the St. Petersburg Institute of Bioregulation and Gerontology. It stimulates telomerase (TERT) activity in somatic cells, elongates telomeres in aged cell cultures, and has demonstrated life-extension effects in multiple animal models (Khavinson VKh et al., Bull Exp Biol Med 2003; Anisimov VN et al., Mech Ageing Dev 2003). Epithalon also modulates pineal melatonin secretion and normalises circadian gene expression (BMAL1, CLOCK), improving circadian amplitude — a key driver of healthy aging (Khavinson V et al., Adv Gerontol 2012). Combined with MOTS-c (mitochondrial AMPK activation, metabolic homeostasis, see lon_001), this protocol targets two independent pillars of the hallmarks of aging: replicative senescence/telomere shortening and mitochondrial dysfunction. The dual-phase structure allows maximal combined loading in weeks 1–6, followed by MOTS-c maintenance to sustain metabolic gains through week 12.",
@@ -6348,8 +6348,8 @@
         },
         "scientificName": "Epithalon (Epitalon) + MOTS-c Telomere & Mitokine Circadian Longevity Protocol",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "created_at": "2026-04-02T00:00:00.000Z",
@@ -6377,7 +6377,7 @@
         "_nanoseconds": 114000000,
         "_seconds": 1777190724
       },
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
       "safety_profile": {
         "contraindications": [
@@ -6442,7 +6442,7 @@
     },
     "met_001": {
       "protocol_duration_weeks": 10,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -6541,7 +6541,7 @@
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
       "_schemaVersion": "antigravity_v2",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "expected_outcomes": {
@@ -6986,7 +6986,7 @@
         ],
         "generatedAt": "2026-04-26T09:05:00+02:00"
       },
-      "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+      "_importBundle": "Atlas Health Core Clinical Protocol Library",
       "_syncSource": "export/protocols/met_001.json",
       "metadata": {
         "longDescription": "MOTS-c (mitochondrial open reading frame of the 12S rRNA-c) is an endogenous mitochondria-derived peptide that translocates to the nucleus under metabolic stress, activating AMPK and the AICAR pathway to improve insulin sensitivity and glucose homeostasis (Lee C et al., Cell Metab 2015; Reynolds JC et al., Nat Aging 2021). AOD-9604, the C-terminal fragment of human growth hormone (hGH 176–191), promotes lipolysis via β-adrenergic receptor pathways without inducing IGF-1 or insulin resistance (Ng FM et al., Biochem Mol Biol Int 1997). Combined, this 10-week protocol targets adipose reduction and metabolic flexibility in individuals with metabolic syndrome, pre-diabetes, or dyslipidaemia. The two-phase structure begins with full dual-compound activation then transitions to MOTS-c maintenance for sustained mitochondrial benefit.",
@@ -7018,8 +7018,8 @@
         "visibility": "public",
         "scientificName": "MOTS-c & AOD-9604 AMPK-Driven Metabolic Activation Protocol",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "evidence_grade_note": "GRADE B: AOD-9604 Phase II trials (Metabolic Pharmaceuticals 2004); MOTS-c preclinical and early Phase I data (Lee C et al., Cell Metab 2015). Robust mechanistic evidence; limited large RCT data for peptide components.",
@@ -7068,7 +7068,7 @@
         "_nanoseconds": 792000000,
         "_seconds": 1777190725
       },
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
       "safety_profile": {
         "drug_interactions": [
@@ -7145,7 +7145,7 @@
     },
     "met_002": {
       "protocol_duration_weeks": 12,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -7226,7 +7226,7 @@
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
       "_schemaVersion": "antigravity_v2",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "protocol_slug": "metabolic-retatrutide-motsc-12w",
@@ -7566,7 +7566,7 @@
         ],
         "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
       },
-      "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+      "_importBundle": "Atlas Health Core Clinical Protocol Library",
       "_syncSource": "export/protocols/met_002.json",
       "metadata": {
         "longDescription": "Retatrutide is a first-in-class triple agonist targeting GLP-1, GIP, and glucagon receptors (GcgR), achieving weight reductions of up to 24% in Phase 2 trials — superior to dual agonists (Jastreboff AM et al., NEJM 2023). The addition of glucagon receptor agonism increases hepatic glucose output acutely but primarily drives energy expenditure through thermogenesis and increased fat oxidation, complementing the appetite suppression of the GLP-1 component. MOTS-c is layered to reinforce peripheral insulin sensitivity, AMPK activation, and mitochondrial biogenesis, offsetting any GcgR-mediated glycaemic variability. This advanced 12-week protocol, structured across three escalating phases, is intended for patients with significant obesity (BMI ≥ 35) or cardiometabolic disease requiring intensive intervention.",
@@ -7684,7 +7684,7 @@
       "_patchedAt": {
         "schema_gap_fix": "2026-04-26T12:37:11Z"
       },
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
       "variant_rules": {
         "tempo": {
@@ -8260,7 +8260,7 @@
         ],
         "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
       },
-      "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+      "_importBundle": "Atlas Health Core Clinical Protocol Library",
       "_syncSource": "export/protocols/neuro_001.json",
       "metadata": {
         "longDescription": "This protocol targets central and peripheral neurological recovery via three synergistic mechanisms. BPC-157 (pentadecapeptide) exerts neuroprotective and neurotrophic effects through upregulation of VEGF, NO synthesis, and modulation of dopaminergic and serotonergic pathways (Sikiric P et al., Curr Pharm Des 2018). SS-31 (elamipretide, D-Arg-Dmt-Lys-Phe-NH₂) is a mitochondria-targeting peptide that concentrates in the inner mitochondrial membrane via electrostatic interaction with cardiolipin, inhibiting cytochrome c peroxidase activity, reducing reactive oxygen species, and restoring ATP production in damaged neurons (Szeto HH, Biochim Biophys Acta 2014). Pinealon (Glu-Asp-Arg) is a short peptide bioregulator derived from the pineal gland that has demonstrated neuroprotective and epigenetic effects on neuronal gene expression, cognitive function, and circadian regulation in preclinical and Russian clinical studies (Khavinson VKh et al., Neurosci Behav Physiol 2002). Indicated for post-concussion syndrome, neurodegeneration, cognitive decline, and neurorecovery post-stroke.",
@@ -8369,7 +8369,7 @@
       "_patchedAt": {
         "schema_gap_fix": "2026-04-26T12:37:11Z"
       },
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
       "variant_rules": {
         "tempo": {
@@ -8437,8 +8437,8 @@
       },
       "number_of_phases": 2,
       "overview_summary": "Eight-week tissue-repair protocol combining BPC-157 and TB-500 to support soft-tissue healing, angiogenesis, inflammation control, and musculoskeletal recovery.",
-      "protocol_author_name": "Med-Peptides Clinical Team",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_name": "Atlas Health Clinical Team",
+      "protocol_author_organization": "Atlas Health",
       "protocol_author_title": "Peptide Specialists",
       "protocol_duration_weeks": 8,
       "protocol_id": "rec_001",
@@ -8799,8 +8799,8 @@
       "complexity_level": "advanced",
       "confidence_score": 90,
       "number_of_phases": 2,
-      "protocol_author_name": "Med-Peptides Clinical Team",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_name": "Atlas Health Clinical Team",
+      "protocol_author_organization": "Atlas Health",
       "protocol_author_title": "Peptide Specialists",
       "protocol_duration_weeks": 8,
       "protocol_id": "rec_002",
@@ -9510,8 +9510,8 @@
         "abbreviatedName": "GHK-Cu + BPC-157 · ECM Repair",
         "version": "1.0",
         "author": {
-          "name": "Med-Peptides Clinical Team",
-          "organization": "Med-Peptides",
+          "name": "Atlas Health Clinical Team",
+          "organization": "Atlas Health",
           "title": "Peptide Specialists"
         },
         "review": {
@@ -9599,8 +9599,8 @@
         "total_vials_required": 4
       },
       "number_of_phases": 2,
-      "protocol_author_name": "Med-Peptides Clinical Team",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_name": "Atlas Health Clinical Team",
+      "protocol_author_organization": "Atlas Health",
       "protocol_author_title": "Peptide Specialists",
       "protocol_duration_weeks": 12,
       "protocol_is_curated": true,
@@ -9960,8 +9960,8 @@
         "scientificName": "GHK-Cu Copper-Peptide Collagen Induction & Skin Rejuvenation Protocol",
         "description": "12-week skin rejuvenation protocol using GHK-Cu copper tripeptide to stimulate collagen and elastin synthesis, upregulate antioxidant gene expression, and reverse dermal aging markers.",
         "author": {
-          "name": "Med-Peptides Clinical Team",
-          "organization": "Med-Peptides",
+          "name": "Atlas Health Clinical Team",
+          "organization": "Atlas Health",
           "title": "Peptide Specialists"
         },
         "review": {
@@ -10009,8 +10009,8 @@
       },
       "number_of_phases": 2,
       "overview_summary": "10-week skin repair and cellular-aging protocol combining GHK-Cu dermal remodeling with a pulsed Epithalon support layer for advanced anti-aging skin objectives.",
-      "protocol_author_name": "Med-Peptides Clinical Team",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_name": "Atlas Health Clinical Team",
+      "protocol_author_organization": "Atlas Health",
       "protocol_author_title": "Peptide Specialists",
       "protocol_duration_weeks": 10,
       "protocol_is_curated": true,
@@ -10395,8 +10395,8 @@
         "scientificName": "GHK-Cu & Epithalon Collagen–Epigenetic Cellular Skin Repair Protocol",
         "description": "12-week advanced skin repair protocol combining GHK-Cu collagen induction and antioxidant gene activation with Epithalon telomere protection and pineal anti-aging epigenetic bioregulation.",
         "author": {
-          "name": "Med-Peptides Clinical Team",
-          "organization": "Med-Peptides",
+          "name": "Atlas Health Clinical Team",
+          "organization": "Atlas Health",
           "title": "Peptide Specialists"
         },
         "review": {
@@ -10438,8 +10438,8 @@
       "active": true,
       "confidence_score": 88,
       "number_of_phases": 2,
-      "protocol_author_name": "Med-Peptides Clinical Team",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_name": "Atlas Health Clinical Team",
+      "protocol_author_organization": "Atlas Health",
       "protocol_author_title": "Peptide Specialists",
       "protocol_duration_weeks": 8,
       "protocol_is_curated": true,
@@ -10831,8 +10831,8 @@
         "scientificName": "DSIP & Selank Delta-Sleep-Inducing & GABAergic Anxiolytic Sleep Restoration Protocol",
         "description": "8-week sleep restoration protocol combining DSIP delta-wave sleep induction with Selank GABAergic anxiolysis to rebuild healthy sleep architecture and reduce cortisol-driven insomnia.",
         "author": {
-          "name": "Med-Peptides Clinical Team",
-          "organization": "Med-Peptides",
+          "name": "Atlas Health Clinical Team",
+          "organization": "Atlas Health",
           "title": "Peptide Specialists"
         },
         "review": {
@@ -10877,8 +10877,8 @@
         "total_vials_required": 8
       },
       "number_of_phases": 2,
-      "protocol_author_name": "Med-Peptides Clinical Team",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_name": "Atlas Health Clinical Team",
+      "protocol_author_organization": "Atlas Health",
       "protocol_author_title": "Peptide Specialists",
       "protocol_duration_weeks": 6,
       "protocol_is_curated": true,
@@ -11269,8 +11269,8 @@
         "scientificName": "DSIP & Epithalon Circadian Rhythm & Telomere-Protective Sleep Protocol",
         "description": "10-week circadian sleep protocol combining DSIP delta-wave induction with Epithalon pineal-melatonin and BMAL1 circadian gene restoration for sleep quality and longevity-oriented benefits.",
         "author": {
-          "name": "Med-Peptides Clinical Team",
-          "organization": "Med-Peptides",
+          "name": "Atlas Health Clinical Team",
+          "organization": "Atlas Health",
           "title": "Peptide Specialists"
         },
         "review": {
@@ -11311,8 +11311,8 @@
       "bundleVersion": "2.0",
       "number_of_phases": 3,
       "physician_supervision_required": true,
-      "protocol_author_name": "Med-Peptides Clinical Team",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_name": "Atlas Health Clinical Team",
+      "protocol_author_organization": "Atlas Health",
       "protocol_duration_weeks": 12,
       "protocol_id": "wm_001",
       "protocol_is_curated": true,
@@ -11346,8 +11346,8 @@
         "visibility": "public",
         "scientificName": "Tirzepatide + MOTS-c GLP-1/GIP Dual-Agonist & Mitokine Protocol",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "created_at": "2026-04-02T00:00:00.000Z",
@@ -12098,8 +12098,8 @@
       "bundleVersion": "2.0",
       "number_of_phases": 3,
       "physician_supervision_required": true,
-      "protocol_author_name": "Med-Peptides Clinical Team",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_name": "Atlas Health Clinical Team",
+      "protocol_author_organization": "Atlas Health",
       "protocol_duration_weeks": 12,
       "protocol_id": "wm_002",
       "protocol_is_curated": true,
@@ -13198,8 +13198,8 @@
       "active": true,
       "bundleVersion": "2.0",
       "physician_supervision_required": true,
-      "protocol_author_name": "Med-Peptides Clinical Team",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_name": "Atlas Health Clinical Team",
+      "protocol_author_organization": "Atlas Health",
       "protocol_author_title": "MD, Anti-Aging & Metabolic Medicine",
       "protocol_id": "wm_004",
       "protocol_is_curated": true,
@@ -13714,8 +13714,8 @@
       "active": true,
       "bundleVersion": "2.0",
       "physician_supervision_required": true,
-      "protocol_author_name": "Med-Peptides Clinical Team",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_name": "Atlas Health Clinical Team",
+      "protocol_author_organization": "Atlas Health",
       "protocol_author_title": "MD, Anti-Aging & Metabolic Medicine",
       "protocol_duration_weeks": 24,
       "protocol_id": "wm_005",

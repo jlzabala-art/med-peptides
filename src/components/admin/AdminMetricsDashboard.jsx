@@ -10,6 +10,8 @@ import {
   where,
   orderBy,
   limit,
+  Timestamp,
+  onSnapshot,
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
@@ -77,6 +79,7 @@ const DEFAULT_CONFIG = {
     recentRegistrations: false, // Hidden by default to reduce clutter
     systemStatus: true,
     supplyNotifier: true,
+    activeUsers: true,
     payoutManager: true,
     auditLogs: false, // Hidden by default
     financeWidget: true,
@@ -105,6 +108,7 @@ const DEFAULT_CONFIG = {
         'recentRegistrations',
         'systemStatus',
         'supplyNotifier',
+        'activeUsers',
         'payoutManager',
         'auditLogs',
         'financeWidget',
@@ -219,6 +223,8 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
   const [isEditing, setIsEditing] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
 
+  const [aiConsumption, setAiConsumption] = useState(0);
+  const [activeUsers, setActiveUsers] = useState([]);
   const [metrics, setMetrics] = useState({
     totalUsers: 0,
     pendingApprovals: 0,
@@ -277,9 +283,42 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
   // Fetch metrics dynamically with respect to wholesalerId scope and setup polling
   useEffect(() => {
     let intervalId;
-    async function fetchMetrics(isSilent = false) {
+    const fetchMetrics = async (isSilent = false) => {
+      if (!isSilent) setLoading(true);
+
       try {
-        if (!isSilent) setLoading(true);
+        const startTime = Date.now();
+        
+        // Presence and AI Cost listeners
+        const activeUsersUnsub = onSnapshot(query(collection(db, 'presence'), where('isOnline', '==', true)), (snap) => {
+          const online = [];
+          snap.forEach(doc => {
+            const data = doc.data();
+            // Optional: filter out users who haven't been active in > 5 mins just in case
+            if (data.lastActiveAt) {
+              const lastActiveMs = data.lastActiveAt.toMillis();
+              if (Date.now() - lastActiveMs < 300000) {
+                online.push(data);
+              }
+            }
+          });
+          setActiveUsers(online);
+        });
+
+        const aiLogsUnsub = onSnapshot(doc(db, 'ai_metrics', 'usage'), (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            let totalCost = 0;
+            if (data.agents) {
+              Object.values(data.agents).forEach(agentStats => {
+                totalCost += agentStats.estimatedCost || 0;
+              });
+            }
+            setAiConsumption(totalCost);
+          } else {
+            setAiConsumption(0);
+          }
+        });
 
         const startDbTime = performance.now();
 
@@ -839,86 +878,100 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
 
   return (
     <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
-      {/* Header title bar with customize buttons */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '1.5rem',
-          borderBottom: '1px solid #dadce0',
-          paddingBottom: '1rem',
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              margin: 0,
-              fontSize: '1.25rem',
-              fontWeight: 600,
-              color: '#202124',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
-          >
-            <Activity size={20} color="#1a73e8" />
-            {wholesalerId ? 'Wholesaler Dashboard' : 'System Overview'}
-          </h2>
-          <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: '#5f6368' }}>
-            {wholesalerId
-              ? 'Performance metrics and patient queue scoped to your B2B circle.'
-              : 'Real-time platform activity metrics, infrastructure health, and cohort logs.'}
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#5f6368' }}>
-              TIME RANGE
-            </label>
-            <select
-              value={timeFilter}
-              onChange={(e) => setTimeFilter(e.target.value)}
-              style={{
-                padding: '0.45rem',
-                borderRadius: '4px',
-                border: '1px solid #dadce0',
-                fontSize: '0.8rem',
-                backgroundColor: '#f8f9fa',
-                outline: 'none',
-              }}
-            >
-              <option value="1d">Today</option>
-              <option value="7d">Last 7 Days</option>
-              <option value="30d">Last Month</option>
-              <option value="90d">Last 3 Months</option>
-              <option value="all">All Time</option>
-            </select>
+      {/* ── Command Center Header ─────────────────────────────────────────── */}
+      <div style={{
+        backgroundColor: 'var(--color-bg-surface, #ffffff)',
+        borderRadius: '16px',
+        padding: '1.75rem 2rem',
+        marginBottom: '1.5rem',
+        position: 'relative',
+        border: '1px solid var(--color-border, #e2e8f0)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+      }}>
+        <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.4rem' }}>
+              {/* Live pulse indicator */}
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#10b981', boxShadow: '0 0 0 0 rgba(16,185,129,0.4)', animation: 'livePulse 2s infinite' }} />
+                <style>{`@keyframes livePulse { 0%{box-shadow:0 0 0 0 rgba(16,185,129,0.4)} 70%{box-shadow:0 0 0 8px rgba(16,185,129,0)} 100%{box-shadow:0 0 0 0 rgba(16,185,129,0)} }`}</style>
+              </div>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Live · All Systems Operational</span>
+            </div>
+            <h2 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 800, color: 'var(--color-text-primary, #1e293b)', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+              {wholesalerId ? 'Partner Overview' : 'Atlas Health · Command Center'}
+            </h2>
+            <p style={{ margin: '0.35rem 0 0', fontSize: '0.85rem', color: 'var(--color-text-secondary, #64748b)' }}>
+              {wholesalerId
+                ? 'Performance metrics scoped to your B2B network.'
+                : 'Real-time platform intelligence — physicians, patients, orders & infrastructure.'}
+            </p>
           </div>
 
-          {isAdmin && !wholesalerId && (
-            <button
-              onClick={() => setIsEditing(!isEditing)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                padding: '0.5rem 0.85rem',
-                border: '1px solid #dadce0',
-                backgroundColor: isEditing ? '#e8f0fe' : 'var(--color-bg-surface)',
-                color: isEditing ? '#1a73e8' : '#3c4043',
-                borderRadius: '4px',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.15s',
-              }}
-            >
-              <Settings size={14} />
-              {isEditing ? 'Close Editor' : 'Customize Layout'}
-            </button>
-          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            {/* Time range selector */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+              <label style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Time Range</label>
+              <select
+                value={timeFilter}
+                onChange={(e) => setTimeFilter(e.target.value)}
+                style={{
+                  padding: '0.5rem 0.85rem',
+                  borderRadius: '8px',
+                  border: '1px solid var(--color-border, #e2e8f0)',
+                  fontSize: '0.82rem',
+                  backgroundColor: 'var(--color-bg-app, #f8fafc)',
+                  color: 'var(--color-text-primary, #334155)',
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="1d">Today</option>
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last Month</option>
+                <option value="90d">Last 3 Months</option>
+                <option value="all">All Time</option>
+              </select>
+            </div>
+
+            {isAdmin && !wholesalerId && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                <label style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Layout</label>
+                <button
+                  onClick={() => setIsEditing(!isEditing)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '0.4rem',
+                    padding: '0.5rem 0.85rem',
+                    border: '1px solid',
+                    borderColor: isEditing ? 'var(--color-primary, #0071bd)' : 'var(--color-border, #e2e8f0)',
+                    backgroundColor: isEditing ? 'rgba(0,113,189,0.05)' : 'var(--color-bg-app, #f8fafc)',
+                    color: isEditing ? 'var(--color-primary, #0071bd)' : 'var(--color-text-secondary, #64748b)',
+                    borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <Settings size={14} />
+                  {isEditing ? 'Close Editor' : 'Customize'}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* KPI Summary Ribbon */}
+        <div style={{ position: 'relative', display: 'flex', gap: '2rem', marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255,255,255,0.08)', flexWrap: 'wrap' }}>
+          {[
+            { label: 'Total Users', value: metrics.totalUsers, color: '#38bdf8' },
+            { label: 'Active Physicians', value: metrics.activePhysicians, color: '#34d399' },
+            { label: 'Active Orders', value: metrics.activeOrders, color: '#a78bfa' },
+            { label: 'Pending Attention', value: metrics.pendingApprovals + metrics.lowStockAlerts, color: metrics.pendingApprovals + metrics.lowStockAlerts > 0 ? '#fb923c' : '#34d399' },
+            { label: 'DB Latency', value: metrics.systemHealth, color: '#64748b' },
+          ].map(({ label, value, color }) => (
+            <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+              <span style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{label}</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 800, color, fontFamily: '"Inter", monospace' }}>{value ?? '—'}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -926,6 +979,61 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
       {showPanel('supplyNotifier') && (
         <div style={{ marginBottom: '2rem' }}>
           <AdminSupplyNotifierWidget />
+        </div>
+      )}
+
+      {/* Active Users & Telemetry Panel */}
+      {showPanel('activeUsers') && (
+        <div style={{ marginBottom: '2rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+          
+          {/* Active Users Widget */}
+          <div style={{ backgroundColor: 'var(--color-bg-surface, #ffffff)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--color-border, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--color-text-primary, #1e293b)' }}>Usuarios Activos ({activeUsers.length})</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }} />
+                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary, #64748b)' }}>En tiempo real</span>
+              </div>
+            </div>
+            {activeUsers.length === 0 ? (
+              <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary, #64748b)', textAlign: 'center', padding: '1rem' }}>No hay usuarios activos en este momento.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '200px', overflowY: 'auto' }}>
+                {activeUsers.map(u => (
+                  <div key={u.userId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem', backgroundColor: 'var(--color-bg-app, #f8fafc)', borderRadius: '6px' }}>
+                    <div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--color-text-primary, #1e293b)' }}>{u.email}</div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary, #64748b)' }}>Rol: {u.role}</div>
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-primary, #0071bd)', backgroundColor: 'rgba(0,113,189,0.1)', padding: '2px 6px', borderRadius: '4px' }}>
+                      {u.currentPath}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* AI Consumption Widget */}
+          <div style={{ backgroundColor: 'var(--color-bg-surface, #ffffff)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--color-border, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 600, color: 'var(--color-text-primary, #1e293b)' }}>Consumo Atlas AI</h3>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+              <span style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--color-primary, #0071bd)', lineHeight: 1 }}>
+                ${aiConsumption.toFixed(3)}
+              </span>
+              <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary, #64748b)' }}>USD este mes</span>
+            </div>
+            
+            <div style={{ marginTop: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--color-text-secondary, #64748b)', marginBottom: '0.25rem' }}>
+                <span>Gemini 1.5 Pro</span>
+                <span>${aiConsumption.toFixed(3)} / $10.00 límite</span>
+              </div>
+              <div style={{ width: '100%', height: '8px', backgroundColor: 'var(--color-bg-app, #f8fafc)', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ width: `${Math.min((aiConsumption / 10) * 100, 100)}%`, height: '100%', backgroundColor: aiConsumption > 8 ? '#ef4444' : 'var(--color-primary, #0071bd)' }} />
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1225,11 +1333,16 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
       )}
 
       {/* KPI Cards Grid */}
+      <div style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Key Performance Indicators</span>
+        <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
+        <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{activeKPIs.length} metrics</span>
+      </div>
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '1.25rem',
+          gap: '1rem',
           marginBottom: '2rem',
         }}
       >

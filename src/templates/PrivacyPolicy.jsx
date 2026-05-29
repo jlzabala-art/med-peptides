@@ -38,7 +38,7 @@ const PrivacyPolicy = () => {
       icon: <Lock size={24} />,
       content: (
         <>
-          <p>Med-Peptides employs industry-standard encryption and security protocols to protect sensitive research procurement data. Access to laboratory records and distribution details is strictly controlled and monitored.</p>
+          <p>Atlas Health employs industry-standard encryption and security protocols to protect sensitive research procurement data. Access to laboratory records and distribution details is strictly controlled and monitored.</p>
           <p>All laboratory-client communications are encrypted using advanced TLS protocols, and our internal databases are isolated from public networks.</p>
         </>
       )
@@ -124,7 +124,7 @@ const PrivacyPolicy = () => {
               <div className="legal-card mb-12" style={{ background: 'var(--gradient-soft)', border: '1px solid rgba(0, 54, 102, 0.05)' }}>
                 <h2 className="h3 text-primary mb-6">Statement of Intent</h2>
                 <p className="text-muted leading-relaxed mb-0">
-                  At Med-Peptides, we recognize that scientific inquiry requires absolute discretion and data integrity. This Privacy Policy outlines our protocols for handling institutional and individual information gathered through our distribution network. As a direct factory representative, we adhere to the highest standards of confidentiality to protect the intellectual property and privacy of our research partners.
+                  At Atlas Health, we recognize that scientific inquiry requires absolute discretion and data integrity. This Privacy Policy outlines our protocols for handling institutional and individual information gathered through our distribution network. As a direct factory representative, we adhere to the highest standards of confidentiality to protect the intellectual property and privacy of our research partners.
                 </p>
               </div>
 
@@ -173,7 +173,7 @@ const PrivacyPolicy = () => {
                 <div className="legal-version-tag">Version 2.2.0 • Institutional Grade</div>
                 <p className="text-xs text-light mb-2">Effective Date: May 1, 2026</p>
                 <p className="text-xs text-light">
-                  Med-Peptides Research Distribution Network • Laboratory Confidentiality Division
+                  Atlas Health Research Distribution Network • Laboratory Confidentiality Division
                 </p>
               </footer>
             </main>

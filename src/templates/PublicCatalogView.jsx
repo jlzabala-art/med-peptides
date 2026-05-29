@@ -182,7 +182,7 @@ export default function PublicCatalogView() {
   // Branding variables
   const primaryColor = catalog.branding?.primaryColor || '#1a73e8';
   const logoUrl = catalog.branding?.logoUrl || '';
-  const companyName = catalog.branding?.companyName || 'Med-Peptides Franchise';
+  const companyName = catalog.branding?.companyName || 'Atlas Health Franchise';
 
   // Helper selectors
   const getProductInfo = (id) => products.find(p => p.id === id || p.slug === id);

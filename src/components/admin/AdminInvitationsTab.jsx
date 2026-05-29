@@ -849,7 +849,7 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
                   style={{ width: '100%', height: '100%', minHeight: '500px', border: 'none' }}
                   srcDoc={getInvitationEmailHtml({
                     toName: previewEmail.name,
-                    fromName: 'Med-Peptides Team',
+                    fromName: 'Atlas Health Team',
                     customMessage: previewEmail.message,
                     roles: previewEmail.roles || [],
                   })}

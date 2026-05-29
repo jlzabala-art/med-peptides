@@ -246,15 +246,15 @@ export default function ProductDetail({
   const structuredData = useMemo(() => {
     if (!product) return null;
     const slug = product.slug || product.name.toLowerCase().replace(/\s+/g, '-');
-    const productUrl = `https://Med-Peptides-app-27a3a.web.app/product/${slug}`;
+    const productUrl = `https://Atlas Health-app-27a3a.web.app/product/${slug}`;
 
     const graph = [
       {
         "@type": "Product",
         "name": product.name,
-        "image": product.image ? [`https://Med-Peptides-app-27a3a.web.app${product.image}`] : [],
+        "image": product.image ? [`https://Atlas Health-app-27a3a.web.app${product.image}`] : [],
         "description": product.shortDesc || product.description,
-        "brand": { "@type": "Brand", "name": "Med-Peptides" },
+        "brand": { "@type": "Brand", "name": "Atlas Health" },
         "sku": product.id || slug,
         "offers": {
           "@type": "Offer",
@@ -270,10 +270,10 @@ export default function ProductDetail({
         "@type": "BreadcrumbList",
         "itemListElement": [
           { "@type": "ListItem", "position": 1, "name": "Home",
-            "item": "https://Med-Peptides-app-27a3a.web.app/" },
+            "item": "https://Atlas Health-app-27a3a.web.app/" },
           { "@type": "ListItem", "position": 2,
             "name": product.category || "Catalog",
-            "item": `https://Med-Peptides-app-27a3a.web.app/collection/${(product.category || "peptides").toLowerCase().replace(/[^a-z0-9]+/g, '-')}` },
+            "item": `https://Atlas Health-app-27a3a.web.app/collection/${(product.category || "peptides").toLowerCase().replace(/[^a-z0-9]+/g, '-')}` },
           { "@type": "ListItem", "position": 3, "name": product.name,
             "item": productUrl }
         ]
@@ -298,10 +298,10 @@ export default function ProductDetail({
   usePageMeta({
     title: product?.name || 'Product Detail',
     description: product?.shortDesc
-      ? `${product.shortDesc} — Research-grade ${product.name} with verified purity, available in multiple formats from Med-Peptides.`
+      ? `${product.shortDesc} — Research-grade ${product.name} with verified purity, available in multiple formats from Atlas Health.`
       : `Detailed technical profile for ${product?.name || 'this peptide'} — purity data, dosage formats, and research references.`,
     path: product?.name ? `/product/${product.slug || product.name.toLowerCase().replace(/\s+/g, '-')}` : '/products',
-    image: product?.image ? `https://Med-Peptides-app-27a3a.web.app${product.image}` : undefined,
+    image: product?.image ? `https://Atlas Health-app-27a3a.web.app${product.image}` : undefined,
     structuredData
   });
 

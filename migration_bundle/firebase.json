@@ -35,7 +35,7 @@
     "providers": {
       "emailPassword": true,
       "googleSignIn": {
-        "oAuthBrandDisplayName": "Med-Peptides",
+        "oAuthBrandDisplayName": "Atlas Health",
         "supportEmail": "jose@mediluxeme.com"
       }
     }

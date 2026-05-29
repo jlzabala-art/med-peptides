@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 /**
- * Med-Peptides - Multi-Layer Clinical Validation Engine
+ * Atlas Health - Multi-Layer Clinical Validation Engine
  * Assesses protocol safety, coherence, and completeness.
  */
 

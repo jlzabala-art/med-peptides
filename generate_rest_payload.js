@@ -46,8 +46,8 @@ const protocolData = {
     "source_type": "curated_library",
     "source_reference": "ReGen_PEPT_Skin_Aesthetics_Protocol_2026",
     "author": {
-      "name": "Med-Peptides Clinical Team",
-      "organization": "Med-Peptides",
+      "name": "Atlas Health Clinical Team",
+      "organization": "Atlas Health",
       "title": "Peptide Specialists"
     },
     "review": {

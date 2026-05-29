@@ -607,7 +607,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
     // ── Header band ──
     doc.setFillColor(0, 54, 102); doc.rect(0, 0, W, 36, 'F');
     doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(20);
-    doc.text('Med-Peptides', W/2, 16, { align: 'center' });
+    doc.text('Atlas Health', W/2, 16, { align: 'center' });
     doc.setFontSize(10); doc.setFont('helvetica','normal');
     doc.text('Sample Order Confirmation', W/2, 24, { align: 'center' });
     doc.text(`Order ID: ${targetOrderId}`, W/2, 31, { align: 'center' });
@@ -745,8 +745,8 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
     const footY = doc.internal.pageSize.getHeight()-15;
     doc.setDrawColor(226,232,240); doc.line(15, footY-4, W-15, footY-4);
     doc.setFontSize(8); doc.setTextColor(148,163,184);
-    doc.text('Med-Peptides — Advanced Research Solutions | info@Med-Peptides.com', W/2, footY, { align: 'center' });
-    doc.save(`Med-Peptides-Order-${targetOrderId}.pdf`);
+    doc.text('Atlas Health — Advanced Research Solutions | info@Atlas Health.com', W/2, footY, { align: 'center' });
+    doc.save(`Atlas Health-Order-${targetOrderId}.pdf`);
    
   }, [orderId, formData, enrichedCartItems, protocolGroups, checkoutTotals, selectedShipping, finalOrderData]);
 
@@ -780,7 +780,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Receipt — ${orderId} — Med-Peptides</title>
+  <title>Receipt — ${orderId} — Atlas Health</title>
   <style>
     @media print {
       body { margin: 0; }
@@ -805,7 +805,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
         <!-- Header -->
         <tr><td style="background:linear-gradient(135deg,#003666 0%,#005a9c 100%);border-radius:14px 14px 0 0;padding:32px 36px;text-align:center;">
           <p style="margin:0;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:8px;">Sample Order</p>
-          <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">Med-Peptides</h1>
+          <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">Atlas Health</h1>
           <p style="margin:10px 0 0;font-size:13px;color:rgba(255,255,255,0.75);">Advanced Research Solutions</p>
         </td></tr>
 
@@ -914,8 +914,8 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
         <!-- Footer -->
         <tr><td style="background:#f8fafc;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 14px 14px;padding:20px 36px;text-align:center;">
           <p style="margin:0;font-size:12px;color:#94a3b8;">
-            Med-Peptides — Advanced Research Solutions<br/>
-            Questions? <a href="mailto:info@Med-Peptides.com" style="color:#003666;">info@Med-Peptides.com</a>
+            Atlas Health — Advanced Research Solutions<br/>
+            Questions? <a href="mailto:info@Atlas Health.com" style="color:#003666;">info@Atlas Health.com</a>
           </p>
         </td></tr>
 
@@ -963,7 +963,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Receipt_${targetOrderId}_Med-Peptides</title>
+  <title>Receipt_${targetOrderId}_Atlas Health</title>
   <style>
     @page { size: A4; margin: 16mm 12mm; }
     @media print {
@@ -981,7 +981,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
         <!-- Header -->
         <tr><td style="background:linear-gradient(135deg,#003666 0%,#005a9c 100%);border-radius:14px 14px 0 0;padding:28px 36px;text-align:center;">
           <p style="margin:0;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:8px;">Sample Order</p>
-          <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">Med-Peptides</h1>
+          <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">Atlas Health</h1>
           <p style="margin:10px 0 0;font-size:13px;color:rgba(255,255,255,0.75);">Advanced Research Solutions</p>
         </td></tr>
 
@@ -1078,8 +1078,8 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
         <!-- Footer -->
         <tr><td style="background:#f8fafc;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 14px 14px;padding:20px 36px;text-align:center;">
           <p style="margin:0;font-size:12px;color:#94a3b8;">
-            Med-Peptides — Advanced Research Solutions<br/>
-            Questions? <a href="mailto:info@Med-Peptides.com" style="color:#003666;">info@Med-Peptides.com</a>
+            Atlas Health — Advanced Research Solutions<br/>
+            Questions? <a href="mailto:info@Atlas Health.com" style="color:#003666;">info@Atlas Health.com</a>
           </p>
         </td></tr>
 
@@ -1088,7 +1088,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
   </table>
   <script>
     window.addEventListener('load', function() {
-      document.title = 'Receipt_${targetOrderId}_Med-Peptides';
+      document.title = 'Receipt_${targetOrderId}_Atlas Health';
       setTimeout(function() { window.print(); }, 300);
     });
   </script>
@@ -1106,7 +1106,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
       // Fallback: download as .html if popups are blocked
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Receipt_${targetOrderId}_Med-Peptides.html`;
+      a.download = `Receipt_${targetOrderId}_Atlas Health.html`;
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
@@ -1425,7 +1425,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
                   <div style={{ background: 'var(--color-bg-surface)', border: '1px solid #e2e8f0', borderRadius: 12, padding: '1rem', fontSize: '0.85rem' }}>
                     <div style={{ marginBottom: '0.45rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Beneficiary</span>
-                      <strong style={{ color: '#0f172a', fontSize: '0.85rem' }}>Med-Peptides International</strong>
+                      <strong style={{ color: '#0f172a', fontSize: '0.85rem' }}>Atlas Health International</strong>
                     </div>
                     <div style={{ marginBottom: '0.45rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>IBAN</span>
@@ -1661,7 +1661,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
               fontSize: '0.68rem', color: 'var(--color-border)',
               letterSpacing: '0.08em', paddingTop: '0.5rem',
             }}>
-              FOR RESEARCH USE ONLY — Not for human therapeutic use &nbsp;·&nbsp; Med-Peptides.com
+              FOR RESEARCH USE ONLY — Not for human therapeutic use &nbsp;·&nbsp; Atlas Health.com
             </div>
 
             </div>{/* end pa-col-left */}

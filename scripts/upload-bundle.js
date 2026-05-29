@@ -37,7 +37,7 @@ if (!protocols.length) {
 }
 
 if (!getApps().length) {
-  initializeApp({ projectId: 'Med-Peptides-app' });
+  initializeApp({ projectId: 'Atlas Health-app' });
 }
 
 const db = getFirestore();

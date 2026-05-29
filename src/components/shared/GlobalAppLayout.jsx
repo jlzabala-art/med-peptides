@@ -74,7 +74,7 @@ export default function GlobalAppLayout({
     groups: isPatientOrPublic ? PATIENT_GROUPS : PUBLIC_GROUPS,
     activeId: location.pathname,
     onNavigate: (path) => navigate(path),
-    header: { title: 'RegenPept', subtitle: user ? 'Patient Portal' : 'Store' },
+    header: { title: 'Atlas Health', subtitle: user ? 'Patient Portal' : 'Store' },
     footer: user ? { label: 'Logout', icon: LogOut, onClick: () => { logout?.(); navigate('/login'); } } : undefined,
     accentColor: user ? '#0071bd' : '#0f172a'
   };

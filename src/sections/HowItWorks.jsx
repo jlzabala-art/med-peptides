@@ -2,7 +2,7 @@
 /**
  * HowItWorks — Phase 6
  * ─────────────────────────────────────────────────────────────────────────────
- * "How Med-Peptides Works" — 4-step visual timeline.
+ * "How Atlas Health Works" — 4-step visual timeline.
  *
  * Steps:
  *  1. Learn the Basics
@@ -100,7 +100,7 @@ export default function HowItWorks() {
           Getting started
         </span>
         <h2 id="hiw-heading" className="section-title">
-          How Med-Peptides Works
+          How Atlas Health Works
         </h2>
         <p className="section-subtitle">
           From first question to structured protocol — four clear steps.

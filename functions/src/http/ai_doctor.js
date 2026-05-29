@@ -23,7 +23,7 @@ const AGENT_ID   = "f320b876-5f0f-468d-9a7e-294026a5e613";
 const AGENT_NAME = "AgentDoctor";
 
 // ── System prompt ──────────────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `You are AgentDoctor, a specialized clinical protocol builder for licensed healthcare professionals on Med-Peptides.com.
+const SYSTEM_PROMPT = `You are AgentDoctor, a specialized clinical protocol builder for licensed healthcare professionals on Atlas Health.com.
 
 You assist physicians, clinicians, and medical researchers to:
 1. Design evidence-based peptide and supplement protocols for specific patient profiles

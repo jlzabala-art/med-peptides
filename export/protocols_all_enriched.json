@@ -6,7 +6,7 @@
     "cog_001": {
       "id": "cog_001",
       "protocol_duration_weeks": 6,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -29,7 +29,7 @@
         ]
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "expected_outcomes": {
@@ -245,8 +245,8 @@
         "primary_goal": "Cognitive Support",
         "visibility": "public",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "evidence_grade_note": "Strong preclinical evidence and multiple Russian Phase II/III clinical trials. Limited large-scale Western RCTs. Grade C per GRADE criteria due to regional publication bias.",
@@ -294,7 +294,7 @@
       },
       "_patchedAt": {},
       "_patchSchema": "antigravity_v2",
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "clinical_evidence_update_2026": {
         "evidence_limitations": [
           "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
@@ -446,7 +446,7 @@
     "cog_002": {
       "id": "cog_002",
       "protocol_duration_weeks": 8,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -533,7 +533,7 @@
         "resolved_monitoring": []
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "expected_outcomes": {
@@ -999,8 +999,8 @@
         "primary_goal": "Cognitive Support",
         "visibility": "public",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "evidence_grade_note": "Multiple Russian Phase II/III RCTs demonstrating anxiolytic efficacy (Zozulya 2014, Semenova 2010). HAM-A validated outcomes. Grade C per GRADE due to regional publication bias and limited Western replication.",
@@ -1048,7 +1048,7 @@
       },
       "_patchedAt": {},
       "_patchSchema": "antigravity_v2",
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "clinical_evidence_update_2026": {
         "evidence_limitations": [
           "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
@@ -1156,7 +1156,7 @@
     "energy_001": {
       "id": "energy_001",
       "protocol_duration_weeks": 10,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -1243,7 +1243,7 @@
         "resolved_monitoring": []
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "expected_outcomes": {
@@ -1677,8 +1677,8 @@
         "visibility": "public",
         "scientificName": "Energy · Mitochondrial Bioenergetics Restoration via AMPK + OXPHOS · 8 Weeks",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "evidence_grade_note": "GRADE B: MOTS-c Phase I human data (Lee C, Cell Metab 2015); SS-31/Elamipretide Phase II data in heart failure and aging (NEJM 2023 RESTORE trial). Strong mechanistic basis; limited large RCT data for fatigue indication specifically.",
@@ -1724,7 +1724,7 @@
       },
       "_patchedAt": {},
       "_patchSchema": "antigravity_v2",
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "clinical_evidence_update_2026": {
         "evidence_limitations": [
           "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
@@ -1837,7 +1837,7 @@
     "energy_002": {
       "id": "energy_002",
       "protocol_duration_weeks": 10,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -1924,7 +1924,7 @@
         "resolved_monitoring": []
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "expected_outcomes": {
@@ -2390,8 +2390,8 @@
         "visibility": "public",
         "scientificName": "Energy · Mitochondrial Membrane Repair + Resilience via SS-31 + MOTS-C · 8 Weeks",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "evidence_grade_note": "GRADE B: MOTS-c (Lee C, Cell Metab 2015); SS-31/Elamipretide MMPOWER-3 trial (Karaa 2018); NR human RCT data (Martens CR, Nat Commun 2018). Combined protocol evidence is extrapolated from individual components.",
@@ -2437,7 +2437,7 @@
       },
       "_patchedAt": {},
       "_patchSchema": "antigravity_v2",
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "clinical_evidence_update_2026": {
         "evidence_limitations": [
           "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
@@ -2545,7 +2545,7 @@
     "horm_001": {
       "id": "horm_001",
       "protocol_duration_weeks": 12,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -2634,7 +2634,7 @@
         "resolved_monitoring": []
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "expected_outcomes": {
@@ -3105,8 +3105,8 @@
         "visibility": "public",
         "scientificName": "CJC-1295 / Ipamorelin GHRH & Ghrelin-Mimetic GH Secretagogue Optimization Protocol",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "evidence_grade_note": "GRADE B: Ipamorelin Phase I/II data (Raun K, Eur J Endocrinol 1998); CJC-1295 Phase II human PK/PD data (Teichman SL, J Clin Endocrinol Metab 2006). IGF-1 endpoints well-validated. Limited long-term RCT data for body composition endpoints.",
@@ -3152,7 +3152,7 @@
       },
       "_patchedAt": {},
       "_patchSchema": "antigravity_v2",
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "clinical_evidence_update_2026": {
         "evidence_limitations": [
           "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
@@ -3266,7 +3266,7 @@
     "horm_002": {
       "id": "horm_002",
       "protocol_duration_weeks": 12,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -3348,7 +3348,7 @@
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
       "_schemaVersion": "antigravity_v2",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
       "protocol_source_reference": "internal_guide",
@@ -3614,7 +3614,7 @@
       ],
       "protocol_is_curated": true,
       "number_of_phases": 3,
-      "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+      "_importBundle": "Atlas Health Core Clinical Protocol Library",
       "primary_goal": "Hormonal Support",
       "risk_class": "moderate",
       "protocol_review_status": "approved",
@@ -3806,8 +3806,8 @@
         "visibility": "public",
         "scientificName": "Tesamorelin + Ipamorelin GHRH-Axis Visceral Adiposity & GH Restoration Protocol",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "evidence_grade_note": "GRADE A- due to FDA approval of Tesamorelin (Egrifta) for HIV-lipodystrophy visceral fat reduction (Falutz J, NEJM 2010). Ipamorelin/CJC-1295 component remains GRADE B (Phase II data). Combined protocol is clinical extrapolation.",
@@ -3858,7 +3858,7 @@
         "_seconds": 1777189741
       },
       "_patchSchema": "antigravity_v2",
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "clinical_evidence_update_2026": {
         "evidence_limitations": [
           "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
@@ -3972,7 +3972,7 @@
     "immune_001": {
       "id": "immune_001",
       "protocol_duration_weeks": 8,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -4049,7 +4049,7 @@
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
       "_schemaVersion": "antigravity_v2",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
       "protocol_source_reference": "internal_guide",
@@ -4114,7 +4114,7 @@
       ],
       "protocol_is_curated": true,
       "number_of_phases": 2,
-      "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+      "_importBundle": "Atlas Health Core Clinical Protocol Library",
       "primary_goal": "Immune / Inflammation",
       "risk_class": "moderate",
       "protocol_review_status": "approved",
@@ -4257,7 +4257,7 @@
         "_seconds": 1777189741
       },
       "_patchSchema": "antigravity_v2",
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "clinical_evidence_update_2026": {
         "evidence_limitations": [
           "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
@@ -4476,7 +4476,7 @@
     "immune_002": {
       "id": "immune_002",
       "protocol_duration_weeks": 8,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -4553,7 +4553,7 @@
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
       "_schemaVersion": "antigravity_v2",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
       "protocol_source_reference": "internal_guide",
@@ -4632,7 +4632,7 @@
       ],
       "protocol_is_curated": true,
       "number_of_phases": 2,
-      "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+      "_importBundle": "Atlas Health Core Clinical Protocol Library",
       "primary_goal": "Immune / Inflammation",
       "risk_class": "moderate",
       "protocol_review_status": "approved",
@@ -4776,7 +4776,7 @@
         "_seconds": 1777189741
       },
       "_patchSchema": "antigravity_v2",
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "clinical_evidence_update_2026": {
         "evidence_limitations": [
           "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
@@ -5012,7 +5012,7 @@
     "lon_001": {
       "id": "lon_001",
       "protocol_duration_weeks": 12,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -5088,7 +5088,7 @@
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
       "_schemaVersion": "antigravity_v2",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
       "protocol_source_reference": "internal_guide",
@@ -5146,7 +5146,7 @@
       ],
       "protocol_is_curated": true,
       "number_of_phases": 2,
-      "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+      "_importBundle": "Atlas Health Core Clinical Protocol Library",
       "primary_goal": "Longevity",
       "risk_class": "moderate",
       "protocol_review_status": "approved",
@@ -5296,7 +5296,7 @@
         "_seconds": 1777189742
       },
       "_patchSchema": "antigravity_v2",
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "clinical_evidence_update_2026": {
         "evidence_limitations": [
           "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
@@ -5498,7 +5498,7 @@
     "lon_002": {
       "id": "lon_002",
       "protocol_duration_weeks": 12,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -5579,7 +5579,7 @@
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
       "_schemaVersion": "antigravity_v2",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
       "protocol_source_reference": "internal_guide",
@@ -5819,7 +5819,7 @@
       ],
       "protocol_is_curated": true,
       "number_of_phases": 2,
-      "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+      "_importBundle": "Atlas Health Core Clinical Protocol Library",
       "primary_goal": "Longevity",
       "risk_class": "low_to_moderate",
       "protocol_review_status": "approved",
@@ -6014,8 +6014,8 @@
         },
         "scientificName": "Epithalon (Epitalon) + MOTS-c Telomere & Mitokine Circadian Longevity Protocol",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "created_at": "2026-04-02T00:00:00.000Z",
@@ -6045,7 +6045,7 @@
         "_seconds": 1777189742
       },
       "_patchSchema": "antigravity_v2",
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "clinical_evidence_update_2026": {
         "evidence_limitations": [
           "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
@@ -6153,7 +6153,7 @@
     "met_001": {
       "id": "met_001",
       "protocol_duration_weeks": 10,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -6252,7 +6252,7 @@
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
       "_schemaVersion": "antigravity_v2",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
       "protocol_source_reference": "internal_guide",
@@ -6482,7 +6482,7 @@
       ],
       "protocol_is_curated": true,
       "number_of_phases": 2,
-      "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+      "_importBundle": "Atlas Health Core Clinical Protocol Library",
       "primary_goal": "Metabolic Health",
       "risk_class": "moderate",
       "protocol_review_status": "approved",
@@ -6677,8 +6677,8 @@
         "visibility": "public",
         "scientificName": "MOTS-c & AOD-9604 AMPK-Driven Metabolic Activation Protocol",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "evidence_grade_note": "GRADE B: AOD-9604 Phase II trials (Metabolic Pharmaceuticals 2004); MOTS-c preclinical and early Phase I data (Lee C et al., Cell Metab 2015). Robust mechanistic evidence; limited large RCT data for peptide components.",
@@ -6729,7 +6729,7 @@
         "_seconds": 1777189743
       },
       "_patchSchema": "antigravity_v2",
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "clinical_evidence_update_2026": {
         "evidence_limitations": [
           "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
@@ -6844,7 +6844,7 @@
     "met_002": {
       "id": "met_002",
       "protocol_duration_weeks": 12,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "bundleVersion": "2.0",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -6925,7 +6925,7 @@
       },
       "protocol_author_notes": "Official curated protocol for general clinical use.",
       "_schemaVersion": "antigravity_v2",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
       "protocol_source_reference": "internal_guide",
@@ -7018,7 +7018,7 @@
       ],
       "protocol_is_curated": true,
       "number_of_phases": 3,
-      "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+      "_importBundle": "Atlas Health Core Clinical Protocol Library",
       "primary_goal": "Metabolic Health",
       "risk_class": "high_complexity",
       "protocol_review_status": "approved",
@@ -7187,7 +7187,7 @@
         "_seconds": 1777189743
       },
       "_patchSchema": "antigravity_v2",
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "expected_outcomes": {
         "qualitative": [
           "Substantial body-weight reduction in high-BMI patients when managed under clinical-trial-level supervision",
@@ -7657,7 +7657,7 @@
       ],
       "protocol_is_curated": false,
       "number_of_phases": 2,
-      "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+      "_importBundle": "Atlas Health Core Clinical Protocol Library",
       "primary_goal": "Recovery / Injury",
       "risk_class": "high_complexity",
       "protocol_review_status": "reviewed",
@@ -7812,7 +7812,7 @@
         "_seconds": 1777189744
       },
       "_patchSchema": "antigravity_v2",
-      "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+      "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
       "clinical_evidence_update_2026": {
         "evidence_limitations": [
           "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
@@ -8070,8 +8070,8 @@
       },
       "number_of_phases": 2,
       "overview_summary": "Eight-week tissue-repair protocol combining BPC-157 and TB-500 to support soft-tissue healing, angiogenesis, inflammation control, and musculoskeletal recovery.",
-      "protocol_author_name": "Med-Peptides Clinical Team",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_name": "Atlas Health Clinical Team",
+      "protocol_author_organization": "Atlas Health",
       "protocol_author_title": "Peptide Specialists",
       "protocol_duration_weeks": 8,
       "protocol_id": "rec_001",
@@ -8404,8 +8404,8 @@
       "complexity_level": "advanced",
       "confidence_score": 90,
       "number_of_phases": 2,
-      "protocol_author_name": "Med-Peptides Clinical Team",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_name": "Atlas Health Clinical Team",
+      "protocol_author_organization": "Atlas Health",
       "protocol_author_title": "Peptide Specialists",
       "protocol_duration_weeks": 8,
       "protocol_id": "rec_002",
@@ -9093,8 +9093,8 @@
         "abbreviatedName": "GHK-Cu + BPC-157 · ECM Repair",
         "version": "1.0",
         "author": {
-          "name": "Med-Peptides Clinical Team",
-          "organization": "Med-Peptides",
+          "name": "Atlas Health Clinical Team",
+          "organization": "Atlas Health",
           "title": "Peptide Specialists"
         },
         "review": {
@@ -9232,8 +9232,8 @@
         "total_vials_required": 4
       },
       "number_of_phases": 2,
-      "protocol_author_name": "Med-Peptides Clinical Team",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_name": "Atlas Health Clinical Team",
+      "protocol_author_organization": "Atlas Health",
       "protocol_author_title": "Peptide Specialists",
       "protocol_duration_weeks": 12,
       "protocol_is_curated": true,
@@ -9591,8 +9591,8 @@
         "scientificName": "GHK-Cu Copper-Peptide Collagen Induction & Skin Rejuvenation Protocol",
         "description": "12-week skin rejuvenation protocol using GHK-Cu copper tripeptide to stimulate collagen and elastin synthesis, upregulate antioxidant gene expression, and reverse dermal aging markers.",
         "author": {
-          "name": "Med-Peptides Clinical Team",
-          "organization": "Med-Peptides",
+          "name": "Atlas Health Clinical Team",
+          "organization": "Atlas Health",
           "title": "Peptide Specialists"
         },
         "review": {
@@ -9624,8 +9624,8 @@
       },
       "number_of_phases": 2,
       "overview_summary": "10-week skin repair and cellular-aging protocol combining GHK-Cu dermal remodeling with a pulsed Epithalon support layer for advanced anti-aging skin objectives.",
-      "protocol_author_name": "Med-Peptides Clinical Team",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_name": "Atlas Health Clinical Team",
+      "protocol_author_organization": "Atlas Health",
       "protocol_author_title": "Peptide Specialists",
       "protocol_duration_weeks": 10,
       "protocol_is_curated": true,
@@ -10009,8 +10009,8 @@
         "scientificName": "GHK-Cu & Epithalon Collagen–Epigenetic Cellular Skin Repair Protocol",
         "description": "12-week advanced skin repair protocol combining GHK-Cu collagen induction and antioxidant gene activation with Epithalon telomere protection and pineal anti-aging epigenetic bioregulation.",
         "author": {
-          "name": "Med-Peptides Clinical Team",
-          "organization": "Med-Peptides",
+          "name": "Atlas Health Clinical Team",
+          "organization": "Atlas Health",
           "title": "Peptide Specialists"
         },
         "review": {
@@ -10036,8 +10036,8 @@
       "active": true,
       "confidence_score": 88,
       "number_of_phases": 2,
-      "protocol_author_name": "Med-Peptides Clinical Team",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_name": "Atlas Health Clinical Team",
+      "protocol_author_organization": "Atlas Health",
       "protocol_author_title": "Peptide Specialists",
       "protocol_duration_weeks": 8,
       "protocol_is_curated": true,
@@ -10428,8 +10428,8 @@
         "scientificName": "DSIP & Selank Delta-Sleep-Inducing & GABAergic Anxiolytic Sleep Restoration Protocol",
         "description": "8-week sleep restoration protocol combining DSIP delta-wave sleep induction with Selank GABAergic anxiolysis to rebuild healthy sleep architecture and reduce cortisol-driven insomnia.",
         "author": {
-          "name": "Med-Peptides Clinical Team",
-          "organization": "Med-Peptides",
+          "name": "Atlas Health Clinical Team",
+          "organization": "Atlas Health",
           "title": "Peptide Specialists"
         },
         "review": {
@@ -10458,8 +10458,8 @@
         "total_vials_required": 8
       },
       "number_of_phases": 2,
-      "protocol_author_name": "Med-Peptides Clinical Team",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_name": "Atlas Health Clinical Team",
+      "protocol_author_organization": "Atlas Health",
       "protocol_author_title": "Peptide Specialists",
       "protocol_duration_weeks": 6,
       "protocol_is_curated": true,
@@ -10849,8 +10849,8 @@
         "scientificName": "DSIP & Epithalon Circadian Rhythm & Telomere-Protective Sleep Protocol",
         "description": "10-week circadian sleep protocol combining DSIP delta-wave induction with Epithalon pineal-melatonin and BMAL1 circadian gene restoration for sleep quality and longevity-oriented benefits.",
         "author": {
-          "name": "Med-Peptides Clinical Team",
-          "organization": "Med-Peptides",
+          "name": "Atlas Health Clinical Team",
+          "organization": "Atlas Health",
           "title": "Peptide Specialists"
         },
         "review": {
@@ -11366,7 +11366,7 @@
       },
       "protocol_duration_weeks": 12,
       "protocol_review_status": "approved",
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "protocol_source_type": "curated_library",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
@@ -11383,7 +11383,7 @@
       "protocol_author_title": "Peptide Specialists",
       "confidence_score": 93,
       "protocol_author_notes": "Official curated protocol for general clinical use.",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "expected_outcomes": {
         "qualitative": [
@@ -11573,8 +11573,8 @@
         "complexity_level": "standard",
         "visibility": "public",
         "author": {
-          "organization": "Med-Peptides",
-          "name": "Med-Peptides Clinical Team",
+          "organization": "Atlas Health",
+          "name": "Atlas Health Clinical Team",
           "title": "Peptide Specialists"
         },
         "review": {
@@ -11669,13 +11669,13 @@
         ]
       },
       "protocol_duration_weeks": 12,
-      "protocol_author_name": "Med-Peptides Clinical Team",
+      "protocol_author_name": "Atlas Health Clinical Team",
       "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
       "protocol_is_physician_authored": false,
       "protocol_source_version": "v5.0",
       "complexity_level": "advanced",
       "protocol_author_notes": "Official curated protocol for general clinical use.",
-      "protocol_author_organization": "Med-Peptides",
+      "protocol_author_organization": "Atlas Health",
       "protocol_last_reviewed_at": "2026-03-29",
       "protocol_source_reference": "internal_guide",
       "protocol_slug": "weight-management-cagrisem-12w",

@@ -1,7 +1,7 @@
 /**
  * emailTemplateRegistry.js
  * ─────────────────────────
- * Canonical registry of all transactional email templates used by Med-Peptides.
+ * Canonical registry of all transactional email templates used by Atlas Health.
  * Each entry has a unique TPL-XXX identifier for reference and support.
  *
  * Templates rendered here use sample data for preview purposes.
@@ -52,7 +52,7 @@ function buildWelcomeCustomerHtml({ firstName = 'Researcher' } = {}) {
     p{margin:15px 0;}
   </style></head><body>
   <div class="container">
-    <div class="header"><h1>Welcome to Med-Peptides</h1></div>
+    <div class="header"><h1>Welcome to Atlas Health</h1></div>
     <div class="content">
       <div class="badge">✅ Account Active</div>
       <p>Hello <strong>${firstName}</strong>,</p>
@@ -65,9 +65,9 @@ function buildWelcomeCustomerHtml({ firstName = 'Researcher' } = {}) {
       </ul>
       <a href="https://med-peptides.com" class="btn">Go to Catalog →</a>
       <p>If you have any questions, reply to this email or contact us via WhatsApp.</p>
-      <p>Best regards,<br>The Med-Peptides Team</p>
+      <p>Best regards,<br>The Atlas Health Team</p>
     </div>
-    <div class="footer"><p>© ${new Date().getFullYear()} Med-Peptides. For research use only.</p></div>
+    <div class="footer"><p>© ${new Date().getFullYear()} Atlas Health. For research use only.</p></div>
   </div></body></html>`;
 }
 
@@ -89,19 +89,19 @@ function buildWelcomeProfessionalHtml({ firstName = 'Researcher', role = 'profes
     p{margin:15px 0;}
   </style></head><body>
   <div class="container">
-    <div class="header"><h1>Med-Peptides</h1><p style="margin:6px 0 0;font-size:13px;opacity:0.8;">Professional Research Platform</p></div>
+    <div class="header"><h1>Atlas Health</h1><p style="margin:6px 0 0;font-size:13px;opacity:0.8;">Professional Research Platform</p></div>
     <div class="content">
       <div class="badge">⏳ Application Under Review</div>
       <p>Hello <strong>${firstName}</strong>,</p>
-      <p>Thank you for applying for <strong>${roleLabel}</strong> access to Med-Peptides. Your application has been received and is currently <strong>pending review</strong> by our team.</p>
+      <p>Thank you for applying for <strong>${roleLabel}</strong> access to Atlas Health. Your application has been received and is currently <strong>pending review</strong> by our team.</p>
       <div class="notice">
         <p style="margin:0;font-size:14px;"><strong>What happens next:</strong><br>
         Our team will review your application within <strong>1–2 business days</strong>. You will receive a separate email with the outcome — either an approval with full access, or further information if we need to follow up.</p>
       </div>
       <p>If you have any questions in the meantime, feel free to reply to this email.</p>
-      <p>Best regards,<br>The Med-Peptides Team</p>
+      <p>Best regards,<br>The Atlas Health Team</p>
     </div>
-    <div class="footer"><p>© ${new Date().getFullYear()} Med-Peptides. For research use only.</p></div>
+    <div class="footer"><p>© ${new Date().getFullYear()} Atlas Health. For research use only.</p></div>
   </div></body></html>`;
 }
 
@@ -119,17 +119,17 @@ function buildDenialHtml({ firstName = 'Researcher', reason = '' } = {}) {
     p{margin:15px 0;}
   </style></head><body>
   <div class="container">
-    <div class="header"><h1>Med-Peptides</h1></div>
+    <div class="header"><h1>Atlas Health</h1></div>
     <div class="content">
       <div class="badge">Application Update</div>
       <p>Hello <strong>${firstName}</strong>,</p>
-      <p>Thank you for your interest in Med-Peptides. After reviewing your application, we are unable to approve your professional access request at this time.</p>
+      <p>Thank you for your interest in Atlas Health. After reviewing your application, we are unable to approve your professional access request at this time.</p>
       ${reason ? `<div class="reason-box"><p style="margin:0;font-size:14px;"><strong>Reason provided:</strong><br>${reason}</p></div>` : ''}
       <p>You are welcome to re-apply in the future or contact our team directly if you believe this decision was made in error.</p>
       <p>We appreciate your understanding.</p>
-      <p>Best regards,<br>The Med-Peptides Team</p>
+      <p>Best regards,<br>The Atlas Health Team</p>
     </div>
-    <div class="footer"><p>© ${new Date().getFullYear()} Med-Peptides.</p></div>
+    <div class="footer"><p>© ${new Date().getFullYear()} Atlas Health.</p></div>
   </div></body></html>`;
 }
 

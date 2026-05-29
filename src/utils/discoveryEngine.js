@@ -1,7 +1,7 @@
  
 /**
  * discoveryEngine.js
- * Deterministic matching engine for the Med-Peptides Discovery System.
+ * Deterministic matching engine for the Atlas Health Discovery System.
  * Uses the following priority order for FAQ matching:
  *   1. product_ids[]     → embedded canonical Firestore product IDs in FAQ docs (preferred)
  *   2. relatedPeptideNames[] → fuzzy name fallback for legacy / unresolved associations

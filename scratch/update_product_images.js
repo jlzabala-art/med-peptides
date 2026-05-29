@@ -1,7 +1,7 @@
 
 import fs from 'fs';
 
-const filePath = '/Users/joseluiszabala/Documents/Antigravity/Med-Peptides-web/src/data/products.js';
+const filePath = '/Users/joseluiszabala/Documents/Antigravity/Atlas Health-web/src/data/products.js';
 let content = fs.readFileSync(filePath, 'utf-8');
 
 const mapping = {

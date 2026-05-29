@@ -417,7 +417,7 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
               <span>{isBeginnerMode ? '🔰 Beginner Mode' : '🔬 Expert Mode'}</span>
             </button>
             <div style={{ fontSize: '0.6rem', color: '#80868b', textAlign: 'center', fontWeight: 500, letterSpacing: '0.02em' }}>
-              RegenPept Assistant v4.5
+              Atlas Health Assistant v4.5
             </div>
           </div>
         </motion.div>

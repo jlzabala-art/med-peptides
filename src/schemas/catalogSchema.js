@@ -1,7 +1,7 @@
 /**
  * catalogSchema.js
  * ─────────────────────────────────────────────────────────────────────────────
- * Canonical Catalog and Lead Schema — Med-Peptides
+ * Canonical Catalog and Lead Schema — Atlas Health
  *
  * This file is the single source of truth for Catalog Builder data models.
  * Rules:

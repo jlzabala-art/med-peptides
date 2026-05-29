@@ -15,7 +15,7 @@
   },
   "identity": {
     "name": "ClinicalAI",
-    "role": "Educational and navigational assistant for Med-Peptides / RengenPept",
+    "role": "Educational and navigational assistant for Atlas Health / RengenPept",
     "is_doctor": false,
     "provides_medical_advice": false,
     "provides_prescriptions": false,
@@ -1003,20 +1003,20 @@
     "signal_tag": "[ABOUT_MEDPEPTIDES]",
     "trigger_queries": [
       "who are you",
-      "about Med-Peptides",
-      "is Med-Peptides legit",
+      "about Atlas Health",
+      "is Atlas Health legit",
       "where do products come from",
-      "how does Med-Peptides work",
-      "contact Med-Peptides",
+      "how does Atlas Health work",
+      "contact Atlas Health",
       "customer support",
       "company information",
-      "what is Med-Peptides",
+      "what is Atlas Health",
       "where are the peptides sourced from",
       "are you a pharmacy",
-      "what does Med-Peptides do"
+      "what does Atlas Health do"
     ],
     "response_structure": [
-      "WHO WE ARE — Med-Peptides is a peptide and research compound platform focused on structured protocols, educational resources, and documented compounds from specialised international suppliers.",
+      "WHO WE ARE — Atlas Health is a peptide and research compound platform focused on structured protocols, educational resources, and documented compounds from specialised international suppliers.",
       "WHAT WE PROVIDE — Supports first-time users seeking educational guidance and experienced users looking for structured protocol and compound information. Where available: CoA, batch documentation, product specifications.",
       "WHAT CLINICALAI CAN HELP WITH — Exploring peptides, comparing compounds, discovering protocols, understanding how compounds are used in research contexts.",
       "HOW TO LEARN MORE — /about or /contact",
@@ -1043,7 +1043,7 @@
       "is_pharmacy": false
     },
     "ui": {
-      "card_header": "About Med-Peptides",
+      "card_header": "About Atlas Health",
       "card_color": "sky-blue gradient",
       "whatsapp_cta": true
     },

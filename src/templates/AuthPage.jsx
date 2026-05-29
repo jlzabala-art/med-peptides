@@ -173,7 +173,7 @@ export default function AuthPage({ onBack }) {
       setSubmitting(true);
       try {
         await register(email, password, fullName, '', '', 'customer', { guestPreferences: prefs, inviteId }, selectedGoals);
-        setSuccess('Account created! Welcome to Med-Peptides.');
+        setSuccess('Account created! Welcome to Atlas Health.');
         setTimeout(() => navigate('/'), 1500);
       } catch (err) {
         if (err.code === 'auth/email-already-in-use') {
@@ -416,7 +416,7 @@ export default function AuthPage({ onBack }) {
             <div>
               <h3 style={{ fontSize: '1.05rem', marginBottom: '0.25rem', fontWeight: 700 }}>Your Account</h3>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0, lineHeight: 1.5 }}>
-                Sign in to access your orders, preferences, and personalized experience with Med-Peptides.
+                Sign in to access your orders, preferences, and personalized experience with Atlas Health.
               </p>
             </div>
           </div>
@@ -523,7 +523,7 @@ export default function AuthPage({ onBack }) {
               {tab === 'login' ? 'Sign in' : 'Create an account'}
             </h2>
             <p style={{ color: '#5f6368', margin: 0, fontSize: '0.95rem', fontFamily: 'var(--font-sans)' }}>
-              {tab === 'login' ? 'to continue to Med-Peptides' : 'to access your personalized research portal'}
+              {tab === 'login' ? 'to continue to Atlas Health' : 'to access your personalized research portal'}
             </p>
           </div>
 

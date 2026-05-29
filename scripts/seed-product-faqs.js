@@ -16,7 +16,7 @@ admin.initializeApp({
   credential: typeof serviceAccount === 'string' && serviceAccount.endsWith('.json')
     ? admin.credential.cert(require(serviceAccount))
     : admin.credential.applicationDefault(),
-  projectId: 'Med-Peptides-app',
+  projectId: 'Atlas Health-app',
 });
 
 const db = admin.firestore();
@@ -203,7 +203,7 @@ const FAQ_DATA = [
       {
         question: 'What dosing format is available for the CJC-1295 + Ipamorelin blend?',
         answer:
-          'Med-Peptides offers this blend in two vial sizes: 5mg|5mg (5mg of each peptide per vial, 10 vials/kit) and 10mg|10mg (10mg of each peptide per vial, 10 vials/kit). Both are lyophilized powders requiring reconstitution with bacteriostatic water before use. The 10mg|10mg format is intended for extended research protocols where higher cumulative doses are being studied. Store at -20°C until reconstitution; use within 28 days of reconstitution when refrigerated at 2–8°C.',
+          'Atlas Health offers this blend in two vial sizes: 5mg|5mg (5mg of each peptide per vial, 10 vials/kit) and 10mg|10mg (10mg of each peptide per vial, 10 vials/kit). Both are lyophilized powders requiring reconstitution with bacteriostatic water before use. The 10mg|10mg format is intended for extended research protocols where higher cumulative doses are being studied. Store at -20°C until reconstitution; use within 28 days of reconstitution when refrigerated at 2–8°C.',
       },
     ],
   },

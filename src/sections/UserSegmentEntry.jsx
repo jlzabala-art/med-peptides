@@ -189,7 +189,7 @@ export default function UserSegmentEntry({ onNavigate }) {
         <span className="section-eyebrow">The Research Ecosystem</span>
         <h2 className="section-title">Built for every role in biological optimization</h2>
         <p className="section-subtitle">
-          From health-conscious individuals to institutional clinical centers — Med-Peptides provides the tools for research, while maintaining exclusive protocols and tiered pricing for verified professionals.
+          From health-conscious individuals to institutional clinical centers — Atlas Health provides the tools for research, while maintaining exclusive protocols and tiered pricing for verified professionals.
         </p>
       </div>
 

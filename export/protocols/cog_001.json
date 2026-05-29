@@ -1,6 +1,6 @@
 {
   "protocol_duration_weeks": 6,
-  "protocol_author_name": "Med-Peptides Clinical Team",
+  "protocol_author_name": "Atlas Health Clinical Team",
   "bundleVersion": "2.0",
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -14,7 +14,7 @@
   },
   "complexity_level": "simple",
   "protocol_author_notes": "Official curated protocol for general clinical use.",
-  "protocol_author_organization": "Med-Peptides",
+  "protocol_author_organization": "Atlas Health",
   "protocol_last_reviewed_at": "2026-03-29",
   "protocol_source_reference": "internal_guide",
   "expected_outcomes": {
@@ -229,7 +229,7 @@
     ]
   },
   "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
-  "_importBundle": "Med-Peptides Clinical Protocol Library · Updated 2026-04-26",
+  "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
   "clinical_evidence_update_2026": {
     "evidence_limitations": [
       "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
@@ -369,8 +369,8 @@
     "primary_goal": "Cognitive Support",
     "visibility": "public",
     "author": {
-      "organization": "Med-Peptides",
-      "name": "Med-Peptides Clinical Team",
+      "organization": "Atlas Health",
+      "name": "Atlas Health Clinical Team",
       "title": "Peptide Specialists"
     },
     "evidence_grade_note": "Strong preclinical evidence and multiple Russian Phase II/III clinical trials. Limited large-scale Western RCTs. Grade C per GRADE criteria due to regional publication bias.",
@@ -419,7 +419,7 @@
   "_patchedAt": {
     "schema_gap_fix": "2026-04-26T12:37:11Z"
   },
-  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
   "overview_summary": "Semax & Selank Neurocognitive Protocol",
   "variant_rules": {
     "tempo": {

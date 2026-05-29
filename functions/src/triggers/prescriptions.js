@@ -29,7 +29,7 @@ function buildDoctorCheckoutEmail({ doctorEmail, doctorName, patientName, rxId, 
     <div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:16px;">
       <div style="background:#003666;color:#fff;padding:20px 24px;border-radius:12px;margin-bottom:24px;">
         <h2 style="margin:0;font-size:18px;font-weight:900;">✅ Paciente completó el checkout</h2>
-        <p style="margin:6px 0 0;opacity:0.75;font-size:14px;">Med-Peptides · Sistema de Prescripciones</p>
+        <p style="margin:6px 0 0;opacity:0.75;font-size:14px;">Atlas Health · Sistema de Prescripciones</p>
       </div>
       <p style="font-size:15px;color:#1e293b;">Hola <strong>${doctorName || 'Doctor'}</strong>,</p>
       <p style="font-size:14px;color:#475569;line-height:1.6;">
@@ -154,7 +154,7 @@ module.exports.onOrderCreatedForRx = onDocumentCreated(
               });
 
               await transporter.sendMail({
-                from: `"Med-Peptides" <${gmailUser.value()}>`,
+                from: `"Atlas Health" <${gmailUser.value()}>`,
                 to:   doctorEmail,
                 subject,
                 html,

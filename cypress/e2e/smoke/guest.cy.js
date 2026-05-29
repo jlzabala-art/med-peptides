@@ -13,8 +13,8 @@ describe('Guest — Smoke Test', () => {
     });
   });
 
-  it('shows the homepage with Med-Peptides branding', () => {
-    cy.contains('Med-Peptides').should('be.visible');
+  it('shows the homepage with Atlas Health branding', () => {
+    cy.contains('Atlas Health').should('be.visible');
     cy.get('#root').should('not.be.empty');
   });
 

@@ -118,7 +118,7 @@ const META_INTENT_MAP = [
   {
     phrases: ["quien eres", "eres una ia", "who are you", "are you ai", "what are you", "que eres"],
     id: "identity",
-    reply: "I am the **Med-Peptides Clinical Intelligence Assistant**. My purpose is to help you navigate our peptide and supplement catalog, technical protocols, and FAQ database."
+    reply: "I am the **Atlas Health Clinical Intelligence Assistant**. My purpose is to help you navigate our peptide and supplement catalog, technical protocols, and FAQ database."
   },
   {
     phrases: ["que puedes hacer", "ayuda", "help", "what can you do", "funcionalidades", "features"],

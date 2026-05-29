@@ -25,7 +25,7 @@ export default function TrustStrip() {
   const { items } = homeData.trustStrip;
 
   return (
-    <section className="ts-wrap" aria-label="Why Med-Peptides">
+    <section className="ts-wrap" aria-label="Why Atlas Health">
       <div className="ts-inner">
         {items.map((item, idx) => {
           const IconComponent = iconMap[item.icon] || ShieldCheck;

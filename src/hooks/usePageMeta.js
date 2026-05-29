@@ -1,9 +1,9 @@
  
 import { useEffect } from 'react';
 
-const BASE_TITLE = 'Med-Peptides';
-const BASE_URL = 'https://Med-Peptides.com';
-const DEFAULT_IMAGE = 'https://Med-Peptides.com/og-premium.png';
+const BASE_TITLE = 'Atlas Health';
+const BASE_URL = 'https://Atlas Health.com';
+const DEFAULT_IMAGE = 'https://Atlas Health.com/og-premium.png';
 
 /**
  * usePageMeta — Updates <title>, <meta description>, and <link canonical>
@@ -52,7 +52,7 @@ export function usePageMeta({ title, description, path = '', image, structuredDa
     setOg('og:url', canonical);
     setOg('og:image', image || DEFAULT_IMAGE);
     setOg('og:type', 'website');
-    setOg('og:site_name', 'Med-Peptides');
+    setOg('og:site_name', 'Atlas Health');
 
     // --- Twitter (upsert — create if not already in DOM) ---
     const setTw = (name, value) => {

@@ -2,7 +2,7 @@
 /**
  * productSchema.js
  * ─────────────────────────────────────────────────────────────────────────────
- * Canonical v2 Product Schema — Med-Peptides
+ * Canonical v2 Product Schema — Atlas Health
  *
  * This file is the single source of truth for the product data model.
  * It defines:

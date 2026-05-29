@@ -9,7 +9,7 @@ const path = require('path');
 const fs = require('fs');
 
 // ── Config ─────────────────────────────────────────────────────────────────
-const SERVICE_ACCOUNT_PATH = path.resolve(__dirname, '../Med-Peptides-app-firebase-adminsdk-fbsvc-d01b0469f1.json');
+const SERVICE_ACCOUNT_PATH = path.resolve(__dirname, '../Atlas Health-app-firebase-adminsdk-fbsvc-d01b0469f1.json');
 const BUNDLE_PATH           = path.resolve(__dirname, '../export/protocol_import_bundle_antigravity_v2.json');
 const COLLECTION            = 'protocols';
 // ────────────────────────────────────────────────────────────────────────────

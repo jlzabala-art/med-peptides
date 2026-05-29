@@ -13,7 +13,7 @@
 export const getApprovalEmailHtml = ({
   fullName = 'User',
   clinicName = '',
-  loginUrl = 'https://Med-Peptides-app-27a3a.web.app/',
+  loginUrl = 'https://Atlas Health-app-27a3a.web.app/',
   role = 'guest',
 } = {}) => {
   // Configuración del Saludo
@@ -72,7 +72,7 @@ export const getApprovalEmailHtml = ({
     <xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
   </noscript>
   <![endif]-->
-  <title>Your Professional Account is Active — Med-Peptides</title>
+  <title>Your Professional Account is Active — Atlas Health</title>
   <style type="text/css">
     /* ─── RESET ──────────────────────────────────────────────── */
     body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
@@ -117,7 +117,7 @@ export const getApprovalEmailHtml = ({
 
   <!-- ─── PHASE 1: PREHEADER (hidden, ~100 chars) ─────────────── -->
   <div style="display:none;font-size:1px;color:#f0f4f8;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
-    Your Med-Peptides professional account is now active — access exclusive research catalogs, bulk pricing &amp; priority support.
+    Your Atlas Health professional account is now active — access exclusive research catalogs, bulk pricing &amp; priority support.
   </div>
 
   <!-- ─── PHASE 1: OUTER WRAPPER TABLE (Outlook safe) ─────────── -->
@@ -137,7 +137,7 @@ export const getApprovalEmailHtml = ({
             <td class="header-cell header-padding"
               style="background-color:#003666;padding:32px 40px;text-align:center;">
               <h1 style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:26px;font-weight:800;color:#ffffff;letter-spacing:2px;text-transform:uppercase;">
-                Med-Peptides
+                Atlas Health
               </h1>
               <p style="margin:6px 0 0;font-size:12px;color:#90c8f0;letter-spacing:1.5px;text-transform:uppercase;font-weight:500;">
                 Professional Research Platform
@@ -165,7 +165,7 @@ export const getApprovalEmailHtml = ({
               <!-- Body -->
               <p class="content-text"
                 style="margin:0 0 24px;font-size:15px;line-height:1.75;color:#475569;">
-                We are pleased to inform you that your professional account with <strong>Med-Peptides</strong> has been successfully verified and activated by our team. You now have full institutional access.
+                We are pleased to inform you that your professional account with <strong>Atlas Health</strong> has been successfully verified and activated by our team. You now have full institutional access.
               </p>
 
               <!-- ─── PHASE 3: FEATURE LIST WITH CHECK ICONS ── -->
@@ -233,7 +233,7 @@ export const getApprovalEmailHtml = ({
               <!-- Brand -->
               <p class="footer-text"
                 style="margin:0 0 6px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;color:#003666;letter-spacing:1px;text-transform:uppercase;">
-                Med-Peptides
+                Atlas Health
               </p>
               <p class="footer-text"
                 style="margin:0 0 12px;font-size:12px;color:#64748b;">
@@ -250,7 +250,7 @@ export const getApprovalEmailHtml = ({
               <p class="footer-text"
                 style="margin:0 0 8px;font-size:11px;color:#94a3b8;">
                 Questions? Contact
-                <a href="mailto:support@Med-Peptides.com"
+                <a href="mailto:support@Atlas Health.com"
                   style="color:#00a3e0;text-decoration:none;font-weight:600;">
                   Technical Support
                 </a>
@@ -259,7 +259,7 @@ export const getApprovalEmailHtml = ({
               <!-- Physical address (CAN-SPAM required) -->
               <p class="footer-text"
                 style="margin:0 0 10px;font-size:11px;color:#94a3b8;line-height:1.5;">
-                Med-Peptides Research Division<br>
+                Atlas Health Research Division<br>
                 123 Research Blvd, Suite 400<br>
                 Miami, FL 33101 · United States
               </p>
@@ -364,7 +364,7 @@ return `
     <xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
   </noscript>
   <![endif]-->
-  <title>You've been invited to Med-Peptides</title>
+  <title>You've been invited to Atlas Health</title>
   <style type="text/css">
     /* ─── RESET ──────────────────────────────────────────────── */
     body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
@@ -412,7 +412,7 @@ return `
 
   <!-- PREHEADER (hidden ~100 chars) -->
   <div style="display:none;font-size:1px;color:#f0f4f8;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
-    ${fromName} has invited you to join Med-Peptides — the professional research peptide platform. Claim your access now.
+    ${fromName} has invited you to join Atlas Health — the professional research peptide platform. Claim your access now.
   </div>
 
   <!-- OUTER WRAPPER (Outlook-safe) -->
@@ -432,7 +432,7 @@ return `
             <td class="header-cell header-padding"
               style="background-color:#003666;padding:32px 40px;text-align:center;">
               <h1 style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:26px;font-weight:800;color:#ffffff;letter-spacing:2px;text-transform:uppercase;">
-                Med-Peptides
+                Atlas Health
               </h1>
               <p style="margin:6px 0 0;font-size:12px;color:#90c8f0;letter-spacing:1.5px;text-transform:uppercase;font-weight:500;">
                 Professional Research Platform
@@ -461,7 +461,7 @@ return `
               <p class="content-text"
                 style="margin:0 0 24px;font-size:15px;line-height:1.75;color:#475569;">
                 <strong style="color:#003666;">${fromName}</strong> has personally invited you to join
-                <strong>Med-Peptides</strong> — the professional platform for institutional research peptide sourcing,
+                <strong>Atlas Health</strong> — the professional platform for institutional research peptide sourcing,
                 custom synthesis, and advanced protocol design.
               </p>
 
@@ -547,7 +547,7 @@ return `
 
               <p class="footer-text"
                 style="margin:0 0 6px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;color:#003666;letter-spacing:1px;text-transform:uppercase;">
-                Med-Peptides
+                Atlas Health
               </p>
               <p class="footer-text"
                 style="margin:0 0 12px;font-size:12px;color:#64748b;">
@@ -562,7 +562,7 @@ return `
               <p class="footer-text"
                 style="margin:0 0 8px;font-size:11px;color:#94a3b8;">
                 Questions? Contact
-                <a href="mailto:support@Med-Peptides.com"
+                <a href="mailto:support@Atlas Health.com"
                   style="color:#00a3e0;text-decoration:none;font-weight:600;">
                   Technical Support
                 </a>
@@ -570,7 +570,7 @@ return `
 
               <p class="footer-text"
                 style="margin:0 0 10px;font-size:11px;color:#94a3b8;line-height:1.5;">
-                Med-Peptides Research Division<br>
+                Atlas Health Research Division<br>
                 123 Research Blvd, Suite 400<br>
                 Miami, FL 33101 · United States
               </p>

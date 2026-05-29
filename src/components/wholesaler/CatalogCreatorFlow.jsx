@@ -10,7 +10,8 @@ import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
 import { 
   ArrowLeft, Save, Bot, Sparkles, Check, 
-  Trash2, Plus, Layout, Search, X, Send, ShoppingCart, Lightbulb, History, ChevronDown, ChevronRight
+  Trash2, Plus, Layout, Search, X, Send, ShoppingCart, Lightbulb, History, ChevronDown, ChevronRight,
+  FileText
 } from 'lucide-react';
 import { renderAIMarkdown } from '../shared/ClinicalAssistant/utils/markdownRenderer';
 import FormattedResponse from '../shared/ClinicalAssistant/components/FormattedResponse';
@@ -69,6 +70,8 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [rightPanelTab, setRightPanelTab] = useState('editor'); // 'editor' or 'preview'
+  const [expandedNoteId, setExpandedNoteId] = useState(null);
   
   // AI Chat state
   const [conversationState, setConversationState] = useState('DISCOVERY'); // DISCOVERY, VALIDATION, GENERATION
@@ -81,6 +84,24 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
   const [previousPrompts, setPreviousPrompts] = useState([]);
   const [openAccordion, setOpenAccordion] = useState(null);
   const chatEndRef = useRef(null);
+
+  // Save active session to localStorage
+  useEffect(() => {
+    // Only save if we are in discovery or validation and it's not the initial restore prompt
+    const lastMsg = chatHistory[chatHistory.length - 1];
+    if (
+      conversationState !== 'GENERATION' && 
+      chatHistory.length > 1 && 
+      !lastMsg?.isRestorePrompt
+    ) {
+      localStorage.setItem('catalogBuilder_activeSession', JSON.stringify({
+        conversationState,
+        discoveryData,
+        currentQuestionIndex,
+        chatHistory
+      }));
+    }
+  }, [conversationState, discoveryData, currentQuestionIndex, chatHistory]);
 
   useEffect(() => {
     async function loadData() {
@@ -134,9 +155,19 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
       }
     }
     
-    // Initialize Discovery Chat
-    const firstQ = DISCOVERY_QUESTIONS[0];
-    setChatHistory([{ role: 'ai', content: firstQ.question, options: firstQ.options }]);
+    // Check if there is an active session to restore
+    const activeSession = localStorage.getItem('catalogBuilder_activeSession');
+    if (activeSession) {
+      setChatHistory([{
+        role: 'ai',
+        content: "Welcome back! I found an unfinished catalog builder session from your last visit. Would you like to resume your progress or start fresh?",
+        options: ["Resume Session", "Start From Scratch"],
+        isRestorePrompt: true
+      }]);
+    } else {
+      const firstQ = DISCOVERY_QUESTIONS[0];
+      setChatHistory([{ role: 'ai', content: firstQ.question, options: firstQ.options }]);
+    }
   }, []);
 
   useEffect(() => {
@@ -149,6 +180,34 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
     
     setChatInput('');
     setChatHistory(prev => [...prev, { role: 'user', content: textToSend }]);
+
+    // Check if handling active session restore prompt
+    const isRestore = chatHistory.length > 0 && chatHistory[chatHistory.length - 1]?.isRestorePrompt;
+    if (isRestore) {
+      if (textToSend === 'Resume Session') {
+        const saved = localStorage.getItem('catalogBuilder_activeSession');
+        if (saved) {
+          try {
+            const data = JSON.parse(saved);
+            setConversationState(data.conversationState || 'DISCOVERY');
+            setDiscoveryData(data.discoveryData || {});
+            setCurrentQuestionIndex(data.currentQuestionIndex || 0);
+            setChatHistory(data.chatHistory || []);
+            return;
+          } catch (e) {
+            console.error('Error restoring session:', e);
+          }
+        }
+      }
+      // If Start From Scratch or error, reset and initialize
+      localStorage.removeItem('catalogBuilder_activeSession');
+      setConversationState('DISCOVERY');
+      setDiscoveryData({});
+      setCurrentQuestionIndex(0);
+      const firstQ = DISCOVERY_QUESTIONS[0];
+      setChatHistory([{ role: 'ai', content: firstQ.question, options: firstQ.options }]);
+      return;
+    }
 
     if (conversationState === 'DISCOVERY') {
       let nextData = { ...discoveryData };
@@ -219,6 +278,23 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
         options: ["Confirm & Generate", "Modify Settings"]
       }]);
     }, 800);
+  };
+
+  const handleUpdateDiscoveryField = (key, value) => {
+    setDiscoveryData(prev => {
+      const next = { ...prev, [key]: value };
+      // Sync chatHistory too so the summaryData in the bubbles reflect the edited values
+      setChatHistory(chatPrev => chatPrev.map(msg => {
+        if (msg.isValidation && msg.summaryData) {
+          return {
+            ...msg,
+            summaryData: next
+          };
+        }
+        return msg;
+      }));
+      return next;
+    });
   };
 
   const executeGeneration = async (data) => {
@@ -334,12 +410,127 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
       } else {
         alert('Catalog saved as draft.');
       }
+      localStorage.removeItem('catalogBuilder_activeSession'); // Clear active session on success
       onBack();
     } catch (e) {
       alert(`Save error: ${e.message}`);
     } finally {
       setSaving(false);
     }
+  };
+
+  const handlePrint = () => {
+    const previewEl = document.getElementById('catalog-preview-printable');
+    if (!previewEl) return;
+    
+    // Open popup window to capture printable preview
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert("Please allow popups to save the catalog as a PDF.");
+      return;
+    }
+    
+    const companyName = catalog?.branding?.companyName || 'Atlas Health';
+    
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>${catalog.title || 'Product Catalog'}</title>
+          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+          <style>
+            body {
+              font-family: ${catalog?.branding?.fontFamily || "'Inter', sans-serif"};
+              color: #202124;
+              background-color: #fff;
+              padding: 20px;
+              margin: 0;
+            }
+            /* Hide CTAs, search inputs and interactives */
+            a[href^="https://us.bigin.online"],
+            button,
+            input,
+            .no-print {
+              display: none !important;
+            }
+            /* Avoid page-breaks within key elements */
+            h1, h2, h3, h4 {
+              page-break-inside: avoid;
+            }
+            section {
+              page-break-inside: avoid;
+              margin-bottom: 2rem;
+            }
+            @media print {
+              body {
+                padding: 0;
+              }
+              @page {
+                size: A4;
+                margin: 20mm;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div style="max-width: 800px; margin: 0 auto;">
+            ${previewEl.innerHTML}
+          </div>
+          <script>
+            // Ensure all FAQ answers are showing in printed document
+            // Normally styled components inside might need to be adjusted
+            window.onload = function() {
+              window.print();
+              setTimeout(() => {
+                window.close();
+              }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  const THEME_PALETTES = {
+    emerald: { primaryColor: '#059669', secondaryColor: '#047857' },
+    royal: { primaryColor: '#1a73e8', secondaryColor: '#185abc' },
+    ruby: { primaryColor: '#e11d48', secondaryColor: '#9f1239' },
+    slate: { primaryColor: '#475569', secondaryColor: '#334155' }
+  };
+
+  const handleThemeChange = (themeName) => {
+    setCatalog(prev => {
+      const nextBranding = { ...(prev.branding || {}) };
+      if (themeName !== 'custom') {
+        nextBranding.primaryColor = THEME_PALETTES[themeName].primaryColor;
+        nextBranding.secondaryColor = THEME_PALETTES[themeName].secondaryColor;
+      }
+      return {
+        ...prev,
+        theme: themeName,
+        branding: nextBranding
+      };
+    });
+  };
+
+  const handleCustomColorChange = (key, hex) => {
+    setCatalog(prev => ({
+      ...prev,
+      branding: {
+        ...(prev.branding || {}),
+        [key]: hex
+      }
+    }));
+  };
+
+  const handleAnnotationChange = (itemId, val) => {
+    setCatalog(prev => ({
+      ...prev,
+      annotations: {
+        ...(prev.annotations || {}),
+        [itemId]: val
+      }
+    }));
   };
 
   if (loadingDb) {
@@ -389,15 +580,46 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
               
               {msg.isValidation && msg.summaryData && (
                 <div style={{ marginLeft: '32px', backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #dadce0', padding: '12px', fontSize: '0.85rem' }}>
-                  <h4 style={{ margin: '0 0 8px 0', color: '#202124' }}>DISCOVERY SUMMARY</h4>
+                  <h4 style={{ margin: '0 0 8px 0', color: '#202124', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>DISCOVERY SUMMARY</span>
+                    <span style={{ fontSize: '0.7rem', color: '#1a73e8', fontWeight: '500' }}>✏️ Click to Edit Live</span>
+                  </h4>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <tbody>
-                      {Object.entries(msg.summaryData).map(([k, v]) => (
-                        <tr key={k} style={{ borderBottom: '1px solid #f1f3f4' }}>
-                          <td style={{ padding: '6px 0', fontWeight: 600, color: '#5f6368', textTransform: 'capitalize', width: '40%' }}>{k}</td>
-                          <td style={{ padding: '6px 0', color: '#202124' }}>{v}</td>
-                        </tr>
-                      ))}
+                      {Object.entries(msg.summaryData).map(([k, v]) => {
+                        const questionObj = DISCOVERY_QUESTIONS.find(q => q.id === k);
+                        return (
+                          <tr key={k} style={{ borderBottom: '1px solid #f1f3f4' }}>
+                            <td style={{ padding: '6px 0', fontWeight: 600, color: '#5f6368', textTransform: 'capitalize', width: '40%' }}>{k}</td>
+                            <td style={{ padding: '6px 0', color: '#202124' }}>
+                              {questionObj ? (
+                                <select
+                                  value={v}
+                                  onChange={(e) => handleUpdateDiscoveryField(k, e.target.value)}
+                                  style={{
+                                    border: '1px solid #dadce0',
+                                    borderRadius: '4px',
+                                    padding: '2px 6px',
+                                    fontSize: '0.8rem',
+                                    backgroundColor: '#fff',
+                                    outline: 'none',
+                                    width: '100%',
+                                    color: '#202124',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  <option value="AI Judgement">AI Judgement</option>
+                                  {questionObj.options.filter(o => o !== "Use your judgement").map(opt => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                  ))}
+                                </select>
+                              ) : (
+                                v
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -561,217 +783,364 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
         </div>
       </div>
 
-      {/* RIGHT PANEL: Live Cart & Catalog Form */}
+      {/* RIGHT PANEL: Live Cart & Catalog Form / Live Preview */}
       <div style={cartPanelStyle}>
-        <div style={{ ...panelHeaderStyle, justifyContent: 'space-between', borderBottom: '1px solid #dadce0', backgroundColor: '#f8f9fa' }}>
-          <h3 style={{ margin: 0, fontSize: '1rem', color: '#202124', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ShoppingCart size={18} color="#1a73e8" /> Catalog Cart
-          </h3>
-          <button onClick={() => setShowPreviewModal(true)} style={actionButtonStyleSecondary}>
-            <Layout size={14} /> Preview
-          </button>
-        </div>
-
-        <div style={cartBodyStyle}>
-          <div style={formFieldStyle}>
-            <label style={labelStyle}>Catalog Title</label>
-            <input 
-              type="text" 
-              value={catalog.title}
-              onChange={(e) => setCatalog(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="Generated by AI or type here..."
-              style={inputStyle}
-            />
-          </div>
-
-          <div style={formFieldStyle}>
-            <label style={labelStyle}>URL Slug</label>
-            <input 
-              type="text" 
-              value={catalog.slug}
-              onChange={(e) => setCatalog(prev => ({ ...prev, slug: e.target.value }))}
-              placeholder="e.g., longevity-catalog"
-              style={inputStyle}
-            />
-          </div>
-
-          <div style={formFieldStyle}>
-            <label style={labelStyle}>Visibility</label>
-            <select 
-              value={catalog.visibility || 'private'}
-              onChange={(e) => setCatalog(prev => ({ ...prev, visibility: e.target.value }))}
-              style={{ ...inputStyle, backgroundColor: '#fff' }}
+        <div style={{ ...panelHeaderStyle, justifyContent: 'space-between', borderBottom: '1px solid #dadce0', backgroundColor: '#f8f9fa', padding: '0.5rem 1.5rem', minHeight: '64px', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '4px', backgroundColor: '#f1f3f4', padding: '4px', borderRadius: '20px' }}>
+            <button 
+              onClick={() => setRightPanelTab('editor')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '6px 14px', borderRadius: '16px', border: 'none',
+                fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
+                backgroundColor: rightPanelTab === 'editor' ? '#fff' : 'transparent',
+                color: rightPanelTab === 'editor' ? '#1a73e8' : '#5f6368',
+                boxShadow: rightPanelTab === 'editor' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                transition: 'all 0.2s',
+                outline: 'none'
+              }}
             >
-              <option value="private">Private (Only I can see and use it)</option>
-              <option value="public">Public (Anyone can view and reuse it)</option>
-            </select>
+              <ShoppingCart size={14} /> Cart Settings
+            </button>
+            <button 
+              onClick={() => setRightPanelTab('preview')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '6px 14px', borderRadius: '16px', border: 'none',
+                fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
+                backgroundColor: rightPanelTab === 'preview' ? '#fff' : 'transparent',
+                color: rightPanelTab === 'preview' ? '#1a73e8' : '#5f6368',
+                boxShadow: rightPanelTab === 'preview' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                transition: 'all 0.2s',
+                outline: 'none'
+              }}
+            >
+              <Layout size={14} /> Visual Preview
+            </button>
           </div>
-
-          <div style={{...formFieldStyle, flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '0.5rem'}}>
-            <input 
-              type="checkbox" 
-              checked={catalog.pricingVisible}
-              onChange={(e) => setCatalog(prev => ({ ...prev, pricingVisible: e.target.checked }))}
-              id="pricing-visible"
-            />
-            <label htmlFor="pricing-visible" style={{...labelStyle, cursor: 'pointer', margin: 0}}>Include Prices?</label>
-          </div>
-
-          {catalog.pricingVisible && (
-            <div style={formFieldStyle}>
-              <label style={labelStyle}>Margin over cost (%)</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <input 
-                  type="number" 
-                  min="0"
-                  step="5"
-                  value={catalog.pricingMargin || 0}
-                  onChange={(e) => setCatalog(prev => ({ ...prev, pricingMargin: Number(e.target.value) }))}
-                  placeholder="e.g., 30"
-                  style={{...inputStyle, width: '100px'}}
-                />
-                <span style={{fontSize: '0.8rem', color: '#5f6368'}}>% applied over your base cost</span>
-              </div>
-            </div>
-          )}
-
-          <div style={{ marginTop: '1.5rem', marginBottom: '0.5rem', borderBottom: '1px solid #dadce0', paddingBottom: '4px' }}>
-            <h4 style={sectionHeaderStyle}>Contact Information</h4>
-            <p style={{ fontSize: '0.75rem', color: '#5f6368', margin: '4px 0 0 0' }}>
-              These details will be hidden if the catalog is made Public.
-            </p>
-          </div>
-
-          <div style={formFieldStyle}>
-            <label style={labelStyle}>Contact Email</label>
-            <input 
-              type="email" 
-              value={catalog.contactEmail || ''}
-              onChange={(e) => setCatalog(prev => ({ ...prev, contactEmail: e.target.value }))}
-              placeholder="e.g., doctor@clinic.com"
-              style={inputStyle}
-            />
-          </div>
-
-          <div style={formFieldStyle}>
-            <label style={labelStyle}>Contact Phone / WhatsApp</label>
-            <input 
-              type="text" 
-              value={catalog.contactPhone || ''}
-              onChange={(e) => setCatalog(prev => ({ ...prev, contactPhone: e.target.value }))}
-              placeholder="e.g., +1 555 0123"
-              style={inputStyle}
-            />
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
-            <h4 style={sectionHeaderStyle}>Items in Catalog ({selectedProductsInFlow.length + selectedProtocolsInFlow.length})</h4>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <select 
-                id="addByGoalSelect"
-                onChange={(e) => handleAddByGoal(e.target.value)}
+          
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            {rightPanelTab === 'preview' && (
+              <button 
+                onClick={handlePrint}
                 style={{
-                  height: '28px', padding: '0 12px', borderRadius: '14px', border: '1px solid var(--border)',
-                  fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-main)', cursor: 'pointer', outline: 'none'
+                  ...actionButtonStyleSmall,
+                  backgroundColor: '#e8f0fe',
+                  color: '#1a73e8',
+                  border: '1px solid #1a73e8',
+                  borderRadius: '16px',
+                  padding: '6px 12px',
+                  fontSize: '0.75rem',
+                  cursor: 'pointer'
                 }}
               >
-                <option value="">Bulk Add by Goal...</option>
-                {CANONICAL_GOALS.map(g => <option key={g} value={g}>{GOAL_LABELS[g]}</option>)}
+                <FileText size={12} /> Save PDF
+              </button>
+            )}
+            <button onClick={() => setShowPreviewModal(true)} style={actionButtonStyleSecondary}>
+              Full Screen
+            </button>
+          </div>
+        </div>
+
+        {rightPanelTab === 'editor' ? (
+          <div style={cartBodyStyle}>
+            <div style={formFieldStyle}>
+              <label style={labelStyle}>Catalog Title</label>
+              <input 
+                type="text" 
+                value={catalog.title}
+                onChange={(e) => setCatalog(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Generated by AI or type here..."
+                style={inputStyle}
+              />
+            </div>
+
+            <div style={formFieldStyle}>
+              <label style={labelStyle}>URL Slug</label>
+              <input 
+                type="text" 
+                value={catalog.slug}
+                onChange={(e) => setCatalog(prev => ({ ...prev, slug: e.target.value }))}
+                placeholder="e.g., longevity-catalog"
+                style={inputStyle}
+              />
+            </div>
+
+            <div style={formFieldStyle}>
+              <label style={labelStyle}>Visibility</label>
+              <select 
+                value={catalog.visibility || 'private'}
+                onChange={(e) => setCatalog(prev => ({ ...prev, visibility: e.target.value }))}
+                style={{ ...inputStyle, backgroundColor: '#fff' }}
+              >
+                <option value="private">Private (Only I can see and use it)</option>
+                <option value="public">Public (Anyone can view and reuse it)</option>
               </select>
-              <button onClick={() => setShowSearchModal(true)} style={actionButtonStyleSmall}>
-                <Plus size={14} /> Add Item
+            </div>
+
+            <div style={formFieldStyle}>
+              <label style={labelStyle}>Branding Color Theme</label>
+              <select 
+                value={catalog.theme || 'royal'}
+                onChange={(e) => handleThemeChange(e.target.value)}
+                style={{ ...inputStyle, backgroundColor: '#fff' }}
+              >
+                <option value="royal">Royal Longevity (Sapphire & Navy)</option>
+                <option value="emerald">Emerald Clinical (Mint & Deep Green)</option>
+                <option value="ruby">Clinical Ruby (Rose & Crimson)</option>
+                <option value="slate">Slate Professional (Charcoal Slate)</option>
+                <option value="custom">Custom Brand Colors</option>
+              </select>
+            </div>
+
+            {catalog.theme === 'custom' && (
+              <div style={{ ...formFieldStyle, flexDirection: 'row', gap: '1rem', marginTop: '0.25rem', marginBottom: '1.25rem' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ ...labelStyle, fontSize: '0.75rem' }}>Primary Color</label>
+                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                    <input 
+                      type="color" 
+                      value={catalog.branding?.primaryColor || '#1a73e8'}
+                      onChange={(e) => handleCustomColorChange('primaryColor', e.target.value)}
+                      style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer', width: '32px', height: '32px' }}
+                    />
+                    <input 
+                      type="text" 
+                      value={catalog.branding?.primaryColor || '#1a73e8'}
+                      onChange={(e) => handleCustomColorChange('primaryColor', e.target.value)}
+                      style={{ ...inputStyle, width: '100%', padding: '6px 8px' }}
+                    />
+                  </div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ ...labelStyle, fontSize: '0.75rem' }}>Secondary Color</label>
+                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                    <input 
+                      type="color" 
+                      value={catalog.branding?.secondaryColor || '#185abc'}
+                      onChange={(e) => handleCustomColorChange('secondaryColor', e.target.value)}
+                      style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer', width: '32px', height: '32px' }}
+                    />
+                    <input 
+                      type="text" 
+                      value={catalog.branding?.secondaryColor || '#185abc'}
+                      onChange={(e) => handleCustomColorChange('secondaryColor', e.target.value)}
+                      style={{ ...inputStyle, width: '100%', padding: '6px 8px' }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div style={{...formFieldStyle, flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '0.5rem'}}>
+              <input 
+                type="checkbox" 
+                checked={catalog.pricingVisible}
+                onChange={(e) => setCatalog(prev => ({ ...prev, pricingVisible: e.target.checked }))}
+                id="pricing-visible"
+              />
+              <label htmlFor="pricing-visible" style={{...labelStyle, cursor: 'pointer', margin: 0}}>Include Prices?</label>
+            </div>
+
+            {catalog.pricingVisible && (
+              <div style={formFieldStyle}>
+                <label style={labelStyle}>Margin over cost (%)</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <input 
+                    type="number" 
+                    min="0"
+                    step="5"
+                    value={catalog.pricingMargin || 0}
+                    onChange={(e) => setCatalog(prev => ({ ...prev, pricingMargin: Number(e.target.value) }))}
+                    placeholder="e.g., 30"
+                    style={{...inputStyle, width: '100px'}}
+                  />
+                  <span style={{fontSize: '0.8rem', color: '#5f6368'}}>% applied over your base cost</span>
+                </div>
+              </div>
+            )}
+
+            <div style={{ marginTop: '1.5rem', marginBottom: '0.5rem', borderBottom: '1px solid #dadce0', paddingBottom: '4px' }}>
+              <h4 style={sectionHeaderStyle}>Contact Information</h4>
+              <p style={{ fontSize: '0.75rem', color: '#5f6368', margin: '4px 0 0 0' }}>
+                These details will be hidden if the catalog is made Public.
+              </p>
+            </div>
+
+            <div style={formFieldStyle}>
+              <label style={labelStyle}>Contact Email</label>
+              <input 
+                type="email" 
+                value={catalog.contactEmail || ''}
+                onChange={(e) => setCatalog(prev => ({ ...prev, contactEmail: e.target.value }))}
+                placeholder="e.g., doctor@clinic.com"
+                style={inputStyle}
+              />
+            </div>
+
+            <div style={formFieldStyle}>
+              <label style={labelStyle}>Contact Phone / WhatsApp</label>
+              <input 
+                type="text" 
+                value={catalog.contactPhone || ''}
+                onChange={(e) => setCatalog(prev => ({ ...prev, contactPhone: e.target.value }))}
+                placeholder="e.g., +1 555 0123"
+                style={inputStyle}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
+              <h4 style={sectionHeaderStyle}>Items in Catalog ({selectedProductsInFlow.length + selectedProtocolsInFlow.length})</h4>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <select 
+                  id="addByGoalSelect"
+                  onChange={(e) => handleAddByGoal(e.target.value)}
+                  style={{
+                    height: '28px', padding: '0 12px', borderRadius: '14px', border: '1px solid var(--border)',
+                    fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-main)', cursor: 'pointer', outline: 'none'
+                  }}
+                >
+                  <option value="">Bulk Add by Goal...</option>
+                  {CANONICAL_GOALS.map(g => <option key={g} value={g}>{GOAL_LABELS[g]}</option>)}
+                </select>
+                <button onClick={() => setShowSearchModal(true)} style={actionButtonStyleSmall}>
+                  <Plus size={14} /> Add Item
+                </button>
+              </div>
+            </div>
+
+            {selectedProductsInFlow.length === 0 && selectedProtocolsInFlow.length === 0 ? (
+              <div style={emptyCartStyle}>No items selected. Ask the AI or add manually.</div>
+            ) : (
+              <div style={cartListStyle}>
+                {(() => {
+                  const grouped = {};
+                  // Group protocols under 'PROTOCOLOS'
+                  if (selectedProtocolsInFlow.length > 0) {
+                    grouped['PROTOCOLOS'] = selectedProtocolsInFlow.map(id => {
+                      const proto = allProtocols.find(x => x.id === id || x.protocol_id === id || x.slug === id);
+                      if (!proto) return null;
+                      
+                      let desc = 'Clinical protocol';
+                      if (proto.products && Array.isArray(proto.products) && proto.products.length > 0) {
+                        desc = `Includes: ${proto.products.join(', ')}`;
+                      } else if (proto.phases && proto.phases.length > 0) {
+                        desc = `${proto.phases.length} phase protocol`;
+                      }
+                      
+                      return {
+                        id: proto.id || proto.protocol_id || proto.slug,
+                        name: proto.name || proto.protocol_id || proto.slug,
+                        type: 'protocol',
+                        desc: desc,
+                        original: proto
+                      };
+                    }).filter(Boolean);
+                  }
+
+                  // Group products
+                  selectedProductsInFlow.forEach(id => {
+                    const p = allProducts.find(x => x.id === id || x.slug === id);
+                    if (!p) return;
+                    const cat = (p.category || p.productType || 'OTROS').toUpperCase();
+                    if (!grouped[cat]) grouped[cat] = [];
+                    grouped[cat].push({
+                      id: p.id || p.slug,
+                      name: p.displayName || p.name,
+                      type: 'product',
+                      desc: p.objective || p.category || p.productType || 'N/A',
+                      original: p
+                    });
+                  });
+
+                  // Sort categories: PEPTIDE, PROTOCOLOS, SUPPLEMENT, TESTING, then others
+                  const order = ['PEPTIDE', 'PROTOCOLOS', 'SUPPLEMENT', 'TESTING'];
+                  const sortedKeys = Object.keys(grouped).sort((a, b) => {
+                    const idxA = order.indexOf(a);
+                    const idxB = order.indexOf(b);
+                    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                    if (idxA !== -1) return -1;
+                    if (idxB !== -1) return 1;
+                    return a.localeCompare(b);
+                  });
+
+                  return sortedKeys.map(cat => (
+                    <div key={cat} style={{ marginBottom: '1rem' }}>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '0.5rem', borderBottom: '1px solid #dadce0', paddingBottom: '4px' }}>
+                        {cat}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {grouped[cat].map(item => (
+                          <div key={item.id} style={{ ...cartItemStyle, flexDirection: 'column', alignItems: 'stretch', gap: '8px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div>
+                                <strong>{item.name}</strong>
+                                <div style={{ fontSize: '0.75rem', color: '#5f6368' }}>{item.desc}</div>
+                              </div>
+                              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                <button 
+                                  onClick={() => setExpandedNoteId(expandedNoteId === item.id ? null : item.id)}
+                                  style={{
+                                    background: 'none', border: 'none', color: '#1a73e8', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600,
+                                    display: 'flex', alignItems: 'center', gap: '4px', outline: 'none'
+                                  }}
+                                >
+                                  {catalog.annotations?.[item.id] ? '📝 Edit Note' : '💬 Add Note'}
+                                </button>
+                                <button onClick={() => item.type === 'protocol' ? handleProtocolToggle(item.id) : handleProductToggle(item.id)} style={removeBtnStyle}>
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </div>
+                            
+                            {(expandedNoteId === item.id || catalog.annotations?.[item.id]) && (
+                              <div style={{ borderTop: '1px solid #dadce0', paddingTop: '8px', marginTop: '4px' }}>
+                                <textarea
+                                  value={catalog.annotations?.[item.id] || ''}
+                                  onChange={(e) => handleAnnotationChange(item.id, e.target.value)}
+                                  placeholder="Write custom instructions or clinical recommendations for this item..."
+                                  style={{
+                                    width: '100%',
+                                    height: '50px',
+                                    padding: '6px 8px',
+                                    borderRadius: '4px',
+                                    border: '1px solid #dadce0',
+                                    fontSize: '0.8rem',
+                                    outline: 'none',
+                                    resize: 'none',
+                                    fontFamily: 'inherit'
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ));
+                })()}
+              </div>
+            )}
+
+            <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
+              <button onClick={() => handleSave(false)} disabled={saving} style={{ ...actionButtonStyleSecondary, flex: 1 }}>
+                <Save size={16} /> Save Draft
+              </button>
+              <button onClick={() => handleSave(true)} disabled={saving} style={{ ...actionButtonStylePrimary, flex: 1 }}>
+                <Check size={16} /> Publish
               </button>
             </div>
           </div>
-
-          {selectedProductsInFlow.length === 0 && selectedProtocolsInFlow.length === 0 ? (
-            <div style={emptyCartStyle}>No items selected. Ask the AI or add manually.</div>
-          ) : (
-            <div style={cartListStyle}>
-              {(() => {
-                const grouped = {};
-                // Group protocols under 'PROTOCOLOS'
-                if (selectedProtocolsInFlow.length > 0) {
-                  grouped['PROTOCOLOS'] = selectedProtocolsInFlow.map(id => {
-                    const proto = allProtocols.find(x => x.id === id || x.protocol_id === id || x.slug === id);
-                    if (!proto) return null;
-                    
-                    let desc = 'Clinical protocol';
-                    if (proto.products && Array.isArray(proto.products) && proto.products.length > 0) {
-                      desc = `Includes: ${proto.products.join(', ')}`;
-                    } else if (proto.phases && proto.phases.length > 0) {
-                      desc = `${proto.phases.length} phase protocol`;
-                    }
-                    
-                    return {
-                      id: proto.id || proto.protocol_id || proto.slug,
-                      name: proto.name || proto.protocol_id || proto.slug,
-                      type: 'protocol',
-                      desc: desc,
-                      original: proto
-                    };
-                  }).filter(Boolean);
-                }
-
-                // Group products
-                selectedProductsInFlow.forEach(id => {
-                  const p = allProducts.find(x => x.id === id || x.slug === id);
-                  if (!p) return;
-                  const cat = (p.category || p.productType || 'OTROS').toUpperCase();
-                  if (!grouped[cat]) grouped[cat] = [];
-                  grouped[cat].push({
-                    id: p.id || p.slug,
-                    name: p.displayName || p.name,
-                    type: 'product',
-                    desc: p.objective || p.category || p.productType || 'N/A',
-                    original: p
-                  });
-                });
-
-                // Sort categories: PEPTIDE, PROTOCOLOS, SUPPLEMENT, TESTING, then others
-                const order = ['PEPTIDE', 'PROTOCOLOS', 'SUPPLEMENT', 'TESTING'];
-                const sortedKeys = Object.keys(grouped).sort((a, b) => {
-                  const idxA = order.indexOf(a);
-                  const idxB = order.indexOf(b);
-                  if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-                  if (idxA !== -1) return -1;
-                  if (idxB !== -1) return 1;
-                  return a.localeCompare(b);
-                });
-
-                return sortedKeys.map(cat => (
-                  <div key={cat} style={{ marginBottom: '1rem' }}>
-                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '0.5rem', borderBottom: '1px solid #dadce0', paddingBottom: '4px' }}>
-                      {cat}
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      {grouped[cat].map(item => (
-                        <div key={item.id} style={cartItemStyle}>
-                          <div>
-                            <strong>{item.name}</strong>
-                            <div style={{ fontSize: '0.75rem', color: '#5f6368' }}>{item.desc}</div>
-                          </div>
-                          <button onClick={() => item.type === 'protocol' ? handleProtocolToggle(item.id) : handleProductToggle(item.id)} style={removeBtnStyle}>
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ));
-              })()}
-            </div>
-          )}
-
-          <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
-            <button onClick={() => handleSave(false)} disabled={saving} style={{ ...actionButtonStyleSecondary, flex: 1 }}>
-              <Save size={16} /> Save Draft
-            </button>
-            <button onClick={() => handleSave(true)} disabled={saving} style={{ ...actionButtonStylePrimary, flex: 1 }}>
-              <Check size={16} /> Publish
-            </button>
+        ) : (
+          <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', backgroundColor: '#f8f9fa' }}>
+            <CatalogPreviewPanel 
+              catalog={catalog}
+              products={allProducts}
+              protocols={allProtocols}
+            />
           </div>
-        </div>
+        )}
       </div>
 
       {/* SEARCH MODAL */}
@@ -823,7 +1192,31 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
           <div style={{ ...modalContentStyle, width: '90%', maxWidth: '1000px', height: '90vh' }}>
             <div style={modalHeaderStyle}>
               <h3 style={{ margin: 0, fontSize: '1rem', color: '#202124', fontWeight: 600 }}>Live Catalog Preview</h3>
-              <button onClick={() => setShowPreviewModal(false)} style={modalCloseButtonStyle}><X size={18} /></button>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <button 
+                  onClick={handlePrint} 
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    backgroundColor: '#e8f0fe',
+                    color: '#1a73e8',
+                    border: '1px solid #1a73e8',
+                    padding: '6px 12px',
+                    borderRadius: '16px',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    outline: 'none'
+                  }}
+                  onMouseOver={(e) => { e.target.style.backgroundColor = '#d2e3fc'; }}
+                  onMouseOut={(e) => { e.target.style.backgroundColor = '#e8f0fe'; }}
+                >
+                  <FileText size={14} /> Save as PDF
+                </button>
+                <button onClick={() => setShowPreviewModal(false)} style={modalCloseButtonStyle}><X size={18} /></button>
+              </div>
             </div>
             <div style={modalBodyStyle}>
               <CatalogPreviewPanel 

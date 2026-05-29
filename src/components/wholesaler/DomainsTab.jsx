@@ -125,7 +125,7 @@ export default function DomainsTab() {
       <div style={{ padding: '2rem', textAlign: 'center' }}>
         <AlertTriangle size={40} style={{ color: 'var(--color-text-tertiary)', margin: '0 auto 1rem' }} />
         <h3 style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>No Franchise Tenant Assigned</h3>
-        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Please contact Med-Peptides support to link your account.</p>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Please contact Atlas Health support to link your account.</p>
       </div>
     );
   }
@@ -173,7 +173,7 @@ export default function DomainsTab() {
         </div>
 
         <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
-          Map your own domain or subdomain (e.g., <code style={{ background: '#f1f5f9', padding: '2px 4px', borderRadius: '4px' }}>orders.yourbrand.ae</code>) to remove any Med-Peptides indicators from your URLs.
+          Map your own domain or subdomain (e.g., <code style={{ background: '#f1f5f9', padding: '2px 4px', borderRadius: '4px' }}>orders.yourbrand.ae</code>) to remove any Atlas Health indicators from your URLs.
         </p>
 
         {success && (

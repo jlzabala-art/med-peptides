@@ -8,8 +8,8 @@
     "total_vials_required": 4
   },
   "number_of_phases": 2,
-  "protocol_author_name": "Med-Peptides Clinical Team",
-  "protocol_author_organization": "Med-Peptides",
+  "protocol_author_name": "Atlas Health Clinical Team",
+  "protocol_author_organization": "Atlas Health",
   "protocol_author_title": "Peptide Specialists",
   "protocol_duration_weeks": 12,
   "protocol_is_curated": true,
@@ -369,8 +369,8 @@
     "scientificName": "GHK-Cu Copper-Peptide Collagen Induction & Skin Rejuvenation Protocol",
     "description": "12-week skin rejuvenation protocol using GHK-Cu copper tripeptide to stimulate collagen and elastin synthesis, upregulate antioxidant gene expression, and reverse dermal aging markers.",
     "author": {
-      "name": "Med-Peptides Clinical Team",
-      "organization": "Med-Peptides",
+      "name": "Atlas Health Clinical Team",
+      "organization": "Atlas Health",
       "title": "Peptide Specialists"
     },
     "review": {

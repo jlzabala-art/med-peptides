@@ -1,7 +1,7 @@
 /**
  * emailHtmlRenderer.js
  * ─────────────────────────────────────────────────────────────────────────────
- * Responsive HTML Email compiler for personalized Med-Peptides catalog shares.
+ * Responsive HTML Email compiler for personalized Atlas Health catalog shares.
  * Optimized for rendering across Gmail, Outlook, Apple Mail, and mobile.
  * ─────────────────────────────────────────────────────────────────────────────
  */
@@ -10,7 +10,7 @@ export function renderCatalogEmailHtml({ catalog, campaign, trackingUrl }) {
   // Brand details
   const primaryColor = catalog?.branding?.primaryColor || '#1a73e8';
   const logoUrl = catalog?.branding?.logoUrl || '';
-  const companyName = catalog?.branding?.companyName || 'Med-Peptides Partner';
+  const companyName = catalog?.branding?.companyName || 'Atlas Health Partner';
   const emailContact = catalog?.branding?.contactEmail || 'support@med-peptides.com';
   const phoneContact = catalog?.branding?.contactPhone || '';
 

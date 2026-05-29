@@ -345,19 +345,19 @@ useEffect(() => {
             "datePublished": post.publishDate,
             "author": {
               "@type": "Person",
-              "name": post.author || "Med-Peptides Team"
+              "name": post.author || "Atlas Health Team"
             },
             "publisher": {
               "@type": "Organization",
-              "name": "Med-Peptides",
+              "name": "Atlas Health",
               "logo": {
                 "@type": "ImageObject",
-                "url": "https://Med-Peptides.com/logo.png"
+                "url": "https://Atlas Health.com/logo.png"
               }
             },
             "mainEntityOfPage": {
               "@type": "WebPage",
-              "@id": `https://Med-Peptides.com/blog/${post.slug}`
+              "@id": `https://Atlas Health.com/blog/${post.slug}`
             }
           }
         }
@@ -967,7 +967,7 @@ Use the article context below to ground your recommendations:${articleContext}${
                 <h4 style={{ fontWeight: '700', margin: 0 }}>Research Standards</h4>
               </div>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.5', margin: 0 }}>
-                This material is presented for informational and educational purposes only. Med-Peptides supports precision science and peer-reviewed biological pathways.
+                This material is presented for informational and educational purposes only. Atlas Health supports precision science and peer-reviewed biological pathways.
               </p>
             </div>
 

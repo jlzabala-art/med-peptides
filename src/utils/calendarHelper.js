@@ -91,7 +91,7 @@ export function generateICS(protocol, startDateStr, options = {}) {
             dtend = formatICSDateTime(eventEndDate, timeStr);
           }
 
-          const summary = `Med-Peptides: ${compound} Dose`;
+          const summary = `Atlas Health: ${compound} Dose`;
           const description = `Protocol: ${protocol.protocol_title || 'Custom Protocol'}\nPhase: Phase ${phaseIdx + 1}: ${phase.phase_title}\nCompound: ${compound} (${strength})\nDose: ${dose}\nRoute: ${route}\nFrequency: ${freq}`;
 
           events.push([
@@ -112,7 +112,7 @@ export function generateICS(protocol, startDateStr, options = {}) {
   const icsLines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Med-Peptides//Clinical Engine//EN',
+    'PRODID:-//Atlas Health//Clinical Engine//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     ...events,

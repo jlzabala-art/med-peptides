@@ -89,7 +89,7 @@ const DISCLAIMER = {
 // Uses Gemini Flash for rich formatting on long responses,
 // fast structural wrap for short ones.
 // ─────────────────────────────────────────────────────────────────────────────
-const RAG_GEMINI_PROMPT = `You are a professional medical content formatter for Med-Peptides.com.
+const RAG_GEMINI_PROMPT = `You are a professional medical content formatter for Atlas Health.com.
 Transform the AI response text into a structured JSON for rendering a beautiful UI.
 
 Return ONLY valid JSON (no markdown wrapper):
@@ -499,30 +499,30 @@ function renderOnboarding(reply, profileData, language) {
 // ─────────────────────────────────────────────────────────────────────────────
 const EMAIL_HTML_PROMPT_EN = `Generate a professional HTML email body for a research platform.
 Rules:
-- Header: <div style="background:#0f0f1a;padding:24px;border-radius:8px 8px 0 0"><span style="color:#6366f1;font-size:20px;font-weight:700">Med-Peptides Research</span></div>
+- Header: <div style="background:#0f0f1a;padding:24px;border-radius:8px 8px 0 0"><span style="color:#6366f1;font-size:20px;font-weight:700">Atlas Health Research</span></div>
 - Body: white background, max-width 600px, padding 24px, Arial font
 - Greeting: warm but professional. Use "Hi there" (not the user's name — do not reference personal data)
 - Short paragraphs (2-3 sentences max each)
 - Do NOT mention: purchase history, browsing behavior, personal data, what we know about them
 - Tone: helpful reminder — NOT sales pressure
 - ONE clear CTA button: <a href="{cta_url}" style="background:#6366f1;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin:16px 0">{cta_text}</a>
-- Footer: <div style="color:#888;font-size:11px;margin-top:32px;border-top:1px solid #eee;padding-top:16px">Med-Peptides Research Platform | research@med-peptides.com | <a href="{unsubscribe_url}" style="color:#888">Unsubscribe</a></div>
+- Footer: <div style="color:#888;font-size:11px;margin-top:32px;border-top:1px solid #eee;padding-top:16px">Atlas Health Research Platform | research@med-peptides.com | <a href="{unsubscribe_url}" style="color:#888">Unsubscribe</a></div>
 - Return ONLY the HTML — no markdown, no explanation`;
 
 const EMAIL_HTML_PROMPT_ES = `Genera el body HTML de un email profesional para una plataforma de investigación.
 Reglas:
-- Encabezado: <div style="background:#0f0f1a;padding:24px;border-radius:8px 8px 0 0"><span style="color:#6366f1;font-size:20px;font-weight:700">Med-Peptides Research</span></div>
+- Encabezado: <div style="background:#0f0f1a;padding:24px;border-radius:8px 8px 0 0"><span style="color:#6366f1;font-size:20px;font-weight:700">Atlas Health Research</span></div>
 - Body: fondo blanco, max-width 600px, padding 24px, fuente Arial
 - Saludo: cálido pero profesional. Usa "Hola" (sin nombre — no referenciar datos personales)
 - Párrafos cortos (máximo 2-3 frases cada uno)
 - NO mencionar: historial de compras, comportamiento de navegación, datos personales
 - Tono: recordatorio amable — SIN presión comercial
 - UN único botón CTA: <a href="{cta_url}" style="background:#6366f1;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin:16px 0">{cta_text}</a>
-- Footer: <div style="color:#888;font-size:11px;margin-top:32px;border-top:1px solid #eee;padding-top:16px">Med-Peptides Research Platform | research@med-peptides.com | <a href="{unsubscribe_url}" style="color:#888">Cancelar suscripción</a></div>
+- Footer: <div style="color:#888;font-size:11px;margin-top:32px;border-top:1px solid #eee;padding-top:16px">Atlas Health Research Platform | research@med-peptides.com | <a href="{unsubscribe_url}" style="color:#888">Cancelar suscripción</a></div>
 - Devuelve SOLO el HTML — sin markdown ni explicaciones`;
 
 async function renderEmail(bodyText, options = {}) {
-  const { language = "en", subject = "Med-Peptides Research Update", ctaUrl = "/catalog", ctaText = "Explore Research →" } = options;
+  const { language = "en", subject = "Atlas Health Research Update", ctaUrl = "/catalog", ctaText = "Explore Research →" } = options;
 
   const prompt = (language === "es" ? EMAIL_HTML_PROMPT_ES : EMAIL_HTML_PROMPT_EN)
     .replace("{cta_url}", ctaUrl)
@@ -544,14 +544,14 @@ async function renderEmail(bodyText, options = {}) {
       subject,
       htmlBody: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
         <div style="background:#0f0f1a;padding:24px;border-radius:8px 8px 0 0">
-          <span style="color:#6366f1;font-size:20px;font-weight:700">Med-Peptides Research</span>
+          <span style="color:#6366f1;font-size:20px;font-weight:700">Atlas Health Research</span>
         </div>
         <div style="padding:24px">
           <p>${bodyText.replace(/\n/g, "<br/>")}</p>
           <a href="${ctaUrl}" style="background:#6366f1;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin:16px 0">${ctaText}</a>
         </div>
         <div style="color:#888;font-size:11px;padding:16px 24px;border-top:1px solid #eee">
-          Med-Peptides Research Platform | research@med-peptides.com
+          Atlas Health Research Platform | research@med-peptides.com
         </div>
       </div>`,
       textBody: bodyText,

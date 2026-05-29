@@ -25,7 +25,7 @@ const AGENT_NAME = "AgentPersonalization";
 
 // ── Intro messages (i18n) ──────────────────────────────────────────────────────
 const INTRO_MESSAGE = {
-  en: `👋 **Hi! I'm ClinicAI**, your personal research guide at Med-Peptides.
+  en: `👋 **Hi! I'm ClinicAI**, your personal research guide at Atlas Health.
 
 I'm here to help you find the right peptides, supplements, and protocols for **your specific goals**.
 
@@ -42,7 +42,7 @@ To give you the best recommendations, I'd love to ask you a few quick questions:
 
 Feel free to answer all at once or one at a time — I'll adapt! 🔬`,
 
-  es: `👋 **¡Hola! Soy ClinicAI**, tu guía de investigación personal en Med-Peptides.
+  es: `👋 **¡Hola! Soy ClinicAI**, tu guía de investigación personal en Atlas Health.
 
 Estoy aquí para ayudarte a encontrar los péptidos, suplementos y protocolos adecuados para **tus objetivos específicos**.
 
@@ -70,7 +70,7 @@ const GOAL_CATALOG_MAP = {
   immune:    { path: "/collection/protocols?q=immune",     tag: "immune-support"   },
 };
 
-const SYSTEM_PROMPT = `You are ClinicAI, the personalization and onboarding agent for Med-Peptides.com.
+const SYSTEM_PROMPT = `You are ClinicAI, the personalization and onboarding agent for Atlas Health.com.
 
 Your role is to conduct a warm, conversational intake interview with new users to understand:
 1. Their primary health or performance goals (recovery, longevity, metabolic, cognitive, sleep, hormonal, immune)

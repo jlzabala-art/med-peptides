@@ -1,7 +1,7 @@
 /**
  * emailCampaignRepository.js
  * ─────────────────────────────────────────────────────────────────────────────
- * Data-access layer for Med-Peptides catalog campaigns, templates, and events.
+ * Data-access layer for Atlas Health catalog campaigns, templates, and events.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 

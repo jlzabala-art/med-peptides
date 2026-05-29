@@ -436,15 +436,15 @@ export default function ProtocolCollectionPage({ onNavigate, onBack }) {
   const location = useLocation();
 
   usePageMeta({
-    title: 'Clinical Protocol Library | Research Peptide Protocols | Med-Peptides',
+    title: 'Clinical Protocol Library | Research Peptide Protocols | Atlas Health',
     description: 'Explore our library of research-grade clinical protocols. Filter by goal, complexity, and compounds. Scientifically structured peptide stacks for serious researchers.',
-    canonicalUrl: 'https://Med-Peptides-app-27a3a.web.app/collection/protocols',
+    canonicalUrl: 'https://Atlas Health-app-27a3a.web.app/collection/protocols',
     structuredData: {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://Med-Peptides-app-27a3a.web.app/' },
-        { '@type': 'ListItem', position: 2, name: 'Protocol Library', item: 'https://Med-Peptides-app-27a3a.web.app/collection/protocols' },
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://Atlas Health-app-27a3a.web.app/' },
+        { '@type': 'ListItem', position: 2, name: 'Protocol Library', item: 'https://Atlas Health-app-27a3a.web.app/collection/protocols' },
       ],
     },
   });

@@ -53,7 +53,7 @@ export default function ClientsTab() {
       <div style={{ padding: '2rem', textAlign: 'center' }}>
         <Users size={40} style={{ color: 'var(--color-text-tertiary)', margin: '0 auto 1rem' }} />
         <h3 style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>No Franchise Tenant Assigned</h3>
-        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Please contact Med-Peptides support to link your account.</p>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Please contact Atlas Health support to link your account.</p>
       </div>
     );
   }

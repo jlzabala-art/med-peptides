@@ -21,7 +21,7 @@ const CATEGORIES = [
 
 export default function BlogPage() {
   usePageMeta({
-    title: 'Physiological Optimization Academy — Med-Peptides',
+    title: 'Physiological Optimization Academy — Atlas Health',
     description: 'Explore peer-reviewed scientific articles, physiological mechanisms, and clinical insights across our 7 physiological optimization goals.',
     canonical: '/blog',
   });
@@ -47,7 +47,7 @@ export default function BlogPage() {
         <div className="blog-hero__container">
           
           <div className="blog-hero__content">
-            <div className="blog-hero__badge">Med-Peptides Knowledge Hub</div>
+            <div className="blog-hero__badge">Atlas Health Knowledge Hub</div>
             <h1 className="blog-hero__title">
               Science You Can <span>Apply</span>
             </h1>

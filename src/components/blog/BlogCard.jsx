@@ -60,7 +60,7 @@ export default function BlogCard({ post }) {
           <div className="blog-card__footer">
             <div className="blog-card__author">
               <div className="blog-card__avatar">MP</div>
-              <span className="blog-card__author-name">Med-Peptides Team</span>
+              <span className="blog-card__author-name">Atlas Health Team</span>
             </div>
             <span className="blog-card__cta">
               <span>Read article</span>

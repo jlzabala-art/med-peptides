@@ -9,7 +9,7 @@ import { usePageMeta } from '../hooks/usePageMeta';
  */
 export default function PeptideEducationPage() {
   const structuredData = useMemo(() => {
-    const pageUrl = 'https://Med-Peptides.com/what-are-peptides';
+    const pageUrl = 'https://Atlas Health.com/what-are-peptides';
     return {
       "@context": "https://schema.org",
       "@graph": [
@@ -17,13 +17,13 @@ export default function PeptideEducationPage() {
           "@type": "MedicalWebPage",
           "@id": `${pageUrl}#webpage`,
           "url": pageUrl,
-          "name": "What Are Peptides? | Scientific Primer | Med-Peptides",
+          "name": "What Are Peptides? | Scientific Primer | Atlas Health",
           "description": "A comprehensive guide to research peptides, cellular signaling, and amino acid sequences for scientific professionals.",
           "isPartOf": {
             "@type": "WebSite",
-            "@id": "https://Med-Peptides.com#website",
-            "name": "Med-Peptides",
-            "url": "https://Med-Peptides.com"
+            "@id": "https://Atlas Health.com#website",
+            "name": "Atlas Health",
+            "url": "https://Atlas Health.com"
           },
           "about": [
             {
@@ -49,15 +49,15 @@ export default function PeptideEducationPage() {
           "mainEntityOfPage": pageUrl,
           "publisher": {
             "@type": "Organization",
-            "name": "Med-Peptides",
+            "name": "Atlas Health",
             "logo": {
               "@type": "ImageObject",
-              "url": "https://Med-Peptides.com/logo.png"
+              "url": "https://Atlas Health.com/logo.png"
             }
           },
           "author": {
             "@type": "Organization",
-            "name": "Med-Peptides"
+            "name": "Atlas Health"
           },
           "articleSection": [
             "Molecular Architecture",
@@ -88,7 +88,7 @@ export default function PeptideEducationPage() {
   }, []);
 
   usePageMeta({
-    title: 'What Are Peptides? | Scientific Primer | Med-Peptides',
+    title: 'What Are Peptides? | Scientific Primer | Atlas Health',
     description: 'A comprehensive guide to research peptides, cellular signaling, and amino acid sequences for scientific professionals.',
     path: '/what-are-peptides',
     structuredData

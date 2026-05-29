@@ -28,7 +28,7 @@ export default function NotificationsPanel({ onClose }) {
         ];
       default:
         return [
-          { id: 1, type: 'system', title: 'Welcome to RegenPept', desc: 'Explore our catalog of peptides and protocols.', time: 'Just now', icon: <Bell size={16} color="var(--color-primary)" /> }
+          { id: 1, type: 'system', title: 'Welcome to Atlas Health', desc: 'Explore our catalog of peptides and protocols.', time: 'Just now', icon: <Bell size={16} color="var(--color-primary)" /> }
         ];
     }
   };

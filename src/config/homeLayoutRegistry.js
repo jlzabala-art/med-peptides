@@ -257,7 +257,7 @@ export const HOME_SECTIONS = {
   },
   WhyChooseMedPeptides: {
     id: 'WhyChooseMedPeptides',
-    label: '✅ ¿Por qué elegir Med-Peptides?',
+    label: '✅ ¿Por qué elegir Atlas Health?',
     description: 'Lista con iconos sobre los pilares de confianza: pureza, trazabilidad y soporte científico.',
     component: WhyChooseMedPeptides,
     category: 'shared',
@@ -288,7 +288,7 @@ export const HOME_SECTIONS = {
   },
   HowItWorks: {
     id: 'HowItWorks',
-    label: '🔄 Cómo Funciona Med-Peptides (4 pasos)',
+    label: '🔄 Cómo Funciona Atlas Health (4 pasos)',
     description: 'Línea de tiempo visual: Aprende → Elige → Calcula → Sigue el protocolo.',
     component: HowItWorks,
     category: 'shared',

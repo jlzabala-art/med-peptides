@@ -140,7 +140,7 @@ function Footer() {
   const year = new Date().getFullYear();
   const [showQuickDisclaimer, setShowQuickDisclaimer] = useState(false);
 
-  const tenantName = tenant?.name || 'Med-Peptides';
+  const tenantName = tenant?.name || 'Atlas Health';
 
   const legalLinks = [
     { label: 'Privacy Policy', path: '/privacy', icon: <Shield size={14} /> },

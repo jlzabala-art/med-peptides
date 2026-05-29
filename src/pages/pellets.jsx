@@ -65,7 +65,7 @@ export default function PelletsPage() {
   return (
     <div className="pellets-page-wrapper">
       <Helmet>
-        <title>Hormone Pellets Catalog | RegenPept</title>
+        <title>Hormone Pellets Catalog | Atlas Health</title>
         <meta name="description" content="Explore our premium range of hormone replacement pellets." />
       </Helmet>
 

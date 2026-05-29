@@ -40,7 +40,7 @@ const AcademyBanner = ({ compact = false, onNavigate }) => {
             <GraduationCap size={14} /> Knowledge Core
           </div>
           <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white', margin: '0 0 0.5rem 0', letterSpacing: '-0.02em' }}>
-            Med-Peptides Academy
+            Atlas Health Academy
           </h3>
           <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)', margin: 0, lineHeight: 1.4 }}>
             Master peptide research with our comprehensive educational protocols.
@@ -167,7 +167,7 @@ const AcademyBanner = ({ compact = false, onNavigate }) => {
               marginBottom: '2rem',
               maxWidth: '540px'
             }}>
-              Med-Peptides Academy provides peer-reviewed protocols, interactive research guides,
+              Atlas Health Academy provides peer-reviewed protocols, interactive research guides,
               and deep-dive technical documentation to ensure optimal results in your laboratory.
             </p>
 

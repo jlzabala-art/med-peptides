@@ -165,7 +165,7 @@
   ],
   "protocol_is_curated": false,
   "number_of_phases": 2,
-  "_importBundle": "Med-Peptides Core Clinical Protocol Library",
+  "_importBundle": "Atlas Health Core Clinical Protocol Library",
   "primary_goal": "Recovery / Injury",
   "risk_class": "high_complexity",
   "protocol_review_status": "reviewed",
@@ -320,7 +320,7 @@
     "_seconds": 1777189744
   },
   "_patchSchema": "antigravity_v2",
-  "_patchBundle": "Med-Peptides Protocol Export - Clinical Update 2026-04-26",
+  "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
   "clinical_evidence_update_2026": {
     "evidence_limitations": [
       "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",

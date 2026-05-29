@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Search, User, Box, Package, LayoutDashboard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../../firebase';
+import { db } from '../firebase';
 import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
 
 const ADMIN_ROUTES = [
@@ -58,17 +58,17 @@ export default function CommandPalette({ isOpen, onClose }) {
       const foundUsers = uSnap.docs
         .map(d => ({ id: d.id, ...d.data() }))
         .filter(u => fuzzyMatch(lowerQ, u.fullName || u.email || ''))
-        .map(u => ({ id: u.id, label: u.fullName || u.email, path: \`/admin?t=users&uid=\${u.id}\`, type: 'User', icon: User }));
+        .map(u => ({ id: u.id, label: u.fullName || u.email, path: `/admin?t=users&uid=${u.id}`, type: 'User', icon: User }));
         
       const foundProducts = pSnap.docs
         .map(d => ({ id: d.id, ...d.data() }))
         .filter(p => fuzzyMatch(lowerQ, p.name || ''))
-        .map(p => ({ id: p.id, label: p.name, path: \`/admin?t=products&pid=\${p.id}\`, type: 'Product', icon: Box }));
+        .map(p => ({ id: p.id, label: p.name, path: `/admin?t=products&pid=${p.id}`, type: 'Product', icon: Box }));
         
       const foundOrders = oSnap.docs
         .map(d => ({ id: d.id, ...d.data() }))
         .filter(o => fuzzyMatch(lowerQ, o.id) || fuzzyMatch(lowerQ, o.userEmail || ''))
-        .map(o => ({ id: o.id, label: \`Order #\${o.id.slice(0,8)} - \${o.userEmail}\`, path: \`/admin?t=orders&oid=\${o.id}\`, type: 'Order', icon: Package }));
+        .map(o => ({ id: o.id, label: `Order #${o.id.slice(0,8)} - ${o.userEmail}`, path: `/admin?t=orders&oid=${o.id}`, type: 'Order', icon: Package }));
         
       setResults([...routeResults, ...foundUsers, ...foundProducts, ...foundOrders]);
     } catch (err) {

@@ -102,9 +102,9 @@ export default function ProductTemplate({
       "@context": "https://schema.org",
       "@type": "Product",
       "name": product.name,
-      "description": product.description?.substring(0, 160) || `Research ${product.name} at Med-Peptides. Premium analytical materials for laboratory research.`,
+      "description": product.description?.substring(0, 160) || `Research ${product.name} at Atlas Health. Premium analytical materials for laboratory research.`,
       "image": product.image || product.images?.[0]?.url,
-      "brand": { "@type": "Brand", "name": "Med-Peptides" },
+      "brand": { "@type": "Brand", "name": "Atlas Health" },
       "offers": {
         "@type": "Offer",
         "availability": "https://schema.org/InStock",
@@ -117,7 +117,7 @@ export default function ProductTemplate({
   usePageMeta({
     title:       product?.name || undefined,
     description: product?.name
-      ? (product?.description?.substring(0, 160) || `Research ${product.name} at Med-Peptides. Premium analytical materials for laboratory research.`)
+      ? (product?.description?.substring(0, 160) || `Research ${product.name} at Atlas Health. Premium analytical materials for laboratory research.`)
       : undefined,
     path:        `/product/${slug}`,
     image:       product?.image || product?.images?.[0]?.url,
