@@ -224,13 +224,13 @@ export default function SidebarGadget(props) {
         }
       }
 
-      // Auto-save the new state
-      setTimeout(() => savePreferences(newGroups), 0);
+      // Auto-save the new state without exiting edit mode
+      setTimeout(() => savePreferences(newGroups, false), 0);
       return newGroups;
     });
   };
 
-  const savePreferences = async (groupsToSave = sidebarGroups) => {
+  const savePreferences = async (groupsToSave = sidebarGroups, exitEditMode = true) => {
     const serializedGroups = groupsToSave.map(g => ({
       id: g.id,
       label: g.label,
@@ -244,13 +244,13 @@ export default function SidebarGadget(props) {
     if (prefsDocRef) {
       try {
         await setDoc(prefsDocRef, { groups: serializedGroups }, { merge: true });
-        setIsEditing(false);
+        if (exitEditMode) setIsEditing(false);
       } catch (e) {
         console.error("Failed to save sidebar preferences", e);
-        setIsEditing(false); // still exit edit mode
+        if (exitEditMode) setIsEditing(false); // still exit edit mode
       }
     } else {
-      setIsEditing(false);
+      if (exitEditMode) setIsEditing(false);
     }
   };
 
@@ -286,6 +286,9 @@ export default function SidebarGadget(props) {
       } else {
         favGroup.items.push(targetItem);
       }
+      
+      // Auto-save favorites toggling without exiting edit mode
+      setTimeout(() => savePreferences(newGroups, false), 0);
       return newGroups;
     });
   };

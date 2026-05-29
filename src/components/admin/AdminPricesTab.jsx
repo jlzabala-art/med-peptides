@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { collection, doc, getDocs, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Percent, Search, Sliders, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Percent, Search, Sliders, RefreshCw, CheckCircle, AlertCircle, BookOpen } from 'lucide-react';
 import AppDataTable from '../ui/AppDataTable';
 import AppEntityCell from '../ui/AppEntityCell';
 
 export default function AdminPricesTab() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [discounts, setDiscounts] = useState({});
   const [loading, setLoading] = useState(true);
   const [savingStatus, setSavingStatus] = useState({ type: null, target: null, status: null });
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('sku') || '');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   useEffect(() => {
@@ -466,15 +469,42 @@ export default function AdminPricesTab() {
               header: 'Product / Category',
               sortValue: (p) => p.name || '',
               render: (p) => (
-                <AppEntityCell
-                  title={p.name}
-                  subtitle={
-                    <>
-                      <span style={{ opacity: 0.5 }}>↳</span> {p.category} | SKU: {p.sku || 'N/A'} |{' '}
-                      {p.dosage || 'No dosage'}
-                    </>
-                  }
-                />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                  <AppEntityCell
+                    title={p.name}
+                    subtitle={
+                      <>
+                        <span style={{ opacity: 0.5 }}>↳</span> {p.category} | SKU: {p.sku || 'N/A'} |{' '}
+                        {p.dosage || 'No dosage'}
+                      </>
+                    }
+                  />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/admin/products?search=${encodeURIComponent(p.sku || p.name)}`);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      padding: '0.4rem 0.6rem',
+                      backgroundColor: 'transparent',
+                      border: '1px solid var(--border)',
+                      borderRadius: 'var(--radius-sm)',
+                      cursor: 'pointer',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      color: 'var(--primary)',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--surface-raised)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                    title="Ir a Ficha Clínica (Materia Medica)"
+                  >
+                    <BookOpen size={14} /> Ficha Clínica
+                  </button>
+                </div>
               ),
             },
             {

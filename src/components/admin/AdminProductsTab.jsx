@@ -2,6 +2,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { collection, query, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import {
@@ -18,7 +19,12 @@ import {
   BookOpen,
   Plus,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Package,
+  ClipboardList,
+  Bot,
+  ShoppingCart,
+  MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import AppDataTable from '../ui/AppDataTable';
@@ -31,8 +37,9 @@ import { catalogRepository } from '../../repositories/catalogRepository';
 import AdminSupplyNotifierWidget from './gadgets/AdminSupplyNotifierWidget';
 import InlineEditField from '../ui/InlineEditField';
 
-// ── ProductMicrosite Component ────────────────────────────────────────────────
+// ─── ProductMicrosite Component ────────────────────────────────────────────────
 function ProductMicrosite({ product, onUpdateProduct }) {
+  const navigate = useNavigate();
   const [summary, setSummary] = useState(product.clinical_summary || '');
   const [isGenerating, setIsGenerating] = useState(false);
   const [chatInput, setChatInput] = useState('');
@@ -40,7 +47,32 @@ function ProductMicrosite({ product, onUpdateProduct }) {
     { role: 'ai', text: `Hello! I'm Atlas AI. I've loaded the data for ${product.name}. What would you like to know about its clinical applications or interactions?` }
   ]);
   const [isTyping, setIsTyping] = useState(false);
-  const [expandedAccordion, setExpandedAccordion] = useState('clinical'); // 'clinical', 'inventory', 'ai'
+  const [expandedAccordion, setExpandedAccordion] = useState('clinical'); // 'clinical', 'inventory', 'protocols', 'ai'
+  const [relatedProtocols, setRelatedProtocols] = useState([]);
+  const [loadingProtocols, setLoadingProtocols] = useState(false);
+
+  useEffect(() => {
+    async function fetchRelatedProtocols() {
+      setLoadingProtocols(true);
+      try {
+        const protocolsRef = collection(db, 'protocols');
+        const snap = await getDocs(protocolsRef);
+        const allProtocols = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const matched = allProtocols.filter(p => {
+          if (!p.phases) return false;
+          return p.phases.some(phase => 
+            phase.items && phase.items.some(item => item.productId === product.id || item.productId === product.sku)
+          );
+        });
+        setRelatedProtocols(matched);
+      } catch (err) {
+        console.error('Error fetching related protocols', err);
+      } finally {
+        setLoadingProtocols(false);
+      }
+    }
+    fetchRelatedProtocols();
+  }, [product.id, product.sku]);
 
   useEffect(() => {
     if (!product.materia_medica && !product.clinical_summary) {
@@ -122,21 +154,19 @@ function ProductMicrosite({ product, onUpdateProduct }) {
       overflow: 'hidden',
       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
     }}>
-      {/* Header */}
-      <div style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-            <span style={{ backgroundColor: '#e0e7ff', color: '#4f46e5', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-              {product.category || 'Peptide'}
-            </span>
-            <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>{product.dosage || 'Standard'}</span>
-          </div>
-          <h3 style={{ margin: 0, fontSize: '1.5rem', color: '#0f172a', fontWeight: 800 }}>{product.name}</h3>
-        </div>
-        <a href={`/catalog/product/${product.id}`} target="_blank" rel="noopener noreferrer" style={{ padding: '0.5rem 1rem', backgroundColor: '#3b82f6', color: 'white', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none' }}>
-          View Store Page
-        </a>
+      {/* B2B Action Bar */}
+      <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+        <button 
+          onClick={() => alert('Próximamente: Añadir a Bulk Order')}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#059669'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#10b981'; }}
+        >
+          <ShoppingCart size={16} /> Incluir en Bulk Order
+        </button>
       </div>
+
+
 
       {/* Accordion 1: Clinical Information */}
       <AccordionHeader title="Información Clínica (Materia Medica)" id="clinical" />
@@ -155,27 +185,36 @@ function ProductMicrosite({ product, onUpdateProduct }) {
             Checking AI Data...
           </div>
         ) : materia ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontSize: '0.95rem', color: '#334155', lineHeight: 1.6 }}>
-            <div>
-              <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mechanism of Action</h4>
-              <p style={{ margin: 0 }}>{materia.mechanism_of_action}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', fontSize: '0.95rem', color: '#334155', lineHeight: 1.6, paddingBottom: '1rem' }}>
+            
+            {/* CAS Number Header if present */}
+            {product.casNumber && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', backgroundColor: '#f1f5f9', padding: '0.5rem 1rem', borderRadius: '8px', width: 'fit-content', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontWeight: 700, color: '#475569', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CAS Registry Number</span>
+                <span style={{ fontFamily: 'monospace', color: '#0f172a', fontWeight: 600, fontSize: '1rem' }}>{product.casNumber}</span>
+              </div>
+            )}
+
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+              <h4 style={{ margin: '0 0 1rem', fontSize: '1rem', color: '#0f172a', fontWeight: 700, borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>Mechanism of Action</h4>
+              <p style={{ margin: 0, textAlign: 'justify' }}>{materia.mechanism_of_action}</p>
             </div>
             
-            <div>
-              <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Clinical Applications</h4>
+            <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.5rem' }}>
+              <h4 style={{ margin: '0 0 1rem', fontSize: '1rem', color: '#0f172a', fontWeight: 700, borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>Clinical Applications</h4>
               <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
                 {materia.clinical_applications?.map((app, idx) => (
-                  <li key={idx} style={{ marginBottom: '0.25rem' }}>{app}</li>
+                  <li key={idx} style={{ marginBottom: '0.5rem' }}>{app}</li>
                 ))}
               </ul>
             </div>
 
             {materia.contraindications && materia.contraindications.length > 0 && (
-              <div>
-                <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Contraindications & Interactions</h4>
+              <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '1.5rem' }}>
+                <h4 style={{ margin: '0 0 1rem', fontSize: '1rem', color: '#991b1b', fontWeight: 700, borderBottom: '2px solid #fecaca', paddingBottom: '0.5rem' }}>Contraindications & Interactions</h4>
                 <ul style={{ margin: 0, paddingLeft: '1.25rem', color: '#b91c1c' }}>
                   {materia.contraindications.map((ci, idx) => (
-                    <li key={idx} style={{ marginBottom: '0.25rem' }}>{ci}</li>
+                    <li key={idx} style={{ marginBottom: '0.5rem' }}>{ci}</li>
                   ))}
                 </ul>
               </div>
@@ -183,11 +222,11 @@ function ProductMicrosite({ product, onUpdateProduct }) {
 
             {materia.references && materia.references.length > 0 && (
               <div>
-                <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Scientific References</h4>
+                <h4 style={{ margin: '0 0 0.75rem', fontSize: '0.9rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Scientific References</h4>
                 <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.85rem' }}>
                   {materia.references.map((ref, idx) => (
                     <li key={idx} style={{ marginBottom: '0.25rem' }}>
-                      <a href={ref.url} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'none', transition: 'color 0.2s', ':hover': { color: '#2563eb' } }}>
+                      <a href={ref.url} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'none', fontWeight: 500, transition: 'color 0.2s', ':hover': { color: '#2563eb' } }}>
                         {ref.title || 'View Study'}
                       </a>
                     </li>
@@ -195,6 +234,18 @@ function ProductMicrosite({ product, onUpdateProduct }) {
                 </ul>
               </div>
             )}
+            
+            {/* Contact Action */}
+            <div style={{ marginTop: '1rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.5rem', display: 'flex', justifyContent: 'flex-start' }}>
+              <button 
+                onClick={() => window.location.href = `/admin/messages?to=medical_team&product=${product.sku}`} 
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', backgroundColor: '#0f172a', color: 'white', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 600, border: 'none', cursor: 'pointer', transition: 'background-color 0.2s' }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#334155'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#0f172a'; }}
+              >
+                <MessageSquare size={18} /> Solicitar Información Adicional
+              </button>
+            </div>
           </div>
         ) : (
           <div style={{ fontSize: '0.95rem', color: '#334155', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
@@ -203,49 +254,7 @@ function ProductMicrosite({ product, onUpdateProduct }) {
         )}
       </div>
 
-      {/* Accordion 2: Non-Clinical Information */}
-      <AccordionHeader title="Información No Clínica (Inventario)" id="inventory" />
-      <div 
-        id="accordion-content-inventory"
-        style={{ 
-          display: expandedAccordion === 'inventory' ? 'block' : 'none',
-          padding: '1.5rem', 
-          backgroundColor: '#f8fafc', 
-          borderBottom: '1px solid #e2e8f0',
-          animation: 'fadeIn 0.3s ease-in-out'
-        }}
-      >
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <span style={{ fontSize: '0.85rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>SKU</span>
-            <span style={{ fontSize: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 600, color: '#0f172a' }}>{product.sku || 'N/A'}</span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <span style={{ fontSize: '0.85rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Warehouse</span>
-            <span style={{ fontSize: '1rem', fontWeight: 500, color: '#0f172a' }}>{product.warehouse || 'Poland'}</span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <span style={{ fontSize: '0.85rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Supplier</span>
-            <span style={{ fontSize: '1rem', fontWeight: 500, color: '#0f172a' }}>{product.supplier || 'N/A'}</span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <span style={{ fontSize: '0.85rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Stock Status</span>
-            <span style={{ 
-              fontSize: '1rem', fontWeight: 700, 
-              color: product.stock < 20 ? 'var(--error)' : product.stock < 50 ? '#f59e0b' : '#10b981' 
-            }}>
-              {product.stock} units
-            </span>
-          </div>
-        </div>
-        <div style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: '#e0e7ff', borderRadius: '8px', border: '1px solid #c7d2fe' }}>
-          <p style={{ margin: 0, fontSize: '0.8rem', color: '#4338ca', lineHeight: 1.4 }}>
-            To modify stock levels, supplier details, or SKU, please navigate to the Inventory Management screen.
-          </p>
-        </div>
-      </div>
-
-      {/* Accordion 3: AI Access */}
+      {/* Accordion 2: AI Access */}
       <AccordionHeader title="Acceso al AI (ClinicDAG Asistente)" id="ai" />
       <div 
         id="accordion-content-ai"
@@ -705,7 +714,7 @@ export default function AdminProductsTab({
       key: 'actions',
       header: 'Actions',
       align: 'right',
-      width: '100px',
+      width: '180px',
       render: (p) => {
         const actions = [];
         actions.push({ type: 'delete', onClick: () => handleDeleteProduct(p.id) });
@@ -715,12 +724,57 @@ export default function AdminProductsTab({
               display: 'flex',
               justifyContent: 'flex-end',
               alignItems: 'center',
-              gap: '0.75rem',
+              gap: '0.5rem',
             }}
           >
             {savingProduct === p.id && (
               <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Saving...</span>
             )}
+            
+            <button 
+              title="Gestión Inventario"
+              onClick={(e) => { e.stopPropagation(); navigate(`/admin/sku-sync?sku=${encodeURIComponent(p.sku || '')}`); }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: '4px' }}
+              onMouseEnter={(e) => e.currentTarget.style.color = '#3b82f6'}
+              onMouseLeave={(e) => e.currentTarget.style.color = '#475569'}
+            >
+              <Package size={16} />
+            </button>
+            <button 
+              title="Consulta Precios"
+              onClick={(e) => { e.stopPropagation(); navigate(`/admin/prices?sku=${encodeURIComponent(p.sku || '')}`); }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: '4px' }}
+              onMouseEnter={(e) => e.currentTarget.style.color = '#10b981'}
+              onMouseLeave={(e) => e.currentTarget.style.color = '#475569'}
+            >
+              <DollarSign size={16} />
+            </button>
+            <button 
+              title="Protocolos Relacionados"
+              onClick={(e) => { e.stopPropagation(); navigate(`/admin/protocols`); }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: '4px' }}
+              onMouseEnter={(e) => e.currentTarget.style.color = '#f59e0b'}
+              onMouseLeave={(e) => e.currentTarget.style.color = '#475569'}
+            >
+              <ClipboardList size={16} />
+            </button>
+            <button 
+              title="Consulta Clínica AI"
+              onClick={(e) => { 
+                e.stopPropagation();
+                window.dispatchEvent(new CustomEvent('OPEN_ATLAS_CLINICAL_MODE', { 
+                  detail: { product: p.name, sku: p.sku } 
+                }));
+              }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#4f46e5', padding: '4px' }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              <Bot size={16} />
+            </button>
+            
+            <div style={{ width: '1px', height: '16px', backgroundColor: '#e2e8f0', margin: '0 4px' }} />
+            
             <AppActionGroup actions={actions} />
           </div>
         );

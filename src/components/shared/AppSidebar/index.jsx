@@ -140,7 +140,7 @@ function SortableSidebarItem({ item, isActive, handleItemClick, expanded, isEdit
         data-tooltip={!expanded ? item.label : undefined}
         title={!expanded ? item.label : undefined}
         aria-current={isActive ? 'page' : undefined}
-        style={{ flex: 1, pointerEvents: isEditing ? 'none' : 'auto', paddingLeft: isEditing ? '4px' : '16px' }}
+        style={{ flex: 1, pointerEvents: isEditing ? 'none' : 'auto', paddingLeft: isEditing ? '4px' : '16px', paddingRight: onToggleFavorite ? '28px' : undefined }}
       >
         <span className="sb-item-icon">
           {Icon && <Icon size={16} />}

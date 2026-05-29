@@ -5,6 +5,7 @@
  * Full admin view: list all protocols, edit metadata + phases.
  */
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../../firebase';
@@ -39,6 +40,7 @@ const STATUS_STYLE = {
 
 // ── PhaseEditor ───────────────────────────────────────────────────────────────
 function PhaseEditor({ phases, products: catalogProducts, onChange }) {
+  const navigate = useNavigate();
   const [productSearch, setProductSearch] = useState('');
 
   const updatePhase = (pi, patch) =>
@@ -161,17 +163,33 @@ function PhaseEditor({ phases, products: catalogProducts, onChange }) {
                     exit={{ opacity: 0, x: 10 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <span
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/admin/products?sku=${encodeURIComponent(item.productId)}`);
+                      }}
                       style={{
                         fontWeight: 600,
                         fontSize: '0.82rem',
-                        color: 'var(--text-main)',
-                        display: 'block',
+                        color: 'var(--primary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 0,
+                        textAlign: 'left',
                         wordBreak: 'break-word',
+                        transition: 'color 0.2s',
+                        textDecoration: 'none'
                       }}
+                      onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                      onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                      title="Ver Ficha Clínica (Materia Medica)"
                     >
                       {item.productName ?? item.productId}
-                    </span>
+                    </button>
 
                     <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
                       <input

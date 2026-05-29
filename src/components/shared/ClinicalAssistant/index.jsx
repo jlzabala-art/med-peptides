@@ -117,6 +117,8 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
   }, [navigate, setIsOpen]);
 
 
+
+
   const {
     messages,
     isLoading,
@@ -146,7 +148,8 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
     autocompleteCandidates,
     handleConfirmAction,
     handleUploadPrice,
-    handleUploadStock
+    handleUploadStock,
+    setMessages
   } = useClinicalAI({
     products,
     protocolIndex,
@@ -167,6 +170,31 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
     contextMode,
     agentType
   });
+
+  useEffect(() => {
+    const handleContextEvent = (e) => {
+      const product = e.detail?.product;
+      const sku = e.detail?.sku;
+      if (product && typeof setMessages === 'function') {
+        setTimeout(() => {
+          setMessages(prev => {
+            const lastMessage = prev[prev.length - 1];
+            if (lastMessage && lastMessage.content.includes(product)) return prev;
+            return [
+              ...prev,
+              {
+                role: 'assistant',
+                content: `**Modo Clínico Activado Temporalmente**\n\nHe recibido el contexto del producto **${product}**${sku ? ` (SKU: ${sku})` : ''}. ¿Qué duda médica o protocolo te gustaría consultar?`,
+                timestamp: new Date()
+              }
+            ];
+          });
+        }, 100);
+      }
+    };
+    window.addEventListener('OPEN_ATLAS_CLINICAL_MODE', handleContextEvent);
+    return () => window.removeEventListener('OPEN_ATLAS_CLINICAL_MODE', handleContextEvent);
+  }, [setIsOpen, setMessages]);
 
   const isProductPage = /^\/product\//.test(location.pathname);
 

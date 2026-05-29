@@ -17,6 +17,7 @@ export default function DashboardLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileAIOpen, setIsMobileAIOpen] = useState(false);
   const [isDesktopAIOpen, setIsDesktopAIOpen] = useState(true);
+  const [overrideContextMode, setOverrideContextMode] = useState(null);
 
   // Show ClinicalAssistant as a 3rd column for doctors, patients and admins on desktop
   const showRightSidebar = !isMobile && ['doctor', 'patient', 'admin'].includes(roleContext) && isDesktopAIOpen;
@@ -28,6 +29,20 @@ export default function DashboardLayout({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    const handleContextEvent = (e) => {
+      // Temporarily override the AI context when opening from a product
+      setOverrideContextMode('clinical');
+      if (isMobile) {
+        setIsMobileAIOpen(true);
+      } else {
+        setIsDesktopAIOpen(true);
+      }
+    };
+    window.addEventListener('OPEN_ATLAS_CLINICAL_MODE', handleContextEvent);
+    return () => window.removeEventListener('OPEN_ATLAS_CLINICAL_MODE', handleContextEvent);
+  }, [isMobile]);
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--background, #F4F8FB)' }}>
@@ -91,7 +106,7 @@ export default function DashboardLayout({
               display: 'flex',
               flexDirection: 'column',
             }}>
-              <ClinicalAssistant embedded={true} isOpen={true} setIsOpen={() => setIsDesktopAIOpen(false)} pageContext={pageContext} contextMode={roleContext === 'admin' ? 'admin' : roleContext === 'doctor' ? 'doctor' : 'patient'} />
+              <ClinicalAssistant embedded={true} isOpen={true} setIsOpen={() => setIsDesktopAIOpen(false)} pageContext={pageContext} contextMode={overrideContextMode || (roleContext === 'admin' ? 'admin' : roleContext === 'doctor' ? 'doctor' : 'patient')} />
             </aside>
           )}
 
@@ -131,7 +146,7 @@ export default function DashboardLayout({
           isOpen={isMobileAIOpen} 
           setIsOpen={setIsMobileAIOpen} 
           pageContext={pageContext} 
-          contextMode={roleContext === 'admin' ? 'admin' : roleContext === 'doctor' ? 'doctor' : 'patient'}
+          contextMode={overrideContextMode || (roleContext === 'admin' ? 'admin' : roleContext === 'doctor' ? 'doctor' : 'patient')}
         />
       )}
     </div>

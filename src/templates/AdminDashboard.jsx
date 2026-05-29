@@ -11,7 +11,7 @@ import {
   ChevronRight, ChevronDown, ClipboardList, Zap, Globe, Wrench,
   FlaskConical, Box, Tag, DollarSign, FileText, Eye, EyeOff, Mail,
   Activity, BookOpen, Cpu, LogOut, Menu, X, Building2, TrendingUp,
-  Building, Stethoscope, HeartPulse, UserPlus, Lock, Briefcase, LayoutTemplate, Network, ScrollText
+  Building, Stethoscope, HeartPulse, UserPlus, Lock, Briefcase, LayoutTemplate, Network, ScrollText, MessageSquare
 } from 'lucide-react';
 import PortalLayout from '../components/ui/PortalLayout';
 
@@ -118,6 +118,7 @@ const NAV_GROUPS = [
       { id: 'doctors',          label: 'Doctors',              icon: Stethoscope },
       { id: 'patients',         label: 'Patients',             icon: HeartPulse },
       { id: 'invitations',      label: 'Invitations',          icon: UserPlus },
+      { id: 'messages',         label: 'Mensajes',             icon: MessageSquare },
     ],
   },
   {
