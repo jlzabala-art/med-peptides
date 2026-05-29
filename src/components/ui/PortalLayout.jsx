@@ -20,6 +20,24 @@ export default function PortalLayout({
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isAiOpen, setAiOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  // Holds live data injected by admin tab components via 'admin-context-update' events
+  const [enrichedContext, setEnrichedContext] = useState(null);
+
+  // Listen for context enrichment events from any admin tab
+  useEffect(() => {
+    const handleContextUpdate = (e) => {
+      if (e?.detail) {
+        setEnrichedContext(prev => ({ ...prev, ...e.detail }));
+      }
+    };
+    window.addEventListener('admin-context-update', handleContextUpdate);
+    return () => window.removeEventListener('admin-context-update', handleContextUpdate);
+  }, []);
+
+  // Reset enrichedContext when the active tab/page changes
+  useEffect(() => {
+    setEnrichedContext(null);
+  }, [pageContext?.activeTab]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -178,7 +196,7 @@ export default function PortalLayout({
                 embedded={true} 
                 isOpen={true} 
                 setIsOpen={() => setAiOpen(false)} 
-                pageContext={pageContext} 
+                pageContext={enrichedContext ? { ...pageContext, ...enrichedContext } : pageContext} 
                 contextMode={roleContext} 
               />
             </div>

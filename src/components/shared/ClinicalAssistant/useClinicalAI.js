@@ -678,9 +678,11 @@ IMPORTANT: The patient retains full purchasing autonomy. Never instruct them wha
         throw new Error('API Error');
       }
       const data = await response.json();
-      const fullReply   = data.reply || '';
-      const formattedData = data.formatted || null;
-      const agentName   = data.agentName || 'AgentRAG';  // ← agent identity
+      const fullReply      = data.reply || '';
+      const formattedData  = data.formatted || null;
+      const agentName      = data.agentName || 'AgentRAG';  // ← agent identity
+      const usageData      = data.usage || null;            // ← token/cost info
+      const adminNavLinks  = data.admin_nav_links || [];    // ← contextual admin routes
 
 
       const proactiveCards = searchProducts(messageText, products, protocolIndex).filter(p => (p.searchScore || 0) > 4).slice(0, 3);
@@ -703,6 +705,8 @@ IMPORTANT: The patient retains full purchasing autonomy. Never instruct them wha
         fullContent: cleanedReply,
         formatted: formattedData,    // ← rich UI data from AgentFormatter
         agentName,                   // ← agent identity for AgentBadge
+        usage: usageData,            // ← token count + estimated cost
+        adminNavLinks,               // ← contextual admin navigation links
         preRankedProducts: proactiveCards,
         preRankedProtocols: proactiveProtocols,
         timestamp: new Date()

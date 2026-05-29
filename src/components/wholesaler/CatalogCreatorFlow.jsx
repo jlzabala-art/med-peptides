@@ -25,6 +25,7 @@ const CANONICAL_GOALS = [
   'sleep_circadian',
 ];
 
+
 const GOAL_LABELS = {
   cognitive_mood: 'Cognitive & Mood',
   hormonal_optimization: 'Hormonal Optimization',
@@ -34,6 +35,23 @@ const GOAL_LABELS = {
   recovery_repair: 'Recovery & Repair',
   sleep_circadian: 'Sleep & Circadian',
 };
+
+const DISCOVERY_QUESTIONS = [
+  { id: 'products', question: "Before generating the website catalogue, which products should be included?", options: ["Entire catalogue", "Selected products", "Specific category", "Include future products", "Use your judgement"] },
+  { id: 'audience', question: "Who is the intended audience for this catalogue?", options: ["Physicians", "Clinics", "Pharmacies", "Distributors", "Consumers", "Researchers", "Use your judgement"] },
+  { id: 'objective', question: "What is the primary objective of the website content?", options: ["Generate sales", "Generate leads", "Product education", "Distributor recruitment", "Product awareness", "SEO positioning", "Use your judgement"] },
+  { id: 'pricing', question: "Should pricing be displayed?", options: ["No pricing", "Retail pricing", "Distributor pricing", "Medical pricing", "Multiple pricing levels", "Use your judgement"] },
+  { id: 'language', question: "What language should be used?", options: ["English", "Spanish", "Arabic", "French", "German", "Multi-language", "Use your judgement"] },
+  { id: 'style', question: "What communication style should be used?", options: ["Scientific", "Medical", "Commercial", "Luxury", "Corporate", "Educational", "Use your judgement"] },
+  { id: 'contentType', question: "What website content should be generated?", options: ["Product pages", "Category pages", "Collection pages", "Landing pages", "Comparison pages", "Homepage sections", "Use your judgement"] },
+  { id: 'detailLevel', question: "How much information should be displayed per product?", options: ["Product name only", "Short summary", "Commercial description", "Technical description", "Scientific overview", "Comprehensive product profile", "Use your judgement"] },
+  { id: 'images', question: "How should product images be handled?", options: ["Existing images provided by user", "Existing database images", "AI-generated suggestions", "No image recommendations", "Use your judgement"] },
+  { id: 'scientificDepth', question: "What scientific depth should be included?", options: ["None", "Basic", "Intermediate", "Advanced", "Research-focused", "Use your judgement"] },
+  { id: 'seo', question: "Should the content be optimized for search engines?", options: ["No", "Basic SEO", "Advanced SEO", "Use your judgement"] },
+  { id: 'cta', question: "What action should the visitor take?", options: ["Contact sales", "Request quotation", "Request information", "Request sample", "Register account", "Buy online", "Use your judgement"] },
+  { id: 'goal', question: "What should the generated content optimize for?", options: ["Maximize sales", "Maximize lead generation", "Maximize SEO performance", "Maximize scientific credibility", "Maximize distributor acquisition", "Maximize conversion rate", "Use your judgement"] }
+];
+
 
 export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog = null, onBack }) {
   const { userProfile } = useAuth();
@@ -53,13 +71,15 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
   const [searchQuery, setSearchQuery] = useState('');
   
   // AI Chat state
-  const [chatHistory, setChatHistory] = useState([
-    { role: 'ai', content: "Hi! I'm your Clinical Catalog Assistant. Tell me what kind of catalog you'd like to build, or click one of the quick prompts below." }
-  ]);
+  const [conversationState, setConversationState] = useState('DISCOVERY'); // DISCOVERY, VALIDATION, GENERATION
+  const [discoveryData, setDiscoveryData] = useState({});
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+
+  const [chatHistory, setChatHistory] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [isAiTyping, setIsAiTyping] = useState(false);
   const [previousPrompts, setPreviousPrompts] = useState([]);
-  const [openAccordion, setOpenAccordion] = useState('curated'); // 'curated', 'previous', or null
+  const [openAccordion, setOpenAccordion] = useState(null);
   const chatEndRef = useRef(null);
 
   useEffect(() => {
@@ -106,8 +126,17 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
     // Load previous prompts
     const saved = localStorage.getItem('catalogBuilder_previousPrompts');
     if (saved) {
-      try { setPreviousPrompts(JSON.parse(saved)); } catch(e){}
+      try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setPreviousPrompts(JSON.parse(saved));
+      } catch (err) {
+        console.error('Error parsing saved prompts', err);
+      }
     }
+    
+    // Initialize Discovery Chat
+    const firstQ = DISCOVERY_QUESTIONS[0];
+    setChatHistory([{ role: 'ai', content: firstQ.question, options: firstQ.options }]);
   }, []);
 
   useEffect(() => {
@@ -118,26 +147,94 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
     const textToSend = customText || chatInput;
     if (!textToSend.trim()) return;
     
-    // Save to history
-    const newHistory = [textToSend, ...previousPrompts.filter(p => p !== textToSend)].slice(0, 10);
-    setPreviousPrompts(newHistory);
-    localStorage.setItem('catalogBuilder_previousPrompts', JSON.stringify(newHistory));
-
     setChatInput('');
     setChatHistory(prev => [...prev, { role: 'user', content: textToSend }]);
-    setIsAiTyping(true);
 
-    try {
-      const auth = getAuth();
-      const token = await auth.currentUser?.getIdToken();
+    if (conversationState === 'DISCOVERY') {
+      let nextData = { ...discoveryData };
+      const currentQ = DISCOVERY_QUESTIONS[currentQuestionIndex];
       
-      const payload = {
-        agentId: "catalog-builder-agent-001",
-        query: textToSend,
-        mode: "build_and_explain",
-        products: allProducts,
-    setChatHistory(prev => [...prev, { role: 'user', content: textToSend }]);
+      if (textToSend === 'Use your judgement') {
+        for (let i = currentQuestionIndex; i < DISCOVERY_QUESTIONS.length; i++) {
+          nextData[DISCOVERY_QUESTIONS[i].id] = "AI Judgement";
+        }
+        setDiscoveryData(nextData);
+        setConversationState('VALIDATION');
+        showValidationSummary(nextData);
+        return;
+      }
 
+      nextData[currentQ.id] = textToSend;
+      setDiscoveryData(nextData);
+
+      const nextIndex = currentQuestionIndex + 1;
+      if (nextIndex < DISCOVERY_QUESTIONS.length) {
+        setCurrentQuestionIndex(nextIndex);
+        const nextQ = DISCOVERY_QUESTIONS[nextIndex];
+        setIsAiTyping(true);
+        setTimeout(() => {
+          setIsAiTyping(false);
+          setChatHistory(prev => [...prev, { role: 'ai', content: nextQ.question, options: nextQ.options }]);
+        }, 600);
+      } else {
+        setConversationState('VALIDATION');
+        showValidationSummary(nextData);
+      }
+      return;
+    }
+
+    if (conversationState === 'VALIDATION') {
+      if (textToSend === 'Confirm & Generate') {
+        setConversationState('GENERATION');
+        executeGeneration(discoveryData);
+      } else if (textToSend === 'Modify Settings') {
+        setConversationState('DISCOVERY');
+        setCurrentQuestionIndex(0);
+        setDiscoveryData({});
+        const firstQ = DISCOVERY_QUESTIONS[0];
+        setChatHistory(prev => [...prev, { role: 'ai', content: "Let's restart the discovery phase. " + firstQ.question, options: firstQ.options }]);
+      }
+      return;
+    }
+
+    if (conversationState === 'GENERATION') {
+      setIsAiTyping(true);
+      try {
+        await callAdminAgent(textToSend);
+      } finally {
+        setIsAiTyping(false);
+      }
+    }
+  };
+
+  const showValidationSummary = (data) => {
+    setIsAiTyping(true);
+    setTimeout(() => {
+      setIsAiTyping(false);
+      setChatHistory(prev => [...prev, { 
+        role: 'ai', 
+        content: "I have gathered all the necessary information. Please review the Discovery Summary below:",
+        isValidation: true,
+        summaryData: data,
+        options: ["Confirm & Generate", "Modify Settings"]
+      }]);
+    }, 800);
+  };
+
+  const executeGeneration = async (data) => {
+    setIsAiTyping(true);
+    const promptText = `
+      Please generate a website catalogue.
+      MANDATORY CONSTRAINTS:
+      ${Object.entries(data).map(([k, v]) => `- ${k.toUpperCase()}: ${v}`).join('\\n')}
+      
+      Follow all rules for Audience Adaptation, SEO Structure, Language, and Pricing.
+    `;
+    await callAdminAgent(promptText);
+    setIsAiTyping(false);
+  };
+
+  const callAdminAgent = async (prompt) => {
     try {
       const response = await fetch('https://europe-west1-med-peptides-app.cloudfunctions.net/adminAgent', {
         method: 'POST',
@@ -147,7 +244,7 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
         },
         body: JSON.stringify({
           action: 'generate_catalog',
-          prompt: textToSend,
+          prompt: prompt,
           context: { ownerId, ownerType, tenantId, currentCatalog: catalog }
         })
       });
@@ -157,7 +254,6 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
         if (data.data.catalog) {
           const suggestedCatalog = data.data.catalog;
           const extractedIds = [];
-          
           if (suggestedCatalog.sections && Array.isArray(suggestedCatalog.sections)) {
             suggestedCatalog.sections.forEach(sec => {
               if (sec.products && Array.isArray(sec.products)) {
@@ -165,7 +261,6 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
               }
             });
           }
-          
           const uniqueIds = [...new Set([...catalog.selectedProducts, ...extractedIds])];
           setCatalog(prev => ({
             ...prev,
@@ -173,7 +268,6 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
             selectedProducts: uniqueIds
           }));
         }
-
         setChatHistory(prev => [...prev, { 
           role: 'ai', 
           content: data.data.message || "I've drafted a catalog based on your request. You can review and refine it in the Cart panel."
@@ -184,8 +278,6 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
     } catch (error) {
       console.error('Chat error:', error);
       setChatHistory(prev => [...prev, { role: 'ai', content: "Sorry, I encountered an error. Please try again." }]);
-    } finally {
-      setIsAiTyping(false);
     }
   };
 
@@ -281,20 +373,64 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
 
         <div style={chatMessagesContainerStyle}>
           {chatHistory.map((msg, i) => (
-            <div key={i} style={msg.role === 'ai' ? aiBubbleWrapperStyle : userBubbleWrapperStyle}>
-              {msg.role === 'ai' && <Bot size={20} color="#1a73e8" style={{ marginTop: '4px', flexShrink: 0 }} />}
-              <div style={msg.role === 'ai' ? aiMessageStyle : userMessageStyle}>
-                {msg.role === 'ai' ? (
-                  typeof msg.content === 'object' ? (
-                    <FormattedResponse formatted={msg.content} />
-                  ) : (
-                    renderAIMarkdown(msg.content)
-                  )
-                ) : msg.content}
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={msg.role === 'ai' ? aiBubbleWrapperStyle : userBubbleWrapperStyle}>
+                {msg.role === 'ai' && <Bot size={20} color="#1a73e8" style={{ marginTop: '4px', flexShrink: 0 }} />}
+                <div style={msg.role === 'ai' ? aiMessageStyle : userMessageStyle}>
+                  {msg.role === 'ai' ? (
+                    typeof msg.content === 'object' ? (
+                      <FormattedResponse formatted={msg.content} />
+                    ) : (
+                      renderAIMarkdown(msg.content)
+                    )
+                  ) : msg.content}
+                </div>
               </div>
+              
+              {msg.isValidation && msg.summaryData && (
+                <div style={{ marginLeft: '32px', backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #dadce0', padding: '12px', fontSize: '0.85rem' }}>
+                  <h4 style={{ margin: '0 0 8px 0', color: '#202124' }}>DISCOVERY SUMMARY</h4>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <tbody>
+                      {Object.entries(msg.summaryData).map(([k, v]) => (
+                        <tr key={k} style={{ borderBottom: '1px solid #f1f3f4' }}>
+                          <td style={{ padding: '6px 0', fontWeight: 600, color: '#5f6368', textTransform: 'capitalize', width: '40%' }}>{k}</td>
+                          <td style={{ padding: '6px 0', color: '#202124' }}>{v}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {msg.options && i === chatHistory.length - 1 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginLeft: msg.role === 'ai' ? '32px' : '0' }}>
+                  {msg.options.map((opt, oIdx) => (
+                    <button 
+                      key={oIdx} 
+                      onClick={() => handleSendMessage(opt)}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '16px',
+                        border: '1px solid #1a73e8',
+                        backgroundColor: '#e8f0fe',
+                        color: '#1a73e8',
+                        fontSize: '0.8rem',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseOver={(e) => { e.target.style.backgroundColor = '#d2e3fc'; }}
+                      onMouseOut={(e) => { e.target.style.backgroundColor = '#e8f0fe'; }}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
-          {chatHistory.length === 1 && (
+          {conversationState !== 'DISCOVERY' && chatHistory.length === 1 && (
             <div style={accordionContainerStyle}>
               {/* Curated Accordion */}
               <div style={accordionSectionStyle}>

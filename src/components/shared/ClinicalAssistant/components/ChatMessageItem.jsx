@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { User, Bot, Copy, Check, Volume2, VolumeX, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { User, Bot, Copy, Check, Volume2, VolumeX, ThumbsUp, ThumbsDown, ExternalLink, Coins } from 'lucide-react';
 import { renderAIMarkdown, processMarkdown } from '../utils/markdownRenderer';
 import EvidenceBadge from './EvidenceBadge';
 import StackSynergyWidget from './StackSynergyWidget';
@@ -316,6 +316,82 @@ export default function ChatMessageItem({ msg, idx, onProductClick, InstantResul
             waterMl={metadata.visualRecon.waterMl}
             dosageMcg={metadata.visualRecon.dosageMcg}
           />
+        )}
+
+        {/* ── Admin Navigation Links ─────────────────────────────────────── */}
+        {isAssistant && msg.adminNavLinks && msg.adminNavLinks.length > 0 && (
+          <div style={{
+            marginTop: '1rem',
+            padding: '0.75rem 1rem',
+            borderRadius: '10px',
+            background: 'linear-gradient(135deg, rgba(26,115,232,0.04) 0%, rgba(26,115,232,0.02) 100%)',
+            border: '1px solid rgba(26,115,232,0.12)',
+          }}>
+            <div style={{
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              color: 'var(--color-text-tertiary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              marginBottom: '0.5rem'
+            }}>📍 Explore in the portal</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+              {msg.adminNavLinks.map((link, li) => (
+                <button
+                  key={li}
+                  onClick={() => navigate(link.path)}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+                    padding: '0.3rem 0.75rem',
+                    borderRadius: '999px',
+                    border: '1px solid rgba(26,115,232,0.25)',
+                    background: 'white',
+                    color: '#1a73e8',
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.18s',
+                    boxShadow: '0 1px 4px rgba(26,115,232,0.08)'
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'rgba(26,115,232,0.08)';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(26,115,232,0.14)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'white';
+                    e.currentTarget.style.boxShadow = '0 1px 4px rgba(26,115,232,0.08)';
+                  }}
+                >
+                  {link.label}
+                  <ExternalLink size={10} />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Query Cost Footnote ───────────────────────────────────────────── */}
+        {isAssistant && msg.usage && (
+          <div style={{
+            marginTop: '0.6rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            fontSize: '0.62rem',
+            color: 'var(--color-text-tertiary)',
+            opacity: 0.75
+          }}>
+            <Coins size={10} />
+            <span>
+              {msg.usage.total_tokens.toLocaleString()} tokens
+              &nbsp;·&nbsp;
+              ${msg.usage.estimated_cost_usd < 0.0001
+                ? '<$0.0001'
+                : `$${msg.usage.estimated_cost_usd.toFixed(5)}`}
+              &nbsp;·&nbsp;
+              {msg.usage.model}
+            </span>
+          </div>
         )}
       </div>
     </div>

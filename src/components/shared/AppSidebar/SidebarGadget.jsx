@@ -25,12 +25,18 @@ export default function SidebarGadget(props) {
       }
     });
 
-    return savedGroups.map(savedGroup => {
+    const usedItemIds = new Set();
+
+    const hydratedGroups = savedGroups.map(savedGroup => {
       const origGroup = originalGroups.find(g => g.id === savedGroup.id) || 
                         (savedGroup.id === 'favorites' ? { id: 'favorites', label: 'Favorites', emoji: '⭐' } : savedGroup);
       
       const hydratedItems = (savedGroup.items || [])
-        .map(savedItem => allItems.get(savedItem.id) || null)
+        .map(savedItem => {
+          const item = allItems.get(savedItem.id) || null;
+          if (item) usedItemIds.add(item.id);
+          return item;
+        })
         .filter(Boolean);
 
       return {
@@ -39,6 +45,30 @@ export default function SidebarGadget(props) {
         items: hydratedItems
       };
     });
+
+    // Add any missing groups that were introduced after the user saved preferences
+    originalGroups.forEach(origGroup => {
+      if (!hydratedGroups.find(g => g.id === origGroup.id)) {
+        hydratedGroups.push({ ...origGroup, items: [] });
+      }
+    });
+
+    // Add any missing items (new features) to their original groups
+    originalGroups.forEach(origGroup => {
+      if (origGroup.items) {
+        origGroup.items.forEach(origItem => {
+          if (!usedItemIds.has(origItem.id)) {
+            const targetGroup = hydratedGroups.find(g => g.id === origGroup.id);
+            if (targetGroup) {
+              if (!targetGroup.items) targetGroup.items = [];
+              targetGroup.items.push(origItem);
+            }
+          }
+        });
+      }
+    });
+
+    return hydratedGroups;
   };
 
   useEffect(() => {

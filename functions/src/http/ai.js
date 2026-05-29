@@ -1549,9 +1549,53 @@ Return ONLY valid JSON.
           formatted = await formatResponse(finalReply, { formatType: "rag_response", role: "admin" });
         }
 
-        const responsePayload = { reply: finalReply, suggestions: suggestions.slice(0, 4) };
+        // ── Token usage estimation (Gemini 2.5-flash pricing) ──────────────
+        // Input: $0.075 / 1M tokens  |  Output: $0.30 / 1M tokens
+        const _inputText = (systemInstruction || '') + (finalPromptText || '');
+        const estimatedInputTokens  = Math.ceil(_inputText.length / 4);
+        const estimatedOutputTokens = Math.ceil(finalReply.length / 4);
+        const _inputCost  = (estimatedInputTokens  / 1_000_000) * 0.075;
+        const _outputCost = (estimatedOutputTokens / 1_000_000) * 0.30;
+        const usage = {
+          input_tokens:        estimatedInputTokens,
+          output_tokens:       estimatedOutputTokens,
+          total_tokens:        estimatedInputTokens + estimatedOutputTokens,
+          estimated_cost_usd:  parseFloat((_inputCost + _outputCost).toFixed(6)),
+          model:               'gemini-2.5-flash'
+        };
+
+        // ── Admin navigation links (contextual shortcuts) ──────────────────
+        const admin_nav_links = [];
+        if (isAdminMode) {
+          const activeTab = reqContext?.page_context?.activeTab || '';
+          const queryLower = (message || '').toLowerCase();
+          const adminRoutes = [
+            { label: '📊 Dashboard KPIs',   path: '/admin',               tab: 'dashboard',    keywords: ['kpi','metric','revenue','dashboard'] },
+            { label: '🛒 Orders',            path: '/admin/orders',         tab: 'orders',       keywords: ['order','pedido','venta'] },
+            { label: '👥 Users',             path: '/admin/users',          tab: 'users',        keywords: ['user','usuario','client','register'] },
+            { label: '📦 Products',          path: '/admin/products',       tab: 'products',     keywords: ['product','producto','inventory','stock'] },
+            { label: '💰 Costs & Margins',   path: '/admin/costs',          tab: 'costs',        keywords: ['cost','coste','margin','precio','price'] },
+            { label: '🧾 Invoices',          path: '/admin/invoices',       tab: 'invoices',     keywords: ['invoice','factura','billing'] },
+            { label: '📈 Analytics',         path: '/admin/analytics',      tab: 'analytics',    keywords: ['analytic','statistic','report','trend'] },
+            { label: '⚙️ Settings',          path: '/admin/settings',       tab: 'settings',     keywords: ['setting','configuracion','config'] },
+            { label: '📋 Invitations',       path: '/admin/invitations',    tab: 'invitations',  keywords: ['invitation','invitacion','invite'] },
+          ];
+          for (const route of adminRoutes) {
+            if (route.tab === activeTab) continue; // skip current tab
+            const isRelevant = route.keywords.some(kw => queryLower.includes(kw));
+            if (isRelevant || admin_nav_links.length < 2) {
+              admin_nav_links.push({ label: route.label, path: route.path });
+              if (admin_nav_links.length >= 3) break;
+            }
+          }
+        }
+
+        const responsePayload = { reply: finalReply, suggestions: suggestions.slice(0, 4), usage };
         if (formatted) {
           responsePayload.formatted = formatted;
+        }
+        if (admin_nav_links.length > 0) {
+          responsePayload.admin_nav_links = admin_nav_links;
         }
 
         res.status(200).json(responsePayload);

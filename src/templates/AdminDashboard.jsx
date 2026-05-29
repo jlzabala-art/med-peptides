@@ -104,7 +104,8 @@ const NAV_GROUPS = [
     label: 'Catalog & Inventory',
     items: [
       { id: 'products',        label: 'Products',        icon: Box },
-      { id: 'variants',        label: 'Variants',        icon: FlaskConical },
+      { id: 'stock',           label: 'Stock',           icon: FlaskConical },
+      { id: 'lab-tests',       label: 'Lab Tests',       icon: ScrollText },
       { id: 'protocols',       label: 'Protocols',       icon: ClipboardList },
     ],
   },
@@ -214,7 +215,8 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
       {tab === 'home-layout'   && <AdminHomeLayoutTab />}
       {tab === 'protocols'     && <AdminProtocolsTab />}
       {tab === 'blueprints'    && <AdminBlueprintsTab />}
-      {tab === 'variants'         && <AdminVariantsTab />}
+      {tab === 'stock'         && <AdminVariantsTab />}
+      {tab === 'lab-tests'     && <AdminPlaceholderTab title="Lab Tests & COAs" description="Manage quality control, third-party tests, and Certificates of Analysis for your stock batches." tags={['Quality', 'Testing']} color="var(--color-primary)" />}
       {tab === 'catalogs'         && <CatalogList ownerId="admin" ownerType="admin" onOpenBuilder={() => { setCatalogToEdit(null); setActiveTab('catalog-builder'); }} onSelectCatalogToEdit={(cat) => { setCatalogToEdit(cat); setActiveTab('catalog-builder'); }} />}
       {tab === 'catalog-builder'  && <CatalogCreatorFlow ownerId="admin" ownerType="admin" editingCatalog={catalogToEdit} onBack={() => { setCatalogToEdit(null); setActiveTab('catalogs'); }} />}
       {tab === 'email-campaigns'  && <EmailCampaignBuilder ownerId="admin" ownerType="admin" onBack={() => setActiveTab('catalogs')} />}

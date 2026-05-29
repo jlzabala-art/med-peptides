@@ -37,6 +37,7 @@ import {
   EyeOff,
   Globe,
   Building2,
+  Link2,
 } from 'lucide-react';
 
 import AdminSupplyNotifierWidget from './gadgets/AdminSupplyNotifierWidget';
@@ -53,6 +54,7 @@ const DEFAULT_CONFIG = {
     'activeOrders',
     'revenue',
     'activePhysicians',
+    'monthlyActivePatients',
     'averageOrderValue',
     'lowStockAlerts',
     'systemHealth',
@@ -63,9 +65,13 @@ const DEFAULT_CONFIG = {
     'activeOrders',
     'revenue',
     'activePhysicians',
+    'monthlyActivePatients',
     'averageOrderValue',
     'lowStockAlerts',
     'systemHealth',
+    'completedOrders',
+    'newUsersThisWeek',
+    'activeRelationships',
   ],
   visiblePanels: {
     recentRegistrations: false, // Hidden by default to reduce clutter
@@ -87,9 +93,13 @@ const DEFAULT_CONFIG = {
         'activeOrders',
         'revenue',
         'activePhysicians',
+        'monthlyActivePatients',
         'averageOrderValue',
         'lowStockAlerts',
         'systemHealth',
+        'completedOrders',
+        'newUsersThisWeek',
+        'activeRelationships',
       ],
       allowedPanels: [
         'recentRegistrations',
@@ -105,7 +115,7 @@ const DEFAULT_CONFIG = {
       ],
     },
     wholesaler: {
-      allowedKPIs: ['totalUsers', 'activeOrders', 'averageOrderValue', 'lowStockAlerts'],
+      allowedKPIs: ['totalUsers', 'activeOrders', 'averageOrderValue', 'lowStockAlerts', 'completedOrders', 'newUsersThisWeek'],
       allowedPanels: ['recentRegistrations', 'supplyNotifier', 'pageVisits', 'doctorCohort'],
     },
   },
@@ -175,6 +185,27 @@ const KPI_METADATA = {
     bgColor: '#e6f4ea',
     subtitle: 'All systems operational',
   },
+  completedOrders: {
+    title: 'Completed Orders',
+    icon: CheckCircle2,
+    color: '#0f9d58',
+    bgColor: '#e6f4ea',
+    subtitle: 'Successfully delivered',
+  },
+  newUsersThisWeek: {
+    title: 'New Users (7d)',
+    icon: Sparkles,
+    color: '#1a73e8',
+    bgColor: '#e8f0fe',
+    subtitle: 'Growth this week',
+  },
+  activeRelationships: {
+    title: 'Active Linkages',
+    icon: Link2,
+    color: '#1a73e8',
+    bgColor: '#e8f0fe',
+    subtitle: 'Doctor-patient pairs',
+  },
 };
 
 export default function AdminMetricsDashboard({ wholesalerId = null }) {
@@ -188,7 +219,6 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
   const [isEditing, setIsEditing] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
 
-  // Live Metrics state
   const [metrics, setMetrics] = useState({
     totalUsers: 0,
     pendingApprovals: 0,
@@ -199,6 +229,9 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
     averageOrderValue: 0,
     lowStockAlerts: 0,
     systemHealth: '0ms',
+    completedOrders: 0,
+    newUsersThisWeek: 0,
+    activeRelationships: 0,
   });
   const [recentUsers, setRecentUsers] = useState([]);
   const [users, setUsers] = useState([]);
@@ -366,6 +399,19 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
             (Number(p.stockQuantity) !== undefined && Number(p.stockQuantity) < 15)
         ).length;
 
+        const completedOrdersCount = allOrders.filter(
+          (o) => o.status === 'completed' || o.status === 'delivered'
+        ).length;
+
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        const newUsersThisWeekCount = scopedUsers.filter((u) => {
+          const createdAt = u.createdAt?.toDate ? u.createdAt.toDate() : new Date(u.createdAt);
+          return createdAt >= oneWeekAgo;
+        }).length;
+
+        const activeRelationshipsCount = allRels.filter((r) => r.status === 'active').length;
+
         setMetrics({
           totalUsers: totalUsersCount,
           pendingApprovals: pendingApprovalsCount,
@@ -376,6 +422,9 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
           averageOrderValue: averageOrderValue,
           lowStockAlerts: lowStockAlertsCount,
           systemHealth: `${dbLatency}ms`,
+          completedOrders: completedOrdersCount,
+          newUsersThisWeek: newUsersThisWeekCount,
+          activeRelationships: activeRelationshipsCount,
         });
 
         setUsers(allUsers);
@@ -391,6 +440,52 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
           })
           .slice(0, 5);
         setRecentUsers(recent);
+
+        // ── Broadcast live metrics to AdminAI via PortalLayout event bus ──
+        // This allows ClinicalAssistant to answer questions about the current
+        // dashboard state (revenue, users, orders, etc.) in real time.
+        const recentUsersSnapshot = recent.map(u => ({
+          name: u.fullName || u.displayName || u.email || 'Unknown',
+          role: u.role || 'patient',
+          status: u.status || 'active',
+          email: u.email || '',
+          createdAt: u.createdAt ? (typeof u.createdAt.toDate === 'function' ? u.createdAt.toDate().toLocaleDateString() : new Date(u.createdAt).toLocaleDateString()) : 'N/A'
+        }));
+
+        // Top 5 orders by value for financial summary
+        const topOrders = [...allOrders]
+          .sort((a, b) => (Number(b.total) || 0) - (Number(a.total) || 0))
+          .slice(0, 5)
+          .map(o => ({
+            id: o.id?.slice(0, 8) || 'N/A',
+            status: o.status || 'unknown',
+            total: `$${Number(o.total || 0).toFixed(2)}`,
+            customer: o.customerName || o.userEmail || 'N/A',
+          }));
+
+        window.dispatchEvent(new CustomEvent('admin-context-update', {
+          detail: {
+            label: 'Dashboard KPIs',
+            activeTab: 'dashboard',
+            live_metrics: {
+              totalUsers: totalUsersCount,
+              pendingApprovals: pendingApprovalsCount,
+              activeOrders: activeOrdersCount,
+              totalRevenue: `$${totalRevenue.toFixed(2)}`,
+              activePhysicians: activePhysiciansCount,
+              monthlyActivePatients: monthlyActivePatientsCount,
+              averageOrderValue: `$${averageOrderValue.toFixed(2)}`,
+              lowStockAlerts: lowStockAlertsCount,
+              completedOrders: completedOrdersCount,
+              newUsersThisWeek: newUsersThisWeekCount,
+              activeRelationships: activeRelationshipsCount,
+              systemLatency: `${dbLatency}ms`,
+            },
+            recent_registrations: recentUsersSnapshot,
+            top_orders_by_value: topOrders,
+            data_timestamp: new Date().toISOString(),
+          }
+        }));
       } catch (err) {
         console.error('Error fetching metrics:', err);
       } finally {

@@ -236,45 +236,6 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
     );
   }
 
-  return (
-    <div style={{ paddingBottom: '4rem' }}>
-      {/* Tab Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-end',
-          marginBottom: '1.5rem',
-          paddingBottom: '1rem',
-          borderBottom: '1px solid var(--border)',
-        }}
-      >
-        <div>
-          <h2
-            style={{ margin: 0, fontSize: '1.25rem', fontWeight: 500, color: 'var(--text-main)' }}
-          >
-            Invitation Registry
-          </h2>
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem' }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Total Sent: <strong>{invitations.length}</strong>
-            </span>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Accepted: <strong>{invitations.filter((i) => i.status === 'accepted').length}</strong>
-            </span>
-          </div>
-        </div>
-        {!readOnly && (
-          <button
-            onClick={() => setShowInviteModal(true)}
-            className="gcp-btn-primary"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
-          >
-            <MailPlus size={16} /> New Invitation
-          </button>
-        )}
-      </div>
-
   const getActiveFilters = () => {
     const active = [];
     if (roleFilter && roleFilter !== 'all') {
@@ -316,6 +277,45 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
       </select>
     </div>
   );
+
+  return (
+    <div style={{ paddingBottom: '4rem' }}>
+      {/* Tab Header */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-end',
+          marginBottom: '1.5rem',
+          paddingBottom: '1rem',
+          borderBottom: '1px solid var(--border)',
+        }}
+      >
+        <div>
+          <h2
+            style={{ margin: 0, fontSize: '1.25rem', fontWeight: 500, color: 'var(--text-main)' }}
+          >
+            Invitation Registry
+          </h2>
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem' }}>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              Total Sent: <strong>{invitations.length}</strong>
+            </span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              Accepted: <strong>{invitations.filter((i) => i.status === 'accepted').length}</strong>
+            </span>
+          </div>
+        </div>
+        {!readOnly && (
+          <button
+            onClick={() => setShowInviteModal(true)}
+            className="gcp-btn-primary"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
+          >
+            <MailPlus size={16} /> New Invitation
+          </button>
+        )}
+      </div>
 
       <AppDataTable
         data={filteredInvitations}
