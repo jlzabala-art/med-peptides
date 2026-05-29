@@ -223,6 +223,52 @@ export default function AdminPricesTab() {
     return matchSearch && matchCategory;
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory]);
+
+  const totalItems = filteredProducts.length;
+  const totalPages = Math.ceil(totalItems / rowsPerPage);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
+  const activeFilters = [];
+  if (selectedCategory !== 'All') {
+    activeFilters.push({ label: 'Category', value: selectedCategory, type: 'category' });
+  }
+
+  const handleFilterRemove = (filter) => {
+    if (filter.type === 'category') setSelectedCategory('All');
+  };
+
+  const renderCustomFilters = () => (
+    <select
+      value={selectedCategory}
+      onChange={(e) => setSelectedCategory(e.target.value)}
+      style={{
+        padding: '0.5rem 1.5rem 0.5rem 1rem',
+        borderRadius: 'var(--radius-sm)',
+        border: '1px solid var(--border)',
+        backgroundColor: 'white',
+        fontSize: '0.85rem',
+        fontWeight: 650,
+        color: 'var(--text-main)',
+      }}
+    >
+      <option value="All">All Categories</option>
+      {uniqueCategories.map((cat) => (
+        <option key={cat} value={cat}>
+          {cat}
+        </option>
+      ))}
+    </select>
+  );
+
   return (
     <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
       {/* Description header */}
@@ -410,76 +456,7 @@ export default function AdminPricesTab() {
         className="card"
         style={{ padding: '0', border: '1px solid var(--border)', overflow: 'hidden' }}
       >
-        {/* Filter controls bar */}
-        <div
-          style={{
-            padding: '1rem 1.5rem',
-            borderBottom: '1px solid var(--border-light)',
-            background: 'var(--surface-raised)',
-          }}
-        >
-          <div
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}
-          >
-            <Percent size={18} color="var(--primary)" />
-            <h3
-              style={{ margin: 0, fontSize: '1.1rem', fontWeight: 850, color: 'var(--text-main)' }}
-            >
-              Interactive Pricing Matrix
-            </h3>
-          </div>
 
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: '200px' }}>
-              <div style={{ position: 'relative' }}>
-                <Search
-                  size={16}
-                  style={{
-                    position: 'absolute',
-                    left: '12px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    color: 'var(--text-muted)',
-                  }}
-                />
-                <input
-                  type="text"
-                  placeholder="Search by SKU or name..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem 1rem 0.5rem 2.5rem',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--border)',
-                    fontSize: '0.85rem',
-                  }}
-                />
-              </div>
-            </div>
-
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              style={{
-                padding: '0.5rem 1.5rem 0.5rem 1rem',
-                borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--border)',
-                backgroundColor: 'white',
-                fontSize: '0.85rem',
-                fontWeight: 650,
-                color: 'var(--text-main)',
-              }}
-            >
-              <option value="All">All Categories</option>
-              {uniqueCategories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
 
         {/* Pricing Table */}
         <AppDataTable
@@ -540,10 +517,25 @@ export default function AdminPricesTab() {
               },
             },
           ]}
-          data={filteredProducts}
+          data={paginatedProducts}
           keyField="id"
           emptyTitle="No products found"
           emptyDescription="Try adjusting the search criteria or category filter."
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          onPageChange={setCurrentPage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={(val) => {
+            setRowsPerPage(val);
+            setCurrentPage(1);
+          }}
+          searchQuery={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Search by SKU or name..."
+          filters={activeFilters}
+          onFilterRemove={handleFilterRemove}
+          renderCustomFilters={renderCustomFilters}
           expandableRender={(p) => {
             const categoryDiscount = discounts[p.category] ?? 15;
             const vialKey = `${p.id}-guestVialPrice`;

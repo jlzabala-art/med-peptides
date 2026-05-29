@@ -30,6 +30,15 @@ function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, 
   return (
     <div ref={setNodeRef} style={style} className="sb-group">
       <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+        {isEditing && (
+          <div 
+            {...attributes} 
+            {...listeners} 
+            style={{ cursor: 'grab', padding: '4px 4px 4px 12px', color: 'var(--text-muted)' }}
+          >
+            <GripVertical size={14} />
+          </div>
+        )}
         <button
           className="sb-group-header"
           onClick={() => !isEditing && toggleGroup(group.id)}
@@ -170,6 +179,45 @@ function SortableSidebarItem({ item, isActive, handleItemClick, expanded, isEdit
   );
 }
 
+// ─── Inline Reset Confirmation ──────────────────────────────────────────────
+function InlineConfirmReset({ onReset }) {
+  const [confirming, setConfirming] = useState(false);
+
+  if (confirming) {
+    return (
+      <div style={{ display: 'flex', gap: '4px', flex: '0 0 auto', padding: '0', margin: 0 }}>
+        <button
+          className="sb-item"
+          onClick={onReset}
+          title="Confirm Reset"
+          style={{ width: 'auto', padding: '0 10px', color: '#fff', backgroundColor: '#ef4444', justifyContent: 'center', borderRadius: '4px' }}
+        >
+          Yes
+        </button>
+        <button
+          className="sb-item"
+          onClick={() => setConfirming(false)}
+          title="Cancel"
+          style={{ width: 'auto', padding: '0 10px', color: 'var(--text-main)', backgroundColor: 'var(--bg-hover)', justifyContent: 'center', borderRadius: '4px' }}
+        >
+          No
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      className="sb-item"
+      onClick={() => setConfirming(true)}
+      title="Reset to Default"
+      style={{ flex: '0 0 auto', width: 'auto', padding: '0 12px', margin: 0, color: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', justifyContent: 'center', borderRadius: '4px' }}
+    >
+      Reset
+    </button>
+  );
+}
+
 // ─── Main AppSidebar ────────────────────────────────────────────────────────
 export default function AppSidebar({
   storageKey = 'app-sidebar',
@@ -294,18 +342,21 @@ export default function AppSidebar({
         </nav>
 
         {footer && (
-          <div className="sb-footer">
+          <div className="sb-footer" style={{ display: 'flex', gap: '4px', padding: '8px', flexDirection: (expanded || isEditing) ? 'row' : 'column' }}>
             <button
               className="sb-item"
               onClick={footer.onClick}
               data-tooltip={!expanded ? footer.label : undefined}
-              style={{ color: isEditing ? 'var(--primary)' : 'var(--text-tertiary)', fontWeight: isEditing ? 600 : 400, justifyContent: 'center' }}
+              style={{ flex: 1, width: 'auto', color: isEditing ? 'var(--primary)' : 'var(--text-tertiary)', fontWeight: isEditing ? 600 : 400, justifyContent: 'center', margin: 0, borderRadius: '4px' }}
             >
               <span className="sb-item-icon">
                 {footer.icon ? <footer.icon size={16} /> : <LogOut size={16} />}
               </span>
               {(expanded || isEditing) && <span className="sb-item-label">{footer.label}</span>}
             </button>
+            {footer.onReset && (expanded || isEditing) && (
+              <InlineConfirmReset onReset={footer.onReset} />
+            )}
           </div>
         )}
       </aside>

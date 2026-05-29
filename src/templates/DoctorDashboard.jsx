@@ -78,9 +78,17 @@ const DOCTOR_NAV_GROUPS = [
 ];
 
 // ── Main ───────────────────────────────────────────────────────────────────────
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+
 export default function DoctorDashboard() {
   const { user, userProfile, logout, activePermissions, baseRole } = useAuth();
-  const [activeTab, setActiveTab]     = useState('overview');
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Derive active tab from URL (e.g. /doctor/patients -> patients)
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  // Default to 'overview' if exactly /doctor
+  const activeTab = pathParts.length > 1 ? pathParts[pathParts.length - 1] : 'overview';
   const [sharedPatients, setSharedPatients] = useState([]);
   const [isMobile, setIsMobile]       = useState(window.innerWidth < 1024);
   const [notifications, setNotifications] = useState([]);
@@ -205,86 +213,7 @@ export default function DoctorDashboard() {
     window.location.href = '/';
   }, [logout]);
 
-  // ── DESKTOP layout ──
-  const renderTab = () => {
-    switch (activeTab) {
-      case 'overview':
-        return (
-          <DoctorOverviewTab
-            doctorId={doctorId}
-            doctorMeta={doctorMeta}
-            patients={sharedPatients}
-            onNavigate={setActiveTab}
-          />
-        );
-      case 'new-prescription':
-        return (
-          <DoctorPrescriptionsTab
-            key="new-prescription"
-            doctorId={doctorId}
-            doctorMeta={doctorMeta}
-            patients={sharedPatients}
-            initialBuilderOpen={true}
-            hideHistory={true}
-            onSavedRedirect={() => setActiveTab('prescriptions-history')}
-          />
-        );
-      case 'prescriptions-history':
-        return (
-          <DoctorPrescriptionsTab
-            key="prescriptions-history"
-            doctorId={doctorId}
-            doctorMeta={doctorMeta}
-            patients={sharedPatients}
-            initialBuilderOpen={false}
-            hideHistory={false}
-          />
-        );
-      case 'patients':
-        return (
-          <PhysicianPatientsTab
-            doctorId={doctorId}
-            doctorMeta={doctorMeta}
-            onPatientsLoaded={(pats) => {
-              setSharedPatients(pats);
-            }}
-          />
-        );
-      case 'orders':
-        return <PhysicianOrdersTab doctorId={doctorId} patients={sharedPatients} />;
-      case 'catalog-builder':
-        return <CatalogCreatorFlow ownerId={doctorId} ownerType="doctor" />;
-      case 'messages':
-        return <DoctorMessagesTab doctorId={doctorId} />;
-      case 'recommendations':
-        return (
-          <PhysicianRecommendationsTab
-            doctorId={doctorId}
-            doctorMeta={doctorMeta}
-            patients={sharedPatients}
-          />
-        );
-      case 'protocols':
-        return (
-          <PhysicianProtocolsTab
-            doctorId={doctorId}
-            doctorMeta={doctorMeta}
-            patients={sharedPatients}
-          />
-        );
-      case 'assistants':
-        return (
-          <PhysicianAssistantsTab
-            doctorId={doctorId}
-            doctorMeta={doctorMeta}
-          />
-        );
-      case 'settings':
-        return <PhysicianSettingsTab />;
-      default:
-        return <div style={{ padding: '2rem', color: 'var(--color-text-tertiary)' }}>Tab not found.</div>;
-    }
-  };
+
 
   const currentTab = ALL_TABS.find(t => t.id === activeTab);
   const currentGroup = DOCTOR_NAV_GROUPS.find(g => g.items.some(i => i.id === activeTab));
@@ -309,7 +238,7 @@ export default function DoctorDashboard() {
     <PortalLayout
       sidebarNavGroups={filteredGroups}
       activeNavId={activeTab}
-      onNavigate={setActiveTab}
+      onNavigate={(id) => navigate(`/doctor/${id === 'overview' ? '' : id}`)}
       portalTitle="Physician Portal"
       roleContext="doctor"
       pageContext={{
@@ -382,7 +311,20 @@ export default function DoctorDashboard() {
 
       <div style={{ padding: '2rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={currentTab?.label || activeTab}>
-          {renderTab()}
+          <Routes>
+            <Route index element={<DoctorOverviewTab doctorId={doctorId} doctorMeta={doctorMeta} patients={sharedPatients} onNavigate={(id) => navigate(`/doctor/${id === 'overview' ? '' : id}`)} />} />
+            <Route path="new-prescription" element={<DoctorPrescriptionsTab key="new-prescription" doctorId={doctorId} doctorMeta={doctorMeta} patients={sharedPatients} initialBuilderOpen={true} hideHistory={true} onSavedRedirect={() => navigate('/doctor/prescriptions-history')} />} />
+            <Route path="prescriptions-history" element={<DoctorPrescriptionsTab key="prescriptions-history" doctorId={doctorId} doctorMeta={doctorMeta} patients={sharedPatients} initialBuilderOpen={false} hideHistory={false} />} />
+            <Route path="patients" element={<PhysicianPatientsTab doctorId={doctorId} doctorMeta={doctorMeta} onPatientsLoaded={setSharedPatients} />} />
+            <Route path="orders" element={<PhysicianOrdersTab doctorId={doctorId} patients={sharedPatients} />} />
+            <Route path="catalog-builder" element={<CatalogCreatorFlow ownerId={doctorId} ownerType="doctor" />} />
+            <Route path="messages" element={<DoctorMessagesTab doctorId={doctorId} />} />
+            <Route path="recommendations" element={<PhysicianRecommendationsTab doctorId={doctorId} doctorMeta={doctorMeta} patients={sharedPatients} />} />
+            <Route path="protocols" element={<PhysicianProtocolsTab doctorId={doctorId} doctorMeta={doctorMeta} patients={sharedPatients} />} />
+            <Route path="assistants" element={<PhysicianAssistantsTab doctorId={doctorId} doctorMeta={doctorMeta} />} />
+            <Route path="settings" element={<PhysicianSettingsTab />} />
+            <Route path="*" element={<Navigate to="" replace />} />
+          </Routes>
         </AdminTabErrorBoundary>
       </div>
     </PortalLayout>

@@ -13,6 +13,8 @@ import {
   EyeOff,
   Eye,
   Trash2,
+  BookOpen,
+  Plus
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import AppDataTable from '../ui/AppDataTable';
@@ -23,6 +25,7 @@ import AppEntityCell from '../ui/AppEntityCell';
 import { useToast } from '../../hooks/useToast';
 import AdminSupplyNotifierWidget from './gadgets/AdminSupplyNotifierWidget';
 import InlineEditField from '../ui/InlineEditField';
+import { catalogRepository } from '../../repositories/catalogRepository';
 
 export default function AdminProductsTab({
   readOnly = false,
@@ -30,7 +33,7 @@ export default function AdminProductsTab({
   allowedCategories = ['All'],
   isWholesaler = false,
 }) {
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const { toast } = useToast();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +51,10 @@ export default function AdminProductsTab({
   const [savingProduct, setSavingProduct] = useState(null);
   const [migrating, setMigrating] = useState(false);
   const [selectedProductIds, setSelectedProductIds] = useState([]);
+
+  const [catalogSelectMode, setCatalogSelectMode] = useState(false);
+  const [myCatalogs, setMyCatalogs] = useState([]);
+  const [loadingCatalogs, setLoadingCatalogs] = useState(false);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -318,6 +325,48 @@ export default function AdminProductsTab({
     }
   };
 
+  async function handleOpenCatalogSelect() {
+    setCatalogSelectMode(true);
+    setLoadingCatalogs(true);
+    try {
+      const list = isAdmin ? await catalogRepository.getAllCatalogs() : await catalogRepository.getCatalogsByOwner(user?.uid);
+      setMyCatalogs(list || []);
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to load catalogs');
+    } finally {
+      setLoadingCatalogs(false);
+    }
+  }
+
+  async function handleAddToCatalog(catalog) {
+    if (!selectedProductIds.length) return;
+    try {
+      const updatedCatalog = { ...catalog };
+      let targetSection = null;
+      if (updatedCatalog.sections && updatedCatalog.sections.length > 0) {
+        targetSection = updatedCatalog.sections[0];
+      } else {
+        targetSection = { title: 'Products', products: [], protocols: [] };
+        updatedCatalog.sections = [targetSection];
+      }
+      
+      const newProducts = [...(targetSection.products || [])];
+      selectedProductIds.forEach(id => {
+        if (!newProducts.includes(id)) newProducts.push(id);
+      });
+      targetSection.products = newProducts;
+
+      await catalogRepository.saveCatalog(updatedCatalog);
+      toast.success(`Added ${selectedProductIds.length} products to ${catalog.title}`);
+      setCatalogSelectMode(false);
+      setSelectedProductIds([]);
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to add to catalog');
+    }
+  }
+
   async function handleDeleteProduct(id) {
     if (readOnly) return;
     if (
@@ -423,28 +472,25 @@ export default function AdminProductsTab({
     return (
       <div
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-start',
-          alignItems: 'flex-start',
-          gap: '1.5rem',
-          borderLeft: '3px solid var(--primary)',
-          paddingLeft: '1.25rem',
+          backgroundColor: 'var(--color-bg-subtle, #f8fafc)',
+          borderRadius: 'var(--radius-lg, 8px)',
+          border: '1px solid var(--border)',
+          padding: '1.5rem',
+          margin: '0.5rem 0',
+          boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)',
         }}
       >
         <div
           style={{
-            width: '100%',
-            maxWidth: '600px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1.25rem',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+            gap: '1.5rem',
           }}
         >
           <div>
             <label style={labelStyle}>SKU</label>
             {readOnly ? (
-              <span className="mono-data">{p.sku || 'N/A'}</span>
+              <span className="mono-data" style={{ padding: '0.5rem 0', display: 'block' }}>{p.sku || 'N/A'}</span>
             ) : (
               <InlineEditField
                 value={p.sku || ''}
@@ -460,6 +506,8 @@ export default function AdminProductsTab({
             {readOnly ? (
               <span
                 style={{
+                  padding: '0.5rem 0',
+                  display: 'block',
                   fontWeight: 700,
                   color: p.stock < 20 ? 'var(--error)' : p.stock < 50 ? '#f59e0b' : 'inherit',
                 }}
@@ -483,7 +531,7 @@ export default function AdminProductsTab({
           <div>
             <label style={labelStyle}>Warehouse</label>
             {readOnly ? (
-              <span>{p.warehouse || 'Poland'}</span>
+              <span style={{ padding: '0.5rem 0', display: 'block' }}>{p.warehouse || 'Poland'}</span>
             ) : (
               <InlineEditField
                 type="select"
@@ -498,7 +546,7 @@ export default function AdminProductsTab({
             <div>
               <label style={labelStyle}>Supplier (optional)</label>
               {readOnly ? (
-                <span>{p.supplier || 'N/A'}</span>
+                <span style={{ padding: '0.5rem 0', display: 'block', color: 'var(--text-muted)' }}>{p.supplier || 'N/A'}</span>
               ) : (
                 <InlineEditField
                   type="select"
@@ -524,9 +572,11 @@ export default function AdminProductsTab({
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.25rem',
-                  width: '100%',
-                  maxWidth: '300px',
+                  gap: '0.5rem',
+                  padding: '0.5rem',
+                  backgroundColor: 'white',
+                  border: '1px solid var(--border)',
+                  borderRadius: '4px',
                 }}
               >
                 <div
@@ -542,8 +592,8 @@ export default function AdminProductsTab({
                     display: 'flex',
                     justifyContent: 'space-between',
                     fontSize: '0.85rem',
-                    borderTop: '1px solid var(--border)',
-                    paddingTop: '0.25rem',
+                    borderTop: '1px solid var(--border-light, #e2e8f0)',
+                    paddingTop: '0.5rem',
                   }}
                 >
                   <span style={{ color: 'var(--text-muted)' }}>Kit (10):</span>
@@ -604,6 +654,84 @@ export default function AdminProductsTab({
     );
   });
 
+  const activeFilters = [];
+  if (filterCategory !== 'All') activeFilters.push({ label: 'Category', value: filterCategory, type: 'category' });
+  if (filterStatus !== 'All') activeFilters.push({ label: 'Status', value: filterStatus, type: 'status' });
+  if (filterWarehouse !== 'All') activeFilters.push({ label: 'Warehouse', value: filterWarehouse, type: 'warehouse' });
+  if (filterStock !== 'All') activeFilters.push({ label: 'Stock', value: filterStock, type: 'stock' });
+
+  const handleFilterRemove = (filter) => {
+    if (filter.type === 'category') setFilterCategory('All');
+    if (filter.type === 'status') setFilterStatus('All');
+    if (filter.type === 'warehouse') setFilterWarehouse('All');
+    if (filter.type === 'stock') setFilterStock('All');
+  };
+
+  const renderCustomFilters = () => (
+    <>
+      {categoriesToShow.length > 0 && (
+        <select
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value)}
+          style={{
+            height: '32px', padding: '0 1.5rem 0 0.75rem', borderRadius: '16px',
+            border: '1px solid var(--border)', backgroundColor: filterCategory === 'All' ? 'white' : 'var(--primary-light)',
+            color: filterCategory === 'All' ? 'var(--text-main)' : 'var(--primary)',
+            fontSize: '0.8rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+          }}
+        >
+          <option value="All">Category: All</option>
+          {categoriesToShow.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+        </select>
+      )}
+      <select
+        value={filterStatus}
+        onChange={(e) => setFilterStatus(e.target.value)}
+        style={{
+          height: '32px', padding: '0 1.5rem 0 0.75rem', borderRadius: '16px',
+          border: '1px solid var(--border)', backgroundColor: filterStatus === 'All' ? 'white' : 'var(--primary-light)',
+          color: filterStatus === 'All' ? 'var(--text-main)' : 'var(--primary)',
+          fontSize: '0.8rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+        }}
+      >
+        <option value="All">Status: All</option>
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+      </select>
+      <select
+        value={filterStock}
+        onChange={(e) => setFilterStock(e.target.value)}
+        style={{
+          height: '32px', padding: '0 1.5rem 0 0.75rem', borderRadius: '16px',
+          border: '1px solid var(--border)', backgroundColor: filterStock === 'All' ? 'white' : 'var(--primary-light)',
+          color: filterStock === 'All' ? 'var(--text-main)' : 'var(--primary)',
+          fontSize: '0.8rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+        }}
+      >
+        <option value="All">Stock: All</option>
+        <option value="In Stock">Healthy (20+)</option>
+        <option value="Low Stock">Low (&lt;20)</option>
+        <option value="Out of Stock">Out of Stock</option>
+      </select>
+      <select
+        value={filterWarehouse}
+        onChange={(e) => setFilterWarehouse(e.target.value)}
+        style={{
+          height: '32px', padding: '0 1.5rem 0 0.75rem', borderRadius: '16px',
+          border: '1px solid var(--border)', backgroundColor: filterWarehouse === 'All' ? 'white' : 'var(--primary-light)',
+          color: filterWarehouse === 'All' ? 'var(--text-main)' : 'var(--primary)',
+          fontSize: '0.8rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+        }}
+      >
+        <option value="All">Warehouse: All</option>
+        <option value="Poland">Poland</option>
+        <option value="UK">UK</option>
+        <option value="USA">USA</option>
+        <option value="Greece">Greece</option>
+      </select>
+    </>
+  );
+
   const totalItems = filteredProducts.length;
   const totalPages = Math.ceil(totalItems / rowsPerPage);
   const paginatedProducts = filteredProducts.slice(
@@ -618,130 +746,7 @@ export default function AdminProductsTab({
           <AdminSupplyNotifierWidget />
         </div>
       )}
-      {/* Toolbar */}
-      <AppFilterBar
-        searchQuery={searchTerm}
-        onSearchChange={setSearchTerm}
-        dateRange={dateRange}
-        onDateRangeChange={setDateRange}
-        searchPlaceholder="Search products by name, category, dosage..."
-        primaryFilters={[]}
-        secondaryActions={
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            {categoriesToShow.length > 0 && (
-              <select
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                style={{
-                  height: '32px',
-                  padding: '0 1.5rem 0 0.75rem',
-                  borderRadius: '16px',
-                  border: '1px solid var(--border)',
-                  backgroundColor: filterCategory === 'All' ? 'white' : 'var(--primary-light)',
-                  color: filterCategory === 'All' ? 'var(--text-main)' : 'var(--primary)',
-                  fontSize: '0.8rem',
-                  fontWeight: 500,
-                  outline: 'none',
-                  cursor: 'pointer',
-                  appearance: 'none',
-                  backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 0.5rem top 50%',
-                  backgroundSize: '0.5rem auto',
-                }}
-              >
-                <option value="All">Category: All</option>
-                {categoriesToShow.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            )}
 
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              style={{
-                height: '32px',
-                padding: '0 1.5rem 0 0.75rem',
-                borderRadius: '16px',
-                border: '1px solid var(--border)',
-                backgroundColor: filterStatus === 'All' ? 'white' : 'var(--primary-light)',
-                color: filterStatus === 'All' ? 'var(--text-main)' : 'var(--primary)',
-                fontSize: '0.8rem',
-                fontWeight: 500,
-                outline: 'none',
-                cursor: 'pointer',
-                appearance: 'none',
-                backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'right 0.5rem top 50%',
-                backgroundSize: '0.5rem auto',
-              }}
-            >
-              <option value="All">Status: All</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
-
-            <select
-              value={filterStock}
-              onChange={(e) => setFilterStock(e.target.value)}
-              style={{
-                height: '32px',
-                padding: '0 1.5rem 0 0.75rem',
-                borderRadius: '16px',
-                border: '1px solid var(--border)',
-                backgroundColor: filterStock === 'All' ? 'white' : 'var(--primary-light)',
-                color: filterStock === 'All' ? 'var(--text-main)' : 'var(--primary)',
-                fontSize: '0.8rem',
-                fontWeight: 500,
-                outline: 'none',
-                cursor: 'pointer',
-                appearance: 'none',
-                backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'right 0.5rem top 50%',
-                backgroundSize: '0.5rem auto',
-              }}
-            >
-              <option value="All">Stock: All</option>
-              <option value="In Stock">Healthy (20+)</option>
-              <option value="Low Stock">Low (&lt;20)</option>
-              <option value="Out of Stock">Out of Stock</option>
-            </select>
-
-            <select
-              value={filterWarehouse}
-              onChange={(e) => setFilterWarehouse(e.target.value)}
-              style={{
-                height: '32px',
-                padding: '0 1.5rem 0 0.75rem',
-                borderRadius: '16px',
-                border: '1px solid var(--border)',
-                backgroundColor: filterWarehouse === 'All' ? 'white' : 'var(--primary-light)',
-                color: filterWarehouse === 'All' ? 'var(--text-main)' : 'var(--primary)',
-                fontSize: '0.8rem',
-                fontWeight: 500,
-                outline: 'none',
-                cursor: 'pointer',
-                appearance: 'none',
-                backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'right 0.5rem top 50%',
-                backgroundSize: '0.5rem auto',
-              }}
-            >
-              <option value="All">Warehouse: All</option>
-              <option value="Poland">Poland</option>
-              <option value="UK">UK</option>
-              <option value="USA">USA</option>
-              <option value="Greece">Greece</option>
-            </select>
-          </div>
-        }
-      />
 
       {/* Table Action Toolbar */}
       {!readOnly && (
@@ -978,6 +983,84 @@ export default function AdminProductsTab({
         </div>
       )}
 
+      {/* Catalog Select Panel */}
+      {!readOnly && catalogSelectMode && (
+        <div
+          style={{
+            backgroundColor: 'white',
+            padding: '1.5rem',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--primary)',
+            marginBottom: '1.5rem',
+            boxShadow: 'var(--shadow-sm)',
+            animation: 'slideDown 0.3s ease-out',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1rem',
+            }}
+          >
+            <h3
+              style={{
+                margin: 0,
+                fontSize: '1.1rem',
+                color: 'var(--primary)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <BookOpen size={20} /> Include {selectedProductIds.length} Products in Catalog
+            </h3>
+            <XCircle
+              size={20}
+              style={{ cursor: 'pointer', color: 'var(--text-muted)' }}
+              onClick={() => setCatalogSelectMode(false)}
+            />
+          </div>
+          
+          {loadingCatalogs ? (
+            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading your catalogs...</div>
+          ) : myCatalogs.length === 0 ? (
+            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+              No catalogs found. You need to create a catalog first before adding products to it.
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
+              {myCatalogs.map(catalog => (
+                <div 
+                  key={catalog.id}
+                  style={{
+                    padding: '1rem',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-md)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    backgroundColor: 'var(--color-bg-subtle)'
+                  }}
+                  onClick={() => handleAddToCatalog(catalog)}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.borderColor = 'var(--primary)';
+                    e.currentTarget.style.backgroundColor = 'var(--primary-light)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                    e.currentTarget.style.backgroundColor = 'var(--color-bg-subtle)';
+                  }}
+                >
+                  <div style={{ fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.25rem' }}>{catalog.title}</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Status: {catalog.status}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {products.length === 0 && !loading && (
         <div
           style={{
@@ -1026,6 +1109,14 @@ export default function AdminProductsTab({
               setRowsPerPage(val);
               setCurrentPage(1);
             }}
+            searchQuery={searchTerm}
+            onSearchChange={setSearchTerm}
+            searchPlaceholder="Search products by name, category, dosage..."
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
+            filters={activeFilters}
+            onFilterRemove={handleFilterRemove}
+            renderCustomFilters={renderCustomFilters}
             renderBatchActions={(selected) => (
               <>
                 <button
@@ -1055,6 +1146,22 @@ export default function AdminProductsTab({
                     }}
                   >
                     <Percent size={14} /> Bulk Price Update
+                  </button>
+                )}
+                {!readOnly && (
+                  <button
+                    onClick={handleOpenCatalogSelect}
+                    className="btn btn-outline"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      fontSize: '0.8rem',
+                      padding: '0.4rem 0.8rem',
+                      background: 'white',
+                    }}
+                  >
+                    <BookOpen size={14} /> Include in Catalog
                   </button>
                 )}
               </>

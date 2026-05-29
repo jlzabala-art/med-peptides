@@ -68,7 +68,52 @@ Create a new **DoctorDashboard** view tailored for doctors:
   - Provide user role from Auth token to conditionally render doctor navigation.
 
 ---
-### Security & Access
+### 1. UI/UX Standardization (GCP Data Tables)
+
+*Status: Planning*
+
+We will standardize all system data tables using the `AppDataTable` component to follow Google Cloud Console UX patterns.
+
+### Objectives:
+- **Consistent Placement:** Search and filter controls will be placed directly above the table header.
+- **Filter Chips:** Active filters will be displayed as chips below the search bar.
+- **Pagination:** Footer-based pagination with a default of 20 items per page.
+- **State Preservation:** Implement server-side pagination with cursors (`startAfter`, `limit`) where applicable.
+
+### Proposed Changes:
+
+#### [MODIFY] `src/components/ui/AppDataTable.jsx`
+- Add a new "Toolbar" section above the table header to render the search input and filter chips.
+- Accept new props: `searchQuery`, `onSearchChange`, `searchPlaceholder`, `filters` (array of active filter objects), `onFilterRemove`, `renderCustomFilters` (for advanced filter dropdowns).
+- Ensure footer pagination controls are styled strictly according to GCP standards (rows per page dropdown, item count text, and simple chevron navigation).
+
+#### [MODIFY] Individual Tab Components (e.g., `AdminCostsTab`, `AdminProductsTab`, `AdminInvitationsTab`, `OrdersTab`, etc.)
+- Remove custom-built search bars and filter dropdowns from the tab headers.
+- Pass search state and filter state directly to the updated `AppDataTable`.
+- Enforce the 20 items per page limit.
+- Update queries to support cursor-based pagination if not already implemented.
+
+## 2. Performance Optimization (Firestore Indices)
+
+*Status: Planning*
+
+To ensure the new paginated and filtered tables perform optimally at scale, we must define Firestore compound indices.
+
+### Proposed Changes:
+- Review queries across all portals (Users, Orders, Products, etc.).
+- Create a `firestore.indexes.json` or equivalent configuration to define required compound indices (e.g., filtering by `status` and sorting by `createdAt`, while paginating).
+- Document the `firebase deploy --only firestore:indexes` command in the walkthrough.
+
+## 3. Audit Logs & Traceability
+
+*Status: Pending*
+
+- Integrate `logAction` into key edit operations in the Wholesaler portal (e.g., Bulk Orders creation, Rx status updates).
+
+## User Review Required
+> [!IMPORTANT]
+> - Are there any specific filters or advanced search behaviors you want natively integrated into `AppDataTable` (e.g., date range pickers), or should complex filters be handled via custom render props?
+> - Do you want to enforce server-side pagination for ALL tables, or is client-side pagination acceptable for smaller datasets (e.g., AdminSettingsTab)?
 
 - Update Firebase security rules to grant doctors read/write access only to their own data.
 - Add unit tests for role‑based rendering.

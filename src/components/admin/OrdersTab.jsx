@@ -9,7 +9,8 @@ import {
   updateDoc,
   serverTimestamp,
 } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db, auth } from '../../firebase';
+import { logAction } from '../../services/auditLogger';
 import {
   ShoppingCart,
   Package,
@@ -44,7 +45,7 @@ const EMAILJS_PUBLIC_KEY = 'rO_f_X4uBvFf3u_3u';
 // Template for admin-side order confirmation email to customer/doctor
 const EMAILJS_CONFIRM_TEMPLATE = 'template_7unfks8';
 
-export default function OrdersTab({ userId, viewMode = 'admin', readOnly = false }) {
+export default function OrdersTab({ buyerId = null, accountManagerId = null, doctorId = null, readOnly = false }) {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,21 +67,22 @@ export default function OrdersTab({ userId, viewMode = 'admin', readOnly = false
   useEffect(() => {
     fetchOrders();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
+  }, [buyerId, accountManagerId, doctorId]);
 
   async function fetchOrders() {
     try {
       setLoading(true);
-      let q;
-      if (viewMode === 'admin') {
-        q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
-      } else {
-        q = query(
-          collection(db, 'orders'),
-          where('paymentOwnerId', '==', userId),
-          orderBy('createdAt', 'desc')
-        );
+      let qBuilder = collection(db, 'orders');
+      if (buyerId) {
+        qBuilder = query(qBuilder, where('paymentOwnerId', '==', buyerId));
       }
+      if (accountManagerId) {
+        qBuilder = query(qBuilder, where('accountManagerId', '==', accountManagerId));
+      }
+      if (doctorId) {
+        qBuilder = query(qBuilder, where('doctorId', '==', doctorId));
+      }
+      const q = query(qBuilder, orderBy('createdAt', 'desc'));
       const snap = await getDocs(q);
       const raw = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       setOrders(raw.filter((o) => o.orderId || (o.items && o.items.length > 0)));
@@ -134,6 +136,13 @@ export default function OrdersTab({ userId, viewMode = 'admin', readOnly = false
         confirmedAt: serverTimestamp(),
         confirmedBy: 'admin',
       });
+      await logAction(
+        auth.currentUser?.uid || 'unknown_admin',
+        'admin',
+        'ORDER_CONFIRM',
+        confirmModal.id,
+        { previousStatus: confirmModal.status, newStatus: 'Confirmed' }
+      );
 
       // 2. Send emails via EmailJS
       const orderId = confirmModal.orderId || confirmModal.id;
@@ -457,6 +466,41 @@ export default function OrdersTab({ userId, viewMode = 'admin', readOnly = false
     </div>
   );
 
+  const getActiveFilters = () => {
+    const active = [];
+    if (filterStatus && filterStatus !== 'All') {
+      active.push({ label: 'Status', value: filterStatus, type: 'statusFilter' });
+    }
+    return active;
+  };
+
+  const handleFilterRemove = (f) => {
+    if (f.type === 'statusFilter') setFilterStatus('All');
+  };
+
+  const renderCustomFilters = () => (
+    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+      <select
+        value={filterStatus}
+        onChange={(e) => setFilterStatus(e.target.value)}
+        style={{
+          padding: '0.4rem 0.75rem',
+          borderRadius: '4px',
+          border: '1px solid var(--border)',
+          backgroundColor: 'white',
+          color: 'var(--text-main)',
+          outline: 'none',
+        }}
+      >
+        <option value="All">All Statuses</option>
+        <option value="Processing">Processing</option>
+        <option value="Shipped">Shipped</option>
+        <option value="Completed">Completed</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+    </div>
+  );
+
   /* ── Render ──────────────────────────────────────────────────────────── */
   return (
     <div style={{ marginBottom: '2rem' }}>
@@ -512,72 +556,6 @@ export default function OrdersTab({ userId, viewMode = 'admin', readOnly = false
         </div>
       </div>
 
-      {/* ── Toolbar ── */}
-      <AppFilterBar
-        searchQuery={searchTerm}
-        onSearchChange={setSearchTerm}
-        searchPlaceholder="Search orders by customer or ID..."
-        secondaryActions={
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              style={{
-                padding: '0.4rem 0.75rem',
-                borderRadius: '4px',
-                border: '1px solid var(--border)',
-                backgroundColor: 'white',
-                color: 'var(--text-main)',
-                outline: 'none',
-              }}
-            >
-              <option value="All">All Statuses</option>
-              <option value="Processing">Processing</option>
-              <option value="Shipped">Shipped</option>
-              <option value="Completed">Completed</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
-
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                border: '1px solid var(--border)',
-                borderRadius: '4px',
-                padding: '0.2rem 0.5rem',
-                backgroundColor: 'white',
-              }}
-            >
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>From:</span>
-              <input
-                type="date"
-                value={dateRange.start}
-                onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                style={{
-                  border: 'none',
-                  outline: 'none',
-                  fontSize: '0.85rem',
-                  color: 'var(--text-main)',
-                }}
-              />
-              <span style={{ color: 'var(--border)' }}>|</span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>To:</span>
-              <input
-                type="date"
-                value={dateRange.end}
-                onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                style={{
-                  border: 'none',
-                  outline: 'none',
-                  fontSize: '0.85rem',
-                  color: 'var(--text-main)',
-                }}
-              />
-            </div>
-          </div>
-        }
-      />
 
       {/* ── Table ── */}
       {loading ? (
@@ -611,6 +589,11 @@ export default function OrdersTab({ userId, viewMode = 'admin', readOnly = false
           expandableRender={renderOrderDetails}
           selectedIds={selectedOrderIds}
           onSelectionChange={setSelectedOrderIds}
+          searchQuery={searchTerm}
+          onSearchChange={setSearchTerm}
+          filters={getActiveFilters()}
+          onFilterRemove={handleFilterRemove}
+          renderCustomFilters={renderCustomFilters}
           renderBatchActions={(selected) => (
             <button
               onClick={handleExportCSV}

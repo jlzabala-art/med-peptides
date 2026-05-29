@@ -4,7 +4,7 @@ import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import RefillReminderBanner from '../components/shared/RefillReminderBanner';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import {
   ShieldCheck, ArrowLeft, Settings, Users, Database, Layers,
   PackageSearch, LayoutDashboard, Bot, Link2, BarChart3,
@@ -81,8 +81,11 @@ const NAV_GROUPS = [
     items: [
       { id: 'email-campaigns',  label: 'Email Campaigns',     icon: Mail },
       { id: 'email-templates',  label: 'Email Templates',     icon: FileText },
-      { id: 'branding',         label: 'Branding',            icon: Eye },
+      { id: 'drip-marketing',   label: 'Drip Sequences',      icon: Zap },
       { id: 'catalogs',         label: 'Catalogs',            icon: BookOpen },
+      { id: 'coupons',          label: 'Coupons & Discounts', icon: Tag },
+      { id: 'referrals',        label: 'Referral Tracking',   icon: Users },
+      { id: 'co-branding',      label: 'Co-Branding',         icon: Eye },
     ],
   },
   {
@@ -235,41 +238,24 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────────
-export default function AdminDashboard({ onBack, initialTab }) {
+export default function AdminDashboard() {
   const { isAdmin, loading: authLoading, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [catalogToEdit, setCatalogToEdit] = useState(null);
 
-  const searchParams = new URLSearchParams(location.search);
-  const activeTab = searchParams.get('t') || initialTab || 'dashboard';
+  // Derive active tab from the URL path instead of query params.
+  // E.g., /admin/users -> 'users', /admin -> 'dashboard'
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const activeTab = pathParts.length > 1 ? pathParts[1] : 'dashboard';
 
   const navToTab = useCallback((tabId) => {
-    navigate(`?t=${tabId}`);
+    navigate(`/admin/${tabId === 'dashboard' ? '' : tabId}`);
   }, [navigate]);
 
   const handleLogout = () => { if (logout) logout(); window.location.href = '/'; };
 
   const currentGroup = NAV_GROUPS.find(g => g.items.some(i => i.id === activeTab));
   const currentItem  = currentGroup?.items.find(i => i.id === activeTab);
-
-  const sidebarProps = {
-    storageKey: "admin-sidebar",
-    groups: NAV_GROUPS,
-    activeId: activeTab,
-    onNavigate: navToTab,
-    accentColor: "#0071bd",
-    header: { title: 'Control Center', subtitle: 'Admin Portal' },
-    footer: { label: 'Logout', icon: LogOut, onClick: handleLogout }
-  };
-
-  const headerProps = {
-    title: currentItem?.label || 'Dashboard',
-    subtitle: currentGroup && currentGroup.label !== currentItem?.label 
-      ? currentGroup.label 
-      : undefined,
-    onSearchClick: () => { console.log('Global search clicked'); }
-  };
 
   return (
     <PortalLayout 
@@ -294,12 +280,9 @@ export default function AdminDashboard({ onBack, initialTab }) {
       }
     >
       <div style={{ padding: '1rem' }}>
-        <TabContent 
-          tab={activeTab} 
-          catalogToEdit={catalogToEdit} 
-          setCatalogToEdit={setCatalogToEdit} 
-          setActiveTab={navToTab} 
-        />
+        <React.Suspense fallback={<AdminLoadingFallback />}>
+          <Outlet />
+        </React.Suspense>
       </div>
     </PortalLayout>
   );

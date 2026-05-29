@@ -20,4 +20,10 @@
   --text-main: #0D1B2E;
   --text-muted: #4A6080;
   --text-light: #7A93B0;
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
 }

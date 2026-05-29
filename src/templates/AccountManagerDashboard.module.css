@@ -1,0 +1,26 @@
+.dashboardContent {
+  padding: var(--spacing-xl);
+}
+
+.catalogWrapper {
+  padding: var(--spacing-lg);
+}
+
+.logoutButton {
+  background: none;
+  border: none;
+  padding: var(--spacing-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.logoutButton:hover {
+  background-color: var(--accent-soft);
+  border-radius: var(--radius-sm);
+}
+
+.logoutButton:focus {
+  outline: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
+}

@@ -52,6 +52,22 @@ export default function AdminUsersTable({
   getWholesalerStats,
   activeAssignments,
   renderBatchActions,
+
+  // Pagination
+  currentPage,
+  totalPages,
+  totalItems,
+  rowsPerPage,
+  onRowsPerPageChange,
+  onPageChange,
+
+  // Toolbar
+  searchQuery,
+  onSearchChange,
+  searchPlaceholder,
+  filters,
+  onFilterRemove,
+  renderCustomFilters,
 }) {
   // Define columns
   const columns = [
@@ -497,6 +513,18 @@ export default function AdminUsersTable({
       expandableRender={renderExpandedRow}
       emptyTitle="No users found"
       emptyDescription="There are no users matching your current filters."
+      currentPage={currentPage}
+      totalPages={totalPages}
+      totalItems={totalItems}
+      rowsPerPage={rowsPerPage}
+      onRowsPerPageChange={onRowsPerPageChange}
+      onPageChange={onPageChange}
+      searchQuery={searchQuery}
+      onSearchChange={onSearchChange}
+      searchPlaceholder={searchPlaceholder}
+      filters={filters}
+      onFilterRemove={onFilterRemove}
+      renderCustomFilters={renderCustomFilters}
     />
   );
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MessageCircle, FileText, Check, HelpCircle, Shield, AlertTriangle, Search, Calendar } from 'lucide-react';
 
-export default function CatalogPreviewPanel({ catalog, products = [], protocols = [], recipientName = '', clinicName = '' }) {
+export default function CatalogPreviewPanel({ catalog, products = [], protocols = [], recipientName = '', clinicName = '', onAdd }) {
   const [activeFaq, setActiveFaq] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -163,12 +163,12 @@ export default function CatalogPreviewPanel({ catalog, products = [], protocols 
             )}
           </div>
 
-          {/* Section Products Grid */}
+          {/* Section Products List - Clinical Formulary Style */}
           {section.products?.length > 0 && (
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-              gap: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.25rem',
               marginBottom: '1.5rem'
             }}>
               {section.products.map(prodId => {
@@ -179,80 +179,133 @@ export default function CatalogPreviewPanel({ catalog, products = [], protocols 
                   (prod.desc || '').toLowerCase().includes(searchQuery.toLowerCase());
                 if (!matchesSearch) return null;
 
+                const rawGoals = prod.goals || [];
+                const goalLabels = {
+                  cognitive_mood: 'Cognitive & Mood',
+                  hormonal_optimization: 'Hormonal Optimization',
+                  immune_support: 'Immune Support',
+                  longevity_anti_aging: 'Longevity & Anti-Aging',
+                  metabolic_weight: 'Metabolic & Weight',
+                  recovery_repair: 'Recovery & Repair',
+                  sleep_circadian: 'Sleep & Circadian',
+                };
+
+                const displayGoals = rawGoals.map(g => goalLabels[g] || g);
+                const displayRoute = prod.defaultVariant?.route?.replace('_', ' ') || 'Injectable';
+
                 return (
                   <div key={prodId} style={{
                     background: 'var(--color-bg-surface)',
                     border: '1px solid #dadce0',
-                    borderRadius: '8px',
-                    padding: '1rem',
+                    borderLeft: `4px solid ${primaryColor}`,
+                    borderRadius: '6px',
+                    padding: '1.25rem',
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    boxShadow: '0 1px 2px 0 rgba(60,64,67,0.1)'
+                    gap: '0.75rem',
+                    boxShadow: '0 1px 2px 0 rgba(60,64,67,0.05)'
                   }}>
-                    <div>
-                      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                        <div style={{
-                          width: '48px',
-                          height: '48px',
-                          backgroundColor: '#f1f3f4',
-                          borderRadius: '6px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: primaryColor
-                        }}>
-                          <FileText size={24} />
-                        </div>
-                        <div>
-                          <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#202124' }}>
-                            {prod.displayName || prod.name}
-                          </h4>
+                    {/* Header Row */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#202124', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {prod.displayName || prod.name}
                           <span style={{
                             fontSize: '0.7rem',
                             color: '#5f6368',
                             backgroundColor: '#f1f3f4',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
+                            padding: '2px 8px',
+                            borderRadius: '12px',
                             fontWeight: 600,
                             textTransform: 'uppercase'
                           }}>
                             {prod.productType || 'peptide'}
                           </span>
-                        </div>
+                        </h4>
+                        {prod.dosage && (
+                          <div style={{ fontSize: '0.85rem', color: '#5f6368', marginTop: '4px', fontWeight: 500 }}>
+                            Dosage / Concentration: {prod.dosage}
+                          </div>
+                        )}
                       </div>
-                      <p style={{
-                        fontSize: '0.8rem',
-                        lineHeight: 1.5,
-                        color: '#5f6368',
-                        margin: '0 0 1rem 0',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden'
-                      }}>
-                        {prod.desc || prod.science?.desc || 'Clinical reference details pending review.'}
-                      </p>
-                    </div>
-
-                    <div style={{
-                      borderTop: '1px solid #f1f3f4',
-                      paddingTop: '0.75rem',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}>
-                      <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#3c4043' }}>
-                        <span style={{ color: '#137333', fontSize: '0.95rem', fontWeight: 700 }}>
+                      
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ color: '#137333', fontSize: '1.1rem', fontWeight: 800 }}>
                           {prod.defaultVariant?.pricing?.retailPrice?.base?.kitUSD 
                             ? `$${prod.defaultVariant.pricing.retailPrice.base.kitUSD}`
                             : 'Contact for Pricing'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Classifications Row */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '0.25rem' }}>
+                      {displayGoals.length > 0 && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#3c4043', textTransform: 'uppercase' }}>Therapeutic Goals:</span>
+                          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                            {displayGoals.map((g, i) => (
+                              <span key={i} style={{ fontSize: '0.75rem', color: primaryColor, backgroundColor: 'rgba(26,115,232,0.1)', padding: '2px 8px', borderRadius: '4px', fontWeight: 500 }}>
+                                {g}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#3c4043', textTransform: 'uppercase' }}>Administration Route:</span>
+                        <span style={{ fontSize: '0.75rem', color: '#b06000', backgroundColor: '#fef7e0', padding: '2px 8px', borderRadius: '4px', fontWeight: 600, textTransform: 'capitalize' }}>
+                          {displayRoute}
                         </span>
                       </div>
-                      <span style={{ fontSize: '0.72rem', color: '#5f6368' }}>
-                        {prod.defaultVariant?.route?.replace('_', ' ') || 'Injectable Vial'}
-                      </span>
                     </div>
+
+                    {/* Description */}
+                    <div style={{
+                      fontSize: '0.85rem',
+                      lineHeight: 1.6,
+                      color: '#4d5156',
+                      borderTop: '1px solid #f1f3f4',
+                      paddingTop: '0.75rem',
+                      marginTop: '0.25rem'
+                    }}>
+                      {prod.desc || prod.science?.desc || 'Clinical reference details pending review.'}
+                    </div>
+
+                    {onAdd && (
+                      <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
+                        <button
+                          onClick={() => onAdd({
+                            type:      prod.type || 'peptide',
+                            id:        prod.id,
+                            name:      prod.displayName || prod.name || '',
+                            sku:       prod.sku || prod.variants?.[0]?.sku || '',
+                            imageUrl:  prod.imageUrl || prod.image || '',
+                            pricing:   prod.pricing || null,
+                            quantity:  1,
+                            unit:      prod.productType === 'testing' || prod.type === 'testing' ? 'kits' : 'vials',
+                            dosage:    '',
+                            frequency: '',
+                            duration:  '',
+                            notes:     '',
+                            recommended_tests: prod.recommended_tests || [],
+                          })}
+                          style={{
+                            background: primaryColor,
+                            color: '#fff',
+                            border: 'none',
+                            padding: '0.5rem 1rem',
+                            borderRadius: '4px',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          + Añadir a Receta
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -294,6 +347,40 @@ export default function CatalogPreviewPanel({ catalog, products = [], protocols 
                             {phase.name || `Phase ${pIdx + 1}`}
                           </span>
                         ))}
+                      </div>
+                    )}
+                    
+                    {onAdd && (
+                      <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
+                        <button
+                          onClick={() => onAdd({
+                            type:      'protocol',
+                            id:        proto.id || proto.protocol_id,
+                            name:      proto.name || proto.protocol_id || '',
+                            sku:       proto.sku || proto.protocol_id || '',
+                            imageUrl:  proto.imageUrl || proto.image || '',
+                            pricing:   proto.pricing || null,
+                            quantity:  1,
+                            unit:      'kit',
+                            dosage:    '',
+                            frequency: '',
+                            duration:  '',
+                            notes:     '',
+                            recommended_tests: proto.recommended_tests || [],
+                          })}
+                          style={{
+                            background: primaryColor,
+                            color: '#fff',
+                            border: 'none',
+                            padding: '0.5rem 1rem',
+                            borderRadius: '4px',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          + Añadir Protocolo
+                        </button>
                       </div>
                     )}
                   </div>

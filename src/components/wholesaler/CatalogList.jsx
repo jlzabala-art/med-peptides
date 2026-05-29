@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { catalogRepository } from '../../repositories/catalogRepository';
 import { 
   FileText, Plus, Eye, Edit3, Copy, Trash2, ExternalLink, 
-  BarChart2, Users, FileDown, Search, ArrowLeft, Send
+  BarChart2, Users, FileDown, Search, ArrowLeft, Send, Check, X, Globe, Lock
 } from 'lucide-react';
 import { getProtocolTemplates } from '../../repositories/protocolRepository';
 import { getDocs, collection } from 'firebase/firestore';
@@ -16,6 +16,7 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
   const [leadsList, setLeadsList] = useState([]);
   const [leadsLoading, setLeadsLoading] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
+  const [previewCatalog, setPreviewCatalog] = useState(null);
 
   useEffect(() => {
     loadCatalogs();
@@ -24,13 +25,21 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
   const loadCatalogs = async () => {
     setLoading(true);
     try {
-      let list = [];
+      let ownedList = [];
       if (ownerType === 'admin') {
-        list = await catalogRepository.getAllCatalogs();
+        ownedList = await catalogRepository.getAllCatalogs();
       } else {
-        list = await catalogRepository.getCatalogsByOwner(ownerId);
+        ownedList = await catalogRepository.getCatalogsByOwner(ownerId);
       }
-      setCatalogs(list);
+      
+      const publicList = await catalogRepository.getPublicCatalogs();
+      
+      // Merge and deduplicate by id
+      const mergedMap = new Map();
+      publicList.forEach(c => mergedMap.set(c.id, c));
+      ownedList.forEach(c => mergedMap.set(c.id, c)); // Owned ones override if there's overlap
+      
+      setCatalogs(Array.from(mergedMap.values()));
     } catch (e) {
       console.error('Error loading catalogs:', e);
     } finally {
@@ -41,13 +50,18 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
   const handleDuplicate = async (catalog) => {
     if (!window.confirm(`Duplicate "${catalog.title}"?`)) return;
     try {
+      const isPublicClone = catalog.ownerId !== ownerId;
       const duplicated = {
         ...catalog,
         id: '', // repo will auto-gen
-        title: `${catalog.title} (Copy)`,
-        slug: `${catalog.slug}-copy-${Math.floor(Math.random() * 1000)}`,
+        title: isPublicClone ? `${catalog.title} (My Clone)` : `${catalog.title} (Copy)`,
+        slug: `${catalog.slug}-copy-${Math.floor(Math.random() * 10000)}`,
         views: 0,
         leadCaptureCount: 0,
+        ownerId: ownerId,           // Assign to current user
+        ownerType: ownerType,       // Assign to current role
+        visibility: 'private',      // Clones are private by default
+        pricingTier: null,          // Clear specific pricing so user's default applies
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -199,6 +213,7 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
               <tr style={theadRowStyle}>
                 <th style={thStyle}>Catalog Name</th>
                 <th style={thStyle}>Slug / Route</th>
+                <th style={thStyle}>Visibility</th>
                 <th style={thStyle}>Audience</th>
                 <th style={thStyle}>Status</th>
                 <th style={thStyle}>Views</th>
@@ -210,6 +225,7 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
             <tbody>
               {filteredCatalogs.map(catalog => {
                 const publicUrl = `/catalog/${catalog.slug}`;
+                const isOwner = catalog.ownerId === ownerId || ownerType === 'admin';
                 return (
                   <tr key={catalog.id} style={tbodyRowStyle}>
                     <td style={{ ...tdStyle, fontWeight: 600, color: '#1a73e8' }}>
@@ -233,6 +249,17 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
                       </div>
                     </td>
                     <td style={tdStyle}>
+                      {catalog.visibility === 'public' ? (
+                        <span style={{...badgeStyle, backgroundColor: '#e8f0fe', color: '#1a73e8', display: 'inline-flex', alignItems: 'center'}}>
+                          <Globe size={12} style={{marginRight: 4}}/> Public
+                        </span>
+                      ) : (
+                        <span style={{...badgeStyle, backgroundColor: '#f1f3f4', color: '#5f6368', display: 'inline-flex', alignItems: 'center'}}>
+                          <Lock size={12} style={{marginRight: 4}}/> Private
+                        </span>
+                      )}
+                    </td>
+                    <td style={tdStyle}>
                       <span style={badgeStyle}>{catalog.audience}</span>
                     </td>
                     <td style={tdStyle}>
@@ -246,45 +273,38 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
                     </td>
                     <td style={tdStyle}>{catalog.views || 0}</td>
                     <td style={tdStyle}>
-                      {catalog.leadCaptureCount > 0 ? (
+                      {catalog.leadCaptureCount > 0 && isOwner ? (
                         <button onClick={() => handleViewLeads(catalog)} style={leadsLinkButtonStyle}>
                           <Users size={12} /> {catalog.leadCaptureCount} leads
                         </button>
                       ) : (
-                        '0'
+                        catalog.leadCaptureCount || '0'
                       )}
                     </td>
                     <td style={tdStyle}>{new Date(catalog.updatedAt).toLocaleDateString()}</td>
                     <td style={{ ...tdStyle, textAlign: 'right' }}>
                       <div style={actionButtonsGroupStyle}>
-                        <button 
-                          onClick={() => handleShareCRM(catalog)} 
-                          title="Share to Bigin CRM / Email" 
-                          style={{ ...actionButtonStyle, color: '#1a73e8' }}
-                        >
-                          <Send size={14} />
+                        <button onClick={() => setPreviewCatalog(catalog)} title="Preview Catalog" style={actionButtonStyle}>
+                          <Eye size={14} />
                         </button>
-                        <button 
-                          onClick={() => onSelectCatalogToEdit(catalog)} 
-                          title="Edit Catalog" 
-                          style={actionButtonStyle}
-                        >
-                          <Edit3 size={14} />
-                        </button>
-                        <button 
-                          onClick={() => handleDuplicate(catalog)} 
-                          title="Duplicate/Clone" 
-                          style={actionButtonStyle}
-                        >
+                        {isOwner && (
+                          <button onClick={() => handleShareCRM(catalog)} title="Share to CRM" style={{ ...actionButtonStyle, color: '#1a73e8' }}>
+                            <Send size={14} />
+                          </button>
+                        )}
+                        {isOwner && (
+                          <button onClick={() => onSelectCatalogToEdit(catalog)} title="Edit Catalog" style={actionButtonStyle}>
+                            <Edit3 size={14} />
+                          </button>
+                        )}
+                        <button onClick={() => handleDuplicate(catalog)} title={isOwner ? "Duplicate" : "Clone for my clinic"} style={actionButtonStyle}>
                           <Copy size={14} />
                         </button>
-                        <button 
-                          onClick={() => handleDelete(catalog.id)} 
-                          title="Delete" 
-                          style={{ ...actionButtonStyle, color: '#d93025' }}
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        {isOwner && (
+                          <button onClick={() => handleDelete(catalog.id)} title="Delete" style={{ ...actionButtonStyle, color: '#d93025' }}>
+                            <Trash2 size={14} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -292,6 +312,32 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* PREVIEW DRAWER */}
+      {previewCatalog && (
+        <div style={drawerOverlayStyle} onClick={() => setPreviewCatalog(null)}>
+          <div style={drawerStyle} onClick={(e) => e.stopPropagation()}>
+            <div style={drawerHeaderStyle}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#202124' }}>Preview: {previewCatalog.title}</h3>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <a href={`/catalog/${previewCatalog.slug}`} target="_blank" rel="noopener noreferrer" style={{...createButtonStyle, backgroundColor: '#f1f3f4', color: '#1a73e8'}}>
+                  <ExternalLink size={14} /> Open Tab
+                </a>
+                <button onClick={() => setPreviewCatalog(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center' }}>
+                  <X size={20} color="#5f6368" />
+                </button>
+              </div>
+            </div>
+            <div style={drawerBodyStyle}>
+              <iframe 
+                src={`/catalog/${previewCatalog.slug}`} 
+                title="Catalog Preview"
+                style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#fff' }}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -492,4 +538,36 @@ const leadsLinkButtonStyle = {
   display: 'inline-flex',
   alignItems: 'center',
   gap: '4px',
+};
+
+const drawerOverlayStyle = {
+  position: 'fixed',
+  top: 0, left: 0, right: 0, bottom: 0,
+  backgroundColor: 'rgba(9, 30, 66, 0.4)',
+  zIndex: 1000,
+  display: 'flex',
+  justifyContent: 'flex-end',
+};
+
+const drawerStyle = {
+  width: '100%',
+  maxWidth: '800px',
+  backgroundColor: '#fff',
+  height: '100%',
+  boxShadow: '-4px 0 16px rgba(0,0,0,0.1)',
+  display: 'flex',
+  flexDirection: 'column',
+};
+
+const drawerHeaderStyle = {
+  padding: '1.5rem',
+  borderBottom: '1px solid #dadce0',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+};
+
+const drawerBodyStyle = {
+  flex: 1,
+  backgroundColor: '#f8f9fa',
 };

@@ -6,7 +6,7 @@ import { db } from '../../firebase';
 import { invitePatientByEmail } from '../../services/assignmentService';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../ui/Card';
-import DataTable from '../ui/DataTable';
+import AppDataTable from '../ui/AppDataTable';
 import StatusBadge from '../ui/StatusBadge';
 import Spinner from '../ui/Spinner';
 import { Users, UserPlus, Check, X, BrainCircuit, Activity, FileText, Loader2 } from 'lucide-react';
@@ -288,16 +288,6 @@ export default function DoctorPatientsTab({ doctorId, doctorMeta, onCountResolve
       </div>
 
       <Card noPadding>
-        <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', background: 'var(--color-bg-app)' }}>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            {[ { key: 'all', label: `All (${patients.length})` }, { key: 'active', label: 'Assigned' }, { key: 'pending', label: 'Pending' } ].map(f => (
-              <button key={f.key} onClick={() => setStatusFilter(f.key)} style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', background: statusFilter === f.key ? '#e0e7ff' : 'transparent', color: statusFilter === f.key ? 'var(--primary)' : 'var(--color-text-secondary)', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s' }}>
-                {f.label}
-              </button>
-            ))}
-          </div>
-          <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Filter by name, email, goal..." style={{ padding: '0.6rem 1rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none', width: '250px' }} />
-        </div>
 
         {isLoading ? (
           <Spinner text="Loading supervised patients..." />
@@ -307,7 +297,26 @@ export default function DoctorPatientsTab({ doctorId, doctorMeta, onCountResolve
             <p style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '1.1rem', margin: '0 0 0.5rem' }}>No patients found.</p>
           </div>
         ) : (
-          <DataTable columns={columns} data={filteredPatients} expandableRender={renderExpandable} />
+          <AppDataTable 
+            columns={columns} 
+            data={filteredPatients} 
+            expandableRender={renderExpandable}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedIds={selectedIds}
+            onSelectionChange={setSelectedIds}
+            renderCustomFilters={() => (
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {[ { key: 'all', label: `All (${patients.length})` }, { key: 'active', label: 'Assigned' }, { key: 'pending', label: 'Pending' } ].map(f => (
+                  <button key={f.key} onClick={() => setStatusFilter(f.key)} style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', background: statusFilter === f.key ? '#e0e7ff' : 'transparent', color: statusFilter === f.key ? 'var(--primary)' : 'var(--color-text-secondary)', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s' }}>
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            filters={statusFilter !== 'all' ? [{ label: 'Status', value: statusFilter, type: 'status' }] : []}
+            onFilterRemove={() => setStatusFilter('all')}
+          />
         )}
       </Card>
 

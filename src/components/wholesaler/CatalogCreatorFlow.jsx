@@ -15,6 +15,26 @@ import {
 import { renderAIMarkdown } from '../shared/ClinicalAssistant/utils/markdownRenderer';
 import FormattedResponse from '../shared/ClinicalAssistant/components/FormattedResponse';
 
+const CANONICAL_GOALS = [
+  'cognitive_mood',
+  'hormonal_optimization',
+  'immune_support',
+  'longevity_anti_aging',
+  'metabolic_weight',
+  'recovery_repair',
+  'sleep_circadian',
+];
+
+const GOAL_LABELS = {
+  cognitive_mood: 'Cognitive & Mood',
+  hormonal_optimization: 'Hormonal Optimization',
+  immune_support: 'Immune Support',
+  longevity_anti_aging: 'Longevity & Anti-Aging',
+  metabolic_weight: 'Metabolic & Weight',
+  recovery_repair: 'Recovery & Repair',
+  sleep_circadian: 'Sleep & Circadian',
+};
+
 export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog = null, onBack }) {
   const { userProfile } = useAuth();
   const tenantId = userProfile?.assignedTenantId || userProfile?.tenantId || ownerId;
@@ -58,7 +78,7 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
         setAllProducts(results[0]);
         setAllProtocols(results[1]);
 
-        if (results[2] && results[2].exists() && !editingCatalog) {
+          if (results[2] && results[2].exists() && !editingCatalog) {
           const tenantData = results[2].data();
           if (tenantData.branding) {
             setCatalog(prev => ({
@@ -66,6 +86,14 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
               branding: tenantData.branding
             }));
           }
+        }
+        
+        if (!editingCatalog) {
+          setCatalog(prev => ({
+            ...prev,
+            contactEmail: prev.contactEmail || userProfile?.email || '',
+            contactPhone: prev.contactPhone || userProfile?.phone || userProfile?.phoneNumber || '',
+          }));
         }
       } catch (e) {
         console.error('Error fetching catalog assets:', e);
@@ -108,36 +136,71 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
         query: textToSend,
         mode: "build_and_explain",
         products: allProducts,
-        protocols: allProtocols,
-        ownerId,
-        ownerType
-      };
+    setChatHistory(prev => [...prev, { role: 'user', content: textToSend }]);
 
-      // Since functions are on europe-west1
-      const res = await fetch("https://europe-west1-med-peptides-app.cloudfunctions.net/catalogAiAssistant", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-        body: JSON.stringify(payload)
+    try {
+      const response = await fetch('https://europe-west1-med-peptides-app.cloudfunctions.net/adminAgent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await getAuth().currentUser.getIdToken()}`
+        },
+        body: JSON.stringify({
+          action: 'generate_catalog',
+          prompt: textToSend,
+          context: { ownerId, ownerType, tenantId, currentCatalog: catalog }
+        })
       });
-      
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const data = await res.json();
-      
-      if (data.formatted) {
-        setChatHistory(prev => [...prev, { role: 'ai', content: data.formatted }]);
-      } else if (data.reply) {
-        setChatHistory(prev => [...prev, { role: 'ai', content: data.reply }]);
+
+      const data = await response.json();
+      if (data.status === 'success' && data.data) {
+        if (data.data.catalog) {
+          const suggestedCatalog = data.data.catalog;
+          const extractedIds = [];
+          
+          if (suggestedCatalog.sections && Array.isArray(suggestedCatalog.sections)) {
+            suggestedCatalog.sections.forEach(sec => {
+              if (sec.products && Array.isArray(sec.products)) {
+                sec.products.forEach(pId => extractedIds.push(pId));
+              }
+            });
+          }
+          
+          const uniqueIds = [...new Set([...catalog.selectedProducts, ...extractedIds])];
+          setCatalog(prev => ({
+            ...prev,
+            ...suggestedCatalog,
+            selectedProducts: uniqueIds
+          }));
+        }
+
+        setChatHistory(prev => [...prev, { 
+          role: 'ai', 
+          content: data.data.message || "I've drafted a catalog based on your request. You can review and refine it in the Cart panel."
+        }]);
+      } else {
+        throw new Error(data.message || 'Failed to parse AI response');
       }
-      
-      if (data.catalogData) {
-        setCatalog(data.catalogData);
-      }
-      
-    } catch (e) {
-      console.error(e);
-      setChatHistory(prev => [...prev, { role: 'ai', content: `Error connecting to AI: ${e.message}` }]);
+    } catch (error) {
+      console.error('Chat error:', error);
+      setChatHistory(prev => [...prev, { role: 'ai', content: "Sorry, I encountered an error. Please try again." }]);
     } finally {
       setIsAiTyping(false);
+    }
+  };
+
+  const handleAddByGoal = (goal) => {
+    if (!goal || goal === '') return;
+    const matchingProducts = allProducts.filter(p => p.goals && p.goals.includes(goal));
+    const newIds = matchingProducts.map(p => p.id || p.slug).filter(Boolean);
+    if (newIds.length > 0) {
+      setCatalog(prev => {
+        const updatedSelected = [...new Set([...(prev.selectedProducts || []), ...newIds])];
+        return { ...prev, selectedProducts: updatedSelected };
+      });
+      // Try to reset the select element
+      const selectEl = document.getElementById('addByGoalSelect');
+      if (selectEl) selectEl.value = '';
     }
   };
 
@@ -396,11 +459,93 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
             />
           </div>
 
+          <div style={formFieldStyle}>
+            <label style={labelStyle}>Visibility</label>
+            <select 
+              value={catalog.visibility || 'private'}
+              onChange={(e) => setCatalog(prev => ({ ...prev, visibility: e.target.value }))}
+              style={{ ...inputStyle, backgroundColor: '#fff' }}
+            >
+              <option value="private">Private (Only I can see and use it)</option>
+              <option value="public">Public (Anyone can view and reuse it)</option>
+            </select>
+          </div>
+
+          <div style={{...formFieldStyle, flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '0.5rem'}}>
+            <input 
+              type="checkbox" 
+              checked={catalog.pricingVisible}
+              onChange={(e) => setCatalog(prev => ({ ...prev, pricingVisible: e.target.checked }))}
+              id="pricing-visible"
+            />
+            <label htmlFor="pricing-visible" style={{...labelStyle, cursor: 'pointer', margin: 0}}>Include Prices?</label>
+          </div>
+
+          {catalog.pricingVisible && (
+            <div style={formFieldStyle}>
+              <label style={labelStyle}>Margin over cost (%)</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input 
+                  type="number" 
+                  min="0"
+                  step="5"
+                  value={catalog.pricingMargin || 0}
+                  onChange={(e) => setCatalog(prev => ({ ...prev, pricingMargin: Number(e.target.value) }))}
+                  placeholder="e.g., 30"
+                  style={{...inputStyle, width: '100px'}}
+                />
+                <span style={{fontSize: '0.8rem', color: '#5f6368'}}>% applied over your base cost</span>
+              </div>
+            </div>
+          )}
+
+          <div style={{ marginTop: '1.5rem', marginBottom: '0.5rem', borderBottom: '1px solid #dadce0', paddingBottom: '4px' }}>
+            <h4 style={sectionHeaderStyle}>Contact Information</h4>
+            <p style={{ fontSize: '0.75rem', color: '#5f6368', margin: '4px 0 0 0' }}>
+              These details will be hidden if the catalog is made Public.
+            </p>
+          </div>
+
+          <div style={formFieldStyle}>
+            <label style={labelStyle}>Contact Email</label>
+            <input 
+              type="email" 
+              value={catalog.contactEmail || ''}
+              onChange={(e) => setCatalog(prev => ({ ...prev, contactEmail: e.target.value }))}
+              placeholder="e.g., doctor@clinic.com"
+              style={inputStyle}
+            />
+          </div>
+
+          <div style={formFieldStyle}>
+            <label style={labelStyle}>Contact Phone / WhatsApp</label>
+            <input 
+              type="text" 
+              value={catalog.contactPhone || ''}
+              onChange={(e) => setCatalog(prev => ({ ...prev, contactPhone: e.target.value }))}
+              placeholder="e.g., +1 555 0123"
+              style={inputStyle}
+            />
+          </div>
+
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
             <h4 style={sectionHeaderStyle}>Items in Catalog ({selectedProductsInFlow.length + selectedProtocolsInFlow.length})</h4>
-            <button onClick={() => setShowSearchModal(true)} style={actionButtonStyleSmall}>
-              <Plus size={14} /> Add Product
-            </button>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <select 
+                id="addByGoalSelect"
+                onChange={(e) => handleAddByGoal(e.target.value)}
+                style={{
+                  height: '28px', padding: '0 12px', borderRadius: '14px', border: '1px solid var(--border)',
+                  fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-main)', cursor: 'pointer', outline: 'none'
+                }}
+              >
+                <option value="">Bulk Add by Goal...</option>
+                {CANONICAL_GOALS.map(g => <option key={g} value={g}>{GOAL_LABELS[g]}</option>)}
+              </select>
+              <button onClick={() => setShowSearchModal(true)} style={actionButtonStyleSmall}>
+                <Plus size={14} /> Add Item
+              </button>
+            </div>
           </div>
 
           {selectedProductsInFlow.length === 0 && selectedProtocolsInFlow.length === 0 ? (

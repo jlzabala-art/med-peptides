@@ -14,6 +14,12 @@ const AUDIT_COL = 'audit_logs';
  */
 export async function logAction(operatorId, operatorRole, action, targetId, metadata = {}) {
   try {
+    // Mock IP and Geolocation for the purpose of the prototype
+    const mockIp = '192.168.1.' + Math.floor(Math.random() * 255);
+    const mockGeo = 'US-CA';
+    const screenRes = typeof window !== 'undefined' ? `${window.screen.width}x${window.screen.height}` : 'unknown';
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
     const payload = {
       operatorId: operatorId || 'guest',
       operatorRole: operatorRole || 'guest',
@@ -22,6 +28,12 @@ export async function logAction(operatorId, operatorRole, action, targetId, meta
       metadata: metadata || {},
       timestamp: serverTimestamp(),
       userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Server',
+      fingerprint: {
+        ip: mockIp,
+        geo: mockGeo,
+        resolution: screenRes,
+        timezone: timezone
+      }
     };
     await addDoc(collection(db, AUDIT_COL), payload);
   } catch (err) {

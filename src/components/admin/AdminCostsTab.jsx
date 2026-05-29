@@ -63,6 +63,20 @@ export default function AdminCostsTab({ readOnly = false }) {
     );
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const totalItems = filteredProducts.length;
+  const totalPages = Math.ceil(totalItems / rowsPerPage);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
   const columns = [
     {
       key: 'product',
@@ -199,22 +213,28 @@ export default function AdminCostsTab({ readOnly = false }) {
         <PayoutManagerWidget />
       </div>
 
-      <AppFilterBar
-        searchQuery={searchTerm}
-        onSearchChange={setSearchTerm}
-        searchPlaceholder="Search product by name or dosage..."
-      />
-
       <div
         className="card"
         style={{ padding: 0, overflowX: 'auto', border: '1px solid var(--border)' }}
       >
         <AppDataTable
           columns={columns}
-          data={filteredProducts}
+          data={paginatedProducts}
           keyField="id"
           emptyTitle="No costs found"
           emptyDescription="No products match your search criteria."
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          onPageChange={setCurrentPage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={(val) => {
+            setRowsPerPage(val);
+            setCurrentPage(1);
+          }}
+          searchQuery={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Search product by name or dosage..."
         />
       </div>
 

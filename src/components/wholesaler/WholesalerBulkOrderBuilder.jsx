@@ -19,6 +19,7 @@ import {
   serverTimestamp, getDocs, limit, orderBy
 } from 'firebase/firestore';
 import { auth, db } from '../../firebase';
+import { logAction } from '../../services/auditLogger';
 import { useAuth } from '../../context/AuthContext';
 import {
   PackageOpen, ClipboardList, Plus, Minus, Trash2, Send, Save,
@@ -343,9 +344,11 @@ export default function WholesalerBulkOrderBuilder() {
       };
       if (bulkId) {
         await updateDoc(doc(db, 'bulk_orders', bulkId), payload);
+        await logAction(uid, 'wholesaler', 'BULK_ORDER_UPDATE_DRAFT', bulkId, { itemsCount: items.length });
       } else {
         const ref = await addDoc(collection(db, 'bulk_orders'), { ...payload, createdAt: serverTimestamp() });
         setBulkId(ref.id);
+        await logAction(uid, 'wholesaler', 'BULK_ORDER_CREATE_DRAFT', ref.id, { itemsCount: items.length });
       }
       showToast('Borrador guardado.');
     } catch (err) { console.error(err); showToast('Error al guardar.', false); }

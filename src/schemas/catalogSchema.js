@@ -61,6 +61,10 @@ export const CANONICAL_CATALOG_FIELDS = Object.freeze([
   'updatedAt',
   'views',
   'leadCaptureCount',
+  'visibility',
+  'pricingMargin',
+  'contactEmail',
+  'contactPhone',
 ]);
 
 /**
@@ -161,6 +165,10 @@ export function emptyCatalog(overrides = {}) {
     updatedAt: now,
     views: 0,
     leadCaptureCount: 0,
+    visibility: 'private',
+    pricingMargin: 0,
+    contactEmail: '',
+    contactPhone: '',
     ...overrides,
   };
 }

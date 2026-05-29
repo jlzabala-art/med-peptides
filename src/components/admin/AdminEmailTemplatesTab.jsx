@@ -35,7 +35,7 @@ function TagBadge({ tag }) {
 }
 
 export default function AdminEmailTemplatesTab() {
-  const [selectedId, setSelectedId] = useState(EMAIL_TEMPLATE_REGISTRY[0]?.id || null);
+  const [selectedId, setSelectedId] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -74,6 +74,276 @@ export default function AdminEmailTemplatesTab() {
       t.id.includes(search.toUpperCase());
     return matchesFilter && matchesSearch;
   });
+
+  const tableHeaderStyle = {
+    padding: '1rem',
+    textAlign: 'left',
+    fontSize: '0.75rem',
+    fontWeight: 700,
+    color: 'var(--text-muted)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    borderBottom: '1px solid var(--border)'
+  };
+
+  const tableCellStyle = {
+    padding: '1rem',
+    borderBottom: '1px solid var(--border)',
+    verticalAlign: 'middle',
+    fontSize: '0.875rem',
+    color: 'var(--text-main)'
+  };
+
+  if (selected) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button 
+            onClick={() => setSelectedId(null)}
+            style={{
+              background: 'none', border: 'none', color: 'var(--primary)',
+              cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem',
+              display: 'flex', alignItems: 'center', gap: '0.25rem'
+            }}
+          >
+            ← Back to list
+          </button>
+          <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)' }}>
+            Preview Template
+          </h2>
+        </div>
+        
+        {/* Preview content here */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {/* Meta card */}
+          <div className="card" style={{ padding: '1.25rem' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                flexWrap: 'wrap',
+                gap: '0.5rem',
+                marginBottom: '1rem',
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    marginBottom: '4px',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: 'monospace',
+                      fontSize: '0.875rem',
+                      fontWeight: 800,
+                      backgroundColor: 'var(--color-primary)',
+                      color: 'white',
+                      padding: '3px 10px',
+                      borderRadius: '5px',
+                      letterSpacing: '0.5px',
+                    }}
+                  >
+                    {selected.id}
+                  </span>
+                  <button
+                    onClick={() => copyId(selected.id)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '4px 10px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border)',
+                      background: 'var(--background)',
+                      cursor: 'pointer',
+                      fontSize: '0.78rem',
+                      color: copiedId === selected.id ? 'var(--success)' : 'var(--text-muted)',
+                    }}
+                  >
+                    {copiedId === selected.id ? (
+                      <>
+                        <Check size={12} /> Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={12} /> Copy ID
+                      </>
+                    )}
+                  </button>
+                </div>
+                <h3 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--text-main)' }}>
+                  {selected.name}
+                </h3>
+              </div>
+              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                {selected.tags.map((tag) => (
+                  <TagBadge key={tag} tag={tag} />
+                ))}
+              </div>
+            </div>
+
+            <p
+              style={{
+                margin: '0 0 1rem',
+                fontSize: '0.875rem',
+                color: 'var(--text-muted)',
+                lineHeight: 1.6,
+              }}
+            >
+              {selected.description}
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div
+                style={{
+                  background: 'var(--background)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.75rem',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    marginBottom: '4px',
+                    color: 'var(--text-muted)',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  <Zap size={12} /> Trigger
+                </div>
+                <div
+                  style={{
+                    fontSize: '0.8rem',
+                    color: 'var(--text-main)',
+                    fontFamily: 'monospace',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {selected.trigger}
+                </div>
+              </div>
+              <div
+                style={{
+                  background: 'var(--background)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.75rem',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    marginBottom: '4px',
+                    color: 'var(--text-muted)',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  <FileCode size={12} /> Source File
+                </div>
+                <div
+                  style={{
+                    fontSize: '0.78rem',
+                    color: 'var(--primary)',
+                    fontFamily: 'monospace',
+                    lineHeight: 1.5,
+                    wordBreak: 'break-all',
+                  }}
+                >
+                  {selected.sourceFile}
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: '0.75rem',
+                background: 'var(--background)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '0.75rem',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  marginBottom: '4px',
+                  color: 'var(--text-muted)',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                }}
+              >
+                <Mail size={12} /> Channel
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-main)' }}>
+                {selected.channel}
+              </div>
+            </div>
+          </div>
+
+          {/* HTML Preview */}
+          <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.875rem 1rem',
+                borderBottom: '1px solid var(--border)',
+                backgroundColor: 'var(--color-bg-app)',
+              }}
+            >
+              <Eye size={15} color="var(--primary)" />
+              <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-main)' }}>
+                Live Preview — Sample Data
+              </span>
+              <span
+                style={{ marginLeft: 'auto', fontSize: '0.75rem', color: 'var(--text-muted)' }}
+              >
+                Rendered with placeholder values
+              </span>
+            </div>
+            <div
+              style={{
+                backgroundColor: '#f1f5f9',
+                padding: '1.5rem',
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+            >
+              <div
+                style={{
+                  backgroundColor: 'white',
+                  width: '100%',
+                  maxWidth: '620px',
+                  borderRadius: 'var(--radius-sm)',
+                  overflow: 'hidden',
+                  boxShadow: 'var(--shadow-sm)',
+                }}
+                dangerouslySetInnerHTML={{ __html: previewHtml }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -144,343 +414,98 @@ export default function AdminEmailTemplatesTab() {
         ))}
       </div>
 
-      {/* Main layout: list + preview */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '300px 1fr',
-          gap: '1rem',
-          alignItems: 'start',
-        }}
-      >
-        {/* Template list */}
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          {filtered.length === 0 && (
-            <div
-              style={{
-                padding: '2rem',
-                textAlign: 'center',
-                color: 'var(--text-muted)',
-                fontSize: '0.875rem',
-              }}
-            >
-              No templates match this filter.
-            </div>
-          )}
-          {filtered.map((tpl, idx) => (
-            <div
-              key={tpl.id}
-              onClick={() => setSelectedId(tpl.id)}
-              style={{
-                padding: '0.875rem 1rem',
-                borderBottom: idx < filtered.length - 1 ? '1px solid var(--border)' : 'none',
-                cursor: 'pointer',
-                backgroundColor: selectedId === tpl.id ? 'rgba(0,113,189,0.07)' : 'transparent',
-                borderLeft:
-                  selectedId === tpl.id ? '3px solid var(--primary)' : '3px solid transparent',
-                transition: 'all 0.15s',
-              }}
-            >
-              {/* ID badge + name */}
-              <div
+      {/* Main layout: data table */}
+      <div className="card" style={{ padding: 0, overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
+          <thead>
+            <tr>
+              <th style={tableHeaderStyle}>ID</th>
+              <th style={tableHeaderStyle}>Template Name & Description</th>
+              <th style={tableHeaderStyle}>Tags</th>
+              <th style={tableHeaderStyle}>Trigger</th>
+              <th style={tableHeaderStyle} align="right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={5} style={{ ...tableCellStyle, textAlign: 'center', color: 'var(--text-muted)', padding: '3rem' }}>
+                  No templates match this filter.
+                </td>
+              </tr>
+            )}
+            {filtered.map((tpl) => (
+              <tr 
+                key={tpl.id}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  marginBottom: '0.35rem',
+                  backgroundColor: 'transparent',
+                  transition: 'background-color 0.15s',
                 }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,113,189,0.03)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
-                <span
-                  style={{
-                    fontFamily: 'monospace',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    backgroundColor: 'var(--color-primary)',
-                    color: 'white',
-                    padding: '2px 7px',
-                    borderRadius: '4px',
-                    letterSpacing: '0.5px',
-                  }}
-                >
-                  {tpl.id}
-                </span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    copyId(tpl.id);
-                  }}
-                  title="Copy ID"
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: copiedId === tpl.id ? 'var(--success)' : 'var(--text-muted)',
-                    padding: '2px',
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  {copiedId === tpl.id ? <Check size={12} /> : <Copy size={12} />}
-                </button>
-              </div>
-              <div
-                style={{
-                  fontWeight: 600,
-                  fontSize: '0.875rem',
-                  color: 'var(--text-main)',
-                  marginBottom: '0.3rem',
-                  lineHeight: 1.3,
-                }}
-              >
-                {tpl.name}
-              </div>
-              <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
-                {tpl.tags.map((tag) => (
-                  <TagBadge key={tag} tag={tag} />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Preview panel */}
-        {selected ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {/* Meta card */}
-            <div className="card" style={{ padding: '1.25rem' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  flexWrap: 'wrap',
-                  gap: '0.5rem',
-                  marginBottom: '1rem',
-                }}
-              >
-                <div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      marginBottom: '4px',
-                    }}
-                  >
+                <td style={{ ...tableCellStyle, width: '120px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <span
                       style={{
                         fontFamily: 'monospace',
-                        fontSize: '0.875rem',
-                        fontWeight: 800,
-                        backgroundColor: 'var(--color-primary)',
-                        color: 'white',
-                        padding: '3px 10px',
-                        borderRadius: '5px',
-                        letterSpacing: '0.5px',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        backgroundColor: 'var(--background)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text-main)',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
                       }}
                     >
-                      {selected.id}
+                      {tpl.id}
                     </span>
                     <button
-                      onClick={() => copyId(selected.id)}
+                      onClick={() => copyId(tpl.id)}
+                      title="Copy ID"
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        padding: '4px 10px',
-                        borderRadius: 'var(--radius-sm)',
-                        border: '1px solid var(--border)',
-                        background: 'var(--background)',
-                        cursor: 'pointer',
-                        fontSize: '0.78rem',
-                        color: copiedId === selected.id ? 'var(--success)' : 'var(--text-muted)',
+                        background: 'none', border: 'none', cursor: 'pointer', padding: '2px',
+                        color: copiedId === tpl.id ? 'var(--success)' : 'var(--text-muted)',
                       }}
                     >
-                      {copiedId === selected.id ? (
-                        <>
-                          <Check size={12} /> Copied!
-                        </>
-                      ) : (
-                        <>
-                          <Copy size={12} /> Copy ID
-                        </>
-                      )}
+                      {copiedId === tpl.id ? <Check size={14} /> : <Copy size={14} />}
                     </button>
                   </div>
-                  <h3 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--text-main)' }}>
-                    {selected.name}
-                  </h3>
-                </div>
-                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                  {selected.tags.map((tag) => (
-                    <TagBadge key={tag} tag={tag} />
-                  ))}
-                </div>
-              </div>
-
-              <p
-                style={{
-                  margin: '0 0 1rem',
-                  fontSize: '0.875rem',
-                  color: 'var(--text-muted)',
-                  lineHeight: 1.6,
-                }}
-              >
-                {selected.description}
-              </p>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <div
-                  style={{
-                    background: 'var(--background)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '0.75rem',
-                  }}
-                >
-                  <div
+                </td>
+                <td style={tableCellStyle}>
+                  <div style={{ fontWeight: 600, color: 'var(--text-main)', marginBottom: '4px' }}>
+                    {tpl.name}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                    {tpl.description}
+                  </div>
+                </td>
+                <td style={tableCellStyle}>
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                    {tpl.tags.map(tag => <TagBadge key={tag} tag={tag} />)}
+                  </div>
+                </td>
+                <td style={{ ...tableCellStyle, fontFamily: 'monospace', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  {tpl.trigger}
+                </td>
+                <td style={{ ...tableCellStyle, textAlign: 'right' }}>
+                  <button
+                    onClick={() => setSelectedId(tpl.id)}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.4rem',
-                      marginBottom: '4px',
-                      color: 'var(--text-muted)',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px',
+                      display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                      padding: '0.4rem 0.75rem', borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border)', background: 'var(--background)',
+                      color: 'var(--text-main)', fontSize: '0.75rem', fontWeight: 600,
+                      cursor: 'pointer'
                     }}
                   >
-                    <Zap size={12} /> Trigger
-                  </div>
-                  <div
-                    style={{
-                      fontSize: '0.8rem',
-                      color: 'var(--text-main)',
-                      fontFamily: 'monospace',
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {selected.trigger}
-                  </div>
-                </div>
-                <div
-                  style={{
-                    background: 'var(--background)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '0.75rem',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.4rem',
-                      marginBottom: '4px',
-                      color: 'var(--text-muted)',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px',
-                    }}
-                  >
-                    <FileCode size={12} /> Source File
-                  </div>
-                  <div
-                    style={{
-                      fontSize: '0.78rem',
-                      color: 'var(--primary)',
-                      fontFamily: 'monospace',
-                      lineHeight: 1.5,
-                      wordBreak: 'break-all',
-                    }}
-                  >
-                    {selected.sourceFile}
-                  </div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  marginTop: '0.75rem',
-                  background: 'var(--background)',
-                  borderRadius: 'var(--radius-sm)',
-                  padding: '0.75rem',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    marginBottom: '4px',
-                    color: 'var(--text-muted)',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                  }}
-                >
-                  <Mail size={12} /> Channel
-                </div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-main)' }}>
-                  {selected.channel}
-                </div>
-              </div>
-            </div>
-
-            {/* HTML Preview */}
-            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.875rem 1rem',
-                  borderBottom: '1px solid var(--border)',
-                  backgroundColor: 'var(--color-bg-app)',
-                }}
-              >
-                <Eye size={15} color="var(--primary)" />
-                <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-main)' }}>
-                  Live Preview — Sample Data
-                </span>
-                <span
-                  style={{ marginLeft: 'auto', fontSize: '0.75rem', color: 'var(--text-muted)' }}
-                >
-                  Rendered with placeholder values
-                </span>
-              </div>
-              <div
-                style={{
-                  backgroundColor: '#f1f5f9',
-                  padding: '1.5rem',
-                  display: 'flex',
-                  justifyContent: 'center',
-                }}
-              >
-                <div
-                  style={{
-                    backgroundColor: 'white',
-                    width: '100%',
-                    maxWidth: '620px',
-                    borderRadius: 'var(--radius-sm)',
-                    overflow: 'hidden',
-                    boxShadow: 'var(--shadow-sm)',
-                  }}
-                  dangerouslySetInnerHTML={{ __html: previewHtml }}
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div
-            className="card"
-            style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}
-          >
-            <Mail size={32} style={{ marginBottom: '0.75rem', opacity: 0.4 }} />
-            <p>Select a template from the list to preview it.</p>
-          </div>
-        )}
+                    <Eye size={14} /> Preview
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>

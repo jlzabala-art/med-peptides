@@ -14,7 +14,8 @@ export default function SidebarGadget(props) {
   const [activeDragItem, setActiveDragItem] = useState(null);
   
   // Storage key for user preferences
-  const prefsDocRef = user ? doc(db, 'users', user.uid, 'preferences', 'sidebar') : null;
+  const storageKey = props.prefsKey || 'sidebar_groups_prefs';
+  const prefsDocRef = user ? doc(db, 'users', user.uid, 'preferences', storageKey) : null;
 
   const rehydrateGroups = (savedGroups, originalGroups) => {
     const allItems = new Map();
@@ -43,10 +44,10 @@ export default function SidebarGadget(props) {
   useEffect(() => {
     async function loadPreferences() {
       // Storage key for user preferences
-      const currentPrefsDocRef = user ? doc(db, 'users', user.uid, 'preferences', 'sidebar') : null;
+      const currentPrefsDocRef = user ? doc(db, 'users', user.uid, 'preferences', storageKey) : null;
 
       // First try localStorage for immediate local feedback
-      const localPrefs = localStorage.getItem('sidebar_groups_prefs');
+      const localPrefs = localStorage.getItem(storageKey);
       if (localPrefs) {
         try {
           const parsed = JSON.parse(localPrefs);
@@ -64,7 +65,7 @@ export default function SidebarGadget(props) {
         if (snap.exists() && snap.data().groups) {
           const rehydrated = rehydrateGroups(snap.data().groups, props.groups);
           setSidebarGroups(rehydrated);
-          localStorage.setItem('sidebar_groups_prefs', JSON.stringify(snap.data().groups));
+          localStorage.setItem(storageKey, JSON.stringify(snap.data().groups));
         } else if (!localPrefs) {
           // Ensure "Favorites" exists
           injectFavoritesGroup(props.groups);
@@ -99,7 +100,9 @@ export default function SidebarGadget(props) {
     const { active } = event;
     const activeData = active.data.current;
     if (activeData?.type === 'item') {
-      setActiveDragItem(activeData.item);
+      setActiveDragItem({ ...activeData.item, type: 'item' });
+    } else if (activeData?.type === 'group') {
+      setActiveDragItem({ ...activeData.group, type: 'group' });
     }
   };
 
@@ -114,9 +117,15 @@ export default function SidebarGadget(props) {
 
     const isActiveItem = active.data.current?.type === 'item';
     const isOverItem = over.data.current?.type === 'item';
+    const isActiveGroup = active.data.current?.type === 'group';
     const isOverGroup = over.data.current?.type === 'group';
 
-    if (!isActiveItem) return; // Only reorder items for now
+    if (isActiveGroup && isOverGroup) {
+      // Group reordering should be done in handleDragEnd to prevent dnd-kit issues
+      return;
+    }
+
+    if (!isActiveItem) return; // Only reorder items
 
     setSidebarGroups((prev) => {
       const activeGroupIndex = prev.findIndex(g => g.items?.some(i => i.id === activeId));
@@ -165,11 +174,34 @@ export default function SidebarGadget(props) {
   };
 
   const handleDragEnd = (event) => {
+    const { active, over } = event;
     setActiveDragItem(null);
+    
+    setSidebarGroups(currentGroups => {
+      let newGroups = currentGroups;
+      
+      if (active && over && active.id !== over.id) {
+        const isActiveGroup = active.data.current?.type === 'group';
+        const isOverGroup = over.data.current?.type === 'group';
+        
+        if (isActiveGroup && isOverGroup) {
+          const activeGroupIndex = currentGroups.findIndex(g => g.id === active.id);
+          const overGroupIndex = currentGroups.findIndex(g => g.id === over.id);
+          
+          if (activeGroupIndex !== -1 && overGroupIndex !== -1) {
+            newGroups = arrayMove(currentGroups, activeGroupIndex, overGroupIndex);
+          }
+        }
+      }
+
+      // Auto-save the new state
+      setTimeout(() => savePreferences(newGroups), 0);
+      return newGroups;
+    });
   };
 
-  const savePreferences = async () => {
-    const serializedGroups = sidebarGroups.map(g => ({
+  const savePreferences = async (groupsToSave = sidebarGroups) => {
+    const serializedGroups = groupsToSave.map(g => ({
       id: g.id,
       label: g.label,
       emoji: g.emoji,
@@ -177,7 +209,7 @@ export default function SidebarGadget(props) {
     }));
 
     // Save to localStorage for immediate local persistence
-    localStorage.setItem('sidebar_groups_prefs', JSON.stringify(serializedGroups));
+    localStorage.setItem(storageKey, JSON.stringify(serializedGroups));
 
     if (prefsDocRef) {
       try {
@@ -229,8 +261,18 @@ export default function SidebarGadget(props) {
   };
 
   const toggleEditMode = () => {
-    if (isEditing) savePreferences();
+    if (isEditing) savePreferences(sidebarGroups);
     else setIsEditing(true);
+  };
+
+  const resetToDefault = async () => {
+    const defaultGroups = [
+      { id: 'favorites', label: 'Favorites', emoji: '⭐', items: [] },
+      ...props.groups
+    ];
+    setSidebarGroups(defaultGroups);
+    await savePreferences(defaultGroups);
+    setIsEditing(false);
   };
 
   return (
@@ -249,7 +291,8 @@ export default function SidebarGadget(props) {
         footer={{
           label: isEditing ? "Save Menu" : "Customize Menu",
           icon: isEditing ? Save : Settings,
-          onClick: toggleEditMode
+          onClick: toggleEditMode,
+          onReset: isEditing ? resetToDefault : null
         }}
       />
       {/* Drag Overlay for smooth animations */}

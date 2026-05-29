@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import StandardDrawer from '../ui/StandardDrawer';
 import {
   collection,
   query,
@@ -241,124 +242,30 @@ export default function UserDetailsModal({ isOpen, onClose, user, onUserUpdate }
   if (!isOpen || !user) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.4)',
-        backdropFilter: 'blur(2px)',
-        zIndex: 9999,
-        display: 'flex',
-        justifyContent: 'flex-end',
-        alignItems: 'stretch',
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: 'white',
-          width: '100%',
-          maxWidth: '850px',
-          height: '100%',
-          boxShadow: '-4px 0 15px rgba(0, 0, 0, 0.1)',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          animation: 'slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-        }}
-      >
-        <style>{`
-          @keyframes slideInRight {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-          }
-        `}</style>
-
-        {/* Header */}
-        <div
-          style={{
-            padding: '1.5rem',
-            borderBottom: '1px solid var(--border)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            backgroundColor: 'white',
-          }}
-        >
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <div>
-              <h2
-                style={{
-                  margin: '0 0 0.5rem 0',
-                  fontSize: '1.25rem',
-                  color: 'var(--text-main)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontWeight: 500,
-                }}
-              >
-                {user.fullName || user.displayName || 'Unnamed User'}
-                {user.approved && <ShieldCheck size={16} color="var(--success)" title="Approved" />}
-              </h2>
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '1rem',
-                  color: 'var(--text-muted)',
-                  fontSize: '0.85rem',
-                  alignItems: 'center',
-                }}
-              >
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                  <Mail size={14} /> {user.email || 'No email'}
-                </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                  <User size={14} /> ID: {user.id.substring(0, 8)}...
-                </span>
-                {user.role !== 'wholesaler' && (
-                  <span
-                    style={{
-                      backgroundColor: 'rgba(0,0,0,0.05)',
-                      padding: '0.1rem 0.5rem',
-                      borderRadius: '4px',
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      textTransform: 'uppercase',
-                      color: 'var(--text-main)',
-                    }}
-                  >
-                    {user.role || 'Patient'}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--text-muted)',
-            }}
-          >
-            <X size={24} />
-          </button>
+    <StandardDrawer
+      isOpen={isOpen}
+      onClose={onClose}
+      width="850px"
+      bodyPadding="0"
+      title={
+        <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {user.fullName || user.displayName || 'Unnamed User'}
+          {user.approved && <ShieldCheck size={16} color="var(--success)" title="Approved" />}
+        </span>
+      }
+      subtitle={
+        <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.85rem', alignItems: 'center' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Mail size={14} /> {user.email || 'No email'}</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><User size={14} /> ID: {user.id.substring(0, 8)}...</span>
+          {user.role !== 'wholesaler' && (
+            <span style={{ backgroundColor: 'rgba(0,0,0,0.05)', padding: '0.1rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', color: 'var(--text-main)' }}>
+              {user.role || 'Patient'}
+            </span>
+          )}
         </div>
-
-        {/* Accordion List - Scrollable Body */}
-        <div
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            backgroundColor: 'var(--color-bg-app)',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
+      }
+    >
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
           {/* SECTION 1: OVERVIEW */}
           <div style={{ borderBottom: '1px solid var(--border)', backgroundColor: 'white' }}>
             <button
@@ -1298,8 +1205,7 @@ export default function UserDetailsModal({ isOpen, onClose, user, onUserUpdate }
               </div>
             )}
           </div>
-        </div>
       </div>
-    </div>
+    </StandardDrawer>
   );
 }

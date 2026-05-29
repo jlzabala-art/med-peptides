@@ -8,6 +8,7 @@ import {
   addDoc,
   updateDoc,
   orderBy,
+  where,
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import {
@@ -37,7 +38,7 @@ const EMAILJS_SERVICE_ID = 'service_vstbe8f';
 const EMAILJS_TEMPLATE_ID = 'template_7unfks8';
 const EMAILJS_PUBLIC_KEY = 'rO_f_X4uBvFf3u_3u';
 
-export default function AdminInvitationsTab() {
+export default function AdminInvitationsTab({ restrictedRoles = null, readOnly = false, tenantId = null }) {
   const { toast } = useToast();
   const [invitations, setInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -65,16 +66,20 @@ export default function AdminInvitationsTab() {
     { id: 'sales_agent', label: 'Sales Agent', color: 'var(--color-primary)' },
     { id: 'staff', label: 'Clinic Staff', color: '#06b6d4' },
     { id: 'patient', label: 'Patient', color: '#ec4899' },
-  ];
+  ].filter(role => !restrictedRoles || restrictedRoles.includes(role.id));
 
   useEffect(() => {
     fetchInvitations();
-  }, []);
+  }, [tenantId]);
 
   async function fetchInvitations() {
     try {
       setLoading(true);
-      const q = query(collection(db, 'invitations'), orderBy('invitedAt', 'desc'));
+      let qBuilder = collection(db, 'invitations');
+      if (tenantId) {
+        qBuilder = query(qBuilder, where('tenantId', '==', tenantId));
+      }
+      const q = query(qBuilder, orderBy('invitedAt', 'desc'));
       const querySnapshot = await getDocs(q);
       const list = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -109,6 +114,7 @@ export default function AdminInvitationsTab() {
         roles: inviteForm.roles,
         status: 'pending',
         invitedAt: new Date(),
+        ...(tenantId ? { tenantId } : {})
       });
 
       await emailjs.send(
@@ -258,57 +264,69 @@ export default function AdminInvitationsTab() {
             </span>
           </div>
         </div>
-        <button
-          onClick={() => setShowInviteModal(true)}
-          className="gcp-btn-primary"
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
-        >
-          <MailPlus size={16} /> New Invitation
-        </button>
+        {!readOnly && (
+          <button
+            onClick={() => setShowInviteModal(true)}
+            className="gcp-btn-primary"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
+          >
+            <MailPlus size={16} /> New Invitation
+          </button>
+        )}
       </div>
 
-      {/* Search and Filters */}
-      <AppFilterBar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        dateRange={dateRange}
-        onDateRangeChange={setDateRange}
-        searchPlaceholder="Search invitations by name or email..."
-        secondaryActions={
-          <select
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-            style={{
-              height: '32px',
-              padding: '0 12px',
-              borderRadius: '16px',
-              border: '1px solid var(--border)',
-              backgroundColor: 'white',
-              color: 'var(--text-main)',
-              fontSize: '13px',
-              fontWeight: 500,
-              cursor: 'pointer',
-              outline: 'none',
-            }}
-          >
-            <option value="all">All Roles</option>
-            <option value="admin">Admin</option>
-            <option value="clinic">Clinic</option>
-            <option value="doctor">Practitioner</option>
-            <option value="wholesaler">Wholesaler</option>
-            <option value="sales_agent">Sales Agent</option>
-            <option value="staff">Clinic Staff</option>
-            <option value="patient">Patient</option>
-          </select>
-        }
-      />
+  const getActiveFilters = () => {
+    const active = [];
+    if (roleFilter && roleFilter !== 'all') {
+      active.push({
+        label: 'Role',
+        value: roleFilter,
+        type: 'roleFilter',
+      });
+    }
+    return active;
+  };
 
-      {/* Main Table */}
+  const handleFilterRemove = (f) => {
+    if (f.type === 'roleFilter') setRoleFilter('all');
+  };
+
+  const renderCustomFilters = () => (
+    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+      <select
+        value={roleFilter}
+        onChange={(e) => setRoleFilter(e.target.value)}
+        style={{
+          height: '32px',
+          padding: '0 12px',
+          borderRadius: '16px',
+          border: '1px solid var(--border)',
+          backgroundColor: 'white',
+          color: 'var(--text-main)',
+          fontSize: '13px',
+          fontWeight: 500,
+          cursor: 'pointer',
+          outline: 'none',
+        }}
+      >
+        <option value="all">All Roles</option>
+        {AVAILABLE_ROLES.map(role => (
+          <option key={role.id} value={role.id}>{role.label}</option>
+        ))}
+      </select>
+    </div>
+  );
+
       <AppDataTable
         data={filteredInvitations}
         keyField="id"
         selectedIds={selectedIds}
         onSelectionChange={setSelectedIds}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        filters={getActiveFilters()}
+        onFilterRemove={handleFilterRemove}
+        renderCustomFilters={renderCustomFilters}
         renderBatchActions={(selected) => (
           <button
             onClick={async () => {
@@ -352,10 +370,10 @@ export default function AdminInvitationsTab() {
                 <AppActionGroup
                   actions={[
                     { type: 'view', onClick: () => setPreviewEmail(inv) },
-                    ...(inv.status !== 'accepted'
+                    ...(inv.status !== 'accepted' && !readOnly
                       ? [{ type: 'send', onClick: () => handleResend(inv) }]
                       : []),
-                    { type: 'delete', onClick: () => handleDeleteInvitation(inv.id) },
+                    ...(!readOnly ? [{ type: 'delete', onClick: () => handleDeleteInvitation(inv.id) }] : []),
                   ]}
                 />
               </div>

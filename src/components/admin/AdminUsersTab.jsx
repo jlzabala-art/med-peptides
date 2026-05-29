@@ -10,6 +10,10 @@ import {
   where,
   addDoc,
   arrayUnion,
+  getCountFromServer,
+  limit,
+  startAfter,
+  orderBy
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import {
@@ -384,12 +388,44 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
     }
   };
 
-  async function fetchUsers() {
+  const [pageSize, setPageSize] = useState(20);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalUsersCount, setTotalUsersCount] = useState(0);
+  const [pageCursors, setPageCursors] = useState({}); // map page number to its starting doc
+
+  async function fetchUsers(page = 1, newPageSize = pageSize) {
     try {
       setLoading(true);
 
+      // We only do true server-side pagination when there is no complex search query
+      // If there is a search query, we might have to fetch more or use a dedicated search.
+      // For this implementation, we will apply pagination to the base query.
+
+      const usersRef = collection(db, 'users');
+      let baseConstraints = [];
+      
+      // If we have a role filter and it's not all, we can filter on the server if it's the primary role field
+      // However, roles are stored in an array `roles` or string `role`. 
+      // To keep it simple and avoid complex index requirements, we will just paginate the base collection.
+      // For a production app with complex filters, we would use Algolia or Typesense.
+
+      // 1. Get total count for pagination math
+      // getCountFromServer is now imported at the top
+      const countSnap = await getCountFromServer(query(usersRef, ...baseConstraints));
+      const total = countSnap.data().count;
+      setTotalUsersCount(total);
+      setTotalPages(Math.ceil(total / newPageSize));
+
+      // 2. Build the query
+      let qConstraints = [...baseConstraints, orderBy('createdAt', 'desc'), limit(newPageSize)];
+      
+      if (page > 1 && pageCursors[page]) {
+        qConstraints.push(startAfter(pageCursors[page]));
+      }
+      
       const [usersSnapshot, relSnap] = await Promise.all([
-        getDocs(query(collection(db, 'users'))),
+        getDocs(query(usersRef, ...qConstraints)),
         getDocs(
           query(collection(db, 'doctor_patient_relationships'), where('status', '==', 'active'))
         ),
@@ -400,6 +436,14 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
         ...doc.data(),
       }));
       setUsers(usersList);
+      
+      // Store cursor for the NEXT page
+      if (usersSnapshot.docs.length > 0) {
+        setPageCursors(prev => ({
+          ...prev,
+          [page + 1]: usersSnapshot.docs[usersSnapshot.docs.length - 1]
+        }));
+      }
 
       const relsList = relSnap.docs.map((doc) => ({
         id: doc.id,
@@ -789,150 +833,192 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
     return true;
   });
 
+  const getActiveFilters = () => {
+    const active = [];
+    if (purchaseFilter && purchaseFilter !== 'all') {
+      active.push({
+        label: defaultRole === 'patient' ? 'Purchases' : 'Status',
+        value: purchaseFilter,
+        type: 'purchaseFilter',
+      });
+    }
+    if (showArchived) {
+      active.push({
+        label: 'View',
+        value: 'Archived',
+        type: 'showArchived',
+      });
+    }
+    return active;
+  };
+
+  const handleFilterRemove = (f) => {
+    if (f.type === 'purchaseFilter') setPurchaseFilter('all');
+    if (f.type === 'showArchived') setShowArchived(false);
+  };
+
+  const renderCustomFilters = () => (
+    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+      {(() => {
+        if (defaultRole === 'patient') {
+          return (
+            <select
+              value={purchaseFilter}
+              onChange={(e) => setPurchaseFilter(e.target.value)}
+              style={{
+                height: '32px', padding: '0 1.5rem 0 0.75rem', borderRadius: '16px',
+                border: '1px solid var(--border)', backgroundColor: purchaseFilter === 'all' ? 'white' : 'var(--primary-light)',
+                color: purchaseFilter === 'all' ? 'var(--text-main)' : 'var(--primary)',
+                fontSize: '0.8rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+              }}
+            >
+              <option value="all">All Patients</option>
+              <option value="buyers">With Purchases</option>
+              <option value="no-purchases">No Purchases</option>
+            </select>
+          );
+        }
+        if (defaultRole === 'doctor' || defaultRole === 'wholesaler') {
+          return (
+            <select
+              value={purchaseFilter}
+              onChange={(e) => setPurchaseFilter(e.target.value)}
+              style={{
+                height: '32px', padding: '0 1.5rem 0 0.75rem', borderRadius: '16px',
+                border: '1px solid var(--border)', backgroundColor: purchaseFilter === 'all' ? 'white' : 'var(--primary-light)',
+                color: purchaseFilter === 'all' ? 'var(--text-main)' : 'var(--primary)',
+                fontSize: '0.8rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+              }}
+            >
+              <option value="all">All {defaultRole === 'doctor' ? 'Physicians' : 'Wholesalers'}</option>
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+            </select>
+          );
+        }
+        return null;
+      })()}
+
+      {defaultRole === 'wholesaler' && (
+        <div
+          style={{
+            display: 'flex',
+            border: '1px solid var(--border)',
+            borderRadius: '6px',
+            overflow: 'hidden',
+          }}
+        >
+          <button
+            onClick={() => setActiveView('list')}
+            style={{
+              padding: '0.4rem 1rem',
+              border: 'none',
+              backgroundColor: activeView === 'list' ? 'var(--primary)' : 'white',
+              color: activeView === 'list' ? 'white' : 'var(--text-main)',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            List View
+          </button>
+          <button
+            onClick={() => setActiveView('tree')}
+            style={{
+              padding: '0.4rem 1rem',
+              border: 'none',
+              backgroundColor: activeView === 'tree' ? 'var(--primary)' : 'white',
+              color: activeView === 'tree' ? 'white' : 'var(--text-main)',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              borderLeft: '1px solid var(--border)',
+            }}
+          >
+            Hierarchy View
+          </button>
+        </div>
+      )}
+
+      {defaultRole !== 'doctor' && defaultRole !== 'wholesaler' && (
+        <select
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value)}
+          style={{
+            height: '32px',
+            padding: '0 12px',
+            borderRadius: '16px',
+            border: '1px solid var(--border)',
+            backgroundColor: 'white',
+            color: 'var(--text-main)',
+            fontSize: '13px',
+            fontWeight: 500,
+            textTransform: 'capitalize',
+            cursor: 'pointer',
+            outline: 'none',
+          }}
+        >
+          {(defaultRole === 'patient'
+            ? ['all', 'patient', 'guest']
+            : ['all', 'admin', 'doctor', 'wholesaler', 'patient', 'guest']
+          ).map((role) => (
+            <option key={role} value={role}>
+              {role === 'all' && defaultRole === 'patient' ? 'All Patients' : role}
+            </option>
+          ))}
+        </select>
+      )}
+
+      <label
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          cursor: 'pointer',
+          fontSize: '0.85rem',
+          color: 'var(--text-muted)',
+          marginLeft: '0.5rem',
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={showArchived}
+          onChange={(e) => setShowArchived(e.target.checked)}
+          style={{ cursor: 'pointer' }}
+        />
+        Show Archived
+      </label>
+    </div>
+  );
+
   return (
     <div>
       <ToastContainer toasts={toasts} onDismiss={toast.dismiss} />
-      <AppFilterBar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        dateRange={dateRange}
-        onDateRangeChange={setDateRange}
-        searchPlaceholder="Search users by name, email, or institution..."
-        primaryFilters={(() => {
-          if (defaultRole === 'patient') {
-            return [
-              { id: 'all', label: 'All Patients' },
-              { id: 'buyers', label: 'With Purchases' },
-              { id: 'no-purchases', label: 'No Purchases' },
-            ];
-          }
-          if (defaultRole === 'doctor' || defaultRole === 'wholesaler') {
-            return [
-              {
-                id: 'all',
-                label: `All ${defaultRole === 'doctor' ? 'Physicians' : 'Wholesalers'}`,
-              },
-              { id: 'active', label: 'Active' },
-              { id: 'pending', label: 'Pending' },
-            ];
-          }
-          return [];
-        })()}
-        onPrimaryFilterChange={setPurchaseFilter}
-        onPrimaryFilterChange={setPurchaseFilter}
-        secondaryActions={
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            {(() => {
-              if (defaultRole === 'wholesaler') {
-                return (
-                  <div
-                    style={{
-                      display: 'flex',
-                      border: '1px solid var(--border)',
-                      borderRadius: '6px',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <button
-                      onClick={() => setActiveView('list')}
-                      style={{
-                        padding: '0.4rem 1rem',
-                        border: 'none',
-                        backgroundColor: activeView === 'list' ? 'var(--primary)' : 'white',
-                        color: activeView === 'list' ? 'white' : 'var(--text-main)',
-                        fontWeight: 600,
-                        fontSize: '0.85rem',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      List View
-                    </button>
-                    <button
-                      onClick={() => setActiveView('tree')}
-                      style={{
-                        padding: '0.4rem 1rem',
-                        border: 'none',
-                        backgroundColor: activeView === 'tree' ? 'var(--primary)' : 'white',
-                        color: activeView === 'tree' ? 'white' : 'var(--text-main)',
-                        fontWeight: 600,
-                        fontSize: '0.85rem',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        borderLeft: '1px solid var(--border)',
-                      }}
-                    >
-                      Hierarchy View
-                    </button>
-                  </div>
-                );
-              }
-              const allowedPills =
-                defaultRole === 'patient'
-                  ? ['all', 'patient', 'guest']
-                  : ['all', 'admin', 'doctor', 'wholesaler', 'patient', 'guest'];
-
-              if (defaultRole === 'doctor') return null;
-
-              return (
-                <select
-                  value={roleFilter}
-                  onChange={(e) => setRoleFilter(e.target.value)}
-                  style={{
-                    height: '32px',
-                    padding: '0 12px',
-                    borderRadius: '16px',
-                    border: '1px solid var(--border)',
-                    backgroundColor: 'white',
-                    color: 'var(--text-main)',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    textTransform: 'capitalize',
-                    cursor: 'pointer',
-                    outline: 'none',
-                  }}
-                >
-                  {allowedPills.map((role) => (
-                    <option key={role} value={role}>
-                      {role === 'all' && defaultRole === 'patient' ? 'All Patients' : role}
-                    </option>
-                  ))}
-                </select>
-              );
-            })()}
-          </div>
-        }
-        actions={
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <label
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                cursor: 'pointer',
-                fontSize: '0.85rem',
-                color: 'var(--text-muted)',
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={showArchived}
-                onChange={(e) => setShowArchived(e.target.checked)}
-                style={{ cursor: 'pointer' }}
-              />
-              Show Archived
-            </label>
-          </div>
-        }
-      />
 
       {defaultRole === 'wholesaler' && activeView === 'tree' && (
-        <WholesalerTreeView wholesalers={filteredUsersList} onUpdate={fetchUsers} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+          <div style={{ padding: '0.5rem 1rem', background: 'white', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <Search size={16} color="var(--text-muted)" />
+              <input 
+                type="text" 
+                placeholder="Search wholesalers..." 
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                style={{ border: 'none', outline: 'none', fontSize: '0.9rem', width: '200px' }}
+              />
+            </div>
+            {renderCustomFilters()}
+          </div>
+          <WholesalerTreeView wholesalers={filteredUsersList} onUpdate={fetchUsers} />
+        </div>
       )}
 
       {!(defaultRole === 'wholesaler' && activeView === 'tree') && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {/* GCP Table Toolbar */}
+          {/* Create Button Top Right */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', paddingBottom: '0.25rem' }}>
             <button
               onClick={() => setIsCreateModalOpen(true)}
@@ -951,6 +1037,12 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
             </button>
           </div>
           <AdminUsersTable
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            searchPlaceholder="Search users by name, email, or institution..."
+            filters={getActiveFilters()}
+            onFilterRemove={handleFilterRemove}
+            renderCustomFilters={renderCustomFilters}
             users={users}
             filteredUsersList={filteredUsersList}
             selectedUserIds={selectedUserIds}
@@ -974,6 +1066,12 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
             loadingUserOrders={loadingUserOrders}
             userOrdersMap={userOrdersMap}
             handleSendWelcomeOffer={handleSendWelcomeOffer}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalUsersCount}
+            rowsPerPage={pageSize}
+            onRowsPerPageChange={(size) => { setPageSize(size); setCurrentPage(1); fetchUsers(1, size); }}
+            onPageChange={(page) => { setCurrentPage(page); fetchUsers(page, pageSize); }}
             getPatientRelationships={getPatientRelationships}
             handleAssignDoctorToPatient={handleAssignDoctorToPatient}
             getDoctorWholesaler={getDoctorWholesaler}

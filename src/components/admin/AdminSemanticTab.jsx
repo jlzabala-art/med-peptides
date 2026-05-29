@@ -29,7 +29,6 @@ import {
   Check,
 } from 'lucide-react';
 import AppDataTable from '../ui/AppDataTable';
-import AppFilterBar from '../ui/AppFilterBar';
 
 const CANONICAL_GOALS = [
   'cognitive_mood',
@@ -679,35 +678,6 @@ export default function AdminSemanticTab({ readOnly = false }) {
         </div>
       </div>
 
-      <AppFilterBar
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        searchPlaceholder="Search by product name prefix (case-sensitive)..."
-        filters={[
-          {
-            id: 'goal',
-            label: 'Canonical Goal',
-            value: selectedGoal,
-            options: [
-              { value: 'all', label: 'All Canonical Goals' },
-              ...CANONICAL_GOALS.map((g) => ({ value: g, label: GOAL_LABELS[g] })),
-            ],
-            onChange: setSelectedGoal,
-          },
-          {
-            id: 'status',
-            label: 'AI Status',
-            value: selectedStatus,
-            options: [
-              { value: 'all', label: 'All AI Statuses' },
-              { value: 'ready', label: 'READY (Enriched)' },
-              { value: 'pending', label: 'PENDING (Incomplete)' },
-            ],
-            onChange: setSelectedStatus,
-          },
-        ]}
-      />
-
       <div
         style={{
           border: '1px solid var(--color-border)',
@@ -751,6 +721,48 @@ export default function AdminSemanticTab({ readOnly = false }) {
           )}
           emptyTitle="No semantic data found"
           emptyDescription="No products matched the given filters."
+          searchQuery={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Search by product name prefix (case-sensitive)..."
+          filters={[
+            ...(selectedGoal !== 'all' ? [{ label: 'Canonical Goal', value: selectedGoal, type: 'goal' }] : []),
+            ...(selectedStatus !== 'all' ? [{ label: 'AI Status', value: selectedStatus, type: 'status' }] : [])
+          ]}
+          onFilterRemove={(f) => {
+            if (f.type === 'goal') setSelectedGoal('all');
+            if (f.type === 'status') setSelectedStatus('all');
+          }}
+          renderCustomFilters={() => (
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <select
+                value={selectedGoal}
+                onChange={(e) => setSelectedGoal(e.target.value)}
+                style={{
+                  height: '32px', padding: '0 1.5rem 0 0.75rem', borderRadius: '16px',
+                  border: '1px solid var(--border)', backgroundColor: selectedGoal === 'all' ? 'white' : 'var(--primary-light)',
+                  color: selectedGoal === 'all' ? 'var(--text-main)' : 'var(--primary)',
+                  fontSize: '0.8rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+                }}
+              >
+                <option value="all">Goal: All</option>
+                {CANONICAL_GOALS.map((g) => <option key={g} value={g}>{GOAL_LABELS[g]}</option>)}
+              </select>
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                style={{
+                  height: '32px', padding: '0 1.5rem 0 0.75rem', borderRadius: '16px',
+                  border: '1px solid var(--border)', backgroundColor: selectedStatus === 'all' ? 'white' : 'var(--primary-light)',
+                  color: selectedStatus === 'all' ? 'var(--text-main)' : 'var(--primary)',
+                  fontSize: '0.8rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+                }}
+              >
+                <option value="all">Status: All</option>
+                <option value="ready">READY (Enriched)</option>
+                <option value="pending">PENDING (Incomplete)</option>
+              </select>
+            </div>
+          )}
         />
         {hasMore && products.length > 0 && !loading && (
           <div

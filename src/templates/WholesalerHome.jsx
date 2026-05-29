@@ -641,7 +641,7 @@ const buttonStyle = {
 };
 
 // ── Overview Tab ───────────────────────────────────────────────────────────────
-function WholesalerOverviewTab({ uid, onNavigate }) {
+export function WholesalerOverviewTab({ uid, onNavigate }) {
   const [rxList, setRxList] = useState([]);
   const [bulkOrders, setBulkOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -895,7 +895,7 @@ function WholesalerOverviewTab({ uid, onNavigate }) {
 }
 
 // ── Bulk Orders Tab ────────────────────────────────────────────────────────────
-function WholesalerBulkTab() {
+export function WholesalerBulkTab() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <div style={{
@@ -925,7 +925,7 @@ function WholesalerBulkTab() {
 }
 
 // ── Rx Inbox Tab ──────────────────────────────────────────────────────────────
-function WholesalerRxInboxTab({ uid }) {
+export function WholesalerRxInboxTab({ uid }) {
   const [rxList, setRxList] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -1014,7 +1014,7 @@ function MobileNotSupported() {
 }
 
 // ── Placeholder tab ────────────────────────────────────────────────────────────
-function PlaceholderTab({ title, description }) {
+export function PlaceholderTab({ title, description }) {
   return (
     <div style={{
       textAlign: 'center', padding: '3rem 2rem', background: 'var(--color-bg-app)',
@@ -1028,23 +1028,19 @@ function PlaceholderTab({ title, description }) {
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────────
+import { Outlet, useLocation } from 'react-router-dom';
+
 export default function WholesalerHome() {
   const { user, userProfile, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
+  const location = useLocation();
+  const navigate = useNavigate();
   const [isMobile, setIsMobile]   = useState(window.innerWidth < 1024);
   const [rxBadge, setRxBadge]     = useState(0);
-  const [catalogToEdit, setCatalogToEdit] = useState(null);
 
-  // Deep-linking handle
-  useEffect(() => {
-    if (window.location.pathname.includes('catalog-builder')) {
-      setActiveTab('catalog-builder');
-    } else if (window.location.pathname.includes('email-campaigns') || window.location.pathname.includes('catalog-email')) {
-      setActiveTab('email-campaigns');
-    } else if (window.location.pathname.includes('catalogs')) {
-      setActiveTab('catalogs');
-    }
-  }, [window.location.pathname]);
+  // Derive active tab from URL (e.g. /wholesaler/rx-inbox -> rx-inbox)
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  // Default to 'overview' if exactly /wholesaler
+  const activeTab = pathParts.length > 1 ? pathParts[pathParts.length - 1] : 'overview';
 
   const uid     = user?.uid;
   const name    = userProfile?.firstName
@@ -1074,29 +1070,11 @@ export default function WholesalerHome() {
 
   const handleLogout = useCallback(() => { logout?.(); window.location.href = '/'; }, [logout]);
 
-  const renderTab = () => {
-    switch (activeTab) {
-      case 'overview':    return <AdminMetricsDashboard wholesalerId={uid} />;
-      case 'rx-inbox':    return <WholesalerRxInboxTab uid={uid} />;
-      case 'bulk-orders': return <WholesalerBulkTab />;
-      case 'geography':   return <GeographyAreasTab />;
-      case 'branding':    return <BrandingTab />;
-      case 'domains':     return <DomainsTab />;
-      case 'clients':     return <ClientsTab />;
-      case 'catalogs':    return <CatalogList ownerId={uid} ownerType="wholesaler" onOpenBuilder={() => { setCatalogToEdit(null); setActiveTab('catalog-builder'); }} onSelectCatalogToEdit={(cat) => { setCatalogToEdit(cat); setActiveTab('catalog-builder'); }} />;
-      case 'catalog-builder': return <CatalogCreatorFlow ownerId={uid} ownerType="wholesaler" editingCatalog={catalogToEdit} onBack={() => { setCatalogToEdit(null); setActiveTab('catalogs'); }} />;
-      case 'email-campaigns': return <EmailCampaignBuilder ownerId={uid} ownerType="wholesaler" onBack={() => setActiveTab('catalogs')} />;
-      case 'inventory':   return <PlaceholderTab title="Inventory Manager" description="Real-time stock view, batch expiry tracking, and restock alerts — coming soon." />;
-      case 'settings':    return <PlaceholderTab title="Account Settings" description="Company details, contacts, and B2B preferences." />;
-      default:            return <div style={{ padding: '2rem', color: 'var(--color-text-tertiary)' }}>Tab not found.</div>;
-    }
-  };
-
   const currentTab = TABS.find(t => t.id === activeTab);
 
   const topbarActions = rxBadge > 0 ? (
     <button
-      onClick={() => setActiveTab('rx-inbox')}
+      onClick={() => navigate('/wholesaler/rx-inbox')}
       style={{
         display: 'flex', alignItems: 'center', gap: '0.5rem',
         padding: '0.4rem 0.8rem', borderRadius: '4px',
@@ -1120,7 +1098,7 @@ export default function WholesalerHome() {
         })),
       }))}
       activeNavId={activeTab}
-      onNavigate={setActiveTab}
+      onNavigate={(id) => navigate(`/wholesaler/${id === 'overview' ? '' : id}`)}
       portalTitle="B2B Portal"
       roleContext="wholesaler"
       pageContext={{
@@ -1143,7 +1121,7 @@ export default function WholesalerHome() {
       <div style={{ padding: '2rem' }}>
         <RefillReminderBanner role="wholesaler" />
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={currentTab?.label || activeTab}>
-          {renderTab()}
+          <Outlet context={{ uid }} />
         </AdminTabErrorBoundary>
       </div>
     </PortalLayout>

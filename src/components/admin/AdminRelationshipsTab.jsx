@@ -3,7 +3,6 @@ import { collection, query, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Layers, Search, Filter } from 'lucide-react';
 import AppDataTable from '../ui/AppDataTable';
-import AppFilterBar from '../ui/AppFilterBar';
 
 const CATEGORIES = [
   'Healing & Recovery',
@@ -73,6 +72,46 @@ export default function AdminRelationshipsTab({ readOnly = false }) {
       return matchesSearch && matchesCat;
     });
   }, [products, searchTerm, categoryFilter]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, categoryFilter]);
+
+  const totalItems = filteredProducts.length;
+  const totalPages = Math.ceil(totalItems / rowsPerPage);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
+  const activeFilters = [];
+  if (categoryFilter !== 'all') {
+    activeFilters.push({ label: 'Category', value: categoryFilter, type: 'category' });
+  }
+
+  const handleFilterRemove = (filter) => {
+    if (filter.type === 'category') setCategoryFilter('all');
+  };
+
+  const renderCustomFilters = () => (
+    <select
+      value={categoryFilter}
+      onChange={(e) => setCategoryFilter(e.target.value)}
+      style={{
+        height: '32px', padding: '0 1.5rem 0 0.75rem', borderRadius: '16px',
+        border: '1px solid var(--border)', backgroundColor: categoryFilter === 'all' ? 'white' : 'var(--primary-light)',
+        color: categoryFilter === 'all' ? 'var(--text-main)' : 'var(--primary)',
+        fontSize: '0.8rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+      }}
+    >
+      <option value="all">Category: All</option>
+      <option value="uncategorized">Uncategorized</option>
+      {CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+    </select>
+  );
 
   const columns = [
     {
@@ -176,64 +215,6 @@ export default function AdminRelationshipsTab({ readOnly = false }) {
         </div>
       </div>
 
-      <AppFilterBar
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        searchPlaceholder="Search by product name..."
-        filters={[
-          {
-            id: 'category',
-            label: 'Category',
-            value: categoryFilter,
-            options: [
-              { value: 'all', label: 'All Categories' },
-              { value: 'uncategorized', label: 'Uncategorized' },
-              ...CATEGORIES.map((c) => ({ value: c, label: c })),
-            ],
-            onChange: setCategoryFilter,
-          },
-        ]}
-      />
-
-      <div
-        style={{
-          display: 'flex',
-          gap: '1rem',
-          flexWrap: 'wrap',
-          backgroundColor: 'var(--color-bg-surface)',
-          padding: '1rem',
-          borderRadius: 'var(--table-radius)',
-          border: '1px solid var(--color-border)',
-          alignItems: 'center',
-        }}
-      >
-        <Layers size={18} color="var(--color-primary)" />
-        <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>
-          {categoryFilter === 'all' && !searchTerm
-            ? 'Total Catalog Products:'
-            : 'Filtered Results:'}
-        </span>
-        <span
-          style={{
-            backgroundColor: 'var(--color-bg-app)',
-            padding: '2px 8px',
-            borderRadius: '12px',
-            fontSize: '0.85rem',
-            fontWeight: 700,
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          {filteredProducts.length} items
-        </span>
-        {categoryFilter !== 'all' && (
-          <span
-            style={{ fontSize: '0.85rem', color: 'var(--color-text-tertiary)', marginLeft: 'auto' }}
-          >
-            Active Filter: {categoryFilter}
-          </span>
-        )}
-      </div>
-
       <div
         style={{
           border: '1px solid var(--color-border)',
@@ -244,10 +225,25 @@ export default function AdminRelationshipsTab({ readOnly = false }) {
       >
         <AppDataTable
           columns={columns}
-          data={filteredProducts}
+          data={paginatedProducts}
           keyField="id"
           emptyTitle="No relationships found"
           emptyDescription="Try adjusting your filters or search term."
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          onPageChange={setCurrentPage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={(val) => {
+            setRowsPerPage(val);
+            setCurrentPage(1);
+          }}
+          searchQuery={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Search by product name..."
+          filters={activeFilters}
+          onFilterRemove={handleFilterRemove}
+          renderCustomFilters={renderCustomFilters}
         />
       </div>
     

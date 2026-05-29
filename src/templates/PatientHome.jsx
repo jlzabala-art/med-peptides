@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { usePatientAIProfile } from '../hooks/usePatientAIProfile';
 import RefillReminderBanner from '../components/shared/RefillReminderBanner';
@@ -9,9 +9,11 @@ import {
   LayoutDashboard, ClipboardList
 } from 'lucide-react';
 import PatientPrescriptionPanel from '../components/patient/PatientPrescriptionPanel';
+import PatientAppointments from './PatientAppointments';
 import { collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import PortalLayout from '../components/ui/PortalLayout';
+import OrdersTab from '../components/admin/OrdersTab';
 
 // ── Goal → peptide metadata ───────────────────────────────────────────────────
 const GOAL_PEPTIDE_MAP = {
@@ -75,13 +77,14 @@ const PATIENT_NAV_GROUPS = [
     label: 'Clinical',
     items: [
       { id: 'prescriptions', label: 'My Prescriptions', icon: ClipboardList },
+      { id: 'appointments', label: 'Appointments', icon: Clock },
     ],
   },
   {
     id: 'orders',
     label: 'Orders & Fulfillment',
     items: [
-      { id: 'my-orders', label: 'My Orders', icon: Package },
+      { id: 'orders', label: 'My Orders', icon: Package },
     ],
   }
 ];
@@ -206,8 +209,10 @@ export default function PatientHome() {
   const location = useLocation();
   const uid = user?.uid;
 
-  const queryParams = new URLSearchParams(location.search);
-  const activeTab = queryParams.get('t') || 'dashboard';
+  // Derive active tab from URL (e.g. /patient/prescriptions -> prescriptions)
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  // Default to 'dashboard' if exactly /patient
+  const activeTab = pathParts.length > 1 ? pathParts[pathParts.length - 1] : 'dashboard';
 
   const name = userProfile?.firstName || userProfile?.name?.split(' ')[0] || 'Patient';
   const goals = useMemo(() => Array.isArray(userProfile?.goals) ? userProfile.goals : [], [userProfile]);
@@ -248,34 +253,7 @@ export default function PatientHome() {
   }, [interests, allGoalKeys]);
 
   const handleNavigate = (tabId) => {
-    if (tabId === 'my-orders') {
-      navigate('/account');
-    } else {
-      navigate(`?t=${tabId}`);
-    }
-  };
-
-  const renderActiveTab = () => {
-    switch (activeTab) {
-      case 'prescriptions':
-        return (
-          <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 1.5rem 4rem' }}>
-            <PatientPrescriptionPanel patientUid={uid} />
-          </div>
-        );
-      case 'dashboard':
-      default:
-        return (
-          <PatientDashboardTab 
-            uid={uid} 
-            activeOrders={activeOrders} 
-            aiSuggestion={aiSuggestion} 
-            interests={interests} 
-            allGoalKeys={allGoalKeys} 
-            recently={recently} 
-          />
-        );
-    }
+    navigate(`/patient/${tabId === 'dashboard' ? '' : tabId}`);
   };
 
   return (
@@ -300,7 +278,34 @@ export default function PatientHome() {
         <p style={{ margin: '0 0 2rem 0', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
           {activeTab === 'prescriptions' ? 'Manage your active recommendations and protocols.' : 'Overview of your active treatments and insights.'}
         </p>
-        {renderActiveTab()}
+        <Routes>
+          <Route index element={
+            <PatientDashboardTab 
+              uid={uid} 
+              activeOrders={activeOrders} 
+              aiSuggestion={aiSuggestion} 
+              interests={interests} 
+              allGoalKeys={allGoalKeys} 
+              recently={recently} 
+            />
+          } />
+          <Route path="prescriptions" element={
+            <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 1.5rem 4rem' }}>
+              <PatientPrescriptionPanel patientUid={uid} />
+            </div>
+          } />
+          <Route path="appointments" element={
+            <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 1.5rem 4rem' }}>
+              <PatientAppointments />
+            </div>
+          } />
+          <Route path="orders" element={
+            <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 1.5rem 4rem' }}>
+              <OrdersTab buyerId={uid} readOnly={true} />
+            </div>
+          } />
+          <Route path="*" element={<Navigate to="" replace />} />
+        </Routes>
       </div>
     </PortalLayout>
   );

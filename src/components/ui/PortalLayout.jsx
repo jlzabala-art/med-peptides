@@ -41,15 +41,18 @@ export default function PortalLayout({
       
       {/* TOPBAR */}
       <header style={{ 
-        height: '48px', 
-        backgroundColor: '#1a73e8', 
-        borderBottom: 'none',
+        height: '60px', 
+        background: 'rgba(255, 255, 255, 0.75)', 
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 1rem',
+        padding: '0 1.5rem',
         zIndex: 50,
-        color: 'white'
+        color: 'var(--color-text-primary)',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)'
       }}>
         {/* Left Side */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -59,39 +62,43 @@ export default function PortalLayout({
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               title="Toggle Menu"
             >
-              <Menu size={20} color="white" />
+              <Menu size={20} color="var(--color-text-primary)" />
             </button>
           )}
-          <div style={{ fontWeight: 500, fontSize: '1.1rem', color: 'white', letterSpacing: '0.2px' }}>
+          <div style={{ fontWeight: 600, fontSize: '1.2rem', color: 'var(--color-primary)', letterSpacing: '-0.3px' }}>
             {portalTitle}
           </div>
         </div>
 
         {/* Center - Global Search (Optional) */}
         {!isMobile && (
-          <div style={{ flex: 1, maxWidth: '720px', margin: '0 2rem' }}>
+          <div style={{ flex: 1, maxWidth: '600px', margin: '0 2rem' }}>
             <div style={{ position: 'relative', width: '100%' }}>
-              <Search size={18} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#5f6368' }} />
+              <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-secondary)' }} />
               <input 
                 type="text" 
-                placeholder="Search resources and services" 
+                placeholder="Search..." 
                 style={{
                   width: '100%',
-                  padding: '0.5rem 1rem 0.5rem 2.5rem',
-                  borderRadius: '4px',
-                  border: '1px solid transparent',
-                  backgroundColor: 'white',
-                  color: '#3c4043',
+                  padding: '0.6rem 1rem 0.6rem 2.8rem',
+                  borderRadius: '24px',
+                  border: '1px solid rgba(0, 0, 0, 0.08)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                  color: 'var(--color-text-primary)',
                   fontSize: '0.9rem',
                   outline: 'none',
-                  transition: 'background-color 0.2s, box-shadow 0.2s',
-                  boxShadow: 'none'
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)'
                 }}
                 onFocus={(e) => {
-                  e.target.style.boxShadow = '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)';
+                  e.target.style.backgroundColor = '#ffffff';
+                  e.target.style.borderColor = 'var(--color-primary-light)';
+                  e.target.style.boxShadow = '0 0 0 4px rgba(var(--color-primary-rgb), 0.1)';
                 }}
                 onBlur={(e) => {
-                  e.target.style.boxShadow = 'none';
+                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+                  e.target.style.borderColor = 'rgba(0, 0, 0, 0.08)';
+                  e.target.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.02)';
                 }}
               />
             </div>
@@ -102,11 +109,17 @@ export default function PortalLayout({
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {headerActions}
           <button onClick={() => setAiOpen(!isAiOpen)} style={iconBtnStyle} title="Toggle System Assistant">
-            <Bot size={20} color={isAiOpen ? '#8ab4f8' : 'white'} />
+            <Bot size={20} color={isAiOpen ? 'var(--color-primary)' : 'var(--color-text-secondary)'} />
           </button>
-          <button style={iconBtnStyle} title="Help"><HelpCircle size={20} color="white" /></button>
-          <button style={iconBtnStyle} title="Notifications"><Bell size={20} color="white" /></button>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#0b57d0', border: '1px solid rgba(255,255,255,0.2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '0.5rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem' }}>
+          <button style={iconBtnStyle} title="Help"><HelpCircle size={20} color="var(--color-text-secondary)" /></button>
+          <button style={iconBtnStyle} title="Notifications"><Bell size={20} color="var(--color-text-secondary)" /></button>
+          <div style={{ 
+            width: '36px', height: '36px', borderRadius: '50%', 
+            background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+            color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+            marginLeft: '0.75rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem',
+            boxShadow: '0 2px 8px rgba(var(--color-primary-rgb), 0.3)'
+          }}>
             U
           </div>
         </div>
@@ -177,13 +190,14 @@ export default function PortalLayout({
 }
 
 const iconBtnStyle = {
-  background: 'none',
-  border: 'none',
+  background: 'rgba(255,255,255,0.5)',
+  border: '1px solid rgba(0,0,0,0.05)',
   padding: '0.5rem',
   cursor: 'pointer',
   borderRadius: '50%',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  transition: 'background-color 0.2s'
+  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+  boxShadow: '0 2px 5px rgba(0,0,0,0.02)'
 };

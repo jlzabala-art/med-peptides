@@ -20,6 +20,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
+import { logAction } from '../../services/auditLogger';
 import {
   ClipboardList, Plus, Trash2, Send, Save, Search, User, Building,
   ChevronDown, FlaskConical, PackageSearch, AlertCircle, CheckCircle2,
@@ -30,6 +31,7 @@ import {
   ITEM_UNITS, FREQUENCIES, DURATIONS, RX_STATUS_META, rxEvent
 } from '../../config/prescriptionConfig';
 import { apiCatalog } from '../../data/apis';
+import CatalogPreviewPanel from '../wholesaler/CatalogPreviewPanel';
 
 
 // ── Mini status badge ─────────────────────────────────────────────────────────
@@ -777,12 +779,14 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
 
       if (savedId) {
         await updateDoc(doc(db, 'prescriptions', savedId), payload);
+        await logAction(user?.uid, 'doctor', 'PRESCRIPTION_UPDATE_DRAFT', savedId, { itemsCount: items.length });
         showToast('Borrador guardado.');
       } else {
         const ref = await addDoc(collection(db, 'prescriptions'), {
           ...payload, createdAt: serverTimestamp(),
         });
         setSavedId(ref.id);
+        await logAction(user?.uid, 'doctor', 'PRESCRIPTION_CREATE_DRAFT', ref.id, { itemsCount: items.length });
         showToast('Prescripción creada y guardada como borrador.');
       }
       onSaved?.(true);
@@ -1775,66 +1779,23 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                     No se encontraron productos en el catálogo.
                   </div>
                 ) : (
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-                    gap: '0.5rem',
-                    maxHeight: '180px',
-                    overflowY: 'auto',
-                    paddingRight: '0.2rem'
-                  }}>
-                    {filteredCatalogItems.map(item => (
-                      <div key={item.id} style={{
-                        background: 'var(--color-bg-surface)',
-                        border: '1px solid #dadce0',
-                        borderRadius: '3px',
-                        padding: '0.4rem',
-                        fontSize: '0.72rem',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between'
-                      }}>
-                        <div>
-                          <div style={{ fontWeight: 600, color: '#202124' }}>
-                            {item.type === 'protocol' ? '🧬' : (item.productType === 'testing' || item.type === 'testing' ? '🔬' : '💊')} {item.name || item.displayName}
-                          </div>
-                          <div style={{ color: '#70757a', fontSize: '0.65rem' }}>
-                            {item.typeLabel} {item.sku ? `| SKU: ${item.sku}` : ''}
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => addItem({
-                            type:      item.type,
-                            id:        item.id,
-                            name:      item.name || item.displayName || '',
-                            sku:       item.sku || item.variants?.[0]?.sku || '',
-                            imageUrl:  item.imageUrl || item.image || '',
-                            pricing:   item.pricing || null,
-                            quantity:  1,
-                            unit:      item.productType === 'testing' || item.type === 'testing' ? 'kits' : 'vials',
-                            dosage:    '',
-                            frequency: '',
-                            duration:  '',
-                            notes:     '',
-                            recommended_tests: item.recommended_tests || [],
-                          })}
-                          style={{
-                            marginTop: '0.4rem',
-                            background: '#e8f0fe',
-                            border: 'none',
-                            color: '#1a73e8',
-                            fontWeight: 600,
-                            fontSize: '0.68rem',
-                            padding: '0.2rem',
-                            borderRadius: '2px',
-                            cursor: 'pointer',
-                            width: '100%'
-                          }}
-                        >
-                          + Añadir a Receta
-                        </button>
-                      </div>
-                    ))}
+                  <div style={{ maxHeight: '600px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px', background: '#fff' }}>
+                    <CatalogPreviewPanel 
+                      catalog={{
+                        heroTitle: "Catálogo Clínico Integral",
+                        heroSubtitle: "Vademécum interactivo para formulación",
+                        sections: [
+                          {
+                            title: "Tratamientos y Protocolos",
+                            products: filteredCatalogItems.filter(i => i.type !== 'protocol').map(i => i.id),
+                            protocols: filteredCatalogItems.filter(i => i.type === 'protocol').map(i => i.id)
+                          }
+                        ]
+                      }}
+                      products={filteredCatalogItems.filter(i => i.type !== 'protocol')}
+                      protocols={filteredCatalogItems.filter(i => i.type === 'protocol')}
+                      onAdd={addItem}
+                    />
                   </div>
                 )}
               </div>

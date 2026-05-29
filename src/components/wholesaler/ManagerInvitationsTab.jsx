@@ -6,7 +6,7 @@ import { UserPlus, Mail, Link as LinkIcon } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Spinner from '../ui/Spinner';
 import Card from '../ui/Card';
-import DataTable from '../ui/DataTable';
+import AppDataTable from '../ui/AppDataTable';
 import StatusBadge from '../ui/StatusBadge';
 
 export default function ManagerInvitationsTab() {
@@ -17,6 +17,8 @@ export default function ManagerInvitationsTab() {
   const [inviteeName, setInviteeName] = useState('');
   const [inviteeEmail, setInviteeEmail] = useState('');
   const [inviteeRole, setInviteeRole] = useState('patient');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const { data: invitations = [], isLoading } = useQuery({
     queryKey: ['managerInvitations', currentUser?.uid],
@@ -113,6 +115,7 @@ export default function ManagerInvitationsTab() {
     {
       header: 'Name / Role',
       key: 'name',
+      sortKey: 'name',
       render: (row) => (
         <>
           <div style={{ fontWeight: 500, color: 'var(--color-text-primary)', fontSize: '0.95rem' }}>{row.name}</div>
@@ -124,6 +127,7 @@ export default function ManagerInvitationsTab() {
     {
       header: 'Date',
       key: 'date',
+      sortKey: 'createdAt',
       render: (row) => (
         <div>
           <div style={{ color: 'var(--color-text-secondary)' }}>Created: {row.createdAt?.toDate ? row.createdAt.toDate().toLocaleDateString() : 'Just now'}</div>
@@ -138,6 +142,7 @@ export default function ManagerInvitationsTab() {
     {
       header: 'Status',
       key: 'status',
+      sortKey: 'status',
       render: (row) => <StatusBadge status={row.status} />
     },
     {
@@ -174,11 +179,21 @@ export default function ManagerInvitationsTab() {
     }
   ];
 
+  const filteredData = invitations.filter(i => {
+    const term = searchTerm.toLowerCase();
+    return (i.name || '').toLowerCase().includes(term) || (i.email || '').toLowerCase().includes(term);
+  });
+
   return (
-    <div style={{ padding: '2rem' }}>
+    <div style={{ padding: '0 1rem' }}>
       <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '0.25rem' }}>User Invitations</h1>
-        <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>Invite doctors, patients, and staff. They will be automatically linked to you upon registration.</p>
+        <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <UserPlus size={24} color="var(--primary)" />
+          User Invitations
+        </h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+          Invite doctors, patients, and staff. They will be automatically linked to you upon registration.
+        </p>
       </div>
 
       <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'flex-start' }}>
@@ -238,22 +253,22 @@ export default function ManagerInvitationsTab() {
         </Card>
 
         {/* History Table */}
-        <Card style={{ flex: '2 1 500px', padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0' }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>Invite History</h2>
-          </div>
-          
+        <div style={{ flex: '2 1 500px' }}>
           {isLoading ? (
-            <Spinner text="Loading invitations..." />
+            <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+              Loading invitations…
+            </div>
           ) : (
-            <DataTable 
-              columns={columns} 
-              data={invitations} 
-              keyField="id" 
-              emptyMessage="No invitations created yet. Fill out the form to get started." 
+            <AppDataTable 
+              data={filteredData}
+              columns={columns}
+              searchQuery={searchTerm}
+              onSearchChange={setSearchTerm}
+              selectedIds={selectedIds}
+              onSelectionChange={setSelectedIds}
             />
           )}
-        </Card>
+        </div>
       </div>
     </div>
   );

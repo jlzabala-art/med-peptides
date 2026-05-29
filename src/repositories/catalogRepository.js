@@ -55,9 +55,6 @@ export const catalogRepository = {
     }
   },
 
-  /**
-   * Fetch all catalogs matching owner credentials.
-   */
   async getCatalogsByOwner(ownerId, ownerType = null) {
     try {
       let q = query(catalogsCol(), where('ownerId', '==', ownerId));
@@ -69,6 +66,20 @@ export const catalogRepository = {
     } catch (err) {
       console.error('[catalogRepository] getCatalogsByOwner error:', err);
       throw err;
+    }
+  },
+
+  /**
+   * Fetch all public catalogs (visible to everyone to clone).
+   */
+  async getPublicCatalogs() {
+    try {
+      const q = query(catalogsCol(), where('visibility', '==', 'public'));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch (err) {
+      console.error('[catalogRepository] getPublicCatalogs error:', err);
+      return []; // Return empty if index is missing instead of crashing
     }
   },
 
@@ -192,6 +203,21 @@ export const catalogRepository = {
       console.error('[catalogRepository] getLeadsForCatalog error:', err);
       const q = query(leadsCol(), where('catalogId', '==', catalogId));
       const snap = await getDocs(q);
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+  },
+
+  /**
+   * Fetch all leads for global admin view.
+   */
+  async getAllLeads() {
+    try {
+      const q = query(leadsCol(), orderBy('createdAt', 'desc'));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch (err) {
+      console.error('[catalogRepository] getAllLeads error:', err);
+      const snap = await getDocs(leadsCol());
       return snap.docs.map(d => ({ id: d.id, ...d.data() }));
     }
   }

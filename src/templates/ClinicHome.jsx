@@ -4,6 +4,7 @@ import { LayoutDashboard, ShoppingBag, Plus, History, Settings, LogOut, ShieldCh
 import PortalLayout from '../components/ui/PortalLayout';
 import DashboardEngine from '../engine/DashboardEngine';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 
 const CLINIC_NAV_GROUPS = [
   {
@@ -31,20 +32,8 @@ const CLINIC_NAV_GROUPS = [
   }
 ];
 
-export default function ClinicHome() {
-  const { user, userProfile, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState('dashboard');
-
-  const clinicName = userProfile?.firstName
-    ? `${userProfile.firstName} ${userProfile.lastName || ''}`.trim()
-    : user?.displayName || 'Clinic';
-
-  const handleLogout = () => {
-    logout?.();
-    window.location.href = '/';
-  };
-
-  const renderDashboard = () => (
+function ClinicDashboardTab({ userProfile }) {
+  return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '4rem' }}>
       <div style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
         <div>
@@ -73,26 +62,41 @@ export default function ClinicHome() {
       <DashboardEngine role="clinic" dataContext={{}} />
     </div>
   );
+}
 
-  const renderTab = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return renderDashboard();
-      default:
-        return (
-          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
-            <h2 style={{ marginBottom: '1rem' }}>Coming Soon</h2>
-            <p>This module is under development.</p>
-          </div>
-        );
-    }
+function PlaceholderTab() {
+  return (
+    <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
+      <h2 style={{ marginBottom: '1rem' }}>Coming Soon</h2>
+      <p>This module is under development.</p>
+    </div>
+  );
+}
+
+export default function ClinicHome() {
+  const { user, userProfile, logout } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Derive active tab from URL (e.g. /clinic-dashboard/inventory -> inventory)
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  // Default to 'dashboard' if exactly /clinic-dashboard
+  const activeTab = pathParts.length > 1 ? pathParts[pathParts.length - 1] : 'dashboard';
+
+  const clinicName = userProfile?.firstName
+    ? `${userProfile.firstName} ${userProfile.lastName || ''}`.trim()
+    : user?.displayName || 'Clinic';
+
+  const handleLogout = () => {
+    logout?.();
+    window.location.href = '/';
   };
 
   return (
     <PortalLayout
       sidebarNavGroups={CLINIC_NAV_GROUPS}
       activeNavId={activeTab}
-      onNavigate={setActiveTab}
+      onNavigate={(id) => navigate(`/clinic-dashboard/${id === 'dashboard' ? '' : id}`)}
       portalTitle="Clinic Portal"
       roleContext="clinic"
       pageContext={{
@@ -112,7 +116,10 @@ export default function ClinicHome() {
     >
       <div style={{ padding: '2rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
-          {renderTab()}
+          <Routes>
+            <Route index element={<ClinicDashboardTab userProfile={userProfile} />} />
+            <Route path="*" element={<PlaceholderTab />} />
+          </Routes>
         </AdminTabErrorBoundary>
       </div>
     </PortalLayout>

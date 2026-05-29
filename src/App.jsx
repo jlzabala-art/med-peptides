@@ -47,12 +47,13 @@ const FAQDiscoveryView = lazy(() => import('./templates/FAQDiscoveryView'));
 const AcademyView = lazy(() => import('./templates/AcademyView'));
 const CourseDetailView = lazy(() => import('./templates/CourseDetailView'));
 const AuthPage = lazy(() => import('./templates/AuthPage'));
-const AdminDashboard = lazy(() => import('./templates/AdminDashboard'));
+const AdminRoutes = lazy(() => import('./routes/AdminRoutes'));
 const UserDashboard = lazy(() => import('./templates/UserDashboard'));
 const RoleDashboard = lazy(() => import('./templates/RoleDashboard'));
 const AccountManagerDashboard = lazy(() => import('./templates/AccountManagerDashboard'));
 const DoctorHome = lazy(() => import('./templates/DoctorHome'));
 const DoctorDashboard = lazy(() => import('./templates/DoctorDashboard'));
+const WholesalerRoutes = lazy(() => import('./routes/WholesalerRoutes'));
 const WholesalerHome = lazy(() => import('./templates/WholesalerHome'));
 const PublicCatalogView = lazy(() => import('./templates/PublicCatalogView'));
 const CatalogEmailTracker = lazy(() => import('./templates/CatalogEmailTracker'));
@@ -1045,18 +1046,7 @@ function App() {
             {/* --- ZONA ADMIN (outside ShopLayout — no public header) --- */}
             <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
               <Route element={<AdminProvider><AdminLayout /></AdminProvider>}>
-                <Route path="/admin"              element={<AdminDashboard initialTab="dashboard" />} />
-                <Route path="/admin/users"        element={<AdminDashboard initialTab="users" />} />
-                <Route path="/admin/products"     element={<AdminDashboard initialTab="products" />} />
-                <Route path="/admin/costs"        element={<AdminDashboard initialTab="costs" />} />
-                <Route path="/admin/prices"       element={<AdminDashboard initialTab="prices" />} />
-                <Route path="/admin/protocols"    element={<AdminDashboard initialTab="protocols" />} />
-                <Route path="/admin/catalogs"     element={<AdminDashboard initialTab="catalogs" />} />
-                <Route path="/admin/catalog-builder" element={<AdminDashboard initialTab="catalog-builder" />} />
-                <Route path="/admin/settings"     element={<AdminDashboard initialTab="settings" />} />
-                <Route path="/admin/home-layout"  element={<AdminDashboard initialTab="home-layout" />} />
-                <Route path="/admin/growth"       element={<AdminDashboard initialTab="analytics" />} />
-                <Route path="/admin/orders"       element={<AdminDashboard initialTab="orders" />} />
+                <Route path="/admin/*"            element={<AdminRoutes />} />
                 <Route path="/admin/patient/:id"  element={<PatientDetailAdmin />} />
               </Route>
             </Route>
@@ -1114,8 +1104,8 @@ function App() {
             </Route>
             <Route element={<ProtectedRoute allowedRoles={['professional', 'patient', 'doctor', 'admin']} />}>
               <Route element={<DoctorProvider><Outlet /></DoctorProvider>}>
-                <Route path="/doctor" element={<DoctorDashboard />} />
-                <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+                <Route path="/doctor/*" element={<DoctorDashboard />} />
+                <Route path="/doctor-dashboard/*" element={<DoctorDashboard />} />
 
                 {/* Account Manager Routing */}
                 <Route path="/account-manager/*" element={<AccountManagerDashboard />} />
@@ -1129,10 +1119,7 @@ function App() {
               />
             }>
               <Route element={<ProtectedRoute allowedRoles={['professional', 'patient', 'doctor', 'admin']} />}>
-                <Route path="/patient" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><PatientHome /></Suspense>} />
-                <Route path="/patient/treatments" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><PatientHome /></Suspense>} />
-                <Route path="/patient/appointments" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><PatientAppointments /></Suspense>} />
-                <Route path="/patient/lab-results" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><PatientHome /></Suspense>} />
+                <Route path="/patient/*" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><PatientHome /></Suspense>} />
                 <Route path="/paciente" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><UserDashboard onOpenCart={() => setActiveModal('cart')} /></Suspense>} />
                 <Route path="/account/supervisor" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><UserDashboard onOpenCart={() => setActiveModal('cart')} /></Suspense>} />
               </Route>
@@ -1147,17 +1134,12 @@ function App() {
                 <Route path="/doctor/profile" element={<DoctorProfile />} />
               </Route>
             </Route>
-            <Route path="/wholesaler" element={activeRole === 'wholesaler' || activeRole === 'admin' ? <WholesalerHome /> : <Navigate to="/paciente" replace />} />
-            <Route path="/wholesaler/catalogs" element={activeRole === 'wholesaler' || activeRole === 'admin' ? <WholesalerHome /> : <Navigate to="/paciente" replace />} />
-            <Route path="/wholesaler/catalog-builder" element={activeRole === 'wholesaler' || activeRole === 'admin' ? <WholesalerHome /> : <Navigate to="/paciente" replace />} />
-            <Route path="/wholesaler/email-campaigns" element={activeRole === 'wholesaler' || activeRole === 'admin' ? <WholesalerHome /> : <Navigate to="/paciente" replace />} />
-            <Route path="/wholeseller/catalogs" element={activeRole === 'wholesaler' || activeRole === 'admin' ? <WholesalerHome /> : <Navigate to="/paciente" replace />} />
-            <Route path="/wholeseller/catalog-builder" element={activeRole === 'wholesaler' || activeRole === 'admin' ? <WholesalerHome /> : <Navigate to="/paciente" replace />} />
-            <Route path="/wholeseller/email-campaigns" element={activeRole === 'wholesaler' || activeRole === 'admin' ? <WholesalerHome /> : <Navigate to="/paciente" replace />} />
+            <Route path="/wholesaler/*" element={activeRole === 'wholesaler' || activeRole === 'admin' ? <WholesalerRoutes /> : <Navigate to="/paciente" replace />} />
+            <Route path="/wholeseller/*" element={<Navigate to="/wholesaler" replace />} />
             <Route path="/catalog/:catalogSlug" element={<PublicCatalogView />} />
             <Route path="/partner/:tenantSlug/catalog/:catalogSlug" element={<PublicCatalogView />} />
             <Route path="/catalog/track/:eventId" element={<CatalogEmailTracker />} />
-            <Route path="/clinic-dashboard" element={activeRole === 'clinic' || activeRole === 'admin' ? <ClinicHome /> : <Navigate to="/paciente" replace />} />
+            <Route path="/clinic-dashboard/*" element={activeRole === 'clinic' || activeRole === 'admin' ? <ClinicHome /> : <Navigate to="/paciente" replace />} />
 
             {/* --- PUBLIC SHOP LAYOUT (continued for Settings & Redirects - Standard) --- */}
             <Route element={

@@ -21,7 +21,8 @@ import {
   where,
   limit,
 } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db, auth } from '../../firebase';
+import { logAction } from '../../services/auditLogger';
 import {
   Layers,
   ChevronDown,
@@ -530,6 +531,14 @@ export default function AdminBulkOrdersTab() {
         ? [...orders.find((o) => o.id === orderId).timeline, event]
         : [event],
     });
+    
+    await logAction(
+      auth.currentUser?.uid || 'unknown_admin',
+      'admin',
+      'BULK_ORDER_UPDATE',
+      orderId,
+      { newStatus }
+    );
   };
 
   // Filtered

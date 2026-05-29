@@ -346,17 +346,17 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
       // Check if user is currently viewing a product/supplement/protocol detail page
       const isPageContextActive = !!(reqContext?.page_context?.activeEntityData);
 
-      const _isPricing = !hasCompoundKeyword && !isPageContextActive && /\b(precio|precios|cuesta|cuestan|cuanto|cost|costs|costing|price|prices|pricing|comprar|buy|buying|wholesale|discount|discounts|cotizacion|how much)\b/i.test(query);
-      const _isShipping = !hasCompoundKeyword && !isPageContextActive && /\b(envio|envios|shipping|delivery|deliveries|logistica|entrega|entregas|plazo|plazos|transit|tracking|seguimiento|customs|aduana|aduanas|how long|cuando llega|cuanto tarda)\b/i.test(query);
+      const _isPricing = !isAdminUser && !hasCompoundKeyword && !isPageContextActive && /\b(precio|precios|cuesta|cuestan|cuanto|cost|costs|costing|price|prices|pricing|comprar|buy|buying|wholesale|discount|discounts|cotizacion|how much)\b/i.test(query);
+      const _isShipping = !isAdminUser && !hasCompoundKeyword && !isPageContextActive && /\b(envio|envios|shipping|delivery|deliveries|logistica|entrega|entregas|plazo|plazos|transit|tracking|seguimiento|customs|aduana|aduanas|how long|cuando llega|cuanto tarda)\b/i.test(query);
 
       // Contact: require explicit contact intent signals. "support" alone is too ambiguous
       // (e.g. "mitochondrial support", "immune support"). Require a second contact signal.
       const _hasExplicitContact = /\b(whatsapp|email|emails|correo|correos|telefono|telefonos|contacto|contactos|soporte|talk to a human|speak to|hablar con|talk to someone|human agent|customer service)\b/i.test(query);
-      const _isContact = !hasCompoundKeyword && !isPageContextActive && !_isEducational && _hasExplicitContact;
+      const _isContact = !isAdminUser && !hasCompoundKeyword && !isPageContextActive && !_isEducational && _hasExplicitContact;
 
       // Lifestyle: only trigger for clearly goal-oriented queries, not educational ones.
       // "What is metabolic priming?" is educational. "I want metabolic support" is lifestyle.
-      const _isLifestyle = !hasCompoundKeyword && !isPageContextActive && !_isEducational && (
+      const _isLifestyle = !isAdminUser && !hasCompoundKeyword && !isPageContextActive && !_isEducational && (
         /\b(muscle|growth|recupera\w*|muscul\w*)\b/i.test(query) ||
         /\b(fat|metabolic\w*|grasa|peso|metabolica\w*)\b/i.test(query) ||
         /\b(cognitive|focus|cognit\w*|cerebr\w*|foco|concentra\w*)\b/i.test(query) ||
@@ -368,7 +368,7 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
       );
 
       // Only fetch Firestore for actual peptide/protocol search queries
-      const _needsFirestore = !_isPricing && !_isShipping && !_isContact && !_isLifestyle;
+      const _needsFirestore = !isAdminUser && !_isPricing && !_isShipping && !_isContact && !_isLifestyle;
 
       let allPeptides = [];
       let activePeptides = [];
@@ -745,7 +745,7 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
       });
 
       const userLevel = detectUserLevel(query);
-      if (tokens.length === 0 && matchedGoals.size === 0) {
+      if (!isAdminUser && tokens.length === 0 && matchedGoals.size === 0) {
         res.status(200).json({
           reply: "What is your main research goal?\n\nFor example: *recovery & tissue repair*, *cognitive performance*, *metabolic support*, *hormonal optimization*, or *longevity*.",
           suggestions: ["Recovery & Repair", "Cognitive Performance", "Metabolic Support", "Hormonal Optimization", "Longevity"]
@@ -811,7 +811,7 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
       // ── Lifestyle Goal Handler ──
       const normalizedQuery = query.toLowerCase().trim();
       
-      const isIntroGoal = !hasCompoundKeyword && (normalizedQuery.includes("embark") || normalizedQuery.includes("journey") || normalizedQuery.includes("camino") || normalizedQuery.includes("optimization paths") || normalizedQuery.includes("8 optimization") || normalizedQuery.includes("7 clinical") || normalizedQuery.includes("ready to embark"));
+      const isIntroGoal = !isAdminUser && !hasCompoundKeyword && (normalizedQuery.includes("embark") || normalizedQuery.includes("journey") || normalizedQuery.includes("camino") || normalizedQuery.includes("optimization paths") || normalizedQuery.includes("8 optimization") || normalizedQuery.includes("7 clinical") || normalizedQuery.includes("ready to embark"));
 
       if (isIntroGoal) {
         const reply = [
@@ -883,7 +883,7 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
       }
 
       // ── Reconstitution Query Handler ──
-      const isReconQuery = !hasCompoundKeyword && (
+      const isReconQuery = !isAdminUser && !hasCompoundKeyword && (
         /\b(reconstit\w*|mezcl\w*|prepar\w*|dilu\w*|calcula\w*|jeringa\w*|syringe\w*|unit\w*|unidad\w*)\b/i.test(query) ||
         /\b(mix|mixing|mixture|mixes|mixed)\b/i.test(query) ||
         /\b(agua|aguas)\b/i.test(query) ||
@@ -952,7 +952,7 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
       }
 
       // ── Storage Query Handler ──
-      const isStorageQuery = !hasCompoundKeyword && /\b(store|storage|guardar|conserv\w*|temperat\w*|refriger\w*)\b/i.test(query);
+      const isStorageQuery = !isAdminUser && !hasCompoundKeyword && /\b(store|storage|guardar|conserv\w*|temperat\w*|refriger\w*)\b/i.test(query);
       if (isStorageQuery) {
         const isSpanish = query.includes("como") || query.includes("guardar") || query.includes("conservar") || query.includes("temperatura") || query.includes("guardan");
         let reply = "";
@@ -1262,19 +1262,33 @@ WIDGET INJECTION RULES (VERY IMPORTANT):
             const totalUsersSnap = await db.collection("users").count().get();
             const totalUsers = totalUsersSnap.data().count;
             
-            // Note: date queries depend on how createdAt is stored, but this is a good estimate
-            // We use standard ISO string comparison for typical Firestore string dates, or Timestamps.
-            // If they are timestamps, we should use admin.firestore.Timestamp, but here we just try a simple query.
             const pendingOrdersSnap = await db.collection("orders").where("status", "==", "pending").count().get();
             const pendingOrders = pendingOrdersSnap.data().count;
             
             const totalOrdersSnap = await db.collection("orders").count().get();
             const totalOrders = totalOrdersSnap.data().count;
 
+            // Fetch today's orders to calculate volume and revenue
+            const todaysOrdersSnap = await db.collection("orders")
+              .where("createdAt", ">=", startOfDay)
+              .get();
+              
+            const todaysOrderVolume = todaysOrdersSnap.size;
+            let todaysRevenue = 0;
+            
+            todaysOrdersSnap.forEach(doc => {
+              const orderData = doc.data();
+              // Summing total or amount field
+              if (orderData.total) todaysRevenue += Number(orderData.total);
+              else if (orderData.amount) todaysRevenue += Number(orderData.amount);
+            });
+
             adminMetricsStr = `
 - Total Registered Users: ${totalUsers}
-- Total Orders: ${totalOrders}
+- Total Lifetime Orders: ${totalOrders}
 - Pending Orders: ${pendingOrders}
+- Today's Order Volume: ${todaysOrderVolume}
+- Today's Total Revenue: $${todaysRevenue.toFixed(2)}
             `;
           } catch (e) {
             console.error("Failed to fetch admin metrics for AI:", e);
@@ -1365,7 +1379,13 @@ ${JSON.stringify(clinicalRules || {})}
         }
 
         // Add final user prompt containing the RAG context
-        const finalPromptText = `${catalogContext}\\nUser Query: "${message}"`;
+        let finalPromptText = "";
+        if (isAdminMode) {
+          finalPromptText = `User Query: "${message}"`;
+        } else {
+          finalPromptText = `${catalogContext}\\nUser Query: "${message}"`;
+        }
+
         if (contents.length > 0 && contents[contents.length - 1].role === 'user') {
           contents[contents.length - 1].parts[0].text += `\\n\\n${finalPromptText}`;
         } else {
@@ -1442,7 +1462,8 @@ ${JSON.stringify(clinicalRules || {})}
         // --- AUDITOR GUARDRAIL LAYER ---
         let auditedReply = reply;
         try {
-          const auditorInstruction = `
+          if (!isAdminMode) {
+            const auditorInstruction = `
 You are the ClinicAI Compliance Auditor.
 Your job is to review the drafted response and ensure it meets strict safety, grounding, and formatting criteria.
 CRITERIA:
@@ -1460,20 +1481,21 @@ Output a JSON object with the following structure:
 }
 Return ONLY valid JSON.
 `;
-          const auditorContents = [
-            {
-              role: 'user',
-              parts: [{ text: `Original Query: "${message}"\n\nCatalog Context: ${catalogContext}\n\nDraft Reply to Audit:\n${reply}` }]
+            const auditorContents = [
+              {
+                role: 'user',
+                parts: [{ text: `Original Query: "${message}"\n\nCatalog Context: ${catalogContext}\n\nDraft Reply to Audit:\n${reply}` }]
+              }
+            ];
+            
+            const auditResStr = await timedCall('auditor_gemini', () => callGemini(auditorContents, auditorInstruction, "gemini-2.5-flash", "application/json"));
+            const auditData = JSON.parse(auditResStr);
+            if (auditData.status === "corrected" && auditData.correctedReply) {
+              auditedReply = auditData.correctedReply;
+              structuredLogger.info(`[clinicalAiAssistant] Auditor intervened`, { sessionId, notes: auditData.auditorNotes });
+            } else {
+              structuredLogger.info(`[clinicalAiAssistant] Auditor approved`, { sessionId, notes: auditData.auditorNotes });
             }
-          ];
-          
-          const auditResStr = await timedCall('auditor_gemini', () => callGemini(auditorContents, auditorInstruction, "gemini-2.5-flash", "application/json"));
-          const auditData = JSON.parse(auditResStr);
-          if (auditData.status === "corrected" && auditData.correctedReply) {
-            auditedReply = auditData.correctedReply;
-            structuredLogger.info(`[clinicalAiAssistant] Auditor intervened`, { sessionId, notes: auditData.auditorNotes });
-          } else {
-            structuredLogger.info(`[clinicalAiAssistant] Auditor approved`, { sessionId, notes: auditData.auditorNotes });
           }
         } catch (auditErr) {
           structuredLogger.error(`[clinicalAiAssistant] Auditor Error:`, auditErr);

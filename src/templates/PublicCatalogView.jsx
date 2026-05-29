@@ -73,8 +73,13 @@ export default function PublicCatalogView() {
         setProtocols(protoList);
 
         // Resolve Inquiry routing
-        const contact = await resolveCatalogContact(cat);
-        setContactInfo(contact);
+        const fallbackContact = await resolveCatalogContact(cat);
+        setContactInfo({
+          email: cat.contactEmail || fallbackContact?.email,
+          whatsAppLink: cat.contactPhone 
+            ? `https://wa.me/${cat.contactPhone.replace(/[^0-9]/g,'')}` 
+            : fallbackContact?.whatsAppLink
+        });
       } catch (err) {
         console.error(err);
         setError('Error loading catalog.');
@@ -330,7 +335,7 @@ export default function PublicCatalogView() {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f3f4', paddingTop: '0.75rem' }}>
                         <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#137333' }}>
                           {catalog.pricingVisible && prod.defaultVariant?.pricing?.retailPrice?.base?.kitUSD
-                            ? `$${prod.defaultVariant.pricing.retailPrice.base.kitUSD}`
+                            ? `$${(prod.defaultVariant.pricing.retailPrice.base.kitUSD * (1 + (catalog.pricingMargin || 0) / 100)).toFixed(2)}`
                             : 'Request Pricing'}
                         </span>
                         <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>
@@ -454,7 +459,7 @@ export default function PublicCatalogView() {
               </form>
             )}
 
-            {contactInfo && (
+            {catalog.visibility !== 'public' && contactInfo && (
               <div style={quickContactContainerStyle}>
                 <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5f6368' }}>
                   Direct Channels

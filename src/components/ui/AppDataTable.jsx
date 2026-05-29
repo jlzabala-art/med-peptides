@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Inbox, ArrowUp, ArrowDown } from 'lucide-react';
+import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Inbox, ArrowUp, ArrowDown, Search, X, Calendar } from 'lucide-react';
 
 export default function AppDataTable({ 
   columns, 
@@ -35,7 +35,17 @@ export default function AppDataTable({
   emptyTitle = "No data found",
   emptyDescription = "There are no records to display.",
   emptyActionLabel,
-  onEmptyAction
+  onEmptyAction,
+
+  // Toolbar (Search, Filter, Date)
+  searchQuery = '',
+  onSearchChange,
+  searchPlaceholder = 'Search...',
+  dateRange = { start: '', end: '' },
+  onDateRangeChange,
+  filters = [],
+  onFilterRemove,
+  renderCustomFilters
 }) {
   const [expandedId, setExpandedId] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
@@ -99,6 +109,108 @@ export default function AppDataTable({
       display: 'flex',
       flexDirection: 'column'
     }}>
+      {/* TOOLBAR */}
+      {(onSearchChange || onDateRangeChange || renderCustomFilters || (filters && filters.length > 0)) && (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+          padding: '1rem',
+          backgroundColor: 'var(--color-bg-surface)',
+          borderBottom: '1px solid var(--color-border)',
+          borderTopLeftRadius: 'var(--radius-md)',
+          borderTopRightRadius: 'var(--radius-md)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            {onSearchChange && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-md)',
+                padding: '0.35rem 0.75rem',
+                backgroundColor: 'var(--color-bg-app)',
+                flex: '1 1 200px',
+                maxWidth: '350px'
+              }}>
+                <Search size={16} color="var(--text-muted)" />
+                <input
+                  type="text"
+                  placeholder={searchPlaceholder}
+                  value={searchQuery}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  style={{
+                    border: 'none', background: 'transparent', outline: 'none',
+                    fontSize: '0.8rem', color: 'var(--text-main)', width: '100%'
+                  }}
+                />
+              </div>
+            )}
+            
+            {onDateRangeChange && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Calendar size={16} color="var(--text-muted)" />
+                <input
+                  type="date"
+                  value={dateRange.start || ''}
+                  onChange={(e) => onDateRangeChange({ ...dateRange, start: e.target.value })}
+                  style={{
+                    border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)',
+                    padding: '0.25rem 0.5rem', fontSize: '0.75rem', outline: 'none',
+                    color: 'var(--text-main)', backgroundColor: 'var(--color-bg-app)'
+                  }}
+                />
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>to</span>
+                <input
+                  type="date"
+                  value={dateRange.end || ''}
+                  onChange={(e) => onDateRangeChange({ ...dateRange, end: e.target.value })}
+                  style={{
+                    border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)',
+                    padding: '0.25rem 0.5rem', fontSize: '0.75rem', outline: 'none',
+                    color: 'var(--text-main)', backgroundColor: 'var(--color-bg-app)'
+                  }}
+                />
+              </div>
+            )}
+
+            {renderCustomFilters && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                {renderCustomFilters()}
+              </div>
+            )}
+          </div>
+
+          {/* Filter Chips */}
+          {filters && filters.length > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Active filters:</span>
+              {filters.map((filter, index) => (
+                <div key={index} style={{
+                  display: 'flex', alignItems: 'center', gap: '0.35rem',
+                  padding: '0.2rem 0.5rem', borderRadius: '1rem',
+                  backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)',
+                  color: 'var(--color-primary)',
+                  fontSize: '0.7rem', fontWeight: 600
+                }}>
+                  {filter.label}: {filter.value}
+                  {onFilterRemove && (
+                    <button
+                      onClick={() => onFilterRemove(filter)}
+                      style={{
+                        background: 'none', border: 'none', padding: 0,
+                        cursor: 'pointer', display: 'flex', alignItems: 'center',
+                        color: 'inherit', opacity: 0.7
+                      }}
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       <div style={{ overflowX: 'auto', overflowY: 'visible', width: '100%', minHeight: '350px', maxHeight: 'calc(100vh - 200px)' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead style={{ 

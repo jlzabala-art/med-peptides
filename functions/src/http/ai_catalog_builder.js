@@ -32,12 +32,11 @@ ${JSON.stringify(protocols.map(p => ({ id: p.id, name: p.name, goal: p.goal, des
 
 TASK:
 1. Formulate a compelling, premium hero section: title, subtitle, and introduction narrative.
-2. Group the products and protocols into 2-3 logical theme-based catalog sections. For each section, provide a title, description, and the list of matching product IDs and protocol IDs.
-3. Generate a set of 3-5 relevant FAQs for the catalog target topic.
-4. Provide 2-3 upsell suggestions and cross-sell recommendations.
-5. Provide a professional clinical research disclaimer (e.g. "For research purposes only...").
+3. Group the products into logical theme-based catalog sections. For each section, provide a title, description, and the list of matching product IDs. Do not limit the number of products; include ALL products that fit the goal.
+4. Provide a professional clinical research disclaimer (e.g. "For research purposes only...").
+5. Do NOT include ANY generic disclaimers in the JSON. The format must match perfectly.
 
-Return ONLY a valid JSON object matching the schema below. Do NOT wrap in markdown code blocks. Output raw JSON.
+Your response must be ONLY valid JSON matching this schema below. Do NOT wrap in markdown code blocks. Output raw JSON.
 
 SCHEMA:
 {
@@ -48,18 +47,8 @@ SCHEMA:
     {
       "title": "Section Title",
       "description": "Section introduction",
-      "products": ["product-id-1", "product-id-2"],
-      "protocols": ["protocol-id-1"]
+      "products": ["product-id-1", "product-id-2"]
     }
-  ],
-  "faq": [
-    { "q": "Question", "a": "Answer" }
-  ],
-  "upsells": [
-    { "name": "Upsell Item Name", "benefit": "Upsell explanation" }
-  ],
-  "crossSellRecommendations": [
-    { "name": "Cross-sell Item", "why": "Why it pairs well" }
   ],
   "disclaimer": "Clinical disclaimer text"
 }`;
