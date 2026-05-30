@@ -12,7 +12,7 @@ import { collection, getDocs, doc, updateDoc, query, orderBy } from 'firebase/fi
 import AppFilterBar from '../ui/AppFilterBar';
 import DataTable from '../ui/DataTable';
 import { db } from '../../firebase';
-import { RefreshCw, EyeOff, Eye, Package, DollarSign, Hash } from 'lucide-react';
+import { RefreshCw, EyeOff, Eye, Package, DollarSign, Hash, AlertTriangle, Check, Save } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────

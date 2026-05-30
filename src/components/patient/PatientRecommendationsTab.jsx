@@ -4,7 +4,7 @@ import { collection, query, where, orderBy, getDocs, doc, updateDoc } from 'fire
 import { db } from '../../firebase';
 import Card from '../ui/Card';
 import DataTable from '../ui/DataTable';
-import StatusBadge from '../ui/StatusBadge';
+import StatusChip from '../ui/StatusChip';
 import Spinner from '../ui/Spinner';
 import { Check, X, FileText } from 'lucide-react';
 
@@ -88,7 +88,7 @@ export default function PatientRecommendationsTab({ userId, acceptRecommendation
         let color = 'warning';
         if (row.status === 'accepted') color = 'success';
         if (row.status === 'rejected') color = 'error';
-        return <StatusBadge status={row.status || 'pending'} variant={color} />;
+        return <StatusChip status={row.status || 'pending'} variant={color} />;
       }
     },
     {

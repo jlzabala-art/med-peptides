@@ -112,7 +112,7 @@ const DEFAULT_AGENTS = {
 };
 
 // ── Status badge ─────────────────────────────────────────────────────────────
-function StatusBadge({ status }) {
+function StatusChip({ status }) {
   const map = {
     active: {
       label: 'Active',
@@ -260,7 +260,7 @@ function AgentCard({ agentKey, agent, onEdit, isActive, saving, onToggle }) {
               >
                 {agent.displayName}
               </h3>
-              <StatusBadge status={isActive ? 'active' : 'inactive'} />
+              <StatusChip status={isActive ? 'active' : 'inactive'} />
               <span
                 style={{
                   fontSize: '0.65rem',

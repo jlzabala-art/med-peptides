@@ -200,7 +200,7 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
       setZohoFinancialError(null);
       try {
         const response = await fetch(
-          'https://europe-west1-atlas-health-app.cloudfunctions.net/fetchZohoBiginWholesaler',
+          'https://europe-west1-med-peptides-app.cloudfunctions.net/fetchZohoBiginWholesaler',
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -240,7 +240,7 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
     setZohoError(null);
     try {
       const response = await fetch(
-        'https://europe-west1-atlas-health-app.cloudfunctions.net/fetchZohoBiginWholesaler',
+        'https://europe-west1-med-peptides-app.cloudfunctions.net/fetchZohoBiginWholesaler',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

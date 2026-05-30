@@ -1,7 +1,7 @@
 import React from 'react';
 import { CheckCircle, Clock, Package, AlertCircle } from 'lucide-react';
 
-export default function StatusBadge({ status }) {
+export default function StatusChip({ status }) {
   const normalized = status?.toLowerCase() || 'unknown';
   
   switch(normalized) {

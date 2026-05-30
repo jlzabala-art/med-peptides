@@ -4,7 +4,7 @@ import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 import Card from '../ui/Card';
 import DataTable from '../ui/DataTable';
-import StatusBadge from '../ui/StatusBadge';
+import StatusChip from '../ui/StatusChip';
 import Spinner from '../ui/Spinner';
 import { Package, Clock, Truck, CheckCircle2 } from 'lucide-react';
 
@@ -85,7 +85,7 @@ export default function PatientOrdersTab({ userId }) {
       key: 'status',
       render: (row) => {
         const config = getStatusConfig(row.status);
-        return <StatusBadge status={row.status || 'Pending'} variant={config.color} icon={config.icon} />;
+        return <StatusChip status={row.status || 'Pending'} variant={config.color} icon={config.icon} />;
       }
     }
   ];

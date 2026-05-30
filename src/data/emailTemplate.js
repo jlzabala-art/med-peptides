@@ -305,7 +305,7 @@ export const getInvitationEmailHtml = ({
   toName = 'Researcher',
   fromName = 'A colleague',
   customMessage = '',
-  registerUrl = 'https://atlas-health-app-27a3a.web.app/auth',
+  registerUrl = 'https://med-peptides-app.web.app/auth',
   roles = [],
 } = {}) => {
 

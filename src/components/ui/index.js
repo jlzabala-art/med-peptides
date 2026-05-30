@@ -12,8 +12,11 @@ export { default as EmptyState } from './EmptyState';
 export { default as DataTable } from './DataTable';
 export { default as Sidebar } from './Sidebar';
 export { default as Header } from './Header';
+export { default as Tabs } from './Tabs';
+export { default as TextField } from './TextField';
+export { default as Select } from './Select';
+export { default as Toggle } from './Toggle';
+export { default as StatusChip } from './StatusChip';
 
 /* Legacy GCP-style components (preserved for backward compatibility) */
-export { default as GcpCard } from './GcpCard';
 export { default as GcpButton } from './GcpButton';
-export { default as GcpModal } from './GcpModal';

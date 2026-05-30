@@ -72,6 +72,7 @@ const DoctorProfile = lazy(() => import('./templates/DoctorProfile'));
 const HormonePelletsPage = lazy(() => import('./pages/pellets.jsx'));
 import PelletDetailPage from './pages/pelletDetail.jsx';
 const PatientDetailAdmin = lazy(() => import('./templates/PatientDetailAdmin'));
+const CalendarPage = lazy(() => import('./components/calendar/CalendarPage'));
 
 const LegalConditions = lazy(() => import('./templates/LegalConditions'));
 const TermsOfUse = lazy(() => import('./templates/TermsOfUse'));
@@ -1127,6 +1128,7 @@ function App() {
             }>
               <Route element={<ProtectedRoute allowedRoles={['professional', 'patient', 'doctor', 'admin']} />}>
                 <Route path="/paciente" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><UserDashboard onOpenCart={() => setActiveModal('cart')} /></Suspense>} />
+                <Route path="/calendar" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><CalendarPage /></Suspense>} />
                 <Route path="/account/supervisor" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><UserDashboard onOpenCart={() => setActiveModal('cart')} /></Suspense>} />
               </Route>
             </Route>
@@ -1332,14 +1334,4 @@ function App() {
   );
 }
 
-function AppWrapper() {
-  return (
-    <AppErrorBoundary>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </AppErrorBoundary>
-  );
-}
-
-export default AppWrapper;
+export default App;

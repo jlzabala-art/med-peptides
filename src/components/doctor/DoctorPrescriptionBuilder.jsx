@@ -35,7 +35,7 @@ import CatalogPreviewPanel from '../wholesaler/CatalogPreviewPanel';
 
 
 // ── Mini status badge ─────────────────────────────────────────────────────────
-function StatusBadge({ status }) {
+function StatusChip({ status }) {
   const m = RX_STATUS_META[status] || RX_STATUS_META.draft;
   return (
     <span style={{
@@ -928,7 +928,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
             </p>
           </div>
         </div>
-        <StatusBadge status={rx.status} />
+        <StatusChip status={rx.status} />
       </div>
 
       {/* ── Type selector ── */}

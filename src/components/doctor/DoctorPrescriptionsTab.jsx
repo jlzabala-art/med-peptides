@@ -12,7 +12,7 @@ import DoctorPrescriptionBuilder from './DoctorPrescriptionBuilder';
 import Card from '../ui/Card';
 import DataTable from '../ui/DataTable';
 import Spinner from '../ui/Spinner';
-import StatusBadge from '../ui/StatusBadge';
+import StatusChip from '../ui/StatusChip';
 
 // ── Kit logistics status tracker milestones ──────────────────────────────────
 const KIT_STEPS = [
@@ -159,7 +159,7 @@ export default function DoctorPrescriptionsTab({ doctorId, doctorMeta, patients 
       key: 'status',
       render: (rx) => {
         const m = RX_STATUS_META[rx.status] || { label: rx.status };
-        return <StatusBadge status={rx.status} customLabel={`${m.emoji || ''} ${m.label}`} />;
+        return <StatusChip status={rx.status} customLabel={`${m.emoji || ''} ${m.label}`} />;
       }
     },
     {

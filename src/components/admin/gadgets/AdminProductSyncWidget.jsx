@@ -41,10 +41,10 @@ import {
 } from 'lucide-react';
 
 // ── Cloud Function endpoint ───────────────────────────────────────────────────
-const SKU_SYNC_URL = 'https://europe-west1-atlas-health-app.cloudfunctions.net/skuSyncAgent';
+const SKU_SYNC_URL = 'https://europe-west1-med-peptides-app.cloudfunctions.net/skuSyncAgent';
 
 // ── Status badge ──────────────────────────────────────────────────────────────
-function StatusBadge({ status }) {
+function StatusChip({ status }) {
   const map = {
     pending_review: {
       label: 'Pending Review',
@@ -191,7 +191,7 @@ function PendingProductCard({ product, onApprove, onReject }) {
           </div>
         </div>
 
-        <StatusBadge status={product.status || 'pending_review'} />
+        <StatusChip status={product.status || 'pending_review'} />
         {expanded ? (
           <ChevronUp size={14} color="var(--color-border)" />
         ) : (

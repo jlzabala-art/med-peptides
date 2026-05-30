@@ -1,19 +1,19 @@
 /* eslint-disable no-unused-vars */
 import { initializeApp } from 'firebase/app';
 import { getAuth, setPersistence, browserLocalPersistence, browserSessionPersistence, signOut } from 'firebase/auth';
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
+import { initializeFirestore, memoryLocalCache } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 import { getFunctions } from 'firebase/functions';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PROYECTO FIREBASE OFICIAL: atlas-health-app  (atlas-health.com)
+// PROYECTO FIREBASE OFICIAL: med-peptides-app  (med-peptides.com)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const firebaseConfig = {
   apiKey: "AIzaSyDOV2zFeLGtPsE_O2b-gR3NHZygPspiSws",
-  authDomain: "atlas-health-app-27a3a.firebaseapp.com",
-  projectId: "atlas-health-app",
-  storageBucket: "atlas-health-app.firebasestorage.app",
+  authDomain: "med-peptides-app-27a3a.firebaseapp.com",
+  projectId: "med-peptides-app",
+  storageBucket: "med-peptides-app.firebasestorage.app",
   messagingSenderId: "514143707883",
   appId: "1:514143707883:web:6c12470433ef6c992714ae",
   measurementId: "G-LYMXGY71FJ"
@@ -68,9 +68,7 @@ export const logErrorToAnalytics = (error, context = {}) => {
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager()
-  })
+  localCache: memoryLocalCache()
 });
 
 if (typeof window !== 'undefined') {

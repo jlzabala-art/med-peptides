@@ -7,7 +7,7 @@ import { invitePatientByEmail } from '../../services/assignmentService';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../ui/Card';
 import DataTable from '../ui/DataTable';
-import StatusBadge from '../ui/StatusBadge';
+import StatusChip from '../ui/StatusChip';
 import Spinner from '../ui/Spinner';
 import { Users, UserPlus, Check, X, BrainCircuit, Activity, FileText, Loader2 } from 'lucide-react';
 
@@ -172,7 +172,7 @@ export default function DoctorPatientsTab({ doctorId, doctorMeta, onCountResolve
     {
       header: 'Status',
       key: 'status',
-      render: (p) => <StatusBadge status={p.status} />
+      render: (p) => <StatusChip status={p.status} />
     },
     {
       header: 'Contact (Email)',

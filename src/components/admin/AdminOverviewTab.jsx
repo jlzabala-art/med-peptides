@@ -18,7 +18,7 @@ import DashboardEngine from '../../engine/DashboardEngine';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
-const SKU_AGENT_URL = 'https://europe-west1-atlas-health-app.cloudfunctions.net/skuSyncAgent';
+const SKU_AGENT_URL = 'https://europe-west1-med-peptides-app.cloudfunctions.net/skuSyncAgent';
 
 export default function AdminOverviewTab({
   users,

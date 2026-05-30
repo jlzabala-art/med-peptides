@@ -30,7 +30,7 @@ import {
   BULK_STATUS, BULK_STATUS_META, RX_STATUS_META, RX_STATUS, aggregatePrescriptionItems
 } from '../../config/prescriptionConfig';
 
-const SUBMIT_CF = 'https://europe-west1-atlas-health-app.cloudfunctions.net/submitBulkOrder';
+const SUBMIT_CF = 'https://europe-west1-med-peptides-app.cloudfunctions.net/submitBulkOrder';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function fmtDate(ts) {

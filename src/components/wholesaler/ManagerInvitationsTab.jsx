@@ -7,7 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Spinner from '../ui/Spinner';
 import Card from '../ui/Card';
 import DataTable from '../ui/DataTable';
-import StatusBadge from '../ui/StatusBadge';
+import StatusChip from '../ui/StatusChip';
 
 export default function ManagerInvitationsTab() {
   const { currentUser } = useAuth();
@@ -143,7 +143,7 @@ export default function ManagerInvitationsTab() {
       header: 'Status',
       key: 'status',
       sortKey: 'status',
-      render: (row) => <StatusBadge status={row.status} />
+      render: (row) => <StatusChip status={row.status} />
     },
     {
       header: 'Actions',

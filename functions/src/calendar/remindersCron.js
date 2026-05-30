@@ -47,11 +47,33 @@ exports.sendCalendarReminders = onSchedule('every 5 minutes', async (event) => {
     });
   });
 
-  // Placeholder for sending notifications via SendGrid, Twilio, or FCM
+  // Send notifications via SendGrid, SMS stub, or FCM
   for (const notif of notifications) {
     console.log(`[Reminders] Sending ${notif.method} to ${notif.uid}: ${notif.title}`);
-    // if (notif.method === 'email') sendGrid.send(...)
-    // if (notif.method === 'sms') twilio.messages.create(...)
-    // if (notif.method === 'push') fcm.send(...)
+    
+    try {
+      if (notif.method === 'email') {
+        // Example SendGrid/Nodemailer dispatch
+        // await sendGrid.send({ to: userEmail, from: 'noreply@atlashealth.com', subject: notif.title, text: notif.body });
+        console.log(`[Email Dispatch Stub] To UID: ${notif.uid} | Subject: ${notif.title}`);
+      } else if (notif.method === 'sms') {
+        // Console-log SMS stub
+        console.log(`[SMS Dispatch Stub] To UID: ${notif.uid} | Message: ${notif.title} - ${notif.body}`);
+      } else if (notif.method === 'push') {
+        // FCM push (admin-sdk)
+        // Ensure user has FCM tokens saved in their user profile
+        // const userDoc = await db.collection('users').doc(notif.uid).get();
+        // const fcmToken = userDoc.data()?.fcmToken;
+        // if (fcmToken) {
+        //   await require('firebase-admin/messaging').getMessaging().send({
+        //     token: fcmToken,
+        //     notification: { title: notif.title, body: notif.body }
+        //   });
+        // }
+        console.log(`[FCM Push Dispatch Stub] To UID: ${notif.uid} | Title: ${notif.title}`);
+      }
+    } catch (err) {
+      console.error(`[Reminders Error] Failed to send ${notif.method} to ${notif.uid}:`, err);
+    }
   }
 });

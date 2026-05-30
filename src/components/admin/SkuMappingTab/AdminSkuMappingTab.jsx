@@ -28,7 +28,7 @@ import {
  *     and trigger manual refetches logged to Firestore.
  */
 
-const AGENT_URL = 'https://europe-west1-atlas-health-app.cloudfunctions.net/skuSyncAgent';
+const AGENT_URL = 'https://europe-west1-med-peptides-app.cloudfunctions.net/skuSyncAgent';
 
 // STATUS META mapping to Lucide icons and colors
 const STATUS_META = {

@@ -26,7 +26,7 @@ const STATUS_COLORS = {
   revoked: { bg: '#fee2e2', text: '#991b1b', dot: 'var(--color-danger)' },
 };
 
-function StatusBadge({ status }) {
+function StatusChip({ status }) {
   const c = STATUS_COLORS[status] || STATUS_COLORS.revoked;
   return (
     <span
@@ -483,7 +483,7 @@ export default function AdminSupervisionTab({ onNavigateToClinicalAI }) {
                       </div>
                     </td>
                     <td style={s.td(i)}>
-                      <StatusBadge status={r.status} />
+                      <StatusChip status={r.status} />
                     </td>
                     <td style={s.td(i)}>
                       <span

@@ -8,6 +8,7 @@ const DocumentUploadModule = React.lazy(() => import('../components/admin/Docume
 const AdminLeadsTab = React.lazy(() => import('../components/admin/AdminLeadsTab'));
 
 // ── Lazy tab components ────────────────────────────────────────────────────────
+const CalendarPage = React.lazy(() => import('../components/calendar/CalendarPage'));
 const AdminUsersTab        = React.lazy(() => import('../components/admin/AdminUsersTab'));
 const AdminWholesellersTab = React.lazy(() => import('../components/admin/AdminWholesellersTab'));
 const AdminAccountManagersTab = React.lazy(() => import('../components/admin/AdminAccountManagersTab'));
@@ -149,8 +150,10 @@ export default function AdminRoutes() {
           </AdminTabErrorBoundary>
         } />
         <Route path="deploy" element={<AdminTabErrorBoundary tabId="deploy" tabLabel="Deploy"><AdminPlaceholderTab title="Deploy & Hosting" description="Monitor application deployments, environment variables, hosting status, and trigger builds." features={['GitHub CI/CD triggers', 'Environment variable manager', 'Real-time build log streaming', 'Domain SSL configurations']} tags={['Infrastructure', 'Hosting', 'Cloud']} color="var(--color-primary)" priority="soon" /></AdminTabErrorBoundary>} />
+        <Route path="calendar" element={<AdminTabErrorBoundary tabId="calendar" tabLabel="Calendar"><CalendarPage /></AdminTabErrorBoundary>} />
+        <Route path="uploads" element={<AdminTabErrorBoundary tabId="uploads" tabLabel="Uploads"><DocumentUploadModule /></AdminTabErrorBoundary>} />
+        <Route path="ai-agents" element={<AdminTabErrorBoundary tabId="ai-agents" tabLabel="AI Agents"><AdminAIAgentsTab /></AdminTabErrorBoundary>} />
       </Route>
-      <Route path="uploads" element={<AdminTabErrorBoundary tabId="uploads" tabLabel="Uploads"><DocumentUploadModule /></AdminTabErrorBoundary>} />
       <Route path="price-drafts" element={<AdminTabErrorBoundary tabId="price-drafts" tabLabel="Price Drafts"><AdminPricesTab /></AdminTabErrorBoundary>} />
     </Routes>
     </Suspense>

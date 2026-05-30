@@ -312,7 +312,7 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
 
   const callAdminAgent = async (prompt) => {
     try {
-      const response = await fetch('https://europe-west1-atlas-health-app.cloudfunctions.net/adminAgent', {
+      const response = await fetch('https://europe-west1-med-peptides-app.cloudfunctions.net/adminAgent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

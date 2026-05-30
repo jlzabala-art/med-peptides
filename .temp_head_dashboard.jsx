@@ -11,9 +11,8 @@ import {
   ChevronRight, ChevronDown, ClipboardList, Zap, Globe, Wrench,
   FlaskConical, Box, Tag, DollarSign, FileText, Eye, EyeOff, Mail,
   Activity, BookOpen, Cpu, LogOut, Menu, X, Building2, TrendingUp,
-  Building, Stethoscope, HeartPulse, UserPlus, Lock, Briefcase, LayoutTemplate, Network, ScrollText, MessageSquare, Calendar, UploadCloud
+  Building, Stethoscope, HeartPulse, UserPlus, Lock, Briefcase, LayoutTemplate, Network, ScrollText, MessageSquare
 } from 'lucide-react';
-import PortalLayout from '../components/ui/PortalLayout';
 
 // ── Lazy tab components ────────────────────────────────────────────────────────
 const AdminUsersTab        = React.lazy(() => import('../components/admin/AdminUsersTab'));
@@ -64,33 +63,6 @@ const NAV_GROUPS = [
     items: [
       { id: 'dashboard',        label: 'Dashboard KPIs',      icon: LayoutDashboard },
       { id: 'messages',         label: 'Mensajes',            icon: MessageSquare, pulse: true },
-      { id: 'calendar',         label: 'Calendario',          icon: Calendar },
-    ],
-  },
-  {
-    id: 'catalog-inventory',
-    label: 'Catalog & Inventory',
-    items: [
-      { id: 'products',        label: 'Products',        icon: Box },
-      { id: 'stock',           label: 'Stock',           icon: FlaskConical },
-      { id: 'lab-tests',       label: 'Lab Tests',       icon: ScrollText },
-      { id: 'protocols',       label: 'Protocols',       icon: ClipboardList },
-      { id: 'uploads',         label: 'Importar Ficheros',icon: UploadCloud },
-    ],
-  },
-  {
-    id: 'ai-system',
-    label: 'AI & Automation',
-    badge: 'LIVE',
-    badgeColor: 'var(--color-success)',
-    items: [
-      { id: 'prescription-agent',label: 'Prescription Agent',  icon: Zap },
-      { id: 'ai-agents',         label: 'AI Agents Hub',       icon: Network },
-      { id: 'clinical-ai',       label: 'Atlas AI',            icon: Bot },
-      { id: 'catalog-builder',   label: 'Catalog Builder',     icon: Wrench },
-      { id: 'semantic',          label: 'AI Semantics',        icon: Cpu },
-      { id: 'ai-logs',           label: 'AI Logs',             icon: ScrollText },
-      { id: 'audit-logs',        label: 'Audit Logs',          icon: ShieldCheck },
     ],
   },
   {
@@ -129,6 +101,16 @@ const NAV_GROUPS = [
     ],
   },
   {
+    id: 'catalog-inventory',
+    label: 'Catalog & Inventory',
+    items: [
+      { id: 'products',        label: 'Products',        icon: Box },
+      { id: 'stock',           label: 'Stock',           icon: FlaskConical },
+      { id: 'lab-tests',       label: 'Lab Tests',       icon: ScrollText },
+      { id: 'protocols',       label: 'Protocols',       icon: ClipboardList },
+    ],
+  },
+  {
     id: 'users-clinics',
     label: 'Users & Clinics',
     items: [
@@ -136,6 +118,20 @@ const NAV_GROUPS = [
       { id: 'doctors',          label: 'Doctors',              icon: Stethoscope },
       { id: 'patients',         label: 'Patients',             icon: HeartPulse },
       { id: 'invitations',      label: 'Invitations',          icon: UserPlus },
+    ],
+  },
+  {
+    id: 'ai-system',
+    label: 'AI & Automation',
+    badge: 'LIVE',
+    badgeColor: 'var(--color-success)',
+    items: [
+      { id: 'clinical-ai',       label: 'Atlas AI',            icon: Bot },
+      { id: 'catalog-builder',   label: 'Catalog Builder',     icon: Wrench },
+      { id: 'prescription-agent',label: 'Prescription Agent',  icon: Zap },
+      { id: 'semantic',          label: 'AI Semantics',        icon: Cpu },
+      { id: 'ai-logs',           label: 'AI Logs',             icon: ScrollText },
+      { id: 'audit-logs',        label: 'Audit Logs',          icon: ShieldCheck },
     ],
   },
   {
@@ -247,52 +243,8 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────────
+import AppPortalLayout from '../layout/AppPortalLayout';
+
 export default function AdminDashboard() {
-  const { isAdmin, loading: authLoading, logout } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // Derive active tab from the URL path instead of query params.
-  // E.g., /admin/users -> 'users', /admin -> 'dashboard'
-  const pathParts = location.pathname.split('/').filter(Boolean);
-  const activeTab = pathParts.length > 1 ? pathParts[1] : 'dashboard';
-
-  const navToTab = useCallback((tabId) => {
-    navigate(`/admin/${tabId === 'dashboard' ? '' : tabId}`);
-  }, [navigate]);
-
-  const handleLogout = () => { if (logout) logout(); window.location.href = '/'; };
-
-  const currentGroup = NAV_GROUPS.find(g => g.items.some(i => i.id === activeTab));
-  const currentItem  = currentGroup?.items.find(i => i.id === activeTab);
-
-  return (
-    <PortalLayout 
-      sidebarNavGroups={NAV_GROUPS}
-      activeNavId={activeTab}
-      onNavigate={navToTab}
-      portalTitle="Control Center"
-      roleContext="admin"
-      pageContext={{
-        activeTab: activeTab,
-        label: currentItem?.label || 'Dashboard',
-        group: currentGroup?.label || 'Overview'
-      }}
-      headerActions={
-        <button 
-          onClick={handleLogout} 
-          style={{ background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-          title="Logout"
-        >
-          <LogOut size={18} color="var(--color-text-secondary)" />
-        </button>
-      }
-    >
-      <div style={{ padding: '1rem' }}>
-        <React.Suspense fallback={<AdminLoadingFallback />}>
-          <Outlet />
-        </React.Suspense>
-      </div>
-    </PortalLayout>
-  );
+  return <AppPortalLayout allowedRoles={['admin']} />;
 }
