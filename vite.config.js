@@ -91,11 +91,26 @@ export default defineConfig({
             if (id.includes('firebase')) {
               return 'vendor-firebase';
             }
-            if (id.includes('jspdf') || id.includes('html2canvas')) {
+            if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('html-to-image')) {
               return 'vendor-pdf';
             }
-            if (id.includes('lucide-react')) {
+            if (id.includes('lucide-react') || id.includes('@heroicons')) {
               return 'vendor-icons';
+            }
+            if (id.includes('recharts') || id.includes('d3-')) {
+              return 'vendor-charts';
+            }
+            if (id.includes('framer-motion')) {
+              return 'vendor-motion';
+            }
+            if (id.includes('@fullcalendar')) {
+              return 'vendor-calendar';
+            }
+            if (id.includes('@tanstack')) {
+              return 'vendor-query';
+            }
+            if (id.includes('@dnd-kit')) {
+              return 'vendor-dnd';
             }
             return 'vendor';
           }

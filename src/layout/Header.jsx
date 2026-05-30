@@ -834,11 +834,12 @@ function Header(props) {
                         <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--success)' }}>Active Session</span>
                       </div>
                     </div>
-                    <Link to="/paciente" className="drawer-link" onClick={() => setMobileMenuOpen(false)}><LayoutDashboard size={18} /> Dashboard</Link>
-                    {isAdmin && (
+                    {activeRole === 'admin' ? (
                       <Link to="/admin" className="drawer-link" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--error, #ef4444)' }}>
                         <LayoutDashboard size={18} /> Admin Board
                       </Link>
+                    ) : (
+                      <Link to="/paciente" className="drawer-link" onClick={() => setMobileMenuOpen(false)}><LayoutDashboard size={18} /> Dashboard</Link>
                     )}                    <button 
                       onClick={() => { logout(); setMobileMenuOpen(false); }}
                       style={{ width: '100%', background: 'none', border: 'none', color: 'var(--text-muted)', textAlign: 'left' }}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 import AppFilterBar from '../ui/AppFilterBar';
 import { useToast } from '../../hooks/useToast';
 import PayoutManagerWidget from './gadgets/PayoutManagerWidget';
@@ -217,7 +217,7 @@ export default function AdminCostsTab({ readOnly = false }) {
         className="card"
         style={{ padding: 0, overflowX: 'auto', border: '1px solid var(--border)' }}
       >
-        <AppDataTable
+        <DataTable
           columns={columns}
           data={paginatedProducts}
           keyField="id"

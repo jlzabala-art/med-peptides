@@ -5,7 +5,6 @@ import {
   Settings, ShoppingBag, Pill, LogOut, Bell, ChevronRight, Laptop, History, Plus,
   MessageSquare, Blocks, FileText
 } from 'lucide-react';
-import PortalLayout from '../components/ui/PortalLayout';
 
 import DoctorOverviewTab         from '../components/doctor/DoctorOverviewTab';
 import PhysicianPatientsTab      from '../components/doctor/DoctorPatientsTab';
@@ -79,6 +78,7 @@ const DOCTOR_NAV_GROUPS = [
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import AppPortalLayout from '../layout/AppPortalLayout';
 
 export default function DoctorDashboard() {
   const { user, userProfile, logout, activePermissions, baseRole } = useAuth();
@@ -235,27 +235,7 @@ export default function DoctorDashboard() {
   };
 
   return (
-    <PortalLayout
-      sidebarNavGroups={filteredGroups}
-      activeNavId={activeTab}
-      onNavigate={(id) => navigate(`/doctor/${id === 'overview' ? '' : id}`)}
-      portalTitle="Physician Portal"
-      roleContext="doctor"
-      pageContext={{
-        activeTab: activeTab,
-        label: currentTab?.label || 'Dashboard',
-        group: currentGroup?.label || 'Overview'
-      }}
-      headerActions={
-        <button 
-          onClick={handleLogout} 
-          style={{ background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-          title="Logout"
-        >
-          <LogOut size={18} color="var(--color-text-secondary)" />
-        </button>
-      }
-    >
+    <AppPortalLayout allowedRoles={['doctor', 'admin', 'staff']}>
       {isAdmin && (
         <div style={{
           background: '#fff7e6',
@@ -327,6 +307,6 @@ export default function DoctorDashboard() {
           </Routes>
         </AdminTabErrorBoundary>
       </div>
-    </PortalLayout>
+    </AppPortalLayout>
   );
 }

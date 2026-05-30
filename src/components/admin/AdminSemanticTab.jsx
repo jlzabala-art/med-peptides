@@ -28,7 +28,7 @@ import {
   Info,
   Check,
 } from 'lucide-react';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 
 const CANONICAL_GOALS = [
   'cognitive_mood',
@@ -686,7 +686,7 @@ export default function AdminSemanticTab({ readOnly = false }) {
           overflow: 'hidden',
         }}
       >
-        <AppDataTable
+        <DataTable
           columns={columns}
           data={products}
           keyField="id"

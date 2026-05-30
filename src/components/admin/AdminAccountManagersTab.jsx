@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 import AppFilterBar from '../ui/AppFilterBar';
 import AppEntityCell from '../ui/AppEntityCell';
 import { Users, Building2, UserCircle, Briefcase, Mail, Phone, Plus, X } from 'lucide-react';
@@ -142,7 +142,7 @@ export default function AdminAccountManagersTab() {
         }
       />
       <div style={{ flex: 1, minHeight: 0 }}>
-        <AppDataTable
+        <DataTable
           data={filtered}
           columns={columns}
           keyField="id"

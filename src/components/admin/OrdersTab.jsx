@@ -35,7 +35,7 @@ import {
 import { exportToCSV } from '../../utils/exportUtils';
 import { useLocation, useNavigate } from 'react-router-dom';
 import emailjs from '@emailjs/browser';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 import AppActionGroup from '../ui/AppActionGroup';
 import AppStatusChip from '../ui/AppStatusChip';
 import AppFilterBar from '../ui/AppFilterBar';
@@ -583,7 +583,7 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
           </p>
         </div>
       ) : (
-        <AppDataTable
+        <DataTable
           data={filtered}
           columns={columns}
           expandableRender={renderOrderDetails}

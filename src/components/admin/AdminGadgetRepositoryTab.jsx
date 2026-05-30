@@ -12,7 +12,7 @@ import {
   AlertTriangle,
   Layers,
 } from 'lucide-react';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 import AppFilterBar from '../ui/AppFilterBar';
 import AppEntityCell from '../ui/AppEntityCell';
 import { useToast } from '../../hooks/useToast';
@@ -220,7 +220,7 @@ export default function AdminGadgetRepositoryTab() {
 
       <AppFilterBar searchPlaceholder="Search gadgets or functions..." onSearch={setSearchTerm} />
 
-      <AppDataTable data={filteredGadgets} columns={columns} defaultSortKey="category" />
+      <DataTable data={filteredGadgets} columns={columns} defaultSortKey="category" />
 
       <div
         style={{

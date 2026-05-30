@@ -27,7 +27,7 @@ import {
 import emailjs from '@emailjs/browser';
 import { getInvitationEmailHtml } from '../../data/emailTemplate';
 
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 import AppEntityCell from '../ui/AppEntityCell';
 import AppStatusChip from '../ui/AppStatusChip';
 import AppActionGroup from '../ui/AppActionGroup';
@@ -317,7 +317,7 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
         )}
       </div>
 
-      <AppDataTable
+      <DataTable
         data={filteredInvitations}
         keyField="id"
         selectedIds={selectedIds}

@@ -6,7 +6,7 @@ import { UserPlus, Mail, Link as LinkIcon } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Spinner from '../ui/Spinner';
 import Card from '../ui/Card';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 import StatusBadge from '../ui/StatusBadge';
 
 export default function ManagerInvitationsTab() {
@@ -259,7 +259,7 @@ export default function ManagerInvitationsTab() {
               Loading invitations…
             </div>
           ) : (
-            <AppDataTable 
+            <DataTable 
               data={filteredData}
               columns={columns}
               searchQuery={searchTerm}

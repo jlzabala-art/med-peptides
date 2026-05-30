@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import AdminDashboard from '../templates/AdminDashboard';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
-import AdminLeadsTab from '../components/admin/AdminLeadsTab';
+
+// ── All tab components are lazy-loaded for optimal code splitting ──────────────
+const DocumentUploadModule = React.lazy(() => import('../components/admin/DocumentUploadModule'));
+const AdminLeadsTab = React.lazy(() => import('../components/admin/AdminLeadsTab'));
 
 // ── Lazy tab components ────────────────────────────────────────────────────────
 const AdminUsersTab        = React.lazy(() => import('../components/admin/AdminUsersTab'));
@@ -46,10 +49,25 @@ const CoBranding = React.lazy(() => import('../components/marketing/CoBranding')
 const DripMarketing = React.lazy(() => import('../components/marketing/DripMarketing'));
 const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
 
+// ── Premium loading skeleton for lazy-loaded admin tabs ────────────────────────
+const AdminTabSkeleton = () => (
+  <div style={{ padding: '2rem' }}>
+    <div className="skeleton" style={{ height: 32, width: 220, marginBottom: '1.5rem' }} />
+    <div className="skeleton" style={{ height: 16, width: '60%', marginBottom: '1rem' }} />
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+      <div className="skeleton" style={{ height: 100, borderRadius: 12 }} />
+      <div className="skeleton" style={{ height: 100, borderRadius: 12 }} />
+      <div className="skeleton" style={{ height: 100, borderRadius: 12 }} />
+    </div>
+    <div className="skeleton" style={{ height: 300, borderRadius: 12 }} />
+  </div>
+);
+
 export default function AdminRoutes() {
   const [catalogToEdit, setCatalogToEdit] = useState(null);
 
   return (
+    <Suspense fallback={<AdminTabSkeleton />}>
     <Routes>
       <Route element={<AdminDashboard />}>
         <Route index element={
@@ -132,6 +150,9 @@ export default function AdminRoutes() {
         } />
         <Route path="deploy" element={<AdminTabErrorBoundary tabId="deploy" tabLabel="Deploy"><AdminPlaceholderTab title="Deploy & Hosting" description="Monitor application deployments, environment variables, hosting status, and trigger builds." features={['GitHub CI/CD triggers', 'Environment variable manager', 'Real-time build log streaming', 'Domain SSL configurations']} tags={['Infrastructure', 'Hosting', 'Cloud']} color="var(--color-primary)" priority="soon" /></AdminTabErrorBoundary>} />
       </Route>
+      <Route path="uploads" element={<AdminTabErrorBoundary tabId="uploads" tabLabel="Uploads"><DocumentUploadModule /></AdminTabErrorBoundary>} />
+      <Route path="price-drafts" element={<AdminTabErrorBoundary tabId="price-drafts" tabLabel="Price Drafts"><AdminPricesTab /></AdminTabErrorBoundary>} />
     </Routes>
+    </Suspense>
   );
 }

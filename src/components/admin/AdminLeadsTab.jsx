@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { catalogRepository } from '../../repositories/catalogRepository';
 import { Users, Mail, Phone, Calendar, ArrowUpRight, Search, Download } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 import AppEntityCell from '../ui/AppEntityCell';
 import AppActionGroup from '../ui/AppActionGroup';
 import { useToast } from '../../hooks/useToast';
@@ -247,7 +247,7 @@ export default function AdminLeadsTab() {
             Loading leads...
           </div>
         ) : (
-          <AppDataTable
+          <DataTable
             data={paginatedLeads}
             columns={columns}
             keyField="id"

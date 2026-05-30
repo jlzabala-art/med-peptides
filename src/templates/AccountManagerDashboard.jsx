@@ -9,7 +9,7 @@ import CouponsManager from '../components/marketing/CouponsManager';
 import ReferralTracking from '../components/marketing/ReferralTracking';
 import CoBranding from '../components/marketing/CoBranding';
 import DripMarketing from '../components/marketing/DripMarketing';
-import PortalLayout from '../components/ui/PortalLayout';
+import AppPortalLayout from '../layout/AppPortalLayout';
 import { useAuth } from '../context/AuthContext';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import styles from './AccountManagerDashboard.module.css';
@@ -71,26 +71,7 @@ export default function AccountManagerDashboard() {
   const currentLabel = NAV_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label || 'Overview';
 
   return (
-    <PortalLayout 
-      sidebarNavGroups={NAV_GROUPS}
-      activeNavId={activeTab}
-      onNavigate={(id) => navigate(`/account-manager/${id}`)}
-      portalTitle="Manager Portal"
-      roleContext="manager"
-      pageContext={{
-        activeTab: activeTab,
-        label: currentLabel
-      }}
-      headerActions={
-        <button 
-          onClick={handleLogout} 
-          className={styles.logoutButton}
-          title="Logout"
-        >
-          <LogOut size={18} color="var(--text-muted)" />
-        </button>
-      }
-    >
+    <AppPortalLayout allowedRoles={['manager', 'admin']}>
       <div className={styles.dashboardContent}>
         <Routes>
           <Route path="/" element={<Navigate to="overview" replace />} />
@@ -123,6 +104,6 @@ export default function AccountManagerDashboard() {
           <Route path="settings" element={<AdminTabErrorBoundary tabId="settings"><UserSettings /></AdminTabErrorBoundary>} />
         </Routes>
       </div>
-    </PortalLayout>
+    </AppPortalLayout>
   );
 }

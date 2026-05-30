@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { collection, query, getDocs, orderBy, limit } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { MessageSquare, User, Bot, Clock, ShieldCheck } from 'lucide-react';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 import AppFilterBar from '../ui/AppFilterBar';
 
 export default function AdminClinicalLogsTab() {
@@ -297,7 +297,7 @@ export default function AdminClinicalLogsTab() {
         }
       />
 
-      <AppDataTable
+      <DataTable
         columns={columns}
         data={paginatedData}
         keyField="id"

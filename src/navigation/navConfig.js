@@ -99,7 +99,7 @@ export const USER_MENU = {
     { label: 'Settings', path: '/settings', icon: 'Settings' },
   ],
   professional: [
-    { label: 'Dashboard',    path: '/paciente',     icon: 'LayoutDashboard' },
+    { label: 'Dashboard',    path: '/doctor',     icon: 'LayoutDashboard' },
     { label: 'My Protocols', path: '/my-protocols',  icon: 'ClipboardList' },
     { label: 'Saved Items',  path: '/saved',         icon: 'Bookmark' },
     { label: 'Orders',       path: '/orders',        icon: 'Package' },

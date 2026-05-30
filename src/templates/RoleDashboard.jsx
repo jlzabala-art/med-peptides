@@ -5,7 +5,7 @@ import { db } from '../firebase';
 import { ShieldCheck, ArrowLeft, Settings, Search, Globe, Users, Database, Layers, PackageSearch, MailPlus, LayoutDashboard, ShoppingCart, Activity, FlaskConical, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import PortalLayout from '../components/ui/PortalLayout';
+import AppPortalLayout from '../layout/AppPortalLayout';
 
 const AdminUsersTab = React.lazy(() => import('../components/admin/AdminUsersTab'));
 const AdminProductsTab = React.lazy(() => import('../components/admin/AdminProductsTab'));
@@ -164,28 +164,7 @@ export default function RoleDashboard({ onBack }) {
   ];
 
   return (
-    <PortalLayout 
-      sidebarNavGroups={sidebarNavGroups}
-      activeNavId={activeTab}
-      onNavigate={setActiveTab}
-      portalTitle={viewConfig?.name || 'Professional Workplace'}
-      roleContext={roleKey}
-      pageContext={{
-        activeTab: activeTab,
-        label: TAB_REGISTRY[activeTab]?.label || 'Dashboard'
-      }}
-      headerActions={
-        <>
-          <button 
-            onClick={onBack}
-            style={{ background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'white' }}
-            title="Return Home"
-          >
-            <ArrowLeft size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Home</span>
-          </button>
-        </>
-      }
-    >
+    <AppPortalLayout allowedRoles={['admin', 'manager', 'wholesaler', 'supplier', 'clinic', 'compounding_pharmacy', 'patient', 'doctor']}>
       <div style={{ padding: '2rem' }}>
         <React.Suspense fallback={<WorkplaceLoadingFallback />}>
           {enabledTabsKeys.length === 0 ? (
@@ -212,6 +191,6 @@ export default function RoleDashboard({ onBack }) {
           )}
         </React.Suspense>
       </div>
-    </PortalLayout>
+    </AppPortalLayout>
   );
 }

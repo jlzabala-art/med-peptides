@@ -28,6 +28,29 @@ Upgrade the existing calendar gadget to a premium, fully‑featured scheduling h
 
 ---
 ## Proposed Changes
+
+### Phase 6: Global Form & Interaction Component Normalization (GCP Style)
+Identify missing Google Cloud-styled interactive components that currently rely on native browser elements across portals, and build them.
+
+#### [NEW] [TextField.jsx](file:///Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/components/ui/TextField.jsx)
+- A standardized, floating-label or outlined input field following GCP forms design.
+- Handles validation states, icons, and helper text.
+
+#### [NEW] [Select.jsx](file:///Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/components/ui/Select.jsx)
+- A standardized dropdown to replace native `<select>` elements, matching GCP aesthetics.
+
+#### [NEW] [Toggle.jsx](file:///Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/components/ui/Toggle.jsx)
+- A standard GCP-style switch for boolean settings.
+
+#### [NEW] [Tabs.jsx](file:///Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/components/ui/Tabs.jsx)
+- A unified tab navigation component to replace the inline tab buttons currently mapped across `DoctorHome`, `WholesalerHome`, and Admin dashboards.
+
+#### [MODIFY] [StatusBadge.jsx](file:///Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/components/ui/StatusBadge.jsx) -> [StatusChip.jsx](file:///Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/components/ui/StatusChip.jsx)
+- Rename and finalize the global StatusChip component, deleting redundant badge definitions.
+
+#### [MODIFY] [index.js](file:///Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/components/ui/index.js)
+- Export all the newly built components for global availability.
+
 ### UI Layer
 - **[NEW]** `src/components/calendar/RegeneraCalendar.jsx` – glass‑morphism dark calendar built with FullCalendar supporting color tags, drag‑and‑drop, timezone selector, recurring‑event modal, hover cards, and protocol‑day badges.
 - **[NEW]** `src/components/calendar/ProtocolDayBadge.jsx` – badge/icon displayed on days that contain protocol dosing for doctor/patient.

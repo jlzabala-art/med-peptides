@@ -18,7 +18,7 @@ import {
   ShieldAlert,
   FileOutput,
 } from 'lucide-react';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 import AppFilterBar from '../ui/AppFilterBar';
 import AppActionGroup from '../ui/AppActionGroup';
 
@@ -288,7 +288,7 @@ export default function AdminAIToolsTab() {
           className="card"
           style={{ padding: 0, overflowX: 'auto', border: '1px solid var(--border)' }}
         >
-          <AppDataTable
+          <DataTable
             columns={[
               {
                 key: 'tool',

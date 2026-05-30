@@ -4,7 +4,7 @@ import { collection, query, getDocs, doc, updateDoc, setDoc } from 'firebase/fir
 import { db } from '../../firebase';
 import AppFilterBar from '../ui/AppFilterBar';
 import AppEntityCell from '../ui/AppEntityCell';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 import AppActionGroup from '../ui/AppActionGroup';
 import {
   Building2,
@@ -153,7 +153,7 @@ export default function AdminWholesellersTab() {
             <Plus size={16} /> New Wholeseller
           </button>
         </div>
-        <AppDataTable
+        <DataTable
           data={filtered}
           columns={columns}
           keyField="id"

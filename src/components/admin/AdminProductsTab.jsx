@@ -28,7 +28,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 import AppActionGroup from '../ui/AppActionGroup';
 import AppStatusToggle from '../ui/AppStatusToggle';
 import AppFilterBar from '../ui/AppFilterBar';
@@ -1283,7 +1283,7 @@ export default function AdminProductsTab({
             Catalog is empty.
           </div>
         ) : (
-          <AppDataTable
+          <DataTable
             data={paginatedProducts}
             columns={columns}
             keyField="id"

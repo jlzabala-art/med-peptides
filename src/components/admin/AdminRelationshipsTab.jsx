@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { collection, query, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Layers, Search, Filter } from 'lucide-react';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 
 const CATEGORIES = [
   'Healing & Recovery',
@@ -223,7 +223,7 @@ export default function AdminRelationshipsTab({ readOnly = false }) {
           overflow: 'hidden',
         }}
       >
-        <AppDataTable
+        <DataTable
           columns={columns}
           data={paginatedProducts}
           keyField="id"

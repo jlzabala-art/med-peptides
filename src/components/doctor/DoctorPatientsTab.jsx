@@ -6,7 +6,7 @@ import { db } from '../../firebase';
 import { invitePatientByEmail } from '../../services/assignmentService';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../ui/Card';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 import StatusBadge from '../ui/StatusBadge';
 import Spinner from '../ui/Spinner';
 import { Users, UserPlus, Check, X, BrainCircuit, Activity, FileText, Loader2 } from 'lucide-react';
@@ -297,7 +297,7 @@ export default function DoctorPatientsTab({ doctorId, doctorMeta, onCountResolve
             <p style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '1.1rem', margin: '0 0 0.5rem' }}>No patients found.</p>
           </div>
         ) : (
-          <AppDataTable 
+          <DataTable 
             columns={columns} 
             data={filteredPatients} 
             expandableRender={renderExpandable}

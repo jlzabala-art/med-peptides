@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { collection, query, where, orderBy, limit, getDocs, startAfter, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 import AppFilterBar from '../ui/AppFilterBar';
 import { Check, X, Shield, Star, Trash2 } from 'lucide-react';
 
@@ -215,7 +215,7 @@ export default function UsersDataWidget({
           Loading users...
         </div>
       ) : (
-        <AppDataTable 
+        <DataTable 
           columns={columns}
           data={users}
           keyField="id"

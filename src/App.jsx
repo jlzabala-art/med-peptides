@@ -1114,7 +1114,11 @@ function App() {
                 <Route path="/account-manager/*" element={<AccountManagerDashboard />} />
               </Route>
             </Route>
-            {/* /patient and dashboard: unified under GlobalAppLayout */}
+            <Route element={<ProtectedRoute allowedRoles={['professional', 'patient', 'doctor', 'admin']} />}>
+              <Route path="/patient/*" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><PatientHome /></Suspense>} />
+            </Route>
+            
+            {/* /paciente and dashboard: unified under GlobalAppLayout */}
             <Route element={
               <GlobalAppLayout 
                 cartCount={cartCount}
@@ -1122,7 +1126,6 @@ function App() {
               />
             }>
               <Route element={<ProtectedRoute allowedRoles={['professional', 'patient', 'doctor', 'admin']} />}>
-                <Route path="/patient/*" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><PatientHome /></Suspense>} />
                 <Route path="/paciente" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><UserDashboard onOpenCart={() => setActiveModal('cart')} /></Suspense>} />
                 <Route path="/account/supervisor" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><UserDashboard onOpenCart={() => setActiveModal('cart')} /></Suspense>} />
               </Route>

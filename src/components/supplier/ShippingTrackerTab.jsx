@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { collection, query, where, onSnapshot, orderBy, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import ShipmentStepper from '../ui/ShipmentStepper';
-import InsightCard from '../ui/InsightCard';
-import { Modal } from '../ui/Modal';
-import { Spinner } from '../ui/Spinner';
+import Card from '../ui/Card';
+import Modal from '../ui/Modal';
+import Spinner from '../ui/Spinner';
 import axios from 'axios';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
 import AppActionGroup from '../ui/AppActionGroup';
-
+import { useCalendarSync } from '../../hooks/useCalendarSync';
 
 /**
  * ShippingTrackerTab
@@ -27,6 +27,8 @@ export default function ShippingTrackerTab({ supplierId }) {
   const [currentShipment, setCurrentShipment] = useState(null);
   const [suggestion, setSuggestion] = useState('');
   const [confidence, setConfidence] = useState(0);
+  const { syncEvent } = useCalendarSync();
+
   // React Query mutation to fetch AI insight
   const fetchInsight = async () => {
     const response = await axios.post(
@@ -39,6 +41,15 @@ export default function ShippingTrackerTab({ supplierId }) {
     onSuccess: (data) => {
       setSuggestion(data.suggestion);
       setConfidence(data.confidence);
+      if (currentShipment) {
+        syncEvent({
+          title: `Shipping Insight: ${currentShipment.trackingNumber || currentShipment.id.slice(0, 8)}`,
+          start: new Date().toISOString(),
+          allDay: true,
+          type: 'shipping',
+          description: data.suggestion,
+        });
+      }
     },
     onError: (error) => {
       console.error('AI insight error', error);
@@ -151,9 +162,14 @@ export default function ShippingTrackerTab({ supplierId }) {
               {actions.length > 0 && <AppActionGroup actions={actions} maxVisible={2} />}
             </div>
             <ShipmentStepper stages={stages} />
-              {suggestion && currentShipment?.id === s.id && (
-                <InsightCard suggestion={suggestion} confidence={confidence} />
-              )}
+                <Card variant="glass" style={{ marginTop: '1rem', borderLeft: '4px solid var(--color-primary)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '1rem' }}>🤖</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-primary)' }}>AI Insight</span>
+                    <span style={{ marginLeft: 'auto', fontSize: '0.7rem', fontWeight: 700, color: 'var(--color-success)', background: 'rgba(16, 185, 129, 0.1)', padding: '0.15rem 0.5rem', borderRadius: 9999 }}>{confidence}% confidence</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.85rem' }}>{suggestion}</p>
+                </Card>
           </div>
         );
       })}

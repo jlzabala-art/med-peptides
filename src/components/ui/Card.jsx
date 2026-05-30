@@ -1,17 +1,52 @@
-import React from 'react';
+/**
+ * Card — Atlas Health container component.
+ *
+ * @param {'default'|'flat'|'glass'} variant
+ * @param {boolean}  hover     — adds lift effect on hover
+ * @param {'sm'|'md'|'lg'} padding
+ * @param {string}   className
+ * @param {Function} onClick
+ * @param {React.ReactNode} children
+ */
+export default function Card({
+  children,
+  variant = 'default',
+  hover = false,
+  padding = 'md',
+  className = '',
+  onClick,
+  ...rest
+}) {
+  const isClickable = typeof onClick === 'function';
 
-export default function Card({ children, style = {}, className = '' }) {
+  const classes = [
+    'ui-card',
+    variant !== 'default' && `ui-card--${variant}`,
+    `ui-card--pad-${padding}`,
+    hover && 'ui-card--hover',
+    isClickable && 'ui-card--clickable',
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <div 
-      className={className}
-      style={{
-        backgroundColor: 'var(--color-bg-surface)',
-        borderRadius: 'var(--radius-md)',
-        boxShadow: 'var(--shadow-sm)',
-        border: '1px solid var(--color-border)',
-        padding: '1.5rem',
-        ...style
-      }}
+    <div
+      className={classes}
+      onClick={onClick}
+      role={isClickable ? 'button' : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      onKeyDown={
+        isClickable
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onClick(e);
+              }
+            }
+          : undefined
+      }
+      {...rest}
     >
       {children}
     </div>

@@ -3,8 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { Stethoscope, Activity, FileText, Bot, HeartPulse, ChevronRight, CheckCircle2, UserPlus, RefreshCw, Zap, ArrowRight, FlaskConical, Calendar, LayoutDashboard, Users, LogOut } from 'lucide-react';
-import { GcpCard, GcpButton } from '../components/ui';
-import PortalLayout from '../components/ui/PortalLayout';
+import { Card, MetricCard, Button } from '../components/ui';
+import AppPortalLayout from '../layout/AppPortalLayout';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import { MessageSquare, Brain } from 'lucide-react';
 
@@ -81,7 +81,7 @@ function AgentCard({ agent, status }) {
   const statusLabel = isActive ? 'Active' : isPending ? 'Pending' : 'Inactive';
 
   return (
-    <GcpCard
+    <Card
       onClick={() => isActive && openClinicalAI(agent.prompt, agent.name)}
       style={{
         cursor: isActive ? 'pointer' : 'default', transition: 'all 0.2s', padding: '1.4rem',
@@ -132,27 +132,9 @@ function AgentCard({ agent, status }) {
           </span>
         )}
       </div>
-    </GcpCard>
+    </Card>
   );
 }
-
-// ── KPI card ─────────────────────────────────────────────────────────────────
-function KpiCard({ label, value, icon: Icon, color, sub }) {
-  return (
-    <GcpCard style={{ padding: '1.3rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-      <div style={{ width: 44, height: 44, borderRadius: '12px', background: `${color}12`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <Icon size={20} color={color} />
-      </div>
-      <div>
-        <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.03em', lineHeight: 1.1 }}>{value}</div>
-        <div style={{ fontSize: '0.72rem', color: 'var(--color-text-tertiary)', fontWeight: 700, marginTop: '0.1rem' }}>{label}</div>
-        {sub && <div style={{ fontSize: '0.65rem', color: 'var(--color-border)', marginTop: '0.1rem' }}>{sub}</div>}
-      </div>
-    </GcpCard>
-  );
-}
-
 const DOCTOR_NAV_GROUPS = [
   {
     id: 'overview',
@@ -356,10 +338,10 @@ export default function DoctorHome() {
 
       {/* ── KPI Row ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '1rem', marginBottom: '2rem' }}>
-        <KpiCard label="Active Patients"  value={metrics.patients}     icon={Users}       color="var(--color-primary)" sub="In follow-up" />
-        <KpiCard label="Appointments Today" value={metrics.appointments} icon={Activity}    color="#0284c7" sub="Today's schedule" />
-        <KpiCard label="Pending Labs"      value={metrics.pendingLabs}  icon={FlaskConical} color="var(--color-warning)" sub="Need review" />
-        <KpiCard label="Active Protocols"  value={metrics.protocols}    icon={FileText}    color="var(--color-success)" sub="Issued" />
+        <MetricCard title="Active Patients"  value={metrics.patients}     icon={Users}       color="var(--color-primary)" subtitle="In follow-up" />
+        <MetricCard title="Appointments Today" value={metrics.appointments} icon={Activity}    color="#0284c7" subtitle="Today's schedule" />
+        <MetricCard title="Pending Labs"      value={metrics.pendingLabs}  icon={FlaskConical} color="var(--color-warning)" subtitle="Need review" />
+        <MetricCard title="Active Protocols"  value={metrics.protocols}    icon={FileText}    color="var(--color-success)" subtitle="Issued" />
       </div>
 
       {/* ── Agent Mission Control ── */}
@@ -444,32 +426,12 @@ export default function DoctorHome() {
   };
 
   return (
-    <PortalLayout
-      sidebarNavGroups={DOCTOR_NAV_GROUPS}
-      activeNavId={activeTab}
-      onNavigate={setActiveTab}
-      portalTitle="Physician Portal"
-      roleContext="doctor"
-      pageContext={{
-        activeTab: activeTab,
-        label: DOCTOR_NAV_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label || 'Dashboard',
-        group: DOCTOR_NAV_GROUPS.find(g => g.items.some(i => i.id === activeTab))?.label || 'Overview'
-      }}
-      headerActions={
-        <button 
-          onClick={handleLogout} 
-          style={{ background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-          title="Logout"
-        >
-          <LogOut size={18} color="var(--color-text-secondary)" />
-        </button>
-      }
-    >
+    <AppPortalLayout allowedRoles={['doctor', 'admin']}>
       <div style={{ padding: '2rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
           {renderTab()}
         </AdminTabErrorBoundary>
       </div>
-    </PortalLayout>
+    </AppPortalLayout>
   );
 }

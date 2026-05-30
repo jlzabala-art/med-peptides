@@ -12,7 +12,7 @@ import PatientPrescriptionPanel from '../components/patient/PatientPrescriptionP
 import PatientAppointments from './PatientAppointments';
 import { collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
-import PortalLayout from '../components/ui/PortalLayout';
+import AppPortalLayout from '../layout/AppPortalLayout';
 import OrdersTab from '../components/admin/OrdersTab';
 import DashboardEngine from '../engine/DashboardEngine';
 import { MessageSquare, Brain } from 'lucide-react';
@@ -133,20 +133,7 @@ export default function PatientHome() {
   };
 
   return (
-    <PortalLayout
-      portalTitle="Patient Portal"
-      roleContext="patient"
-      sidebarNavGroups={PATIENT_NAV_GROUPS}
-      activeNavId={activeTab}
-      onNavigate={handleNavigate}
-      headerActions={
-        hasProfile && (
-          <span style={{ backgroundColor: '#dcfce7', color: '#166534', padding: '4px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, border: '1px solid #bbf7d0' }}>
-            AI PROFILE ACTIVE
-          </span>
-        )
-      }
-    >
+    <AppPortalLayout allowedRoles={['patient', 'admin']}>
       <div style={{ padding: '1.5rem', backgroundColor: '#f8f9fa', minHeight: '100%' }}>
         <h1 style={{ margin: '0 0 0.25rem 0', fontSize: '1.4rem', fontWeight: 600, color: '#0f172a' }}>
           {activeTab === 'prescriptions' ? 'My Prescriptions' : `Welcome back, ${name}`}
@@ -192,6 +179,6 @@ export default function PatientHome() {
           <Route path="*" element={<Navigate to="" replace />} />
         </Routes>
       </div>
-    </PortalLayout>
+    </AppPortalLayout>
   );
 }

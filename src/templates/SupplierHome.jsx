@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LayoutDashboard, ShoppingBag, Globe, History, Settings, LogOut, Package } from 'lucide-react';
-import PortalLayout from '../components/ui/PortalLayout';
+import AppPortalLayout from '../layout/AppPortalLayout';
 import DashboardEngine from '../engine/DashboardEngine';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
@@ -40,7 +40,7 @@ const SUPPLIER_NAV_GROUPS = [
   }
 ];
 
-function SupplierDashboardTab({ userProfile }) {
+export function SupplierDashboardTab({ userProfile }) {
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '4rem' }}>
       <div style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
@@ -72,7 +72,7 @@ function SupplierDashboardTab({ userProfile }) {
   );
 }
 
-function PlaceholderTab() {
+export function PlaceholderTab() {
   return (
     <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
       <h2 style={{ marginBottom: '1rem' }}>Coming Soon</h2>
@@ -95,27 +95,7 @@ export default function SupplierHome() {
   };
 
   return (
-    <PortalLayout
-      sidebarNavGroups={SUPPLIER_NAV_GROUPS}
-      activeNavId={activeTab}
-      onNavigate={(id) => navigate(`/supplier-dashboard/${id === 'dashboard' ? '' : id}`)}
-      portalTitle="Supplier Portal"
-      roleContext="supplier"
-      pageContext={{
-        activeTab: activeTab,
-        label: SUPPLIER_NAV_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label || 'Dashboard',
-        group: SUPPLIER_NAV_GROUPS.find(g => g.items.some(i => i.id === activeTab))?.label || 'Overview'
-      }}
-      headerActions={
-        <button 
-          onClick={handleLogout} 
-          style={{ background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-          title="Logout"
-        >
-          <LogOut size={18} color="var(--color-text-secondary)" />
-        </button>
-      }
-    >
+    <AppPortalLayout allowedRoles={['supplier', 'admin']}>
       <div style={{ padding: '2rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
           <Routes>
@@ -139,6 +119,6 @@ export default function SupplierHome() {
           </Routes>
         </AdminTabErrorBoundary>
       </div>
-    </PortalLayout>
+    </AppPortalLayout>
   );
 }

@@ -15,6 +15,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { getAllRelationships, updateRelationshipStatus } from '../../services/assignmentService';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../firebase';
+import { MetricCard } from '../ui';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -329,8 +330,8 @@ export default function AdminSupervisionTab({ onNavigateToClinicalAI }) {
 
       {/* KPI Cards */}
       <div style={s.kpiRow}>
-        <KpiCard
-          label="Active"
+        <MetricCard
+          title="Active"
           value={counts.active || 0}
           color="var(--color-success)"
           icon="✅"
@@ -344,8 +345,8 @@ export default function AdminSupervisionTab({ onNavigateToClinicalAI }) {
             })
           }
         />
-        <KpiCard
-          label="Pending"
+        <MetricCard
+          title="Pending"
           value={counts.pending || 0}
           color="#f59e0b"
           icon="⏳"
@@ -359,8 +360,8 @@ export default function AdminSupervisionTab({ onNavigateToClinicalAI }) {
             })
           }
         />
-        <KpiCard
-          label="Paused"
+        <MetricCard
+          title="Paused"
           value={counts.paused || 0}
           color="#6366f1"
           icon="⏸"
@@ -374,8 +375,8 @@ export default function AdminSupervisionTab({ onNavigateToClinicalAI }) {
             })
           }
         />
-        <KpiCard
-          label="Revoked"
+        <MetricCard
+          title="Revoked"
           value={counts.revoked || 0}
           color="var(--color-danger)"
           icon="🚫"
@@ -389,8 +390,8 @@ export default function AdminSupervisionTab({ onNavigateToClinicalAI }) {
             })
           }
         />
-        <KpiCard
-          label="Total"
+        <MetricCard
+          title="Total"
           value={relationships.length}
           color="var(--color-text-tertiary)"
           icon="🔗"

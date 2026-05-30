@@ -12,10 +12,8 @@ import {
   LayoutDashboard, Layers, Package, TrendingUp, Settings,
   LogOut, ChevronRight, ArrowRight, Clock, CheckCircle2,
   AlertCircle, Truck, Box, BarChart3, Laptop, Bell,
-  ClipboardList, Building2, Zap, Users, Plus, Trash2, FileText, Download, ChevronUp, ChevronDown,
-  MapPin, Paintbrush, Globe, MessageSquare, Brain
+  MapPin, Paintbrush, Globe, MessageSquare, Brain, Mail
 } from 'lucide-react';
-import PortalLayout from '../components/ui/PortalLayout';
 
 import WholesalerBulkOrderBuilder from '../components/wholesaler/WholesalerBulkOrderBuilder';
 import AdminMetricsDashboard from '../components/admin/AdminMetricsDashboard';
@@ -26,7 +24,7 @@ import ClientsTab from '../components/wholesaler/ClientsTab';
 import CatalogList from '../components/wholesaler/CatalogList';
 import CatalogCreatorFlow from '../components/wholesaler/CatalogCreatorFlow';
 import EmailCampaignBuilder from '../components/wholesaler/EmailCampaignBuilder';
-
+import { Card, MetricCard } from '../components/ui';
 // ── Flat tab list (for reference) ────────────────────────────────────────────────────────────
 const TABS = [
   { id: 'overview',    label: 'Overview',    icon: LayoutDashboard },
@@ -485,12 +483,12 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
                       style={selectStyle}
                     >
                       <option value="">-- Seleccionar --</option>
-                      <optgroup label="Productos">
+                      <optgroup title="Productos">
                         {catalogProducts.map(p => (
                           <option key={p.id} value={p.id}>{p.name}</option>
                         ))}
                       </optgroup>
-                      <optgroup label="Protocolos">
+                      <optgroup title="Protocolos">
                         {catalogProtocols.map(p => (
                           <option key={p.id} value={p.id}>{p.name}</option>
                         ))}
@@ -721,36 +719,36 @@ export function WholesalerOverviewTab({ uid, onNavigate }) {
 
       {/* KPI row */}
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-        <KpiCard
-          label="Assigned Rx"
+        <MetricCard
+          title="Assigned Rx"
           value={loading ? '…' : assigned}
-          sub="waiting to be added to bulk"
+          subtitle="waiting to be added to bulk"
           icon={ClipboardList}
           color="#6366f1"
-          urgent={assigned > 0}
+          alert={assigned > 0}
           onClick={() => onNavigate('rx-inbox')}
         />
-        <KpiCard
-          label="In Bulk Orders"
+        <MetricCard
+          title="In Bulk Orders"
           value={loading ? '…' : inBulk}
-          sub="consolidated, pending shipment"
+          subtitle="consolidated, pending shipment"
           icon={Layers}
           color="#8b5cf6"
           onClick={() => onNavigate('bulk-orders')}
         />
-        <KpiCard
-          label="Pending Bulk Orders"
+        <MetricCard
+          title="Pending Bulk Orders"
           value={loading ? '…' : pendingBulk}
-          sub="awaiting admin confirmation"
+          subtitle="awaiting admin confirmation"
           icon={Truck}
           color="#f59e0b"
-          urgent={pendingBulk > 0}
+          alert={pendingBulk > 0}
           onClick={() => onNavigate('bulk-orders')}
         />
-        <KpiCard
-          label="Fulfilled"
+        <MetricCard
+          title="Fulfilled"
           value={loading ? '…' : fulfilled}
-          sub="prescriptions delivered"
+          subtitle="prescriptions delivered"
           icon={CheckCircle2}
           color="var(--color-success)"
         />
@@ -1031,6 +1029,7 @@ export function PlaceholderTab({ title, description }) {
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 import { Outlet, useLocation } from 'react-router-dom';
+import AppPortalLayout from '../layout/AppPortalLayout';
 
 export default function WholesalerHome() {
   const { user, userProfile, logout } = useAuth();
@@ -1091,41 +1090,13 @@ export default function WholesalerHome() {
   ) : null;
 
   return (
-    <PortalLayout
-      sidebarNavGroups={WHOLESALER_NAV_GROUPS.map(g => ({
-        ...g,
-        items: g.items.map(i => ({
-          ...i,
-          badge: i.id === 'rx-inbox' && rxBadge > 0 ? rxBadge : 0,
-        })),
-      }))}
-      activeNavId={activeTab}
-      onNavigate={(id) => navigate(`/wholesaler/${id === 'overview' ? '' : id}`)}
-      portalTitle="B2B Portal"
-      roleContext="wholesaler"
-      pageContext={{
-        activeTab: activeTab,
-        label: currentTab?.label || 'Dashboard'
-      }}
-      headerActions={
-        <>
-          {topbarActions}
-          <button 
-            onClick={handleLogout} 
-            style={{ background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-            title="Logout"
-          >
-            <LogOut size={18} color="var(--color-text-secondary)" />
-          </button>
-        </>
-      }
-    >
+    <AppPortalLayout allowedRoles={['wholesaler', 'admin']}>
       <div style={{ padding: '2rem' }}>
         <RefillReminderBanner role="wholesaler" />
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={currentTab?.label || activeTab}>
           <Outlet context={{ uid }} />
         </AdminTabErrorBoundary>
       </div>
-    </PortalLayout>
+    </AppPortalLayout>
   );
 }

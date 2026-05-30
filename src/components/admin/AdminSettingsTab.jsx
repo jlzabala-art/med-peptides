@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Globe, Truck, HardDrive, Trash2, GitCommit } from 'lucide-react';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 
 export default function AdminSettingsTab({ readOnly = false }) {
   const [settings, setSettings] = useState({
@@ -67,7 +67,7 @@ export default function AdminSettingsTab({ readOnly = false }) {
       </div>
     );
 
-  // Convert objects to arrays for AppDataTable
+  // Convert objects to arrays for DataTable
   const usdRatesArray = Object.entries(settings.exchangeRates || {}).map(([key, value]) => ({
     id: key,
     currency: key,
@@ -295,7 +295,7 @@ export default function AdminSettingsTab({ readOnly = false }) {
               overflow: 'hidden',
             }}
           >
-            <AppDataTable columns={usdColumns} data={usdRatesArray} keyField="id" />
+            <DataTable columns={usdColumns} data={usdRatesArray} keyField="id" />
           </div>
         </div>
 
@@ -328,7 +328,7 @@ export default function AdminSettingsTab({ readOnly = false }) {
               overflow: 'hidden',
             }}
           >
-            <AppDataTable columns={eurColumns} data={eurRatesArray} keyField="id" />
+            <DataTable columns={eurColumns} data={eurRatesArray} keyField="id" />
           </div>
         </div>
       </div>
@@ -368,7 +368,7 @@ export default function AdminSettingsTab({ readOnly = false }) {
               overflow: 'hidden',
             }}
           >
-            <AppDataTable columns={shippingColumns} data={shippingArray} keyField="id" />
+            <DataTable columns={shippingColumns} data={shippingArray} keyField="id" />
           </div>
         </div>
 
@@ -454,7 +454,7 @@ export default function AdminSettingsTab({ readOnly = false }) {
             }}
           >
             {backups.length > 0 ? (
-              <AppDataTable columns={backupColumns} data={backups} keyField="hash" />
+              <DataTable columns={backupColumns} data={backups} keyField="hash" />
             ) : (
               <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                 No backups available. Auto backup script may not be running.

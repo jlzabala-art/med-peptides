@@ -667,4 +667,97 @@
   position: relative;
 }
 
+/* ── RegeneraCalendar Styling ────────────────────────────────────────────── */
+:root {
+  --color-calendar-bg: rgba(20, 24, 30, 0.85);
+  --color-calendar-border: rgba(255, 255, 255, 0.1);
+  --radius-calendar: 16px;
+  --shadow-calendar: 0 8px 32px rgba(0, 0, 0, 0.2);
+  
+  --event-color-prescription: #3b82f6; /* Blue */
+  --event-color-shipping: #10b981;     /* Green */
+  --event-color-marketing: #8b5cf6;    /* Purple */
+  --event-color-order: #f59e0b;        /* Amber */
+  --event-color-protocol: #ec4899;     /* Pink */
+}
+
+.regenera-calendar-wrapper {
+  background: var(--color-calendar-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-calendar-border);
+  border-radius: var(--radius-calendar);
+  box-shadow: var(--shadow-calendar);
+  padding: 1.5rem;
+  color: #f8fafc;
+  overflow: hidden;
+}
+
+/* FullCalendar Overrides for Dark Glassmorphism */
+.regenera-calendar-wrapper .fc {
+  --fc-border-color: rgba(255, 255, 255, 0.08);
+  --fc-button-bg-color: rgba(255, 255, 255, 0.1);
+  --fc-button-border-color: rgba(255, 255, 255, 0.2);
+  --fc-button-hover-bg-color: rgba(255, 255, 255, 0.2);
+  --fc-button-hover-border-color: rgba(255, 255, 255, 0.3);
+  --fc-button-active-bg-color: var(--primary);
+  --fc-button-active-border-color: var(--primary);
+  --fc-today-bg-color: rgba(255, 255, 255, 0.05);
+  font-family: inherit;
+}
+
+.regenera-calendar-wrapper .fc-theme-standard th {
+  border: 1px solid var(--color-calendar-border);
+  padding: 0.5rem 0;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.regenera-calendar-wrapper .fc-daygrid-day-number {
+  color: #f1f5f9;
+  padding: 0.5rem;
+}
+
+/* Event micro-animations */
+.regenera-calendar-wrapper .fc-event {
+  border-radius: 4px;
+  border: none;
+  padding: 2px 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.regenera-calendar-wrapper .fc-event:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 10 !important;
+}
+
+/* Conflict glow */
+.regenera-calendar-wrapper .fc-event.conflict-glow {
+  box-shadow: 0 0 8px #ef4444, inset 0 0 4px #ef4444;
+  animation: pulseConflict 1.5s infinite;
+}
+
+@keyframes pulseConflict {
+  0% { box-shadow: 0 0 8px rgba(239, 68, 68, 0.6); }
+  50% { box-shadow: 0 0 16px rgba(239, 68, 68, 1); }
+  100% { box-shadow: 0 0 8px rgba(239, 68, 68, 0.6); }
+}
+
+/* Protocol Day Badge */
+.protocol-day-badge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--event-color-protocol);
+  box-shadow: 0 0 6px var(--event-color-protocol);
+}
+
+
 

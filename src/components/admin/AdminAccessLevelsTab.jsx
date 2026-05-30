@@ -15,7 +15,7 @@ import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 import AppEntityCell from '../ui/AppEntityCell';
 import AppActionGroup from '../ui/AppActionGroup';
 
@@ -410,7 +410,7 @@ export default function AdminAccessLevelsTab() {
       )}
 
       {/* Main Table */}
-      <AppDataTable
+      <DataTable
         data={Object.entries(ROLE_LABELS).map(([roleKey, details]) => ({ roleKey, ...details }))}
         keyField="roleKey"
         columns={[

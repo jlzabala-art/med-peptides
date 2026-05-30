@@ -10,7 +10,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { collection, getDocs, doc, updateDoc, query, orderBy } from 'firebase/firestore';
 import AppFilterBar from '../ui/AppFilterBar';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 import { db } from '../../firebase';
 import { RefreshCw, EyeOff, Eye, Package, DollarSign, Hash } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
@@ -391,7 +391,7 @@ export default function AdminVariantsTab() {
 
       <AppFilterBar onSearch={setSearchTerm} searchPlaceholder="Search product or variant SKU..." />
 
-      <AppDataTable
+      <DataTable
         columns={columns}
         data={filteredGroups}
         keyField="product.id"

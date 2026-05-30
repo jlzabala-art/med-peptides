@@ -1,5 +1,5 @@
 import React from 'react';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 import AppEntityCell from '../ui/AppEntityCell';
 import AppStatusChip from '../ui/AppStatusChip';
 import AppActionGroup from '../ui/AppActionGroup';
@@ -481,7 +481,7 @@ export default function AdminUsersTable({
   };
 
   return (
-    <AppDataTable
+    <DataTable
       data={filteredUsersList}
       columns={columns}
       keyField="id"
@@ -489,7 +489,7 @@ export default function AdminUsersTable({
       onSelectionChange={
         handleSelectAll
           ? (ids) => {
-              // AppDataTable passes an array of IDs.
+              // DataTable passes an array of IDs.
               // We need to map this to our parent's logic.
               // Wait, the parent's handleSelectAll currently toggles all,
               // and handleSelectUser toggles one.

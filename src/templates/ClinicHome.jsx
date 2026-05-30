@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LayoutDashboard, ShoppingBag, Plus, History, Settings, LogOut, ShieldCheck } from 'lucide-react';
-import PortalLayout from '../components/ui/PortalLayout';
+import AppPortalLayout from '../layout/AppPortalLayout';
 import DashboardEngine from '../engine/DashboardEngine';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
@@ -99,27 +99,7 @@ export default function ClinicHome() {
   };
 
   return (
-    <PortalLayout
-      sidebarNavGroups={CLINIC_NAV_GROUPS}
-      activeNavId={activeTab}
-      onNavigate={(id) => navigate(`/clinic-dashboard/${id === 'dashboard' ? '' : id}`)}
-      portalTitle="Clinic Portal"
-      roleContext="clinic"
-      pageContext={{
-        activeTab: activeTab,
-        label: CLINIC_NAV_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label || 'Dashboard',
-        group: CLINIC_NAV_GROUPS.find(g => g.items.some(i => i.id === activeTab))?.label || 'Overview'
-      }}
-      headerActions={
-        <button 
-          onClick={handleLogout} 
-          style={{ background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-          title="Logout"
-        >
-          <LogOut size={18} color="var(--color-text-secondary)" />
-        </button>
-      }
-    >
+    <AppPortalLayout allowedRoles={['clinic', 'admin']}>
       <div style={{ padding: '2rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
           <Routes>
@@ -138,6 +118,6 @@ export default function ClinicHome() {
           </Routes>
         </AdminTabErrorBoundary>
       </div>
-    </PortalLayout>
+    </AppPortalLayout>
   );
 }

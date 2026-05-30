@@ -3,7 +3,7 @@ import { collection, doc, getDocs, getDoc, setDoc, updateDoc } from 'firebase/fi
 import { db } from '../../firebase';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Percent, Search, Sliders, RefreshCw, CheckCircle, AlertCircle, BookOpen } from 'lucide-react';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 import AppEntityCell from '../ui/AppEntityCell';
 
 export default function AdminPricesTab() {
@@ -319,7 +319,7 @@ export default function AdminPricesTab() {
           </h3>
         </div>
 
-        <AppDataTable
+        <DataTable
           data={uniqueCategories.map((cat) => ({
             id: cat,
             category: cat,
@@ -462,7 +462,7 @@ export default function AdminPricesTab() {
 
 
         {/* Pricing Table */}
-        <AppDataTable
+        <DataTable
           columns={[
             {
               key: 'product',

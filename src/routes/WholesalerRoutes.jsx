@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
@@ -10,6 +10,15 @@ import WholesalerHome, {
   PlaceholderTab
 } from '../templates/WholesalerHome';
 import DashboardEngine from '../engine/DashboardEngine';
+
+// ── Premium loading skeleton ──────────────────────────────────────────────────
+const TabSkeleton = () => (
+  <div style={{ padding: '2rem' }}>
+    <div className="skeleton" style={{ height: 28, width: 200, marginBottom: '1.25rem' }} />
+    <div className="skeleton" style={{ height: 14, width: '50%', marginBottom: '1.5rem' }} />
+    <div className="skeleton" style={{ height: 240, borderRadius: 12 }} />
+  </div>
+);
 
 const AdminMetricsDashboard = React.lazy(() => import('../components/admin/AdminMetricsDashboard'));
 const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
@@ -29,6 +38,7 @@ export default function WholesalerRoutes() {
   const [catalogToEdit, setCatalogToEdit] = useState(null);
 
   return (
+    <Suspense fallback={<TabSkeleton />}>
     <Routes>
       <Route element={<WholesalerHome />}>
         <Route index element={
@@ -48,16 +58,12 @@ export default function WholesalerRoutes() {
         } />
         <Route path="messages" element={
           <AdminTabErrorBoundary tabId="messages" tabLabel="Mensajes">
-            <React.Suspense fallback={<div>Loading messaging...</div>}>
-              <MessagingWidget />
-            </React.Suspense>
+            <MessagingWidget />
           </AdminTabErrorBoundary>
         } />
         <Route path="clinical-ai" element={
           <AdminTabErrorBoundary tabId="clinical-ai" tabLabel="Atlas Health">
-            <React.Suspense fallback={<div>Loading Atlas Health AI...</div>}>
-              <ClinicalAIWidget />
-            </React.Suspense>
+            <ClinicalAIWidget />
           </AdminTabErrorBoundary>
         } />
         <Route path="geography" element={
@@ -121,5 +127,6 @@ export default function WholesalerRoutes() {
         } />
       </Route>
     </Routes>
+    </Suspense>
   );
 }

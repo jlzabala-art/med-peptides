@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { RX_STATUS_META } from '../../config/prescriptionConfig';
 import DoctorPrescriptionBuilder from './DoctorPrescriptionBuilder';
-import Card from '../ui/Card';
+import { Card, MetricCard } from '../ui';
 import Spinner from '../ui/Spinner';
 
 const PIPELINE_STEPS = [
@@ -19,29 +19,6 @@ const PIPELINE_STEPS = [
   { key: 'added_to_bulk',            label: 'In Bulk',     color: '#8b5cf6', bg: '#f5f3ff' },
   { key: 'fulfilled',                label: 'Fulfilled',   color: 'var(--color-success)', bg: '#d1fae5' },
 ];
-
-function KpiCard({ label, value, sub, icon: Icon, color, urgent, onClick }) {
-  return (
-    <Card 
-      onClick={onClick}
-      style={{ 
-        flex: '1 1 200px', 
-        minWidth: 0,
-        cursor: onClick ? 'pointer' : 'default',
-        borderLeft: urgent ? `4px solid ${color}` : undefined,
-        borderColor: urgent ? color : undefined,
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-        <Icon size={20} color={urgent ? color : 'var(--color-text-secondary)'} strokeWidth={2} />
-        {urgent && <span style={{ fontSize: '0.65rem', fontWeight: 700, color: color, textTransform: 'uppercase' }}>Action Needed</span>}
-      </div>
-      <div style={{ fontSize: '1.75rem', fontWeight: 600, color: 'var(--color-text-primary)', lineHeight: 1 }}>{value}</div>
-      <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>{label}</div>
-      {sub && <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>{sub}</div>}
-    </Card>
-  );
-}
 
 function RxRow({ rx }) {
   const meta = RX_STATUS_META[rx.status] || RX_STATUS_META.draft;
@@ -146,10 +123,10 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
         )}
 
         <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-          <KpiCard label="Activas" value={isLoading ? '…' : active} sub="En proceso / tránsito" icon={Send} color="var(--color-primary)" onClick={() => onNavigate?.('prescriptions')} />
-          <KpiCard label="Borradores" value={isLoading ? '…' : drafts} sub="Requieren atención" icon={Clock} color="#f59e0b" urgent={drafts > 0} onClick={() => onNavigate?.('prescriptions')} />
-          <KpiCard label="Entregadas" value={isLoading ? '…' : fulfilled} sub="Completadas" icon={CheckCircle2} color="var(--color-success)" onClick={() => onNavigate?.('prescriptions')} />
-          <KpiCard label="Mis Pacientes" value={patientCount || '—'} sub="Registrados" icon={Users} color="#8b5cf6" onClick={() => onNavigate?.('patients')} />
+          <MetricCard title="Activas" value={isLoading ? '…' : active} subtitle="En proceso / tránsito" icon={Send} color="var(--color-primary)" onClick={() => onNavigate?.('prescriptions')} />
+          <MetricCard title="Borradores" value={isLoading ? '…' : drafts} subtitle="Requieren atención" icon={Clock} color="#f59e0b" alert={drafts > 0} onClick={() => onNavigate?.('prescriptions')} />
+          <MetricCard title="Entregadas" value={isLoading ? '…' : fulfilled} subtitle="Completadas" icon={CheckCircle2} color="var(--color-success)" onClick={() => onNavigate?.('prescriptions')} />
+          <MetricCard title="Mis Pacientes" value={patientCount || '—'} subtitle="Registrados" icon={Users} color="#8b5cf6" onClick={() => onNavigate?.('patients')} />
         </div>
 
         <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>

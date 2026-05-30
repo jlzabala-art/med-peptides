@@ -56,3 +56,16 @@ exports.submitBulkOrder = submitBulkOrder; // Wholesaler bulk order submission +
 // ── Scheduled Tasks ──────────────────────────────────────────────────────────
 exports.syncPeptideAnalytics = require("./src/scheduled/analytics_sync")(ga4PropertyId);
 exports.keepAliveZoho        = require("./src/scheduled/zohoKeepAlive");
+
+// ── Calendar & Scheduling ───────────────────────────────────────────────────
+const calendarAuth = require("./src/http/calendarAuth");
+exports.generateCalendarAuthUrl = calendarAuth.generateAuthUrl;
+exports.handleCalendarAuthCallback = calendarAuth.handleAuthCallback;
+
+const calendarSync = require("./src/triggers/calendarSync");
+exports.syncToGoogleCalendar = calendarSync.syncToGoogleCalendar;
+exports.protocolDaySync = calendarSync.protocolDaySync;
+
+const sendReminders = require("./src/scheduled/sendReminders");
+exports.sendReminders = sendReminders.sendReminders;
+

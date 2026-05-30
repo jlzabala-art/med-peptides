@@ -4,7 +4,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Users, Mail, Phone, Calendar, UserCheck } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import AppDataTable from '../ui/AppDataTable';
+import DataTable from '../ui/DataTable';
 
 export default function ManagerClientsTab() {
   const { currentUser } = useAuth();
@@ -111,7 +111,7 @@ export default function ManagerClientsTab() {
       ) : isError ? (
         <div style={{ padding: '2rem', color: 'red' }}>Failed to load clients.</div>
       ) : (
-        <AppDataTable 
+        <DataTable 
           data={filteredClients}
           columns={columns}
           searchQuery={searchTerm}

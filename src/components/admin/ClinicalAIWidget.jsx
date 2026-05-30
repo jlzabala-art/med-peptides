@@ -14,7 +14,7 @@ import { collection, query, getDocs, orderBy, limit } from 'firebase/firestore';
 import CuriosityMap from './gadgets/CuriosityMap';
 import LanguageSplit from './gadgets/LanguageSplit';
 import FrictionSignals from './gadgets/FrictionSignals';
-import { GcpCard, GcpButton } from '../ui';
+import { Card, MetricCard, Button } from '../ui';
 import { db } from '../../firebase';
 
 // ─── Data fetch ───────────────────────────────────────────────────────────────
@@ -153,7 +153,7 @@ function getLogMatches(log, compProducts, compSupplements, compProtocols) {
 }
 
 // ─── Aggregate helpers ────────────────────────────────────────────────────────
-function computeKPIs(logs, products) {
+function computeKPIs(logs, compProducts) {
   const sessions = new Map();
   for (const log of logs) {
     if (!sessions.has(log.sessionId)) sessions.set(log.sessionId, []);
@@ -391,49 +391,7 @@ function ActivityFeed({ logs, compProducts, compSupplements, compProtocols }) {
   );
 }
 
-// ─── KPI Card ─────────────────────────────────────────────────────────────────
-function KpiCard({ icon: Icon, label, value, sub, color, bg }) {
-  return (
-    <GcpCard style={{ padding: '1.5rem', borderTop: `4px solid ${color}` }}>
-      <div
-        style={{
-          width: 36,
-          height: 36,
-          borderRadius: 'var(--radius-sm)',
-          background: bg,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: '0.75rem',
-        }}
-      >
-        <Icon size={18} color={color} />
-      </div>
-      <div
-        style={{
-          fontSize: '1.75rem',
-          fontWeight: 900,
-          color: 'var(--text-main)',
-          letterSpacing: '-0.03em',
-          lineHeight: 1,
-        }}
-      >
-        {value}
-      </div>
-      <div
-        style={{
-          fontSize: '0.78rem',
-          fontWeight: 700,
-          color: 'var(--text-main)',
-          margin: '0.35rem 0 0.15rem',
-        }}
-      >
-        {label}
-      </div>
-      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{sub}</div>
-    </GcpCard>
-  );
-}
+
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function AdminClinicalAITab({ context = null }) {
@@ -532,7 +490,7 @@ export default function AdminClinicalAITab({ context = null }) {
       </div>
 
       {/* Filters Card */}
-      <GcpCard
+      <Card
         style={{
           marginBottom: '2rem',
           display: 'flex',
@@ -629,7 +587,7 @@ export default function AdminClinicalAITab({ context = null }) {
             {loading ? 'Loading…' : 'Refresh'}
           </button>
         </div>
-      </GcpCard>
+      </Card>
 
       {/* ── Context Banner (from Supervision Monitor) ── */}
       {context && (
@@ -711,35 +669,35 @@ export default function AdminClinicalAITab({ context = null }) {
 
       {/* ── KPI Row ── */}
       <div className="clinical-ai-kpi-grid">
-        <KpiCard
+        <MetricCard
           icon={MessageSquare}
-          label="AI Sessions"
+          title="AI Sessions"
           value={loading ? '…' : kpis.totalSessions}
-          sub="Unique conversations"
+          subtitle="Unique conversations"
           color="#8b5cf6"
           bg="rgba(139,92,246,0.08)"
         />
-        <KpiCard
+        <MetricCard
           icon={Compass}
-          label="Total Queries"
+          title="Total Queries"
           value={loading ? '…' : kpis.totalQueries}
-          sub="User messages logged"
+          subtitle="User messages logged"
           color="var(--color-success)"
           bg="rgba(16,185,129,0.08)"
         />
-        <KpiCard
+        <MetricCard
           icon={Brain}
-          label="Avg Session Depth"
+          title="Avg Session Depth"
           value={loading ? '…' : kpis.avgDepth}
-          sub="Messages per session"
+          subtitle="Messages per session"
           color="var(--color-primary)"
           bg="rgba(59,130,246,0.08)"
         />
-        <KpiCard
+        <MetricCard
           icon={Brain}
-          label="Top Compound"
+          title="Top Compound"
           value={loading ? '…' : kpis.topCompound}
-          sub="Most queried compound"
+          subtitle="Most queried compound"
           color="#f59e0b"
           bg="rgba(245,158,11,0.08)"
         />
