@@ -1,188 +1,72 @@
-# Admin & Doctor Dashboard UI Revamp
+# RegeneraPept Calendar – Full Enhancement Plan
 
 ## Goal Description
-
-Redesign the **AdminDashboard** to provide a modern, premium experience:
-- Clear organization of metrics, user management, and system logs.
-- Use glassmorphism cards, subtle gradients, and responsive layout.
-- Implement an accordion with 4 tabs (only one open at a time) for mobile elegance.
-- Apply the corporate color palette used on the home page (lighter, vibrant hues).
-- Ensure accessibility (ARIA labels, focus states).
-
-Create a new **DoctorDashboard** view tailored for doctors:
-- Display doctor‑specific information: upcoming appointments, patient list, prescribed protocols, and analytics.
-- Use the same design system as the admin view for visual consistency.
-- Provide navigation to patient detail pages and protocol management.
-
-## User Review Required
-
-> [!IMPORTANT]
-> Please review the proposed changes:
-> - Acceptance of a major UI overhaul (may affect existing routes and styling).
-> - Addition of a new route `/doctor-dashboard` and corresponding navigation entry.
-> - Confirmation of the corporate color variables (if different from the current home palette).
-> - Confirmation of data to display on the doctor view (e.g., appointments API, patient collection).
-
-## Open Questions
-
-> [!WARNING]
-> - Which specific admin sections should be grouped into the 4 accordion tabs? (e.g., **Metrics**, **User Management**, **System Logs**, **Settings**).
-> - What exact doctor‑side data fields are required? Do we fetch from existing Firestore collections or need new ones?
-> - Should the doctor view support role‑based access control via Firebase Auth rules?
-
-## Proposed Changes
+Upgrade the existing calendar gadget to a premium, fully‑featured scheduling hub that supports:
+- Color‑coded event families (prescriptions, shipping, marketing, orders, medical protocols)
+- Drag‑and‑drop rescheduling with visual feedback
+- Recurring‑event wizard for prescriptions and protocol dosing
+- Conflict detection and resolution UI
+- Per‑event reminder preferences (push, email, SMS) ✅ all enabled (todos)
+- Time‑zone override per event
+- Two‑way sync with the user’s Google Calendar (full access scope `https://www.googleapis.com/auth/calendar`)
+- Rich hover cards with timeline, actions, QR code
+- Dark‑mode + glass‑morphism styling with micro‑animations
+- Full accessibility (keyboard navigation, ARIA, high‑contrast mode)
+- Export to iCal/CSV
+- Analytics dashboard summarising upcoming/past events and compliance (retention 1 year)
+- **Critical**: Show protocol‑day entries for both the doctor and patient (days when any treatment protocol must be taken).
 
 ---
-### Admin Dashboard
-
-- **[MODIFY]** `src/templates/AdminDashboard.jsx`
-  - Refactor into four accordion sections.
-  - Replace dark background colors with variables from `src/styles/theme.css` (e.g., `--color-primary`, `--color-accent`).
-  - Add glassmorphism card component `GlassCard` for each metric.
-  - Ensure responsive grid using CSS `grid` and `@container` queries.
-  - Add ARIA attributes for accessibility.
-
-- **[NEW]** `src/components/Accordion.jsx`
-  - Reusable accordion component with controlled open state (single open tab).
-
-- **[NEW]** `src/components/GlassCard.jsx`
-  - Styled card with backdrop‑filter, subtle shadow, and gradient overlay.
-
-- **[MODIFY]** `src/styles/theme.css`
-  - Introduce corporate palette variables (`--brand-primary`, `--brand-secondary`).
-  - Update dark mode colors to lighter tones.
-
----
-### Doctor Dashboard
-
-- **[NEW]** `src/templates/DoctorDashboard.jsx`
-  - Layout with sections: **Appointments**, **My Patients**, **Prescriptions**, **Analytics**.
-  - Utilizes `GlassCard` and `Accordion` for consistency.
-  - Pulls data from Firestore collections `appointments`, `patients`, `prescriptions` scoped to `auth.currentUser.uid`.
-
-- **[MODIFY]** `src/App.jsx` (or router config)
-  - Add route `/doctor-dashboard` pointing to `DoctorDashboard`.
-  - Add navigation menu entry visible only for users with role `doctor`.
-
-- **[NEW]** `src/context/RoleContext.jsx`
-  - Provide user role from Auth token to conditionally render doctor navigation.
-
----
-### 1. UI/UX Standardization (GCP Data Tables)
-
-*Status: Planning*
-
-We will standardize all system data tables using the `AppDataTable` component to follow Google Cloud Console UX patterns.
-
-### Objectives:
-- **Consistent Placement:** Search and filter controls will be placed directly above the table header.
-- **Filter Chips:** Active filters will be displayed as chips below the search bar.
-- **Pagination:** Footer-based pagination with a default of 20 items per page.
-- **State Preservation:** Implement server-side pagination with cursors (`startAfter`, `limit`) where applicable.
-
-### Proposed Changes:
-
-#### [MODIFY] `src/components/ui/AppDataTable.jsx`
-- Add a new "Toolbar" section above the table header to render the search input and filter chips.
-- Accept new props: `searchQuery`, `onSearchChange`, `searchPlaceholder`, `filters` (array of active filter objects), `onFilterRemove`, `renderCustomFilters` (for advanced filter dropdowns).
-- Ensure footer pagination controls are styled strictly according to GCP standards (rows per page dropdown, item count text, and simple chevron navigation).
-
-#### [MODIFY] Individual Tab Components (e.g., `AdminCostsTab`, `AdminProductsTab`, `AdminInvitationsTab`, `OrdersTab`, etc.)
-- Remove custom-built search bars and filter dropdowns from the tab headers.
-- Pass search state and filter state directly to the updated `AppDataTable`.
-- Enforce the 20 items per page limit.
-- Update queries to support cursor-based pagination if not already implemented.
-
-## 2. Performance Optimization (Firestore Indices)
-
-*Status: Planning*
-
-To ensure the new paginated and filtered tables perform optimally at scale, we must define Firestore compound indices.
-
-### Proposed Changes:
-- Review queries across all portals (Users, Orders, Products, etc.).
-- Create a `firestore.indexes.json` or equivalent configuration to define required compound indices (e.g., filtering by `status` and sorting by `createdAt`, while paginating).
-- Document the `firebase deploy --only firestore:indexes` command in the walkthrough.
-
-## 3. Audit Logs & Traceability
-
-*Status: Pending*
-
-- Integrate `logAction` into key edit operations in the Wholesaler portal (e.g., Bulk Orders creation, Rx status updates).
-
 ## User Review Required
 > [!IMPORTANT]
-> - Are there any specific filters or advanced search behaviors you want natively integrated into `AppDataTable` (e.g., date range pickers), or should complex filters be handled via custom render props?
-> - Do you want to enforce server-side pagination for ALL tables, or is client-side pagination acceptable for smaller datasets (e.g., AdminSettingsTab)?
+> The plan introduces new backend services (Cloud Functions for reminders, Google Calendar OAuth flow, Firestore schema changes) and UI components. All open questions have been answered by the user:
+> - **Google Calendar OAuth scope:** full access (`https://www.googleapis.com/auth/calendar`).
+> - **Reminder channels:** Email (SendGrid/Firebase), SMS (Twilio), Push (FCM) – all enabled.
+> - **Protocol data source:** Existing `protocols` collection will be used.
+> - **Analytics retention:** 1 year.
+> Proceed with implementation.
 
-# Supply Chain & Portal Architecture (B2B/B2C)
-
-This plan outlines the system integration for the complex B2B supply chain, including Suppliers, Wholesalers, Compounding Pharmacies, and Clinics.
-
-## Open Questions
-- **Supplier APIs**: Will suppliers upload their API catalog via CSV/Excel, or integrate via an external ERP/API?
-- **Pharmacy Catalog separation**: Since a Compounding Pharmacy acts as a buyer (purchasing raw APIs) and a supplier (selling formulations to Clinics), should they have two separate catalogs in Firestore (`api_catalog` vs `formulation_catalog`)?
-
-## B2B Ecosystem Hierarchy
-
-### 1. Suppliers (Fabricantes / Distribuidores API)
-- **Role**: `supplier`
-- **Function**: Sell raw APIs and materials to Wholesalers and Compounding Pharmacies.
-- **Portal**: `SupplierHome` (New Portal using `DashboardEngine`)
-  - Can manage raw API catalogs.
-  - Can fulfill bulk B2B orders from Wholesalers/Pharmacies.
-
-### 2. Wholesalers (Distribuidores / Franquiciados)
-- **Role**: `wholesaler`
-- **Function**: Buy in bulk from Suppliers; sell finished goods to Clinics and occasionally directly to Patients or Pharmacies.
-- **Portal**: `WholesalerHome` (Migrated to `DashboardEngine`)
-  - Downstream: Catalogs for Clinics, Rx Inbox for fulfillment.
-  - Upstream: Procurement from Suppliers.
-
-### 3. Compounding Pharmacies (Farmacias de Formulación Magistral)
-- **Role**: `compounding_pharmacy`
-- **Function (DUAL)**:
-  - **As Buyer (Upstream)**: Buy APIs and supplies from Suppliers/Wholesalers.
-  - **As Seller (Downstream)**: Sell bespoke formulations and peptides to Clinics and Wholesalers.
-- **Portal**: `PharmacyHome` (Migrated to `DashboardEngine`)
-  - **Upstream Hub**: API purchasing, lab supply orders.
-  - **Downstream Hub**: Formulations management, order fulfillment from Clinics.
-  - Has a separate portal because the UX needs to dynamically switch between "Buying" (APIs) and "Selling" (Formulations).
-
-### 4. Clinics (Clínicas)
-- **Role**: `clinic`
-- **Function**: Buy formulations from Compounding Pharmacies and finished goods from Wholesalers.
-- **Portal**: `ClinicHome` (Uses `DashboardEngine`)
-  - Central procurement from both Wholesalers and Pharmacies.
-
+---
 ## Proposed Changes
+### UI Layer
+- **[NEW]** `src/components/calendar/RegeneraCalendar.jsx` – glass‑morphism dark calendar built with FullCalendar supporting color tags, drag‑and‑drop, timezone selector, recurring‑event modal, hover cards, and protocol‑day badges.
+- **[NEW]** `src/components/calendar/ProtocolDayBadge.jsx` – badge/icon displayed on days that contain protocol dosing for doctor/patient.
+- **[MODIFY]** `src/components/supplier/ShippingTrackerTab.jsx` – import new `useCalendarSync` hook to push shipping‑insight events to the calendar.
+- **[MODIFY]** `src/components/ui/ThemeProvider.jsx` – add dark‑mode toggle and glass‑morphism CSS variables.
+- **[NEW]** `src/components/calendar/AnalyticsPanel.jsx` – Chart.js charts summarising upcoming vs past events, compliance percentages.
 
-### Portal Integration (DashboardEngine)
-#### [MODIFY] [DoctorHome.jsx](file:///Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/templates/DoctorHome.jsx)
-#### [MODIFY] [WholesalerHome.jsx](file:///Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/templates/WholesalerHome.jsx)
-#### [MODIFY] [PharmacyHome.jsx](file:///Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/templates/PharmacyHome.jsx)
-- Integrated `DashboardEngine` for consistent widget-based UI.
-- Embedded `MessagingWidget` ("Mensajes") and `ClinicalAIWidget` ("Atlas Health") as top-level tools available across all admin/professional portals, maximizing reuse of the Admin Portal's resources.
+### Backend / Firestore
+- **[NEW]** Collection `calendar_events` (see schema below).
+- **[NEW]** Extend existing `protocols` collection with `doses` sub‑field if not present; `protocol_schedules` collection not needed.
+- **[NEW]** Cloud Function `syncToGoogleCalendar` – creates/updates events in the user’s Google Calendar using the OAuth token stored in Firestore (`users/{uid}/googleCalendar`).
+- **[NEW]** Cloud Function `sendReminders` – runs every 5 min (Cron) to scan `calendar_events` for upcoming reminders and dispatch via Email (SendGrid), SMS (Twilio), and Push (FCM).
+- **[NEW]** Cloud Function `protocolDaySync` – on write to `protocols`, generate matching `calendar_events` entries of type `protocol` for each dose date.
 
-### Sidebar Customization Fixes
-#### [MODIFY] [AppSidebar/index.jsx](file:///Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/components/shared/AppSidebar/index.jsx)
-- Fixed bug where pinned/favorite items did not visually highlight outside of the Favorites group.
+### Authentication / OAuth
+- Add a new route `/auth/google-calendar` (Firebase Function) that initiates the Google OAuth flow and stores the token (encrypted) in Firestore under `users/{uid}/googleCalendar`.
 
-### Branding Updates
-- Removed all legacy "med-peptides" mentions from `index.html`, `manifest.json`, `robots.txt`, and `App.jsx`, standardizing on **Atlas Health**.
+### Styling & Assets
+- Extend `src/index.css` with tokens:
+  - `--color-calendar-bg` (dark translucent)
+  - `--radius-calendar` (rounded)
+  - `--shadow-calendar` (subtle elevation)
+  - Event‑type color variables matching `EVENT_COLORS`.
+- Add CSS for event colors, conflict glow, hover micro‑animations, and glass‑morphism backdrop.
 
-- Update Firebase security rules to grant doctors read/write access only to their own data.
-- Add unit tests for role‑based rendering.
-
+---
 ## Verification Plan
-
 ### Automated Tests
-- Run existing Jest/React Testing Library suite.
-- Add new tests for `Accordion` (single open tab) and `DoctorDashboard` role rendering.
-- Use `firebase emulators:exec` to validate security rules.
+- Unit tests for Cloud Functions (`syncToGoogleCalendar`, `sendReminders`, `protocolDaySync`).
+- Integration test using Firebase Emulator Suite to ensure Firestore ↔ Google Calendar sync.
+- UI snapshot tests for `RegeneraCalendar` (dark mode, drag‑and‑drop, protocol badges).
 
 ### Manual Verification
-- Open admin dashboard on desktop and mobile (responsive check).
-- Verify color scheme matches home page.
-- Switch to a doctor account and ensure the doctor view displays correct data.
-- Perform accessibility audit with Chrome DevTools (a11y tab).
+- Create a sample prescription with a 30‑day recurrence and verify it appears on the calendar with correct color and reminder emails.
+- Add a protocol schedule for a patient and confirm protocol‑day badges show on the calendar for both doctor and patient views.
+- Perform a drag‑and‑drop move and ensure Firestore updates and Google Calendar syncs.
+- Toggle dark mode and check glass‑morphism backdrop.
+- Export the calendar to iCal and re‑import to verify data fidelity.
+- Test accessibility: keyboard navigation, screen‑reader announcements, high‑contrast toggle.
+
+---
+**Ready to start** – implementation will begin after creating the task checklist.

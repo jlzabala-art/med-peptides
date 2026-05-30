@@ -22,7 +22,7 @@ export default function ShippingTrackerTab({ supplierId }) {
   const isAccountManager = userRole?.includes('account_manager');
   const [shipments, setShipments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [insightLoading, setInsightLoading] = useState(false);
+
   const [insightModalOpen, setInsightModalOpen] = useState(false);
   const [currentShipment, setCurrentShipment] = useState(null);
   const [suggestion, setSuggestion] = useState('');
