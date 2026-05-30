@@ -135,9 +135,9 @@ export default function PortalLayout({
           const lowStock = [];
           snapProducts.docs.forEach(doc => {
             const data = doc.data();
-            const variants = data.variants || [];
+            const variants = Array.isArray(data.variants) ? data.variants : [];
             variants.forEach((v, index) => {
-              const stock = v.stock ?? v.quantity ?? 100;
+              const stock = v?.stock ?? v?.quantity ?? 100;
               if (stock <= 10) {
                 lowStock.push({
                   id: `${doc.id}_${index}`,

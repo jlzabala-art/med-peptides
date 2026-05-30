@@ -79,6 +79,7 @@ service cloud.firestore {
     match /ai_config/{id}              { allow read, write: if isAdmin(); }
     match /clinical_logs/{id}          { allow read, write: if isAdmin(); }
     match /ai_response_cache/{id}      { allow read, write: if isAdmin(); }
+    match /page_views/{id}             { allow create: if true; allow read, update, delete: if isAdmin(); }
 
     // PROTOCOLS — fully public read (get + list + query)
     match /protocols/{protocolId} {

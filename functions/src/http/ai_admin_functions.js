@@ -222,7 +222,7 @@ const ADMIN_TOOLS = [
         },
         {
           name: "query_inactive_users",
-          description: "Searches for users who have been inactive for a specified number of days.",
+          description: "CRITICAL TOOL: ALWAYS use this tool when the user asks to find, filter, or list 'inactive users', 'users inactive for X days', or 'users who haven't logged in'. Searches for users who have been inactive for a specified number of days.",
           parameters: {
             type: "OBJECT",
             properties: {

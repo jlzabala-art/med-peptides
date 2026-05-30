@@ -1,5 +1,6 @@
 import React from 'react';
 import RegeneraCalendar from './RegeneraCalendar';
+import './CalendarCloud.css';
 
 export default function CalendarPage() {
   return (
@@ -13,7 +14,7 @@ export default function CalendarPage() {
         </p>
       </header>
       
-      <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: 'var(--radius-xl)' }}>
+      <div className="gc-surface gc-calendar-wrapper">
         <RegeneraCalendar />
       </div>
     </div>

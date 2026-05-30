@@ -3,7 +3,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, query, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, getDocs, doc, updateDoc, deleteDoc, limit, startAfter, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
 import {
   Search,
@@ -61,6 +61,35 @@ function ProductMicrosite({ product, onUpdateProduct }) {
   const [expandedAccordion, setExpandedAccordion] = useState('clinical'); // 'clinical', 'inventory', 'protocols', 'ai'
   const [relatedProtocols, setRelatedProtocols] = useState([]);
   const [loadingProtocols, setLoadingProtocols] = useState(false);
+  const [batches, setBatches] = useState([]);
+  const [loadingBatches, setLoadingBatches] = useState(false);
+
+  useEffect(() => {
+    async function fetchBatches() {
+      setLoadingBatches(true);
+      try {
+        // Querying all batches for this product (needs where if it scales, but filtering here for now to avoid needing composite indexes if we order)
+        // A simple where is fine:
+        const { query, where, collection, getDocs, orderBy } = await import('firebase/firestore');
+        const batchesRef = collection(db, 'batches');
+        const q = query(batchesRef, where('productId', '==', product.id || product.sku));
+        const snap = await getDocs(q);
+        const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Sort manually by date or let it be
+        data.sort((a, b) => {
+          const d1 = a.uploadDate?.toDate ? a.uploadDate.toDate() : new Date(a.uploadDate || 0);
+          const d2 = b.uploadDate?.toDate ? b.uploadDate.toDate() : new Date(b.uploadDate || 0);
+          return d2 - d1;
+        });
+        setBatches(data);
+      } catch (err) {
+        console.error('Error fetching batches', err);
+      } finally {
+        setLoadingBatches(false);
+      }
+    }
+    fetchBatches();
+  }, [product.id, product.sku]);
 
   useEffect(() => {
     async function fetchRelatedProtocols() {
@@ -253,9 +282,63 @@ function ProductMicrosite({ product, onUpdateProduct }) {
             {summary}
           </div>
         )}
+          </div>
+        )}
       </div>
 
-      {/* Accordion 2: AI Access */}
+      {/* Accordion 2: Batches & CoAs */}
+      <AccordionHeader title="Lotes y CoAs" id="batches" />
+      <div 
+        id="accordion-content-batches"
+        style={{ 
+          display: expandedAccordion === 'batches' ? 'block' : 'none',
+          padding: '1.5rem', 
+          borderBottom: '1px solid #e2e8f0',
+          animation: 'fadeIn 0.3s ease-in-out',
+          backgroundColor: '#f8fafc'
+        }}
+      >
+        {loadingBatches ? (
+          <div style={{ color: '#64748b', fontSize: '0.9rem' }}>Cargando lotes...</div>
+        ) : batches.length === 0 ? (
+          <div style={{ color: '#64748b', fontSize: '0.9rem', textAlign: 'center', padding: '1rem' }}>No hay lotes ni CoAs registrados para este producto.</div>
+        ) : (
+          <div style={{ display: 'grid', gap: '1rem' }}>
+            {batches.map(batch => (
+              <div key={batch.id} style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+                  <h4 style={{ margin: 0, fontSize: '1rem', color: '#0f172a', fontWeight: 700 }}>Lote: {batch.batchNumber || batch.id}</h4>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', backgroundColor: '#e2e8f0', color: '#475569', borderRadius: '4px', fontWeight: 600 }}>{batch.categoryType || 'General'}</span>
+                  </div>
+                </div>
+                
+                {/* Peptide API specific data rendering */}
+                {(batch.categoryType === 'Peptide API' || product.category === 'Peptide APIs') && batch.extractedData && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', fontSize: '0.85rem' }}>
+                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Pureza HPLC</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.purityHPLC ? `${batch.extractedData.purityHPLC}%` : 'N/A'}</span></div>
+                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Net Peptide Content</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.netPeptideContent ? `${batch.extractedData.netPeptideContent}%` : 'N/A'}</span></div>
+                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Endotoxinas</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.endotoxinLevel || 'N/A'}</span></div>
+                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Contenido de Agua</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.waterContent ? `${batch.extractedData.waterContent}%` : 'N/A'}</span></div>
+                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Sales (Acetato/TFA)</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.acetateContent ? `${batch.extractedData.acetateContent}%` : 'N/A'}</span></div>
+                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Confirmación MS</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.massSpectralAnalysis || 'N/A'}</span></div>
+                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Apariencia</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.appearance || 'N/A'}</span></div>
+                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Resultado / Status</span><span style={{ fontWeight: 600, color: batch.extractedData.conclusion === 'Pass' || batch.extractedData.conclusion === 'Approved' ? '#10b981' : '#f59e0b' }}>{batch.extractedData.conclusion || 'N/A'}</span></div>
+                  </div>
+                )}
+                
+                {batch.documentId && (
+                  <div style={{ marginTop: '1rem', borderTop: '1px solid #e2e8f0', paddingTop: '0.75rem' }}>
+                    <a href={`/admin/documents/${batch.documentId}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>Ver Documento Original (PDF) &rarr;</a>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Accordion 3: AI Access */}
       <AccordionHeader title="Acceso al AI (ClinicDAG Asistente)" id="ai" />
       <div 
         id="accordion-content-ai"
@@ -348,7 +431,11 @@ export default function AdminProductsTab({
   const [isBulkOrderModalOpen, setIsBulkOrderModalOpen] = useState(false);
   const [productsToBulkOrder, setProductsToBulkOrder] = useState([]);
 
-  // Pagination State
+  // Pagination State (Firestore)
+  const [lastVisible, setLastVisible] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+
+  // Pagination State (Local UI)
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(20);
 
@@ -360,14 +447,33 @@ export default function AdminProductsTab({
     fetchProducts();
   }, []);
 
-  async function fetchProducts() {
+  async function fetchProducts(loadMore = false) {
     try {
-      setLoading(true);
-      const q = query(collection(db, 'products'));
+      if (!loadMore) setLoading(true);
+      
+      let q;
+      if (loadMore && lastVisible) {
+        q = query(collection(db, 'products'), orderBy('name'), startAfter(lastVisible), limit(50));
+      } else {
+        q = query(collection(db, 'products'), orderBy('name'), limit(50));
+      }
+      
       const querySnapshot = await getDocs(q);
-      let productsList = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
+      const newDocs = querySnapshot.docs;
+      
+      if (newDocs.length < 50) {
+        setHasMore(false);
+      } else {
+        setHasMore(true);
+      }
+      
+      if (newDocs.length > 0) {
+        setLastVisible(newDocs[newDocs.length - 1]);
+      }
+
+      let productsList = newDocs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
       }));
 
       // Filter if restricted by allowedCategories
@@ -375,7 +481,16 @@ export default function AdminProductsTab({
         productsList = productsList.filter((p) => allowedCategories.includes(p.category));
       }
 
-      setProducts(productsList);
+      if (loadMore) {
+        setProducts(prev => {
+          // Avoid duplicates
+          const existingIds = new Set(prev.map(p => p.id));
+          const uniqueNew = productsList.filter(p => !existingIds.has(p.id));
+          return [...prev, ...uniqueNew];
+        });
+      } else {
+        setProducts(productsList);
+      }
     } catch (err) {
       console.error('Error fetching products:', err);
     } finally {
@@ -1283,6 +1398,7 @@ export default function AdminProductsTab({
             Catalog is empty.
           </div>
         ) : (
+          <>
           <DataTable
             data={paginatedProducts}
             columns={columns}
@@ -1389,6 +1505,18 @@ export default function AdminProductsTab({
               </>
             )}
           />
+          {hasMore && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+              <button 
+                className="btn btn-outline" 
+                onClick={() => fetchProducts(true)}
+                disabled={loading}
+              >
+                {loading ? 'Cargando...' : 'Cargar más productos'}
+              </button>
+            </div>
+          )}
+          </>
         )}
       </div>
     

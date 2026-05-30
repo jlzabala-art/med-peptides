@@ -178,13 +178,13 @@ export default function RegeneraCalendar() {
 
   // Toolbar with extra buttons
   const renderToolbar = () => (
-    <div className="calendar-toolbar" style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-      <button className="btn-magnetic" onClick={openCreateModal}>Nuevo evento</button>
-      <button className="btn-magnetic" onClick={exportCSV}>Exportar CSV</button>
-      <button className="btn-magnetic" onClick={exportICal}>Exportar iCal</button>
-      <button className="btn-magnetic" onClick={fetchGoogleAuth}>Conectar Google Calendar</button>
+    <div className="calendar-toolbar" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+      <button className="gc-button-primary" onClick={openCreateModal}>Nuevo evento</button>
+      <button className="gc-button-secondary" onClick={exportCSV}>Exportar CSV</button>
+      <button className="gc-button-secondary" onClick={exportICal}>Exportar iCal</button>
+      <button className="gc-button-secondary" onClick={fetchGoogleAuth}>Conectar Google Calendar</button>
       {googleAuthUrl && (
-        <a href={googleAuthUrl} target="_blank" rel="noopener noreferrer" className="btn-magnetic">
+        <a href={googleAuthUrl} target="_blank" rel="noopener noreferrer" className="gc-button-secondary" style={{textDecoration: 'none'}}>
           Autorizar Google
         </a>
       )}
@@ -209,31 +209,22 @@ export default function RegeneraCalendar() {
       />
 
       {/* Modal for create / edit */}
-      <AnimatePresence>
-        {modalOpen && (
-          <motion.div
-            className="calendar-modal-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}
-          >
-            <motion.div
-              className="calendar-modal"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              style={{ background: '#fff', borderRadius: '12px', padding: '1.5rem', width: '90%', maxWidth: '500px', boxShadow: '0 4px 24px rgba(0,0,0,0.2)' }}
-            >
-              <h3>{modalMode === 'create' ? 'Crear nuevo evento' : 'Editar evento'}</h3>
-              <form onSubmit={handleSubmit}>
-                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                  <label>Título</label>
-                  <input type="text" required value={eventForm.title} onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })} className="input" />
+      {modalOpen && (
+        <div className="gc-dialog-overlay">
+          <div className="gc-dialog">
+            <div className="gc-dialog-header">
+              <h3 className="gc-dialog-title">{modalMode === 'create' ? 'Crear nuevo evento' : 'Editar evento'}</h3>
+            </div>
+            
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
+              <div className="gc-dialog-body">
+                <div className="gc-form-group">
+                  <label className="gc-form-label">Título</label>
+                  <input type="text" required value={eventForm.title} onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })} className="gc-input" />
                 </div>
-                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                  <label>Tipo</label>
-                  <select value={eventForm.type} onChange={(e) => setEventForm({ ...eventForm, type: e.target.value })} className="input">
+                <div className="gc-form-group">
+                  <label className="gc-form-label">Tipo</label>
+                  <select value={eventForm.type} onChange={(e) => setEventForm({ ...eventForm, type: e.target.value })} className="gc-input">
                     <option value="prescription">Prescription</option>
                     <option value="shipping">Shipping</option>
                     <option value="marketing">Marketing</option>
@@ -242,44 +233,46 @@ export default function RegeneraCalendar() {
                     <option value="default">Default</option>
                   </select>
                 </div>
-                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                  <label>Inicio</label>
-                  <input type="datetime-local" required value={eventForm.start} onChange={(e) => setEventForm({ ...eventForm, start: e.target.value })} className="input" />
+                <div className="gc-form-group">
+                  <label className="gc-form-label">Inicio</label>
+                  <input type="datetime-local" required value={eventForm.start} onChange={(e) => setEventForm({ ...eventForm, start: e.target.value })} className="gc-input" />
                 </div>
-                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                  <label>Fin (opcional)</label>
-                  <input type="datetime-local" value={eventForm.end} onChange={(e) => setEventForm({ ...eventForm, end: e.target.value })} className="input" />
+                <div className="gc-form-group">
+                  <label className="gc-form-label">Fin (opcional)</label>
+                  <input type="datetime-local" value={eventForm.end} onChange={(e) => setEventForm({ ...eventForm, end: e.target.value })} className="gc-input" />
                 </div>
-                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                  <label>Zona horaria</label>
-                  <select value={eventForm.timezone} onChange={(e) => setEventForm({ ...eventForm, timezone: e.target.value })} className="input">
+                <div className="gc-form-group">
+                  <label className="gc-form-label">Zona horaria</label>
+                  <select value={eventForm.timezone} onChange={(e) => setEventForm({ ...eventForm, timezone: e.target.value })} className="gc-input">
                     {timezoneList.map((tz) => (
                       <option key={tz} value={tz}>{tz}</option>
                     ))}
                   </select>
                 </div>
-                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                  <label>Descripción</label>
-                  <textarea value={eventForm.description} onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })} className="input" rows={3} />
+                <div className="gc-form-group">
+                  <label className="gc-form-label">Descripción</label>
+                  <textarea value={eventForm.description} onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })} className="gc-input" rows={3} />
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                  {modalMode === 'edit' && (
-                    <button type="button" className="btn-magnetic" onClick={handleDelete} style={{ background: '#e53e3e', color: '#fff' }}>
-                      Eliminar
-                    </button>
-                  )}
-                  <button type="button" className="btn-magnetic" onClick={() => setModalOpen(false)}>
-                    Cancelar
+              </div>
+
+              <div className="gc-dialog-footer">
+                {modalMode === 'edit' && (
+                  <button type="button" className="gc-button-secondary" onClick={handleDelete} style={{ color: '#d93025', borderColor: '#d93025' }}>
+                    Eliminar
                   </button>
-                  <button type="submit" className="btn-magnetic" style={{ background: '#3182ce', color: '#fff' }}>
-                    Guardar
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                )}
+                <div style={{ flex: 1 }}></div>
+                <button type="button" className="gc-button-secondary" onClick={() => setModalOpen(false)}>
+                  Cancelar
+                </button>
+                <button type="submit" className="gc-button-primary">
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

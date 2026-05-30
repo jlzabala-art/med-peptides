@@ -31,13 +31,7 @@ function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, 
     <div ref={setNodeRef} style={style} className="sb-group">
       <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
         {isEditing && (
-          <div 
-            {...attributes} 
-            {...listeners} 
-            style={{ cursor: 'grab', padding: '4px 4px 4px 12px', color: 'var(--text-muted)' }}
-          >
-            <GripVertical size={14} />
-          </div>
+          <div style={{ padding: '4px 4px 4px 12px', width: '28px' }} />
         )}
         <button
           className="sb-group-header"

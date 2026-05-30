@@ -109,6 +109,21 @@ const DEFAULT_AGENTS = {
     tools: ['JSON Schema Generator', 'SEO Copywriting'],
     consoleUrl: null, // Custom gemini agent
   },
+  document_processor: {
+    displayName: 'Document Processing AI',
+    agentId: 'doc-processor-001',
+    type: 'native',
+    model: 'gemini-2.5-flash',
+    region: 'global',
+    status: 'active',
+    queryType: 'document_processing',
+    description: 'Reads PDFs, extracts Product Name, Purity, Batch, and generates semantic text for Vector DB.',
+    emoji: '📄',
+    color: '#ef4444',
+    bg: 'rgba(239,68,68,0.08)',
+    tools: ['Gemini Vision', 'Text Extraction', 'Data Matching'],
+    consoleUrl: null,
+  },
 };
 
 // ── Status badge ─────────────────────────────────────────────────────────────
@@ -537,12 +552,23 @@ export default function AdminAIAgentsTab() {
 
       if (snap.exists()) {
         const data = snap.data();
-        // Merge: use Firestore status/agentId but keep static metadata
+        // Merge: use Firestore status/agentId but keep static metadata. 
+        // We iterate over ALL keys in Firestore to allow dynamic agents to appear.
         const merged = { ...DEFAULT_AGENTS };
-        for (const key of Object.keys(merged)) {
-          if (data[key]) {
-            merged[key] = { ...merged[key], ...data[key] };
-          }
+        for (const key of Object.keys(data)) {
+          merged[key] = { 
+            ...(merged[key] || { 
+              displayName: key, 
+              status: 'active', 
+              type: 'native', 
+              model: 'unknown', 
+              region: 'global', 
+              emoji: '🤖', 
+              tools: [], 
+              description: 'Dynamically loaded from database.' 
+            }), 
+            ...data[key] 
+          };
         }
         setAgents(merged);
       }

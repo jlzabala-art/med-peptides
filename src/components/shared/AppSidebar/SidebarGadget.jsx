@@ -34,7 +34,7 @@ export default function SidebarGadget(props) {
       const hydratedItems = (savedGroup.items || [])
         .map(savedItem => {
           const item = allItems.get(savedItem.id) || null;
-          if (item) usedItemIds.add(item.id);
+          if (item && savedGroup.id !== 'favorites') usedItemIds.add(item.id);
           return item;
         })
         .filter(Boolean);
@@ -245,7 +245,11 @@ export default function SidebarGadget(props) {
       id: g.id,
       label: g.label,
       emoji: g.emoji,
-      items: (g.items || []).map(i => ({ id: i.id, label: i.label, path: i.path }))
+      items: (g.items || []).map(i => {
+        const itemData = { id: i.id, label: i.label };
+        if (i.path) itemData.path = i.path;
+        return itemData;
+      })
     }));
 
     // Save to localStorage for immediate local persistence
