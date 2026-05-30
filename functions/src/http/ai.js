@@ -1579,6 +1579,8 @@ ${JSON.stringify(clinicalRules || {})}
                     previewText = `**SUSPEND** user \`${fnArgs.user_id}\`. Reason: ${fnArgs.reason}`;
                   } else if (fnName === "update_order_status") {
                     previewText = `Update order \`#${fnArgs.order_id}\` to status: **${fnArgs.new_status}**`;
+                  } else if (fnName === "create_purchase_order") {
+                    previewText = `**CREATE PURCHASE ORDER** for supplier **${fnArgs.supplier}** with ${fnArgs.items.length} items.`;
                   }
 
                   res.status(200).json({

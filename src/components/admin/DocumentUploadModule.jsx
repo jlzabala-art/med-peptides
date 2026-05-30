@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { db, storage } from '../../firebase';
+import { db, storage, functions } from '../../firebase';
 import { collection, query, orderBy, getDocs, addDoc, serverTimestamp, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
+import { httpsCallable } from 'firebase/functions';
 import { useAuth } from '../../context/AuthContext';
 import { FileText, UploadCloud, CheckCircle, Clock, AlertCircle, X, ExternalLink, Database, Search, Filter, Calendar, Trash2, Share2, Mail, ChevronDown, ChevronRight, Download, Edit2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -51,8 +52,18 @@ export default function DocumentUploadModule() {
           getDocs(query(collection(db, 'uploaded_documents'), orderBy('createdAt', 'desc'))),
           getDocs(query(collection(db, 'products'), orderBy('name')))
         ]);
+        
+        const prods = prodsSnap.docs.map(d => ({ id: d.id, ...d.data(), variants: [] }));
+        
+        await Promise.all(prods.map(async (prod) => {
+          try {
+            const vSnap = await getDocs(collection(db, 'products', prod.id, 'variants'));
+            prod.variants = vSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          } catch(e) {}
+        }));
+
         setDocuments(docsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
-        setProducts(prodsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        setProducts(prods);
       } catch (err) {
         console.error("Error fetching data:", err);
       } finally {
@@ -120,6 +131,26 @@ export default function DocumentUploadModule() {
           };
           const docRef = await addDoc(collection(db, 'uploaded_documents'), newDocData);
           setDocuments(prev => [{ id: docRef.id, ...newDocData, createdAt: { toDate: () => new Date() } }, ...prev]);
+          
+          // Trigger AI COA Parser if it's a PDF
+          if (file.type === 'application/pdf' && documentType === 'COA') {
+            try {
+              const parseCOA = httpsCallable(functions, 'parseCOADocument');
+              const aiResult = await parseCOA({ docId: docRef.id, storagePath: storageRef.fullPath });
+              
+              if (aiResult.data?.success) {
+                const extracted = aiResult.data.extractedData;
+                setDocuments(prev => prev.map(d => 
+                  d.id === docRef.id ? { ...d, status: 'processed', extractedData: extracted } : d
+                ));
+              }
+            } catch (aiErr) {
+              console.error("AI Parsing failed:", aiErr);
+              setDocuments(prev => prev.map(d => 
+                d.id === docRef.id ? { ...d, status: 'failed_ai' } : d
+              ));
+            }
+          }
         } catch (dbError) {
           console.error("Error adding to Firestore:", dbError);
         } finally {
@@ -136,13 +167,41 @@ export default function DocumentUploadModule() {
     return fileName.replace(/\(\d+\)/g, '').replace(/\.pdf$/i, '').trim();
   };
 
-  const guessProductId = (fileName) => {
-    if (!products || products.length === 0) return null;
+  const guessProductVariantId = (fileName, extractedData) => {
+    if (!products || products.length === 0) return { productId: null, variantId: null };
+    
+    // If AI extracted data, use it directly to find the exact variant
+    if (extractedData?.peptide_name) {
+      const pepName = extractedData.peptide_name.toLowerCase();
+      const dosageStr = extractedData.dosage ? extractedData.dosage.toLowerCase().replace(/\s+/g, '') : null;
+      
+      const prodMatch = products.find(p => p.name.toLowerCase().includes(pepName) || pepName.includes(p.name.toLowerCase()));
+      if (prodMatch) {
+        if (dosageStr && prodMatch.variants?.length > 0) {
+          const varMatch = prodMatch.variants.find(v => {
+            const vLabel = (v.label || v.dosage || '').toLowerCase().replace(/\s+/g, '');
+            return vLabel.includes(dosageStr) || dosageStr.includes(vLabel);
+          });
+          if (varMatch) return { productId: prodMatch.id, variantId: varMatch.id };
+        }
+        return { productId: prodMatch.id, variantId: null };
+      }
+    }
+
     const lowerName = fileName.toLowerCase();
-    // Sort products by name length descending so we match the most specific product first
     const sortedProducts = [...products].sort((a, b) => b.name.length - a.name.length);
     const match = sortedProducts.find(p => lowerName.includes(p.name.toLowerCase()));
-    return match ? match.id : null;
+    
+    if (match) {
+      // Try to guess variant from filename if AI didn't provide it
+      if (match.variants?.length > 0) {
+        const varMatch = match.variants.find(v => lowerName.includes((v.label || v.dosage || '').toLowerCase()));
+        if (varMatch) return { productId: match.id, variantId: varMatch.id };
+      }
+      return { productId: match.id, variantId: null };
+    }
+    
+    return { productId: null, variantId: null };
   };
 
   const groupedDocuments = useMemo(() => {
@@ -158,7 +217,8 @@ export default function DocumentUploadModule() {
          const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt?.toDate?.()?.getTime?.() || 0);
          return timeB - timeA;
        });
-       return { main: group[0], variants: group.slice(1), allIds: group.map(g => g.id) };
+       const base = getBaseName(group[0].fileName);
+       return { baseName: base, main: group[0], variants: group, allIds: group.map(g => g.id) };
     });
   }, [documents]);
 
@@ -196,10 +256,18 @@ export default function DocumentUploadModule() {
   const paginatedGroups = filteredGroups.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   // -- Event Handlers --
-  const handleAssignProduct = async (docId, productId) => {
+  const handleAssignProduct = async (docId, compoundId) => {
     try {
-      await updateDoc(doc(db, 'uploaded_documents', docId), { productId });
-      setDocuments(prev => prev.map(d => d.id === docId ? { ...d, productId } : d));
+      let productId = null;
+      let variantId = null;
+      if (compoundId && compoundId !== 'rejected') {
+        const parts = compoundId.split('::');
+        productId = parts[0];
+        variantId = parts[1] === 'master' ? null : parts[1];
+      }
+
+      await updateDoc(doc(db, 'uploaded_documents', docId), { productId, variantId });
+      setDocuments(prev => prev.map(d => d.id === docId ? { ...d, productId, variantId } : d));
     } catch(err) {
       console.error("Error assigning product:", err);
       alert("Error assigning product");
@@ -232,6 +300,15 @@ export default function DocumentUploadModule() {
       setSelectedDocs(new Set());
     } catch(err) {
       console.error("Error archiving:", err);
+    }
+  };
+
+  const handleArchiveSingle = async (docId, currentState) => {
+    try {
+      await updateDoc(doc(db, 'uploaded_documents', docId), { isArchived: !currentState });
+      setDocuments(prev => prev.map(d => d.id === docId ? { ...d, isArchived: !currentState } : d));
+    } catch(err) {
+      console.error("Error archiving single doc:", err);
     }
   };
 
@@ -354,7 +431,7 @@ export default function DocumentUploadModule() {
             <Database size={20} color="#3b82f6" />
             <div>
               <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)' }}>AI Data Extraction enabled</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Files uploaded are automatically routed to the Document Processing Agent. Est. cost: ~$0.0025 per page (Gemini 2.5 Flash).</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Files uploaded are automatically routed to the Document Processing Agent. <b>Monthly Cost (GCP Vertex/Gemini): ~$4.50</b> | Est. ~$0.0025 per page.</div>
             </div>
           </div>
           <Link to="/admin/agents" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: '#3b82f6', textDecoration: 'none' }}>
@@ -444,132 +521,180 @@ export default function DocumentUploadModule() {
             </div>
 
             {/* Rows */}
-            {paginatedGroups.map(({ main, variants, allIds }) => {
-              const baseName = getBaseName(main.fileName);
+            {paginatedGroups.map(({ baseName, main, variants, allIds }) => {
               const isExpanded = expandedGroups.has(baseName);
-              const hasVariants = variants.length > 0;
               const allSelected = allIds.every(id => selectedDocs.has(id));
               const someSelected = allIds.some(id => selectedDocs.has(id));
-              const suggestedId = !main.productId ? guessProductId(main.fileName) : null;
-              const suggestedProduct = suggestedId ? products.find(p => p.id === suggestedId) : null;
 
               return (
-                <div key={main.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                  {/* Master Row */}
+                <div key={baseName} style={{ borderBottom: '1px solid var(--border)' }}>
+                  {/* Master Row (Folder/Group) */}
                   <div style={{ display: 'grid', gridTemplateColumns: '40px 3fr 2fr 1.5fr 40px', padding: '1rem 1.5rem', alignItems: 'center', backgroundColor: someSelected && !allSelected ? 'rgba(0,113,189,0.02)' : allSelected ? 'rgba(0,113,189,0.05)' : 'white' }}>
                     <div>
                       <input type="checkbox" checked={allSelected} ref={input => { if (input) input.indeterminate = someSelected && !allSelected; }} onChange={() => toggleGroupSelection(allIds)} style={{ cursor: 'pointer', width: '18px', height: '18px' }} />
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      {hasVariants && (
-                        <button onClick={() => toggleGroupExpand(baseName)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.2rem', color: 'var(--text-muted)' }}>
-                          {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                        </button>
-                      )}
-                      {!hasVariants && <div style={{ width: '18px' }} />}
+                      <button onClick={() => toggleGroupExpand(baseName)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.2rem', color: 'var(--text-muted)' }}>
+                        {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                      </button>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <div onClick={() => !editingDocId && setDrawerDoc(main)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <FileText size={18} color="var(--primary)" />
-                            {editingDocId === main.id ? (
-                              <input 
-                                autoFocus 
-                                value={editingName} 
-                                onChange={(e) => setEditingName(e.target.value)} 
-                                onBlur={saveEditing}
-                                onKeyDown={(e) => e.key === 'Enter' && saveEditing()}
-                                style={{ padding: '0.2rem', borderRadius: '4px', border: '1px solid var(--primary)', outline: 'none', fontWeight: 600, color: 'var(--primary)' }}
-                              />
-                            ) : (
-                              <span style={{ fontWeight: 600, color: 'var(--primary)' }}>{baseName}</span>
-                            )}
+                            <span onClick={() => toggleGroupExpand(baseName)} style={{ cursor: 'pointer', fontWeight: 600, color: 'var(--primary)' }}>{baseName}</span>
                           </div>
-                          {!editingDocId && (
-                            <button onClick={(e) => startEditing(main.id, main.fileName, e)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.2rem' }} title="Rename Document">
-                              <Edit2 size={14} />
-                            </button>
-                          )}
-                          {hasVariants && <span onClick={() => toggleGroupExpand(baseName)} style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.1rem 0.5rem', backgroundColor: '#e2e8f0', borderRadius: '12px', color: '#475569', fontWeight: 700 }}>+{variants.length} var</span>}
-                        </div>
-                        <div onClick={() => setDrawerDoc(main)} style={{ cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                          {new Date(main.createdAt?.toDate?.() || Date.now()).toLocaleDateString()} • {main.fileSize ? (main.fileSize / 1024 / 1024).toFixed(2) : '0.00'} MB
+                          <span onClick={() => toggleGroupExpand(baseName)} style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.1rem 0.5rem', backgroundColor: '#e2e8f0', borderRadius: '12px', color: '#475569', fontWeight: 700 }}>
+                            {variants.length} archivo(s)
+                          </span>
                         </div>
                       </div>
                     </div>
-                    <div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        {main.productId ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <select 
-                              value={main.productId} 
-                              onChange={(e) => handleAssignProduct(main.id, e.target.value)}
-                              style={{ padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '0.85rem', maxWidth: '180px' }}
-                            >
-                              <option value="">-- Unassigned --</option>
-                              {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                            </select>
-                            <Link to={`/admin/products/${main.productId}`} style={{ color: 'var(--primary)' }} title="Go to Product">
-                              <ExternalLink size={16} />
-                            </Link>
-                          </div>
-                        ) : suggestedProduct ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#f0fdf4', padding: '0.4rem', borderRadius: '6px', border: '1px dashed #4ade80' }}>
-                            <span style={{ fontSize: '0.8rem', color: '#166534' }}>Asociar a: <b>{suggestedProduct.name}</b>?</span>
-                            <button onClick={() => handleAssignProduct(main.id, suggestedId)} style={{ background: '#22c55e', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', padding: '0.2rem', display: 'flex', alignItems: 'center' }} title="Confirmar">
-                              <CheckCircle size={14} />
-                            </button>
-                            <button onClick={() => handleAssignProduct(main.id, 'rejected')} style={{ background: 'transparent', color: '#64748b', border: 'none', cursor: 'pointer', padding: '0.2rem', display: 'flex', alignItems: 'center' }} title="Rechazar">
-                              <X size={14} />
-                            </button>
-                          </div>
-                        ) : (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <select 
-                              value="" 
-                              onChange={(e) => handleAssignProduct(main.id, e.target.value)}
-                              style={{ padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '0.85rem', maxWidth: '180px' }}
-                            >
-                              <option value="">-- Unassigned --</option>
-                              {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                            </select>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                      <div title={main.status === 'completed' ? 'Extracted' : 'Processing'} style={{ cursor: 'help', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {main.status === 'completed' ? <CheckCircle size={18} color="var(--success)" /> : <Clock size={18} color="#d97706" />}
-                      </div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <button onClick={() => setDrawerDoc(main)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)' }} title="Preview">
-                        <ExternalLink size={18} />
-                      </button>
-                    </div>
+                    <div>{/* Empty Associated Product for group */}</div>
+                    <div>{/* Empty AI Status for group */}</div>
+                    <div>{/* Empty Actions for group */}</div>
                   </div>
 
                   {/* Variants Dropdown */}
-                  {isExpanded && variants.map((variant, index) => (
-                    <div key={variant.id} style={{ display: 'grid', gridTemplateColumns: '40px 3fr 2fr 1.5fr 40px', padding: '0.75rem 1.5rem 0.75rem 3rem', alignItems: 'center', backgroundColor: '#f8fafc', borderTop: '1px dashed var(--border)' }}>
-                      <div>
-                        <input type="checkbox" checked={selectedDocs.has(variant.id)} onChange={() => toggleSelection(variant.id)} style={{ cursor: 'pointer' }} />
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <div onClick={() => setDrawerDoc(variant)} style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column' }}>
-                          <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 600 }}>Variant #{index + 1}</span>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>{variant.fileName}</span>
+                  {isExpanded && variants.map((variant, index) => {
+                    const guessed = (!variant.productId && !variant.variantId) ? guessProductVariantId(variant.fileName, variant.extractedData) : null;
+                    const suggestedProduct = guessed?.productId ? products.find(p => p.id === guessed.productId) : null;
+                    const suggestedVariant = guessed?.variantId && suggestedProduct ? suggestedProduct.variants?.find(v => v.id === guessed.variantId) : null;
+                    
+                    const currentVal = variant.productId ? (variant.variantId ? `${variant.productId}::${variant.variantId}` : `${variant.productId}::master`) : "";
+
+                    return (
+                      <div key={variant.id} style={{ display: 'grid', gridTemplateColumns: '40px 3fr 2fr 1.5fr 40px', padding: '1rem 1.5rem 1rem 3rem', alignItems: 'center', backgroundColor: '#f8fafc', borderTop: '1px dashed var(--border)' }}>
+                        <div>
+                          <input type="checkbox" checked={selectedDocs.has(variant.id)} onChange={() => toggleSelection(variant.id)} style={{ cursor: 'pointer' }} />
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); handleRename(variant.id, variant.fileName); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.2rem' }} title="Rename Variant">
-                          <Edit2 size={14} />
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              {editingDocId === variant.id ? (
+                                <input 
+                                  autoFocus 
+                                  value={editingName} 
+                                  onChange={(e) => setEditingName(e.target.value)} 
+                                  onBlur={saveEditing}
+                                  onKeyDown={(e) => e.key === 'Enter' && saveEditing()}
+                                  style={{ padding: '0.2rem', borderRadius: '4px', border: '1px solid var(--primary)', outline: 'none', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem' }}
+                                />
+                              ) : (
+                                <span onClick={() => !editingDocId && setDrawerDoc(variant)} style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 600, cursor: 'pointer' }}>{variant.fileName}</span>
+                              )}
+                              {!editingDocId && (
+                                <button onClick={(e) => startEditing(variant.id, variant.fileName, e)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.1rem' }} title="Rename Variant">
+                                  <Edit2 size={12} />
+                                </button>
+                              )}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                              {new Date(variant.createdAt?.toDate?.() || Date.now()).toLocaleDateString()} • {variant.fileSize ? (variant.fileSize / 1024 / 1024).toFixed(2) : '0.00'} MB
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            {(variant.productId || variant.variantId) ? (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <select 
+                                  value={currentVal} 
+                                  onChange={(e) => handleAssignProduct(variant.id, e.target.value)}
+                                  style={{ padding: '0.3rem', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '0.8rem', maxWidth: '180px' }}
+                                >
+                                  <option value="">-- Unassigned --</option>
+                                  {products.map(p => (
+                                    <optgroup key={p.id} label={p.name}>
+                                      <option value={`${p.id}::master`}>Base Product (No Variant)</option>
+                                      {p.variants?.map(v => (
+                                        <option key={v.id} value={`${p.id}::${v.id}`}>
+                                          {v.label || v.dosage || v.id}
+                                        </option>
+                                      ))}
+                                    </optgroup>
+                                  ))}
+                                </select>
+                                <Link to={`/admin/products/${variant.productId}`} style={{ color: 'var(--primary)' }} title="Go to Product">
+                                  <ExternalLink size={14} />
+                                </Link>
+                              </div>
+                            ) : suggestedProduct ? (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#f0fdf4', padding: '0.3rem', borderRadius: '6px', border: '1px dashed #4ade80' }}>
+                                <span style={{ fontSize: '0.75rem', color: '#166534' }}>
+                                  Asociar a: <b>{suggestedProduct.name} {suggestedVariant ? `(${suggestedVariant.label || suggestedVariant.dosage})` : ''}</b>?
+                                </span>
+                                <button onClick={() => handleAssignProduct(variant.id, `${guessed.productId}::${guessed.variantId || 'master'}`)} style={{ background: '#22c55e', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', padding: '0.15rem', display: 'flex', alignItems: 'center' }} title="Confirmar">
+                                  <CheckCircle size={12} />
+                                </button>
+                                <button onClick={() => handleAssignProduct(variant.id, 'rejected')} style={{ background: 'transparent', color: '#64748b', border: 'none', cursor: 'pointer', padding: '0.15rem', display: 'flex', alignItems: 'center' }} title="Rechazar">
+                                  <X size={12} />
+                                </button>
+                              </div>
+                            ) : (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <select 
+                                  value="" 
+                                  onChange={(e) => handleAssignProduct(variant.id, e.target.value)}
+                                  style={{ padding: '0.3rem', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '0.8rem', maxWidth: '180px' }}
+                                >
+                                  <option value="">-- Unassigned --</option>
+                                  {products.map(p => (
+                                    <optgroup key={p.id} label={p.name}>
+                                      <option value={`${p.id}::master`}>Base Product (No Variant)</option>
+                                      {p.variants?.map(v => (
+                                        <option key={v.id} value={`${p.id}::${v.id}`}>
+                                          {v.label || v.dosage || v.id}
+                                        </option>
+                                      ))}
+                                    </optgroup>
+                                  ))}
+                                </select>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* AI Status Column */}
+                        <div>
+                          {variant.status === 'processing' && (
+                            <span style={{ fontSize: '0.75rem', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                              <Clock size={12} className="spin" /> Procesando IA...
+                            </span>
+                          )}
+                          {variant.status === 'processed' && variant.extractedData && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--color-success)', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600 }}>
+                                <CheckCircle size={12} /> Extracción Exitosa
+                              </span>
+                              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', backgroundColor: 'white', padding: '0.3rem', borderRadius: '4px', border: '1px solid var(--border)' }}>
+                                <div><b>Péptido:</b> {variant.extractedData.peptide_name || 'N/A'}</div>
+                                <div><b>Dosis:</b> {variant.extractedData.dosage || 'N/A'}</div>
+                                <div><b>Pureza:</b> {variant.extractedData.purity_percentage || 'N/A'}</div>
+                              </div>
+                            </div>
+                          )}
+                          {variant.status === 'failed_ai' && (
+                            <span style={{ fontSize: '0.75rem', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                              <AlertCircle size={12} /> Error en IA
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Actions Column */}
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', alignItems: 'center' }}>
+                          <button onClick={() => handleArchiveSingle(variant.id, variant.isArchived)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: variant.isArchived ? 'var(--text-muted)' : 'var(--text-main)' }} title={variant.isArchived ? "Restore" : "Archive"}>
+                            {variant.isArchived ? <ArchiveRestore size={16} /> : <Archive size={16} />}
+                          </button>
+                          <button onClick={() => setDrawerDoc(variant)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)' }} title="Preview">
+                            <Eye size={16} />
+                          </button>
+                          <a href={variant.url} download={variant.fileName} style={{ color: 'var(--text-muted)' }} title="Download">
+                            <Download size={16} />
+                          </a>
+                        </div>
                       </div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{new Date(variant.createdAt?.toDate?.() || Date.now()).toLocaleString()}</div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Variant Copy</div>
-                      <div style={{ textAlign: 'right' }}>
-                        <button onClick={() => setDrawerDoc(variant)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)' }} title="Preview"><ExternalLink size={16} /></button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               );
             })}

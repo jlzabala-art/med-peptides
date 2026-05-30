@@ -73,6 +73,7 @@ const NAV_GROUPS = [
     items: [
       { id: 'products',        label: 'Products',        icon: Box },
       { id: 'stock',           label: 'Stock',           icon: FlaskConical },
+      { id: 'enrichment',      label: 'Catalog Enrichment', icon: Database },
       { id: 'lab-tests',       label: 'Lab Tests',       icon: ScrollText },
       { id: 'protocols',       label: 'Protocols',       icon: ClipboardList },
       { id: 'uploads',         label: 'Importar Ficheros',icon: UploadCloud },
@@ -100,6 +101,7 @@ const NAV_GROUPS = [
       { id: 'leads',            label: 'Leads',               icon: Users },
       { id: 'orders',           label: 'Orders',              icon: PackageSearch },
       { id: 'bulk-orders',      label: 'Bulk Orders',         icon: Box },
+      { id: 'agency-deals',     label: 'Agency Deals',        icon: Briefcase },
       { id: 'analytics',        label: 'Analytics',           icon: BarChart3 },
       { id: 'account-managers', label: 'Account Managers',    icon: ShieldCheck },
     ],

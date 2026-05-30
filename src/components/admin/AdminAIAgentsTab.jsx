@@ -124,6 +124,21 @@ const DEFAULT_AGENTS = {
     tools: ['Gemini Vision', 'Text Extraction', 'Data Matching'],
     consoleUrl: null,
   },
+  admin_assistant: {
+    displayName: 'Admin Co-Pilot',
+    agentId: 'admin-agent-001',
+    type: 'native',
+    model: 'gemini-2.5-pro',
+    region: 'global',
+    status: 'active',
+    queryType: 'admin_assistant',
+    description: 'Autonomous Admin Assistant. Analyzes commercial data (sales, LTV, trends) and helps orchestrate ERP tasks.',
+    emoji: '🤖',
+    color: '#0ea5e9',
+    bg: 'rgba(14,165,233,0.08)',
+    tools: ['Sales Intelligence', 'CRM Lookup', 'Financial Reports'],
+    consoleUrl: null,
+  },
 };
 
 // ── Status badge ─────────────────────────────────────────────────────────────

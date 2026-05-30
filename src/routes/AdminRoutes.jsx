@@ -49,6 +49,8 @@ const ReferralTracking = React.lazy(() => import('../components/marketing/Referr
 const CoBranding = React.lazy(() => import('../components/marketing/CoBranding'));
 const DripMarketing = React.lazy(() => import('../components/marketing/DripMarketing'));
 const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
+const AdminCatalogEnrichmentTab = React.lazy(() => import('../components/admin/AdminCatalogEnrichmentTab'));
+const AdminAgencyDealsTab = React.lazy(() => import('../components/admin/AdminAgencyDealsTab'));
 
 // ── Premium loading skeleton for lazy-loaded admin tabs ────────────────────────
 const AdminTabSkeleton = () => (
@@ -153,6 +155,8 @@ export default function AdminRoutes() {
         <Route path="calendar" element={<AdminTabErrorBoundary tabId="calendar" tabLabel="Calendar"><CalendarPage /></AdminTabErrorBoundary>} />
         <Route path="uploads" element={<AdminTabErrorBoundary tabId="uploads" tabLabel="Uploads"><DocumentUploadModule /></AdminTabErrorBoundary>} />
         <Route path="ai-agents" element={<AdminTabErrorBoundary tabId="ai-agents" tabLabel="AI Agents"><AdminAIAgentsTab /></AdminTabErrorBoundary>} />
+        <Route path="enrichment" element={<AdminTabErrorBoundary tabId="enrichment" tabLabel="Enrichment"><AdminCatalogEnrichmentTab /></AdminTabErrorBoundary>} />
+        <Route path="agency-deals" element={<AdminTabErrorBoundary tabId="agency-deals" tabLabel="Agency Deals"><AdminAgencyDealsTab /></AdminTabErrorBoundary>} />
       </Route>
       <Route path="price-drafts" element={<AdminTabErrorBoundary tabId="price-drafts" tabLabel="Price Drafts"><AdminPricesTab /></AdminTabErrorBoundary>} />
     </Routes>

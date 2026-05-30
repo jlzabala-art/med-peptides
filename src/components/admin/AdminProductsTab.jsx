@@ -282,8 +282,6 @@ function ProductMicrosite({ product, onUpdateProduct }) {
             {summary}
           </div>
         )}
-          </div>
-        )}
       </div>
 
       {/* Accordion 2: Batches & CoAs */}

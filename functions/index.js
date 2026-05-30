@@ -32,6 +32,7 @@ exports.newsletterSubscribe        = require("./src/http/newsletter_subscribe");
 exports.skuSyncAgent               = require("./src/http/ai_sku_sync");         // AgentSkuSync — Zoho↔Firebase SKU coordination (admin only)
 exports.refineSemanticAgent        = require("./src/http/ai_semantic_refine");   // AgentSemanticRefine — Semantic metadata builder (admin only)
 exports.catalogAiAssistant         = require("./src/http/ai_catalog_builder");   // AgentCatalogBuilder — Dynamic Catalog platform (Vertex AI)
+exports.parseCOADocument           = require("./src/http/parse_coa_document").parseCOADocument; // COA PDF parsing AI
 
 exports.acceptInvitation           = require("./src/http/acceptInvitation").acceptInvitation; // Secure invitation acceptance
 exports.generatePaymentLink        = require("./src/http/generatePaymentLink").generatePaymentLink; // Stripe Payment Links

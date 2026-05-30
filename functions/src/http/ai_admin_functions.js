@@ -339,13 +339,78 @@ const ADMIN_TOOLS = [
             },
             required: ["segment", "goal"]
           }
+        },
+        {
+          name: "get_top_selling_products",
+          description: "Returns the most sold products based on historical orders.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              limit: { type: "INTEGER", description: "How many products to return (default 5)." }
+            }
+          }
+        },
+        {
+          name: "get_customer_ltv",
+          description: "Calculates the Lifetime Value (LTV) for a specific user.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              user_id: { type: "STRING", description: "The user's document ID or email." }
+            },
+            required: ["user_id"]
+          }
+        },
+        {
+          name: "simulate_margin_impact",
+          description: "Simulates the revenue impact of changing a product's price based on its recent sales volume.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              product_id: { type: "STRING", description: "The product ID." },
+              new_price: { type: "NUMBER", description: "The hypothetical new retail price." }
+            },
+            required: ["product_id", "new_price"]
+          }
+        },
+        {
+          name: "get_user_activity_summary",
+          description: "Returns an audit summary of recent actions or orders performed by a specific user.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              user_id: { type: "STRING", description: "The user's document ID." }
+            },
+            required: ["user_id"]
+          }
+        },
+        {
+          name: "create_purchase_order",
+          description: "Proposes creating a purchase order for laboratory suppliers to restock products. REQUIRES admin confirmation.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              items: {
+                type: "ARRAY",
+                items: {
+                  type: "OBJECT",
+                  properties: {
+                    product_id: { type: "STRING" },
+                    quantity: { type: "INTEGER" }
+                  }
+                }
+              },
+              supplier: { type: "STRING", description: "Supplier name." }
+            },
+            required: ["items", "supplier"]
+          }
         }
       ]
     }
 ];
 
 // Functions that write to Firestore and need confirmation
-const WRITE_FUNCTIONS = new Set(["update_product_price", "update_product_cost", "update_user_role", "batch_update_product_price", "batch_update_product_stock", "update_regional_price", "update_geographic_restriction", "suspend_user", "update_order_status", "create_discount_campaign"]);
+const WRITE_FUNCTIONS = new Set(["update_product_price", "update_product_cost", "update_user_role", "batch_update_product_price", "batch_update_product_stock", "update_regional_price", "update_geographic_restriction", "suspend_user", "update_order_status", "create_discount_campaign", "create_purchase_order"]);
 
 // ── Read-only function executor ───────────────────────────────────────────────
 
@@ -642,9 +707,60 @@ async function executeReadOnlyFunction(fn, args, db) {
       const { order_id } = args;
       const docRef = db.collection("orders").doc(order_id);
       const snap = await docRef.get();
-      if (!snap.exists) return `Order #${order_id} not found.`;
+      if (!snap.exists)      return `User \`${user_id}\` suspended.`;
+    }
+
+    case "create_purchase_order": {
+      const { items, supplier } = args;
       
-      const o = snap.data();
+      // Calculate total cost and bundle items
+      let totalCost = 0;
+      const poItems = [];
+      for (const item of items) {
+        let pSnap = await db.collection("products").doc(item.product_id).get();
+        if (!pSnap.exists) {
+          const bySlug = await db.collection("products").where("slug", "==", item.product_id).limit(1).get();
+          if (!bySlug.empty) pSnap = bySlug.docs[0];
+        }
+        
+        const cost = pSnap.exists ? Number(pSnap.data().costPrice || pSnap.data().cost_price || 0) : 0;
+        const name = pSnap.exists ? (pSnap.data().displayName || pSnap.data().name) : item.product_id;
+        
+        totalCost += (cost * item.quantity);
+        poItems.push({
+          productId: pSnap.id || item.product_id,
+          name: name,
+          quantity: item.quantity,
+          unitCost: cost,
+          totalLineCost: cost * item.quantity
+        });
+      }
+      
+      const docRef = db.collection("purchase_orders").doc();
+      await docRef.set({
+        supplier,
+        items: poItems,
+        totalCost,
+        status: "draft",
+        createdBy: callerUid,
+        createdAt: timestamp,
+        updatedAt: timestamp
+      });
+      
+      // Audit log
+      await db.collection("audit_logs").add({
+        action: "create_purchase_order",
+        po_id: docRef.id,
+        supplier,
+        totalCost,
+        adminId: callerUid,
+        timestamp
+      });
+      
+      return `Created Purchase Order \`${docRef.id}\` for supplier **${supplier}** with total estimated cost of **$${totalCost.toFixed(2)}**.`;
+    }
+
+    default: const o = snap.data();
       let riskScore = 0;
       let flags = [];
       
@@ -731,6 +847,162 @@ async function executeReadOnlyFunction(fn, args, db) {
       const body = `We are writing to you today because ${goal}.\n\nAtlas Health is committed to providing the highest purity peptides and clinical supplements for your research and longevity needs.\n\nBest regards,\nThe Atlas Health Team\nhttps://atlas-health.com`;
       
       return `**Email Draft Generated for segment [${segment.toUpperCase()}]:**\n\n\`\`\`text\n${intro}\n\n${body}\n\`\`\`\n\n*Note: This is a draft. You can copy this into your email marketing tool (e.g. Mailchimp, SendGrid) to dispatch.*`;
+    }
+
+    case "get_top_selling_products": {
+      const { limit = 5 } = args;
+      const snap = await db.collection("orders").get();
+      const productCounts = {};
+      
+      snap.forEach(doc => {
+        const o = doc.data();
+        if (o.status !== "cancelled" && o.items) {
+          o.items.forEach(item => {
+            const pid = item.productId || item.name || item.id;
+            if (!productCounts[pid]) productCounts[pid] = { name: item.name || pid, count: 0, revenue: 0 };
+            productCounts[pid].count += (item.quantity || 1);
+            productCounts[pid].revenue += (item.price || 0) * (item.quantity || 1);
+          });
+        }
+      });
+      
+      const sorted = Object.values(productCounts).sort((a,b) => b.count - a.count).slice(0, limit);
+      if (sorted.length === 0) return "No product sales data found.";
+      
+      return `**Top ${limit} Selling Products (All Time):**\n\n` + sorted.map((p,i) => `${i+1}. **${p.name}** — ${p.count} units sold (Total Rev: $${p.revenue.toFixed(2)})`).join("\n");
+    }
+
+    case "get_customer_ltv": {
+      const { user_id } = args;
+      let snap = await db.collection("orders").where("userId", "==", user_id).get();
+      if (snap.empty) {
+        // Try by email
+        snap = await db.collection("orders").where("userEmail", "==", user_id).get();
+      }
+      
+      if (snap.empty) return `No orders found for user: ${user_id}. LTV is $0.00.`;
+      
+      let totalSpent = 0;
+      let orderCount = 0;
+      let firstOrderDate = Date.now();
+      
+      snap.forEach(doc => {
+        const o = doc.data();
+        if (o.status !== "cancelled") {
+          totalSpent += Number(o.total) || 0;
+          orderCount++;
+          const dateMs = o.createdAt ? (o.createdAt.seconds ? o.createdAt.seconds * 1000 : o.createdAt) : Date.now();
+          if (dateMs < firstOrderDate) firstOrderDate = dateMs;
+        }
+      });
+      
+      const customerLifespanDays = Math.max(1, (Date.now() - firstOrderDate) / (1000 * 60 * 60 * 24));
+      const aov = totalSpent / orderCount;
+      
+      return [
+        `**Customer Lifetime Value (LTV) Report for ${user_id}**`,
+        `- **Total LTV (Revenue):** $${totalSpent.toFixed(2)}`,
+        `- **Total Valid Orders:** ${orderCount}`,
+        `- **Average Order Value (AOV):** $${aov.toFixed(2)}`,
+        `- **Customer Tenure:** ${Math.round(customerLifespanDays)} days`
+      ].join("\n");
+    }
+
+    case "simulate_margin_impact": {
+      const { product_id, new_price } = args;
+      // Get current product details
+      let pSnap = await db.collection("products").doc(product_id).get();
+      if (!pSnap.exists) {
+        const bySlug = await db.collection("products").where("slug", "==", product_id).limit(1).get();
+        if (bySlug.empty) return `Product ${product_id} not found.`;
+        pSnap = bySlug.docs[0];
+      }
+      
+      const p = pSnap.data();
+      const cost = Number(p.costPrice || p.cost_price || 0);
+      const name = p.displayName || p.name || product_id;
+      
+      // Get recent 30-day sales volume
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const ordersSnap = await db.collection("orders").where("createdAt", ">=", thirtyDaysAgo).get();
+      let volume30 = 0;
+      let currentAvgPrice = 0;
+      let rev30 = 0;
+      
+      ordersSnap.forEach(doc => {
+        const o = doc.data();
+        if (o.status !== "cancelled" && o.items) {
+          o.items.forEach(item => {
+            if (item.productId === pSnap.id || item.name === name) {
+              volume30 += (item.quantity || 1);
+              rev30 += (item.price || 0) * (item.quantity || 1);
+            }
+          });
+        }
+      });
+      
+      if (volume30 > 0) currentAvgPrice = rev30 / volume30;
+      
+      const currentProfit = (currentAvgPrice - cost) * volume30;
+      const simulatedProfit = (new_price - cost) * volume30;
+      const profitDelta = simulatedProfit - currentProfit;
+      
+      const currentMargin = currentAvgPrice > 0 ? ((currentAvgPrice - cost) / currentAvgPrice * 100).toFixed(1) : "N/A";
+      const newMargin = new_price > 0 ? ((new_price - cost) / new_price * 100).toFixed(1) : "N/A";
+      
+      return [
+        `**Margin Impact Simulation for: ${name}**`,
+        `- **Cost Price:** $${cost.toFixed(2)}`,
+        `- **30-Day Sales Volume:** ${volume30} units`,
+        ``,
+        `**Current Economics (Last 30 Days):**`,
+        `- Estimated Avg Price: $${currentAvgPrice.toFixed(2)}`,
+        `- Current Margin: ${currentMargin}%`,
+        `- Gross Profit (30d): $${currentProfit.toFixed(2)}`,
+        ``,
+        `**Simulated Economics (at $${new_price}):**`,
+        `- New Margin: ${newMargin}%`,
+        `- Projected Gross Profit (30d): $${simulatedProfit.toFixed(2)}`,
+        ``,
+        `**Projected Impact (assuming flat volume):** ${profitDelta >= 0 ? '🟢 +$' : '🔴 -$'}${Math.abs(profitDelta).toFixed(2)} per month`
+      ].join("\n");
+    }
+
+    case "get_user_activity_summary": {
+      const { user_id } = args;
+      let uSnap = await db.collection("users").doc(user_id).get();
+      if (!uSnap.exists) {
+        const byEmail = await db.collection("users").where("email", "==", user_id).limit(1).get();
+        if (!byEmail.empty) uSnap = byEmail.docs[0];
+      }
+      
+      const name = uSnap.exists ? (uSnap.data().fullName || uSnap.data().email) : user_id;
+      
+      const logsSnap = await db.collection("audit_logs").where("userId", "==", user_id).orderBy("timestamp", "desc").limit(5).get();
+      let logsList = [];
+      logsSnap.forEach(doc => {
+        const d = doc.data();
+        const time = d.timestamp ? new Date(d.timestamp.seconds * 1000).toLocaleString() : "Unknown";
+        logsList.push(`- [${time}] Action: ${d.action}`);
+      });
+      
+      const ordersSnap = await db.collection("orders").where("userId", "==", user_id).orderBy("createdAt", "desc").limit(3).get();
+      let ordersList = [];
+      ordersSnap.forEach(doc => {
+        const o = doc.data();
+        const time = o.createdAt ? new Date(o.createdAt.seconds * 1000).toLocaleDateString() : "Unknown";
+        ordersList.push(`- [${time}] Order #${doc.id.slice(0,6)} - $${o.total} (${o.status})`);
+      });
+      
+      return [
+        `**Activity Summary for User: ${name}**`,
+        ``,
+        `**Recent Orders (up to 3):**`,
+        ordersList.length > 0 ? ordersList.join("\n") : "- No recent orders.",
+        ``,
+        `**Recent Admin Audit Logs (up to 5):**`,
+        logsList.length > 0 ? logsList.join("\n") : "- No admin audit logs found."
+      ].join("\n");
     }
 
     default:

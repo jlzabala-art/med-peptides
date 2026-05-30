@@ -113,7 +113,7 @@ export default function PortalLayout({
         description: 'Requiere revisión de credenciales y aprobación de cuenta.',
         severity: 'critical',
         timeLabel: 'Nuevo',
-        actionPath: '/admin/doctors'
+        actionPath: 'doctors'
       }));
 
       // 2. Orders pending dispatch
@@ -126,7 +126,7 @@ export default function PortalLayout({
           description: `Total: $${doc.data().total || doc.data().amount || 0} - En espera de validación de pago.`,
           severity: 'warning',
           timeLabel: '24h',
-          actionPath: '/admin/orders'
+          actionPath: 'orders'
         }));
 
         // 3. Low stock products (e.g. less than 10 vials/units)
@@ -146,7 +146,7 @@ export default function PortalLayout({
                   description: `Quedan solo ${stock} unidades de este producto en inventario.`,
                   severity: 'critical',
                   timeLabel: 'Urgente',
-                  actionPath: '/admin/products'
+                  actionPath: 'products'
                 });
               }
             });
