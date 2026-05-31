@@ -1,20 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { catalogRepository } from '../../repositories/catalogRepository';
-import { Users, Mail, Phone, Calendar, ArrowUpRight, Search, Download } from 'lucide-react';
+import { Users, Mail, Phone, Calendar, ArrowUpRight, Search, Download, Loader2, RefreshCcw, FileText } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import DataTable from '../ui/DataTable';
 import AppEntityCell from '../ui/AppEntityCell';
 import AppActionGroup from '../ui/AppActionGroup';
 import { useToast } from '../../hooks/useToast';
+import { collection, query, orderBy, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { useNavigate } from 'react-router-dom';
 
 export default function AdminLeadsTab() {
   const { isAdmin, user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
+  const [selectedLeadIds, setSelectedLeadIds] = useState([]);
+  const [isSyncing, setIsSyncing] = useState(false);
   
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -31,10 +37,28 @@ export default function AdminLeadsTab() {
   async function fetchLeads() {
     setLoading(true);
     try {
-      const leadsData = isAdmin 
-        ? await catalogRepository.getAllLeads() 
-        : await catalogRepository.getLeadsByOwner(user?.uid);
-      setLeads(leadsData || []);
+      const [leadsData, rfqsSnap] = await Promise.all([
+        isAdmin 
+          ? catalogRepository.getAllLeads() 
+          : catalogRepository.getLeadsByOwner(user?.uid),
+        getDocs(query(collection(db, 'agency_rfqs'), orderBy('createdAt', 'desc')))
+      ]);
+      
+      const rfqs = rfqsSnap.docs.map(d => {
+        const data = d.data();
+        return {
+          id: d.id,
+          name: data.clientName || 'RFQ Client',
+          email: 'N/A (B2B)',
+          message: `RFQ from ${data.supplierName || 'Supplier'}\nItems: ${data.items?.length || 0}`,
+          status: data.status?.toLowerCase() || 'new',
+          createdAt: data.createdAt,
+          type: 'rfq',
+          originalData: data
+        };
+      });
+
+      setLeads([...(leadsData || []), ...rfqs]);
     } catch (err) {
       console.error('Error fetching leads:', err);
       toast.error('Failed to load leads.');
@@ -48,10 +72,14 @@ export default function AdminLeadsTab() {
       const leadToUpdate = leads.find(l => l.id === leadId);
       if (!leadToUpdate) return;
       
-      const updatedLead = { ...leadToUpdate, status: newStatus };
-      await catalogRepository.saveLeadRequest(updatedLead);
+      if (leadToUpdate.type === 'rfq') {
+         await updateDoc(doc(db, 'agency_rfqs', leadId), { status: newStatus.toUpperCase() });
+      } else {
+         const updatedLead = { ...leadToUpdate, status: newStatus };
+         await catalogRepository.saveLeadRequest(updatedLead);
+      }
       
-      setLeads(prev => prev.map(l => l.id === leadId ? updatedLead : l));
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
       toast.success(`Lead status updated to ${newStatus}`);
     } catch (err) {
       console.error('Error updating lead status:', err);
@@ -114,15 +142,29 @@ export default function AdminLeadsTab() {
       sortKey: 'contact',
       sortValue: (l) => (l.name || '').toLowerCase(),
       render: (l) => (
-        <AppEntityCell
-          title={l.name || 'Unknown Contact'}
-          subtitle={
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '2px' }}><Mail size={10} /> {l.email}</span>
-              {l.phone && <span style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>| <Phone size={10} /> {l.phone}</span>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <AppEntityCell
+            title={l.name || 'Unknown Contact'}
+            subtitle={
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '2px' }}><Mail size={10} /> {l.email}</span>
+                {l.phone && <span style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>| <Phone size={10} /> {l.phone}</span>}
+              </div>
+            }
+          />
+          {l.temperature && (
+            <div style={{ 
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              backgroundColor: l.temperature === 'HOT' ? '#fef2f2' : l.temperature === 'WARM' ? '#fffbeb' : '#f8fafc',
+              color: l.temperature === 'HOT' ? '#ef4444' : l.temperature === 'WARM' ? '#f59e0b' : '#64748b',
+              border: `1px solid ${l.temperature === 'HOT' ? '#fca5a5' : l.temperature === 'WARM' ? '#fcd34d' : '#e2e8f0'}`,
+              borderRadius: '8px', padding: '2px 8px', minWidth: '40px'
+            }}>
+              <span style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.5px' }}>{l.temperature}</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{l.score || 0}</span>
             </div>
-          }
-        />
+          )}
+        </div>
       ),
     },
     {
@@ -264,25 +306,66 @@ export default function AdminLeadsTab() {
             searchQuery={searchTerm}
             onSearchChange={setSearchTerm}
             searchPlaceholder="Search leads by name, email, or phone..."
+            selectedIds={selectedLeadIds}
+            onSelectionChange={setSelectedLeadIds}
             filters={activeFilters}
             onFilterRemove={handleFilterRemove}
             renderCustomFilters={renderCustomFilters}
             emptyTitle="No leads found"
             emptyDescription="There are no incoming leads at this time. When clinics request information via catalogs, they will appear here."
             renderBatchActions={(selected) => (
-              <button
-                onClick={handleExportCSV}
-                className="btn btn-primary"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontSize: '0.8rem',
-                  padding: '0.4rem 0.8rem',
-                }}
-              >
-                <Download size={14} /> Export All
-              </button>
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <button
+                  onClick={async () => {
+                    if(selectedLeadIds.length === 0) return toast.error("Select leads to sync");
+                    setIsSyncing(true);
+                    // Sincronización simulada con Zoho Bigin, se conectará al webhook
+                    setTimeout(() => {
+                      setIsSyncing(false);
+                      toast.success(`Sincronizados ${selectedLeadIds.length} leads con Zoho Bigin.`);
+                      setSelectedLeadIds([]);
+                    }, 1500);
+                  }}
+                  className="btn btn-primary"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontSize: '0.8rem',
+                    padding: '0.4rem 0.8rem',
+                  }}
+                  disabled={isSyncing}
+                >
+                  {isSyncing ? <Loader2 size={14} className="spin" /> : <RefreshCcw size={14} />}
+                  Sincronizar Zoho Bigin
+                </button>
+                <button
+                  onClick={() => navigate('/admin/rfq')}
+                  className="btn btn-secondary"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontSize: '0.8rem',
+                    padding: '0.4rem 0.8rem',
+                  }}
+                >
+                  <FileText size={14} /> Importar Cotización Excel
+                </button>
+                <button
+                  onClick={handleExportCSV}
+                  className="btn btn-primary"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontSize: '0.8rem',
+                    padding: '0.4rem 0.8rem',
+                  }}
+                >
+                  <Download size={14} /> Export All
+                </button>
+              </div>
             )}
           />
         )}

@@ -33,17 +33,16 @@ export default function PortalHeader({ onToggleAI }) {
           <span className="badge">3</span>
         </button>
 
-        {/* AI Assistant Trigger (GCP Style) */}
-        <motion.button 
-          className="ai-trigger-btn" 
+        {/* AI Assistant Trigger */}
+        <button 
+          className="icon-btn" 
           onClick={onToggleAI}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
           title="Open AI Assistant"
+          aria-label="Ask AI"
+          style={{ color: 'var(--color-primary, #003666)' }}
         >
-          <FiCpu className="ai-icon" />
-          <span>Ask AI</span>
-        </motion.button>
+          <FiCpu />
+        </button>
 
         {/* User Profile */}
         <div className="user-profile">
@@ -150,25 +149,6 @@ export default function PortalHeader({ onToggleAI }) {
           align-items: center;
           justify-content: center;
           border: 2px solid white;
-        }
-
-        .ai-trigger-btn {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          background: linear-gradient(135deg, var(--color-primary, #003666), #005bb5);
-          color: white;
-          border: none;
-          padding: 0.5rem 1rem;
-          border-radius: 9999px;
-          font-weight: 600;
-          font-size: 0.875rem;
-          cursor: pointer;
-          box-shadow: 0 4px 12px rgba(0, 54, 102, 0.2);
-        }
-
-        .ai-icon {
-          font-size: 1.1rem;
         }
 
         .user-profile {

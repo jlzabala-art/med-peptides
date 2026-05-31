@@ -22,6 +22,24 @@ const ADMIN_QUICK_PROMPTS = [
   { label: 'Pending Invites', text: 'Show me pending invitations older than 7 days.' }
 ];
 
+const CALENDAR_QUICK_PROMPTS = [
+  { label: 'New Event', text: 'Open the form to create a new calendar event.' },
+  { label: 'Export CSV', text: 'Export calendar events to a CSV file.' },
+  { label: 'Export iCal', text: 'Export events to iCal format for Apple or Outlook.' },
+  { label: 'Connect Google', text: 'Connect your account to sync Google Calendar.' }
+];
+
+const ORDERS_QUICK_PROMPTS = [
+  { label: 'Archive Orders', text: 'Bulk archive selected sales orders.' },
+  { label: 'Delete Orders', text: 'Delete selected sales orders.' },
+  { label: 'Filter by Status', text: 'Show me how to filter orders by status.' }
+];
+
+const LEADS_QUICK_PROMPTS = [
+  { label: 'Import Excel/RFQ', text: 'Open the interface to import and process RFQs and catalogs from Excel.' },
+  { label: 'Sync CRM', text: 'Sync leads with Zoho Bigin.' }
+];
+
 const RESEARCH_QUICK_PROMPTS = [
   { label: 'Optimization Goals', text: 'How do I set up my research goals?' },
   { label: 'Track Biomarkers', text: 'What biomarkers should I track for cellular health?' },
@@ -125,6 +143,7 @@ export default function ChatInputBar({
   suggestions = [],
   isTyping = false,
   contextMode = 'clinical',
+  pageContext,
   onUploadPrice,
   onUploadStock
 }) {
@@ -904,7 +923,13 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                 );
               })
             ) : (
-              (contextMode === 'admin' ? ADMIN_QUICK_PROMPTS : contextMode === 'doctor' ? CLINICAL_QUICK_PROMPTS : RESEARCH_QUICK_PROMPTS).map((p, index) => (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', justifyContent: 'center' }}>
+              {(pageContext?.activeTab === 'calendar' ? CALENDAR_QUICK_PROMPTS :
+                pageContext?.activeTab === 'orders' ? ORDERS_QUICK_PROMPTS :
+                pageContext?.activeTab === 'leads' ? LEADS_QUICK_PROMPTS :
+                contextMode === 'admin' ? ADMIN_QUICK_PROMPTS : 
+                contextMode === 'doctor' ? CLINICAL_QUICK_PROMPTS : 
+                RESEARCH_QUICK_PROMPTS).map((p, index) => (
                 <button
                   key={`quick-${index}`}
                   onClick={() => onSend(p.text)}
@@ -938,7 +963,8 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                 >
                   {p.label}
                 </button>
-              ))
+              ))}
+              </div>
             )}
           </div>
         </div>

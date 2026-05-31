@@ -8,6 +8,8 @@ import {
   doc,
   updateDoc,
   serverTimestamp,
+  deleteDoc,
+  limit,
 } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 import { logAction } from '../../services/auditLogger';
@@ -31,6 +33,8 @@ import {
   Receipt,
   ExternalLink,
   Search,
+  Archive,
+  Trash2,
 } from 'lucide-react';
 import { exportToCSV } from '../../utils/exportUtils';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -82,10 +86,10 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
       if (doctorId) {
         qBuilder = query(qBuilder, where('doctorId', '==', doctorId));
       }
-      const q = query(qBuilder, orderBy('createdAt', 'desc'));
+      const q = query(qBuilder, orderBy('createdAt', 'desc'), limit(20));
       const snap = await getDocs(q);
       const raw = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      setOrders(raw.filter((o) => o.orderId || (o.items && o.items.length > 0)));
+      setOrders(raw); // Removed arbitrary items filter so all real orders show up
     } catch (err) {
       console.error('Error fetching orders:', err);
     } finally {
@@ -193,6 +197,29 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
       setSendResult(`❌ Error: ${err.message}`);
     } finally {
       setSending(false);
+    }
+  };
+
+  /* ── Archive & Delete ────────────────────────────────────────────────── */
+  const handleArchive = async (order) => {
+    try {
+      if (!window.confirm(`Are you sure you want to archive order #${order.orderNumber || order.id.substring(0,8).toUpperCase()}?`)) return;
+      await updateDoc(doc(db, 'orders', order.id), { status: 'Archived' });
+      setOrders(orders.map(o => o.id === order.id ? { ...o, status: 'Archived' } : o));
+    } catch (err) {
+      console.error('Archive error:', err);
+      alert('Failed to archive order.');
+    }
+  };
+
+  const handleDeleteOrder = async (order) => {
+    try {
+      if (!window.confirm(`Are you sure you want to DELETE order #${order.orderNumber || order.id.substring(0,8).toUpperCase()}? This action cannot be undone.`)) return;
+      await deleteDoc(doc(db, 'orders', order.id));
+      setOrders(orders.filter(o => o.id !== order.id));
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('Failed to delete order.');
     }
   };
 
@@ -360,6 +387,8 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
 
         actions.push({ type: 'view', onClick: () => setViewModal(o) });
         actions.push({ type: 'download', onClick: () => console.log('Download invoice', o.id) });
+        actions.push({ type: 'archive', onClick: () => handleArchive(o) });
+        actions.push({ type: 'delete', onClick: () => handleDeleteOrder(o) });
 
         return (
           <div
@@ -403,14 +432,31 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
               textTransform: 'uppercase',
             }}
           >
-            <Stethoscope size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Assigned
-            Clinic/Doctor
+            <Stethoscope size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Routing / Doctor
           </h5>
           <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-            {o.doctorName || 'Not Assigned'}
+            {o.doctorName ? o.doctorName : 'Direct B2C Order'}
           </div>
           <div style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)' }}>
-            {o.doctorEmail || '—'}
+            {o.doctorEmail ? o.doctorEmail : 'No clinic assigned'}
+          </div>
+        </div>
+        <div>
+          <h5
+            style={{
+              margin: '0 0 0.5rem',
+              fontSize: '0.8rem',
+              color: 'var(--color-text-secondary)',
+              textTransform: 'uppercase',
+            }}
+          >
+            <Users size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Assigned To
+          </h5>
+          <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+            {o.accountManagerName || 'System Default'}
+          </div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)' }}>
+            {o.accountManagerId ? `ID: ${o.accountManagerId}` : 'Auto-assigned'}
           </div>
         </div>
         <div>
@@ -462,6 +508,72 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
             </strong>
           </div>
         </div>
+      </div>
+
+      {/* ── Order Items List ── */}
+      <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
+        <h5 style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>
+          <Package size={14} style={{ verticalAlign: 'middle', marginRight: 6 }} /> Order Items
+        </h5>
+        {o.items && o.items.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {o.items.map((item, idx) => (
+              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--color-bg-surface)', padding: '0.75rem 1rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  {item.image ? (
+                    <img src={item.image} alt={item.name} style={{ width: 44, height: 44, objectFit: 'cover', borderRadius: '4px' }} />
+                  ) : (
+                    <div style={{ width: 44, height: 44, borderRadius: '4px', background: 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Package size={20} color="var(--color-text-tertiary)" />
+                    </div>
+                  )}
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>{item.name || 'Unknown Product'}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>
+                      Qty: <strong>{item.quantity || 1}</strong> • SKU: {item.sku || item.productId || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontWeight: 700, color: 'var(--color-primary)', fontSize: '0.95rem' }}>
+                    ${parseFloat((item.price || 0) * (item.quantity || 1)).toFixed(2)}
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', fontWeight: 500 }}>
+                    (${parseFloat(item.price || 0).toFixed(2)} / ea)
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ fontSize: '0.85rem', color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>
+            No item details available in this legacy order.
+          </div>
+        )}
+      </div>
+      
+      {/* ── Additional Metadata ── */}
+      <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+        <div>
+          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px', fontWeight: 600 }}>Stripe Payment Intent</span>
+          <code style={{ fontSize: '0.8rem', background: 'var(--color-bg-surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--color-border)', color: 'var(--color-text-main)' }}>
+            {o.paymentIntentId || 'N/A'}
+          </code>
+        </div>
+        <div>
+          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px', fontWeight: 600 }}>Database Order ID</span>
+          <code style={{ fontSize: '0.8rem', background: 'var(--color-bg-surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--color-border)', color: 'var(--color-text-main)' }}>
+            {o.id}
+          </code>
+        </div>
+        {o.trackingNumber && (
+          <div>
+            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px', fontWeight: 600 }}>Tracking Number</span>
+            <code style={{ fontSize: '0.8rem', background: 'var(--color-bg-surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--color-border)', color: 'var(--color-primary)' }}>
+              {o.trackingNumber}
+            </code>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -548,10 +660,10 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
         <div>
           <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <ShoppingCart size={24} color="var(--primary)" />
-            Order Queue
+            Sales Orders
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-            Review, confirm, and notify patients and doctors for each order.
+            Review, confirm, and manage your sales orders.
           </p>
         </div>
       </div>
@@ -595,19 +707,94 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
           onFilterRemove={handleFilterRemove}
           renderCustomFilters={renderCustomFilters}
           renderBatchActions={(selected) => (
-            <button
-              onClick={handleExportCSV}
-              className="btn btn-primary"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                fontSize: '0.8rem',
-                padding: '0.4rem 0.8rem',
-              }}
-            >
-              <Download size={14} /> Export Selected
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <button
+                onClick={handleExportCSV}
+                className="btn btn-primary"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontSize: '0.8rem',
+                  padding: '0.4rem 0.8rem',
+                }}
+              >
+                <Download size={14} /> Export Selected
+              </button>
+              <button
+                onClick={async () => {
+                  if (!window.confirm(`Are you sure you want to archive ${selectedOrderIds.length} orders?`)) return;
+                  try {
+                    const toArchive = [...selectedOrderIds];
+                    for (const id of toArchive) {
+                      await updateDoc(doc(db, 'orders', id), { status: 'Archived' });
+                    }
+                    setOrders(orders.map(o => toArchive.includes(o.id) ? { ...o, status: 'Archived' } : o));
+                    setSelectedOrderIds([]);
+                  } catch (err) {
+                    console.error('Bulk archive error:', err);
+                    alert('Failed to archive some orders.');
+                  }
+                }}
+                className="btn btn-secondary"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontSize: '0.8rem',
+                  padding: '0.4rem 0.8rem',
+                  color: 'var(--color-warning)',
+                  borderColor: 'var(--color-warning)'
+                }}
+              >
+                <Archive size={14} /> Archive Selected
+              </button>
+              <button
+                onClick={async () => {
+                  if (!window.confirm(`Are you sure you want to DELETE ${selectedOrderIds.length} orders? This cannot be undone.`)) return;
+                  try {
+                    const toDelete = [...selectedOrderIds];
+                    for (const id of toDelete) {
+                      await deleteDoc(doc(db, 'orders', id));
+                    }
+                    setOrders(orders.filter(o => !toDelete.includes(o.id)));
+                    setSelectedOrderIds([]);
+                  } catch (err) {
+                    console.error('Bulk delete error:', err);
+                    alert('Failed to delete some orders.');
+                  }
+                }}
+                className="btn btn-secondary"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontSize: '0.8rem',
+                  padding: '0.4rem 0.8rem',
+                  color: 'var(--color-danger)',
+                  borderColor: 'var(--color-danger)'
+                }}
+              >
+                <Trash2 size={14} /> Delete Selected
+              </button>
+              <button
+                onClick={() => {
+                   alert("Bulk Convert to Invoices will be fully integrated with Zoho Books once the syncing module is active.");
+                }}
+                className="btn btn-secondary"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontSize: '0.8rem',
+                  padding: '0.4rem 0.8rem',
+                  color: '#10b981',
+                  borderColor: '#10b981'
+                }}
+              >
+                <FileText size={14} /> Convert to Invoices
+              </button>
+            </div>
           )}
         />
       )}

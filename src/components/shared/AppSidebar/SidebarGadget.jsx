@@ -111,20 +111,18 @@ export default function SidebarGadget(props) {
   const injectFavoritesGroup = (initialGroups) => {
     const hasFavs = initialGroups.some(g => g.id === 'favorites');
     if (!hasFavs) {
-      let messagesItem = null;
+      // Find Products item to pin in favorites by default
+      let productsItem = null;
       initialGroups.forEach(g => {
-        const found = (g.items || []).find(i => i.id === 'messages' || i.id === 'Mensajes');
-        if (found) messagesItem = { ...found };
+        const found = (g.items || []).find(i => i.id === 'products');
+        if (found) productsItem = { ...found };
       });
-      
-      const newGroups = initialGroups.map(g => ({
-        ...g,
-        items: (g.items || []).filter(i => i.id !== 'messages' && i.id !== 'Mensajes')
-      }));
-      
+
+      const favItems = productsItem ? [productsItem] : [];
+
       setSidebarGroups([
-        { id: 'favorites', label: 'Favorites', emoji: '⭐', items: messagesItem ? [messagesItem] : [] },
-        ...newGroups
+        { id: 'favorites', label: 'Favorites', emoji: '⭐', items: favItems },
+        ...initialGroups
       ]);
     } else {
       setSidebarGroups(initialGroups);
@@ -342,7 +340,8 @@ export default function SidebarGadget(props) {
     >
       <AppSidebar 
         {...props} 
-        groups={displayGroups} 
+        groups={displayGroups}
+        pinnedItems={props.pinnedItems || []}
         isEditing={isEditing}
         onToggleFavorite={handleToggleFavorite}
         footer={{

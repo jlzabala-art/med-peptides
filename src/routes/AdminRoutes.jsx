@@ -51,6 +51,7 @@ const DripMarketing = React.lazy(() => import('../components/marketing/DripMarke
 const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
 const AdminCatalogEnrichmentTab = React.lazy(() => import('../components/admin/AdminCatalogEnrichmentTab'));
 const AdminAgencyDealsTab = React.lazy(() => import('../components/admin/AdminAgencyDealsTab'));
+const AdminRFQTab = React.lazy(() => import('../components/admin/AdminRFQTab'));
 
 // ── Premium loading skeleton for lazy-loaded admin tabs ────────────────────────
 const AdminTabSkeleton = () => (
@@ -83,6 +84,7 @@ export default function AdminRoutes() {
         <Route path="clinics" element={<AdminTabErrorBoundary tabId="clinics" tabLabel="Clinics"><AdminPlaceholderTab title="Clinics" description="Manage physical clinic locations and metadata." tags={['Network', 'Clinics']} color="var(--color-primary)" /></AdminTabErrorBoundary>} />
         <Route path="doctors" element={<AdminTabErrorBoundary tabId="doctors" tabLabel="Doctors"><AdminUsersTab defaultRole="doctor" readOnly={false} canApprove={true} /></AdminTabErrorBoundary>} />
         <Route path="patients" element={<AdminTabErrorBoundary tabId="patients" tabLabel="Patients"><AdminUsersTab defaultRole="patient" readOnly={false} canApprove={true} /></AdminTabErrorBoundary>} />
+        <Route path="rfq" element={<AdminTabErrorBoundary tabId="rfq" tabLabel="RFQ"><AdminRFQTab /></AdminTabErrorBoundary>} />
         <Route path="users" element={<AdminTabErrorBoundary tabId="users" tabLabel="Users"><AdminUsersTab readOnly={false} canApprove={true} /></AdminTabErrorBoundary>} />
         <Route path="products" element={<AdminTabErrorBoundary tabId="products" tabLabel="Products"><AdminProductsTab readOnly={false} hideCosts={false} allowedCategories={['All']} /></AdminTabErrorBoundary>} />
         <Route path="costs" element={<AdminTabErrorBoundary tabId="costs" tabLabel="Costs"><AdminCostsTab readOnly={false} /></AdminTabErrorBoundary>} />

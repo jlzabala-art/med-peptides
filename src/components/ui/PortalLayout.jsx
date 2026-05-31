@@ -67,6 +67,7 @@ const ROLE_AGENT_TYPE = {
 export default function PortalLayout({ 
   children, 
   sidebarNavGroups = [], 
+  sidebarPinnedItems = [],
   activeNavId, 
   onNavigate,
   portalTitle = 'Cloud Console',
@@ -126,7 +127,7 @@ export default function PortalLayout({
           description: `Total: $${doc.data().total || doc.data().amount || 0} - En espera de validación de pago.`,
           severity: 'warning',
           timeLabel: '24h',
-          actionPath: 'orders'
+          actionPath: `orders?orderId=${doc.id}`
         }));
 
         // 3. Low stock products (e.g. less than 10 vials/units)
@@ -198,9 +199,21 @@ export default function PortalLayout({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const siriAnimation = `
+    @keyframes siriGlow {
+      0%, 100% { box-shadow: 0 0 10px 2px rgba(168, 85, 247, 0.4); transform: scale(1); }
+      50% { box-shadow: 0 0 25px 6px rgba(168, 85, 247, 0.8); transform: scale(1.08); }
+    }
+    @keyframes siriGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+  `;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden', backgroundColor: 'var(--color-bg-app)' }}>
-      
+      <style>{siriAnimation}</style>
       {/* TOPBAR */}
       <header style={{ 
         height: '60px', 
@@ -268,8 +281,22 @@ export default function PortalLayout({
         {/* Right Side */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {headerActions}
-          <button onClick={() => setAiOpen(!isAiOpen)} style={iconBtnStyle} title="Toggle Atlas AI">
-            <Bot size={20} color={isAiOpen ? 'var(--color-primary)' : 'var(--color-text-secondary)'} />
+          <button 
+            onClick={() => setAiOpen(!isAiOpen)} 
+            style={{
+              ...iconBtnStyle,
+              background: 'linear-gradient(270deg, #ec4899, #8b5cf6, #3b82f6, #ec4899)',
+              backgroundSize: '300% 300%',
+              animation: 'siriGradient 6s ease infinite, siriGlow 3s ease-in-out infinite',
+              border: 'none',
+              padding: '0.55rem',
+              color: 'white',
+              boxShadow: '0 0 15px rgba(139, 92, 246, 0.5)',
+              marginRight: '0.25rem'
+            }} 
+            title="Ask Atlas AI"
+          >
+            <Bot size={20} color="white" />
           </button>
           <button style={iconBtnStyle} title="Help"><HelpCircle size={20} color="var(--color-text-secondary)" /></button>
           
@@ -393,6 +420,7 @@ export default function PortalLayout({
         {/* LEFT SIDEBAR GADGET */}
         <SidebarGadget 
           groups={sidebarNavGroups}
+          pinnedItems={sidebarPinnedItems}
           activeId={activeNavId}
           onNavigate={onNavigate}
           isOpen={isSidebarOpen}

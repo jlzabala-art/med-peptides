@@ -15,6 +15,9 @@ export default function AdminPricesTab() {
   const [savingStatus, setSavingStatus] = useState({ type: null, target: null, status: null });
   const [searchTerm, setSearchTerm] = useState(searchParams.get('sku') || '');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  // Auto-expand the product row when coming from the Products tab via ?productId=
+  const autoExpandProductId = searchParams.get('productId') || null;
+  const [expandedRowIds, setExpandedRowIds] = useState(() => autoExpandProductId ? new Set([autoExpandProductId]) : new Set());
 
   useEffect(() => {
     fetchPricingData();

@@ -6,7 +6,7 @@ import { httpsCallable } from 'firebase/functions';
 import { useAuth } from '../../context/AuthContext';
 import { FileText, UploadCloud, CheckCircle, Clock, AlertCircle, X, ExternalLink, Database, Search, Filter, Calendar, Trash2, Share2, Mail, ChevronDown, ChevronRight, Download, Edit2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Archive, ArchiveRestore } from 'lucide-react';
+import { Archive, ArchiveRestore, Eye } from 'lucide-react';
 
 export default function DocumentUploadModule() {
   const { user } = useAuth();

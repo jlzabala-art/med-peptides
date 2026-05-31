@@ -70,15 +70,15 @@ function ProductMicrosite({ product, onUpdateProduct }) {
       try {
         // Querying all batches for this product (needs where if it scales, but filtering here for now to avoid needing composite indexes if we order)
         // A simple where is fine:
-        const { query, where, collection, getDocs, orderBy } = await import('firebase/firestore');
-        const batchesRef = collection(db, 'batches');
-        const q = query(batchesRef, where('productId', '==', product.id || product.sku));
+        const { query, where, collection, getDocs } = await import('firebase/firestore');
+        const docsRef = collection(db, 'uploaded_documents');
+        const q = query(docsRef, where('productId', '==', product.id));
         const snap = await getDocs(q);
         const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // Sort manually by date or let it be
+        // Sort manually by date
         data.sort((a, b) => {
-          const d1 = a.uploadDate?.toDate ? a.uploadDate.toDate() : new Date(a.uploadDate || 0);
-          const d2 = b.uploadDate?.toDate ? b.uploadDate.toDate() : new Date(b.uploadDate || 0);
+          const d1 = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+          const d2 = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
           return d2 - d1;
         });
         setBatches(data);
@@ -278,9 +278,16 @@ function ProductMicrosite({ product, onUpdateProduct }) {
             </div>
           </div>
         ) : (
-          <div style={{ fontSize: '0.95rem', color: '#334155', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
-            {summary}
-          </div>
+          <div 
+            style={{ fontSize: '0.95rem', color: '#334155', lineHeight: 1.6 }}
+            dangerouslySetInnerHTML={{ 
+              __html: summary
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/### (.*?)\n/g, '<h4 style="margin: 1.5rem 0 0.5rem; font-size: 1rem; color: #0f172a; font-weight: 700; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">$1</h4>')
+                .replace(/\n\n/g, '<br/><br/>')
+                .replace(/\n- /g, '<br/>&bull; ') 
+            }}
+          />
         )}
       </div>
 
@@ -305,29 +312,25 @@ function ProductMicrosite({ product, onUpdateProduct }) {
             {batches.map(batch => (
               <div key={batch.id} style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem' }}>
-                  <h4 style={{ margin: 0, fontSize: '1rem', color: '#0f172a', fontWeight: 700 }}>Lote: {batch.batchNumber || batch.id}</h4>
+                  <h4 style={{ margin: 0, fontSize: '1rem', color: '#0f172a', fontWeight: 700 }}>Documento: {batch.fileName || batch.id}</h4>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', backgroundColor: '#e2e8f0', color: '#475569', borderRadius: '4px', fontWeight: 600 }}>{batch.categoryType || 'General'}</span>
+                    <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', backgroundColor: '#e2e8f0', color: '#475569', borderRadius: '4px', fontWeight: 600 }}>{batch.documentType || 'CoA'}</span>
                   </div>
                 </div>
                 
-                {/* Peptide API specific data rendering */}
-                {(batch.categoryType === 'Peptide API' || product.category === 'Peptide APIs') && batch.extractedData && (
+                {batch.extractedData && (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', fontSize: '0.85rem' }}>
-                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Pureza HPLC</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.purityHPLC ? `${batch.extractedData.purityHPLC}%` : 'N/A'}</span></div>
-                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Net Peptide Content</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.netPeptideContent ? `${batch.extractedData.netPeptideContent}%` : 'N/A'}</span></div>
-                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Endotoxinas</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.endotoxinLevel || 'N/A'}</span></div>
-                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Contenido de Agua</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.waterContent ? `${batch.extractedData.waterContent}%` : 'N/A'}</span></div>
-                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Sales (Acetato/TFA)</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.acetateContent ? `${batch.extractedData.acetateContent}%` : 'N/A'}</span></div>
-                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Confirmación MS</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.massSpectralAnalysis || 'N/A'}</span></div>
-                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Apariencia</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.appearance || 'N/A'}</span></div>
+                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Péptido</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.peptide_name || 'N/A'}</span></div>
+                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Dosis</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.dosage || 'N/A'}</span></div>
+                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Pureza HPLC</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.purity_percentage || batch.extractedData.purityHPLC ? `${batch.extractedData.purity_percentage || batch.extractedData.purityHPLC}` : 'N/A'}</span></div>
+                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Net Peptide Content</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.netPeptideContent ? `${batch.extractedData.netPeptideContent}` : 'N/A'}</span></div>
                     <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Resultado / Status</span><span style={{ fontWeight: 600, color: batch.extractedData.conclusion === 'Pass' || batch.extractedData.conclusion === 'Approved' ? '#10b981' : '#f59e0b' }}>{batch.extractedData.conclusion || 'N/A'}</span></div>
                   </div>
                 )}
                 
-                {batch.documentId && (
+                {batch.url && (
                   <div style={{ marginTop: '1rem', borderTop: '1px solid #e2e8f0', paddingTop: '0.75rem' }}>
-                    <a href={`/admin/documents/${batch.documentId}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>Ver Documento Original (PDF) &rarr;</a>
+                    <a href={batch.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>Ver Documento Original (PDF) &rarr;</a>
                   </div>
                 )}
               </div>
@@ -860,10 +863,10 @@ export default function AdminProductsTab({
       render: (p) => {
   const actions = [
     { type: 'inventory', onClick: () => {
-      navigate(`/admin/sku-sync?sku=${encodeURIComponent(p.sku || '')}`);
+      navigate(`/admin/sku-sync?sku=${encodeURIComponent(p.sku || '')}&productId=${encodeURIComponent(p.id || '')}`);
     } },
     { type: 'pricing', onClick: () => {
-      navigate(`/admin/prices?sku=${encodeURIComponent(p.sku || '')}`);
+      navigate(`/admin/prices?sku=${encodeURIComponent(p.sku || '')}&productId=${encodeURIComponent(p.id || '')}`);
     } },
     { type: 'protocols', onClick: () => {
       navigate(`/admin/protocols`);

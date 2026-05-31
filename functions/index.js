@@ -33,6 +33,16 @@ exports.skuSyncAgent               = require("./src/http/ai_sku_sync");         
 exports.refineSemanticAgent        = require("./src/http/ai_semantic_refine");   // AgentSemanticRefine — Semantic metadata builder (admin only)
 exports.catalogAiAssistant         = require("./src/http/ai_catalog_builder");   // AgentCatalogBuilder — Dynamic Catalog platform (Vertex AI)
 exports.parseCOADocument           = require("./src/http/parse_coa_document").parseCOADocument; // COA PDF parsing AI
+exports.parseRFQDocument           = require("./src/http/parse_rfq_document").parseRFQDocument; // RFQ PDF parsing AI
+exports.parsePriceListDocument = require('./src/http/parse_price_list').parsePriceListDocument;
+exports.parseUniversalDocument = require('./src/http/parse_universal_document').parseUniversalDocument;
+
+// CRON JOBS
+exports.checkInventoryLevels = require('./src/cron/check_inventory_levels').checkInventoryLevels; 
+
+// TRIGGERS
+exports.scoreNewLead = require('./src/triggers/on_lead_created').scoreNewLead;
+exports.reconcileSupplierInvoice   = require("./src/http/reconcile_supplier_invoice").reconcileSupplierInvoice; // 3-way invoice matching
 
 exports.acceptInvitation           = require("./src/http/acceptInvitation").acceptInvitation; // Secure invitation acceptance
 exports.generatePaymentLink        = require("./src/http/generatePaymentLink").generatePaymentLink; // Stripe Payment Links

@@ -216,6 +216,7 @@ function InlineConfirmReset({ onReset }) {
 export default function AppSidebar({
   storageKey = 'app-sidebar',
   groups = [],
+  pinnedItems = [], // Always-visible items above the accordion (e.g. Dashboard, Messages)
   activeId,
   onNavigate,
   accentColor = '#0071bd',
@@ -237,7 +238,10 @@ export default function AppSidebar({
       const saved = JSON.parse(localStorage.getItem(`${storageKey}:openGroups`) ?? 'null');
       if (saved) return new Set(saved);
     } catch {}
-    return new Set(groups.map(g => g.id));
+    
+    // Default: only the active group is open
+    const activeGroup = groups.find(g => g.items?.some(i => i.id === activeId));
+    return activeGroup ? new Set([activeGroup.id]) : new Set();
   });
 
   useEffect(() => {
@@ -255,7 +259,8 @@ export default function AppSidebar({
     } else {
       const activeGroup = groups.find(g => g.items?.some(i => i.id === activeId));
       if (activeGroup) {
-        setOpenGroups(prev => { const next = new Set(prev); next.add(activeGroup.id); return next; });
+        // Accordion behavior: ONLY keep the active group open when navigating
+        setOpenGroups(new Set([activeGroup.id]));
       }
     }
   }, [activeId, groups, isEditing, expanded]);
@@ -329,6 +334,36 @@ export default function AppSidebar({
         </div>
 
         <nav className="sb-scroll" role="navigation">
+          {/* ── Pinned items — always visible, not inside accordion ── */}
+          {pinnedItems.length > 0 && (
+            <div className="sb-pinned-section">
+              {pinnedItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = item.id === activeId;
+                return (
+                  <button
+                    key={item.id}
+                    className={`sb-item${isActive ? ' active' : ''}${item.pulse ? ' pulse' : ''}`}
+                    onClick={() => handleItemClick(item.id)}
+                    data-tooltip={!expanded ? item.label : undefined}
+                    title={!expanded ? item.label : undefined}
+                    aria-current={isActive ? 'page' : undefined}
+                    style={{ paddingLeft: '16px' }}
+                  >
+                    <span className="sb-item-icon">
+                      {Icon && <Icon size={16} />}
+                    </span>
+                    <span className="sb-item-label">{item.label}</span>
+                    {!!item.badge && (
+                      <span className="sb-item-badge">{item.badge > 99 ? '99+' : item.badge}</span>
+                    )}
+                  </button>
+                );
+              })}
+              <div className="sb-divider" style={{ marginTop: '6px' }} />
+            </div>
+          )}
+
           <SortableContext items={groups.map(g => g.id)} strategy={verticalListSortingStrategy}>
             {groups.map((group, gi) => (
               <React.Fragment key={group.id}>

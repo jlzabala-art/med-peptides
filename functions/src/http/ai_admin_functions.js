@@ -760,7 +760,12 @@ async function executeReadOnlyFunction(fn, args, db) {
       return `Created Purchase Order \`${docRef.id}\` for supplier **${supplier}** with total estimated cost of **$${totalCost.toFixed(2)}**.`;
     }
 
-    default: const o = snap.data();
+    case "analyze_order_risk": {
+      const { order_id } = args;
+      const snap = await db.collection("orders").doc(order_id).get();
+      if (!snap.exists) return `Order \`${order_id}\` not found.`;
+      
+      const o = snap.data();
       let riskScore = 0;
       let flags = [];
       

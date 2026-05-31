@@ -10,8 +10,8 @@ import {
   PackageSearch, LayoutDashboard, Bot, Link2, BarChart3,
   ChevronRight, ChevronDown, ClipboardList, Zap, Globe, Wrench,
   FlaskConical, Box, Tag, DollarSign, FileText, Eye, EyeOff, Mail,
-  Activity, BookOpen, Cpu, LogOut, Menu, X, Building2, TrendingUp,
-  Building, Stethoscope, HeartPulse, UserPlus, Lock, Briefcase, LayoutTemplate, Network, ScrollText, MessageSquare, Calendar, UploadCloud
+  Activity, BookOpen, Cpu, LogOut, Menu, X, Building2, TrendingUp, Truck,
+  Building, Stethoscope, HeartPulse, UserPlus, Lock, Briefcase, LayoutTemplate, Network, ScrollText, MessageSquare, Calendar, UploadCloud, Settings2, CheckCircle
 } from 'lucide-react';
 import PortalLayout from '../components/ui/PortalLayout';
 
@@ -19,6 +19,12 @@ import PortalLayout from '../components/ui/PortalLayout';
 const AdminUsersTab        = React.lazy(() => import('../components/admin/AdminUsersTab'));
 const AdminWholesellersTab = React.lazy(() => import('../components/admin/AdminWholesellersTab'));
 const AdminAccountManagersTab = React.lazy(() => import('../components/admin/AdminAccountManagersTab'));
+const AdminWorkflowsTab = React.lazy(() => import('../components/admin/AdminWorkflowsTab'));
+const AdminLogisticsTab = React.lazy(() => import('../components/admin/AdminLogisticsTab'));
+const ImportCatalogsTab = React.lazy(() => import('../components/admin/imports/ImportCatalogsTab'));
+const ImportPriceListsTab = React.lazy(() => import('../components/admin/imports/ImportPriceListsTab'));
+const ImportCoATab = React.lazy(() => import('../components/admin/imports/ImportCoATab'));
+const ImportRFQTab = React.lazy(() => import('../components/admin/imports/ImportRFQTab'));
 const AdminProductsTab     = React.lazy(() => import('../components/admin/AdminProductsTab'));
 const AdminSettingsTab     = React.lazy(() => import('../components/admin/AdminSettingsTab'));
 const AdminInvitationsTab  = React.lazy(() => import('../components/admin/AdminInvitationsTab'));
@@ -56,15 +62,19 @@ const EmailCampaignBuilder = React.lazy(() => import('../components/wholesaler/E
 // icon alias (lucide doesn't export MailPlus2 — must be before NAV_GROUPS)
 function MailPlus2(props) { return <UserPlus {...props} />; }
 
+// ── Always-visible pinned items (not inside accordion groups) ─────────────────
+const PINNED_ITEMS = [
+  { id: 'dashboard', label: 'Dashboard KPIs', icon: LayoutDashboard },
+  { id: 'messages',  label: 'Mensajes',        icon: MessageSquare, pulse: true },
+];
+
 // ── Intent-based navigation groups ────────────────────────────────────────────
 const NAV_GROUPS = [
   {
     id: 'overview',
     label: 'Overview',
     items: [
-      { id: 'dashboard',        label: 'Dashboard KPIs',      icon: LayoutDashboard },
-      { id: 'messages',         label: 'Mensajes',            icon: MessageSquare, pulse: true },
-      { id: 'calendar',         label: 'Calendario',          icon: Calendar },
+      { id: 'calendar', label: 'Calendario', icon: Calendar },
     ],
   },
   {
@@ -85,6 +95,7 @@ const NAV_GROUPS = [
     badge: 'LIVE',
     badgeColor: 'var(--color-success)',
     items: [
+      { id: 'workflows',         label: 'Automation Workflows',icon: Settings2 },
       { id: 'prescription-agent',label: 'Prescription Agent',  icon: Zap },
       { id: 'ai-agents',         label: 'AI Agents Hub',       icon: Network },
       { id: 'clinical-ai',       label: 'Atlas AI',            icon: Bot },
@@ -95,13 +106,24 @@ const NAV_GROUPS = [
     ],
   },
   {
+    id: 'data-import',
+    label: 'Importar Ficheros',
+    items: [
+      { id: 'import-catalogs',  label: 'Catalogs',            icon: BookOpen },
+      { id: 'import-prices',    label: 'Price Lists',         icon: Tag },
+      { id: 'import-coa',       label: 'Certificates (CoA)',  icon: CheckCircle },
+      { id: 'import-rfq',       label: 'Client RFQs',         icon: FileText },
+    ],
+  },
+  {
     id: 'sales-operations',
     label: 'Sales & Operations',
     items: [
       { id: 'leads',            label: 'Leads',               icon: Users },
-      { id: 'orders',           label: 'Orders',              icon: PackageSearch },
+      { id: 'orders',           label: 'Sales Orders',        icon: PackageSearch },
       { id: 'bulk-orders',      label: 'Bulk Orders',         icon: Box },
       { id: 'agency-deals',     label: 'Agency Deals',        icon: Briefcase },
+      { id: 'logistics',        label: 'Logistics Tracker',   icon: Truck },
       { id: 'analytics',        label: 'Analytics',           icon: BarChart3 },
       { id: 'account-managers', label: 'Account Managers',    icon: ShieldCheck },
     ],
@@ -194,6 +216,12 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
       {tab === 'dashboard' && (
         <AdminMetricsDashboard />
       )}
+      {tab === 'workflows' && <AdminWorkflowsTab />}
+      {tab === 'logistics' && <AdminLogisticsTab />}
+      {tab === 'import-catalogs' && <ImportCatalogsTab />}
+      {tab === 'import-prices' && <ImportPriceListsTab />}
+      {tab === 'import-coa' && <ImportCoATab />}
+      {tab === 'import-rfq' && <ImportRFQTab />}
       {tab === 'wholesellers'  && <AdminWholesellersTab />}
       {tab === 'account-managers' && <AdminAccountManagersTab />}
       {tab === 'clinics'       && <AdminPlaceholderTab title="Clinics" description="Manage physical clinic locations and metadata." tags={['Network', 'Clinics']} color="var(--color-primary)" />}
@@ -266,11 +294,13 @@ export default function AdminDashboard() {
   const handleLogout = () => { if (logout) logout(); window.location.href = '/'; };
 
   const currentGroup = NAV_GROUPS.find(g => g.items.some(i => i.id === activeTab));
-  const currentItem  = currentGroup?.items.find(i => i.id === activeTab);
+  const currentItem  = currentGroup?.items.find(i => i.id === activeTab)
+                    ?? PINNED_ITEMS.find(i => i.id === activeTab);
 
   return (
     <PortalLayout 
       sidebarNavGroups={NAV_GROUPS}
+      sidebarPinnedItems={PINNED_ITEMS}
       activeNavId={activeTab}
       onNavigate={navToTab}
       portalTitle="Control Center"

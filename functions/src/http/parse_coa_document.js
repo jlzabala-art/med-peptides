@@ -35,6 +35,7 @@ exports.parseCOADocument = onCall(
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
       
       const systemInstruction = `You are a medical laboratory document parser. Analyze the provided Certificate of Analysis (COA) PDF and extract: 1. peptide_name (the name of the compound, e.g., 'AOD-9604', 'Retatrutide'), 2. dosage (the dosage or fill weight, e.g., '5mg', '10 mg'), 3. purity_percentage (the purity result, e.g., '99.8%'). Return ONLY a strict JSON object with these exact keys. Example: {"peptide_name": "AOD-9604", "dosage": "5mg", "purity_percentage": "99.8%"}. Do NOT wrap the JSON in markdown code blocks, return raw JSON string.`;
+      const db = getFirestore(); // Init DB here so it can be used below
 
       const payload = {
         contents: [
@@ -83,15 +84,45 @@ exports.parseCOADocument = onCall(
         }
       }
 
+      // --- PHASE 8: COMPLIANCE CHECK (WORKFLOW ENGINE) ---
+      let quarantine = false;
+      let complianceRemarks = "";
+      
+      try {
+        const configDoc = await db.collection("system_config").doc("workflows").get();
+        if (configDoc.exists) {
+          const config = configDoc.data().compliance;
+          if (config && config.enabled && config.params) {
+            const minPurity = config.params.min_purity || 99.0;
+            
+            // Extract numeric value from "99.8%" string
+            const purityStr = parsed.purity_percentage || "0";
+            const purityMatch = purityStr.match(/[\d.]+/);
+            const purityValue = purityMatch ? parseFloat(purityMatch[0]) : 0;
+            
+            if (purityValue < minPurity) {
+              quarantine = true;
+              complianceRemarks = `Purity (${purityValue}%) is below minimum threshold (${minPurity}%).`;
+            }
+            
+            // Note: If endotoxins were extracted by Gemini, check those too. 
+            // The prompt only asked for purity originally, but we can extend this easily.
+          }
+        }
+      } catch (err) {
+        console.error("Failed to execute compliance check", err);
+      }
+      
       // Save extracted data to the Firestore document
-      const db = getFirestore();
       await db.collection("uploaded_documents").doc(docId).update({
         extractedData: parsed,
         status: "processed",
+        quarantine: quarantine,
+        complianceRemarks: complianceRemarks,
         updatedAt: FieldValue.serverTimestamp()
       });
 
-      return { success: true, extractedData: parsed };
+      return { success: true, extractedData: parsed, quarantine, complianceRemarks };
 
     } catch (err) {
       console.error(err);

@@ -1,22 +1,22 @@
 import React from 'react';
 import RegeneraCalendar from './RegeneraCalendar';
-import './CalendarCloud.css';
+import { Card } from '../ui';
+import './CalendarCloud.css'; // Keep for FullCalendar overrides but we will style the wrapper
 
 export default function CalendarPage() {
   return (
-    <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
-      <header style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--color-text-primary)' }}>
-          Mi Calendario
-        </h1>
-        <p style={{ color: 'var(--color-text-secondary)' }}>
-          Gestiona tus prescripciones, seguimientos y protocolos de tratamiento.
-        </p>
-      </header>
-      
-      <div className="gc-surface gc-calendar-wrapper">
-        <RegeneraCalendar />
+    <div className="space-y-6 pb-20">
+      <div className="flex items-center gap-3 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Calendar</h1>
+          <p className="text-gray-500 dark:text-gray-400">
+            Manage your prescriptions, follow-ups, and treatment protocols.
+          </p>
+        </div>
       </div>
+      <Card className="p-6 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
+        <RegeneraCalendar />
+      </Card>
     </div>
   );
 }

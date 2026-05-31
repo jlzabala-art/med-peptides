@@ -61,6 +61,8 @@ const CatalogEmailTracker = lazy(() => import('./templates/CatalogEmailTracker')
 const ClinicHome = lazy(() => import('./templates/ClinicHome'));
 const PharmacyHome = lazy(() => import('./templates/PharmacyHome'));
 const SupplierHome = lazy(() => import('./templates/SupplierHome'));
+const PublicSupplierQuote = lazy(() => import('./components/public/PublicSupplierQuote'));
+const PublicClientQuote = lazy(() => import('./components/public/PublicClientQuote'));
 const PatientHome = lazy(() => import('./templates/PatientHome'));
 const PatientAppointments = lazy(() => import('./templates/PatientAppointments'));
 const DoctorPatients = lazy(() => import('./templates/DoctorPatients'));
@@ -990,6 +992,10 @@ function App() {
             {/* ── STANDALONE ROUTES ── */}
             <Route path="/login" element={<AuthPage onBack={() => window.history.back()} />} />
             <Route path="/session-ended" element={<ExitProfessionalMode onBack={() => navigate('/')} onLogin={() => navigate('/login')} />} />
+            
+            {/* ── MAGIC LINKS (No Auth Required) ── */}
+            <Route path="/supplier-quote/:id" element={<PublicSupplierQuote />} />
+            <Route path="/client-quote/:id" element={<PublicClientQuote />} />
 
             {/* ── PUBLIC SHOP LAYOUT (Standard) ── */}
             <Route element={
