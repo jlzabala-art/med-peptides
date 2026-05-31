@@ -298,7 +298,7 @@ function ProductMicrosite({ product, onUpdateProduct }) {
         {loadingBatches ? (
           <div style={{ color: '#64748b', fontSize: '0.9rem' }}>Cargando lotes...</div>
         ) : batches.length === 0 ? (
-          <div style={{ color: '#64748b', fontSize: '0.9rem', textAlign: 'center', padding: '1rem' }}>No hay lotes ni CoAs registrados para este producto.</div>
+          <div style={{ color: '#64748b', fontSize: '0.9rem', textAlign: 'center', padding: '1rem' }}>No batches or CoAs registered for this product.</div>
         ) : (
           <div style={{ display: 'grid', gap: '1rem' }}>
             {batches.map(batch => (
@@ -407,6 +407,7 @@ export default function AdminProductsTab({
   const [filterStock, setFilterStock] = useState('All');
   const [filterWarehouse, setFilterWarehouse] = useState('All');
   const [filterZoho, setFilterZoho] = useState('All');
+  const [filterSource, setFilterSource] = useState('All');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
   const [bulkMode, setBulkMode] = useState(null);
@@ -435,7 +436,7 @@ export default function AdminProductsTab({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filterCategory, filterStatus, filterStock, filterWarehouse, filterZoho, dateRange]);
+  }, [searchTerm, filterCategory, filterStatus, filterStock, filterWarehouse, filterZoho, filterSource, dateRange]);
 
   useEffect(() => {
     fetchProducts();
@@ -648,6 +649,7 @@ export default function AdminProductsTab({
             supplier: cols[12]?.replace(/"/g, '') || '',
             isActive: cols[13]?.toLowerCase().includes('inactive') ? false : true,
             updatedAt: new Date().toISOString(),
+            lastImportedAt: new Date().toISOString(),
           };
 
           const productRef = doc(db, 'products', id);
@@ -905,11 +907,11 @@ export default function AdminProductsTab({
         return updateDoc(ref, { isActive: false });
       });
       await Promise.all(promises);
-      addToast(`Se han desactivado ${selectedIds.length} productos.`, 'success');
+      addToast(`${selectedIds.length} products have been deactivated.`, 'success');
       setSelectedProductIds([]);
       fetchProducts();
     } catch (error) {
-      addToast('Error al desactivar productos: ' + error.message, 'error');
+      addToast('Error deactivating products: ' + error.message, 'error');
     }
   };
 
@@ -939,7 +941,17 @@ export default function AdminProductsTab({
 
     let matchesDate = true;
     if (dateRange.start || dateRange.end) {
-      const updated = p.updatedAt ? new Date(p.updatedAt) : null;
+      // Fallback to createdAt if updatedAt is null
+      let updatedStr = p.updatedAt;
+      if (!updatedStr && p.createdAt) {
+        if (p.createdAt?.toDate) {
+          updatedStr = p.createdAt.toDate().toISOString();
+        } else if (typeof p.createdAt === 'string') {
+          updatedStr = p.createdAt;
+        }
+      }
+      
+      const updated = updatedStr ? new Date(updatedStr) : null;
       if (updated) {
         if (dateRange.start && updated < new Date(dateRange.start)) matchesDate = false;
         if (dateRange.end) {
@@ -958,6 +970,25 @@ export default function AdminProductsTab({
       if (filterZoho === 'Not Synced') matchesZoho = !p.zoho_item_id;
     }
 
+    let matchesSource = true;
+    if (filterSource === 'Recently Imported') {
+      let baseDateStr = p.updatedAt;
+      if (!baseDateStr && p.createdAt) {
+        if (p.createdAt?.toDate) {
+          baseDateStr = p.createdAt.toDate().toISOString();
+        } else if (typeof p.createdAt === 'string') {
+          baseDateStr = p.createdAt;
+        }
+      }
+      const importedAt = p.lastImportedAt ? new Date(p.lastImportedAt) : (baseDateStr ? new Date(baseDateStr) : null);
+      if (!importedAt) {
+        matchesSource = false;
+      } else {
+        const hoursSinceImport = (new Date() - importedAt) / (1000 * 60 * 60);
+        if (hoursSinceImport > 24) matchesSource = false;
+      }
+    }
+
     return (
       matchesCategory &&
       matchesStatus &&
@@ -965,7 +996,8 @@ export default function AdminProductsTab({
       matchesStock &&
       matchesSearch &&
       matchesDate &&
-      matchesZoho
+      matchesZoho &&
+      matchesSource
     );
   });
 
@@ -975,6 +1007,7 @@ export default function AdminProductsTab({
   if (filterWarehouse !== 'All') activeFilters.push({ label: 'Warehouse', value: filterWarehouse, type: 'warehouse' });
   if (filterStock !== 'All') activeFilters.push({ label: 'Stock', value: filterStock, type: 'stock' });
   if (filterZoho !== 'All') activeFilters.push({ label: 'Zoho', value: filterZoho, type: 'zoho' });
+  if (filterSource !== 'All') activeFilters.push({ label: 'Source', value: filterSource, type: 'source' });
 
   const handleFilterRemove = (filter) => {
     if (filter.type === 'category') setFilterCategory('All');
@@ -991,10 +1024,10 @@ export default function AdminProductsTab({
           value={filterCategory}
           onChange={(e) => setFilterCategory(e.target.value)}
           style={{
-            height: '32px', padding: '0 1.5rem 0 0.75rem', borderRadius: '16px',
+            height: '24px', padding: '0 1rem 0 0.4rem', borderRadius: '12px',
             border: '1px solid var(--border)', backgroundColor: filterCategory === 'All' ? 'white' : 'var(--primary-light)',
             color: filterCategory === 'All' ? 'var(--text-main)' : 'var(--primary)',
-            fontSize: '0.8rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+            fontSize: '0.7rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
           }}
         >
           <option value="All">Category: All</option>
@@ -1005,10 +1038,10 @@ export default function AdminProductsTab({
         value={filterStatus}
         onChange={(e) => setFilterStatus(e.target.value)}
         style={{
-          height: '32px', padding: '0 1.5rem 0 0.75rem', borderRadius: '16px',
+          height: '24px', padding: '0 1rem 0 0.4rem', borderRadius: '12px',
           border: '1px solid var(--border)', backgroundColor: filterStatus === 'All' ? 'white' : 'var(--primary-light)',
           color: filterStatus === 'All' ? 'var(--text-main)' : 'var(--primary)',
-          fontSize: '0.8rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+          fontSize: '0.7rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
         }}
       >
         <option value="All">Status: All</option>
@@ -1019,10 +1052,10 @@ export default function AdminProductsTab({
         value={filterZoho}
         onChange={(e) => setFilterZoho(e.target.value)}
         style={{
-          height: '32px', padding: '0 1.5rem 0 0.75rem', borderRadius: '16px',
+          height: '24px', padding: '0 1rem 0 0.4rem', borderRadius: '12px',
           border: '1px solid var(--border)', backgroundColor: filterZoho === 'All' ? 'white' : 'var(--primary-light)',
           color: filterZoho === 'All' ? 'var(--text-main)' : 'var(--primary)',
-          fontSize: '0.8rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+          fontSize: '0.7rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
         }}
       >
         <option value="All">Zoho Sync: All</option>
@@ -1030,13 +1063,26 @@ export default function AdminProductsTab({
         <option value="Not Synced">Not Synced</option>
       </select>
       <select
+        value={filterSource}
+        onChange={(e) => setFilterSource(e.target.value)}
+        style={{
+          height: '24px', padding: '0 1rem 0 0.4rem', borderRadius: '12px',
+          border: '1px solid var(--border)', backgroundColor: filterSource === 'All' ? 'white' : 'var(--primary-light)',
+          color: filterSource === 'All' ? 'var(--text-main)' : 'var(--primary)',
+          fontSize: '0.7rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+        }}
+      >
+        <option value="All">Source: All</option>
+        <option value="Recently Imported">Recently Imported (24h)</option>
+      </select>
+      <select
         value={filterStock}
         onChange={(e) => setFilterStock(e.target.value)}
         style={{
-          height: '32px', padding: '0 1.5rem 0 0.75rem', borderRadius: '16px',
+          height: '24px', padding: '0 1rem 0 0.4rem', borderRadius: '12px',
           border: '1px solid var(--border)', backgroundColor: filterStock === 'All' ? 'white' : 'var(--primary-light)',
           color: filterStock === 'All' ? 'var(--text-main)' : 'var(--primary)',
-          fontSize: '0.8rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+          fontSize: '0.7rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
         }}
       >
         <option value="All">Stock: All</option>
@@ -1048,10 +1094,10 @@ export default function AdminProductsTab({
         value={filterWarehouse}
         onChange={(e) => setFilterWarehouse(e.target.value)}
         style={{
-          height: '32px', padding: '0 1.5rem 0 0.75rem', borderRadius: '16px',
+          height: '24px', padding: '0 1rem 0 0.4rem', borderRadius: '12px',
           border: '1px solid var(--border)', backgroundColor: filterWarehouse === 'All' ? 'white' : 'var(--primary-light)',
           color: filterWarehouse === 'All' ? 'var(--text-main)' : 'var(--primary)',
-          fontSize: '0.8rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+          fontSize: '0.7rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
         }}
       >
         <option value="All">Warehouse: All</option>
@@ -1538,7 +1584,7 @@ export default function AdminProductsTab({
                 onClick={() => fetchProducts(true)}
                 disabled={loading}
               >
-                {loading ? 'Cargando...' : 'Cargar más productos'}
+                {loading ? 'Loading...' : 'Load more products'}
               </button>
             </div>
           )}

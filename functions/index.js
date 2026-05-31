@@ -37,6 +37,8 @@ exports.parseRFQDocument           = require("./src/http/parse_rfq_document").pa
 exports.parsePriceListDocument = require('./src/http/parse_price_list').parsePriceListDocument;
 exports.parsePriceListImage = require('./src/http/parse_price_list_image').parsePriceListImage;
 exports.parseUniversalDocument = require('./src/http/parse_universal_document').parseUniversalDocument;
+exports.apiParseDocument = require('./src/http/api_parse_document').apiParseDocument;
+exports.refineImportData = require('./src/http/refine_import_data').refineImportData;
 
 // CRON JOBS
 exports.checkInventoryLevels = require('./src/cron/check_inventory_levels').checkInventoryLevels; 

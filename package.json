@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:gadget": "vite build -c vite.gadget.config.js",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -50,6 +51,7 @@
     "date-fns": "^4.4.0",
     "firebase": "^12.10.0",
     "framer-motion": "^12.38.0",
+    "fuse.js": "^7.4.0",
     "glob": "^13.0.6",
     "html-to-image": "^1.11.13",
     "jspdf": "^4.2.1",

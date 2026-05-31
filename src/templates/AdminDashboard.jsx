@@ -25,6 +25,7 @@ const ImportCatalogsTab = React.lazy(() => import('../components/admin/imports/I
 const ImportPriceListsTab = React.lazy(() => import('../components/admin/imports/ImportPriceListsTab'));
 const ImportCoATab = React.lazy(() => import('../components/admin/imports/ImportCoATab'));
 const ImportRFQTab = React.lazy(() => import('../components/admin/imports/ImportRFQTab'));
+const AdminImportHistoryTab = React.lazy(() => import('../components/admin/imports/AdminImportHistoryTab'));
 const AdminProductsTab     = React.lazy(() => import('../components/admin/AdminProductsTab'));
 const AdminSettingsTab     = React.lazy(() => import('../components/admin/AdminSettingsTab'));
 const AdminInvitationsTab  = React.lazy(() => import('../components/admin/AdminInvitationsTab'));
@@ -114,6 +115,7 @@ const NAV_GROUPS = [
       { id: 'import-rfq',       label: 'Client RFQs',         icon: FileText },
       { id: 'import-prescriptions', label: 'Prescriptions',   icon: ClipboardList },
       { id: 'import-bloodworks',    label: 'Bloodworks',      icon: Activity },
+      { id: 'import-history',       label: 'Import History',  icon: Database },
     ],
   },
   {
@@ -221,8 +223,9 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
       {tab === 'logistics' && <AdminLogisticsTab />}
       {tab === 'import-catalogs' && <ImportCatalogsTab />}
       {tab === 'import-prices' && <ImportPriceListsTab />}
-      {tab === 'import-coa' && <DocumentUploadModule />}
+      {tab === 'import-coa' && <ImportCoATab />}
       {tab === 'import-rfq' && <ImportRFQTab />}
+      {tab === 'import-history' && <AdminImportHistoryTab />}
       {tab === 'import-prescriptions' && <AdminPlaceholderTab title="Import Prescriptions" description="Upload patient prescriptions and doctor notes." tags={['Medical', 'Imports']} color="var(--color-primary)" />}
       {tab === 'import-bloodworks' && <AdminPlaceholderTab title="Import Bloodworks" description="Upload lab results and blood panels." tags={['Labs', 'Imports']} color="var(--color-primary)" />}
       {tab === 'wholesellers'  && <AdminWholesellersTab />}

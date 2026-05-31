@@ -175,7 +175,7 @@ export default function DataTable({
             )}
 
             {renderCustomFilters && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                 {renderCustomFilters()}
               </div>
             )}

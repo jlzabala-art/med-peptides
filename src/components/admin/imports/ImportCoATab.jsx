@@ -32,6 +32,7 @@ export default function ImportCoATab() {
               <th style={{ width: '40px', textAlign: 'center' }}>
                 <input type="checkbox" checked={selectedRows.size === parsedData.length} onChange={(e) => toggleAll(e.target.checked)} />
               </th>
+              <th>AI Confidence</th>
               <th>Status</th>
               <th>Batch Number</th>
               <th>Product Tested</th>
@@ -45,11 +46,20 @@ export default function ImportCoATab() {
               const isQuarantined = purity < 98;
               const status = isQuarantined ? 'ALERT' : 'UNCHANGED';
               const colors = getStatusColor(status);
-              
+              const score = item.confidence_score || 0;
+              let confColor = '#10b981'; // Green
+              if (score < 50) confColor = '#ef4444'; // Red
+              else if (score < 80) confColor = '#f59e0b'; // Yellow
+
+              const isChecked = selectedRows.has(idx);
+
               return (
-                <tr key={idx} style={{ backgroundColor: isQuarantined ? '#fef2f2' : 'transparent', opacity: selectedRows.has(idx) ? 1 : 0.5 }}>
+                <tr key={idx} style={{ backgroundColor: score < 50 && isChecked ? '#fef2f2' : (isQuarantined ? '#fef2f2' : 'transparent'), opacity: isChecked ? 1 : 0.5 }}>
                   <td style={{ textAlign: 'center' }}>
-                    <input type="checkbox" checked={selectedRows.has(idx)} onChange={() => toggleRow(idx)} />
+                    <input type="checkbox" checked={isChecked} onChange={() => toggleRow(idx)} />
+                  </td>
+                  <td style={{ fontWeight: 700, color: confColor }}>
+                    {score}%
                   </td>
                   <td>
                     <span style={{ 
