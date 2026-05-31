@@ -8,7 +8,7 @@ export default function ImportRFQTab() {
     // TODO: Connect to Firestore
   };
 
-  const renderDiffTable = ({ parsedData, selectedRows, toggleRow, toggleAll }) => (
+  const renderDiffTable = ({ parsedData, selectedRows, toggleRow, toggleAll, updateRow }) => (
     <table className="gcp-table" style={{ width: '100%', fontSize: '0.9rem' }}>
       <thead>
         <tr>
@@ -55,10 +55,39 @@ export default function ImportRFQTab() {
                 </span>
               </td>
               <td>
-                <strong>{item.peptide_name}</strong>
-                {item.dosage && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.dosage}</div>}
+                <input 
+                  type="text" 
+                  value={item.peptide_name || ''} 
+                  onChange={(e) => updateRow(idx, 'peptide_name', e.target.value)}
+                  style={{ width: '100%', padding: '0.25rem', border: '1px solid var(--border)', borderRadius: '4px', fontWeight: 'bold' }} 
+                />
+                <div style={{ marginTop: '4px' }}>
+                  <input 
+                    type="text" 
+                    value={item.dosage || ''} 
+                    placeholder="Dosage"
+                    onChange={(e) => updateRow(idx, 'dosage', e.target.value)}
+                    style={{ width: '100%', padding: '0.25rem', border: '1px solid var(--border)', borderRadius: '4px', fontSize: '0.8rem', color: 'var(--text-muted)' }} 
+                  />
+                </div>
               </td>
-              <td><strong>{quantityRequested} {item.units || ''}</strong></td>
+              <td>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <input 
+                    type="number" 
+                    value={item.quantity || ''} 
+                    onChange={(e) => updateRow(idx, 'quantity', parseInt(e.target.value, 10))}
+                    style={{ width: '60px', padding: '0.25rem', border: '1px solid var(--border)', borderRadius: '4px', textAlign: 'right', fontWeight: 'bold' }} 
+                  />
+                  <input 
+                    type="text" 
+                    value={item.units || ''} 
+                    placeholder="Units"
+                    onChange={(e) => updateRow(idx, 'units', e.target.value)}
+                    style={{ width: '60px', padding: '0.25rem', border: '1px solid var(--border)', borderRadius: '4px' }} 
+                  />
+                </div>
+              </td>
               <td>
                 <span style={{ color: needsBackorder ? '#d97706' : '#10b981', fontWeight: 600 }}>
                   {simulatedStock} units available

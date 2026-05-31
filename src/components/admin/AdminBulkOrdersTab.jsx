@@ -127,10 +127,10 @@ function SourceBreakdown({ sources }) {
           }}
         >
           {s.type === 'own'
-            ? `📦 Stock propio`
+            ? `📦 Own stock`
             : s.type === 'prescription'
               ? `💊 Rx: ${s.patientName || '—'} (Dr. ${s.doctorName || '—'})`
-              : `🛒 Order B2C: ${s.patientName || '—'}`}
+              : `🛒 B2C Order: ${s.patientName || '—'}`}
           {' · '}
           {s.quantity} u.
         </div>
@@ -249,8 +249,8 @@ function AggregatedItemsPanel({ items, isEditable, onUpdateItemQuantity }) {
           marginTop: '0.25rem',
         }}
       >
-        {(items || []).length} líneas · {(items || []).reduce((s, i) => s + (i.quantity || 0), 0)}{' '}
-        unidades totales
+        {(items || []).length} lines · {(items || []).reduce((s, i) => s + (i.quantity || 0), 0)}{' '}
+        total units
       </div>
     </div>
   );
@@ -262,20 +262,20 @@ function BulkActions({ order, onUpdate }) {
 
   const next = {
     draft: {
-      label: 'Enviar (Submit)',
+      label: 'Submit Order',
       nextStatus: 'submitted',
       icon: CheckCircle2,
       color: '#6366f1',
     },
     submitted: {
-      label: 'Confirmar pedido',
+      label: 'Confirm Order',
       nextStatus: 'confirmed',
       icon: CheckCircle2,
       color: 'var(--color-success)',
     },
-    confirmed: { label: 'Marcar enviado', nextStatus: 'shipped', icon: Truck, color: '#f59e0b' },
+    confirmed: { label: 'Mark Shipped', nextStatus: 'shipped', icon: Truck, color: '#f59e0b' },
     shipped: {
-      label: 'Marcar entregado',
+      label: 'Mark Delivered',
       nextStatus: 'delivered',
       icon: Package,
       color: '#6366f1',
@@ -316,7 +316,7 @@ function BulkActions({ order, onUpdate }) {
       }}
     >
       <next.icon size={13} />
-      {acting ? 'Guardando…' : next.label}
+      {acting ? 'Saving…' : next.label}
     </button>
   );
 }
@@ -364,7 +364,7 @@ function BulkOrderCard({ order, onUpdate }) {
             letterSpacing: '0.07em',
           }}
         >
-          🔔 NUEVO PEDIDO B2B — Requiere confirmación
+          🔔 NEW B2B ORDER — Confirmation required
         </div>
       )}
 
@@ -411,7 +411,7 @@ function BulkOrderCard({ order, onUpdate }) {
               alignItems: 'center',
             }}
           >
-            <Clock size={9} /> Enviado: {submittedDate}
+            <Clock size={9} /> Sent: {submittedDate}
             <span>· {order.wholesalerEmail || '—'}</span>
             {order.source_prescription_ids?.length > 0 && (
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
@@ -423,7 +423,7 @@ function BulkOrderCard({ order, onUpdate }) {
                 · <ShoppingBag size={9} /> {order.source_order_ids.length} orders
               </span>
             )}
-            <span>· {order.aggregated_items?.length || 0} líneas</span>
+            <span>· {order.aggregated_items?.length || 0} lines</span>
           </div>
         </div>
 
@@ -448,7 +448,7 @@ function BulkOrderCard({ order, onUpdate }) {
           {/* Aggregated items */}
           {order.aggregated_items?.length > 0 && (
             <div style={{ marginBottom: '1rem' }}>
-              <div style={sLabel}>📦 Ítems agregados</div>
+              <div style={sLabel}>📦 Aggregated Items</div>
               <div style={{ marginTop: '0.5rem' }}>
                 <AggregatedItemsPanel 
                   items={order.aggregated_items} 
@@ -485,7 +485,7 @@ function BulkOrderCard({ order, onUpdate }) {
                 marginBottom: '1rem',
               }}
             >
-              <span style={{ fontWeight: 700 }}>Nota del wholesaler:</span> {order.notes}
+              <span style={{ fontWeight: 700 }}>Wholesaler Note:</span> {order.notes}
             </div>
           )}
 
@@ -531,7 +531,7 @@ function BulkOrderCard({ order, onUpdate }) {
           {/* Contextual Chat */}
           {order.status !== 'draft' && (
             <div style={{ marginTop: '1.5rem', height: '400px', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
-              <div style={sLabel}>💬 Chat del Pedido</div>
+              <div style={sLabel}>💬 Order Chat</div>
               <div style={{ marginTop: '0.5rem', height: 'calc(100% - 1.5rem)' }}>
                 <ConversationThread 
                   conversationId={`order_${order.id}`} 
@@ -681,8 +681,8 @@ export default function AdminBulkOrdersTab() {
               Bulk Orders B2B
             </h2>
             <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--color-text-tertiary)' }}>
-              {stats.total} total · {stats.submitted} pendientes · {stats.confirmed} confirmados ·{' '}
-              {stats.shipped} en tránsito · {stats.delivered} entregados
+              {stats.total} total · {stats.submitted} pending · {stats.confirmed} confirmed ·{' '}
+              {stats.shipped} shipped · {stats.delivered} delivered
             </p>
           </div>
         </div>
@@ -699,7 +699,7 @@ export default function AdminBulkOrdersTab() {
             borderRadius: 'var(--radius-sm)',
           }}
         >
-          <Plus size={14} /> Crear Bulk Order
+          <Plus size={14} /> Create Bulk Order
         </button>
       </div>
 
@@ -732,10 +732,10 @@ export default function AdminBulkOrdersTab() {
           <AlertCircle size={16} color="var(--color-danger)" />
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 800, color: '#991b1b', fontSize: '0.82rem' }}>
-              {stats.submitted} pedido{stats.submitted > 1 ? 's' : ''} B2B esperando confirmación
+              {stats.submitted} pending B2B order{stats.submitted > 1 ? 's' : ''} awaiting confirmation
             </div>
             <div style={{ fontSize: '0.7rem', color: '#fca5a5', fontWeight: 600 }}>
-              Confirma los pedidos para que el wholesaler pueda proceder.
+              Confirm the orders so the wholesaler can proceed.
             </div>
           </div>
         </div>
@@ -744,18 +744,18 @@ export default function AdminBulkOrdersTab() {
       {/* Filter pills */}
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
         {[
-          { key: 'all', label: `Todos (${stats.total})`, color: 'var(--color-primary)' },
-          { key: 'draft', label: `Borradores (${orders.filter(o => o.status === 'draft').length})`, color: 'var(--color-text-tertiary)' },
-          { key: 'submitted', label: `Pendiente (${stats.submitted})`, color: '#6366f1' },
+          { key: 'all', label: `All (${stats.total})`, color: 'var(--color-primary)' },
+          { key: 'draft', label: `Drafts (${orders.filter(o => o.status === 'draft').length})`, color: 'var(--color-text-tertiary)' },
+          { key: 'submitted', label: `Pending (${stats.submitted})`, color: '#6366f1' },
           {
             key: 'confirmed',
-            label: `Confirmado (${stats.confirmed})`,
+            label: `Confirmed (${stats.confirmed})`,
             color: 'var(--color-success)',
           },
-          { key: 'shipped', label: `En tránsito (${stats.shipped})`, color: '#f59e0b' },
+          { key: 'shipped', label: `Shipped (${stats.shipped})`, color: '#f59e0b' },
           {
             key: 'delivered',
-            label: `Entregado (${stats.delivered})`,
+            label: `Delivered (${stats.delivered})`,
             color: 'var(--color-success)',
           },
         ].map((f) => (
@@ -801,11 +801,11 @@ export default function AdminBulkOrdersTab() {
           <Layers size={40} strokeWidth={1.2} style={{ marginBottom: '0.75rem' }} />
           <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>
             {filterStatus !== 'all'
-              ? 'No hay bulk orders con ese estado.'
-              : 'Aún no hay bulk orders de wholesalers.'}
+              ? 'No bulk orders found with this status.'
+              : 'No bulk orders from wholesalers yet.'}
           </div>
           <div style={{ fontSize: '0.75rem', marginTop: '0.4rem' }}>
-            Los bulk orders aparecerán aquí cuando los wholesalers los envíen.
+            Bulk orders will appear here once wholesalers submit them.
           </div>
         </div>
       ) : (

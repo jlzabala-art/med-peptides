@@ -10,7 +10,7 @@ export default function ImportCoATab() {
     // TODO: Connect to Firestore
   };
 
-  const renderDiffTable = ({ parsedData, selectedRows, toggleRow, toggleAll }) => {
+  const renderDiffTable = ({ parsedData, selectedRows, toggleRow, toggleAll, updateRow }) => {
     const exportErrors = () => {
       const errors = parsedData.filter(item => parseFloat(item.purity_percentage) < 98);
       const worksheet = XLSX.utils.json_to_sheet(errors);
@@ -69,10 +69,32 @@ export default function ImportCoATab() {
                       {colors.label}
                     </span>
                   </td>
-                  <td><strong>{item.batch_number}</strong></td>
-                  <td>{item.peptide_name}</td>
                   <td>
-                    <strong style={{ color: isQuarantined ? '#ef4444' : '#10b981' }}>{item.purity_percentage}%</strong>
+                    <input 
+                      type="text" 
+                      value={item.batch_number || ''} 
+                      onChange={(e) => updateRow(idx, 'batch_number', e.target.value)}
+                      style={{ width: '100%', padding: '0.25rem', border: '1px solid var(--border)', borderRadius: '4px', fontWeight: 'bold' }} 
+                    />
+                  </td>
+                  <td>
+                    <input 
+                      type="text" 
+                      value={item.peptide_name || ''} 
+                      onChange={(e) => updateRow(idx, 'peptide_name', e.target.value)}
+                      style={{ width: '100%', padding: '0.25rem', border: '1px solid var(--border)', borderRadius: '4px' }} 
+                    />
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <input 
+                        type="number" 
+                        step="0.1"
+                        value={item.purity_percentage || ''} 
+                        onChange={(e) => updateRow(idx, 'purity_percentage', parseFloat(e.target.value))}
+                        style={{ width: '60px', padding: '0.25rem', border: '1px solid var(--border)', borderRadius: '4px', textAlign: 'right', fontWeight: 'bold', color: isQuarantined ? '#ef4444' : '#10b981' }} 
+                      />%
+                    </div>
                   </td>
                   <td>
                     {isQuarantined ? (

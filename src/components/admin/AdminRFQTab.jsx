@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, getDocs, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, functions, storage } from '../../firebase';
-import * as XLSX from 'xlsx';
+import { db, functions, storage, auth } from '../../firebase';
 import { FileText, Loader2, Plus, Sparkles, CheckCircle, AlertTriangle, Send, Receipt } from 'lucide-react';
 import { Card } from '../ui';
 import SupplierPriceListUpdater from './gadgets/SupplierPriceListUpdater';
@@ -47,31 +46,21 @@ export default function AdminRFQTab() {
     const file = e.target.files[0];
     if (!file) return;
 
-    setParseProgress({ state: 'reading', count: 0 });
     try {
-      // 1. Read Excel using xlsx
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
-      
-      const rows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
-      
-      // Filter out empty rows (common in Excel exports)
-      const validRows = rows.filter(row => {
-        return Object.values(row).some(val => val !== null && val !== undefined && val.toString().trim() !== '');
-      });
+      const tempId = crypto.randomUUID();
+      const currentUserUid = auth.currentUser?.uid || 'unknown';
+      const storagePath = `temp_imports/${currentUserUid}/${tempId}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const storageRef = ref(storage, storagePath);
 
-      const numProducts = validRows.length;
-      setParseProgress({ state: 'analyzing', count: numProducts });
+      setParseProgress({ state: 'uploading', count: 0 });
+      await uploadBytes(storageRef, file);
 
-      // Create a clean worksheet from the valid rows to generate the CSV
-      const cleanWorksheet = XLSX.utils.json_to_sheet(validRows);
-      const csvContent = XLSX.utils.sheet_to_csv(cleanWorksheet);
-
-      // 2. Send CSV to our Gemini Cloud Function
+      setParseProgress({ state: 'analyzing', count: 0 });
       const parseRFQDocument = httpsCallable(functions, 'parseRFQDocument');
-      const response = await parseRFQDocument({ rfqText: csvContent });
+      const response = await parseRFQDocument({
+        storagePath: storagePath,
+        mimeType: file.type || 'application/octet-stream',
+      });
 
       if (response.data.success) {
         // Init the parsed items with cost and margin states

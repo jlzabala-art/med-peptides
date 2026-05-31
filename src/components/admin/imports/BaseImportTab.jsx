@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { functions, db } from '../../../firebase';
+import { functions, db, storage } from '../../../firebase';
+import { ref, uploadBytes } from 'firebase/storage';
 import { useAuth } from '../../../context/AuthContext';
 import { UploadCloud, FileText, Loader2, Save, X, CheckCircle } from 'lucide-react';
 import { Card } from '../../ui';
@@ -96,8 +97,8 @@ export default function BaseImportTab({ title, description, context, renderDiffT
         const file = files[i];
         addLog(`Preparing file ${i + 1} of ${files.length}: ${file.name}`);
         
-        let base64Data = '';
         let mimeType = file.type;
+        let fileToUpload = file;
 
         if (
           mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
@@ -116,27 +117,18 @@ export default function BaseImportTab({ title, description, context, renderDiffT
           const csvContent = XLSX.utils.sheet_to_csv(cleanWorksheet);
           
           addLog(`Encoding data safely for AI Engine...`);
-          base64Data = await new Promise((resolve, reject) => {
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          });
-          
+          fileToUpload = new File([csvContent], file.name.replace(/\\.[^/.]+$/, ".csv"), { type: 'text/csv' });
           mimeType = 'text/csv';
-        } else {
-          addLog(`Reading Document File...`);
-          base64Data = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          });
         }
 
+        const storagePath = `temp_imports/${user.uid}/${Date.now()}_${fileToUpload.name}`;
+        const fileRef = ref(storage, storagePath);
+        
+        addLog(`Uploading Document securely...`);
+        await uploadBytes(fileRef, fileToUpload);
+
         addLog(`Sending data to Gemini AI Engine. This may take up to 5 minutes...`);
-        const response = await parseUniversal({ base64Data, mimeType, context, instructions: aiInstructions });
+        const response = await parseUniversal({ storagePath, mimeType, context, instructions: aiInstructions });
         
         if (response.data.success) {
           addLog(`Success: AI extracted ${response.data.items.length} items from ${file.name}.`);
@@ -423,6 +415,11 @@ export default function BaseImportTab({ title, description, context, renderDiffT
                 toggleAll: (checked) => {
                   if (checked) setSelectedRows(new Set(parsedData.map((_, i) => i)));
                   else setSelectedRows(new Set());
+                },
+                updateRow: (idx, field, value) => {
+                  const newData = [...parsedData];
+                  newData[idx] = { ...newData[idx], [field]: value };
+                  setParsedData(newData);
                 }
               })}
             </div>

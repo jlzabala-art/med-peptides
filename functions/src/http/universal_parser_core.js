@@ -1,5 +1,7 @@
-async function executeUniversalParse(base64Data, mimeType, context, aiInstructions, apiKey) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+const { GoogleGenAI } = require('@google/genai');
+
+async function executeUniversalParse(filePath, mimeType, context, aiInstructions, apiKey) {
+  const ai = new GoogleGenAI({ apiKey });
 
   let systemInstruction = "";
   if (context === "RFQ") {
@@ -40,43 +42,47 @@ Output a JSON array of objects: { "batch_number": "str", "peptide_name": "str", 
     systemInstruction += `\n\nUSER CUSTOM INSTRUCTIONS:\n${aiInstructions}`;
   }
 
-  const payload = {
-    contents: [
-      {
-        role: "user",
-        parts: [
-          { text: "Extract the data according to the system instructions." },
-          { inlineData: { mimeType, data: base64Data } }
-        ]
-      }
-    ],
-    systemInstruction: { parts: [{ text: systemInstruction }] },
-    generationConfig: { temperature: 0.1, responseMimeType: "application/json" }
-  };
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error("Error calling Gemini API: " + errText);
-  }
-
-  const responseData = await response.json();
-  const text = responseData.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-  
-  let parsed = [];
+  let uploadedFile;
   try {
-    parsed = JSON.parse(text);
-  } catch (e) {
-    const cleanText = text.replace(/```json/gi, "").replace(/```/g, "").trim();
-    parsed = JSON.parse(cleanText);
-  }
+    uploadedFile = await ai.files.upload({
+      file: filePath,
+      config: { mimeType }
+    });
 
-  return parsed;
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [
+        {
+          fileData: {
+            fileUri: uploadedFile.uri,
+            mimeType: uploadedFile.mimeType
+          }
+        },
+        { text: "Extract the data according to the system instructions." }
+      ],
+      config: {
+        systemInstruction: systemInstruction,
+        temperature: 0.1,
+        responseMimeType: "application/json"
+      }
+    });
+
+    const text = response.text || response.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+    
+    let parsed = [];
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      const cleanText = text.replace(/```json/gi, "").replace(/```/g, "").trim();
+      parsed = JSON.parse(cleanText);
+    }
+
+    return parsed;
+  } finally {
+    if (uploadedFile && uploadedFile.name) {
+      await ai.files.delete({ name: uploadedFile.name }).catch(err => console.error("Failed to delete file:", err));
+    }
+  }
 }
 
 module.exports = { executeUniversalParse };

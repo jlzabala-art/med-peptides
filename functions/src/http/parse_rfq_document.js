@@ -3,19 +3,34 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { getFirestore } = require("firebase-admin/firestore");
 const { defineSecret } = require("firebase-functions/params");
+const { getStorage } = require("firebase-admin/storage");
+const { GoogleGenAI } = require("@google/genai");
+const os = require("os");
+const path = require("path");
 
 const GEMINI_API_KEY_SECRET = defineSecret("GEMINI_API_KEY");
 
 exports.parseRFQDocument = onCall(
-  { secrets: [GEMINI_API_KEY_SECRET], cors: true },
+  { secrets: [GEMINI_API_KEY_SECRET], cors: true, timeoutSeconds: 300, memory: "1GiB" },
   async (request) => {
     // Auth check
     if (!request.auth) throw new HttpsError("unauthenticated", "Auth required.");
 
-    const { rfqText } = request.data;
-    if (!rfqText) {
-      throw new HttpsError("invalid-argument", "Missing RFQ text data.");
+    const { storagePath, mimeType } = request.data;
+    if (!storagePath || !mimeType) {
+      throw new HttpsError("invalid-argument", "Missing storagePath or mimeType data.");
     }
+
+    // Security: ensure the file belongs to the calling user
+    const callerUid = request.auth.uid;
+    if (!storagePath.startsWith(`temp_imports/${callerUid}/`)) {
+      throw new HttpsError("permission-denied", "Access denied: file does not belong to this user.");
+    }
+
+    const fs = require('fs');
+    const bucket = getStorage().bucket();
+    const fileRef = bucket.file(storagePath);
+    const tempFilePath = path.join(os.tmpdir(), path.basename(storagePath) || 'rfq_tmp');
 
     const db = getFirestore();
 
@@ -33,20 +48,24 @@ exports.parseRFQDocument = onCall(
       console.error("Failed to fetch catalog:", e);
     }
 
+    let uploadedFile;
     try {
       const apiKey = GEMINI_API_KEY_SECRET.value();
       if (!apiKey) throw new Error("GEMINI_API_KEY secret is missing or empty");
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+      // Download from Firebase Storage to Cloud Function's /tmp
+      await fileRef.download({ destination: tempFilePath });
+      console.log(`[Import] Downloaded RFQ ${storagePath} to ${tempFilePath}`);
+
+      const ai = new GoogleGenAI({ apiKey });
+
+      uploadedFile = await ai.files.upload({
+        file: tempFilePath,
+        config: { mimeType }
+      });
 
       const systemInstruction = `You are a clinical supply chain AI assistant. 
-You will receive raw text extracted from a compounding pharmacy's Request For Quote (RFQ) Excel file or CSV.
-Your job is to identify every requested item (typically a peptide or supplement), the requested dosage, and the quantity needed.
-
-Here is the raw RFQ text:
-"""
-${rfqText.substring(0, 5000)}
-"""
+Your job is to identify every requested item (typically a peptide or supplement), the requested dosage, and the quantity needed from the uploaded Request For Quote (RFQ) or Purchase Order.
 
 Here is our current Product Catalog (JSON format):
 """
@@ -69,26 +88,25 @@ Output a raw JSON array where each object has this strict structure:
 
 Output ONLY valid JSON, starting with [ and ending with ]. Do NOT wrap the JSON in markdown code blocks, return a raw JSON string.`;
 
-      const payload = {
-        contents: [{ role: "user", parts: [{ text: "Extract the data according to the system instructions." }] }],
-        systemInstruction: { parts: [{ text: systemInstruction }] },
-        generationConfig: { temperature: 0.1, responseMimeType: "application/json" }
-      };
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [
+          {
+            fileData: {
+              fileUri: uploadedFile.uri,
+              mimeType: uploadedFile.mimeType
+            }
+          },
+          { text: "Extract the data according to the system instructions." }
+        ],
+        config: {
+          systemInstruction: systemInstruction,
+          temperature: 0.1,
+          responseMimeType: "application/json"
+        }
       });
 
-      if (!response.ok) {
-        const errText = await response.text();
-        console.error("Gemini API Error:", errText);
-        throw new HttpsError("internal", "Error calling Gemini API: " + errText);
-      }
-
-      const responseData = await response.json();
-      const text = responseData.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+      const text = response.text || response.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
       
       let parsed = [];
       try {
@@ -109,6 +127,35 @@ Output ONLY valid JSON, starting with [ and ending with ]. Do NOT wrap the JSON 
     } catch (err) {
       console.error("parseRFQDocument AI failed:", err);
       throw new HttpsError("internal", err.message);
+    } finally {
+      // 1. Delete Gemini file
+      if (uploadedFile && uploadedFile.name) {
+        try {
+          const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY_SECRET.value() });
+          await ai.files.delete({ name: uploadedFile.name });
+          console.log(`[Import] Cleaned up Gemini file: ${uploadedFile.name}`);
+        } catch(e) {
+          console.warn("[Import] Failed to delete Gemini file:", e.message);
+        }
+      }
+
+      // 2. Delete local temp file
+      try {
+        if (fs.existsSync(tempFilePath)) {
+          fs.unlinkSync(tempFilePath);
+          console.log(`[Import] Cleaned up local temp file: ${tempFilePath}`);
+        }
+      } catch (cleanupErr) {
+        console.warn("[Import] Could not clean local temp file:", cleanupErr.message);
+      }
+
+      // 3. Delete Firebase Storage file
+      try {
+        await fileRef.delete();
+        console.log(`[Import] Deleted Storage file: ${storagePath}`);
+      } catch (storageErr) {
+        console.warn("[Import] Could not delete Storage file:", storageErr.message);
+      }
     }
   }
 );

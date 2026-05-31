@@ -48,7 +48,7 @@ export default function ImportPriceListsTab() {
     await Promise.all(promises);
   };
 
-  const Row = ({ item, idx, isChecked, toggleRow }) => {
+  const Row = ({ item, idx, isChecked, toggleRow, updateRow }) => {
     const [mappedId, setMappedId] = useState(item.mappedProductId || '');
 
     useEffect(() => {
@@ -74,7 +74,7 @@ export default function ImportPriceListsTab() {
 
     const handleSelectChange = (e) => {
       const val = e.target.value;
-      item.mappedProductId = val;
+      updateRow(idx, 'mappedProductId', val);
       setMappedId(val);
     };
 
@@ -108,8 +108,23 @@ export default function ImportPriceListsTab() {
           <strong>{item.peptide_name || item.original_text}</strong>
           {item.dosage && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.dosage}</div>}
         </td>
-        <td style={{ textAlign: 'right', fontWeight: 600 }}>{item.moq || 1}</td>
-        <td style={{ textAlign: 'right', fontWeight: 600 }}>${item.unit_cost || '0.00'}</td>
+        <td style={{ textAlign: 'right', fontWeight: 600 }}>
+          <input 
+            type="number" 
+            value={item.moq || 1} 
+            onChange={(e) => updateRow(idx, 'moq', parseInt(e.target.value, 10) || 1)}
+            style={{ width: '60px', padding: '0.25rem', border: '1px solid var(--border)', borderRadius: '4px', textAlign: 'right' }} 
+          />
+        </td>
+        <td style={{ textAlign: 'right', fontWeight: 600 }}>
+          $<input 
+            type="number" 
+            step="0.01"
+            value={item.unit_cost || 0} 
+            onChange={(e) => updateRow(idx, 'unit_cost', parseFloat(e.target.value) || 0)}
+            style={{ width: '80px', padding: '0.25rem', border: '1px solid var(--border)', borderRadius: '4px', textAlign: 'right', marginLeft: '4px' }} 
+          />
+        </td>
         <td style={{ padding: '0.5rem' }}>
           <select 
             value={mappedId} 
@@ -125,7 +140,7 @@ export default function ImportPriceListsTab() {
     );
   };
 
-  const renderDiffTable = ({ parsedData, selectedRows, toggleRow, toggleAll }) => (
+  const renderDiffTable = ({ parsedData, selectedRows, toggleRow, toggleAll, updateRow }) => (
     <table className="gcp-table" style={{ width: '100%', fontSize: '0.9rem', borderCollapse: 'collapse' }}>
       <thead>
         <tr style={{ borderBottom: '2px solid var(--border)', textAlign: 'left' }}>
@@ -147,7 +162,8 @@ export default function ImportPriceListsTab() {
             item={item} 
             idx={idx} 
             isChecked={selectedRows.has(idx)} 
-            toggleRow={toggleRow} 
+            toggleRow={toggleRow}
+            updateRow={updateRow}
           />
         ))}
       </tbody>
