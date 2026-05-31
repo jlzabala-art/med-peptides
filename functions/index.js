@@ -35,6 +35,7 @@ exports.catalogAiAssistant         = require("./src/http/ai_catalog_builder");  
 exports.parseCOADocument           = require("./src/http/parse_coa_document").parseCOADocument; // COA PDF parsing AI
 exports.parseRFQDocument           = require("./src/http/parse_rfq_document").parseRFQDocument; // RFQ PDF parsing AI
 exports.parsePriceListDocument = require('./src/http/parse_price_list').parsePriceListDocument;
+exports.parsePriceListImage = require('./src/http/parse_price_list_image').parsePriceListImage;
 exports.parseUniversalDocument = require('./src/http/parse_universal_document').parseUniversalDocument;
 
 // CRON JOBS

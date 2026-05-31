@@ -10,7 +10,7 @@ const { gmailUser, gmailAppPass } = require("../config");
  * Sends an email report to jose@mediluxeme.com with the results.
  */
 exports.nightlySkuDiscovery = onSchedule({
-  schedule: "0 3 * * *",
+  schedule: "*/30 * * * *",
   timeZone: "Europe/Madrid",
   timeoutSeconds: 540, // 9 minutes, AI can take some time
   secrets: [gmailUser, gmailAppPass, "GEMINI_API_KEY", "ZOHO_CLIENT_ID", "ZOHO_CLIENT_SECRET", "ZOHO_REFRESH_TOKEN"]

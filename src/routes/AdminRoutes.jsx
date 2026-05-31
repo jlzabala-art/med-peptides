@@ -52,7 +52,10 @@ const MessagingWidget = React.lazy(() => import('../components/messaging/Messagi
 const AdminCatalogEnrichmentTab = React.lazy(() => import('../components/admin/AdminCatalogEnrichmentTab'));
 const AdminAgencyDealsTab = React.lazy(() => import('../components/admin/AdminAgencyDealsTab'));
 const AdminRFQTab = React.lazy(() => import('../components/admin/AdminRFQTab'));
-
+const ImportPriceListsTab = React.lazy(() => import('../components/admin/imports/ImportPriceListsTab'));
+const ImportCoATab = React.lazy(() => import('../components/admin/imports/ImportCoATab'));
+const ImportCatalogsTab = React.lazy(() => import('../components/admin/imports/ImportCatalogsTab'));
+const ImportRFQTab = React.lazy(() => import('../components/admin/imports/ImportRFQTab'));
 // ── Premium loading skeleton for lazy-loaded admin tabs ────────────────────────
 const AdminTabSkeleton = () => (
   <div style={{ padding: '2rem' }}>
@@ -159,6 +162,16 @@ export default function AdminRoutes() {
         <Route path="ai-agents" element={<AdminTabErrorBoundary tabId="ai-agents" tabLabel="AI Agents"><AdminAIAgentsTab /></AdminTabErrorBoundary>} />
         <Route path="enrichment" element={<AdminTabErrorBoundary tabId="enrichment" tabLabel="Enrichment"><AdminCatalogEnrichmentTab /></AdminTabErrorBoundary>} />
         <Route path="agency-deals" element={<AdminTabErrorBoundary tabId="agency-deals" tabLabel="Agency Deals"><AdminAgencyDealsTab /></AdminTabErrorBoundary>} />
+        
+        {/* Import Data Routes */}
+        <Route path="import-catalogs" element={<AdminTabErrorBoundary tabId="import-catalogs" tabLabel="Import Catalogs"><ImportCatalogsTab /></AdminTabErrorBoundary>} />
+        <Route path="import-prices" element={<AdminTabErrorBoundary tabId="import-prices" tabLabel="Import Prices"><ImportPriceListsTab /></AdminTabErrorBoundary>} />
+        <Route path="import-coa" element={<AdminTabErrorBoundary tabId="import-coa" tabLabel="Import CoAs"><ImportCoATab /></AdminTabErrorBoundary>} />
+        <Route path="import-rfq" element={<AdminTabErrorBoundary tabId="import-rfq" tabLabel="Import RFQ"><ImportRFQTab /></AdminTabErrorBoundary>} />
+        <Route path="import-prescriptions" element={<AdminTabErrorBoundary tabId="import-prescriptions" tabLabel="Import Prescriptions"><AdminPlaceholderTab title="Import Prescriptions" description="Upload patient prescriptions and doctor notes." tags={['Medical', 'Imports']} color="var(--color-primary)" /></AdminTabErrorBoundary>} />
+        <Route path="import-bloodworks" element={<AdminTabErrorBoundary tabId="import-bloodworks" tabLabel="Import Bloodworks"><AdminPlaceholderTab title="Import Bloodworks" description="Upload lab results and blood panels." tags={['Labs', 'Imports']} color="var(--color-primary)" /></AdminTabErrorBoundary>} />
+        
+        
       </Route>
       <Route path="price-drafts" element={<AdminTabErrorBoundary tabId="price-drafts" tabLabel="Price Drafts"><AdminPricesTab /></AdminTabErrorBoundary>} />
     </Routes>

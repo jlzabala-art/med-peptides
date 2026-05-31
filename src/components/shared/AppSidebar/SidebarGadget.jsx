@@ -239,16 +239,17 @@ export default function SidebarGadget(props) {
   };
 
   const savePreferences = async (groupsToSave = sidebarGroups, exitEditMode = true) => {
-    const serializedGroups = groupsToSave.map(g => ({
-      id: g.id,
-      label: g.label,
-      emoji: g.emoji,
-      items: (g.items || []).map(i => {
-        const itemData = { id: i.id, label: i.label };
-        if (i.path) itemData.path = i.path;
+    const serializedGroups = groupsToSave.map(g => {
+      const groupData = { id: g.id };
+      if (g.label !== undefined) groupData.label = g.label;
+      if (g.emoji !== undefined) groupData.emoji = g.emoji;
+      groupData.items = (g.items || []).map(i => {
+        const itemData = { id: i.id, label: i.label || '' };
+        if (i.path !== undefined) itemData.path = i.path;
         return itemData;
-      })
-    }));
+      });
+      return groupData;
+    });
 
     // Save to localStorage for immediate local persistence
     localStorage.setItem(storageKey, JSON.stringify(serializedGroups));

@@ -21,10 +21,12 @@ const ZOHO_REGION   = "UAE";
 // ── API Endpoints ─────────────────────────────────────────────────────────────
 // MEDILUXE is UAE org — uses Middle East (.me) regional servers
 // If ME fails, zoho_client auto-retries with global (.com)
-const ZOHO_BOOKS_BASE_URL      = "https://www.zohoapis.me/books/v3";
-const ZOHO_BOOKS_BASE_URL_GLOBAL = "https://www.zohoapis.com/books/v3";
-const ZOHO_OAUTH_URL           = "https://accounts.zoho.me/oauth/v2/token";
-const ZOHO_OAUTH_URL_GLOBAL    = "https://accounts.zoho.com/oauth/v2/token";
+const ZOHO_BOOKS_BASE_URL        = "https://www.zohoapis.me/books/v3";
+const ZOHO_BOOKS_BASE_URL_GLOBAL   = "https://www.zohoapis.com/books/v3";
+const ZOHO_INVENTORY_BASE_URL      = "https://www.zohoapis.me/inventory/v1";
+const ZOHO_INVENTORY_BASE_URL_GLOBAL = "https://www.zohoapis.com/inventory/v1";
+const ZOHO_OAUTH_URL             = "https://accounts.zoho.me/oauth/v2/token";
+const ZOHO_OAUTH_URL_GLOBAL      = "https://accounts.zoho.com/oauth/v2/token";
 
 // ── Default request config ────────────────────────────────────────────────────
 const ZOHO_DEFAULT_PARAMS = {
@@ -90,6 +92,8 @@ module.exports = {
   ZOHO_REGION,
   ZOHO_BOOKS_BASE_URL,
   ZOHO_BOOKS_BASE_URL_GLOBAL,
+  ZOHO_INVENTORY_BASE_URL,
+  ZOHO_INVENTORY_BASE_URL_GLOBAL,
   ZOHO_OAUTH_URL,
   ZOHO_OAUTH_URL_GLOBAL,
   ZOHO_DEFAULT_PARAMS,

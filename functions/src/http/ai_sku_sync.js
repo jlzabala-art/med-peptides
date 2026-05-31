@@ -53,8 +53,11 @@ async function loadFirebaseProducts(db) {
               firebase_sku:        v.sku || p.sku || "",
               name:                `${p.displayName || p.name}${v.label ? ` (${v.label})` : ""}`,
               category:            p.category || p.classification?.categories?.[0] || "",
-              description:         p.description || p.shortDescription || "",
+              description:         v.description || p.description || p.shortDescription || "",
               guest_usd:           parseFloat(v.price?.guest_usd) || 0,
+              firebase_purchase_usd: parseFloat(v.purchase_usd) || 0,
+              firebase_purchase_description: v.purchase_description || "",
+              firebase_supplier_name: v.supplier_name || p.supplier_name || "",
             });
           });
         } else {
@@ -66,6 +69,9 @@ async function loadFirebaseProducts(db) {
             category:            p.category || "",
             description:         p.description || p.shortDescription || "",
             guest_usd:           parseFloat(p.guestVialPrice) || 0,
+            firebase_purchase_usd: parseFloat(p.purchase_usd) || 0,
+            firebase_purchase_description: p.purchase_description || "",
+            firebase_supplier_name: p.supplier_name || "",
           });
         }
       } catch (_) {
@@ -79,6 +85,9 @@ async function loadFirebaseProducts(db) {
             category:            p.category || "",
             description:         "",
             guest_usd:           0,
+            firebase_purchase_usd: 0,
+            firebase_purchase_description: "",
+            firebase_supplier_name: "",
           });
         }
       }
@@ -226,6 +235,14 @@ async function discover(db, aedRate, useAI = true) {
       cf_firebase_sku_set: false,
       guest_usd:           fbProduct?.guest_usd || 0,
       guest_aed:           usdToAed(fbProduct?.guest_usd || 0, aedRate),
+      firebase_purchase_usd: fbProduct?.firebase_purchase_usd || 0,
+      firebase_description: fbProduct?.description || "",
+      firebase_purchase_description: fbProduct?.firebase_purchase_description || "",
+      firebase_supplier_name: fbProduct?.firebase_supplier_name || "",
+      zoho_purchase_rate: 0,
+      zoho_description: "",
+      zoho_purchase_description: "",
+      zoho_vendor_name: "",
       created_at:          FieldValue.serverTimestamp(),
       last_synced_at:      null,
     };
@@ -248,6 +265,10 @@ async function discover(db, aedRate, useAI = true) {
       zoho_org_id: "662274409",
       status: "zoho_only",
       guest_aed: z.rate || 0,
+      zoho_purchase_rate: z.purchase_rate || 0,
+      zoho_description: z.description || "",
+      zoho_purchase_description: z.purchase_description || "",
+      zoho_vendor_name: z.vendor_name || "",
       created_at: FieldValue.serverTimestamp(),
       last_synced_at: null,
     };
@@ -268,6 +289,10 @@ async function discover(db, aedRate, useAI = true) {
       status: "firebase_only",
       guest_usd: fb.guest_usd || 0,
       guest_aed: usdToAed(fb.guest_usd || 0, aedRate),
+      firebase_purchase_usd: fb.firebase_purchase_usd || 0,
+      firebase_description: fb.description || "",
+      firebase_purchase_description: fb.firebase_purchase_description || "",
+      firebase_supplier_name: fb.firebase_supplier_name || "",
       created_at: FieldValue.serverTimestamp(),
       last_synced_at: null,
     };
@@ -839,7 +864,18 @@ Return ONLY the short label, no quotes, no extra text.
 
 // ── Sync and Save mode ───────────────────────────────────────────────────────────────
 async function syncAndSave(db, body) {
-  const { mappingId, firebase_name, zoho_name, firebase_category, zoho_category } = body;
+  const { 
+    mappingId, 
+    firebase_sku, zoho_sku,
+    firebase_name, zoho_name, 
+    firebase_category, zoho_category,
+    firebase_purchase_usd, zoho_purchase_rate,
+    guest_usd, guest_aed,
+    firebase_description, zoho_description,
+    firebase_purchase_description, zoho_purchase_description,
+    firebase_supplier_name, zoho_vendor_name
+  } = body;
+  
   if (!mappingId) throw new Error("mappingId is required");
 
   const mappingRef = db.collection(ZOHO_FIRESTORE.SKU_MAPPINGS).doc(mappingId);
@@ -848,30 +884,75 @@ async function syncAndSave(db, body) {
 
   const currentMapping = mappingSnap.data();
 
-  // 1. Update Firebase Product
+  const fbCat = (firebase_category !== undefined ? firebase_category : currentMapping.category || "").trim().toLowerCase();
+  const zhCat = (zoho_category !== undefined ? zoho_category : currentMapping.zoho_category || currentMapping.category || "").trim().toLowerCase();
+  
+  if (fbCat && zhCat && fbCat !== zhCat) {
+    throw new Error("Cannot sync: Firebase and Zoho categories must match exactly.");
+  }
+
+  // 1. Update Firebase Product/Variant
   if (currentMapping.firebase_product_id) {
-    const productRef = db.collection("products").doc(currentMapping.firebase_product_id);
+    let targetRef = db.collection("products").doc(currentMapping.firebase_product_id);
+    if (currentMapping.firebase_variant_id) {
+       targetRef = targetRef.collection("variants").doc(currentMapping.firebase_variant_id);
+    }
+    
     const updates = {};
     if (firebase_name !== undefined) updates.title = firebase_name;
     if (firebase_category !== undefined) updates.category = firebase_category;
+    if (firebase_sku !== undefined) updates.sku = firebase_sku;
+    if (firebase_purchase_usd !== undefined) updates.purchase_usd = parseFloat(firebase_purchase_usd) || 0;
+    if (guest_usd !== undefined) updates.guest_usd = parseFloat(guest_usd) || 0;
+    if (firebase_description !== undefined) updates.description = firebase_description;
+    if (firebase_purchase_description !== undefined) updates.purchase_description = firebase_purchase_description;
+    if (firebase_supplier_name !== undefined) updates.supplier_name = firebase_supplier_name;
     
     if (Object.keys(updates).length > 0) {
       updates.updated_at = FieldValue.serverTimestamp();
-      await productRef.update(updates);
+      await targetRef.update(updates).catch(() => {/* non-fatal */});
     }
   }
 
   // 2. Update Zoho Item
   if (currentMapping.zoho_item_id) {
     const updates = {};
+    if (zoho_sku !== undefined) updates.sku = zoho_sku;
     if (zoho_name !== undefined) updates.name = zoho_name;
-    if (zoho_category !== undefined) updates.category_name = zoho_category;
+    
+    // Zoho Inventory Item Group Logic
+    if (zoho_category && zoho_category.trim() !== "") {
+      try {
+        const groups = await zoho.listInventoryItemGroups();
+        let targetGroup = groups.find(g => g.group_name.toLowerCase() === zoho_category.trim().toLowerCase());
+        
+        if (!targetGroup) {
+          // Create the item group if it doesn't exist
+          targetGroup = await zoho.createInventoryItemGroup({ group_name: zoho_category.trim() });
+        }
+        
+        if (targetGroup && targetGroup.group_id) {
+          updates.group_id = targetGroup.group_id;
+        }
+      } catch (err) {
+        structuredLogger.error({ event: "zoho_item_group_creation_failed", err: err.message });
+        // We log the error but don't strictly fail the whole sync just for the group, 
+        // in case Zoho rejects linking standalone items to groups.
+      }
+    }
+    
+    if (guest_aed !== undefined) updates.rate = parseFloat(guest_aed) || 0;
+    if (zoho_purchase_rate !== undefined) updates.purchase_rate = parseFloat(zoho_purchase_rate) || 0;
+    if (zoho_description !== undefined) updates.description = zoho_description;
+    if (zoho_purchase_description !== undefined) updates.purchase_description = zoho_purchase_description;
+
     
     if (Object.keys(updates).length > 0) {
       try {
         await zoho.updateItem(currentMapping.zoho_item_id, updates);
       } catch (err) {
         structuredLogger.error({ event: "zoho_item_update_failed", mappingId, err: err.message });
+        throw new Error(`Zoho Error: ${err.message}`);
       }
     }
   }
@@ -881,10 +962,23 @@ async function syncAndSave(db, body) {
     status: SYNC_STATUS.SYNCED,
     last_synced_at: FieldValue.serverTimestamp()
   };
+  
+  if (firebase_sku !== undefined) mappingUpdates.firebase_sku = firebase_sku;
+  if (zoho_sku !== undefined) mappingUpdates.zoho_sku = zoho_sku;
   if (firebase_name !== undefined) mappingUpdates.firebase_name = firebase_name;
   if (zoho_name !== undefined) mappingUpdates.zoho_name = zoho_name;
   if (firebase_category !== undefined) mappingUpdates.category = firebase_category;
   if (zoho_category !== undefined) mappingUpdates.zoho_category = zoho_category;
+  if (firebase_purchase_usd !== undefined) mappingUpdates.firebase_purchase_usd = parseFloat(firebase_purchase_usd) || 0;
+  if (zoho_purchase_rate !== undefined) mappingUpdates.zoho_purchase_rate = parseFloat(zoho_purchase_rate) || 0;
+  if (guest_usd !== undefined) mappingUpdates.guest_usd = parseFloat(guest_usd) || 0;
+  if (guest_aed !== undefined) mappingUpdates.guest_aed = parseFloat(guest_aed) || 0;
+  if (firebase_description !== undefined) mappingUpdates.firebase_description = firebase_description;
+  if (zoho_description !== undefined) mappingUpdates.zoho_description = zoho_description;
+  if (firebase_purchase_description !== undefined) mappingUpdates.firebase_purchase_description = firebase_purchase_description;
+  if (zoho_purchase_description !== undefined) mappingUpdates.zoho_purchase_description = zoho_purchase_description;
+  if (firebase_supplier_name !== undefined) mappingUpdates.firebase_supplier_name = firebase_supplier_name;
+  if (zoho_vendor_name !== undefined) mappingUpdates.zoho_vendor_name = zoho_vendor_name;
 
   await mappingRef.update(mappingUpdates);
   return { mappingId, status: SYNC_STATUS.SYNCED };

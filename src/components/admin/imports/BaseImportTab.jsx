@@ -13,6 +13,7 @@ export default function BaseImportTab({ title, description, context, renderDiffT
   const [selectedRows, setSelectedRows] = useState(new Set());
   const [isSaving, setIsSaving] = useState(false);
   const [aiInstructions, setAiInstructions] = useState('');
+  const [status, setStatus] = useState({ type: '', message: '' });
   
   const handleDragOver = (e) => e.preventDefault();
   const handleDrop = (e) => {
@@ -39,6 +40,7 @@ export default function BaseImportTab({ title, description, context, renderDiffT
   const processFile = async () => {
     if (!file) return;
     setIsParsing(true);
+    setStatus({ type: 'info', message: 'Starting read process...' });
     setProgressText('Preparing file...');
     
     try {
@@ -51,6 +53,7 @@ export default function BaseImportTab({ title, description, context, renderDiffT
         file.name.endsWith('.xlsx') || file.name.endsWith('.csv')
       ) {
         setProgressText('Reading Excel/CSV...');
+        setStatus({ type: 'info', message: 'Converting tabular data...' });
         const data = await file.arrayBuffer();
         const workbook = XLSX.read(data);
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -64,6 +67,7 @@ export default function BaseImportTab({ title, description, context, renderDiffT
         mimeType = 'text/csv';
       } else {
         setProgressText('Reading Document...');
+        setStatus({ type: 'info', message: 'Converting document to base64...' });
         base64Data = await new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result.split(',')[1]);
@@ -73,23 +77,24 @@ export default function BaseImportTab({ title, description, context, renderDiffT
       }
 
       setProgressText('AI Analyzing Document...');
+      setStatus({ type: 'info', message: 'Connecting to AI Engine...' });
       const parseUniversal = httpsCallable(functions, 'parseUniversalDocument');
       const response = await parseUniversal({ base64Data, mimeType, context, instructions: aiInstructions });
       
       if (response.data.success) {
-        // Enriched item logic can be moved to specific tabs if needed, or done generically here
         const items = response.data.items.map(item => ({
           ...item,
           diffStatus: Math.random() > 0.7 ? 'NEW' : (Math.random() > 0.5 ? 'MODIFIED' : 'UNCHANGED')
         }));
         setParsedData(items);
         setSelectedRows(new Set(items.map((_, i) => i)));
+        setStatus({ type: 'success', message: `Analysis complete! Found ${items.length} items.` });
       } else {
-        alert("Parse Failed");
+        setStatus({ type: 'error', message: 'AI could not process the document correctly.' });
       }
     } catch (err) {
       console.error(err);
-      alert("Error parsing document: " + err.message);
+      setStatus({ type: 'error', message: "Error processing document: " + err.message });
     }
     
     setIsParsing(false);
@@ -97,14 +102,17 @@ export default function BaseImportTab({ title, description, context, renderDiffT
 
   const handleSave = async () => {
     setIsSaving(true);
+    setStatus({ type: 'info', message: 'Saving data...' });
     try {
       const finalData = parsedData.filter((_, idx) => selectedRows.has(idx));
       await onSave(finalData);
       setParsedData(null);
       setFile(null);
       setSelectedRows(new Set());
+      setStatus({ type: 'success', message: 'Data successfully imported and saved!' });
+      setTimeout(() => setStatus({ type: '', message: '' }), 5000);
     } catch (err) {
-      alert("Error saving: " + err.message);
+      setStatus({ type: 'error', message: "Error saving: " + err.message });
     }
     setIsSaving(false);
   };
@@ -117,6 +125,19 @@ export default function BaseImportTab({ title, description, context, renderDiffT
           <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.95rem' }}>{description}</p>
         </div>
       </div>
+
+      {status.message && (
+        <div style={{
+          padding: '1rem', marginBottom: '1rem', borderRadius: '8px',
+          backgroundColor: status.type === 'error' ? '#fef2f2' : status.type === 'success' ? '#f0fdf4' : '#f0f9ff',
+          color: status.type === 'error' ? '#991b1b' : status.type === 'success' ? '#166534' : '#075985',
+          border: `1px solid ${status.type === 'error' ? '#fecaca' : status.type === 'success' ? '#bbf7d0' : '#bae6fd'}`,
+          display: 'flex', alignItems: 'center', gap: '0.5rem'
+        }}>
+          {status.type === 'error' ? <X size={20} /> : status.type === 'success' ? <CheckCircle size={20} /> : <Loader2 size={20} className={isParsing ? "spin" : ""} />}
+          <span style={{ fontWeight: 500 }}>{status.message}</span>
+        </div>
+      )}
 
       {!parsedData ? (
         <Card style={{ padding: '2rem' }}>
@@ -167,7 +188,7 @@ export default function BaseImportTab({ title, description, context, renderDiffT
               <textarea 
                 value={aiInstructions}
                 onChange={e => setAiInstructions(e.target.value)}
-                placeholder="e.g., 'Ignore products with purity under 90%' or 'Apply a 10% discount to all costs'"
+                placeholder="e.g., 'Review discounts carefully', or 'Double-check that all products exist in the catalog'"
                 style={{
                   width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)',
                   fontSize: '0.9rem', minHeight: '80px', resize: 'vertical'
@@ -176,12 +197,12 @@ export default function BaseImportTab({ title, description, context, renderDiffT
               />
             </div>
             
-            <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-start' }}>
               <button 
                 onClick={processFile} 
                 disabled={!file || isParsing}
                 className="gcp-btn gcp-btn--primary"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: (!file || isParsing) ? 0.5 : 1, width: '100%', justifyContent: 'center' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: (!file || isParsing) ? 0.5 : 1 }}
               >
                 {isParsing ? <Loader2 size={16} className="spin" /> : <UploadCloud size={16} />}
                 Start AI Extraction
@@ -193,7 +214,7 @@ export default function BaseImportTab({ title, description, context, renderDiffT
         <Card>
           <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Reconciliation Diff</h3>
+              <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Data Review</h3>
               <p style={{ margin: '0.25rem 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Review the extracted data before saving to the database.</p>
             </div>
             <div style={{ display: 'flex', gap: '1rem' }}>

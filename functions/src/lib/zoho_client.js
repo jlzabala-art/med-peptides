@@ -21,13 +21,13 @@ const {
   ZOHO_ORG_ID,
   ZOHO_BOOKS_BASE_URL,
   ZOHO_BOOKS_BASE_URL_GLOBAL,
+  ZOHO_INVENTORY_BASE_URL,
+  ZOHO_INVENTORY_BASE_URL_GLOBAL,
   ZOHO_OAUTH_URL,
   ZOHO_OAUTH_URL_GLOBAL,
   ZOHO_SECRETS,
   ZOHO_FIRESTORE,
 } = require("./zoho_config");
-
-
 // ── Secret loader (lazy — only runs in Cloud Functions env) ──────────────────
 let _secrets = null;
 async function loadSecrets() {
@@ -48,9 +48,10 @@ async function loadSecrets() {
 }
 
 // ── Token cache ───────────────────────────────────────────────────────────────
-let _memCache    = { token: null, expiresAt: 0 };
-let _oauthUrl    = ZOHO_OAUTH_URL;   // starts with ME, may fall back to .com
-let _booksUrl    = ZOHO_BOOKS_BASE_URL;
+let _memCache     = { token: null, expiresAt: 0 };
+let _oauthUrl     = ZOHO_OAUTH_URL;   // starts with ME, may fall back to .com
+let _booksUrl     = ZOHO_BOOKS_BASE_URL;
+let _inventoryUrl = ZOHO_INVENTORY_BASE_URL;
 
 async function getAccessToken() {
   const now = Date.now();
@@ -65,17 +66,17 @@ async function getAccessToken() {
   const cacheDoc = await db.doc(`${ZOHO_FIRESTORE.TOKEN_CACHE}/access_token_v2`).get();
   if (cacheDoc.exists) {
     const cached = cacheDoc.data();
-    if (cached.expires_at > now + 60000) {
+    if (cached.expires_at > now + 400000) { // Buffer of 6m+
       _memCache = { token: cached.access_token, expiresAt: cached.expires_at };
       // Restore persisted region
       if (cached.oauth_url) _oauthUrl = cached.oauth_url;
       if (cached.books_url) _booksUrl = cached.books_url;
+      if (cached.inventory_url) _inventoryUrl = cached.inventory_url;
       return cached.access_token;
     }
   }
 
-  // 3. Fetch new token — try Global first (Self Client created on api-console.zoho.com),
-  //    then ME (.me) as fallback for regional orgs.
+  // 3. Fetch new token — try Global first, then ME (.me) as fallback
   const { clientId, clientSecret, refreshToken } = await loadSecrets();
   const params = new URLSearchParams({
     grant_type:    "refresh_token",
@@ -86,11 +87,11 @@ async function getAccessToken() {
 
   let data;
   const urlsToTry = [
-    { oauth: ZOHO_OAUTH_URL_GLOBAL, books: ZOHO_BOOKS_BASE_URL_GLOBAL, label: "Global" },
-    { oauth: ZOHO_OAUTH_URL,        books: ZOHO_BOOKS_BASE_URL,        label: "ME"     },
+    { oauth: ZOHO_OAUTH_URL_GLOBAL, books: ZOHO_BOOKS_BASE_URL_GLOBAL, inv: ZOHO_INVENTORY_BASE_URL_GLOBAL, label: "Global" },
+    { oauth: ZOHO_OAUTH_URL,        books: ZOHO_BOOKS_BASE_URL,        inv: ZOHO_INVENTORY_BASE_URL,        label: "ME"     },
   ];
 
-  for (const { oauth, books, label } of urlsToTry) {
+  for (const { oauth, books, inv, label } of urlsToTry) {
     try {
       const resp = await fetch(oauth, { method: "POST", body: params });
       const json = await resp.json();
@@ -98,12 +99,12 @@ async function getAccessToken() {
         data = json;
         _oauthUrl = oauth;
         _booksUrl = books;
+        _inventoryUrl = inv;
         console.info(`[zoho_client] OAuth OK via ${label} (${oauth})`);
         break;
       }
       console.warn(`[zoho_client] OAuth rejected via ${label}: ${JSON.stringify(json)}`);
     } catch (netErr) {
-      // DNS/network failure — try next URL
       console.warn(`[zoho_client] Network error via ${label}: ${netErr.message}`);
     }
   }
@@ -115,19 +116,20 @@ async function getAccessToken() {
   const expiresAt = now + (data.expires_in || 3600) * 1000;
   _memCache = { token: data.access_token, expiresAt };
 
-  // Persist to Firestore (non-blocking) — store which region worked
-  db.doc(`${ZOHO_FIRESTORE.TOKEN_CACHE}/access_token`).set({
+  // Persist to Firestore (non-blocking)
+  db.doc(`${ZOHO_FIRESTORE.TOKEN_CACHE}/access_token_v2`).set({
     access_token: data.access_token,
     expires_at:   expiresAt,
     refreshed_at: now,
     oauth_url:    _oauthUrl,
     books_url:    _booksUrl,
+    inventory_url: _inventoryUrl
   }).catch(() => {/* non-fatal */});
 
   return data.access_token;
 }
 
-// ── Base request ──────────────────────────────────────────────────────────────
+// ── Base request (Books) ────────────────────────────────────────────────────────
 async function request(method, path, { body, params = {} } = {}, retries = 3) {
   const token  = await getAccessToken();
   const qp     = new URLSearchParams({ organization_id: ZOHO_ORG_ID, ...params });
@@ -153,26 +155,53 @@ async function request(method, path, { body, params = {} } = {}, retries = 3) {
 
   const data = await resp.json();
   if (!resp.ok || data.code !== 0) {
-    throw new Error(`Zoho API error [${resp.status}] ${path}: ${JSON.stringify(data)}`);
+    throw new Error(`Zoho Books API error [${resp.status}] ${path}: ${JSON.stringify(data)}`);
   }
 
   return data;
 }
 
-// ── Items API ─────────────────────────────────────────────────────────────────
+// ── Base request (Inventory) ────────────────────────────────────────────────────
+async function requestInventory(method, path, { body, params = {} } = {}, retries = 3) {
+  const token  = await getAccessToken();
+  const qp     = new URLSearchParams({ organization_id: ZOHO_ORG_ID, ...params });
+  const url    = `${_inventoryUrl}${path}?${qp.toString()}`;
 
-/**
- * List all items (handles pagination automatically).
- * @param {object} filters — Optional Zoho filter params (filter_by, search_text, etc.)
- * @returns {Array} All items across all pages
- */
+  const options = {
+    method,
+    headers: {
+      "Authorization": `Zoho-oauthtoken ${token}`,
+      "Content-Type":  "application/json",
+    },
+  };
+  if (body) options.body = JSON.stringify(body);
+
+  const resp = await fetch(url, options);
+
+  // Auto-retry on 429 (rate limit) or 5xx
+  if ((resp.status === 429 || resp.status >= 500) && retries > 0) {
+    const delay = resp.status === 429 ? 2000 : 1000;
+    await new Promise(r => setTimeout(r, delay));
+    return requestInventory(method, path, { body, params }, retries - 1);
+  }
+
+  const data = await resp.json();
+  if (!resp.ok || data.code !== 0) {
+    throw new Error(`Zoho Inventory API error [${resp.status}] ${path}: ${JSON.stringify(data)}`);
+  }
+
+  return data;
+}
+
+// ── Items API (Uses Inventory) ────────────────────────────────────────────────
+
 async function listAllItems(filters = {}) {
   const allItems = [];
   let page = 1;
   let hasMore = true;
 
   while (hasMore) {
-    const data = await request("GET", "/items", {
+    const data = await requestInventory("GET", "/items", {
       params: { ...filters, page, per_page: 200 },
     });
     allItems.push(...(data.items || []));
@@ -183,50 +212,54 @@ async function listAllItems(filters = {}) {
   return allItems;
 }
 
-/**
- * Get a single item by ID.
- */
 async function getItem(itemId) {
-  const data = await request("GET", `/items/${itemId}`);
+  const data = await requestInventory("GET", `/items/${itemId}`);
   return data.item;
 }
 
-/**
- * Update an existing item (PATCH).
- * @param {string} itemId  — Zoho item_id
- * @param {object} updates — Partial item fields to update (rate, custom_fields, sku, etc.)
- */
 async function updateItem(itemId, updates) {
-  const data = await request("PUT", `/items/${itemId}`, { body: updates });
+  const data = await requestInventory("PUT", `/items/${itemId}`, { body: updates });
   return data.item;
 }
 
-/**
- * Create a new item in Zoho Books.
- */
 async function createItem(itemData) {
-  const data = await request("POST", "/items", { body: itemData });
+  const data = await requestInventory("POST", "/items", { body: itemData });
   return data.item;
 }
 
-/**
- * Search items by name (partial match).
- */
 async function searchItems(name) {
-  const data = await request("GET", "/items", {
+  const data = await requestInventory("GET", "/items", {
     params: { name_contains: name, per_page: 10, filter_by: "Status.All" },
   });
   return data.items || [];
 }
 
+// ── Item Groups API (Inventory) ────────────────────────────────────────────────
+
+async function listInventoryItemGroups(filters = {}) {
+  const allGroups = [];
+  let page = 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    const data = await requestInventory("GET", "/itemgroups", {
+      params: { ...filters, page, per_page: 200 },
+    });
+    allGroups.push(...(data.itemgroups || []));
+    hasMore = data.page_context?.has_more_page === true;
+    page++;
+  }
+
+  return allGroups;
+}
+
+async function createInventoryItemGroup(groupData) {
+  const data = await requestInventory("POST", "/itemgroups", { body: groupData });
+  return data.itemgroup;
+}
+
 // ── Custom Fields ─────────────────────────────────────────────────────────────
 
-/**
- * Set a custom field value on a Zoho Books item.
- * @param {string} itemId      — Zoho item_id
- * @param {string} fieldLabel  — Custom field label (e.g. "Firebase SKU")
- * @param {string} value       — Value to set
- */
 async function setItemCustomField(itemId, fieldLabel, value) {
   return updateItem(itemId, {
     custom_fields: [{ label: fieldLabel, value }],
@@ -235,17 +268,11 @@ async function setItemCustomField(itemId, fieldLabel, value) {
 
 // ── Financial & Invoices API ──────────────────────────────────────────────────
 
-/**
- * List invoices with optional filters.
- */
 async function listInvoices(filters = {}) {
   const data = await request("GET", "/invoices", { params: filters });
   return data.invoices || [];
 }
 
-/**
- * List customer payments with optional filters.
- */
 async function listCustomerPayments(filters = {}) {
   const data = await request("GET", "/customerpayments", { params: filters });
   return data.customerpayments || [];
@@ -253,9 +280,6 @@ async function listCustomerPayments(filters = {}) {
 
 // ── Sync audit log ────────────────────────────────────────────────────────────
 
-/**
- * Write a sync event to the Zoho sync log collection.
- */
 async function logSyncEvent(event) {
   const db = getFirestore();
   await db.collection(ZOHO_FIRESTORE.SYNC_LOG).add({
@@ -273,9 +297,10 @@ module.exports = {
   createItem,
   searchItems,
   setItemCustomField,
+  listInventoryItemGroups,
+  createInventoryItemGroup,
   listInvoices,
   listCustomerPayments,
   logSyncEvent,
-  // Low-level request (for advanced use cases)
   _request: request,
 };

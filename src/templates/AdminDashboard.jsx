@@ -86,7 +86,6 @@ const NAV_GROUPS = [
       { id: 'enrichment',      label: 'Catalog Enrichment', icon: Database },
       { id: 'lab-tests',       label: 'Lab Tests',       icon: ScrollText },
       { id: 'protocols',       label: 'Protocols',       icon: ClipboardList },
-      { id: 'uploads',         label: 'Importar Ficheros',icon: UploadCloud },
     ],
   },
   {
@@ -107,12 +106,14 @@ const NAV_GROUPS = [
   },
   {
     id: 'data-import',
-    label: 'Importar Ficheros',
+    label: 'Import Data',
     items: [
       { id: 'import-catalogs',  label: 'Catalogs',            icon: BookOpen },
       { id: 'import-prices',    label: 'Price Lists',         icon: Tag },
       { id: 'import-coa',       label: 'Certificates (CoA)',  icon: CheckCircle },
       { id: 'import-rfq',       label: 'Client RFQs',         icon: FileText },
+      { id: 'import-prescriptions', label: 'Prescriptions',   icon: ClipboardList },
+      { id: 'import-bloodworks',    label: 'Bloodworks',      icon: Activity },
     ],
   },
   {
@@ -220,8 +221,10 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
       {tab === 'logistics' && <AdminLogisticsTab />}
       {tab === 'import-catalogs' && <ImportCatalogsTab />}
       {tab === 'import-prices' && <ImportPriceListsTab />}
-      {tab === 'import-coa' && <ImportCoATab />}
+      {tab === 'import-coa' && <DocumentUploadModule />}
       {tab === 'import-rfq' && <ImportRFQTab />}
+      {tab === 'import-prescriptions' && <AdminPlaceholderTab title="Import Prescriptions" description="Upload patient prescriptions and doctor notes." tags={['Medical', 'Imports']} color="var(--color-primary)" />}
+      {tab === 'import-bloodworks' && <AdminPlaceholderTab title="Import Bloodworks" description="Upload lab results and blood panels." tags={['Labs', 'Imports']} color="var(--color-primary)" />}
       {tab === 'wholesellers'  && <AdminWholesellersTab />}
       {tab === 'account-managers' && <AdminAccountManagersTab />}
       {tab === 'clinics'       && <AdminPlaceholderTab title="Clinics" description="Manage physical clinic locations and metadata." tags={['Network', 'Clinics']} color="var(--color-primary)" />}

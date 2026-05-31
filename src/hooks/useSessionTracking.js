@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { db } from '../firebase';
-import { doc, runTransaction, serverTimestamp, increment } from 'firebase/firestore';
+import { doc, runTransaction, serverTimestamp, increment, setDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 
 /**
@@ -28,34 +28,16 @@ export default function useSessionTracking() {
       }
 
       try {
-        const today = new Date().toISOString().split('T')[0]; // e.g. "2026-05-31"
         const sessionRef = doc(db, 'user_sessions', user.uid);
-
-        await runTransaction(db, async (transaction) => {
-          const sessionDoc = await transaction.get(sessionRef);
-
-          if (!sessionDoc.exists() || sessionDoc.data().date !== today) {
-            // New day or first time tracking: initialize counter
-            transaction.set(sessionRef, {
-              date: today,
-              total_seconds: 60,
-              last_ping: serverTimestamp(),
-              role: user.role || 'user',
-              displayName: user.displayName || user.email || 'Unknown',
-              email: user.email || ''
-            });
-          } else {
-            // Same day: increment time
-            transaction.update(sessionRef, {
-              total_seconds: increment(60),
-              last_ping: serverTimestamp(),
-              role: user.role || 'user',
-              displayName: user.displayName || user.email || 'Unknown',
-              email: user.email || ''
-            });
-          }
-        });
         
+        await setDoc(sessionRef, {
+          total_seconds: increment(60),
+          last_ping: serverTimestamp(),
+          role: user.role || 'user',
+          displayName: user.displayName || user.email || 'Unknown',
+          email: user.email || ''
+        }, { merge: true });
+
         // Console log for debugging, can be removed in production
         // console.log('[Session Tracking] Ping sent.');
       } catch (err) {

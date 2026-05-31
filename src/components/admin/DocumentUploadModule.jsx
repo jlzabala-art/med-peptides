@@ -143,12 +143,43 @@ export default function DocumentUploadModule() {
                 setDocuments(prev => prev.map(d => 
                   d.id === docRef.id ? { ...d, status: 'processed', extractedData: extracted } : d
                 ));
+                await updateDoc(doc(db, 'uploaded_documents', docRef.id), { status: 'processed', extractedData: extracted });
               }
             } catch (aiErr) {
               console.error("AI Parsing failed:", aiErr);
               setDocuments(prev => prev.map(d => 
                 d.id === docRef.id ? { ...d, status: 'failed_ai' } : d
               ));
+              await updateDoc(doc(db, 'uploaded_documents', docRef.id), { status: 'failed_ai' });
+            }
+          } else if (documentType === 'PRICING_LIST' && file.type.startsWith('image/')) {
+            try {
+              const reader = new FileReader();
+              reader.onloadend = async () => {
+                try {
+                  const parsePriceListImage = httpsCallable(functions, 'parsePriceListImage');
+                  const aiResult = await parsePriceListImage({
+                    imageBase64: reader.result,
+                    mimeType: file.type
+                  });
+                  if (aiResult.data?.success) {
+                    setDocuments(prev => prev.map(d => 
+                      d.id === docRef.id ? { ...d, status: 'processed', extractedData: aiResult.data.items } : d
+                    ));
+                    await updateDoc(doc(db, 'uploaded_documents', docRef.id), { status: 'processed', extractedData: aiResult.data.items });
+                  } else {
+                    setDocuments(prev => prev.map(d => d.id === docRef.id ? { ...d, status: 'failed_ai' } : d));
+                    await updateDoc(doc(db, 'uploaded_documents', docRef.id), { status: 'failed_ai' });
+                  }
+                } catch (e) {
+                  console.error("AI Price Parsing failed:", e);
+                  setDocuments(prev => prev.map(d => d.id === docRef.id ? { ...d, status: 'failed_ai' } : d));
+                  await updateDoc(doc(db, 'uploaded_documents', docRef.id), { status: 'failed_ai' });
+                }
+              };
+              reader.readAsDataURL(file);
+            } catch (e) {
+              console.error("FileReader failed:", e);
             }
           }
         } catch (dbError) {
@@ -385,6 +416,33 @@ export default function DocumentUploadModule() {
     startEditing(docId, currentName);
   };
 
+  const [isApplyingPrices, setIsApplyingPrices] = useState(false);
+
+  const handleApplyPrices = async (extractedData, docId) => {
+    if (!extractedData || !Array.isArray(extractedData)) return;
+    setIsApplyingPrices(true);
+    try {
+      const promises = extractedData
+        .filter(item => item.productId && !item.requires_creation && item.new_cost)
+        .map(item => {
+          const productRef = doc(db, 'products', item.productId);
+          return updateDoc(productRef, {
+            guestVialPrice: parseFloat(item.new_cost),
+            updatedAt: new Date().toISOString()
+          });
+        });
+      
+      await Promise.all(promises);
+      alert('¡Precios actualizados correctamente en el catálogo!');
+      setDrawerDoc(null);
+    } catch (err) {
+      console.error("Failed to apply prices:", err);
+      alert("Error al guardar algunos precios.");
+    } finally {
+      setIsApplyingPrices(false);
+    }
+  };
+
   return (
     <div style={{ position: 'relative', minHeight: '80vh' }}>
       
@@ -401,7 +459,7 @@ export default function DocumentUploadModule() {
           }}
           onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
         >
-          <input ref={fileInputRef} type="file" onChange={handleChange} style={{ display: 'none' }} accept=".pdf,.csv,.xlsx,.xls" />
+          <input ref={fileInputRef} type="file" onChange={handleChange} style={{ display: 'none' }} accept=".pdf,.csv,.xlsx,.xls,.png,.jpg,.jpeg" />
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
             <div style={{ padding: '1rem', backgroundColor: 'rgba(0,113,189,0.1)', borderRadius: '50%', color: 'var(--primary)' }}>
               <UploadCloud size={32} />
@@ -415,7 +473,6 @@ export default function DocumentUploadModule() {
             <label style={{ fontSize: '0.9rem', fontWeight: 600 }}>Tipo de Documento:</label>
             <select value={documentType} onChange={(e) => setDocumentType(e.target.value)} style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
               <option value="COA">Certificado de Análisis (CoA)</option>
-              <option value="PRICING_LIST">Lista de Precios</option>
               <option value="CLINICAL_STUDY">Estudio Clínico</option>
               <option value="OTHER">Otro</option>
             </select>
@@ -661,7 +718,7 @@ export default function DocumentUploadModule() {
                               <Clock size={12} className="spin" /> Procesando IA...
                             </span>
                           )}
-                          {variant.status === 'processed' && variant.extractedData && (
+                          {variant.status === 'processed' && variant.extractedData && variant.documentType === 'COA' && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                               <span style={{ fontSize: '0.75rem', color: 'var(--color-success)', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600 }}>
                                 <CheckCircle size={12} /> Extracción Exitosa
@@ -670,6 +727,19 @@ export default function DocumentUploadModule() {
                                 <div><b>Péptido:</b> {variant.extractedData.peptide_name || 'N/A'}</div>
                                 <div><b>Dosis:</b> {variant.extractedData.dosage || 'N/A'}</div>
                                 <div><b>Pureza:</b> {variant.extractedData.purity_percentage || 'N/A'}</div>
+                              </div>
+                            </div>
+                          )}
+                          {variant.status === 'processed' && variant.extractedData && variant.documentType === 'PRICING_LIST' && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--color-success)', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600 }}>
+                                <CheckCircle size={12} /> Precios Extraídos
+                              </span>
+                              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', backgroundColor: 'white', padding: '0.3rem', borderRadius: '4px', border: '1px solid var(--border)' }}>
+                                <div><b>Items Encontrados:</b> {Array.isArray(variant.extractedData) ? variant.extractedData.length : 0}</div>
+                                <div style={{ color: 'var(--primary)', cursor: 'pointer', marginTop: '0.2rem', fontWeight: 600 }} onClick={() => setDrawerDoc(variant)}>
+                                  Ver Validación <ChevronRight size={10} style={{ verticalAlign: 'middle' }} />
+                                </div>
                               </div>
                             </div>
                           )}
@@ -766,24 +836,77 @@ export default function DocumentUploadModule() {
 
             {/* PDF Viewer */}
             <div style={{ flex: 1, backgroundColor: '#e2e8f0', padding: '1rem', overflow: 'hidden' }}>
-              {(drawerDoc.fileType?.includes('pdf') || drawerDoc.fileName?.toLowerCase().endsWith('.pdf')) && drawerDoc.url ? (
-                <object data={drawerDoc.url} type="application/pdf" width="100%" height="100%" style={{ border: 'none', borderRadius: '8px', backgroundColor: 'white' }}>
-                  <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'white', borderRadius: '8px', color: 'var(--text-muted)' }}>
-                    <p style={{ marginBottom: '1rem' }}>El navegador no permite previsualizar este archivo online (quizás porque los permisos de descarga bloquean el visor de Chrome).</p>
-                    <a href={drawerDoc.url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', padding: '0.6rem 1.2rem', backgroundColor: 'var(--primary)', color: 'white', borderRadius: '8px', fontWeight: 600, textDecoration: 'none' }}>
-                      <Download size={16} style={{ verticalAlign: 'middle', marginRight: '0.4rem' }} /> Descargar PDF
-                    </a>
+              {drawerDoc.documentType === 'PRICING_LIST' && drawerDoc.extractedData ? (
+                <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '1.5rem', height: '100%', overflowY: 'auto' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-main)' }}>Validación de Precios</h3>
+                    <button 
+                      onClick={() => handleApplyPrices(drawerDoc.extractedData, drawerDoc.id)}
+                      disabled={isApplyingPrices}
+                      style={{ padding: '0.6rem 1.2rem', backgroundColor: 'var(--primary)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: isApplyingPrices ? 'not-allowed' : 'pointer', opacity: isApplyingPrices ? 0.7 : 1 }}
+                    >
+                      {isApplyingPrices ? 'Aplicando...' : 'Aplicar al Sistema'}
+                    </button>
                   </div>
-                </object>
-              ) : (
-                <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                  {drawerDoc.url ? 'Preview no disponible para este formato.' : 'Enlace de descarga no encontrado para este documento.'}
-                  {drawerDoc.url && (
-                    <a href={drawerDoc.url} target="_blank" rel="noopener noreferrer" style={{ marginTop: '1rem', padding: '0.6rem 1.2rem', backgroundColor: 'white', border: '1px solid var(--border)', color: 'var(--primary)', borderRadius: '8px', fontWeight: 600, textDecoration: 'none' }}>
-                      Descargar archivo
-                    </a>
-                  )}
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '2px solid var(--border)', textAlign: 'left' }}>
+                        <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Texto Original (Imagen)</th>
+                        <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Producto Asociado</th>
+                        <th style={{ padding: '0.75rem', color: 'var(--text-muted)', textAlign: 'right' }}>Nuevo Coste</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {drawerDoc.extractedData.map((item, idx) => {
+                        const matchedProduct = item.productId ? products.find(p => p.id === item.productId) : null;
+                        return (
+                          <tr key={idx} style={{ borderBottom: '1px solid var(--border)' }}>
+                            <td style={{ padding: '0.75rem' }}>
+                              <div style={{ fontWeight: 600 }}>{item.peptide_name || 'Desconocido'}</div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.original_text || '-'}</div>
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              {matchedProduct ? (
+                                <span style={{ color: 'var(--color-success)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                  <CheckCircle size={14} /> {matchedProduct.name}
+                                </span>
+                              ) : (
+                                <span style={{ color: '#f59e0b', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                  <AlertCircle size={14} /> Requiere Creación
+                                </span>
+                              )}
+                            </td>
+                            <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 800, color: 'var(--text-main)' }}>
+                              ${item.new_cost || '0.00'}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
+              ) : (
+                <>
+                  {(drawerDoc.fileType?.includes('pdf') || drawerDoc.fileName?.toLowerCase().endsWith('.pdf')) && drawerDoc.url ? (
+                    <object data={drawerDoc.url} type="application/pdf" width="100%" height="100%" style={{ border: 'none', borderRadius: '8px', backgroundColor: 'white' }}>
+                      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'white', borderRadius: '8px', color: 'var(--text-muted)' }}>
+                        <p style={{ marginBottom: '1rem' }}>El navegador no permite previsualizar este archivo online (quizás porque los permisos de descarga bloquean el visor de Chrome).</p>
+                        <a href={drawerDoc.url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', padding: '0.6rem 1.2rem', backgroundColor: 'var(--primary)', color: 'white', borderRadius: '8px', fontWeight: 600, textDecoration: 'none' }}>
+                          <Download size={16} style={{ verticalAlign: 'middle', marginRight: '0.4rem' }} /> Descargar PDF
+                        </a>
+                      </div>
+                    </object>
+                  ) : (
+                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                      {drawerDoc.url ? 'Preview no disponible para este formato.' : 'Enlace de descarga no encontrado para este documento.'}
+                      {drawerDoc.url && (
+                        <a href={drawerDoc.url} target="_blank" rel="noopener noreferrer" style={{ marginTop: '1rem', padding: '0.6rem 1.2rem', backgroundColor: 'white', border: '1px solid var(--border)', color: 'var(--primary)', borderRadius: '8px', fontWeight: 600, textDecoration: 'none' }}>
+                          Descargar archivo
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </>
               )}
             </div>
             

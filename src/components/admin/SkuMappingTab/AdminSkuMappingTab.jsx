@@ -14,6 +14,8 @@ import {
   Database,
   Info,
   Search,
+  ArrowRight,
+  ArrowLeft,
 } from 'lucide-react';
 
 /**
@@ -162,6 +164,49 @@ export default function AdminSkuMappingTab() {
     }));
   };
 
+  const handleCopyField = (mappingId, m, sourcePrefix, targetPrefix, field) => {
+    const sourceField = `${sourcePrefix}_${field}`;
+    const targetField = `${targetPrefix}_${field}`;
+    
+    let val = edits[mappingId]?.[sourceField];
+    if (val === undefined) {
+      if (sourceField === 'firebase_category' && field === 'category') val = m.category || '';
+      else if (sourceField === 'zoho_category' && field === 'category') val = m.zoho_category || m.category || '';
+      else if (sourceField === 'firebase_sale_usd' && field === 'sale_price') val = m.guest_usd || 0;
+      else if (sourceField === 'zoho_sale_aed' && field === 'sale_price') val = m.guest_aed || 0;
+      else val = m[sourceField] || '';
+    }
+
+    // Handle currency conversion
+    if (field === 'sale_price') {
+      if (sourcePrefix === 'firebase') {
+        // USD to AED
+        val = (parseFloat(val) || 0) * 3.673;
+        handleEditChange(mappingId, 'guest_aed', val.toFixed(2));
+      } else {
+        // AED to USD
+        val = (parseFloat(val) || 0) / 3.673;
+        handleEditChange(mappingId, 'guest_usd', val.toFixed(2));
+      }
+      return;
+    }
+
+    if (field === 'purchase_price') {
+      if (sourcePrefix === 'firebase') {
+        // USD to AED
+        val = (parseFloat(val) || 0) * 3.673;
+        handleEditChange(mappingId, 'zoho_purchase_rate', val.toFixed(2));
+      } else {
+        // AED to USD
+        val = (parseFloat(val) || 0) / 3.673;
+        handleEditChange(mappingId, 'firebase_purchase_usd', val.toFixed(2));
+      }
+      return;
+    }
+
+    handleEditChange(mappingId, targetField, val);
+  };
+
   const handleSaveAndSync = async (m) => {
     const editData = edits[m.id] || {};
     // If nothing edited, fallback to existing values
@@ -171,6 +216,18 @@ export default function AdminSkuMappingTab() {
       zoho_name: editData.zoho_name !== undefined ? editData.zoho_name : m.zoho_name,
       firebase_category: editData.firebase_category !== undefined ? editData.firebase_category : (m.category || ''),
       zoho_category: editData.zoho_category !== undefined ? editData.zoho_category : (m.zoho_category || m.category || ''),
+      firebase_sku: editData.firebase_sku !== undefined ? editData.firebase_sku : m.firebase_sku,
+      zoho_sku: editData.zoho_sku !== undefined ? editData.zoho_sku : m.zoho_sku,
+      guest_usd: editData.guest_usd !== undefined ? editData.guest_usd : m.guest_usd,
+      guest_aed: editData.guest_aed !== undefined ? editData.guest_aed : m.guest_aed,
+      firebase_purchase_usd: editData.firebase_purchase_usd !== undefined ? editData.firebase_purchase_usd : m.firebase_purchase_usd,
+      zoho_purchase_rate: editData.zoho_purchase_rate !== undefined ? editData.zoho_purchase_rate : m.zoho_purchase_rate,
+      firebase_description: editData.firebase_description !== undefined ? editData.firebase_description : m.firebase_description,
+      zoho_description: editData.zoho_description !== undefined ? editData.zoho_description : m.zoho_description,
+      firebase_purchase_description: editData.firebase_purchase_description !== undefined ? editData.firebase_purchase_description : m.firebase_purchase_description,
+      zoho_purchase_description: editData.zoho_purchase_description !== undefined ? editData.zoho_purchase_description : m.zoho_purchase_description,
+      firebase_supplier_name: editData.firebase_supplier_name !== undefined ? editData.firebase_supplier_name : m.firebase_supplier_name,
+      zoho_vendor_name: editData.zoho_vendor_name !== undefined ? editData.zoho_vendor_name : m.zoho_vendor_name,
     };
 
     setSyncingRowId(m.id);
@@ -656,103 +713,235 @@ export default function AdminSkuMappingTab() {
                       <tr style={styles.trExpanded}>
                         <td colSpan={6} style={{ padding: 0 }}>
                           <div style={{ ...styles.detailPanel, display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
-                              {/* Card 1: Firebase Product */}
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 20 }}>
+                              {/* Unified Mapping Details Card */}
                               <div style={styles.detailCard}>
-                                <span style={styles.detailCardTitle}>Firebase Catalog Details</span>
-                                <div style={styles.detailField}>
-                                  <span style={styles.detailLabel}>Product Name</span>
-                                  <input
-                                    type="text"
-                                    style={styles.editInput}
-                                    value={edits[m.id]?.firebase_name !== undefined ? edits[m.id].firebase_name : (m.firebase_name || '')}
-                                    onChange={(e) => handleEditChange(m.id, 'firebase_name', e.target.value)}
-                                  />
-                                </div>
-                                <div style={styles.detailField}>
-                                  <span style={styles.detailLabel}>Firebase SKU</span>
-                                <div>
-                                  <code style={styles.sku}>{m.firebase_sku || '—'}</code>
-                                </div>
-                              </div>
-                              <div style={styles.detailField}>
-                                <span style={styles.detailLabel}>Document ID</span>
-                                <span style={styles.monoId}>{m.firebase_product_id}</span>
-                              </div>
-                              <div style={styles.detailField}>
-                                <span style={styles.detailLabel}>Category</span>
-                                <input
-                                  type="text"
-                                  style={styles.editInput}
-                                  value={edits[m.id]?.firebase_category !== undefined ? edits[m.id].firebase_category : (m.category || '')}
-                                  onChange={(e) => handleEditChange(m.id, 'firebase_category', e.target.value)}
-                                  placeholder="No category set"
-                                />
-                              </div>
-                              {m.firebase_variant_id && (
-                                <div style={styles.detailField}>
-                                  <span style={styles.detailLabel}>Variant ID</span>
-                                  <span style={styles.monoId}>{m.firebase_variant_id}</span>
-                                </div>
-                              )}
-                              <div style={styles.detailField}>
-                                <span style={styles.detailLabel}>Guest Catalog Price</span>
-                                <span style={styles.detailValue}>
-                                  ${(m.guest_usd || 0).toFixed(2)} USD
-                                </span>
-                              </div>
-                            </div>
+                                <span style={styles.detailCardTitle}>Mapping Details</span>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 32px 1fr', gap: '16px', alignItems: 'center' }}>
+                                  {/* Header Row */}
+                                  <div style={{ fontWeight: 600, color: '#5f6368', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Firebase Catalog</div>
+                                  <div></div>
+                                  <div style={{ fontWeight: 600, color: '#5f6368', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Zoho Books Item</div>
+                                  {/* Row 1: Name */}
+                                  <div style={styles.detailField}>
+                                    <span style={styles.detailLabel}>Product Name</span>
+                                    <input
+                                      type="text"
+                                      style={styles.editInput}
+                                      value={edits[m.id]?.firebase_name !== undefined ? edits[m.id].firebase_name : (m.firebase_name || '')}
+                                      onChange={(e) => handleEditChange(m.id, 'firebase_name', e.target.value)}
+                                    />
+                                  </div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', marginTop: 14 }}>
+                                    <button onClick={() => handleCopyField(m.id, m, 'firebase', 'zoho', 'name')} style={styles.copyBtn} title="Copy to Zoho"><ArrowRight size={14} /></button>
+                                    <button onClick={() => handleCopyField(m.id, m, 'zoho', 'firebase', 'name')} style={styles.copyBtn} title="Copy to Firebase"><ArrowLeft size={14} /></button>
+                                  </div>
+                                  <div style={styles.detailField}>
+                                    <span style={styles.detailLabel}>Item Name</span>
+                                    <input
+                                      type="text"
+                                      style={styles.editInput}
+                                      value={edits[m.id]?.zoho_name !== undefined ? edits[m.id].zoho_name : (m.zoho_name || '')}
+                                      onChange={(e) => handleEditChange(m.id, 'zoho_name', e.target.value)}
+                                    />
+                                  </div>
 
-                              {/* Card 2: Zoho Books Item */}
-                              <div style={styles.detailCard}>
-                                <span style={styles.detailCardTitle}>Zoho Books Item Details</span>
-                                <div style={styles.detailField}>
-                                  <span style={styles.detailLabel}>Item Name</span>
-                                  <input
-                                    type="text"
-                                    style={styles.editInput}
-                                    value={edits[m.id]?.zoho_name !== undefined ? edits[m.id].zoho_name : (m.zoho_name || '')}
-                                    onChange={(e) => handleEditChange(m.id, 'zoho_name', e.target.value)}
-                                  />
+                                  {/* Row 2: Category */}
+                                  <div style={styles.detailField}>
+                                    <span style={styles.detailLabel}>Category</span>
+                                    <input
+                                      type="text"
+                                      style={styles.editInput}
+                                      value={edits[m.id]?.firebase_category !== undefined ? edits[m.id].firebase_category : (m.category || '')}
+                                      onChange={(e) => handleEditChange(m.id, 'firebase_category', e.target.value)}
+                                      placeholder="No category set"
+                                    />
+                                  </div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', marginTop: 14 }}>
+                                    <button onClick={() => handleCopyField(m.id, m, 'firebase', 'zoho', 'category')} style={styles.copyBtn} title="Copy to Zoho"><ArrowRight size={14} /></button>
+                                    <button onClick={() => handleCopyField(m.id, m, 'zoho', 'firebase', 'category')} style={styles.copyBtn} title="Copy to Firebase"><ArrowLeft size={14} /></button>
+                                  </div>
+                                  <div style={styles.detailField}>
+                                    <span style={styles.detailLabel}>Category / Group</span>
+                                    <input
+                                      type="text"
+                                      style={styles.editInput}
+                                      value={edits[m.id]?.zoho_category !== undefined ? edits[m.id].zoho_category : (m.zoho_category || m.category || '')}
+                                      onChange={(e) => handleEditChange(m.id, 'zoho_category', e.target.value)}
+                                      placeholder="No category set"
+                                    />
+                                  </div>
+
+                                  {/* Row 3: SKU */}
+                                  <div style={styles.detailField}>
+                                    <span style={styles.detailLabel}>Firebase SKU</span>
+                                    <input
+                                      type="text"
+                                      style={styles.editInput}
+                                      value={edits[m.id]?.firebase_sku !== undefined ? edits[m.id].firebase_sku : (m.firebase_sku || '')}
+                                      onChange={(e) => handleEditChange(m.id, 'firebase_sku', e.target.value)}
+                                    />
+                                  </div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', marginTop: 14 }}>
+                                    <button onClick={() => handleCopyField(m.id, m, 'firebase', 'zoho', 'sku')} style={styles.copyBtn} title="Copy to Zoho"><ArrowRight size={14} /></button>
+                                    <button onClick={() => handleCopyField(m.id, m, 'zoho', 'firebase', 'sku')} style={styles.copyBtn} title="Copy to Firebase"><ArrowLeft size={14} /></button>
+                                  </div>
+                                  <div style={styles.detailField}>
+                                    <span style={styles.detailLabel}>Zoho SKU</span>
+                                    <input
+                                      type="text"
+                                      style={styles.editInput}
+                                      value={edits[m.id]?.zoho_sku !== undefined ? edits[m.id].zoho_sku : (m.zoho_sku || '')}
+                                      onChange={(e) => handleEditChange(m.id, 'zoho_sku', e.target.value)}
+                                    />
+                                  </div>
+
+                                  {/* Row 4: Sale Price */}
+                                  <div style={styles.detailField}>
+                                    <span style={styles.detailLabel}>Sale Price (USD)</span>
+                                    <input
+                                      type="number"
+                                      style={styles.editInput}
+                                      value={edits[m.id]?.guest_usd !== undefined ? edits[m.id].guest_usd : (m.guest_usd || 0)}
+                                      onChange={(e) => handleEditChange(m.id, 'guest_usd', e.target.value)}
+                                    />
+                                  </div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', marginTop: 14 }}>
+                                    <button onClick={() => handleCopyField(m.id, m, 'firebase', 'zoho', 'sale_price')} style={styles.copyBtn} title="Copy and Convert to AED"><ArrowRight size={14} /></button>
+                                    <button onClick={() => handleCopyField(m.id, m, 'zoho', 'firebase', 'sale_price')} style={styles.copyBtn} title="Copy and Convert to USD"><ArrowLeft size={14} /></button>
+                                  </div>
+                                  <div style={styles.detailField}>
+                                    <span style={styles.detailLabel}>Sale Rate (AED)</span>
+                                    <input
+                                      type="number"
+                                      style={styles.editInput}
+                                      value={edits[m.id]?.guest_aed !== undefined ? edits[m.id].guest_aed : (m.guest_aed || 0)}
+                                      onChange={(e) => handleEditChange(m.id, 'guest_aed', e.target.value)}
+                                    />
+                                  </div>
+
+                                  {/* Row 5: Purchase Price */}
+                                  <div style={styles.detailField}>
+                                    <span style={styles.detailLabel}>Purchase Price (USD)</span>
+                                    <input
+                                      type="number"
+                                      style={styles.editInput}
+                                      value={edits[m.id]?.firebase_purchase_usd !== undefined ? edits[m.id].firebase_purchase_usd : (m.firebase_purchase_usd || 0)}
+                                      onChange={(e) => handleEditChange(m.id, 'firebase_purchase_usd', e.target.value)}
+                                    />
+                                  </div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', marginTop: 14 }}>
+                                    <button onClick={() => handleCopyField(m.id, m, 'firebase', 'zoho', 'purchase_price')} style={styles.copyBtn} title="Copy and Convert to AED"><ArrowRight size={14} /></button>
+                                    <button onClick={() => handleCopyField(m.id, m, 'zoho', 'firebase', 'purchase_price')} style={styles.copyBtn} title="Copy and Convert to USD"><ArrowLeft size={14} /></button>
+                                  </div>
+                                  <div style={styles.detailField}>
+                                    <span style={styles.detailLabel}>Purchase Rate (AED)</span>
+                                    <input
+                                      type="number"
+                                      style={styles.editInput}
+                                      value={edits[m.id]?.zoho_purchase_rate !== undefined ? edits[m.id].zoho_purchase_rate : (m.zoho_purchase_rate || 0)}
+                                      onChange={(e) => handleEditChange(m.id, 'zoho_purchase_rate', e.target.value)}
+                                    />
+                                  </div>
+
+                                  {/* Row 6: Sale Description */}
+                                  <div style={styles.detailField}>
+                                    <span style={styles.detailLabel}>Sale Description</span>
+                                    <input
+                                      type="text"
+                                      style={styles.editInput}
+                                      value={edits[m.id]?.firebase_description !== undefined ? edits[m.id].firebase_description : (m.firebase_description || '')}
+                                      onChange={(e) => handleEditChange(m.id, 'firebase_description', e.target.value)}
+                                    />
+                                  </div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', marginTop: 14 }}>
+                                    <button onClick={() => handleCopyField(m.id, m, 'firebase', 'zoho', 'description')} style={styles.copyBtn} title="Copy to Zoho"><ArrowRight size={14} /></button>
+                                    <button onClick={() => handleCopyField(m.id, m, 'zoho', 'firebase', 'description')} style={styles.copyBtn} title="Copy to Firebase"><ArrowLeft size={14} /></button>
+                                  </div>
+                                  <div style={styles.detailField}>
+                                    <span style={styles.detailLabel}>Sale Description</span>
+                                    <input
+                                      type="text"
+                                      style={styles.editInput}
+                                      value={edits[m.id]?.zoho_description !== undefined ? edits[m.id].zoho_description : (m.zoho_description || '')}
+                                      onChange={(e) => handleEditChange(m.id, 'zoho_description', e.target.value)}
+                                    />
+                                  </div>
+
+                                  {/* Row 7: Purchase Description */}
+                                  <div style={styles.detailField}>
+                                    <span style={styles.detailLabel}>Purchase Description</span>
+                                    <input
+                                      type="text"
+                                      style={styles.editInput}
+                                      value={edits[m.id]?.firebase_purchase_description !== undefined ? edits[m.id].firebase_purchase_description : (m.firebase_purchase_description || '')}
+                                      onChange={(e) => handleEditChange(m.id, 'firebase_purchase_description', e.target.value)}
+                                    />
+                                  </div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', marginTop: 14 }}>
+                                    <button onClick={() => handleCopyField(m.id, m, 'firebase', 'zoho', 'purchase_description')} style={styles.copyBtn} title="Copy to Zoho"><ArrowRight size={14} /></button>
+                                    <button onClick={() => handleCopyField(m.id, m, 'zoho', 'firebase', 'purchase_description')} style={styles.copyBtn} title="Copy to Firebase"><ArrowLeft size={14} /></button>
+                                  </div>
+                                  <div style={styles.detailField}>
+                                    <span style={styles.detailLabel}>Purchase Description</span>
+                                    <input
+                                      type="text"
+                                      style={styles.editInput}
+                                      value={edits[m.id]?.zoho_purchase_description !== undefined ? edits[m.id].zoho_purchase_description : (m.zoho_purchase_description || '')}
+                                      onChange={(e) => handleEditChange(m.id, 'zoho_purchase_description', e.target.value)}
+                                    />
+                                  </div>
+
+                                  {/* Row 8: Supplier */}
+                                  <div style={styles.detailField}>
+                                    <span style={styles.detailLabel}>Supplier Name</span>
+                                    <input
+                                      type="text"
+                                      style={styles.editInput}
+                                      value={edits[m.id]?.firebase_supplier_name !== undefined ? edits[m.id].firebase_supplier_name : (m.firebase_supplier_name || '')}
+                                      onChange={(e) => handleEditChange(m.id, 'firebase_supplier_name', e.target.value)}
+                                    />
+                                  </div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', marginTop: 14 }}>
+                                    <button onClick={() => handleCopyField(m.id, m, 'firebase', 'zoho', 'supplier')} style={styles.copyBtn} title="Copy to Zoho"><ArrowRight size={14} /></button>
+                                    <button onClick={() => handleCopyField(m.id, m, 'zoho', 'firebase', 'supplier')} style={styles.copyBtn} title="Copy to Firebase"><ArrowLeft size={14} /></button>
+                                  </div>
+                                  <div style={styles.detailField}>
+                                    <span style={styles.detailLabel}>Preferred Vendor Name</span>
+                                    <input
+                                      type="text"
+                                      style={styles.editInput}
+                                      value={edits[m.id]?.zoho_vendor_name !== undefined ? edits[m.id].zoho_vendor_name : (m.zoho_vendor_name || '')}
+                                      onChange={(e) => handleEditChange(m.id, 'zoho_vendor_name', e.target.value)}
+                                    />
+                                  </div>
+
+                                  {/* Row 9: IDs / Links */}
+                                  <div style={{ ...styles.detailField, paddingTop: 12, borderTop: '1px solid #f1f3f4', marginTop: 8 }}>
+                                    <span style={styles.detailLabel}>IDs</span>
+                                    <div style={{ display: 'flex', gap: 8 }}>
+                                      <span style={styles.monoId}>{m.firebase_product_id}</span>
+                                      {m.firebase_variant_id && <span style={styles.monoId}>{m.firebase_variant_id}</span>}
+                                    </div>
+                                  </div>
+                                  <div style={{ paddingTop: 12, borderTop: '1px solid #f1f3f4', marginTop: 8 }}></div>
+                                  <div style={{ ...styles.detailField, paddingTop: 12, borderTop: '1px solid #f1f3f4', marginTop: 8 }}>
+                                    <span style={styles.detailLabel}>Zoho Item ID</span>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                      <span style={styles.monoId}>{m.zoho_item_id}</span>
+                                      <a
+                                        href={`https://erp.mediluxeme.com/app/662274409#/inventory/items/${m.zoho_item_id}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={styles.detailLink}
+                                      >
+                                        <ExternalLink size={13} style={{ marginRight: 4 }} />
+                                        Edit
+                                      </a>
+                                    </div>
+                                  </div>
                                 </div>
-                                <div style={styles.detailField}>
-                                  <span style={styles.detailLabel}>Category / Group</span>
-                                  <input
-                                    type="text"
-                                    style={styles.editInput}
-                                    value={edits[m.id]?.zoho_category !== undefined ? edits[m.id].zoho_category : (m.zoho_category || m.category || '')}
-                                    onChange={(e) => handleEditChange(m.id, 'zoho_category', e.target.value)}
-                                    placeholder="No category set"
-                                  />
-                                </div>
-                                <div style={styles.detailField}>
-                                  <span style={styles.detailLabel}>Zoho SKU</span>
-                                <div>
-                                  <code style={styles.sku}>{m.zoho_sku || '—'}</code>
-                                </div>
                               </div>
-                              <div style={styles.detailField}>
-                                <span style={styles.detailLabel}>Zoho Item ID</span>
-                                <span style={styles.monoId}>{m.zoho_item_id}</span>
-                              </div>
-                              <div style={styles.detailField}>
-                                <span style={styles.detailLabel}>Zoho Books Rate</span>
-                                <span style={styles.detailValue}>
-                                  {(m.guest_aed || 0).toFixed(2)} AED
-                                </span>
-                              </div>
-                              <div style={{ marginTop: 'auto', paddingTop: 8 }}>
-                                <a
-                                  href={`https://erp.mediluxeme.com/app/662274409#/inventory/items/${m.zoho_item_id}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={styles.detailLink}
-                                >
-                                  <ExternalLink size={13} style={{ marginRight: 4 }} />
-                                  Edit in Zoho Books
-                                </a>
-                              </div>
-                            </div>
                             </div>
 
                             {/* Card 3: Match Metadata & Local Actions (Full Width) */}
@@ -1204,6 +1393,20 @@ const styles = {
     lineHeight: 1.5,
     color: '#3c4043',
     fontStyle: 'italic',
+  },
+
+  copyBtn: {
+    background: 'none',
+    border: '1px solid #dadce0',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    padding: '4px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#5f6368',
+    backgroundColor: '#f8f9fa',
+    transition: 'all 0.2s ease',
   },
   monoId: {
     fontFamily: 'monospace',
