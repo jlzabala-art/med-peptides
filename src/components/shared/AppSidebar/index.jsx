@@ -25,7 +25,6 @@ function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, 
   };
 
   const items = group.items || [];
-  const maxH = isOpen ? `${items.length * 40 + 8}px` : '0px';
 
   return (
     <div ref={setNodeRef} style={style} className="sb-group">
@@ -46,9 +45,10 @@ function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, 
           {group.badge && expanded && (
             <span style={{
               fontSize: '9px', fontWeight: 800, letterSpacing: '0.5px',
-              padding: '1px 5px', borderRadius: '3px',
+              padding: '2px 6px', borderRadius: '4px',
               backgroundColor: group.badgeColor || '#0071bd',
               color: 'white', marginRight: '4px',
+              lineHeight: 1,
             }}>
               {group.badge}
             </span>
@@ -83,7 +83,7 @@ function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, 
         
         {/* Drop zone placeholder for empty groups */}
         {isEditing && items.length === 0 && (
-          <div style={{ padding: '8px 16px', fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic', textAlign: 'center' }}>
+          <div style={{ padding: '8px 16px', fontSize: '0.75rem', color: 'var(--sb-muted)', fontStyle: 'italic', textAlign: 'center' }}>
             Drop items here
           </div>
         )}
@@ -123,7 +123,7 @@ function SortableSidebarItem({ item, isActive, handleItemClick, expanded, isEdit
         <div 
           {...attributes} 
           {...listeners} 
-          style={{ cursor: 'grab', padding: '0 8px', color: 'var(--text-muted)' }}
+          style={{ cursor: 'grab', padding: '0 6px', color: 'var(--sb-muted)' }}
         >
           <GripVertical size={14} />
         </div>
@@ -134,7 +134,12 @@ function SortableSidebarItem({ item, isActive, handleItemClick, expanded, isEdit
         data-tooltip={!expanded ? item.label : undefined}
         title={!expanded ? item.label : undefined}
         aria-current={isActive ? 'page' : undefined}
-        style={{ flex: 1, pointerEvents: isEditing ? 'none' : 'auto', paddingLeft: isEditing ? '4px' : '16px', paddingRight: onToggleFavorite ? '28px' : undefined }}
+        style={{
+          flex: 1,
+          pointerEvents: isEditing ? 'none' : 'auto',
+          paddingLeft: isEditing ? '4px' : undefined,
+          paddingRight: onToggleFavorite ? '30px' : undefined,
+        }}
       >
         <span className="sb-item-icon">
           {Icon && <Icon size={16} />}
@@ -145,7 +150,7 @@ function SortableSidebarItem({ item, isActive, handleItemClick, expanded, isEdit
         )}
       </button>
       
-      {/* Pin to Favorites Button */}
+      {/* Pin to Favorites Button — visible on hover or when editing/pinned */}
       {onToggleFavorite && (isEditing || expanded) && (
         <button
           className="sb-item-pin-btn"
@@ -153,20 +158,20 @@ function SortableSidebarItem({ item, isActive, handleItemClick, expanded, isEdit
           title={isFavorite ? "Remove from Favorites" : "Pin to Favorites"}
           style={{
             position: 'absolute',
-            right: '8px',
+            right: '10px',
             background: 'none',
             border: 'none',
             cursor: 'pointer',
             padding: '4px',
-            color: isFavorite ? '#f59e0b' : 'var(--text-muted)',
+            color: isFavorite ? '#f59e0b' : 'var(--sb-muted)',
             opacity: isEditing || isFavorite ? 1 : 0,
             transition: 'opacity 0.2s, transform 0.2s, color 0.2s',
             zIndex: 10,
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = '#f59e0b'; e.currentTarget.style.transform = 'scale(1.1)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = isFavorite ? '#f59e0b' : 'var(--text-muted)'; e.currentTarget.style.transform = 'scale(1)'; }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = '#f59e0b'; e.currentTarget.style.transform = 'scale(1.15)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = isFavorite ? '#f59e0b' : 'var(--sb-muted)'; e.currentTarget.style.transform = 'scale(1)'; }}
         >
-          <Star size={14} fill={isFavorite ? '#f59e0b' : 'none'} />
+          <Star size={13} fill={isFavorite ? '#f59e0b' : 'none'} />
         </button>
       )}
     </div>
@@ -179,12 +184,12 @@ function InlineConfirmReset({ onReset }) {
 
   if (confirming) {
     return (
-      <div style={{ display: 'flex', gap: '4px', flex: '0 0 auto', padding: '0', margin: 0 }}>
+      <div style={{ display: 'flex', gap: '4px', flex: '0 0 auto' }}>
         <button
           className="sb-item"
           onClick={onReset}
           title="Confirm Reset"
-          style={{ width: 'auto', padding: '0 10px', color: '#fff', backgroundColor: '#ef4444', justifyContent: 'center', borderRadius: '4px' }}
+          style={{ width: 'auto', padding: '4px 10px', color: '#fff', backgroundColor: '#ef4444', justifyContent: 'center', borderRadius: '8px', fontSize: '11px', fontWeight: 600 }}
         >
           Yes
         </button>
@@ -192,7 +197,7 @@ function InlineConfirmReset({ onReset }) {
           className="sb-item"
           onClick={() => setConfirming(false)}
           title="Cancel"
-          style={{ width: 'auto', padding: '0 10px', color: 'var(--text-main)', backgroundColor: 'var(--bg-hover)', justifyContent: 'center', borderRadius: '4px' }}
+          style={{ width: 'auto', padding: '4px 10px', color: 'var(--sb-text)', backgroundColor: 'var(--sb-hover-bg)', justifyContent: 'center', borderRadius: '8px', fontSize: '11px', fontWeight: 600 }}
         >
           No
         </button>
@@ -205,7 +210,7 @@ function InlineConfirmReset({ onReset }) {
       className="sb-item"
       onClick={() => setConfirming(true)}
       title="Reset to Default"
-      style={{ flex: '0 0 auto', width: 'auto', padding: '0 12px', margin: 0, color: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', justifyContent: 'center', borderRadius: '4px' }}
+      style={{ flex: '0 0 auto', width: 'auto', padding: '4px 12px', color: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.08)', justifyContent: 'center', borderRadius: '8px', fontSize: '11px', fontWeight: 600 }}
     >
       Reset
     </button>
@@ -216,16 +221,16 @@ function InlineConfirmReset({ onReset }) {
 export default function AppSidebar({
   storageKey = 'app-sidebar',
   groups = [],
-  pinnedItems = [], // Always-visible items above the accordion (e.g. Dashboard, Messages)
+  pinnedItems = [],
   activeId,
   onNavigate,
-  accentColor = '#0071bd',
+  accentColor = '#1a73e8',
   header = {},
   footer,
   isOpen,
   onClose,
   isMobile,
-  isEditing = false, // Injected by SidebarGadget wrapper
+  isEditing = false,
   onToggleFavorite
 }) {
   const [expanded, setExpanded] = useState(() => {
@@ -239,7 +244,6 @@ export default function AppSidebar({
       if (saved) return new Set(saved);
     } catch {}
     
-    // Default: only the active group is open
     const activeGroup = groups.find(g => g.items?.some(i => i.id === activeId));
     return activeGroup ? new Set([activeGroup.id]) : new Set();
   });
@@ -254,12 +258,11 @@ export default function AppSidebar({
 
   useEffect(() => {
     if (isEditing) {
-      setOpenGroups(new Set(groups.map(g => g.id))); // Open all when editing
-      if (!expanded) setExpanded(true); // Must be expanded to edit properly
+      setOpenGroups(new Set(groups.map(g => g.id)));
+      if (!expanded) setExpanded(true);
     } else {
       const activeGroup = groups.find(g => g.items?.some(i => i.id === activeId));
       if (activeGroup) {
-        // Accordion behavior: ONLY keep the active group open when navigating
         setOpenGroups(new Set([activeGroup.id]));
       }
     }
@@ -275,7 +278,12 @@ export default function AppSidebar({
   const toggleGroup = useCallback((groupId) => {
     setOpenGroups(prev => {
       const next = new Set(prev);
-      if (next.has(groupId)) next.delete(groupId); else next.add(groupId);
+      if (next.has(groupId)) {
+        next.delete(groupId);
+      } else {
+        next.clear(); // Enforce accordion behavior globally
+        next.add(groupId);
+      }
       return next;
     });
   }, []);
@@ -296,7 +304,10 @@ export default function AppSidebar({
     isEditing ? 'editing-mode' : ''
   ].filter(Boolean).join(' ');
 
-  const sidebarStyle = { '--sb-active-border': accentColor, '--sb-active-bg': `${accentColor}25` };
+  const sidebarStyle = {
+    '--sb-active-color': accentColor,
+    '--sb-active-bg': `${accentColor}18`,
+  };
 
   return (
     <>
@@ -334,7 +345,7 @@ export default function AppSidebar({
         </div>
 
         <nav className="sb-scroll" role="navigation">
-          {/* ── Pinned items — always visible, not inside accordion ── */}
+          {/* ── Pinned items — always visible ── */}
           {pinnedItems.length > 0 && (
             <div className="sb-pinned-section">
               {pinnedItems.map((item) => {
@@ -348,7 +359,6 @@ export default function AppSidebar({
                     data-tooltip={!expanded ? item.label : undefined}
                     title={!expanded ? item.label : undefined}
                     aria-current={isActive ? 'page' : undefined}
-                    style={{ paddingLeft: '16px' }}
                   >
                     <span className="sb-item-icon">
                       {Icon && <Icon size={16} />}
@@ -360,10 +370,11 @@ export default function AppSidebar({
                   </button>
                 );
               })}
-              <div className="sb-divider" style={{ marginTop: '6px' }} />
+              <div className="sb-divider" />
             </div>
           )}
 
+          {/* ── Accordion groups ── */}
           <SortableContext items={groups.map(g => g.id)} strategy={verticalListSortingStrategy}>
             {groups.map((group, gi) => (
               <React.Fragment key={group.id}>
@@ -387,12 +398,18 @@ export default function AppSidebar({
         </nav>
 
         {footer && (
-          <div className="sb-footer" style={{ display: 'flex', gap: '4px', padding: '8px', flexDirection: (expanded || isEditing) ? 'row' : 'column' }}>
+          <div className="sb-footer" style={{ display: 'flex', gap: '4px', flexDirection: (expanded || isEditing) ? 'row' : 'column' }}>
             <button
               className="sb-item"
               onClick={footer.onClick}
               data-tooltip={!expanded ? footer.label : undefined}
-              style={{ flex: 1, width: 'auto', color: isEditing ? 'var(--primary)' : 'var(--text-tertiary)', fontWeight: isEditing ? 600 : 400, justifyContent: 'center', margin: 0, borderRadius: '4px' }}
+              style={{
+                flex: 1,
+                width: 'auto',
+                color: isEditing ? 'var(--sb-active-color)' : 'var(--sb-muted)',
+                fontWeight: isEditing ? 600 : 400,
+                justifyContent: 'center',
+              }}
             >
               <span className="sb-item-icon">
                 {footer.icon ? <footer.icon size={16} /> : <LogOut size={16} />}

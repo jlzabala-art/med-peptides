@@ -42,6 +42,7 @@ exports.checkInventoryLevels = require('./src/cron/check_inventory_levels').chec
 
 // TRIGGERS
 exports.scoreNewLead = require('./src/triggers/on_lead_created').scoreNewLead;
+exports.onProductCreated = require('./src/triggers/products').onProductCreated;
 exports.reconcileSupplierInvoice   = require("./src/http/reconcile_supplier_invoice").reconcileSupplierInvoice; // 3-way invoice matching
 
 exports.acceptInvitation           = require("./src/http/acceptInvitation").acceptInvitation; // Secure invitation acceptance
@@ -67,6 +68,9 @@ exports.submitBulkOrder = submitBulkOrder; // Wholesaler bulk order submission +
 // ── Scheduled Tasks ──────────────────────────────────────────────────────────
 exports.syncPeptideAnalytics = require("./src/scheduled/analytics_sync")(ga4PropertyId);
 exports.keepAliveZoho        = require("./src/scheduled/zohoKeepAlive");
+exports.syncZohoToFirebase   = require("./src/scheduled/syncZohoToFirebase").syncZohoToFirebase;
+exports.nightlySkuDiscovery  = require("./src/scheduled/nightlySkuDiscovery").nightlySkuDiscovery;
+exports.adminDailyDigest     = require("./src/scheduled/adminDailyDigest").adminDailyDigest;
 
 // ── Calendar & Scheduling ───────────────────────────────────────────────────
 const calendarAuth = require("./src/http/calendarAuth");

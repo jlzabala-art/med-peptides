@@ -474,6 +474,13 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ── user_sessions — Tracking connection time ──
+    match /user_sessions/{uid} {
+      allow read: if isAuthenticated() && (request.auth.uid == uid || isAdmin());
+      allow create, update: if isAuthenticated() && request.auth.uid == uid;
+      allow delete: if isAdmin();
+    }
+
     // Default catch-all: Admins only
     match /{document=**} {
       allow read, write: if isAdmin();

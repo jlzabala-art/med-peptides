@@ -95,7 +95,7 @@ function buildMatchingPrompt(firebaseProducts, zohoItems) {
   ).join("\n");
 
   const zohoLines = zohoItems.map((z, i) =>
-    `${i + 1}. [ZH-${z.item_id.slice(-6)}] "${z.name}" | SKU: ${z.sku || "—"} | rate: ${z.rate} AED`
+    `${i + 1}. [ZH-${z.item_id.slice(-6)}] "${z.name}" | SKU: ${z.sku || "—"} | cat: ${z.category_name || z.group_name || "—"} | rate: ${z.rate} AED`
   ).join("\n");
 
   return `You are a product catalog matching expert. Match Firebase products to Zoho Books items.
@@ -120,6 +120,7 @@ Return ONLY a JSON array:
     "zoho_item_id": "<full Zoho item_id>",
     "zoho_sku": "<Zoho SKU>",
     "zoho_name": "<Zoho item name>",
+    "zoho_category": "<Zoho category name or group name if available, else empty>",
     "confidence": <0-100 integer>,
     "reasoning": "<1-2 sentences explaining the match>"
   }
@@ -216,6 +217,7 @@ async function discover(db, aedRate, useAI = true) {
       zoho_item_id:        match.zoho_item_id,
       zoho_sku:            match.zoho_sku || "",
       zoho_name:           match.zoho_name,
+      zoho_category:       match.zoho_category || "",
       zoho_org_id:         "662274409",
       match_confidence:    match.confidence,
       match_reasoning:     match.reasoning,
@@ -232,15 +234,58 @@ async function discover(db, aedRate, useAI = true) {
     results.push({ ...record });
   }
 
-  await batch.commit();
+  // ── Phase 4: Persist Unmapped Items ───────────────────────────────────────
+  const unmappedZoho = zohoItems.filter(z => !matches.some(m => m.zoho_item_id === z.item_id));
+  for (const z of unmappedZoho) {
+    const docId = `unmapped_zoho_${z.item_id}`;
+    const record = {
+      firebase_product_id: null,
+      firebase_name: "— Not in Firebase —",
+      zoho_item_id: z.item_id,
+      zoho_sku: z.sku || "",
+      zoho_name: z.name,
+      zoho_category: z.category_name || z.group_name || "",
+      zoho_org_id: "662274409",
+      status: "zoho_only",
+      guest_aed: z.rate || 0,
+      created_at: FieldValue.serverTimestamp(),
+      last_synced_at: null,
+    };
+    batch.set(db.collection(ZOHO_FIRESTORE.SKU_MAPPINGS).doc(docId), record, { merge: true });
+    results.push(record);
+  }
+
+  const unmappedFirebase = firebaseProducts.filter(fb => !matches.some(m => m.firebase_product_id === fb.firebase_product_id));
+  for (const fb of unmappedFirebase) {
+    const docId = `unmapped_fb_${fb.firebase_product_id}${fb.firebase_variant_id ? '_' + fb.firebase_variant_id : ''}`;
+    const record = {
+      firebase_product_id: fb.firebase_product_id,
+      firebase_variant_id: fb.firebase_variant_id || null,
+      firebase_sku: fb.firebase_sku || fb.sku || "",
+      firebase_name: fb.name,
+      zoho_item_id: null,
+      zoho_name: "— Not in Zoho —",
+      status: "firebase_only",
+      guest_usd: fb.guest_usd || 0,
+      guest_aed: usdToAed(fb.guest_usd || 0, aedRate),
+      created_at: FieldValue.serverTimestamp(),
+      last_synced_at: null,
+    };
+    batch.set(db.collection(ZOHO_FIRESTORE.SKU_MAPPINGS).doc(docId), record, { merge: true });
+    results.push(record);
+  }
+
+  await batch.commit(); // Note: if total items > 500, we'll need chunking. Assuming < 500 for now.
 
   const autoConfirmed = results.filter(r => r.status === SYNC_STATUS.CONFIRMED).length;
   const needsReview   = results.filter(r => r.status === SYNC_STATUS.PENDING).length;
 
   return {
-    matched:        results.length,
+    matched:        matches.length,
     auto_confirmed: autoConfirmed,
     needs_review:   needsReview,
+    unmapped_zoho:  unmappedZoho.length,
+    unmapped_fb:    unmappedFirebase.length,
     firebase_total: firebaseProducts.length,
     candidates:    results,
   };
@@ -262,7 +307,14 @@ async function confirmMapping(db, { mappingId, action, adminNote }) {
     match_method:   MATCH_METHOD.ADMIN_CONFIRMED,
     admin_note:     adminNote || null,
     confirmed_at:   FieldValue.serverTimestamp(),
+    last_error:     FieldValue.delete()
   });
+
+  if (action === "confirm") {
+    await pushBulk(db, { mappingIds: [mappingId] });
+    const finalDoc = await docRef.get();
+    return { mappingId, status: finalDoc.data().status };
+  }
 
   return { mappingId, status: newStatus };
 }
@@ -283,10 +335,17 @@ async function confirmBulk(db, { mappingIds, action, adminNote }) {
       match_method:   MATCH_METHOD.ADMIN_CONFIRMED,
       admin_note:     adminNote || null,
       confirmed_at:   FieldValue.serverTimestamp(),
+      last_error:     FieldValue.delete()
     });
   }
 
   await batch.commit();
+
+  if (action === "confirm") {
+    await pushBulk(db, { mappingIds });
+    return { mappingIds, status: SYNC_STATUS.SYNCED }; // assuming it goes to synced or error
+  }
+
   return { mappingIds, status: newStatus };
 }
 
@@ -314,13 +373,20 @@ async function pushToZoho(db, { dryRun = false } = {}) {
     }
 
     try {
-      await zoho.setItemCustomField(mapping.zoho_item_id, ZOHO_CF_FIREBASE_SKU, mapping.firebase_sku);
-      await zoho.setItemCustomField(mapping.zoho_item_id, ZOHO_CF_FIREBASE_ID, mapping.firebase_product_id);
+      await zoho.updateItem(mapping.zoho_item_id, {
+        sku: mapping.firebase_sku,
+        custom_fields: [
+          { label: ZOHO_CF_FIREBASE_SKU, value: mapping.firebase_sku },
+          { label: ZOHO_CF_FIREBASE_ID, value: mapping.firebase_product_id }
+        ]
+      });
 
       await doc.ref.update({
         status:              SYNC_STATUS.SYNCED,
         cf_firebase_sku_set: true,
+        zoho_sku:            mapping.firebase_sku,
         last_synced_at:      FieldValue.serverTimestamp(),
+        last_error:          FieldValue.delete()
       });
 
       // Also write zoho_item_id back to Firebase product
@@ -372,19 +438,30 @@ async function pushBulk(db, { mappingIds, dryRun = false }) {
     }
 
     try {
-      await zoho.setItemCustomField(mapping.zoho_item_id, ZOHO_CF_FIREBASE_SKU, mapping.firebase_sku);
-      await zoho.setItemCustomField(mapping.zoho_item_id, ZOHO_CF_FIREBASE_ID, mapping.firebase_product_id);
+      await zoho.updateItem(mapping.zoho_item_id, {
+        sku: mapping.firebase_sku,
+        custom_fields: [
+          { label: ZOHO_CF_FIREBASE_SKU, value: mapping.firebase_sku },
+          { label: ZOHO_CF_FIREBASE_ID, value: mapping.firebase_product_id }
+        ]
+      });
 
       await docRef.update({
         status:              SYNC_STATUS.SYNCED,
         cf_firebase_sku_set: true,
+        zoho_sku:            mapping.firebase_sku,
         last_synced_at:      FieldValue.serverTimestamp(),
+        last_error:          FieldValue.delete()
       });
 
       // Also write zoho_item_id back to Firebase product
       if (mapping.firebase_product_id) {
         await db.doc(`products/${mapping.firebase_product_id}`)
-          .update({ zoho_item_id: mapping.zoho_item_id, zoho_org_id: "662274409" })
+          .update({ 
+            zoho_item_id: mapping.zoho_item_id, 
+            zoho_org_id: "662274409",
+            ...(mapping.zoho_category ? { zoho_category: mapping.zoho_category } : {})
+          })
           .catch(() => {/* non-fatal */});
       }
 
@@ -426,12 +503,14 @@ async function refetchSingle(db, { mappingId, zoho_item_id, userProfile }) {
   // Extract Zoho SKU and Name
   const newZohoSku = item.sku || "";
   const newZohoName = item.name || "";
+  const newZohoCategory = item.category_name || item.group_name || "";
   const newRate = item.rate || 0;
 
   // Update in Firestore sku_mappings
   const updates = {
     zoho_sku: newZohoSku,
     zoho_name: newZohoName,
+    zoho_category: newZohoCategory,
     guest_aed: newRate, // update AED rate
     last_synced_at: FieldValue.serverTimestamp()
   };
@@ -464,6 +543,353 @@ async function refetchSingle(db, { mappingId, zoho_item_id, userProfile }) {
   };
 }
 
+// ── Manual Force Match ───────────────────────────────────────────────────────
+async function forceMatch(db, { mappingId, zoho_item_id, userProfile }) {
+  if (!mappingId || !zoho_item_id) {
+    throw new Error("force_match requires mappingId and zoho_item_id");
+  }
+
+  const docRef = db.collection(ZOHO_FIRESTORE.SKU_MAPPINGS).doc(mappingId);
+  const docSnap = await docRef.get();
+  if (!docSnap.exists) throw new Error(`Mapping ${mappingId} not found`);
+
+  structuredLogger.info({ event: "force_match_start", mappingId, zoho_item_id });
+
+  // Fetch the Zoho item to get its details
+  const item = await zoho.getItem(zoho_item_id);
+  if (!item) throw new Error(`Item ${zoho_item_id} not found in Zoho Books`);
+
+  const updates = {
+    zoho_item_id: item.item_id,
+    zoho_sku: item.sku || "",
+    zoho_name: item.name || "",
+    zoho_category: item.category_name || item.group_name || "",
+    guest_aed: item.rate || 0,
+    status: SYNC_STATUS.CONFIRMED, // Force match automatically confirms it
+    match_confidence: 100,
+    match_method: MATCH_METHOD.MANUAL,
+    match_reasoning: "Manually linked by administrator",
+    last_synced_at: FieldValue.serverTimestamp(),
+    last_error: FieldValue.delete()
+  };
+
+  await docRef.update(updates);
+
+  // Audit log
+  const adminEmail = userProfile?.email || "admin@regenpept.test";
+  await db.collection(ZOHO_FIRESTORE.SYNC_LOG).add({
+    event: "manual_force_match",
+    mapping_id: mappingId,
+    zoho_item_id: item.item_id,
+    admin: adminEmail,
+    timestamp: FieldValue.serverTimestamp()
+  });
+
+  // Automatically push to Zoho Books
+  await pushBulk(db, { mappingIds: [mappingId] });
+  
+  const finalDoc = await docRef.get();
+  
+  return {
+    mappingId,
+    zoho_item_id: item.item_id,
+    status: finalDoc.data().status
+  };
+}
+
+// ── Import from Zoho to Firebase ──────────────────────────────────────────────
+async function importZohoItem(db, { zoho_item_id, userProfile, aedRate }) {
+  if (!zoho_item_id) throw new Error("zoho_item_id is required");
+  
+  structuredLogger.info({ event: "zoho_import_start", zoho_item_id });
+  
+  // Fetch from Zoho Books API
+  const item = await zoho.getItem(zoho_item_id);
+  if (!item) throw new Error(`Item ${zoho_item_id} not found in Zoho Books`);
+
+  // Create Firebase product ID based on Zoho item ID or just auto-generate
+  const firebaseProductId = `zoho_${item.item_id}`;
+
+  const usdPrice = item.rate ? Math.round((item.rate / aedRate) * 100) / 100 : 0;
+
+  // 1. Create Product in Firebase
+  const productRef = db.collection("products").doc(firebaseProductId);
+  await productRef.set({
+    title: item.name || "Imported Product",
+    sku: item.sku || "",
+    price: usdPrice,
+    guest_usd: usdPrice,
+    active: false,
+    source: "zoho_books",
+    created_at: FieldValue.serverTimestamp(),
+    updated_at: FieldValue.serverTimestamp(),
+  });
+
+  // 2. Create Mapping
+  const mappingId = `${firebaseProductId}_${item.item_id}`;
+  const mappingRef = db.collection(ZOHO_FIRESTORE.SKU_MAPPINGS).doc(mappingId);
+  
+  const mappingRecord = {
+    firebase_product_id: firebaseProductId,
+    firebase_variant_id: null,
+    firebase_sku: item.sku || "",
+    firebase_name: item.name || "Imported Product",
+    zoho_item_id: item.item_id,
+    zoho_sku: item.sku || "",
+    zoho_name: item.name || "",
+    zoho_category: item.category_name || item.group_name || "",
+    zoho_org_id: "662274409",
+    match_confidence: 100,
+    match_reasoning: "Imported from Zoho Books",
+    match_method: MATCH_METHOD.MANUAL,
+    status: SYNC_STATUS.SYNCED,
+    cf_firebase_sku_set: true, // we assume it matches since we created it from Zoho
+    guest_usd: usdPrice,
+    guest_aed: item.rate || 0,
+    created_at: FieldValue.serverTimestamp(),
+    last_synced_at: FieldValue.serverTimestamp(),
+  };
+
+  await mappingRef.set(mappingRecord);
+
+  // 3. Log it
+  const adminEmail = userProfile?.email || "admin@regenpept.test";
+  await db.collection(ZOHO_FIRESTORE.SYNC_LOG).add({
+    event: "import_zoho_item",
+    mapping_id: mappingId,
+    zoho_item_id: item.item_id,
+    firebase_product_id: firebaseProductId,
+    admin: adminEmail,
+    timestamp: FieldValue.serverTimestamp()
+  });
+
+  return { firebaseProductId, mappingId, status: SYNC_STATUS.SYNCED };
+}
+
+// ── Family Alignment ────────────────────────────────────────────────────────
+async function getFamilyDetails(db, { firebaseProductId }) {
+  // 1. Get Firebase Product
+  const productDoc = await db.collection("products").doc(firebaseProductId).get();
+  if (!productDoc.exists) throw new Error("Product not found");
+  const p = productDoc.data();
+
+  // 2. Get Firebase Variants
+  const variantsSnap = await productDoc.ref.collection("variants").get();
+  const variants = variantsSnap.docs.map(v => ({ id: v.id, ...v.data() }));
+
+  const fbFamily = [];
+  if (variants.length > 0) {
+    variants.forEach(v => fbFamily.push({
+      firebase_product_id: firebaseProductId,
+      firebase_variant_id: v.id,
+      name: `${p.displayName || p.name} (${v.label})`,
+      sku: v.sku || p.sku || "",
+      guest_usd: parseFloat(v.price?.guest_usd) || 0,
+      label: v.label
+    }));
+  } else {
+    fbFamily.push({
+      firebase_product_id: firebaseProductId,
+      firebase_variant_id: null,
+      name: p.displayName || p.name,
+      sku: p.sku || "",
+      guest_usd: parseFloat(p.guestVialPrice) || 0,
+      label: "Base"
+    });
+  }
+
+  // 3. Search Zoho by Product Base Name
+  const baseName = p.displayName || p.name || "";
+  const zohoItems = await zoho.searchItems(baseName.split(" ")[0]); // simple heuristic, use first word if name is long, or just the whole name if small.
+  // Actually, searching by the whole baseName is safer:
+  const searchResults = await zoho.searchItems(baseName);
+  
+  // 4. Return both arrays
+  return {
+    firebaseVariants: fbFamily,
+    zohoItems: searchResults.map(i => ({
+      item_id: i.item_id,
+      name: i.name,
+      sku: i.sku || "",
+      rate: i.rate || 0,
+      status: i.status
+    }))
+  };
+}
+
+async function createVariantInZoho(db, { firebaseProductId, firebaseVariantId, aedRate }) {
+  // Pull from Firebase
+  const productDoc = await db.collection("products").doc(firebaseProductId).get();
+  if (!productDoc.exists) throw new Error("Product not found");
+  const p = productDoc.data();
+  
+  let v = null;
+  if (firebaseVariantId) {
+    const vDoc = await productDoc.ref.collection("variants").doc(firebaseVariantId).get();
+    if (vDoc.exists) v = vDoc.data();
+  }
+
+  const baseName = p.displayName || p.name;
+  const label = v?.label ? ` - ${v.label}` : "";
+  const zohoName = `${baseName}${label}`;
+  const sku = v?.sku || p.sku || "";
+  const guestUsd = parseFloat(v?.price?.guest_usd || p.guestVialPrice || 0);
+  const aedPrice = Math.round(guestUsd * aedRate * 100) / 100;
+
+  // Create in Zoho
+  const itemData = {
+    name: zohoName,
+    rate: aedPrice,
+    sku: sku,
+    item_type: "inventory",
+    product_type: "goods"
+  };
+  
+  const newItem = await zoho.createItem(itemData);
+  
+  // Create mapping
+  const mappingId = `${firebaseProductId}_${newItem.item_id}`;
+  const mappingRecord = {
+    firebase_product_id: firebaseProductId,
+    firebase_variant_id: firebaseVariantId || null,
+    firebase_sku: sku,
+    firebase_name: zohoName,
+    zoho_item_id: newItem.item_id,
+    zoho_sku: sku,
+    zoho_name: zohoName,
+    zoho_category: "",
+    zoho_org_id: "662274409",
+    match_confidence: 100,
+    match_reasoning: "Created from Firebase Variant via Family Alignment",
+    match_method: MATCH_METHOD.MANUAL,
+    status: SYNC_STATUS.SYNCED,
+    cf_firebase_sku_set: true,
+    guest_usd: guestUsd,
+    guest_aed: aedPrice,
+    created_at: FieldValue.serverTimestamp(),
+    last_synced_at: FieldValue.serverTimestamp()
+  };
+
+  await db.collection(ZOHO_FIRESTORE.SKU_MAPPINGS).doc(mappingId).set(mappingRecord);
+  
+  return { zoho_item_id: newItem.item_id, mappingId };
+}
+
+async function createVariantInFirebase(db, { zohoItemId, firebaseProductId, aedRate }) {
+  const item = await zoho.getItem(zohoItemId);
+  if (!item) throw new Error("Zoho item not found");
+  
+  const productDoc = await db.collection("products").doc(firebaseProductId).get();
+  if (!productDoc.exists) throw new Error("Product not found");
+  const p = productDoc.data();
+
+  // Use AI to extract variant label
+  const prompt = `
+You are a text extractor.
+Base Product Name: "${p.displayName || p.name}"
+Zoho Item Name: "${item.name}"
+Extract just the variant or dosage label from the Zoho Item Name that differentiates it from the Base Product. 
+For example, if base is "BPC-157" and Zoho is "BPC-157 10mg vial", return "10mg vial".
+If base is "GHK-Cu" and Zoho is "GHK-Cu (Kit)", return "Kit".
+Return ONLY the short label, no quotes, no extra text.
+`;
+  const rawResponse = await callGemini([{ role: "user", parts: [{ text: prompt }] }], "You extract short labels.", "gemini-2.0-flash", "text/plain", 100);
+  const label = rawResponse.trim() || "Imported Variant";
+
+  const usdPrice = item.rate ? Math.round((item.rate / aedRate) * 100) / 100 : 0;
+  
+  // Create variant
+  const variantRef = productDoc.ref.collection("variants").doc();
+  const sku = item.sku || `FB-VAR-${variantRef.id.slice(0,6)}`;
+  
+  await variantRef.set({
+    label: label,
+    sku: sku,
+    price: { guest_usd: usdPrice },
+    created_at: FieldValue.serverTimestamp()
+  });
+
+  // Create mapping
+  const mappingId = `${firebaseProductId}_${item.item_id}`;
+  const mappingRecord = {
+    firebase_product_id: firebaseProductId,
+    firebase_variant_id: variantRef.id,
+    firebase_sku: sku,
+    firebase_name: `${p.displayName || p.name} (${label})`,
+    zoho_item_id: item.item_id,
+    zoho_sku: item.sku || "",
+    zoho_name: item.name,
+    zoho_category: item.category_name || item.group_name || "",
+    zoho_org_id: "662274409",
+    match_confidence: 100,
+    match_reasoning: "Created from Zoho Item via Family Alignment",
+    match_method: MATCH_METHOD.MANUAL,
+    status: SYNC_STATUS.SYNCED,
+    cf_firebase_sku_set: false,
+    guest_usd: usdPrice,
+    guest_aed: item.rate || 0,
+    created_at: FieldValue.serverTimestamp(),
+    last_synced_at: FieldValue.serverTimestamp()
+  };
+
+  await db.collection(ZOHO_FIRESTORE.SKU_MAPPINGS).doc(mappingId).set(mappingRecord);
+  
+  return { firebase_variant_id: variantRef.id, mappingId };
+}
+
+// ── Sync and Save mode ───────────────────────────────────────────────────────────────
+async function syncAndSave(db, body) {
+  const { mappingId, firebase_name, zoho_name, firebase_category, zoho_category } = body;
+  if (!mappingId) throw new Error("mappingId is required");
+
+  const mappingRef = db.collection(ZOHO_FIRESTORE.SKU_MAPPINGS).doc(mappingId);
+  const mappingSnap = await mappingRef.get();
+  if (!mappingSnap.exists) throw new Error("Mapping not found");
+
+  const currentMapping = mappingSnap.data();
+
+  // 1. Update Firebase Product
+  if (currentMapping.firebase_product_id) {
+    const productRef = db.collection("products").doc(currentMapping.firebase_product_id);
+    const updates = {};
+    if (firebase_name !== undefined) updates.title = firebase_name;
+    if (firebase_category !== undefined) updates.category = firebase_category;
+    
+    if (Object.keys(updates).length > 0) {
+      updates.updated_at = FieldValue.serverTimestamp();
+      await productRef.update(updates);
+    }
+  }
+
+  // 2. Update Zoho Item
+  if (currentMapping.zoho_item_id) {
+    const updates = {};
+    if (zoho_name !== undefined) updates.name = zoho_name;
+    if (zoho_category !== undefined) updates.category_name = zoho_category;
+    
+    if (Object.keys(updates).length > 0) {
+      try {
+        await zoho.updateItem(currentMapping.zoho_item_id, updates);
+      } catch (err) {
+        structuredLogger.error({ event: "zoho_item_update_failed", mappingId, err: err.message });
+      }
+    }
+  }
+
+  // 3. Update Mapping
+  const mappingUpdates = {
+    status: SYNC_STATUS.SYNCED,
+    last_synced_at: FieldValue.serverTimestamp()
+  };
+  if (firebase_name !== undefined) mappingUpdates.firebase_name = firebase_name;
+  if (zoho_name !== undefined) mappingUpdates.zoho_name = zoho_name;
+  if (firebase_category !== undefined) mappingUpdates.category = firebase_category;
+  if (zoho_category !== undefined) mappingUpdates.zoho_category = zoho_category;
+
+  await mappingRef.update(mappingUpdates);
+  return { mappingId, status: SYNC_STATUS.SYNCED };
+}
+
 // ── Status mode ───────────────────────────────────────────────────────────────
 async function getStatus(db) {
   const allSnap = await db.collection(ZOHO_FIRESTORE.SKU_MAPPINGS).get();
@@ -480,7 +906,7 @@ async function getStatus(db) {
 }
 
 // ── Agent (factory) ───────────────────────────────────────────────────────────
-module.exports = createAgent({
+const agent = createAgent({
   agentId:         AGENT_ID,
   agentName:       AGENT_NAME,
   allowedRoles:    new Set(["admin"]),
@@ -511,6 +937,11 @@ module.exports = createAgent({
       case "confirm_bulk": {
         const result = await confirmBulk(db, body);
         return { reply: `Bulk mappings updated to status ${result.status}.`, extras: result };
+      }
+
+      case "sync_and_save": {
+        const result = await syncAndSave(db, body);
+        return { reply: `Mapping ${result.mappingId} updated and synced.`, extras: result };
       }
 
       case "push": {
@@ -547,6 +978,50 @@ module.exports = createAgent({
         };
       }
 
+      case "force_match": {
+        const result = await forceMatch(db, {
+          mappingId: body.mappingId,
+          zoho_item_id: body.zoho_item_id,
+          userProfile: ctx.userProfile
+        });
+        return {
+          reply: `Manually matched and confirmed to Zoho Item ${result.zoho_item_id}.`,
+          extras: result,
+        };
+      }
+
+      case "import_zoho": {
+        const result = await importZohoItem(db, {
+          zoho_item_id: body.zoho_item_id,
+          userProfile: ctx.userProfile,
+          aedRate: aedRate
+        });
+        return {
+          reply: `Imported Zoho item ${result.zoho_item_id} into Firebase product ${result.firebaseProductId}.`,
+          extras: result,
+        };
+      }
+
+      case "list_zoho_items": {
+        const items = await zoho.listAllItems({ filter_by: "Status.Active" });
+        // Return only what's needed for the UI dropdown
+        const slimItems = items.map(i => ({
+          item_id: i.item_id,
+          name: i.name,
+          sku: i.sku || "",
+          rate: i.rate || 0,
+        }));
+        return {
+          reply: `Fetched ${slimItems.length} active Zoho items.`,
+          extras: { items: slimItems },
+        };
+      }
+
+      case "list_firebase_products": {
+        const fbProducts = await loadFirebaseProducts(db);
+        return { reply: `Found ${fbProducts.length} Firebase products.`, extras: { products: fbProducts } };
+      }
+
       case "status":
       default: {
         const result = await getStatus(db);
@@ -563,3 +1038,6 @@ module.exports = createAgent({
     extras: {},
   }),
 });
+
+agent.discover = discover;
+module.exports = agent;

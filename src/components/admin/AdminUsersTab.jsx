@@ -2537,7 +2537,7 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
                                 </div>
                               </div>
                               <a
-                                href={`https://books.zoho.me/app#/contacts/${zohoFinancialData.contact.id}`}
+                                href={`https://erp.mediluxeme.com/app/662274409#/contacts/${zohoFinancialData.contact.id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="gcp-btn-secondary"
@@ -2654,7 +2654,7 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
                                       >
                                         <td style={{ padding: '0.5rem 0.75rem', fontWeight: 600 }}>
                                           <a
-                                            href={`https://books.zoho.me/app#/invoices/${inv.invoiceId}`}
+                                            href={`https://erp.mediluxeme.com/app/662274409#/invoices/${inv.invoiceId}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             style={{

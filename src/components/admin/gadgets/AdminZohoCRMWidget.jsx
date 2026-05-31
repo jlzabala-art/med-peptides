@@ -189,7 +189,7 @@ function CustomerRow({ c, rank }) {
         {/* Actions */}
         <td style={{ padding: '0.6rem 0.85rem', verticalAlign: 'middle', textAlign: 'center' }}>
           <a
-            href={`https://books.zoho.me/app#/contacts/${c.contact_id}`}
+            href={`https://erp.mediluxeme.com/app/662274409#/contacts/${c.contact_id}`}
             target="_blank"
             rel="noreferrer"
             style={{

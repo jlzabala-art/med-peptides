@@ -38,15 +38,7 @@ import { catalogRepository } from '../../repositories/catalogRepository';
 import AdminSupplyNotifierWidget from './gadgets/AdminSupplyNotifierWidget';
 import InlineEditField from '../ui/InlineEditField';
 import BulkOrderSelectionModal from './BulkOrders/BulkOrderSelectionModal';
-
-// ─── TooltipWrapper Component ───────────────────────────────────────────────────
-function TooltipWrapper({ text, children }) {
-  return (
-    <div title={text} style={{ display: 'inline-flex' }}>
-      {children}
-    </div>
-  );
-}
+import TooltipWrapper from '../ui/TooltipWrapper';
 
 // ─── ProductMicrosite Component ────────────────────────────────────────────────
 function ProductMicrosite({ product, onUpdateProduct }) {
@@ -414,6 +406,7 @@ export default function AdminProductsTab({
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterStock, setFilterStock] = useState('All');
   const [filterWarehouse, setFilterWarehouse] = useState('All');
+  const [filterZoho, setFilterZoho] = useState('All');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
   const [bulkMode, setBulkMode] = useState(null);
@@ -442,7 +435,7 @@ export default function AdminProductsTab({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filterCategory, filterStatus, filterStock, filterWarehouse, dateRange]);
+  }, [searchTerm, filterCategory, filterStatus, filterStock, filterWarehouse, filterZoho, dateRange]);
 
   useEffect(() => {
     fetchProducts();
@@ -803,14 +796,23 @@ export default function AdminProductsTab({
       sortKey: 'product',
       sortValue: (p) => p.name.toLowerCase(),
       render: (p) => (
-        <AppEntityCell
-          title={p.name}
-          subtitle={
-            <>
-              <span style={{ opacity: 0.5 }}>↳</span> {p.category} | {p.dosage}
-            </>
-          }
-        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {p.zoho_item_id ? (
+            <TooltipWrapper text="Synced to Zoho Inventory">
+              <UploadCloud size={16} color="#1a73e8" />
+            </TooltipWrapper>
+          ) : (
+            <div style={{ width: 16 }}></div>
+          )}
+          <AppEntityCell
+            title={p.name}
+            subtitle={
+              <>
+                <span style={{ opacity: 0.5 }}>↳</span> {p.category} | {p.dosage}
+              </>
+            }
+          />
+        </div>
       ),
     },
     {
@@ -950,13 +952,20 @@ export default function AdminProductsTab({
       }
     }
 
+    let matchesZoho = true;
+    if (filterZoho !== 'All') {
+      if (filterZoho === 'Synced') matchesZoho = !!p.zoho_item_id;
+      if (filterZoho === 'Not Synced') matchesZoho = !p.zoho_item_id;
+    }
+
     return (
       matchesCategory &&
       matchesStatus &&
       matchesWarehouse &&
       matchesStock &&
       matchesSearch &&
-      matchesDate
+      matchesDate &&
+      matchesZoho
     );
   });
 
@@ -965,12 +974,14 @@ export default function AdminProductsTab({
   if (filterStatus !== 'All') activeFilters.push({ label: 'Status', value: filterStatus, type: 'status' });
   if (filterWarehouse !== 'All') activeFilters.push({ label: 'Warehouse', value: filterWarehouse, type: 'warehouse' });
   if (filterStock !== 'All') activeFilters.push({ label: 'Stock', value: filterStock, type: 'stock' });
+  if (filterZoho !== 'All') activeFilters.push({ label: 'Zoho', value: filterZoho, type: 'zoho' });
 
   const handleFilterRemove = (filter) => {
     if (filter.type === 'category') setFilterCategory('All');
     if (filter.type === 'status') setFilterStatus('All');
     if (filter.type === 'warehouse') setFilterWarehouse('All');
     if (filter.type === 'stock') setFilterStock('All');
+    if (filter.type === 'zoho') setFilterZoho('All');
   };
 
   const renderCustomFilters = () => (
@@ -1003,6 +1014,20 @@ export default function AdminProductsTab({
         <option value="All">Status: All</option>
         <option value="Active">Active</option>
         <option value="Inactive">Inactive</option>
+      </select>
+      <select
+        value={filterZoho}
+        onChange={(e) => setFilterZoho(e.target.value)}
+        style={{
+          height: '32px', padding: '0 1.5rem 0 0.75rem', borderRadius: '16px',
+          border: '1px solid var(--border)', backgroundColor: filterZoho === 'All' ? 'white' : 'var(--primary-light)',
+          color: filterZoho === 'All' ? 'var(--text-main)' : 'var(--primary)',
+          fontSize: '0.8rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+        }}
+      >
+        <option value="All">Zoho Sync: All</option>
+        <option value="Synced">Synced</option>
+        <option value="Not Synced">Not Synced</option>
       </select>
       <select
         value={filterStock}

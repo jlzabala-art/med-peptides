@@ -13,6 +13,7 @@ import {
   X,
   Database,
   Info,
+  Search,
 } from 'lucide-react';
 
 /**
@@ -67,6 +68,20 @@ const STATUS_META = {
     icon: AlertTriangle,
     border: '#f43f5e',
   },
+  zoho_only: {
+    label: 'Zoho Only',
+    color: '#5f6368',
+    bg: 'rgba(95,99,104,0.06)',
+    icon: Database,
+    border: '#5f6368',
+  },
+  firebase_only: {
+    label: 'Firebase Only',
+    color: '#fbbc04',
+    bg: 'rgba(251,188,4,0.06)',
+    icon: Database,
+    border: '#fbbc04',
+  },
 };
 
 async function callAgent(mode, extra = {}, token) {
@@ -91,8 +106,12 @@ export default function AdminSkuMappingTab() {
   const [syncingRowId, setSyncingRowId] = useState(null);
   const [log, setLog] = useState([]);
   const [filter, setFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedIds, setSelectedIds] = useState([]);
   const [expandedRowIds, setExpandedRowIds] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+  const [edits, setEdits] = useState({});
 
   const addLog = (msg, type = 'info') =>
     setLog((prev) => [{ msg, type, ts: new Date().toLocaleTimeString() }, ...prev].slice(0, 30));
@@ -129,8 +148,50 @@ export default function AdminSkuMappingTab() {
   }, [user, userProfile]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
     loadStatus();
-  }, [loadStatus]);
+  }, []);
+
+  const handleEditChange = (id, field, value) => {
+    setEdits(prev => ({
+      ...prev,
+      [id]: {
+        ...(prev[id] || {}),
+        [field]: value
+      }
+    }));
+  };
+
+  const handleSaveAndSync = async (m) => {
+    const editData = edits[m.id] || {};
+    // If nothing edited, fallback to existing values
+    const payload = {
+      mappingId: m.id,
+      firebase_name: editData.firebase_name !== undefined ? editData.firebase_name : m.firebase_name,
+      zoho_name: editData.zoho_name !== undefined ? editData.zoho_name : m.zoho_name,
+      firebase_category: editData.firebase_category !== undefined ? editData.firebase_category : (m.category || ''),
+      zoho_category: editData.zoho_category !== undefined ? editData.zoho_category : (m.zoho_category || m.category || ''),
+    };
+
+    setSyncingRowId(m.id);
+    addLog(`Saving edits and syncing mapping ${m.id.slice(-8)}...`, 'info');
+    try {
+      const token = await getToken();
+      await callAgent('sync_and_save', agentBody('sync_and_save', payload), token);
+      addLog(`✅ Saved and synced mapping ${m.id.slice(-8)}`, 'success');
+      // Clear edits for this row on success
+      setEdits(prev => {
+        const next = { ...prev };
+        delete next[m.id];
+        return next;
+      });
+      await loadStatus();
+    } catch (e) {
+      addLog(`Sync failed: ${e.message}`, 'error');
+    } finally {
+      setSyncingRowId(null);
+    }
+  };
 
   // ── Run discovery ─────────────────────────────────────────────────────────
   async function runDiscover() {
@@ -173,30 +234,6 @@ export default function AdminSkuMappingTab() {
     }
   };
 
-  // ── Push all confirmed to Zoho ─────────────────────────────────────────────
-  async function pushAllConfirmed(dryRun = false) {
-    setLoading(true);
-    addLog(
-      dryRun
-        ? '🧪 Dry run push for all confirmed mappings...'
-        : '🚀 Pushing all confirmed mappings to Zoho Books...',
-      'info'
-    );
-    try {
-      const token = await getToken();
-      const data = await callAgent('push', agentBody('push', { dryRun }), token);
-      addLog(
-        `${dryRun ? '[DRY RUN] ' : ''}Pushed: ${data.pushed ?? 0}, Failed: ${data.failed ?? 0}`,
-        'success'
-      );
-      if (!dryRun) await loadStatus();
-    } catch (e) {
-      addLog(`Push failed: ${e.message}`, 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // ── Bulk Actions Handler ──────────────────────────────────────────────────
   async function handleBulkAction(action) {
     setLoading(true);
@@ -234,32 +271,28 @@ export default function AdminSkuMappingTab() {
     }
   };
 
-  // ── Manual Refetch single Zoho item ──────────────────────────────────────
-  async function handleRefetch(mappingId, zohoItemId) {
-    setSyncingRowId(mappingId);
-    addLog(`Syncing Zoho item ${zohoItemId} directly from Zoho Books API...`, 'info');
-    try {
-      const token = await getToken();
-      const data = await callAgent(
-        'refetch',
-        agentBody('refetch', { mappingId, zoho_item_id: zohoItemId }),
-        token
-      );
-      addLog(
-        data.reply || `Refetched Zoho item ${zohoItemId} successfully`,
-        data.updated ? 'success' : 'info'
-      );
-      await loadStatus();
-    } catch (e) {
-      addLog(`Sync failed: ${e.message}`, 'error');
-    } finally {
-      setSyncingRowId(null);
-    }
-  };
-
   // ── Row selection helpers ──────────────────────────────────────────────────
-  const filtered = filter === 'all' ? mappings : mappings.filter((m) => m.status === filter);
-  const confirmedCount = mappings.filter((m) => m.status === 'confirmed').length;
+  const baseFiltered = filter === 'all' 
+    ? mappings 
+    : mappings.filter((m) => m.status === filter);
+        
+  const filtered = baseFiltered.filter(m => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (m.firebase_name || '').toLowerCase().includes(q) ||
+           (m.zoho_name || '').toLowerCase().includes(q) ||
+           (m.firebase_sku || '').toLowerCase().includes(q) ||
+           (m.zoho_sku || '').toLowerCase().includes(q);
+  });
+
+  // ── Pagination ────────────────────────────────────────────────────────────
+  const totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
+  const paginatedItems = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentPage(1);
+  }, [filter, searchQuery]);
 
   const handleSelectRow = (id) => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -296,26 +329,18 @@ export default function AdminSkuMappingTab() {
           <p style={styles.subtitle}>Firebase Catalog ↔ Zoho Books (MEDILUXE · 662274409 · AED)</p>
         </div>
         <div style={styles.headerActions}>
-          <button style={styles.btnGcpSecondary} onClick={loadStatus} disabled={loading}>
-            ↻ Refresh
-          </button>
-          <button
-            style={styles.btnGcpSecondary}
-            onClick={() => pushAllConfirmed(true)}
-            disabled={loading || confirmedCount === 0}
-          >
-            🧪 Dry Run Push All
-          </button>
-          <button
-            style={styles.btnGcpSecondary}
-            onClick={() => pushAllConfirmed(false)}
-            disabled={loading || confirmedCount === 0}
-          >
-            🚀 Push All Confirmed {confirmedCount > 0 ? `(${confirmedCount})` : ''}
-          </button>
-          <button style={styles.btnGcpPrimary} onClick={runDiscover} disabled={loading}>
-            {loading ? '⏳ Running...' : '🔍 Run Discovery'}
-          </button>
+          <div title="Reloads current status without triggering any sync or AI logic" style={{ display: 'inline-block' }}>
+            <button style={styles.btnGcpSecondary} onClick={loadStatus} disabled={loading}>
+              <RefreshCw size={14} style={{ marginRight: 6, animation: loading ? 'spin 1s linear infinite' : 'none' }} />
+              Refresh
+            </button>
+          </div>
+          <div title="Uses Atlas AI to rescan Firebase and Zoho catalogs to find new matches" style={{ display: 'inline-block' }}>
+            <button style={styles.btnGcpPrimary} onClick={runDiscover} disabled={loading}>
+              <Search size={14} style={{ marginRight: 6 }} />
+              Find Matches
+            </button>
+          </div>
         </div>
       </div>
 
@@ -352,27 +377,49 @@ export default function AdminSkuMappingTab() {
         </div>
       )}
 
-      {/* GCP Horizontal Tabs for filtering */}
-      <div style={styles.tabsRow}>
-        <button
-          onClick={() => setFilter('all')}
-          style={
-            filter === 'all' ? { ...styles.tabButton, ...styles.tabButtonActive } : styles.tabButton
-          }
-        >
-          All Mappings ({mappings.length})
-        </button>
-        {Object.entries(STATUS_META).map(([key, meta]) => (
-          <button
-            key={key}
-            onClick={() => setFilter(key)}
-            style={
-              filter === key ? { ...styles.tabButton, ...styles.tabButtonActive } : styles.tabButton
-            }
+      {/* Compact Filters / Actions Bar */}
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: '13px', fontWeight: 600, color: '#3c4043' }}>Filter View:</span>
+          <select 
+            value={filter} 
+            onChange={(e) => {
+              setFilter(e.target.value);
+            }}
+            style={{
+              padding: '6px 12px',
+              fontSize: '13px',
+              border: '1px solid #dadce0',
+              borderRadius: '4px',
+              backgroundColor: '#fff',
+              color: '#202124',
+              cursor: 'pointer',
+              outline: 'none',
+              minWidth: '180px'
+            }}
           >
-            {meta.label} ({mappings.filter((m) => m.status === key).length})
-          </button>
-        ))}
+            <option value="all">All Mappings ({mappings.length})</option>
+            {Object.entries(STATUS_META).map(([key, meta]) => (
+              <option key={key} value={key}>
+                {meta.label} ({mappings.filter((m) => m.status === key).length})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div style={{ width: '1px', height: '24px', backgroundColor: '#dadce0', margin: '0 8px' }}></div>
+        
+        <div style={{ position: 'relative', flex: 1, minWidth: 250, maxWidth: 400 }}>
+          <Search size={16} style={{ position: 'absolute', left: 12, top: 10, color: '#5f6368' }} />
+          <input 
+            type="text" 
+            placeholder="Search by Name or SKU..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ width: '100%', padding: '8px 12px 8px 36px', borderRadius: 4, border: '1px solid #dadce0', fontSize: 14 }}
+          />
+        </div>
       </div>
 
       {/* Sticky Bulk Action Toolbar */}
@@ -427,7 +474,8 @@ export default function AdminSkuMappingTab() {
               : `No mappings match the active filter: ${filter}`}
           </div>
         ) : (
-          <table className="gcp-table" style={styles.table}>
+          <>
+            <table className="gcp-table" style={styles.table}>
             <thead>
               <tr style={{ borderBottom: '1px solid #dadce0' }}>
                 <th style={{ width: '30px', padding: '8px 10px' }}></th>
@@ -441,18 +489,22 @@ export default function AdminSkuMappingTab() {
                     style={{ cursor: 'pointer' }}
                   />
                 </th>
-                <th style={styles.th}>Firebase Product</th>
-                <th style={styles.th}>SKU (Firebase)</th>
-                <th style={styles.th}>Zoho Item</th>
-                <th style={styles.th}>SKU (Zoho)</th>
+                <th style={styles.th}>Product Details</th>
                 <th style={styles.th}>Confidence</th>
                 <th style={{ ...styles.th, textAlign: 'center' }}>Status</th>
                 <th style={styles.th}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((m) => {
-                const meta = STATUS_META[m.status] || STATUS_META.pending;
+              {paginatedItems.map((m) => {
+                const isZohoOnly = m.status === 'zoho_only';
+                const isFirebaseOnly = m.status === 'firebase_only';
+                
+                let meta;
+                if (isZohoOnly) meta = { icon: Database, color: '#5f6368', label: 'In Zoho Only' };
+                else if (isFirebaseOnly) meta = { icon: Database, color: '#fbbc04', label: 'In Firebase Only' };
+                else meta = STATUS_META[m.status] || STATUS_META.pending;
+
                 const IconComponent = meta.icon;
                 const isActing = actionId === m.id;
                 const isExpanded = expandedRowIds.includes(m.id);
@@ -503,32 +555,24 @@ export default function AdminSkuMappingTab() {
                         />
                       </td>
 
-                      {/* Firebase Name */}
+                      {/* Product Details (Dual Line) */}
                       <td
                         style={{ ...styles.td, cursor: 'pointer' }}
                         onClick={() => toggleRowExpanded(m.id)}
                       >
-                        <div style={styles.productName}>{m.firebase_name}</div>
+                        {/* Firebase Line */}
+                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, gap: 8 }}>
+                          <span style={{ fontSize: 10, fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase', width: 65 }}>Firebase</span>
+                          <div style={styles.productName}>{m.firebase_name || <span style={{color: '#9aa0a6', fontStyle: 'italic'}}>Missing</span>}</div>
+                          <code style={styles.sku}>{m.firebase_sku || '—'}</code>
+                        </div>
+                        {/* Zoho Line */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 10, fontWeight: 700, color: '#34a853', textTransform: 'uppercase', width: 65 }}>Zoho</span>
+                          <div style={styles.productName}>{m.zoho_name || <span style={{color: '#9aa0a6', fontStyle: 'italic'}}>Missing</span>}</div>
+                          <code style={styles.sku}>{m.zoho_sku || '—'}</code>
+                        </div>
                       </td>
-
-                      {/* Firebase SKU */}
-                      <td style={styles.td}>
-                        <code style={styles.sku}>{m.firebase_sku || '—'}</code>
-                      </td>
-
-                      {/* Zoho Name */}
-                      <td
-                        style={{ ...styles.td, cursor: 'pointer' }}
-                        onClick={() => toggleRowExpanded(m.id)}
-                      >
-                        <div style={styles.productName}>{m.zoho_name}</div>
-                      </td>
-
-                      {/* Zoho SKU */}
-                      <td style={styles.td}>
-                        <code style={styles.sku}>{m.zoho_sku || '—'}</code>
-                      </td>
-
                       {/* Match Confidence */}
                       <td style={styles.td}>
                         <div style={styles.confidence}>
@@ -610,17 +654,23 @@ export default function AdminSkuMappingTab() {
                     {/* Expandable Side-by-Side Tree Detail Panel */}
                     {isExpanded && (
                       <tr style={styles.trExpanded}>
-                        <td colSpan={9} style={{ padding: 0 }}>
-                          <div style={styles.detailPanel}>
-                            {/* Card 1: Firebase Product */}
-                            <div style={styles.detailCard}>
-                              <span style={styles.detailCardTitle}>Firebase Catalog Details</span>
-                              <div style={styles.detailField}>
-                                <span style={styles.detailLabel}>Product Name</span>
-                                <span style={styles.detailValueBold}>{m.firebase_name}</span>
-                              </div>
-                              <div style={styles.detailField}>
-                                <span style={styles.detailLabel}>Firebase SKU</span>
+                        <td colSpan={6} style={{ padding: 0 }}>
+                          <div style={{ ...styles.detailPanel, display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
+                              {/* Card 1: Firebase Product */}
+                              <div style={styles.detailCard}>
+                                <span style={styles.detailCardTitle}>Firebase Catalog Details</span>
+                                <div style={styles.detailField}>
+                                  <span style={styles.detailLabel}>Product Name</span>
+                                  <input
+                                    type="text"
+                                    style={styles.editInput}
+                                    value={edits[m.id]?.firebase_name !== undefined ? edits[m.id].firebase_name : (m.firebase_name || '')}
+                                    onChange={(e) => handleEditChange(m.id, 'firebase_name', e.target.value)}
+                                  />
+                                </div>
+                                <div style={styles.detailField}>
+                                  <span style={styles.detailLabel}>Firebase SKU</span>
                                 <div>
                                   <code style={styles.sku}>{m.firebase_sku || '—'}</code>
                                 </div>
@@ -628,6 +678,16 @@ export default function AdminSkuMappingTab() {
                               <div style={styles.detailField}>
                                 <span style={styles.detailLabel}>Document ID</span>
                                 <span style={styles.monoId}>{m.firebase_product_id}</span>
+                              </div>
+                              <div style={styles.detailField}>
+                                <span style={styles.detailLabel}>Category</span>
+                                <input
+                                  type="text"
+                                  style={styles.editInput}
+                                  value={edits[m.id]?.firebase_category !== undefined ? edits[m.id].firebase_category : (m.category || '')}
+                                  onChange={(e) => handleEditChange(m.id, 'firebase_category', e.target.value)}
+                                  placeholder="No category set"
+                                />
                               </div>
                               {m.firebase_variant_id && (
                                 <div style={styles.detailField}>
@@ -643,15 +703,30 @@ export default function AdminSkuMappingTab() {
                               </div>
                             </div>
 
-                            {/* Card 2: Zoho Books Item */}
-                            <div style={styles.detailCard}>
-                              <span style={styles.detailCardTitle}>Zoho Books Item Details</span>
-                              <div style={styles.detailField}>
-                                <span style={styles.detailLabel}>Item Name</span>
-                                <span style={styles.detailValueBold}>{m.zoho_name}</span>
-                              </div>
-                              <div style={styles.detailField}>
-                                <span style={styles.detailLabel}>Zoho SKU</span>
+                              {/* Card 2: Zoho Books Item */}
+                              <div style={styles.detailCard}>
+                                <span style={styles.detailCardTitle}>Zoho Books Item Details</span>
+                                <div style={styles.detailField}>
+                                  <span style={styles.detailLabel}>Item Name</span>
+                                  <input
+                                    type="text"
+                                    style={styles.editInput}
+                                    value={edits[m.id]?.zoho_name !== undefined ? edits[m.id].zoho_name : (m.zoho_name || '')}
+                                    onChange={(e) => handleEditChange(m.id, 'zoho_name', e.target.value)}
+                                  />
+                                </div>
+                                <div style={styles.detailField}>
+                                  <span style={styles.detailLabel}>Category / Group</span>
+                                  <input
+                                    type="text"
+                                    style={styles.editInput}
+                                    value={edits[m.id]?.zoho_category !== undefined ? edits[m.id].zoho_category : (m.zoho_category || m.category || '')}
+                                    onChange={(e) => handleEditChange(m.id, 'zoho_category', e.target.value)}
+                                    placeholder="No category set"
+                                  />
+                                </div>
+                                <div style={styles.detailField}>
+                                  <span style={styles.detailLabel}>Zoho SKU</span>
                                 <div>
                                   <code style={styles.sku}>{m.zoho_sku || '—'}</code>
                                 </div>
@@ -668,7 +743,7 @@ export default function AdminSkuMappingTab() {
                               </div>
                               <div style={{ marginTop: 'auto', paddingTop: 8 }}>
                                 <a
-                                  href={`https://books.zoho.me/app#/items/${m.zoho_item_id}`}
+                                  href={`https://erp.mediluxeme.com/app/662274409#/inventory/items/${m.zoho_item_id}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   style={styles.detailLink}
@@ -678,8 +753,9 @@ export default function AdminSkuMappingTab() {
                                 </a>
                               </div>
                             </div>
+                            </div>
 
-                            {/* Card 3: Match Metadata & Local Actions */}
+                            {/* Card 3: Match Metadata & Local Actions (Full Width) */}
                             <div style={styles.detailCard}>
                               <span style={styles.detailCardTitle}>Engine Metadata & Actions</span>
                               <div style={styles.detailField}>
@@ -706,6 +782,20 @@ export default function AdminSkuMappingTab() {
                                   <p style={styles.detailReasoning}>{m.match_reasoning}</p>
                                 </div>
                               )}
+                              
+                              {/* Category Mismatch Warning */}
+                              {(() => {
+                                const fbCat = (edits[m.id]?.firebase_category !== undefined ? edits[m.id].firebase_category : (m.category || '')).trim().toLowerCase();
+                                const zhCat = (edits[m.id]?.zoho_category !== undefined ? edits[m.id].zoho_category : (m.zoho_category || m.category || '')).trim().toLowerCase();
+                                const mismatch = fbCat && zhCat && fbCat !== zhCat;
+                                return mismatch ? (
+                                  <div style={{ marginTop: 8, padding: '8px 12px', backgroundColor: 'rgba(239,68,68,0.1)', color: 'var(--color-danger)', borderRadius: 4, fontSize: 12, display: 'flex', alignItems: 'center' }}>
+                                    <AlertTriangle size={14} style={{ marginRight: 6 }} />
+                                    <span>Categories do not match. They must be the same to synchronize.</span>
+                                  </div>
+                                ) : null;
+                              })()}
+
                               <div
                                 style={{
                                   display: 'flex',
@@ -715,19 +805,31 @@ export default function AdminSkuMappingTab() {
                                 }}
                               >
                                 <button
-                                  style={styles.btnGcpSecondary}
-                                  onClick={() => handleRefetch(m.id, m.zoho_item_id)}
-                                  disabled={syncingRowId === m.id}
+                                  style={{
+                                    ...styles.btnGcpPrimary, 
+                                    display: 'flex', 
+                                    alignItems: 'center',
+                                    opacity: (() => {
+                                      const fbCat = (edits[m.id]?.firebase_category !== undefined ? edits[m.id].firebase_category : (m.category || '')).trim().toLowerCase();
+                                      const zhCat = (edits[m.id]?.zoho_category !== undefined ? edits[m.id].zoho_category : (m.zoho_category || m.category || '')).trim().toLowerCase();
+                                      return (fbCat && zhCat && fbCat !== zhCat) ? 0.5 : 1;
+                                    })()
+                                  }}
+                                  onClick={() => handleSaveAndSync(m)}
+                                  disabled={syncingRowId === m.id || (() => {
+                                    const fbCat = (edits[m.id]?.firebase_category !== undefined ? edits[m.id].firebase_category : (m.category || '')).trim().toLowerCase();
+                                    const zhCat = (edits[m.id]?.zoho_category !== undefined ? edits[m.id].zoho_category : (m.zoho_category || m.category || '')).trim().toLowerCase();
+                                    return (fbCat && zhCat && fbCat !== zhCat);
+                                  })()}
                                 >
                                   <RefreshCw
                                     size={13}
                                     style={{
-                                      marginRight: 4,
-                                      animation:
-                                        syncingRowId === m.id ? 'spin 1s linear infinite' : 'none',
+                                      marginRight: 6,
+                                      animation: syncingRowId === m.id ? 'spin 1s linear infinite' : 'none',
                                     }}
                                   />
-                                  {syncingRowId === m.id ? 'Syncing...' : 'Sync from Zoho'}
+                                  {syncingRowId === m.id ? 'Saving...' : 'Save & Sync'}
                                 </button>
                                 {m.status === 'pending' && (
                                   <>
@@ -758,6 +860,30 @@ export default function AdminSkuMappingTab() {
               })}
             </tbody>
           </table>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '16px', borderTop: '1px solid #dadce0' }}>
+              <button
+                style={{ ...styles.btnGcpSecondary, marginRight: 8, padding: '4px 8px' }}
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              >
+                Previous
+              </button>
+              <span style={{ fontSize: 12, color: '#5f6368', margin: '0 8px' }}>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                style={{ ...styles.btnGcpSecondary, marginLeft: 8, padding: '4px 8px' }}
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              >
+                Next
+              </button>
+            </div>
+          )}
+          </>
         )}
       </div>
 
@@ -1050,6 +1176,18 @@ const styles = {
   detailLabel: {
     fontSize: 11,
     color: '#80868b',
+  },
+  editInput: {
+    padding: '4px 8px',
+    border: '1px solid #dadce0',
+    borderRadius: '4px',
+    fontSize: '13px',
+    fontFamily: 'inherit',
+    color: '#202124',
+    width: '100%',
+    boxSizing: 'border-box',
+    marginTop: '2px',
+    background: '#fff',
   },
   detailValue: {
     fontSize: 13,

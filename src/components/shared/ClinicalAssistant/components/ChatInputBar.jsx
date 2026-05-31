@@ -927,6 +927,13 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
               {(pageContext?.activeTab === 'calendar' ? CALENDAR_QUICK_PROMPTS :
                 pageContext?.activeTab === 'orders' ? ORDERS_QUICK_PROMPTS :
                 pageContext?.activeTab === 'leads' ? LEADS_QUICK_PROMPTS :
+                pageContext?.activeTab === 'zoho_books' ? [
+                  { label: 'Sync Pending', text: 'Show me how to sync pending products to Zoho Books.' },
+                  { label: 'Check Errors', text: 'Can you help me resolve the current Zoho synchronization errors?' },
+                  { label: 'Item Groups', text: 'How do we create Item Groups and Variants in Zoho Inventory?' },
+                  { label: 'Composite Items', text: 'Show me how to structure protocols as Composite Items.' },
+                  { label: 'Zoho Permissions', text: 'Explain the Zoho Books permissions required for synchronization.' }
+                ] :
                 contextMode === 'admin' ? ADMIN_QUICK_PROMPTS : 
                 contextMode === 'doctor' ? CLINICAL_QUICK_PROMPTS : 
                 RESEARCH_QUICK_PROMPTS).map((p, index) => (

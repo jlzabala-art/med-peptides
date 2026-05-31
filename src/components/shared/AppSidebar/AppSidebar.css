@@ -506,5 +506,4 @@
 }
 
 /* ── Edit / drag mode ────────────────────────────────────────────────────────── */
-.app-sidebar.editing-mode .sb-group-header { pointer-events: none; }
-.app-sidebar.editing-mode .sb-item        { pointer-events: none; }
+/* Managed via inline styles on draggable items so footer buttons remain clickable */

@@ -62,7 +62,7 @@ async function getAccessToken() {
 
   // 2. Firestore cache (survives cold starts)
   const db       = getFirestore();
-  const cacheDoc = await db.doc(`${ZOHO_FIRESTORE.TOKEN_CACHE}/access_token`).get();
+  const cacheDoc = await db.doc(`${ZOHO_FIRESTORE.TOKEN_CACHE}/access_token_v2`).get();
   if (cacheDoc.exists) {
     const cached = cacheDoc.data();
     if (cached.expires_at > now + 60000) {
@@ -233,6 +233,24 @@ async function setItemCustomField(itemId, fieldLabel, value) {
   });
 }
 
+// ── Financial & Invoices API ──────────────────────────────────────────────────
+
+/**
+ * List invoices with optional filters.
+ */
+async function listInvoices(filters = {}) {
+  const data = await request("GET", "/invoices", { params: filters });
+  return data.invoices || [];
+}
+
+/**
+ * List customer payments with optional filters.
+ */
+async function listCustomerPayments(filters = {}) {
+  const data = await request("GET", "/customerpayments", { params: filters });
+  return data.customerpayments || [];
+}
+
 // ── Sync audit log ────────────────────────────────────────────────────────────
 
 /**
@@ -255,6 +273,8 @@ module.exports = {
   createItem,
   searchItems,
   setItemCustomField,
+  listInvoices,
+  listCustomerPayments,
   logSyncEvent,
   // Low-level request (for advanced use cases)
   _request: request,

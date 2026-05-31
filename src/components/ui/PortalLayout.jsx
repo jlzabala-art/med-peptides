@@ -5,12 +5,13 @@ import SidebarGadget from '../shared/AppSidebar/SidebarGadget';
 import { db } from '../../firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import CommandPalette from '../CommandPalette';
+import useSessionTracking from '../../hooks/useSessionTracking';
 
 // ── Atlas AI — Suggested Prompts per Role ──────────────────────────────────────
 const ROLE_SUGGESTED_PROMPTS = {
   admin: [
-    { label: '📊 Show platform KPIs' },
-    { label: '🔍 Usuarios pendientes de verificación' },
+    { label: '🔄 Sincronizar catálogo con Zoho' },
+    { label: '🛠️ Revisar errores de SKU Sync' },
     { label: '📦 Pedidos sin procesar hoy' },
     { label: '⚠️ Alertas de stock bajo' },
   ],
@@ -75,6 +76,8 @@ export default function PortalLayout({
   pageContext = null,
   headerActions
 }) {
+  useSessionTracking(); // Start tracking session for the current user
+
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isAiOpen, setAiOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
