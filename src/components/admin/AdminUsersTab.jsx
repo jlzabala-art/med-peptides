@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
+import { useLocation } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import {
   collection,
@@ -71,6 +72,16 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
   const [showArchived, setShowArchived] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const deepLinkSearch = params.get('search');
+
+  useEffect(() => {
+    if (deepLinkSearch) {
+      setSearchQuery(deepLinkSearch);
+    }
+  }, [deepLinkSearch]);
+
   const [roleFilter, setRoleFilter] = useState(defaultRole || 'all');
   const [selectedUserIds, setSelectedUserIds] = useState([]);
   const [detailsUser, setDetailsUser] = useState(null);
@@ -436,6 +447,21 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
         ...doc.data(),
       }));
       setUsers(usersList);
+      // Inject data context for Atlas AI
+      const pending = usersList.filter(u => !u.approved && !u.isArchived);
+      const doctors = usersList.filter(u => u.role === 'doctor' || (u.roles || []).includes('doctor'));
+      const patients = usersList.filter(u => u.role === 'patient' || (u.roles || []).includes('patient'));
+      window.dispatchEvent(new CustomEvent('admin-context-update', {
+        detail: {
+          page: 'users',
+          totalUsers: usersList.length,
+          pendingApproval: pending.length,
+          doctorCount: doctors.length,
+          patientCount: patients.length,
+          pendingUsers: pending.slice(0, 5).map(u => ({ name: u.fullName || u.displayName, email: u.email, role: u.role })),
+          summary: `Users panel: ${usersList.length} total users. ${pending.length} pending approval, ${doctors.length} doctors, ${patients.length} patients.`
+        }
+      }));
       
       // Store cursor for the NEXT page
       if (usersSnapshot.docs.length > 0) {

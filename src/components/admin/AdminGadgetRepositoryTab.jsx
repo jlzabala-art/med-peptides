@@ -104,23 +104,30 @@ export default function AdminGadgetRepositoryTab() {
           >
             <Layers size={14} /> {row.status}
           </span>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-            {row.usedIn && row.usedIn.length > 0 ? row.usedIn.map((portal, idx) => (
-              <span key={idx} style={{ 
-                padding: '2px 6px', 
-                background: '#e0f2fe', 
-                color: '#0369a1', 
-                borderRadius: '4px', 
-                fontSize: '0.7rem', 
-                fontWeight: 600,
-                border: '1px solid #bae6fd' 
-              }}>
-                {portal}
-              </span>
-            )) : (
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Not used</span>
-            )}
-          </div>
+          {row.usedIn && row.usedIn.length > 0 ? (
+            <select
+              style={{
+                width: '100%',
+                maxWidth: '180px',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                border: '1px solid var(--border-color)',
+                background: 'var(--surface)',
+                color: 'var(--text-main)',
+                fontSize: '0.75rem',
+                outline: 'none',
+              }}
+            >
+              <option disabled defaultValue>{row.usedIn.length} Portals</option>
+              {row.usedIn.map((portal, idx) => (
+                <option key={idx} value={portal}>
+                  {portal}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Not used</span>
+          )}
         </div>
       ),
     },

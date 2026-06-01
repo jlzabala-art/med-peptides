@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import {
@@ -109,6 +110,16 @@ export default function AdminSkuMappingTab() {
   const [log, setLog] = useState([]);
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const deepLinkSearch = params.get('search');
+
+  useEffect(() => {
+    if (deepLinkSearch) {
+      setSearchQuery(deepLinkSearch);
+    }
+  }, [deepLinkSearch]);
+
   const [selectedIds, setSelectedIds] = useState([]);
   const [expandedRowIds, setExpandedRowIds] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);

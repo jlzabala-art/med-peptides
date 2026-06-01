@@ -8,7 +8,7 @@
  * @param {Function} onClick
  * @param {React.ReactNode} children
  */
-export default function Card({
+export function Card({
   children,
   variant = 'default',
   hover = false,
@@ -52,3 +52,37 @@ export default function Card({
     </div>
   );
 }
+
+export function CardHeader({ className = '', children, ...rest }) {
+  return (
+    <div className={`px-6 py-4 border-b ${className}`} {...rest}>
+      {children}
+    </div>
+  );
+}
+
+export function CardTitle({ className = '', children, ...rest }) {
+  return (
+    <h3 className={`text-lg font-semibold ${className}`} {...rest}>
+      {children}
+    </h3>
+  );
+}
+
+export function CardDescription({ className = '', children, ...rest }) {
+  return (
+    <p className={`text-sm text-gray-500 ${className}`} {...rest}>
+      {children}
+    </p>
+  );
+}
+
+export function CardContent({ className = '', children, ...rest }) {
+  return (
+    <div className={`p-6 ${className}`} {...rest}>
+      {children}
+    </div>
+  );
+}
+
+export default Card;

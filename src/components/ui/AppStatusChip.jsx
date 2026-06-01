@@ -22,11 +22,14 @@ export default function AppStatusChip({ status }) {
   switch(normalized) {
     case 'active':
     case 'linked':
+    case 'accepted':
+    case 'aceptada':
       bg = 'var(--color-success-bg)';
       color = 'var(--color-success)';
       Icon = normalized === 'linked' ? Link2 : CheckCircle2;
       break;
     case 'pending':
+    case 'pendiente':
     case 'unverified':
       bg = 'var(--color-warning-bg)';
       color = 'var(--color-warning)';
@@ -34,6 +37,8 @@ export default function AppStatusChip({ status }) {
       break;
     case 'suspended':
     case 'inactive':
+    case 'expired':
+    case 'caducada':
       bg = 'var(--color-danger-bg)';
       color = 'var(--color-danger)';
       Icon = XCircle;
@@ -49,6 +54,8 @@ export default function AppStatusChip({ status }) {
       Icon = EyeOff;
       break;
     case 'invited':
+    case 'sent':
+    case 'enviada':
       bg = 'var(--color-info-bg)';
       color = 'var(--color-info)';
       Icon = Mail;

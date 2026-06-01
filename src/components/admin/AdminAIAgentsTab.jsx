@@ -586,6 +586,19 @@ export default function AdminAIAgentsTab() {
           };
         }
         setAgents(merged);
+        // Inject data context for Atlas AI
+        const activeAgents = Object.entries(merged).filter(([_, a]) => a.status === 'active');
+        const tokenSum = Object.values(usageSnap.data()?.agents || {}).reduce((acc, m) => acc + (m.tokens || 0), 0);
+        window.dispatchEvent(new CustomEvent('admin-context-update', {
+          detail: {
+            page: 'ai-agents',
+            totalAgents: Object.keys(merged).length,
+            activeAgentsCount: activeAgents.length,
+            totalTokensUsed: tokenSum,
+            agentList: activeAgents.map(([key, a]) => ({ key, name: a.name, model: a.model })),
+            summary: `AI Agents Panel: ${activeAgents.length} active agents. Total tokens used: ${tokenSum}.`
+          }
+        }));
       }
     } catch (err) {
       console.error('[AdminAIAgentsTab] Load failed:', err);

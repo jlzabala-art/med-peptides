@@ -412,7 +412,7 @@ export default function DataTable({
                 }}
               >
                 {[10, 20, 50, 100].map(val => (
-                  <option key={val} value={val}>{val}</option>
+                  <option key={`rpp-${val}`} value={val}>{val}</option>
                 ))}
               </select>
             ) : (

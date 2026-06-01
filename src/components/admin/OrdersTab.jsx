@@ -35,6 +35,7 @@ import {
   Search,
   Archive,
   Trash2,
+  Sparkles,
 } from 'lucide-react';
 import { exportToCSV } from '../../utils/exportUtils';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -103,6 +104,19 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
       const snap = await getDocs(q);
       const raw = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       setOrders(raw); // Removed arbitrary items filter so all real orders show up
+      // Inject data context for Atlas AI
+      const pendingOrders = raw.filter(o => o.status === 'Pending' || o.status === 'Processing');
+      const highValueOrders = raw.filter(o => o.total > 500);
+      window.dispatchEvent(new CustomEvent('admin-context-update', {
+        detail: {
+          page: 'orders',
+          totalOrders: raw.length,
+          pendingCount: pendingOrders.length,
+          highValueCount: highValueOrders.length,
+          recentPending: pendingOrders.slice(0, 5).map(o => ({ id: o.id, customer: o.customerName || o.customerEmail, total: o.total, status: o.status })),
+          summary: `Orders dashboard: ${raw.length} total orders loaded. ${pendingOrders.length} pending processing, ${highValueOrders.length} high-value orders (>$500).`
+        }
+      }));
     } catch (err) {
       console.error('Error fetching orders:', err);
     } finally {
@@ -332,6 +346,22 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
                 />
               )}
               #{orderNum}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.dispatchEvent(new CustomEvent('OPEN_ATLAS_CLINICAL_MODE', {
+                    detail: { prompt: `Resume y analiza el pedido #${orderNum} del cliente ${o.customer?.fullName || o.customer?.name || 'Desconocido'}. ¿Hay alguna alerta logística o de stock?` }
+                  }));
+                }}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer', 
+                  padding: '2px', color: 'var(--color-primary)', 
+                  display: 'inline-flex', alignItems: 'center'
+                }}
+                title="Ask Atlas to analyze this order"
+              >
+                <Sparkles size={14} />
+              </button>
             </div>
             <div style={{ fontSize: '0.85rem', color: 'var(--color-text-main)', fontWeight: 600 }}>
               {o.customer?.fullName || o.customer?.name || '—'}

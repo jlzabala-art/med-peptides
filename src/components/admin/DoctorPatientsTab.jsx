@@ -44,6 +44,17 @@ export default function PhysicianPatientsTab({ doctorId }) {
 
       const resolvedPatients = await Promise.all(patientPromises);
       setPatients(resolvedPatients);
+      // Inject data context for Atlas AI
+      window.dispatchEvent(new CustomEvent('admin-context-update', {
+        detail: {
+          page: 'patients',
+          totalPatients: resolvedPatients.length,
+          activeProtocolsCount: resolvedPatients.filter(p => p.activeProtocols > 0).length,
+          pendingTasksCount: resolvedPatients.filter(p => p.pendingTasks > 0).length,
+          samplePatients: resolvedPatients.slice(0, 5).map(p => ({ name: p.fullName || p.email, lastVisit: p.lastVisit, riskLevel: p.riskLevel })),
+          summary: `Doctor Dashboard: ${resolvedPatients.length} assigned patients. ${resolvedPatients.filter(p => p.activeProtocols > 0).length} on active protocols.`
+        }
+      }));
     } catch (err) {
       console.error('Error fetching patients:', err);
     } finally {

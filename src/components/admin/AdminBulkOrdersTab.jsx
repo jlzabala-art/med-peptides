@@ -9,6 +9,7 @@
  * Admin also sees admin_notifications badge for new unread bulk orders.
  */
 
+import { useLocation } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import {
   collection,
@@ -411,6 +412,16 @@ export default function AdminBulkOrdersTab() {
   const [unreadCount, setUnread] = useState(0);
   const [showBuilder, setShowBuilder] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const deepLinkSearch = params.get('search');
+
+  useEffect(() => {
+    if (deepLinkSearch) {
+      setSearchTerm(deepLinkSearch);
+    }
+  }, [deepLinkSearch]);
+
 
   // Real-time listener
   useEffect(() => {
@@ -422,6 +433,19 @@ export default function AdminBulkOrdersTab() {
         setOrders(all);
         setUnread(all.filter((o) => o.status === 'submitted').length);
         setLoading(false);
+        // Inject data context for Atlas AI
+        const submittedOrders = all.filter(o => o.status === 'submitted');
+        const processingOrders = all.filter(o => o.status === 'processing');
+        window.dispatchEvent(new CustomEvent('admin-context-update', {
+          detail: {
+            page: 'bulk-orders',
+            totalBulkOrders: all.length,
+            submittedCount: submittedOrders.length,
+            processingCount: processingOrders.length,
+            recentSubmitted: submittedOrders.slice(0, 5).map(o => ({ id: o.id, user: o.userEmail || o.userId, total: o.totalValue, status: o.status })),
+            summary: `Bulk Orders dashboard: ${all.length} bulk orders. ${submittedOrders.length} newly submitted, ${processingOrders.length} processing.`
+          }
+        }));
       },
       () => setLoading(false)
     );

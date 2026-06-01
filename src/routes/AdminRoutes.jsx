@@ -59,6 +59,7 @@ const ImportPriceListsTab = React.lazy(() => import('../components/admin/imports
 const ImportCoATab = React.lazy(() => import('../components/admin/imports/ImportCoATab'));
 const ImportCatalogsTab = React.lazy(() => import('../components/admin/imports/ImportCatalogsTab'));
 const ImportRFQTab = React.lazy(() => import('../components/admin/imports/ImportRFQTab'));
+const ShippingTrackerTab = React.lazy(() => import('../components/supplier/ShippingTrackerTab'));
 // ── Premium loading skeleton for lazy-loaded admin tabs ────────────────────────
 const AdminTabSkeleton = () => (
   <div style={{ padding: '2rem' }}>
@@ -101,6 +102,7 @@ export default function AdminRoutes() {
         <Route path="invitations" element={<AdminTabErrorBoundary tabId="invitations" tabLabel="Invitations"><AdminInvitationsTab readOnly={false} /></AdminTabErrorBoundary>} />
         <Route path="views" element={<AdminTabErrorBoundary tabId="views" tabLabel="Views"><AdminViewsConfigTab /></AdminTabErrorBoundary>} />
         <Route path="orders" element={<AdminTabErrorBoundary tabId="orders" tabLabel="Orders"><OrdersTab readOnly={false} /></AdminTabErrorBoundary>} />
+        <Route path="stock" element={<AdminTabErrorBoundary tabId="stock" tabLabel="Stock & Inventory"><AdminVariantsTab /></AdminTabErrorBoundary>} />
         <Route path="bulk-orders" element={<AdminTabErrorBoundary tabId="bulk-orders" tabLabel="Bulk Orders"><AdminBulkOrdersTab /></AdminTabErrorBoundary>} />
         <Route path="access-levels" element={<AdminTabErrorBoundary tabId="access-levels" tabLabel="Access Levels"><AdminAccessLevelsTab /></AdminTabErrorBoundary>} />
         <Route path="clinical-ai" element={<AdminTabErrorBoundary tabId="clinical-ai" tabLabel="Clinical AI"><ClinicalAIWidget /></AdminTabErrorBoundary>} />
@@ -165,6 +167,7 @@ export default function AdminRoutes() {
         <Route path="ai-agents" element={<AdminTabErrorBoundary tabId="ai-agents" tabLabel="AI Agents"><AdminAIAgentsTab /></AdminTabErrorBoundary>} />
         <Route path="enrichment" element={<AdminTabErrorBoundary tabId="enrichment" tabLabel="Enrichment"><AdminCatalogEnrichmentTab /></AdminTabErrorBoundary>} />
         <Route path="agency-deals" element={<AdminTabErrorBoundary tabId="agency-deals" tabLabel="Agency Deals"><AdminAgencyDealsTab /></AdminTabErrorBoundary>} />
+        <Route path="shipping" element={<AdminTabErrorBoundary tabId="shipping" tabLabel="Shipping Tracker"><ShippingTrackerTab /></AdminTabErrorBoundary>} />
         <Route path="finance" element={<AdminTabErrorBoundary tabId="finance" tabLabel="Financial Dashboard"><AdminFinanceTab /></AdminTabErrorBoundary>} />
         <Route path="my-profile" element={<AdminTabErrorBoundary tabId="my-profile" tabLabel="My Profile"><UserProfileTab /></AdminTabErrorBoundary>} />
         

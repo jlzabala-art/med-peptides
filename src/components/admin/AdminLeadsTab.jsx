@@ -8,7 +8,7 @@ import AppActionGroup from '../ui/AppActionGroup';
 import { useToast } from '../../hooks/useToast';
 import { collection, query, orderBy, getDocs, updateDoc, doc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { useNavigate } from 'react-router-dom';
+import {  useNavigate , useLocation } from 'react-router-dom';
 import AdminPageHeader from './AdminPageHeader';
 
 // Normalizes strings for exact matching
@@ -1158,6 +1158,16 @@ export default function AdminLeadsTab() {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const deepLinkSearch = params.get('search');
+
+  useEffect(() => {
+    if (deepLinkSearch) {
+      setSearchTerm(deepLinkSearch);
+    }
+  }, [deepLinkSearch]);
+
   const [filterStatus, setFilterStatus] = useState('All');
   const [selectedLeadIds, setSelectedLeadIds] = useState([]);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -1265,6 +1275,21 @@ export default function AdminLeadsTab() {
       });
 
       setLeads(combined);
+      // Inject data context for Atlas AI
+      const newLeads = combined.filter(l => l.status === 'new');
+      const rfqLeads = combined.filter(l => l.type === 'rfq');
+      const hotLeads = combined.filter(l => l.temperature === 'HOT');
+      window.dispatchEvent(new CustomEvent('admin-context-update', {
+        detail: {
+          page: 'leads',
+          totalLeads: combined.length,
+          newLeadsCount: newLeads.length,
+          rfqCount: rfqLeads.length,
+          hotLeadsCount: hotLeads.length,
+          recentLeads: combined.slice(0, 5).map(l => ({ name: l.name, status: l.status, type: l.type, date: l.createdAt })),
+          summary: `Lead pipeline: ${combined.length} total leads. ${newLeads.length} new, ${hotLeads.length} hot leads, ${rfqLeads.length} B2B RFQs pending.`
+        }
+      }));
     } catch (err) {
       console.error('Error fetching leads:', err);
       toast.error('Failed to load leads.');

@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, getDocs, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
@@ -15,6 +16,16 @@ export default function AdminRFQTab() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [parseProgress, setParseProgress] = useState({ state: 'idle', count: 0 });
   const [searchTerm, setSearchTerm] = useState('');
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const deepLinkSearch = params.get('rfqId');
+
+  useEffect(() => {
+    if (deepLinkSearch) {
+      setSearchTerm(deepLinkSearch);
+    }
+  }, [deepLinkSearch]);
+
 
   // New RFQ State
   const [currentRFQ, setCurrentRFQ] = useState(null);

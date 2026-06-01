@@ -215,8 +215,27 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
       }
     };
     window.addEventListener('OPEN_ATLAS_CLINICAL_MODE', handleContextEvent);
-    return () => window.removeEventListener('OPEN_ATLAS_CLINICAL_MODE', handleContextEvent);
-  }, [setIsOpen, setMessages]);
+
+    const handleShortcutPrompt = (e) => {
+      const prompt = e.detail?.prompt;
+      if (prompt && typeof setInput === 'function') {
+        setInput(prompt);
+        setIsPulsing(true);
+        setTimeout(() => {
+          const inputEl = document.querySelector('.clinical-assistant-container input[type="text"], .clinical-assistant-container textarea');
+          if (inputEl) {
+            inputEl.focus();
+          }
+        }, 400);
+      }
+    };
+    window.addEventListener('ai-shortcut-prompt', handleShortcutPrompt);
+
+    return () => {
+      window.removeEventListener('OPEN_ATLAS_CLINICAL_MODE', handleContextEvent);
+      window.removeEventListener('ai-shortcut-prompt', handleShortcutPrompt);
+    };
+  }, [setIsOpen, setMessages, setInput]);
 
   const isProductPage = /^\/product\//.test(location.pathname);
 
@@ -536,13 +555,13 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
         {messages.length === 0 && suggestedPrompts.length > 0 && !isLoading && (
           <div style={{ padding: '1rem 1.25rem 0.5rem', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
             <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem', opacity: 0.7 }}>
-              Sugerencias para tu portal
+              Suggested Actions
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
               {suggestedPrompts.map((p, i) => (
                 <button
                   key={i}
-                  onClick={() => handleSend(p.label)}
+                  onClick={() => handleSend(p.prompt || p.label)}
                   style={{
                     padding: '0.4rem 0.8rem',
                     borderRadius: '999px',

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, getDocs, doc, updateDoc, addDoc } from 'firebase/firestore';
+import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
 import DataTable from '../ui/DataTable';
 import AppFilterBar from '../ui/AppFilterBar';
@@ -8,6 +9,7 @@ import PayoutManagerWidget from './gadgets/PayoutManagerWidget';
 
 export default function AdminCostsTab({ readOnly = false }) {
   const { toast } = useToast();
+  const { currentUser } = useAuth();
   const [products, setProducts] = useState([]);
   const [settings, setSettings] = useState({ exchangeRates: { euro: 0.92 } });
   const [costCurrency, setCostCurrency] = useState('usd');
@@ -41,15 +43,28 @@ export default function AdminCostsTab({ readOnly = false }) {
 
   async function handleUpdateProduct(id, updates) {
     try {
-      const productRef = doc(db, 'products', id);
-      await updateDoc(productRef, {
-        ...updates,
-        updatedAt: new Date().toISOString(),
+      const product = products.find(p => p.id === id);
+      const oldCost = product ? product.costPrice : 0;
+      const productName = product ? product.name : id;
+      
+      // PHASE 1: CFO Architecture - Send to Approval Queue instead of direct update
+      await addDoc(collection(db, 'financial_approvals'), {
+        type: 'cost_update',
+        status: 'pending',
+        data: {
+          productId: id,
+          productName,
+          oldCost,
+          updates
+        },
+        requestedBy: currentUser?.email || 'Admin',
+        createdAt: new Date().toISOString()
       });
-      setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
+      
+      toast.success('Cost update sent to CFO for approval.');
     } catch (err) {
-      console.error('Error updating product cost:', err);
-      toast.error('Failed to update cost.');
+      console.error('Error queueing product cost update:', err);
+      toast.error('Failed to queue cost update.');
     }
   };
 
@@ -124,6 +139,50 @@ export default function AdminCostsTab({ readOnly = false }) {
           )}
         </div>
       ),
+    },
+    {
+      key: 'retail_price',
+      header: 'Retail Price',
+      align: 'right',
+      sortValue: (p) => p.price || 0,
+      render: (p) => (
+        <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>
+          ${p.price || 0}
+        </span>
+      )
+    },
+    {
+      key: 'gross_margin',
+      header: 'Gross Margin (%)',
+      align: 'center',
+      sortValue: (p) => {
+        const cost = p.costPrice || 0;
+        const price = p.price || 0;
+        if (price === 0) return 0;
+        return ((price - cost) / price) * 100;
+      },
+      render: (p) => {
+        const cost = p.costPrice || 0;
+        const price = p.price || 0;
+        if (price === 0) return <span style={{color: 'gray'}}>N/A</span>;
+        const margin = ((price - cost) / price) * 100;
+        const isLow = margin < 40;
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <span style={{
+              fontWeight: 800,
+              color: isLow ? '#ef4444' : '#10b981',
+              backgroundColor: isLow ? '#fee2e2' : '#d1fae5',
+              padding: '2px 8px',
+              borderRadius: '12px',
+              fontSize: '0.8rem'
+            }}>
+              {margin.toFixed(1)}%
+            </span>
+            {isLow && <span title="Low Margin Alert (Below 40%)" style={{cursor: 'help'}}>⚠️</span>}
+          </div>
+        );
+      }
     },
     {
       key: 'calculated_cost',

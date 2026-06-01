@@ -12,8 +12,9 @@ import { collection, getDocs, doc, updateDoc, query, orderBy } from 'firebase/fi
 import AppFilterBar from '../ui/AppFilterBar';
 import DataTable from '../ui/DataTable';
 import { db } from '../../firebase';
-import { RefreshCw, EyeOff, Eye, Package, DollarSign, Hash, AlertTriangle, Check, Save } from 'lucide-react';
+import { RefreshCw, EyeOff, Eye, Package, DollarSign, Hash, AlertTriangle, Check, Save, Sparkles } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
+import { useLocation } from 'react-router-dom';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -41,6 +42,16 @@ export default function AdminVariantsTab() {
   const [saved, setSaved] = useState({}); // same key → bool
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const deepLinkSearch = params.get('search');
+
+  useEffect(() => {
+    if (deepLinkSearch) {
+      setSearchTerm(deepLinkSearch);
+    }
+  }, [deepLinkSearch]);
+
 
   // ── Fetch all products + their variants ───────────────────────────────────
 
@@ -276,6 +287,25 @@ export default function AdminVariantsTab() {
           <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>
             {g.product.displayName ?? g.product.name}
           </span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              window.dispatchEvent(new CustomEvent('OPEN_ATLAS_CLINICAL_MODE', {
+                detail: { product: g.product.displayName ?? g.product.name }
+              }));
+            }}
+            style={{
+              background: 'rgba(59,130,246,0.1)', border: 'none', cursor: 'pointer', 
+              padding: '0.2rem 0.4rem', borderRadius: '4px', color: 'var(--color-primary)', 
+              display: 'inline-flex', alignItems: 'center', transition: 'background 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(59,130,246,0.2)'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(59,130,246,0.1)'}
+            title="Ask Atlas about this product"
+          >
+            <Sparkles size={13} style={{ marginRight: '4px' }} />
+            <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>Atlas</span>
+          </button>
           {(g.product.dosage || g.product.strength) && (
             <span
               style={{

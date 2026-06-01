@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc, limit, startAfter } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Card } from '../ui';
 import { PackageSearch, FileCheck, Truck, Clock, CheckCircle } from 'lucide-react';
@@ -8,22 +8,75 @@ export default function AdminLogisticsTab() {
   const [shipments, setShipments] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [lastVisible, setLastVisible] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
+
   useEffect(() => {
     loadShipments();
   }, []);
 
-  const loadShipments = async () => {
+  const loadShipments = async (loadMore = false) => {
     setLoading(true);
     try {
-      // Load RFQs that have been reconciled and passed to logistics
-      // Statuses: RECONCILED, SHIPPED, DELIVERED
-      const q = query(
+      let q = query(
         collection(db, 'agency_rfqs'), 
-        where('status', 'in', ['RECONCILED', 'SHIPPED', 'DELIVERED'])
+        where('status', 'in', ['RECONCILED', 'SHIPPED', 'DELIVERED']),
+        limit(5)
       );
+
+      if (loadMore && lastVisible) {
+        q = query(
+          collection(db, 'agency_rfqs'), 
+          where('status', 'in', ['RECONCILED', 'SHIPPED', 'DELIVERED']),
+          startAfter(lastVisible),
+          limit(5)
+        );
+      }
+
       const snap = await getDocs(q);
       const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      setShipments(data);
+      
+      if (loadMore) {
+        setShipments(prev => {
+          const updated = [...prev, ...data];
+          window.dispatchEvent(new CustomEvent('admin-context-update', {
+            detail: {
+              page: 'logistics',
+              shipmentCount: updated.length,
+              shipments: updated.slice(0, 10).map(s => ({
+                id: s.id,
+                status: s.status,
+                clientName: s.clientName || s.supplierName || 'Unknown',
+                createdAt: s.createdAt,
+                items: s.items?.length || 0
+              })),
+              summary: `Logistics tracker: ${updated.length} shipments loaded. Statuses: ${[...new Set(updated.map(s => s.status))].join(', ')}.`
+            }
+          }));
+          return updated;
+        });
+      } else {
+        setShipments(data);
+        window.dispatchEvent(new CustomEvent('admin-context-update', {
+          detail: {
+            page: 'logistics',
+            shipmentCount: data.length,
+            shipments: data.slice(0, 10).map(s => ({
+              id: s.id,
+              status: s.status,
+              clientName: s.clientName || s.supplierName || 'Unknown',
+              createdAt: s.createdAt,
+              items: s.items?.length || 0
+            })),
+            summary: `Logistics tracker: ${data.length} shipments loaded. Statuses: ${[...new Set(data.map(s => s.status))].join(', ')}.`
+          }
+        }));
+      }
+
+      if (snap.docs.length > 0) {
+        setLastVisible(snap.docs[snap.docs.length - 1]);
+      }
+      setHasMore(snap.docs.length === 5);
     } catch (err) {
       console.error(err);
     }
@@ -42,7 +95,7 @@ export default function AdminLogisticsTab() {
     }
   };
 
-  if (loading) {
+  if (loading && shipments.length === 0) {
     return <div className="p-8 text-center text-gray-500">Loading shipments...</div>;
   }
 
@@ -135,6 +188,18 @@ export default function AdminLogisticsTab() {
               </table>
             </Card>
           ))}
+        </div>
+      )}
+
+      {hasMore && (
+        <div className="mt-8 text-center">
+          <button
+            onClick={() => loadShipments(true)}
+            disabled={loading}
+            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition disabled:opacity-50"
+          >
+            {loading ? 'Loading...' : 'Load More Shipments'}
+          </button>
         </div>
       )}
     </div>

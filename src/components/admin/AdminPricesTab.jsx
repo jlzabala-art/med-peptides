@@ -61,6 +61,17 @@ export default function AdminPricesTab() {
 
       setProducts(productsList);
       setDiscounts(updatedDiscounts);
+      // Inject data context for Atlas AI
+      window.dispatchEvent(new CustomEvent('admin-context-update', {
+        detail: {
+          page: 'prices',
+          totalProducts: productsList.length,
+          categoriesWithDiscounts: Object.keys(updatedDiscounts),
+          globalDiscounts: updatedDiscounts,
+          samplePrices: productsList.slice(0, 5).map(p => ({ sku: p.sku, price: p.price, activeDiscount: updatedDiscounts[p.category] || 0 })),
+          summary: `Pricing dashboard: ${productsList.length} products loaded. Global discounts applied across ${Object.keys(updatedDiscounts).length} categories.`
+        }
+      }));
     } catch (err) {
       console.error('Error loading pricing data:', err);
     } finally {

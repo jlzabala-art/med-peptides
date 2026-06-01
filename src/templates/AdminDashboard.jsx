@@ -122,6 +122,7 @@ const NAV_GROUPS = [
       { id: 'bulk-orders',      label: 'Bulk Orders',         icon: Box },
       { id: 'agency-deals',     label: 'Agency Deals',        icon: Briefcase },
       { id: 'logistics',        label: 'Logistics Tracker',   icon: Truck },
+      { id: 'shipping',         label: 'Shipping Network',    icon: Globe },
       { id: 'analytics',        label: 'Analytics',           icon: BarChart3 },
       { id: 'account-managers', label: 'Account Managers',    icon: ShieldCheck },
     ],

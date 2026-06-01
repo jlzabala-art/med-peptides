@@ -3,8 +3,29 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiCpu } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useLocation } from 'react-router-dom';
-// Depending on the role, we might render different AI tools here. 
-// For now, we will render a standard AI Chat interface placeholder.
+import ClinicalAssistant from '../components/shared/ClinicalAssistant';
+
+const ROLE_SUGGESTED_PROMPTS = {
+  doctor: [
+    { label: '💉 Protocolo para pérdida de peso' },
+    { label: '🔬 Evidencia clínica BPC-157' },
+    { label: '📋 Redactar nota clínica' },
+  ],
+  patient: [
+    { label: '💬 Explícame mi protocolo actual' },
+    { label: '📅 ¿Qué esperar en semana 2?' },
+  ],
+  wholesaler: [
+    { label: '📦 ¿Qué péptidos tienen más demanda?' },
+    { label: '💰 Optimizar márgenes' },
+  ],
+};
+
+const ROLE_AGENT_TYPE = {
+  doctor: 'clinical_decision',
+  patient: 'wellness_companion',
+  wholesaler: 'b2b_optimizer',
+};
 
 export default function PortalAIDrawer({ isOpen, onClose }) {
   const { activeRole, userProfile } = useAuth();
@@ -44,25 +65,16 @@ export default function PortalAIDrawer({ isOpen, onClose }) {
               </button>
             </div>
 
-            <div className="drawer-content">
-              <div className="ai-context-banner">
-                <p><strong>Context:</strong> You are acting as <span>{activeRole}</span> viewing <code>{currentPath}</code>.</p>
-                <p>How can I assist you today, {userProfile?.firstName || 'User'}?</p>
-              </div>
-
-              {/* Chat Interface Placeholder */}
-              <div className="chat-area">
-                <div className="chat-bubble ai">
-                  Hello! I'm ready to help you analyze data, draft protocols, or manage inventory based on your current view.
-                </div>
-              </div>
-            </div>
-
-            <div className="drawer-footer">
-              <div className="chat-input-wrapper">
-                <input type="text" placeholder="Ask AI a question..." className="chat-input" />
-                <button className="send-btn">Send</button>
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+              <ClinicalAssistant 
+                embedded={true} 
+                isOpen={isOpen} 
+                setIsOpen={onClose} 
+                pageContext={{ path: currentPath }} 
+                contextMode={activeRole}
+                agentType={ROLE_AGENT_TYPE[activeRole] || 'default'}
+                suggestedPrompts={ROLE_SUGGESTED_PROMPTS[activeRole] || []}
+              />
             </div>
           </motion.div>
         </>

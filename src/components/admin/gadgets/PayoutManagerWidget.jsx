@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, addDoc } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { DollarSign, FileText, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
@@ -62,9 +62,33 @@ export default function PayoutManagerWidget({
     fetchPayouts();
   }, [activeRole]);
 
-  const handleApprove = (id) => {
-    // Demo action
-    setPayouts((prev) => prev.map((p) => (p.id === id ? { ...p, status: 'processing' } : p)));
+  const handleApprove = async (id) => {
+    const payout = payouts.find(p => p.id === id);
+    if (!payout) return;
+
+    if (payout.amount >= 1000) {
+      // Send to CFO Approval Queue
+      try {
+        await addDoc(collection(db, 'financial_approvals'), {
+          type: 'payout_auth',
+          status: 'pending',
+          data: {
+            payoutId: id,
+            amount: payout.amount,
+            recipientName: payout.doctorName
+          },
+          requestedBy: activeRole || 'Admin',
+          createdAt: new Date().toISOString()
+        });
+        alert('High-value payout routed to CFO for approval.');
+        setPayouts((prev) => prev.map((p) => (p.id === id ? { ...p, status: 'pending' } : p)));
+      } catch (err) {
+        console.error('Error queueing approval', err);
+      }
+    } else {
+      // Normal flow
+      setPayouts((prev) => prev.map((p) => (p.id === id ? { ...p, status: 'processing' } : p)));
+    }
   };
 
   if (activeRole !== 'admin') return null;

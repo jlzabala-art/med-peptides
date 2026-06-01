@@ -592,6 +592,18 @@ export default function AdminProtocolsTab() {
         hasMore: more,
       } = await getPaginatedProtocols(null, 20);
       setProtocols(data);
+      // Inject data context for Atlas AI
+      const activeProtocols = data.filter(p => p.status === 'active');
+      window.dispatchEvent(new CustomEvent('admin-context-update', {
+        detail: {
+          page: 'protocols',
+          totalProtocols: data.length,
+          activeCount: activeProtocols.length,
+          categories: [...new Set(data.map(p => p.therapeutic_category).filter(Boolean))],
+          recentActive: activeProtocols.slice(0, 5).map(p => ({ title: p.protocol_name || p.title, category: p.therapeutic_category, phases: p.phases?.length || 0 })),
+          summary: `Clinical Protocols: ${data.length} total protocols. ${activeProtocols.length} active.`
+        }
+      }));
       setLastDoc(last);
       setHasMore(more);
     } catch (err) {

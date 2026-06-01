@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import {
   collection,
@@ -9,6 +10,8 @@ import {
   updateDoc,
   orderBy,
   where,
+  limit,
+  startAfter,
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import {
@@ -34,9 +37,9 @@ import AppActionGroup from '../ui/AppActionGroup';
 import AppFilterBar from '../ui/AppFilterBar';
 import { useToast } from '../../hooks/useToast';
 
-const EMAILJS_SERVICE_ID = 'service_vstbe8f';
-const EMAILJS_TEMPLATE_ID = 'template_7unfks8';
-const EMAILJS_PUBLIC_KEY = 'rO_f_X4uBvFf3u_3u';
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_vstbe8f';
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_7unfks8';
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'rO_f_X4uBvFf3u_3u';
 
 export default function AdminInvitationsTab({ restrictedRoles = null, readOnly = false, tenantId = null }) {
   const { toast } = useToast();
@@ -47,6 +50,10 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
   const [sortField, setSortField] = useState('invitedAt');
   const [sortDirection, setSortDirection] = useState('desc');
 
+  const [lastVisible, setLastVisible] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
+  const PAGE_SIZE = 50;
+
   // Modal states
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [previewEmail, setPreviewEmail] = useState(null); // Will hold the invitation object to preview
@@ -55,6 +62,16 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
   const [inviteForm, setInviteForm] = useState({ name: '', email: '', message: '', roles: [] });
 
   const [searchQuery, setSearchQuery] = useState('');
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const deepLinkSearch = params.get('search');
+
+  useEffect(() => {
+    if (deepLinkSearch) {
+      setSearchQuery(deepLinkSearch);
+    }
+  }, [deepLinkSearch]);
+
   const [roleFilter, setRoleFilter] = useState('all');
   const [selectedIds, setSelectedIds] = useState([]);
 
@@ -72,20 +89,37 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
     fetchInvitations();
   }, [tenantId]);
 
-  async function fetchInvitations() {
+  async function fetchInvitations(loadMore = false) {
     try {
       setLoading(true);
       let qBuilder = collection(db, 'invitations');
       if (tenantId) {
         qBuilder = query(qBuilder, where('tenantId', '==', tenantId));
       }
-      const q = query(qBuilder, orderBy('invitedAt', 'desc'));
+      
+      let q;
+      if (loadMore && lastVisible) {
+        q = query(qBuilder, orderBy('invitedAt', 'desc'), startAfter(lastVisible), limit(PAGE_SIZE));
+      } else {
+        q = query(qBuilder, orderBy('invitedAt', 'desc'), limit(PAGE_SIZE));
+      }
+      
       const querySnapshot = await getDocs(q);
       const list = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      setInvitations(list);
+      
+      if (loadMore) {
+        setInvitations(prev => [...prev, ...list]);
+      } else {
+        setInvitations(list);
+      }
+      
+      if (querySnapshot.docs.length > 0) {
+        setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+      }
+      setHasMore(querySnapshot.docs.length === PAGE_SIZE);
     } catch (err) {
       console.error('Error fetching invitations:', err);
     } finally {
@@ -213,7 +247,7 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
     return true;
   });
 
-  if (loading) {
+  if (loading && invitations.length === 0) {
     return (
       <div
         style={{
@@ -246,6 +280,18 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
       });
     }
     return active;
+  };
+
+  const getInvitationStatus = (inv) => {
+    if (inv.status === 'accepted') return 'Aceptada';
+    if (inv.invitedAt) {
+       const sentDate = inv.invitedAt.toDate ? inv.invitedAt.toDate() : new Date(inv.invitedAt);
+       const daysSince = (new Date() - sentDate) / (1000 * 60 * 60 * 24);
+       if (daysSince > 7) return 'Caducada';
+       if (daysSince < 1) return 'Enviada';
+       return 'Pendiente';
+    }
+    return inv.status === 'pending' ? 'Pendiente' : (inv.status || 'Pendiente');
   };
 
   const handleFilterRemove = (f) => {
@@ -302,7 +348,7 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
               Total Sent: <strong>{invitations.length}</strong>
             </span>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Accepted: <strong>{invitations.filter((i) => i.status === 'accepted').length}</strong>
+              Accepted: <strong>{invitations.filter((i) => getInvitationStatus(i) === 'Aceptada').length}</strong>
             </span>
           </div>
         </div>
@@ -366,7 +412,7 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
             sortKey: 'status',
             render: (inv) => (
               <AppStatusChip 
-                status={inv.status === 'accepted' ? 'active' : 'pending'} 
+                status={getInvitationStatus(inv)} 
               />
             ),
           },
@@ -407,7 +453,7 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
               <div className="show-on-mobile" style={{ display: 'none', gap: '1rem' }}>
                 <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Status:</span>
                 <span style={{ color: 'var(--text-main)', fontWeight: 500 }}>
-                  {inv.status === 'accepted' ? 'Active' : 'Pending'}
+                  {getInvitationStatus(inv)}
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -460,6 +506,19 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
           </div>
         )}
       />
+
+      {hasMore && (
+        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+          <button
+            onClick={() => fetchInvitations(true)}
+            disabled={loading}
+            className="btn btn-outline"
+            style={{ fontSize: '0.85rem' }}
+          >
+            {loading ? 'Loading...' : 'Load More'}
+          </button>
+        </div>
+      )}
 
       {/* Modal: New Invitation */}
       {showInviteModal && (

@@ -641,6 +641,20 @@
       ]
     },
     {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "total",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "calendar_events",
       "queryScope": "COLLECTION",
       "fields": [

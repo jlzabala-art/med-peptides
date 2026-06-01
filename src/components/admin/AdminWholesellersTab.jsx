@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import CreateWholesellerDrawer from './CreateWholesellerDrawer';
 import { collection, query, getDocs, doc, updateDoc, setDoc } from 'firebase/firestore';
@@ -24,6 +25,16 @@ export default function AdminWholesellersTab() {
   const [wholesellers, setWholesellers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const deepLinkSearch = params.get('search');
+
+  useEffect(() => {
+    if (deepLinkSearch) {
+      setSearchTerm(deepLinkSearch);
+    }
+  }, [deepLinkSearch]);
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {

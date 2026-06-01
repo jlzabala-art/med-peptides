@@ -176,6 +176,13 @@ export function useClinicalAI({
   });
 
   const [sessionIntents, setSessionIntents] = useState([]);
+  const [dynamicPageContext, setDynamicPageContext] = useState(null);
+
+  useEffect(() => {
+    const handler = (e) => setDynamicPageContext(e.detail);
+    window.addEventListener('UPDATE_GLOBAL_CONTEXT', handler);
+    return () => window.removeEventListener('UPDATE_GLOBAL_CONTEXT', handler);
+  }, []);
   const [hasNewActivity, setHasNewActivity] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -634,19 +641,24 @@ export function useClinicalAI({
               }
               return null;
             })(),
-            ...externalPageContext
+            ...externalPageContext,
+            ...(dynamicPageContext || {})
           },
           instructions: contextMode === 'admin' ? `
 --- ADMIN MODE ACTIVE ---
 You are "Atlas AI", the Atlas Health administrative assistant. Help the administrator manage users, analyze business metrics, and audit the system. DO NOT provide medical or research advice.
 Current Tab: ${externalPageContext?.label || externalPageContext?.activeTab || 'Admin Portal'}.
+${externalPageContext?.summary ? `Context Summary: ${externalPageContext.summary}` : ''}
+${externalPageContext ? `Page Data (JSON): ${JSON.stringify(externalPageContext, (key, val) => key === 'page' || key === 'label' || key === 'activeTab' || key === 'summary' ? undefined : val)}` : ''}
 ` : `
 ${buildClinicalAITrainingBlock(detectedIntent, userCtx?.role || 'patient')}
 LAYER:${responseLayer} DIRECTIVE. Respond at depth ${responseLayer}/4.
 ${externalPageContext ? `
 --- ACTIVE PAGE CONTEXT ---
 The user is currently navigating the Application.
-Current Tab: ${externalPageContext.label || externalPageContext.activeTab}.
+Current Tab: ${externalPageContext.label || externalPageContext.activeTab || 'Application'}.
+${externalPageContext.summary ? `Context Summary: ${externalPageContext.summary}` : ''}
+Page Data (JSON): ${JSON.stringify(externalPageContext, (key, val) => key === 'page' || key === 'label' || key === 'activeTab' || key === 'summary' ? undefined : val)}
 If the user asks questions about the platform, help them with tasks related to this section.
 --- END ACTIVE PAGE CONTEXT ---` : ''}
 ${doctorContextRef.current ? `

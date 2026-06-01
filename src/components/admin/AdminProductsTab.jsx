@@ -490,13 +490,41 @@ export default function AdminProductsTab({
 
       if (loadMore) {
         setProducts(prev => {
-          // Avoid duplicates
           const existingIds = new Set(prev.map(p => p.id));
           const uniqueNew = productsList.filter(p => !existingIds.has(p.id));
-          return [...prev, ...uniqueNew];
+          const updated = [...prev, ...uniqueNew];
+          // Inject data context for Atlas AI
+          const lowStock = updated.filter(p => (p.stock || 0) < 20);
+          const outOfStock = updated.filter(p => (p.stock || 0) === 0);
+          window.dispatchEvent(new CustomEvent('admin-context-update', {
+            detail: {
+              page: 'products',
+              totalProducts: updated.length,
+              lowStockCount: lowStock.length,
+              outOfStockCount: outOfStock.length,
+              categories: [...new Set(updated.map(p => p.category).filter(Boolean))],
+              lowStockItems: lowStock.slice(0, 5).map(p => ({ name: p.name, sku: p.sku, stock: p.stock })),
+              summary: `Product catalog: ${updated.length} products loaded. ${outOfStock.length} out of stock, ${lowStock.length} with low stock (<20 units).`
+            }
+          }));
+          return updated;
         });
       } else {
         setProducts(productsList);
+        // Inject data context for Atlas AI
+        const lowStock = productsList.filter(p => (p.stock || 0) < 20);
+        const outOfStock = productsList.filter(p => (p.stock || 0) === 0);
+        window.dispatchEvent(new CustomEvent('admin-context-update', {
+          detail: {
+            page: 'products',
+            totalProducts: productsList.length,
+            lowStockCount: lowStock.length,
+            outOfStockCount: outOfStock.length,
+            categories: [...new Set(productsList.map(p => p.category).filter(Boolean))],
+            lowStockItems: lowStock.slice(0, 5).map(p => ({ name: p.name, sku: p.sku, stock: p.stock })),
+            summary: `Product catalog: ${productsList.length} products loaded. ${outOfStock.length} out of stock, ${lowStock.length} with low stock (<20 units).`
+          }
+        }));
       }
     } catch (err) {
       console.error('Error fetching products:', err);

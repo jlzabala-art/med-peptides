@@ -33,7 +33,8 @@
     "enrich:catalog": "node scripts/enrich_catalog_ai.mjs",
     "enrich:peptides": "node scripts/enrich_peptides_ai.mjs",
     "enrich:protocols": "node scripts/enrich_protocols_ai.mjs",
-    "audit:styles": "node scripts/audit_inline_styles.cjs"
+    "audit:styles": "node scripts/audit_inline_styles.cjs",
+    "cron": "node scripts/nightly_cron.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -58,6 +59,7 @@
     "jspdf-autotable": "^5.0.7",
     "libphonenumber-js": "^1.12.40",
     "lucide-react": "^0.577.0",
+    "node-cron": "^4.2.1",
     "pino": "^9.0.0",
     "puppeteer": "^25.0.4",
     "react": "^19.2.4",
