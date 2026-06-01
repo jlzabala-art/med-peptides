@@ -12,6 +12,7 @@ const MessagingWidget = React.lazy(() => import('../components/messaging/Messagi
 const ClinicalAIWidget = React.lazy(() => import('../components/admin/ClinicalAIWidget'));
 const PatientPrescriptionPanel = React.lazy(() => import('../components/patient/PatientPrescriptionPanel'));
 const OrdersTab = React.lazy(() => import('../components/admin/OrdersTab'));
+const UserProfileTab = React.lazy(() => import('../components/shared/UserProfileTab'));
 
 const TabSkeleton = () => (
   <div style={{ padding: '2rem' }}>
@@ -43,7 +44,7 @@ export default function PatientRoutes() {
             </AdminTabErrorBoundary>
           } />
           <Route path="messages" element={
-            <AdminTabErrorBoundary tabId="messages" tabLabel="Mensajes">
+            <AdminTabErrorBoundary tabId="messages" tabLabel="Messages">
               <div style={{ height: 'calc(100vh - 80px)', margin: '-1.5rem' }}>
                 <MessagingWidget />
               </div>
@@ -73,6 +74,13 @@ export default function PatientRoutes() {
           <Route path="settings" element={
             <AdminTabErrorBoundary tabId="settings" tabLabel="Settings">
               <UserSettings onBack={() => navigate('/patient')} />
+            </AdminTabErrorBoundary>
+          } />
+          <Route path="my-profile" element={
+            <AdminTabErrorBoundary tabId="my-profile" tabLabel="My Profile">
+              <div style={{ padding: '0 1.5rem 4rem' }}>
+                <UserProfileTab />
+              </div>
             </AdminTabErrorBoundary>
           } />
           <Route path="*" element={<Navigate to="" replace />} />

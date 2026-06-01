@@ -69,7 +69,7 @@ export default function ConversationThread({ conversationId, conversationType, r
       await addDoc(collection(db, 'conversations', conversationId, 'messages'), {
         senderId: user.uid,
         senderRole: isAdmin ? 'admin' : userRole || 'user',
-        senderName: user.displayName || user.email || 'Usuario',
+        senderName: user.displayName || user.email || 'User',
         content,
         attachments: attachmentsToSent,
         timestamp: serverTimestamp(),
@@ -87,7 +87,7 @@ export default function ConversationThread({ conversationId, conversationType, r
     }
   };
 
-  if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Cargando mensajes...</div>;
+  if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading messages...</div>;
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -113,13 +113,13 @@ export default function ConversationThread({ conversationId, conversationType, r
       if (textData.toLowerCase().includes('sku')) {
         setPendingAttachments(prev => [...prev, {
           type: 'product_card',
-          name: 'Producto arrastrado',
+          name: 'Dragged product',
           sku: textData.substring(0, 15)
         }]);
       } else {
         setPendingAttachments(prev => [...prev, {
           type: 'proposal',
-          title: 'Documento arrastrado',
+          title: 'Dragged document',
           content: textData.substring(0, 50)
         }]);
       }
@@ -141,7 +141,7 @@ export default function ConversationThread({ conversationId, conversationType, r
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
           <div style={{ background: 'white', padding: '1.5rem', borderRadius: '12px', boxShadow: 'var(--shadow-lg)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
             <UploadCloud size={32} color="var(--color-primary)" />
-            <div style={{ fontWeight: 700, color: 'var(--color-primary)' }}>Suelta para adjuntar contexto</div>
+            <div style={{ fontWeight: 700, color: 'var(--color-primary)' }}>Drop to attach context</div>
           </div>
         </div>
       )}
@@ -150,13 +150,13 @@ export default function ConversationThread({ conversationId, conversationType, r
       <div style={{ padding: '1rem', background: 'var(--color-bg-surface)', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800 }}>
-            {conversationType === 'order_support' ? 'Pedido B2B' : 'Consulta'} #{referenceId?.slice(0,8)}
+            {conversationType === 'order_support' ? 'B2B Order' : 'Inquiry'} #{referenceId?.slice(0,8)}
           </h3>
-          <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-tertiary)' }}>Comunicación segura</p>
+          <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-tertiary)' }}>Secure communication</p>
         </div>
         {onResolved && (
           <button onClick={onResolved} style={{ background: 'transparent', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '0.3rem 0.6rem', fontSize: '0.7rem', display: 'flex', gap: '0.3rem', alignItems: 'center', cursor: 'pointer' }}>
-            <CheckCircle2 size={12} color="var(--color-success)"/> Resolver
+            <CheckCircle2 size={12} color="var(--color-success)"/> Resolve
           </button>
         )}
       </div>
@@ -165,7 +165,7 @@ export default function ConversationThread({ conversationId, conversationType, r
       <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {messages.length === 0 ? (
           <div style={{ textAlign: 'center', color: 'var(--color-text-tertiary)', fontSize: '0.8rem', marginTop: '2rem' }}>
-            No hay mensajes en esta conversación.<br/>Escribe abajo para iniciar.
+            No messages in this conversation.<br/>Type below to start.
           </div>
         ) : (
           messages.map(msg => {
@@ -173,7 +173,7 @@ export default function ConversationThread({ conversationId, conversationType, r
             return (
               <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start' }}>
                 <div style={{ fontSize: '0.65rem', color: 'var(--color-text-tertiary)', marginBottom: '0.2rem', marginLeft: isMe ? 0 : '0.5rem', marginRight: isMe ? '0.5rem' : 0 }}>
-                  {isMe ? 'Tú' : msg.senderRole === 'admin' ? 'Soporte / Admin' : msg.senderName}
+                  {isMe ? 'You' : msg.senderRole === 'admin' ? 'Support / Admin' : msg.senderName}
                 </div>
                 <div style={{ 
                   background: isMe ? 'var(--color-primary)' : 'var(--color-bg-surface)', 
@@ -206,7 +206,7 @@ export default function ConversationThread({ conversationId, conversationType, r
         
         {pendingAttachments.length > 0 && (
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', padding: '0.5rem', background: 'var(--color-bg-app)', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
-            <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', width: '100%' }}>Adjuntos pendientes:</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', width: '100%' }}>Pending attachments:</div>
             {pendingAttachments.map((att, i) => (
               <div key={i} style={{ fontSize: '0.75rem', background: 'white', padding: '0.3rem 0.6rem', borderRadius: '4px', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 {att.type === 'product_card' ? <Package size={12}/> : <FileText size={12}/>}
@@ -219,14 +219,14 @@ export default function ConversationThread({ conversationId, conversationType, r
 
         <form onSubmit={handleSend} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
           <button type="button" onClick={() => {
-            const sku = prompt("Introducir SKU para adjuntar contexto:");
-            if (sku) setPendingAttachments(prev => [...prev, { type: 'product_card', name: 'Producto adjunto', sku }]);
+            const sku = prompt("Enter SKU to attach context:");
+            if (sku) setPendingAttachments(prev => [...prev, { type: 'product_card', name: 'Attached product', sku }]);
           }} title="Adjuntar documento / SKU" style={{ background: 'transparent', border: 'none', color: 'var(--color-text-tertiary)', cursor: 'pointer', padding: '0.3rem' }}>
             <FileText size={18} />
           </button>
           <input 
             type="text" 
-            placeholder={pendingAttachments.length > 0 ? "Añade un mensaje a tus adjuntos..." : "Escribe un mensaje..."}
+            placeholder={pendingAttachments.length > 0 ? "Add a message to your attachments..." : "Type a message..."}
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             style={{ flex: 1, padding: '0.6rem 1rem', borderRadius: '20px', border: '1px solid var(--color-border)', background: 'var(--color-bg-app)', fontSize: '0.85rem' }}

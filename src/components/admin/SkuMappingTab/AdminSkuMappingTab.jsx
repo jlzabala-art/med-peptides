@@ -112,7 +112,7 @@ export default function AdminSkuMappingTab() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [expandedRowIds, setExpandedRowIds] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20;
+  const itemsPerPage = 50;
   const [edits, setEdits] = useState({});
 
   const addLog = (msg, type = 'info') =>
@@ -632,25 +632,27 @@ export default function AdminSkuMappingTab() {
                       </td>
                       {/* Match Confidence */}
                       <td style={styles.td}>
-                        <div style={styles.confidence}>
-                          <div style={styles.confidenceBarWrapper}>
-                            <div
-                              style={{
-                                ...styles.confidenceBar,
-                                width: `${m.match_confidence || 0}%`,
-                                background:
-                                  m.match_confidence >= 85
-                                    ? 'var(--color-success)'
-                                    : m.match_confidence >= 60
-                                      ? '#f59e0b'
-                                      : 'var(--color-danger)',
-                              }}
-                            />
-                          </div>
-                          <span style={{ color: '#5f6368', fontSize: 12 }}>
-                            {m.match_confidence || 0}%
-                          </span>
-                        </div>
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          fontSize: 12,
+                          fontWeight: 700,
+                          background:
+                            (m.match_confidence || 0) >= 85
+                              ? 'rgba(16,185,129,0.1)'
+                              : (m.match_confidence || 0) >= 60
+                                ? 'rgba(245,158,11,0.1)'
+                                : 'rgba(239,68,68,0.1)',
+                          color:
+                            (m.match_confidence || 0) >= 85
+                              ? '#10b981'
+                              : (m.match_confidence || 0) >= 60
+                                ? '#f59e0b'
+                                : '#ef4444',
+                        }}>
+                          {m.match_confidence || 0}%
+                        </span>
                       </td>
 
                       {/* Status Icon with Tooltip */}
@@ -1228,7 +1230,7 @@ const styles = {
     fontSize: 13,
   },
   th: {
-    padding: '10px 14px',
+    padding: '7px 12px',
     textAlign: 'left',
     color: '#5f6368',
     fontWeight: 700,
@@ -1247,7 +1249,7 @@ const styles = {
     borderBottom: '1px solid #dadce0',
   },
   td: {
-    padding: '10px 14px',
+    padding: '6px 12px',
     color: '#3c4043',
     verticalAlign: 'middle',
   },
@@ -1285,18 +1287,6 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: 8,
-  },
-  confidenceBarWrapper: {
-    width: 50,
-    height: 4,
-    background: '#e8eaed',
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  confidenceBar: {
-    height: '100%',
-    borderRadius: 2,
-    transition: 'width 0.3s',
   },
   badge: {
     padding: '3px 8px',

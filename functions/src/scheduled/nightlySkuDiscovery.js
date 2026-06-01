@@ -67,6 +67,10 @@ async function sendEmailReport(result) {
 
       <p>Por favor, accede al panel de administración de la plataforma (Sección <strong>Settings > Integrations > Zoho Books</strong>) para revisar y aprobar los emparejamientos pendientes en la pestaña de <strong>SKU Sync</strong>.</p>
       
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="https://platform.regenpept.com/admin" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; font-size: 16px;">Revisar Productos</a>
+      </div>
+      
       <p style="margin-top: 30px; font-size: 12px; color: #888;">
         Este es un mensaje automático generado por Atlas AI.<br>
         Mediluxe System Administration

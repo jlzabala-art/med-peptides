@@ -17,6 +17,7 @@ import DoctorMessagesTab           from '../components/doctor/DoctorMessagesTab'
 
 // ── Lazy ─────────────────────────────────────────────────────────────────────
 const CatalogCreatorFlow = React.lazy(() => import('../components/wholesaler/CatalogCreatorFlow'));
+const UserProfileTab = React.lazy(() => import('../components/shared/UserProfileTab'));
 
 const TabSkeleton = () => (
   <div style={{ padding: '2rem' }}>
@@ -185,6 +186,11 @@ export default function DoctorRoutes() {
           <Route path="settings" element={
             <AdminTabErrorBoundary tabId="settings" tabLabel="Settings">
               <SettingsWrapper />
+            </AdminTabErrorBoundary>
+          } />
+          <Route path="my-profile" element={
+            <AdminTabErrorBoundary tabId="my-profile" tabLabel="My Profile">
+              <UserProfileTab />
             </AdminTabErrorBoundary>
           } />
           <Route path="*" element={<Navigate to="" replace />} />

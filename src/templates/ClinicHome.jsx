@@ -13,7 +13,7 @@ export const CLINIC_NAV_GROUPS = [
     label: 'Overview',
     items: [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { id: 'messages', label: 'Mensajes', icon: MessageSquare },
+      { id: 'messages', label: 'Messages', icon: MessageSquare },
       { id: 'clinical-ai', label: 'Atlas Health', icon: Brain },
     ],
   },

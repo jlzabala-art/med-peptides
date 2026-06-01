@@ -59,6 +59,7 @@ const AdminGadgetRepositoryTab = React.lazy(() => import('../components/admin/Ad
 const CatalogList = React.lazy(() => import('../components/wholesaler/CatalogList'));
 const CatalogCreatorFlow = React.lazy(() => import('../components/wholesaler/CatalogCreatorFlow'));
 const EmailCampaignBuilder = React.lazy(() => import('../components/wholesaler/EmailCampaignBuilder'));
+const AdminFinanceTab = React.lazy(() => import('../components/admin/AdminFinanceTab'));
 
 // icon alias (lucide doesn't export MailPlus2 — must be before NAV_GROUPS)
 function MailPlus2(props) { return <UserPlus {...props} />; }
@@ -66,18 +67,12 @@ function MailPlus2(props) { return <UserPlus {...props} />; }
 // ── Always-visible pinned items (not inside accordion groups) ─────────────────
 const PINNED_ITEMS = [
   { id: 'dashboard', label: 'Dashboard KPIs', icon: LayoutDashboard },
-  { id: 'messages',  label: 'Mensajes',        icon: MessageSquare, pulse: true },
+  { id: 'messages',  label: 'Messages',        icon: MessageSquare, pulse: true },
+  { id: 'calendar',  label: 'Calendar',        icon: Calendar },
 ];
 
 // ── Intent-based navigation groups ────────────────────────────────────────────
 const NAV_GROUPS = [
-  {
-    id: 'overview',
-    label: 'Overview',
-    items: [
-      { id: 'calendar', label: 'Calendario', icon: Calendar },
-    ],
-  },
   {
     id: 'catalog-inventory',
     label: 'Catalog & Inventory',
@@ -136,12 +131,20 @@ const NAV_GROUPS = [
     label: 'Marketing & Brand',
     items: [
       { id: 'email-campaigns',  label: 'Email Campaigns',     icon: Mail },
+      { id: 'newsletter',       label: 'Newsletter Signups',  icon: Mail },
       { id: 'email-templates',  label: 'Email Templates',     icon: FileText },
       { id: 'drip-marketing',   label: 'Drip Sequences',      icon: Zap },
       { id: 'catalogs',         label: 'Catalogs',            icon: BookOpen },
       { id: 'coupons',          label: 'Coupons & Discounts', icon: Tag },
       { id: 'referrals',        label: 'Referral Tracking',   icon: Users },
       { id: 'co-branding',      label: 'Co-Branding',         icon: Eye },
+    ],
+  },
+  {
+    id: 'finance-management',
+    label: 'Finance & Billing',
+    items: [
+      { id: 'finance',          label: 'Financial Dashboard', icon: DollarSign },
     ],
   },
   {
@@ -263,6 +266,7 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
       {tab === 'catalogs'         && <CatalogList ownerId="admin" ownerType="admin" onOpenBuilder={() => { setCatalogToEdit(null); setActiveTab('catalog-builder'); }} onSelectCatalogToEdit={(cat) => { setCatalogToEdit(cat); setActiveTab('catalog-builder'); }} />}
       {tab === 'catalog-builder'  && <CatalogCreatorFlow ownerId="admin" ownerType="admin" editingCatalog={catalogToEdit} onBack={() => { setCatalogToEdit(null); setActiveTab('catalogs'); }} />}
       {tab === 'email-campaigns'  && <EmailCampaignBuilder ownerId="admin" ownerType="admin" onBack={() => setActiveTab('catalogs')} />}
+      {tab === 'newsletter'       && <AdminPlaceholderTab title="Newsletter Signups" description="View and export B2C newsletter subscribers." tags={['Marketing', 'B2C']} color="var(--color-primary)" />}
       {tab === 'email-templates'   && <AdminEmailTemplatesTab />}
       {tab === 'gadget-repository' && <AdminGadgetRepositoryTab />}
       {tab === 'sku-sync'           && <AdminSkuMappingTab />}
@@ -284,14 +288,38 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
-  const { isAdmin, loading: authLoading, logout } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const { isAdmin, loading: authLoading, logout, userProfile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const filteredNavGroups = React.useMemo(() => {
+    if (!userProfile?.allowedAdminTabs || userProfile.allowedAdminTabs.length === 0) {
+      return NAV_GROUPS;
+    }
+    return NAV_GROUPS.map(group => ({
+      ...group,
+      items: group.items.filter(item => userProfile.allowedAdminTabs.includes(item.id))
+    })).filter(group => group.items.length > 0);
+  }, [userProfile?.allowedAdminTabs]);
 
   // Derive active tab from the URL path instead of query params.
   // E.g., /admin/users -> 'users', /admin -> 'dashboard'
   const pathParts = location.pathname.split('/').filter(Boolean);
   const activeTab = pathParts.length > 1 ? pathParts[1] : 'dashboard';
+
+  React.useEffect(() => {
+    if (userProfile?.allowedAdminTabs && userProfile.allowedAdminTabs.length > 0) {
+      if (!userProfile.allowedAdminTabs.includes(activeTab) && activeTab !== 'dashboard' && activeTab !== 'my-profile') {
+        // Not allowed to access this tab
+        navigate(`/admin/${userProfile.allowedAdminTabs[0]}`);
+      } else if (activeTab === 'dashboard' && !userProfile.allowedAdminTabs.includes('dashboard')) {
+        // They requested the root dashboard, but it's not explicitly allowed. Redirect.
+        navigate(`/admin/${userProfile.allowedAdminTabs[0]}`);
+      }
+    }
+  }, [userProfile?.allowedAdminTabs, activeTab, navigate]);
 
   const navToTab = useCallback((tabId) => {
     navigate(`/admin/${tabId === 'dashboard' ? '' : tabId}`);
@@ -305,7 +333,7 @@ export default function AdminDashboard() {
 
   return (
     <PortalLayout 
-      sidebarNavGroups={NAV_GROUPS}
+      sidebarNavGroups={filteredNavGroups}
       sidebarPinnedItems={PINNED_ITEMS}
       activeNavId={activeTab}
       onNavigate={navToTab}

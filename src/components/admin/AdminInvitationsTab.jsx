@@ -360,6 +360,16 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
             sortValue: (inv) => (inv.name || inv.email || '').toLowerCase(),
             render: (inv) => <AppEntityCell title={inv.name} subtitle={inv.email} />,
           },
+          {
+            key: 'status',
+            header: 'Status',
+            sortKey: 'status',
+            render: (inv) => (
+              <AppStatusChip 
+                status={inv.status === 'accepted' ? 'active' : 'pending'} 
+              />
+            ),
+          },
           // Roles and Date Sent have been moved to the expanded view to strictly enforce the 3-column paradigm.
           {
             key: 'actions',
@@ -548,19 +558,20 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
                 >
                   New principals *
                 </label>
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '0.5rem' }}>
                   <input
                     type="email"
                     placeholder="Email address (e.g., jane@clinic.com)"
                     value={inviteForm.email}
                     onChange={(e) => setInviteForm((p) => ({ ...p, email: e.target.value }))}
                     style={{
-                      flex: 1,
+                      width: '100%',
                       padding: '0.6rem 0.75rem',
                       borderRadius: '4px',
                       border: '1px solid var(--border)',
                       fontSize: '0.9rem',
                       outline: 'none',
+                      boxSizing: 'border-box',
                       backgroundColor: 'transparent',
                       color: 'var(--text-primary)',
                     }}
@@ -571,12 +582,13 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
                     value={inviteForm.name}
                     onChange={(e) => setInviteForm((p) => ({ ...p, name: e.target.value }))}
                     style={{
-                      flex: 1,
+                      width: '100%',
                       padding: '0.6rem 0.75rem',
                       borderRadius: '4px',
                       border: '1px solid var(--border)',
                       fontSize: '0.9rem',
                       outline: 'none',
+                      boxSizing: 'border-box',
                       backgroundColor: 'transparent',
                       color: 'var(--text-primary)',
                     }}

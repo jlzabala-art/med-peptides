@@ -64,9 +64,21 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState('');
 
+  // Pagination State (Local UI)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
+
   const location = useLocation();
   const targetId = new URLSearchParams(location.search).get('orderId');
   const rowRefs = useRef({});
+
+  // Pre-populate search from deep-link orderId param
+  useEffect(() => {
+    if (targetId && !searchTerm) {
+      setSearchTerm(targetId);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetId]);
 
   /* ── Fetch ──────────────────────────────────────────────────────────── */
   useEffect(() => {
@@ -87,7 +99,7 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
       if (doctorId) {
         qBuilder = query(qBuilder, where('doctorId', '==', doctorId));
       }
-      const q = query(qBuilder, orderBy('createdAt', 'desc'), limit(20));
+      const q = query(qBuilder, orderBy('createdAt', 'desc'), limit(500));
       const snap = await getDocs(q);
       const raw = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       setOrders(raw); // Removed arbitrary items filter so all real orders show up
@@ -230,10 +242,12 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
       filterStatus === 'All' || o.status?.toLowerCase() === filterStatus.toLowerCase();
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
+      !searchLower ||
       (o.customer?.fullName || o.customer?.name || '').toLowerCase().includes(searchLower) ||
       (o.customer?.email || '').toLowerCase().includes(searchLower) ||
       (o.orderId || '').toLowerCase().includes(searchLower) ||
-      (o.orderNumber || '').toLowerCase().includes(searchLower);
+      (o.orderNumber || '').toLowerCase().includes(searchLower) ||
+      (o.id || '').toLowerCase().includes(searchLower);
 
     let matchesDate = true;
     if (dateRange.start || dateRange.end) {
@@ -254,6 +268,17 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
 
     return matchesStatus && matchesSearch && matchesDate;
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatus, dateRange]);
+
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / rowsPerPage);
+  const paginatedOrders = filtered.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
 
   const handleExportCSV = () => {
     const exportData =
@@ -621,29 +646,44 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
       {targetId && !loading && (
         <div
           style={{
-            background: 'var(--surface)',
+            background: 'linear-gradient(135deg, #eff6ff, #dbeafe)',
+            border: '1px solid #bfdbfe',
             borderRadius: 'var(--radius-md)',
-            padding: '1rem 1.5rem',
-            marginBottom: '1.5rem',
-            color: 'var(--color-bg-surface)',
+            padding: '0.875rem 1.25rem',
+            marginBottom: '1.25rem',
             display: 'flex',
             alignItems: 'center',
             gap: '0.75rem',
+            justifyContent: 'space-between',
           }}
         >
-          <Package size={20} />
-          <span style={{ fontWeight: 700 }}>
-            Deep-link active — showing order{' '}
-            <code
-              style={{
-                background: 'rgba(255,255,255,0.2)',
-                padding: '2px 8px',
-                borderRadius: '4px',
-              }}
-            >
-              #{targetId}
-            </code>
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ background: '#3b82f6', borderRadius: '8px', padding: '6px', display: 'flex' }}>
+              <Package size={16} color="white" />
+            </div>
+            <div>
+              <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1e40af' }}>
+                🔔 Notification filter active
+              </span>
+              <div style={{ fontSize: '0.75rem', color: '#3b82f6', marginTop: '1px' }}>
+                Showing order{' '}
+                <code style={{ background: 'rgba(59,130,246,0.12)', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                  #{targetId.slice(0, 8).toUpperCase()}
+                </code>
+                {' '}— click an order to see details
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => { setSearchTerm(''); navigate('/admin/orders', { replace: true }); }}
+            style={{
+              background: 'none', border: '1px solid #bfdbfe', borderRadius: '6px',
+              padding: '0.3rem 0.75rem', fontSize: '0.75rem', fontWeight: 600,
+              color: '#3b82f6', cursor: 'pointer', whiteSpace: 'nowrap'
+            }}
+          >
+            Clear filter ✕
+          </button>
         </div>
       )}
 
@@ -682,7 +722,7 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
         </div>
       ) : (
         <DataTable
-          data={filtered}
+          data={paginatedOrders}
           columns={columns}
           expandableRender={renderOrderDetails}
           selectedIds={selectedOrderIds}
@@ -692,6 +732,12 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
           filters={getActiveFilters()}
           onFilterRemove={handleFilterRemove}
           renderCustomFilters={renderCustomFilters}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={setRowsPerPage}
+          totalItems={totalItems}
           renderBatchActions={(selected) => (
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
               <button

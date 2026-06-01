@@ -62,7 +62,7 @@ const WHOLESALER_NAV_GROUPS = [
     items: [
       { id: 'rx-inbox',    label: 'Rx Inbox',    icon: ClipboardList },
       { id: 'bulk-orders', label: 'Bulk Orders', icon: Layers },
-      { id: 'messages', label: 'Mensajes', icon: MessageSquare },
+      { id: 'messages', label: 'Messages', icon: MessageSquare },
       { id: 'clinical-ai', label: 'Atlas Health', icon: Brain },
     ],
   },

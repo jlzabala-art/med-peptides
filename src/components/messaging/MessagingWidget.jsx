@@ -21,6 +21,8 @@ export default function MessagingWidget({ role, ownerId }) {
   const [loading, setLoading] = useState(true);
   const [activeConvId, setActiveConvId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showNewChat, setShowNewChat] = useState(false);
+  const [newChatName, setNewChatName] = useState('');
 
   useEffect(() => {
     if (!user) return;
@@ -50,23 +52,24 @@ export default function MessagingWidget({ role, ownerId }) {
 
   const activeConv = conversations.find(c => c.id === activeConvId);
 
-  const handleCreateGroup = async () => {
-    // Basic group creation stub
-    const groupName = prompt("Nombre del grupo:");
-    if (!groupName) return;
+  const handleCreateGroup = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!newChatName.trim()) return;
 
     try {
       const docRef = await addDoc(collection(db, 'conversations'), {
-        type: 'group',
-        groupName,
+        type: 'direct',
+        groupName: newChatName.trim(),
         participants: [effectiveId], // In a real flow, you'd select participants from a modal
         createdAt: serverTimestamp(),
-        lastMessage: 'Grupo creado',
+        lastMessage: 'Conversation started',
         lastMessageAt: serverTimestamp(),
         status: 'open',
         unreadCount: {}
       });
       setActiveConvId(docRef.id);
+      setShowNewChat(false);
+      setNewChatName('');
     } catch(err) {
       console.error(err);
     }
@@ -78,16 +81,29 @@ export default function MessagingWidget({ role, ownerId }) {
       <div style={{ width: '320px', background: 'var(--color-bg-surface)', borderRadius: '12px', border: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <div style={{ padding: '1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>Mensajes</h2>
-            <button onClick={handleCreateGroup} style={{ background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '6px', padding: '0.4rem', cursor: 'pointer' }} title="Nuevo Grupo">
+            <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>Messages</h2>
+            <button onClick={() => setShowNewChat(!showNewChat)} style={{ background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '6px', padding: '0.4rem', cursor: 'pointer' }} title="New Conversation">
               <Plus size={16} />
             </button>
           </div>
+          {showNewChat && (
+            <form onSubmit={handleCreateGroup} style={{ display: 'flex', gap: '0.5rem' }}>
+              <input 
+                type="text" 
+                placeholder="Enter name or topic..." 
+                value={newChatName}
+                onChange={(e) => setNewChatName(e.target.value)}
+                style={{ flex: 1, padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.8rem' }}
+                autoFocus
+              />
+              <button type="submit" style={{ background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '6px', padding: '0.4rem 0.8rem', fontSize: '0.8rem', cursor: 'pointer' }}>Start</button>
+            </form>
+          )}
           <div style={{ position: 'relative' }}>
             <Search size={14} style={{ position: 'absolute', left: '0.6rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-tertiary)' }} />
             <input 
               type="text" 
-              placeholder="Buscar..." 
+              placeholder="Search..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ width: '100%', padding: '0.4rem 0.4rem 0.4rem 2rem', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.8rem' }}
@@ -97,9 +113,9 @@ export default function MessagingWidget({ role, ownerId }) {
 
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {loading ? (
-            <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>Cargando...</div>
+            <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>Loading...</div>
           ) : filtered.length === 0 ? (
-            <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>No hay conversaciones.</div>
+            <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>No conversations found.</div>
           ) : (
             filtered.map(c => {
               const isUnread = c.unreadCount?.[effectiveId] > 0;
@@ -118,11 +134,11 @@ export default function MessagingWidget({ role, ownerId }) {
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
                     <div style={{ fontWeight: isUnread ? 800 : 600, fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>
                       {c.type === 'group' ? (
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Users size={12}/> {c.groupName || 'Grupo'}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Users size={12}/> {c.groupName || 'Group'}</span>
                       ) : c.type === 'order_support' ? (
-                        `Pedido #${c.referenceId?.slice(0,6)}`
+                        `Order #${c.referenceId?.slice(0,6)}`
                       ) : (
-                        c.type === 'product_inquiry' ? `Consulta SKU` : 'Chat Directo'
+                        c.type === 'product_inquiry' ? `SKU Inquiry` : 'Direct Chat'
                       )}
                     </div>
                     {c.lastMessageAt && (
@@ -132,7 +148,7 @@ export default function MessagingWidget({ role, ownerId }) {
                     )}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: isUnread ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: isUnread ? 600 : 400 }}>
-                    {c.lastMessage || 'Sin mensajes'}
+                    {c.lastMessage || 'No messages yet'}
                   </div>
                 </div>
               );
@@ -153,10 +169,10 @@ export default function MessagingWidget({ role, ownerId }) {
             } : null}
           />
         ) : (
-          <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-tertiary)', background: 'var(--color-bg-surface)', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-tertiary)', background: 'var(--color-bg-surface)', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
             <MessageSquare size={48} strokeWidth={1} style={{ marginBottom: '1rem' }} />
-            <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>Selecciona una conversación</div>
-            <div style={{ fontSize: '0.85rem', marginTop: '0.5rem' }}>o inicia un nuevo chat de grupo.</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>Select a conversation</div>
+            <div style={{ fontSize: '0.85rem', marginTop: '0.5rem' }}>or start a new message.</div>
           </div>
         )}
       </div>

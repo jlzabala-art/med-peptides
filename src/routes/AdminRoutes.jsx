@@ -6,6 +6,7 @@ import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 // ── All tab components are lazy-loaded for optimal code splitting ──────────────
 const DocumentUploadModule = React.lazy(() => import('../components/admin/DocumentUploadModule'));
 const AdminLeadsTab = React.lazy(() => import('../components/admin/AdminLeadsTab'));
+const UserProfileTab = React.lazy(() => import('../components/shared/UserProfileTab'));
 
 // ── Lazy tab components ────────────────────────────────────────────────────────
 const CalendarPage = React.lazy(() => import('../components/calendar/CalendarPage'));
@@ -32,6 +33,7 @@ const AdminClinicalLogsTab = React.lazy(() => import('../components/admin/AdminC
 const AdminHomeLayoutTab   = React.lazy(() => import('../components/admin/AdminHomeLayoutTab'));
 const AdminPlaceholderTab  = React.lazy(() => import('../components/admin/AdminPlaceholderTab'));
 const AdminAIAgentsTab     = React.lazy(() => import('../components/admin/AdminAIAgentsTab'));
+const AdminDeployHostingTab= React.lazy(() => import('../components/admin/AdminDeployHostingTab'));
 const AdminStorageTab      = React.lazy(() => import('../components/admin/AdminStorageTab'));
 const AdminAIToolsTab      = React.lazy(() => import('../components/admin/AdminAIToolsTab'));
 const AdminSkuMappingTab   = React.lazy(() => import('../components/admin/SkuMappingTab/AdminSkuMappingTab'));
@@ -44,6 +46,7 @@ const AdminGadgetRepositoryTab = React.lazy(() => import('../components/admin/Ad
 const CatalogList = React.lazy(() => import('../components/wholesaler/CatalogList'));
 const CatalogCreatorFlow = React.lazy(() => import('../components/wholesaler/CatalogCreatorFlow'));
 const EmailCampaignBuilder = React.lazy(() => import('../components/wholesaler/EmailCampaignBuilder'));
+const AdminFinanceTab = React.lazy(() => import('../components/admin/AdminFinanceTab'));
 const CouponsManager = React.lazy(() => import('../components/marketing/CouponsManager'));
 const ReferralTracking = React.lazy(() => import('../components/marketing/ReferralTracking'));
 const CoBranding = React.lazy(() => import('../components/marketing/CoBranding'));
@@ -112,7 +115,7 @@ export default function AdminRoutes() {
         <Route path="drip-marketing" element={<AdminTabErrorBoundary tabId="drip-marketing" tabLabel="Drip Marketing"><DripMarketing ownerId="admin" ownerType="admin" /></AdminTabErrorBoundary>} />
         <Route path="pricing-visibility" element={<AdminTabErrorBoundary tabId="pricing-visibility" tabLabel="Pricing Visibility"><AdminPlaceholderTab title="Pricing Visibility" description="Configure regional pricing walls and product visibility." tags={['Pricing', 'Access']} color="var(--color-primary)" /></AdminTabErrorBoundary>} />
         <Route path="leads" element={<AdminTabErrorBoundary tabId="leads" tabLabel="Leads"><AdminLeadsTab /></AdminTabErrorBoundary>} />
-        <Route path="messages" element={<AdminTabErrorBoundary tabId="messages" tabLabel="Mensajes"><MessagingWidget role="admin" ownerId="admin" /></AdminTabErrorBoundary>} />
+        <Route path="messages" element={<AdminTabErrorBoundary tabId="messages" tabLabel="Messages"><MessagingWidget role="admin" ownerId="admin" /></AdminTabErrorBoundary>} />
         <Route path="home-layout" element={<AdminTabErrorBoundary tabId="home-layout" tabLabel="Home Layout"><AdminHomeLayoutTab /></AdminTabErrorBoundary>} />
         <Route path="protocols" element={<AdminTabErrorBoundary tabId="protocols" tabLabel="Protocols"><AdminProtocolsTab /></AdminTabErrorBoundary>} />
         <Route path="blueprints" element={<AdminTabErrorBoundary tabId="blueprints" tabLabel="Blueprints"><AdminBlueprintsTab /></AdminTabErrorBoundary>} />
@@ -156,12 +159,14 @@ export default function AdminRoutes() {
             </div>
           </AdminTabErrorBoundary>
         } />
-        <Route path="deploy" element={<AdminTabErrorBoundary tabId="deploy" tabLabel="Deploy"><AdminPlaceholderTab title="Deploy & Hosting" description="Monitor application deployments, environment variables, hosting status, and trigger builds." features={['GitHub CI/CD triggers', 'Environment variable manager', 'Real-time build log streaming', 'Domain SSL configurations']} tags={['Infrastructure', 'Hosting', 'Cloud']} color="var(--color-primary)" priority="soon" /></AdminTabErrorBoundary>} />
+        <Route path="deploy" element={<AdminTabErrorBoundary tabId="deploy" tabLabel="Deploy"><AdminDeployHostingTab /></AdminTabErrorBoundary>} />
         <Route path="calendar" element={<AdminTabErrorBoundary tabId="calendar" tabLabel="Calendar"><CalendarPage /></AdminTabErrorBoundary>} />
         <Route path="uploads" element={<AdminTabErrorBoundary tabId="uploads" tabLabel="Uploads"><DocumentUploadModule /></AdminTabErrorBoundary>} />
         <Route path="ai-agents" element={<AdminTabErrorBoundary tabId="ai-agents" tabLabel="AI Agents"><AdminAIAgentsTab /></AdminTabErrorBoundary>} />
         <Route path="enrichment" element={<AdminTabErrorBoundary tabId="enrichment" tabLabel="Enrichment"><AdminCatalogEnrichmentTab /></AdminTabErrorBoundary>} />
         <Route path="agency-deals" element={<AdminTabErrorBoundary tabId="agency-deals" tabLabel="Agency Deals"><AdminAgencyDealsTab /></AdminTabErrorBoundary>} />
+        <Route path="finance" element={<AdminTabErrorBoundary tabId="finance" tabLabel="Financial Dashboard"><AdminFinanceTab /></AdminTabErrorBoundary>} />
+        <Route path="my-profile" element={<AdminTabErrorBoundary tabId="my-profile" tabLabel="My Profile"><UserProfileTab /></AdminTabErrorBoundary>} />
         
         {/* Import Data Routes */}
         <Route path="import-catalogs" element={<AdminTabErrorBoundary tabId="import-catalogs" tabLabel="Import Catalogs"><ImportCatalogsTab /></AdminTabErrorBoundary>} />

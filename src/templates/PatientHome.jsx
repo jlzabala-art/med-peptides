@@ -50,7 +50,7 @@ export const PATIENT_NAV_GROUPS = [
     items: [
       { id: 'appointments', label: 'Care Team', icon: Users },
       { id: 'prescriptions', label: 'My Prescriptions', icon: ClipboardList },
-      { id: 'messages', label: 'Mensajes', icon: MessageSquare },
+      { id: 'messages', label: 'Messages', icon: MessageSquare },
       { id: 'clinical-ai', label: 'Atlas Health', icon: Brain },
     ],
   },

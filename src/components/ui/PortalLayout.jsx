@@ -6,6 +6,7 @@ import { db } from '../../firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import CommandPalette from '../CommandPalette';
 import useSessionTracking from '../../hooks/useSessionTracking';
+import { useNavigate } from 'react-router-dom';
 
 // ── Atlas AI — Suggested Prompts per Role ──────────────────────────────────────
 const ROLE_SUGGESTED_PROMPTS = {
@@ -77,6 +78,7 @@ export default function PortalLayout({
   headerActions
 }) {
   useSessionTracking(); // Start tracking session for the current user
+  const routerNavigate = useNavigate();
 
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isAiOpen, setAiOpen] = useState(true);
@@ -243,13 +245,21 @@ export default function PortalLayout({
               <Menu size={20} color="var(--color-text-primary)" />
             </button>
           )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '1.2rem', color: 'var(--color-primary)', letterSpacing: '-0.3px' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="2" y1="12" x2="22" y2="12" />
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-            </svg>
-            {portalTitle}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <img 
+              src="/logo-premium.png" 
+              alt="Atlas Health" 
+              style={{ height: '44px', width: 'auto', objectFit: 'contain' }} 
+              onError={(e) => { e.target.onerror = null; e.target.src = '/logo.png'; }} 
+            />
+            {portalTitle && (
+              <>
+                <span style={{ color: '#e2e8f0', fontSize: '1.4rem', fontWeight: 300 }}>|</span>
+                <span style={{ fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-secondary)', letterSpacing: '-0.2px' }}>
+                  {portalTitle}
+                </span>
+              </>
+            )}
           </div>
         </div>
 
@@ -286,20 +296,10 @@ export default function PortalLayout({
           {headerActions}
           <button 
             onClick={() => setAiOpen(!isAiOpen)} 
-            style={{
-              ...iconBtnStyle,
-              background: 'linear-gradient(270deg, #ec4899, #8b5cf6, #3b82f6, #ec4899)',
-              backgroundSize: '300% 300%',
-              animation: 'siriGradient 6s ease infinite, siriGlow 3s ease-in-out infinite',
-              border: 'none',
-              padding: '0.55rem',
-              color: 'white',
-              boxShadow: '0 0 15px rgba(139, 92, 246, 0.5)',
-              marginRight: '0.25rem'
-            }} 
+            style={iconBtnStyle} 
             title="Ask Atlas AI"
           >
-            <Bot size={20} color="white" />
+            <Bot size={20} color={isAiOpen ? 'var(--color-primary)' : 'var(--color-text-secondary)'} />
           </button>
           <button style={iconBtnStyle} title="Help"><HelpCircle size={20} color="var(--color-text-secondary)" /></button>
           
@@ -365,7 +365,12 @@ export default function PortalLayout({
                       <div 
                         key={idx} 
                         onClick={() => {
-                          if (n.actionPath) onNavigate(n.actionPath);
+                          if (n.actionPath) {
+                            // If path contains query string, navigate to /admin/<tab>?query
+                            const [tabPart, queryPart] = n.actionPath.split('?');
+                            const fullPath = `/admin/${tabPart}${queryPart ? '?' + queryPart : ''}`;
+                            routerNavigate(fullPath);
+                          }
                           setNotificationsOpen(false);
                         }}
                         style={{
@@ -405,13 +410,17 @@ export default function PortalLayout({
             )}
           </div>
 
-          <div style={{ 
+          <div 
+            onClick={() => routerNavigate(`/${roleContext}/my-profile`)}
+            style={{ 
             width: '36px', height: '36px', borderRadius: '50%', 
             background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
             color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', 
             marginLeft: '0.75rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem',
             boxShadow: '0 2px 8px rgba(var(--color-primary-rgb), 0.3)'
-          }}>
+          }}
+            title="Mi Perfil"
+          >
             U
           </div>
         </div>

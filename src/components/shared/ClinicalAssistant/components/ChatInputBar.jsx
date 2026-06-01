@@ -23,7 +23,7 @@ const ADMIN_QUICK_PROMPTS = [
 ];
 
 const CALENDAR_QUICK_PROMPTS = [
-  { label: 'New Event', text: 'Open the form to create a new calendar event.' },
+  { label: 'New Event', text: 'Open the form to create a new calendar event.', action: () => window.dispatchEvent(new CustomEvent('open-calendar-modal')) },
   { label: 'Export CSV', text: 'Export calendar events to a CSV file.' },
   { label: 'Export iCal', text: 'Export events to iCal format for Apple or Outlook.' },
   { label: 'Connect Google', text: 'Connect your account to sync Google Calendar.' }
@@ -939,7 +939,13 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                 RESEARCH_QUICK_PROMPTS).map((p, index) => (
                 <button
                   key={`quick-${index}`}
-                  onClick={() => onSend(p.text)}
+                  onClick={() => {
+                    if (p.action) {
+                      p.action();
+                    } else {
+                      onSend(p.text);
+                    }
+                  }}
                   style={{
                     border: `1px solid ${themeAccent}1C`,
                     backgroundColor: 'var(--color-bg-app)',

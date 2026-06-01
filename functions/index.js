@@ -7,6 +7,7 @@ initializeApp();
 // ── Triggers ─────────────────────────────────────────────────────────────────
 exports.onNewOrder    = require("./src/triggers/orders")(gmailUser, gmailAppPass);
 exports.onUserCreated = require("./src/triggers/users")(gmailUser, gmailAppPass);
+exports.syncProfileToBigin = require("./src/triggers/users_bigin_sync");
 
 // ── Prescription triggers ─────────────────────────────────────────────────────
 const prescriptionTriggers = require("./src/triggers/prescriptions");
@@ -59,6 +60,9 @@ exports.fetchZohoCRMIntelligence = fetchZohoCRMIntelligence; // Zoho Books conta
 const { fetchZohoBiginWholesaler } = require("./src/zoho/fetchZohoBiginWholesaler");
 exports.fetchZohoBiginWholesaler = fetchZohoBiginWholesaler;
 
+const { fetchFinanceDashboard } = require("./src/zoho/fetchFinanceDashboard");
+exports.fetchFinanceDashboard = fetchFinanceDashboard;
+
 const { searchZohoContactByEmail } = require("./src/zoho/searchZohoContactByEmail");
 exports.searchZohoContactByEmail = searchZohoContactByEmail;
 
@@ -88,3 +92,8 @@ exports.protocolDaySync = calendarSync.protocolDaySync;
 const sendReminders = require("./src/scheduled/sendReminders");
 exports.sendReminders = sendReminders.sendReminders;
 
+// -- Backups --
+exports.scheduledFirestoreExport = require('./src/triggers/scheduled_backups').scheduledFirestoreExport;
+const backupEndpoints = require('./src/http/backup_endpoints');
+exports.triggerManualBackup = backupEndpoints.triggerManualBackup;
+exports.logGitBackup = backupEndpoints.logGitBackup;

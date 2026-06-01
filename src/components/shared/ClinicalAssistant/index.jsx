@@ -21,6 +21,7 @@ import InstantResultsTabs from './components/InstantResultsTabs';
 import SupportEscalationCard from './components/SupportEscalationCard';
 // import ChatFAB from './components/ChatFAB';
 import ChatSuggestions from './components/ChatSuggestions';
+import ContextActionCards from './components/ContextActionCards';
 import SessionHistoryDrawer from './components/SessionHistoryDrawer';
 import ResearchDetailDrawer from './components/ResearchDetailDrawer';
 
@@ -570,6 +571,9 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
             </div>
           </div>
         )}
+
+        <ContextActionCards onActionClick={(id, label, prompt) => handleSend(prompt || label)} />
+
         <ChatMessageList 
           messages={messages}
           isLoading={isLoading}
@@ -648,6 +652,7 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
             suggestions={suggestions}
             isTyping={isTyping}
             contextMode={contextMode}
+            pageContext={pageContext}
             onUploadPrice={handleUploadPrice}
             onUploadStock={handleUploadStock}
           />

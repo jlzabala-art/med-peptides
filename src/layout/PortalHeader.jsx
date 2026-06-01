@@ -2,10 +2,12 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { FiSearch, FiBell, FiCpu } from 'react-icons/fi';
 import { motion } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import AtlasHealthLogo from '../components/brand/AtlasHealthLogo';
 
 export default function PortalHeader({ onToggleAI }) {
   const { userProfile, activeRole } = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
 
   // Create a simple breadcrumb from the pathname
@@ -17,6 +19,7 @@ export default function PortalHeader({ onToggleAI }) {
   return (
     <header className="portal-header">
       <div className="header-left">
+        <AtlasHealthLogo size={24} style={{ marginRight: '1rem', opacity: 0.8 }} />
         <h1 className="header-title">{breadcrumb}</h1>
       </div>
 
@@ -29,7 +32,7 @@ export default function PortalHeader({ onToggleAI }) {
 
         {/* Notifications */}
         <button className="icon-btn" aria-label="Notifications">
-          <FiBell />
+          <FiBell className="bell-ringing" />
           <span className="badge">3</span>
         </button>
 
@@ -45,7 +48,7 @@ export default function PortalHeader({ onToggleAI }) {
         </button>
 
         {/* User Profile */}
-        <div className="user-profile">
+        <div className="user-profile" onClick={() => navigate('/profile')} title="Manage Account Settings">
           <div className="avatar">
             {userProfile?.firstName?.charAt(0) || userProfile?.email?.charAt(0) || 'U'}
           </div>
@@ -70,6 +73,11 @@ export default function PortalHeader({ onToggleAI }) {
           position: sticky;
           top: 0;
           z-index: 900;
+        }
+
+        .header-left {
+          display: flex;
+          align-items: center;
         }
 
         .header-title {
@@ -181,13 +189,29 @@ export default function PortalHeader({ onToggleAI }) {
         .user-name {
           font-weight: 600;
           font-size: 0.875rem;
-          color: #1a202c;
+          color: var(--color-text-primary, #1a202c);
         }
 
         .user-role {
           font-size: 0.75rem;
-          color: #718096;
+          color: var(--color-text-secondary, #718096);
           text-transform: capitalize;
+        }
+
+        @keyframes ring {
+          0% { transform: rotate(0); }
+          10% { transform: rotate(15deg); }
+          20% { transform: rotate(-10deg); }
+          30% { transform: rotate(15deg); }
+          40% { transform: rotate(-10deg); }
+          50% { transform: rotate(0); }
+          100% { transform: rotate(0); }
+        }
+
+        .bell-ringing {
+          animation: ring 2s infinite ease-in-out;
+          transform-origin: top center;
+          display: inline-block;
         }
       `}</style>
     </header>

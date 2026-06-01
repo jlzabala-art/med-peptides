@@ -29,7 +29,7 @@ export default function ClinicRoutes() {
         <Route element={<ClinicHome />}>
           <Route index element={<ClinicDashboardTab />} />
           <Route path="messages" element={
-            <AdminTabErrorBoundary tabId="messages" tabLabel="Mensajes">
+            <AdminTabErrorBoundary tabId="messages" tabLabel="Messages">
               <MessagingWidget role="clinic" />
             </AdminTabErrorBoundary>
           } />

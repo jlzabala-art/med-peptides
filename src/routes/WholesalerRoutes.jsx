@@ -58,7 +58,7 @@ export default function WholesalerRoutes() {
           </AdminTabErrorBoundary>
         } />
         <Route path="messages" element={
-          <AdminTabErrorBoundary tabId="messages" tabLabel="Mensajes">
+          <AdminTabErrorBoundary tabId="messages" tabLabel="Messages">
             <MessagingWidget />
           </AdminTabErrorBoundary>
         } />

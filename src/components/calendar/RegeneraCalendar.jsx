@@ -56,6 +56,19 @@ export default function RegeneraCalendar() {
   const [timezoneList, setTimezoneList] = useState([]);
   const [googleAuthUrl, setGoogleAuthUrl] = useState('');
 
+  // Initial fetch and custom event listener for AI Actions
+  useEffect(() => {
+    const handleOpenModal = () => {
+      setSelectedEvent(null);
+      setEventForm(defaultEventForm);
+      setModalMode('create');
+      setModalOpen(true);
+    };
+
+    window.addEventListener('open-calendar-modal', handleOpenModal);
+    return () => window.removeEventListener('open-calendar-modal', handleOpenModal);
+  }, []);
+
   // Load timezone list once
   useEffect(() => {
     if (Intl.supportedValuesOf) {
@@ -118,8 +131,21 @@ export default function RegeneraCalendar() {
   // Submit handler for modal form
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Auto-generate title if not provided by patient or type
+    const patientName = eventForm.patientId ? eventForm.patientId : 'Unassigned';
+    let typeName = 'Event';
+    switch(eventForm.type) {
+      case 'prescription': typeName = 'Prescription / Dose'; break;
+      case 'protocol': typeName = 'Protocol Day'; break;
+      case 'order': typeName = 'Order / Purchase'; break;
+      case 'shipping': typeName = 'Shipping'; break;
+      default: typeName = 'Other'; break;
+    }
+    const generatedTitle = `${patientName} - ${typeName}`;
+
     const payload = {
-      title: eventForm.title,
+      title: generatedTitle,
       start: eventForm.start,
       end: eventForm.end,
       type: eventForm.type,
@@ -266,11 +292,8 @@ export default function RegeneraCalendar() {
             
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', maxHeight: '80vh', overflowY: 'auto' }}>
               <div className="cal-dialog-body" style={{ paddingBottom: '0.5rem' }}>
-                <h4 style={{ margin: '0 0 1rem', fontSize: '0.9rem', color: 'var(--color-primary)', borderBottom: '1px solid var(--border)', paddingBottom: '0.4rem' }}>Basic Details</h4>
-                <div className="cal-form-group">
-                  <label className="cal-form-label">Title</label>
-                  <input type="text" required value={eventForm.title} onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })} className="cal-input" disabled={isPatient} />
-                </div>
+                <h4 style={{ margin: '0 0 1rem', fontSize: '0.9rem', color: 'var(--color-primary)', borderBottom: '1px solid var(--border)', paddingBottom: '0.4rem' }}>Event Details</h4>
+
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                   <div className="cal-form-group" style={{ flex: '1 1 150px' }}>
                     <label className="cal-form-label">Patient</label>

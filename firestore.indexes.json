@@ -639,6 +639,20 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "calendar_events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ownerIds",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "start",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []

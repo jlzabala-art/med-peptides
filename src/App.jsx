@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
+import AtlasHealthLogo from './components/brand/AtlasHealthLogo';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import { resolveProductPrice } from './utils/resolveProductPrice';
 import { Routes, Route, useNavigate, useLocation, Navigate, useParams, Outlet } from 'react-router-dom';
@@ -135,22 +136,22 @@ const SupplementDetailPage = lazy(() => import('./templates/SupplementDetailPage
 const TestingDetailPage = lazy(() => import('./templates/TestingDetailPage'));
 const APIDashboard = lazy(() => import('./templates/APIDashboard'));
 
-// Premium Loading Component for Suspense
+// Branded Atlas Health loading screen (used as Suspense fallback)
 const ClinicalLoader = () => (
-  <div style={{ height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-    <div className="clinical-pulse-loader">
-      <div className="pulse-inner"></div>
+  <div style={{
+    height: '80vh', display: 'flex', flexDirection: 'column',
+    alignItems: 'center', justifyContent: 'center', gap: '1rem'
+  }}>
+    <div style={{ animation: 'atlas-pulse 1.8s ease-in-out infinite' }}>
+      <AtlasHealthLogo size={52} />
+    </div>
+    <p style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 500, margin: 0 }}>Cargando…</p>
+    <div style={{ width: 100, height: 3, borderRadius: 99, background: 'rgba(0,54,102,0.08)', overflow: 'hidden' }}>
+      <div style={{ height: '100%', borderRadius: 99, background: 'linear-gradient(90deg,#003666,#00BCD4)', animation: 'atlas-shimmer 1.4s ease-in-out infinite' }} />
     </div>
     <style>{`
-      .clinical-pulse-loader {
-        width: 60px; height: 60px; border-radius: 50%;
-        background: rgba(0,75,135,0.1); display: flex; align-items: center; justify-content: center;
-      }
-      .pulse-inner {
-        width: 30px; height: 30px; border-radius: 50%; background: var(--primary);
-        animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-      }
-      @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.5; } 100% { transform: scale(2.4); opacity: 0; } }
+      @keyframes atlas-pulse { 0%,100%{opacity:.8;transform:scale(1)} 50%{opacity:1;transform:scale(1.06)} }
+      @keyframes atlas-shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(200%)} }
     `}</style>
   </div>
 );
@@ -1119,11 +1120,22 @@ function App() {
                 <Route path="/doctor-dashboard/*" element={<DoctorRoutes />} />
 
                 {/* Account Manager Routing */}
-                <Route path="/account-manager/*" element={<AccountManagerDashboard />} />
+                <Route path="account-manager/*" element={<AccountManagerDashboard />} />
               </Route>
             </Route>
+
+            <Route path="/profile" element={
+              <AppErrorBoundary>
+                <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
+                  <UserSettings onBack={() => window.history.back()} />
+                </div>
+              </AppErrorBoundary>
+            } />
+
+            <Route path="checkout" element={<Checkout />} />
+
             <Route element={<ProtectedRoute allowedRoles={['professional', 'patient', 'doctor', 'admin']} />}>
-              <Route path="/patient/*" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><PatientRoutes /></Suspense>} />
+              <Route path="/patient/*" element={<Suspense fallback={<ClinicalLoader />}><PatientRoutes /></Suspense>} />
             </Route>
             
             {/* /paciente and dashboard: unified under GlobalAppLayout */}
@@ -1134,9 +1146,9 @@ function App() {
               />
             }>
               <Route element={<ProtectedRoute allowedRoles={['professional', 'patient', 'doctor', 'admin']} />}>
-                <Route path="/paciente" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><UserDashboard onOpenCart={() => setActiveModal('cart')} /></Suspense>} />
-                <Route path="/calendar" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><CalendarPage /></Suspense>} />
-                <Route path="/account/supervisor" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><UserDashboard onOpenCart={() => setActiveModal('cart')} /></Suspense>} />
+                <Route path="/paciente" element={<Suspense fallback={<ClinicalLoader />}><UserDashboard onOpenCart={() => setActiveModal('cart')} /></Suspense>} />
+                <Route path="/calendar" element={<Suspense fallback={<ClinicalLoader />}><CalendarPage /></Suspense>} />
+                <Route path="/account/supervisor" element={<Suspense fallback={<ClinicalLoader />}><UserDashboard onOpenCart={() => setActiveModal('cart')} /></Suspense>} />
               </Route>
             </Route>
             {/* Sub-paths with ClinicalLayout (legacy tabs) */}

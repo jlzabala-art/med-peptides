@@ -62,7 +62,7 @@ export default function SupplierRoutes() {
           </AdminTabErrorBoundary>
         } />
         <Route path="messages" element={
-          <AdminTabErrorBoundary tabId="messages" tabLabel="Mensajes">
+          <AdminTabErrorBoundary tabId="messages" tabLabel="Messages">
             <MessagingWidget role="supplier" />
           </AdminTabErrorBoundary>
         } />

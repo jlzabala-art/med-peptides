@@ -149,7 +149,7 @@ const DOCTOR_NAV_GROUPS = [
     items: [
       { id: 'my-patients', label: 'My Patients', icon: Users },
       { id: 'appointments', label: 'Appointments', icon: Calendar },
-      { id: 'messages', label: 'Mensajes', icon: MessageSquare },
+      { id: 'messages', label: 'Messages', icon: MessageSquare },
       { id: 'clinical-ai', label: 'Atlas Health', icon: Brain },
     ],
   },

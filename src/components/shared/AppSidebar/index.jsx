@@ -239,22 +239,17 @@ export default function AppSidebar({
   });
 
   const [openGroups, setOpenGroups] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(`${storageKey}:openGroups`) ?? 'null');
-      if (saved) return new Set(saved);
-    } catch {}
-    
+    const initialSet = new Set(['favorites']); // Always try to open favorites initially
     const activeGroup = groups.find(g => g.items?.some(i => i.id === activeId));
-    return activeGroup ? new Set([activeGroup.id]) : new Set();
+    if (activeGroup && activeGroup.id !== 'favorites') {
+      initialSet.add(activeGroup.id);
+    }
+    return initialSet;
   });
 
   useEffect(() => {
     localStorage.setItem(`${storageKey}:expanded`, JSON.stringify(expanded));
   }, [expanded, storageKey]);
-
-  useEffect(() => {
-    localStorage.setItem(`${storageKey}:openGroups`, JSON.stringify([...openGroups]));
-  }, [openGroups, storageKey]);
 
   useEffect(() => {
     if (isEditing) {
@@ -263,7 +258,12 @@ export default function AppSidebar({
     } else {
       const activeGroup = groups.find(g => g.items?.some(i => i.id === activeId));
       if (activeGroup) {
-        setOpenGroups(new Set([activeGroup.id]));
+        setOpenGroups(prev => {
+          const next = new Set();
+          if (prev.has('favorites')) next.add('favorites');
+          next.add(activeGroup.id);
+          return next;
+        });
       }
     }
   }, [activeId, groups, isEditing, expanded]);
@@ -278,10 +278,18 @@ export default function AppSidebar({
   const toggleGroup = useCallback((groupId) => {
     setOpenGroups(prev => {
       const next = new Set(prev);
+      
+      if (groupId === 'favorites') {
+        if (next.has('favorites')) next.delete('favorites');
+        else next.add('favorites');
+        return next;
+      }
+
       if (next.has(groupId)) {
         next.delete(groupId);
       } else {
-        next.clear(); // Enforce accordion behavior globally
+        next.clear(); // Enforce accordion globally
+        if (prev.has('favorites')) next.add('favorites'); // Preserve favorites
         next.add(groupId);
       }
       return next;
@@ -330,13 +338,13 @@ export default function AppSidebar({
           <div className="sb-brand" style={{ display: 'flex', alignItems: 'center' }}>
             {header.title && (
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '10px', color: 'var(--color-primary, #0071bd)' }}>
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="2" y1="12" x2="22" y2="12" />
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                </svg>
+                <img 
+                  src="/favicon.svg" 
+                  alt="Atlas Health Logo" 
+                  style={{ width: '42px', height: '42px', objectFit: 'contain', marginRight: '12px' }} 
+                />
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span className="sb-brand-title">{header.title}</span>
+                  {/* <span className="sb-brand-title">{header.title}</span> */}
                   {header.subtitle && <span className="sb-brand-sub">{header.subtitle}</span>}
                 </div>
               </div>

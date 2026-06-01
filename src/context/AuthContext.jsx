@@ -22,7 +22,7 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
-export const ADMIN_EMAILS = ['jose@mediluxem.com', 'kasia@mediluxem.com', 'jose@mediluxeme.com', 'kasia@mediluxeme.com', 'admin@regenpept.test'];
+export const ADMIN_EMAILS = ['jose@mediluxem.com', 'kasia@mediluxem.com', 'jose@mediluxeme.com', 'kasia@mediluxeme.com', 'business@mediluxeme.com', 'admin@regenpept.test'];
 
 export const DEFAULT_ROLE_PERMISSIONS = {
   admin: {

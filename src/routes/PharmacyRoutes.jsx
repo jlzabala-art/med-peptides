@@ -29,7 +29,7 @@ export default function PharmacyRoutes() {
         <Route element={<PharmacyHome />}>
           <Route index element={<PharmacyDashboardTab />} />
           <Route path="messages" element={
-            <AdminTabErrorBoundary tabId="messages" tabLabel="Mensajes">
+            <AdminTabErrorBoundary tabId="messages" tabLabel="Messages">
               <MessagingWidget role="compounding_pharmacy" />
             </AdminTabErrorBoundary>
           } />
