@@ -17,107 +17,33 @@ import AppFilterBar from '../ui/AppFilterBar';
 import AppEntityCell from '../ui/AppEntityCell';
 import { useToast } from '../../hooks/useToast';
 
-// Gadget Metadata Definition
-const ADMIN_GADGETS = [
-  {
-    id: 'AdminFinanceWidget',
-    name: 'Finance Intelligence',
-    icon: DollarSign,
-    category: 'Operational',
-    description:
-      'Tracks cashflow, calculates gross margins, estimates taxes, and visualizes financial performance.',
-    status: 'Parametrized',
-    baseClass: true,
-    parameters: ['ownerId', 'ownerType', 'permissions', 'hideCosts'],
-  },
-  {
-    id: 'AdminProductSyncWidget',
-    name: 'Catalog Synchronizer',
-    icon: RefreshCw,
-    category: 'Inventory',
-    description:
-      'Synchronizes external catalog structures (Zoho Books/Bigin) and updates internal product inventory.',
-    status: 'Parametrized',
-    baseClass: true,
-    parameters: ['ownerId', 'ownerType', 'permissions', 'hideCosts'],
-  },
-  {
-    id: 'AdminZohoCRMWidget',
-    name: 'Zoho CRM Hub',
-    icon: Users,
-    category: 'Integrations',
-    description:
-      'Coordinates active deals, lead management, and relationship pipelines via Zoho Bigin.',
-    status: 'Parametrized',
-    baseClass: true,
-    parameters: ['ownerId', 'ownerType', 'permissions', 'hideCosts'],
-  },
-  {
-    id: 'SystemAuditLogWidget',
-    name: 'System Audit Log',
-    icon: Shield,
-    category: 'Security',
-    description:
-      'Displays raw platform events, security traces, login events, and transaction modifications.',
-    status: 'Parametrized',
-    baseClass: true,
-    parameters: ['ownerId', 'ownerType', 'permissions', 'hideCosts'],
-  },
-  {
-    id: 'PayoutManagerWidget',
-    name: 'Payout Manager',
-    icon: ArrowRightLeft,
-    category: 'Finance',
-    description:
-      'Aggregates due balances and orchestrates mass payouts across physician networks and clinical partners.',
-    status: 'Parametrized',
-    baseClass: true,
-    parameters: ['ownerId', 'ownerType', 'permissions', 'hideCosts'],
-  },
-  {
-    id: 'AdminSupplyNotifierWidget',
-    name: 'Supply Notifier',
-    icon: Database,
-    category: 'Inventory',
-    description:
-      'Detects low-stock thresholds globally and alerts the logistics teams for urgent restocks.',
-    status: 'Parametrized',
-    baseClass: true,
-    parameters: ['ownerId', 'ownerType', 'permissions', 'hideCosts'],
-  },
-  {
-    id: 'GlobalLogisticsQueueWidget',
-    name: 'Global Logistics Queue',
-    icon: Globe,
-    category: 'Operations',
-    description:
-      'Manages incoming stock transfers, international shipments, and inter-warehouse movements.',
-    status: 'Parametrized',
-    baseClass: true,
-    parameters: ['ownerId', 'ownerType', 'permissions', 'hideCosts'],
-  },
-  {
-    id: 'B2BOrderApprovalsWidget',
-    name: 'B2B Order Approvals',
-    icon: Check,
-    category: 'Sales',
-    description:
-      'Review interface for bulk B2B purchases that require administrative sign-off due to volume or compliance.',
-    status: 'Parametrized',
-    baseClass: true,
-    parameters: ['ownerId', 'ownerType', 'permissions', 'hideCosts'],
-  },
-];
+// Dynamic gadget fetch
 
 export default function AdminGadgetRepositoryTab() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
+  const [gadgets, setGadgets] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredGadgets = ADMIN_GADGETS.filter(
+  React.useEffect(() => {
+    fetch('/gadgets-catalog.json')
+      .then(res => res.json())
+      .then(data => {
+        setGadgets(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to load gadgets catalog:', err);
+        setLoading(false);
+      });
+  }, []);
+
+  const filteredGadgets = gadgets.filter(
     (g) =>
       g.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       g.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      g.category.toLowerCase().includes(searchTerm.toLowerCase())
+      g.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      g.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const columns = [
@@ -127,8 +53,7 @@ export default function AdminGadgetRepositoryTab() {
       sortKey: 'gadget',
       sortValue: (row) => row.name.toLowerCase(),
       render: (row) => {
-        const Icon = row.icon;
-        return <AppEntityCell title={row.name} subtitle={row.id} icon={<Icon size={18} />} />;
+        return <AppEntityCell title={row.name} subtitle={row.id} icon={<Layers size={18} />} />;
       },
     },
     {
@@ -164,13 +89,13 @@ export default function AdminGadgetRepositoryTab() {
     },
     {
       key: 'status',
-      header: 'Status & Parameters',
+      header: 'Used Portals',
       render: (row) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <span
             style={{
               fontSize: '0.8rem',
-              color: row.status === 'Parametrized' ? 'var(--color-success)' : 'var(--text-muted)',
+              color: 'var(--color-success)',
               display: 'flex',
               alignItems: 'center',
               gap: '0.3rem',
@@ -179,11 +104,23 @@ export default function AdminGadgetRepositoryTab() {
           >
             <Layers size={14} /> {row.status}
           </span>
-          <span
-            style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontFamily: 'monospace' }}
-          >
-            {row.parameters?.join(', ') || 'None'}
-          </span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+            {row.usedIn && row.usedIn.length > 0 ? row.usedIn.map((portal, idx) => (
+              <span key={idx} style={{ 
+                padding: '2px 6px', 
+                background: '#e0f2fe', 
+                color: '#0369a1', 
+                borderRadius: '4px', 
+                fontSize: '0.7rem', 
+                fontWeight: 600,
+                border: '1px solid #bae6fd' 
+              }}>
+                {portal}
+              </span>
+            )) : (
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Not used</span>
+            )}
+          </div>
         </div>
       ),
     },
@@ -220,7 +157,11 @@ export default function AdminGadgetRepositoryTab() {
 
       <AppFilterBar searchPlaceholder="Search gadgets or functions..." onSearch={setSearchTerm} />
 
-      <DataTable data={filteredGadgets} columns={columns} defaultSortKey="category" />
+      {loading ? (
+        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading gadgets catalog...</div>
+      ) : (
+        <DataTable data={filteredGadgets} columns={columns} defaultSortKey="category" />
+      )}
 
       <div
         style={{

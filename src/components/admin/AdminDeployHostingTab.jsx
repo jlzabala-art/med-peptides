@@ -2,19 +2,38 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { GitBranch, GitCommit, Database, Clock, Terminal, Activity, ShieldCheck, HardDriveDownload, Server, Calendar as CalendarIcon, CheckCircle, XCircle } from 'lucide-react';
 import { db, functions } from '../../firebase';
-import { collection, query, orderBy, getDocs, limit } from 'firebase/firestore';
+import { collection, query, orderBy, getDocs, limit, where } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
+import AppFilterBar from '../ui/AppFilterBar';
 
 export default function AdminDeployHostingTab() {
   const [isDeploying, setIsDeploying] = useState(false);
-  const [isBackingUp, setIsBackingUp] = useState(false);
+  const [isBackingUpDB, setIsBackingUpDB] = useState(false);
+  const [isBackingUpCode, setIsBackingUpCode] = useState(false);
   const [backups, setBackups] = useState([]);
   const [loadingBackups, setLoadingBackups] = useState(true);
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
   const fetchBackups = async () => {
     setLoadingBackups(true);
     try {
-      const q = query(collection(db, 'system_backups'), orderBy('timestamp', 'desc'), limit(15));
+      let constraints = [];
+      if (dateRange.start) {
+        constraints.push(where('timestamp', '>=', new Date(dateRange.start)));
+      }
+      if (dateRange.end) {
+        const endDate = new Date(dateRange.end);
+        endDate.setHours(23, 59, 59, 999);
+        constraints.push(where('timestamp', '<=', endDate));
+      }
+      
+      const q = query(
+        collection(db, 'system_backups'), 
+        ...constraints, 
+        orderBy('timestamp', 'desc'), 
+        limit(20)
+      );
+      
       const querySnapshot = await getDocs(q);
       const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setBackups(data);
@@ -27,20 +46,36 @@ export default function AdminDeployHostingTab() {
 
   useEffect(() => {
     fetchBackups();
-  }, []);
+  }, [dateRange]);
 
-  const handleManualBackup = async () => {
-    setIsBackingUp(true);
+  const handleManualDBBackup = async () => {
+    setIsBackingUpDB(true);
     try {
       const triggerBackup = httpsCallable(functions, 'triggerManualBackup');
       await triggerBackup();
-      // Wait a moment and refresh the list
       setTimeout(fetchBackups, 2000);
     } catch (err) {
-      console.error("Error triggering backup", err);
-      alert("Error triggering backup. Check console for details.");
+      console.error("Error triggering DB backup", err);
+      alert("Error triggering DB backup. Check console for details.");
     } finally {
-      setIsBackingUp(false);
+      setIsBackingUpDB(false);
+    }
+  };
+
+  const handleManualCodeBackup = async () => {
+    setIsBackingUpCode(true);
+    try {
+      const response = await fetch('/api/run-code-backup');
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to trigger code backup');
+      }
+      alert("Code backup executed successfully via local script.");
+    } catch (err) {
+      console.error("Error triggering Code backup", err);
+      alert("Error triggering Code backup. This relies on the local Vite dev server plugin.");
+    } finally {
+      setIsBackingUpCode(false);
     }
   };
 
@@ -113,48 +148,63 @@ export default function AdminDeployHostingTab() {
         {/* NIGHTLY BACKUPS CARD */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-          style={{ backgroundColor: 'white', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', border: '1px solid var(--border-light)' }}
+          style={{ backgroundColor: 'white', borderRadius: '12px', padding: 0, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', border: '1px solid var(--border-light)', overflow: 'hidden' }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-            <div style={{ padding: '8px', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px', color: '#10b981' }}>
-              <Database size={20} />
+          <div style={{ padding: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+              <div style={{ padding: '8px', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px', color: '#10b981' }}>
+                <Database size={20} />
+              </div>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Automated Backups</h2>
             </div>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Automated Backups</h2>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div style={{ display: 'flex', gap: '1rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
+                <div style={{ padding: '0.5rem', background: 'white', borderRadius: '8px', color: '#3b82f6', alignSelf: 'flex-start', boxShadow: 'var(--shadow-sm)' }}>
+                  <GitCommit size={20} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1rem', fontWeight: 600, color: 'var(--text-main)' }}>Code Backup (Git)</h3>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Executes locally via Cron every night at <strong>01:00 AM</strong>.</p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
+                <div style={{ padding: '0.5rem', background: 'white', borderRadius: '8px', color: '#10b981', alignSelf: 'flex-start', boxShadow: 'var(--shadow-sm)' }}>
+                  <Database size={20} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1rem', fontWeight: 600, color: 'var(--text-main)' }}>Database Export (Firestore)</h3>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Executes via Cloud Scheduler every night at <strong>02:00 AM</strong>. Maximum 5 copies retained.</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div style={{ borderLeft: '3px solid #3b82f6', paddingLeft: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                <Clock size={14} color="#64748b" />
-                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>Code Backup (Git)</span>
-              </div>
-              <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>Executes locally via Cron every night at <strong>01:00 AM</strong>.</p>
-            </div>
-
-            <div style={{ borderLeft: '3px solid #10b981', paddingLeft: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                <Clock size={14} color="#64748b" />
-                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>Database Export (Firestore)</span>
-              </div>
-              <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>Executes via Cloud Scheduler every night at <strong>02:00 AM</strong>.</p>
-            </div>
-          </div>
-
-          <div style={{ marginTop: '2rem' }}>
+          <div style={{ padding: '1.5rem', borderTop: '1px solid var(--border-light)', background: '#f8fafc', display: 'flex', gap: '1rem' }}>
             <button
-              onClick={handleManualBackup}
-              disabled={isBackingUp}
+              onClick={handleManualCodeBackup}
+              disabled={isBackingUpCode}
               style={{
-                width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0',
-                backgroundColor: 'white', color: '#334155', fontWeight: 600, cursor: isBackingUp ? 'not-allowed' : 'pointer',
+                flex: 1, padding: '0.75rem 1rem', background: 'white', border: '1px solid var(--border-color)', color: 'var(--text-main)',
+                borderRadius: '8px', fontWeight: 600, cursor: isBackingUpCode ? 'not-allowed' : 'pointer',
                 display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem',
-                transition: 'all 0.2s'
+                opacity: isBackingUpCode ? 0.7 : 1, transition: 'all 0.2s'
               }}
-              onMouseEnter={(e) => { if(!isBackingUp) e.currentTarget.style.backgroundColor = '#f8fafc'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'white'; }}
             >
-              {isBackingUp ? <Activity size={18} className="animate-spin" /> : <HardDriveDownload size={18} />}
-              {isBackingUp ? 'Executing Backup...' : 'Run Backup Now'}
+              {isBackingUpCode ? <><RefreshCw size={18} className="spin" /> Zipping...</> : <><GitCommit size={18}/> Code</>}
+            </button>
+            <button
+              onClick={handleManualDBBackup}
+              disabled={isBackingUpDB}
+              style={{
+                flex: 1, padding: '0.75rem 1rem', background: 'white', border: '1px solid var(--border-color)', color: 'var(--text-main)',
+                borderRadius: '8px', fontWeight: 600, cursor: isBackingUpDB ? 'not-allowed' : 'pointer',
+                display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem',
+                opacity: isBackingUpDB ? 0.7 : 1, transition: 'all 0.2s'
+              }}
+            >
+              {isBackingUpDB ? <><RefreshCw size={18} className="spin" /> Exporting...</> : <><Database size={18}/> DB</>}
             </button>
           </div>
         </motion.div>
@@ -167,10 +217,20 @@ export default function AdminDeployHostingTab() {
           <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <CalendarIcon size={18} /> Backup History Registry
           </h2>
-          <button onClick={fetchBackups} style={{ background: 'none', border: '1px solid var(--border-light)', padding: '0.4rem 0.8rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}>
-            Refresh
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <button onClick={fetchBackups} style={{ background: 'none', border: '1px solid var(--border-light)', padding: '0.4rem 0.8rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}>
+              Refresh
+            </button>
+          </div>
         </div>
+        
+        <div style={{ padding: '1rem 1.5rem', backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border-light)' }}>
+          <AppFilterBar 
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
+          />
+        </div>
+
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
             <thead>

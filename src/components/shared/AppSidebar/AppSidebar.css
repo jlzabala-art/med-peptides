@@ -96,7 +96,9 @@
   opacity: 1;
   transition: opacity var(--sb-duration) var(--sb-easing);
 }
-.app-sidebar.collapsed .sb-brand { opacity: 0; pointer-events: none; }
+.app-sidebar.collapsed .sb-brand { opacity: 1; pointer-events: auto; }
+.app-sidebar.collapsed .sb-brand-sub { opacity: 0; display: none; }
+.app-sidebar.collapsed .collapsed-logo { width: 36px !important; height: 36px !important; margin: 0 !important; }
 
 .sb-brand-title {
   font-size: 13px;

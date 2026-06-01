@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FileText, TrendingUp, AlertCircle, ShoppingCart, UserCheck, MessageSquare, ClipboardList, Calendar, ShieldAlert, RefreshCw, Sparkles, BookOpen } from 'lucide-react';
+import { FileText, TrendingUp, AlertCircle, ShoppingCart, UserCheck, MessageSquare, ClipboardList, Calendar, ShieldAlert, RefreshCw, Sparkles, BookOpen, Terminal, Database, Activity } from 'lucide-react';
 
 export default function ContextActionCards({ onActionClick }) {
   const location = useLocation();
@@ -10,9 +10,18 @@ export default function ContextActionCards({ onActionClick }) {
   // Contextual operational functions based on path
   const getContextCards = () => {
     // ADMIN PORTAL
+    if (path === '/admin/deploy') {
+      return [
+        { id: 'deploy_trigger', icon: Terminal, label: 'Trigger Deploy', desc: 'Deploy to Prod', color: 'blue', prompt: 'Trigger a new manual deployment to production.' },
+        { id: 'deploy_backup', icon: Database, label: 'Run Backup', desc: 'DB Snapshot', color: 'green', prompt: 'Trigger a manual database backup right now.' },
+        { id: 'deploy_status', icon: Activity, label: 'Check Status', desc: 'System health', color: 'purple', prompt: 'Show me the current system health and last deployment status.' },
+        { id: 'deploy_logs', icon: FileText, label: 'Audit Logs', desc: 'Recent errors', color: 'orange', prompt: 'Check the recent system logs for any critical errors.' }
+      ];
+    }
+    
     if (path === '/admin') {
       return [
-        { id: 'admin_report', icon: FileText, label: 'Generate Daily Report', desc: 'PDF summary of metrics', color: 'blue', prompt: 'Generate a daily sales report for today.' },
+        { id: 'admin_report', icon: FileText, label: 'Monthly Report', desc: 'PDF summary of metrics', color: 'blue', prompt: 'Generate a monthly sales and operations report.' },
         { id: 'admin_alerts', icon: AlertCircle, label: 'System Alerts', desc: 'Critical notifications', color: 'red', prompt: 'Check for pending user approvals and system alerts.' }
       ];
     }

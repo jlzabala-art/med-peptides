@@ -239,12 +239,7 @@ export default function AppSidebar({
   });
 
   const [openGroups, setOpenGroups] = useState(() => {
-    const initialSet = new Set(['favorites']); // Always try to open favorites initially
-    const activeGroup = groups.find(g => g.items?.some(i => i.id === activeId));
-    if (activeGroup && activeGroup.id !== 'favorites') {
-      initialSet.add(activeGroup.id);
-    }
-    return initialSet;
+    return new Set(['favorites']);
   });
 
   useEffect(() => {
@@ -255,17 +250,8 @@ export default function AppSidebar({
     if (isEditing) {
       setOpenGroups(new Set(groups.map(g => g.id)));
       if (!expanded) setExpanded(true);
-    } else {
-      const activeGroup = groups.find(g => g.items?.some(i => i.id === activeId));
-      if (activeGroup) {
-        setOpenGroups(prev => {
-          const next = new Set();
-          if (prev.has('favorites')) next.add('favorites');
-          next.add(activeGroup.id);
-          return next;
-        });
-      }
     }
+    // Removed auto-open logic for activeGroup to satisfy "no debe tener desplegado ninguna categoria" on load
   }, [activeId, groups, isEditing, expanded]);
 
   useEffect(() => {
@@ -335,19 +321,14 @@ export default function AppSidebar({
               <Menu size={18} />
             </button>
           )}
-          <div className="sb-brand" style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="sb-brand" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '16px 0', width: '100%' }}>
             {header.title && (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <img 
-                  src="/favicon.svg" 
-                  alt="Atlas Health Logo" 
-                  style={{ width: '42px', height: '42px', objectFit: 'contain', marginRight: '12px' }} 
-                />
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {/* <span className="sb-brand-title">{header.title}</span> */}
-                  {header.subtitle && <span className="sb-brand-sub">{header.subtitle}</span>}
-                </div>
-              </div>
+              <img 
+                src="/favicon.svg" 
+                alt="Atlas Health Logo" 
+                style={{ width: '64px', height: '64px', objectFit: 'contain', transition: 'width 0.2s, height 0.2s' }} 
+                className={expanded ? '' : 'collapsed-logo'}
+              />
             )}
           </div>
         </div>

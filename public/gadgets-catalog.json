@@ -1,0 +1,368 @@
+[
+  {
+    "id": "ClinicalAIWidget",
+    "name": "Clinical A I",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "DocumentUploadWidget",
+    "name": "Document Upload",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": [
+      "Shared / Foundation"
+    ]
+  },
+  {
+    "id": "ScanPriceListWidget",
+    "name": "Scan Price List",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "AdminFinanceWidget",
+    "name": "Admin Finance",
+    "category": "Finance",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": [
+      "Admin Portal"
+    ]
+  },
+  {
+    "id": "AdminProductSyncWidget",
+    "name": "Admin Product Sync",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": [
+      "Admin Portal"
+    ]
+  },
+  {
+    "id": "AdminSupplyNotifierWidget",
+    "name": "Admin Supply Notifier",
+    "category": "Operations",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": [
+      "Admin Portal"
+    ]
+  },
+  {
+    "id": "AdminZohoCRMWidget",
+    "name": "Admin Zoho C R M",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "B2BOrderApprovalsWidget",
+    "name": "B2 B Order Approvals",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": [
+      "Admin Portal"
+    ]
+  },
+  {
+    "id": "GlobalLogisticsQueueWidget",
+    "name": "Global Logistics Queue",
+    "category": "Operations",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": [
+      "Admin Portal"
+    ]
+  },
+  {
+    "id": "PayoutManagerWidget",
+    "name": "Payout Manager",
+    "category": "Finance",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": [
+      "Admin Portal"
+    ]
+  },
+  {
+    "id": "SystemAuditLogWidget",
+    "name": "System Audit Log",
+    "category": "Security",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": [
+      "Admin Portal"
+    ]
+  },
+  {
+    "id": "ClinicalProgressMonitorWidget",
+    "name": "Clinical Progress Monitor",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "DirectMessageWidget",
+    "name": "Direct Message",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "LabResultsInboxWidget",
+    "name": "Lab Results Inbox",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "PrescriptionGeneratorWidget",
+    "name": "Prescription Generator",
+    "category": "Operations",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "ProtocolAdherenceWidget",
+    "name": "Protocol Adherence",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "ProtocolBuilderWidget",
+    "name": "Protocol Builder",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "RefillApprovalsWidget",
+    "name": "Refill Approvals",
+    "category": "Operations",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "MessagingWidget",
+    "name": "Messaging",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "AdverseEventLoggerWidget",
+    "name": "Adverse Event Logger",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "BloodworkUploaderWidget",
+    "name": "Bloodwork Uploader",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "DailyCheckinWidget",
+    "name": "Daily Checkin",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "MyActivePrescriptionsWidget",
+    "name": "My Active Prescriptions",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "MyMedicalTeamWidget",
+    "name": "My Medical Team",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "RefillRequestWidget",
+    "name": "Refill Request",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "SymptomLoggerWidget",
+    "name": "Symptom Logger",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "SidebarGadget",
+    "name": "Sidebar",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": [
+      "Shared / Foundation"
+    ]
+  },
+  {
+    "id": "StackSynergyWidget",
+    "name": "Stack Synergy",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": [
+      "Shared / Foundation"
+    ]
+  },
+  {
+    "id": "VisualReconWidget",
+    "name": "Visual Recon",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": [
+      "Shared / Foundation"
+    ]
+  },
+  {
+    "id": "DocumentUploadWidget",
+    "name": "Document Upload",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": [
+      "Admin Portal"
+    ]
+  },
+  {
+    "id": "UsersDataWidget",
+    "name": "Users Data",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "BatchExpirationTrackerWidget",
+    "name": "Batch Expiration Tracker",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "BulkOrderTrackerWidget",
+    "name": "Bulk Order Tracker",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "BulkRestockPortalWidget",
+    "name": "Bulk Restock Portal",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "PrescriptionIntakeWidget",
+    "name": "Prescription Intake",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "RealTimeStockManagerWidget",
+    "name": "Real Time Stock Manager",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "StockAlertsWidget",
+    "name": "Stock Alerts",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  },
+  {
+    "id": "TurnoverAnalyticsWidget",
+    "name": "Turnover Analytics",
+    "category": "Operational",
+    "description": "Dynamically discovered platform widget.",
+    "iconName": "Box",
+    "status": "Auto-discovered",
+    "usedIn": []
+  }
+]

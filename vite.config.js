@@ -1,10 +1,26 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { exec } from 'child_process'
+
+function codeBackupPlugin() {
+  return {
+    name: 'code-backup-plugin',
+    configureServer(server) {
+      server.middlewares.use('/api/run-code-backup', (req, res) => {
+        exec('./scripts/git_nightly_backup.sh --manual', (err, stdout, stderr) => {
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ success: !err, output: stdout, error: stderr }));
+        });
+      });
+    }
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    codeBackupPlugin(),
     react(),
     VitePWA({
       registerType: 'autoUpdate',

@@ -77,6 +77,12 @@ module.exports = onDocumentWritten(
     const userData = event.data.after.data();
     if (!userData || !userData.email) return;
 
+    // Phase 3: Ensure this runs specifically for medical profiles
+    if (userData.role !== 'doctor' && userData.role !== 'clinic' && userData.role !== 'wholesaler') {
+      console.log(`[Bigin Sync] Skipping non-medical user profile: ${userData.email}`);
+      return;
+    }
+
     try {
       const accessToken = await getAccessToken(
         zohoClientId.value(),
@@ -86,7 +92,7 @@ module.exports = onDocumentWritten(
 
       const contactName = userData.firstName 
         ? `${userData.firstName} ${userData.lastName || ''}`.trim() 
-        : userData.name || userData.displayName || 'Unknown';
+        : userData.name || userData.displayName || userData.clinicName || 'Unknown';
 
       const tags = (userData.tags && Array.isArray(userData.tags)) ? [...userData.tags] : [];
       if (!tags.includes('Atlas Health')) {
@@ -95,12 +101,22 @@ module.exports = onDocumentWritten(
 
       const addressDetails = userData.address || {};
 
+      // Enrich description with Medical Data
+      let descriptionBlocks = [];
+      if (userData.professionalRole) descriptionBlocks.push(`Role: ${userData.professionalRole}`);
+      if (userData.specialty) descriptionBlocks.push(`Specialty: ${userData.specialty}`);
+      if (userData.clinicName) descriptionBlocks.push(`Clinic: ${userData.clinicName}`);
+      if (userData.medicalLicense) descriptionBlocks.push(`Medical License: ${userData.medicalLicense}`);
+      if (userData.yearsOfExperience) descriptionBlocks.push(`Experience: ${userData.yearsOfExperience} years`);
+      if (userData.verificationStatus) descriptionBlocks.push(`Verification: ${userData.verificationStatus}`);
+      if (userData.language) descriptionBlocks.push(`Language: ${userData.language}`);
+
       const contactData = {
         Last_Name: userData.lastName || contactName || "Unknown",
         First_Name: userData.firstName || "",
         Email: userData.email,
         Phone: userData.phone || "",
-        Description: `Professional Role: ${userData.professionalRole || 'N/A'}\nLanguage: ${userData.language || 'N/A'}`,
+        Description: descriptionBlocks.join('\n') || 'Profile created from Atlas Health Portal',
         Mailing_Street: addressDetails.street || "",
         Mailing_City: addressDetails.city || "",
         Mailing_Zip: addressDetails.postalCode || "",

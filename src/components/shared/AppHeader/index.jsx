@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, HelpCircle, User, ChevronDown, ShoppingCart, Menu, Bot } from 'lucide-react';
+import { Search, Bell, HelpCircle, User, ChevronDown, ShoppingCart, Menu, Sparkles } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { useHeaderContext } from '../../../context/HeaderContext';
 import './AppHeader.css';
@@ -99,12 +99,13 @@ export default function AppHeader({
         
         {showDesktopAIToggle && (
           <button 
-            className="app-header-action" 
+            className="app-header-action ai-toggle-btn" 
             aria-label="Toggle Clinical AI"
             onClick={onToggleDesktopAI}
-            style={{ color: isDesktopAIOpen ? 'var(--primary)' : 'inherit' }}
+            style={{ color: isDesktopAIOpen ? 'var(--color-accent)' : 'inherit', display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            <Bot size={20} strokeWidth={1.8} />
+            <Sparkles size={20} strokeWidth={2} className={isDesktopAIOpen ? 'pulse-icon' : ''} />
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, display: 'none' }} className="ai-label">Atlas AI</span>
           </button>
         )}
         
@@ -141,8 +142,16 @@ export default function AppHeader({
           onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
           style={{ position: 'relative' }}
         >
-          <div className="app-header-avatar">
-            {getInitials()}
+          <div className="app-header-avatar" style={{ overflow: 'hidden' }}>
+            {(userProfile?.photoURL || user?.photoURL) ? (
+              <img 
+                src={userProfile?.photoURL || user?.photoURL} 
+                alt="Profile Avatar" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              />
+            ) : (
+              getInitials()
+            )}
           </div>
           <div className="app-header-user-info">
             <span className="app-header-user-name">{displayName}</span>
