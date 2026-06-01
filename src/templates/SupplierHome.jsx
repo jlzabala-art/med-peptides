@@ -4,7 +4,7 @@ import { LayoutDashboard, ShoppingBag, Globe, History, Settings, LogOut, Package
 import AppPortalLayout from '../layout/AppPortalLayout';
 import DashboardEngine from '../engine/DashboardEngine';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
-import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation, Navigate, Outlet } from 'react-router-dom';
 import { MessageSquare } from 'lucide-react';
 import OrdersTab from '../components/admin/OrdersTab';
 import AdminClientsTab from '../components/admin/AdminClientsTab';
@@ -98,25 +98,7 @@ export default function SupplierHome() {
     <AppPortalLayout allowedRoles={['supplier', 'admin']}>
       <div style={{ padding: '2rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
-          <Routes>
-            <Route index element={<SupplierDashboardTab userProfile={userProfile} />} />
-            <Route path="messages" element={
-              <React.Suspense fallback={<div>Cargando Mensajes...</div>}>
-                <MessagingWidget role="supplier" />
-              </React.Suspense>
-            } />
-            <Route path="orders" element={<OrdersTab buyerId={user?.uid} />} />
-            <Route path="clients" element={<AdminClientsTab ownerId={user?.uid} ownerType="supplier" />} />
-            <Route path="catalog" element={<AdminProductsTab readOnly={false} ownerId={user?.uid} ownerType="supplier" />} />
-            <Route path="shipments" element={<ShippingTrackerTab supplierId={user?.uid} />} />
-            <Route path="account-managers" element={<AdminAccountManagersTab supplierId={user?.uid} />} />
-            <Route path="atlas-ai" element={
-              <React.Suspense fallback={<div>Cargando Atlas Health AI...</div>}>
-                <ClinicalAIWidget role="supplier" />
-              </React.Suspense>
-            } />
-            <Route path="*" element={<PlaceholderTab />} />
-          </Routes>
+          <Outlet context={{ userProfile }} />
         </AdminTabErrorBoundary>
       </div>
     </AppPortalLayout>

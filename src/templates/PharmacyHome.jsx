@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, ShoppingBag, Plus, History, Settings, LogOut, FlaskConical, Inbox } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Plus, History, Settings, FlaskConical, Inbox } from 'lucide-react';
 import AppPortalLayout from '../layout/AppPortalLayout';
 import DashboardEngine from '../engine/DashboardEngine';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
-import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { useLocation, Outlet } from 'react-router-dom';
 import { MessageSquare, Brain } from 'lucide-react';
 
-const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
-const ClinicalAIWidget = React.lazy(() => import('../components/admin/ClinicalAIWidget'));
-
-const PHARMACY_NAV_GROUPS = [
+export const PHARMACY_NAV_GROUPS = [
   {
     id: 'overview',
     label: 'Overview',
@@ -46,7 +43,9 @@ const PHARMACY_NAV_GROUPS = [
   }
 ];
 
-function PharmacyDashboardTab({ userProfile }) {
+export function PharmacyDashboardTab({ userProfile }) {
+  const { userProfile: ctxProfile } = useAuth();
+  const profile = userProfile || ctxProfile;
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '4rem' }}>
       <div style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
@@ -58,18 +57,15 @@ function PharmacyDashboardTab({ userProfile }) {
             Gestión B2B Dual: Compras (APIs) y Ventas (Fórmulas Magistrales).
           </p>
         </div>
-        
         <div style={{ background: 'white', padding: '1rem 1.5rem', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', fontWeight: 800 }}>
-            {userProfile?.firstName?.[0] || 'P'}
+            {profile?.firstName?.[0] || 'P'}
           </div>
           <div>
             <div style={{ fontWeight: 800, color: 'var(--text-main)' }}>
-              {userProfile?.firstName} {userProfile?.lastName}
+              {profile?.firstName} {profile?.lastName}
             </div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Compounding Pharmacy
-            </div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Compounding Pharmacy</div>
           </div>
         </div>
       </div>
@@ -78,7 +74,7 @@ function PharmacyDashboardTab({ userProfile }) {
   );
 }
 
-function PlaceholderTab() {
+export function PlaceholderTab() {
   return (
     <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
       <h2 style={{ marginBottom: '1rem' }}>Coming Soon</h2>
@@ -88,36 +84,17 @@ function PlaceholderTab() {
 }
 
 export default function PharmacyHome() {
-  const { user, userProfile, logout } = useAuth();
+  const { userProfile } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
 
   const pathParts = location.pathname.split('/').filter(Boolean);
   const activeTab = pathParts.length > 1 ? pathParts[pathParts.length - 1] : 'dashboard';
-
-  const handleLogout = () => {
-    logout?.();
-    window.location.href = '/';
-  };
 
   return (
     <AppPortalLayout allowedRoles={['compounding_pharmacy', 'admin']}>
       <div style={{ padding: '2rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
-          <Routes>
-            <Route index element={<PharmacyDashboardTab userProfile={userProfile} />} />
-            <Route path="messages" element={
-              <React.Suspense fallback={<div>Cargando Mensajes...</div>}>
-                <MessagingWidget role="compounding_pharmacy" />
-              </React.Suspense>
-            } />
-            <Route path="clinical-ai" element={
-              <React.Suspense fallback={<div>Cargando Atlas Health...</div>}>
-                <ClinicalAIWidget />
-              </React.Suspense>
-            } />
-            <Route path="*" element={<PlaceholderTab />} />
-          </Routes>
+          <Outlet context={{ userProfile }} />
         </AdminTabErrorBoundary>
       </div>
     </AppPortalLayout>

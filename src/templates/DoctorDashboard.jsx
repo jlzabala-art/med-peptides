@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard, Users, ClipboardList, FlaskConical,
@@ -20,7 +20,7 @@ import AdminTabErrorBoundary     from '../components/admin/AdminTabErrorBoundary
 import DoctorMessagesTab         from '../components/doctor/DoctorMessagesTab';
 
 // Firestore notifications listener
-import { collection, query, where, orderBy, limit, onSnapshot, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 // ── Nav groups (Google Cloud-style semantic grouping) ──────────────────────
@@ -77,11 +77,11 @@ const DOCTOR_NAV_GROUPS = [
 ];
 
 // ── Main ───────────────────────────────────────────────────────────────────────
-import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import AppPortalLayout from '../layout/AppPortalLayout';
 
 export default function DoctorDashboard() {
-  const { user, userProfile, logout, activePermissions, baseRole } = useAuth();
+  const { user, userProfile, baseRole } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -90,8 +90,6 @@ export default function DoctorDashboard() {
   // Default to 'overview' if exactly /doctor
   const activeTab = pathParts.length > 1 ? pathParts[pathParts.length - 1] : 'overview';
   const [sharedPatients, setSharedPatients] = useState([]);
-  const [isMobile, setIsMobile]       = useState(window.innerWidth < 1024);
-  const [notifications, setNotifications] = useState([]);
 
   // Impersonation state for administrators
   const [doctorsList, setDoctorsList] = useState([]);
@@ -156,83 +154,7 @@ export default function DoctorDashboard() {
     
   const doctorMeta = { doctorName, specialty: activeDoctorProfile?.specialty || '' };
 
-  // Responsive guard
-  useEffect(() => {
-    const h = () => setIsMobile(window.innerWidth < 1024);
-    window.addEventListener('resize', h);
-    return () => window.removeEventListener('resize', h);
-  }, []);
-
-  // Real-time notifications for active doctorId
-  useEffect(() => {
-    if (!doctorId) return;
-    const q = query(
-      collection(db, 'notifications'),
-      where('recipientId', '==', doctorId),
-      where('read', '==', false),
-      orderBy('createdAt', 'desc'),
-      limit(20)
-    );
-    const unsub = onSnapshot(q, snap => {
-      setNotifications(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    }, () => {});
-    return () => unsub();
-  }, [doctorId]);
-
-  // Badge counts per tab
-  const notifCounts = useMemo(() => {
-    const orderNotifs = notifications.filter(n => n.type === 'patient_checkout').length;
-    return {
-      overview:      notifications.length,
-      orders:        orderNotifs,
-      prescriptions: notifications.filter(n => n.type?.startsWith('rx')).length,
-    };
-  }, [notifications]);
-
-  // Allowed tabs (flat, for fallback + permission logic)
-  const allowedTabs = useMemo(() => ALL_TABS.filter(tab => {
-    if (tab.perm === 'canRecommend' && activePermissions?.canRecommend === false) return false;
-    if (tab.perm === 'canBulkOrder' && activePermissions?.canBulkOrder === false) return false;
-    return true;
-  }), [activePermissions]);
-
-  // Build permission-filtered groups for AppSidebar
-  const allowedIds = useMemo(() => new Set(allowedTabs.map(t => t.id)), [allowedTabs]);
-  const filteredGroups = useMemo(() => {
-    const withBadge = (items) => items
-      .filter(i => allowedIds.has(i.id))
-      .map(i => ({ ...i, badge: notifCounts?.[i.id] || 0 }));
-    const groups = DOCTOR_NAV_GROUPS
-      .map(g => ({ ...g, items: withBadge(g.items) }))
-      .filter(g => g.items.length > 0);
-    return groups;
-  }, [allowedIds, notifCounts, activePermissions]);
-
-  const handleLogout = useCallback(() => {
-    logout?.();
-    window.location.href = '/';
-  }, [logout]);
-
-
-
   const currentTab = ALL_TABS.find(t => t.id === activeTab);
-  const currentGroup = DOCTOR_NAV_GROUPS.find(g => g.items.some(i => i.id === activeTab));
-
-  const sidebarProps = {
-    storageKey: "doctor-sidebar",
-    groups: filteredGroups,
-    activeId: activeTab,
-    onNavigate: setActiveTab,
-    accentColor: "var(--color-success)",
-    header: { title: 'Physician Portal', subtitle: doctorName },
-    footer: { label: 'Sign out', icon: LogOut, onClick: handleLogout }
-  };
-
-  const headerProps = {
-    title: currentTab?.label || 'Dashboard',
-    subtitle: `${doctorName} · Atlas Health Physician Portal`,
-    onSearchClick: () => {}
-  };
 
   return (
     <AppPortalLayout allowedRoles={['doctor', 'admin', 'staff']}>
@@ -291,20 +213,7 @@ export default function DoctorDashboard() {
 
       <div style={{ padding: '2rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={currentTab?.label || activeTab}>
-          <Routes>
-            <Route index element={<DoctorOverviewTab doctorId={doctorId} doctorMeta={doctorMeta} patients={sharedPatients} onNavigate={(id) => navigate(`/doctor/${id === 'overview' ? '' : id}`)} />} />
-            <Route path="new-prescription" element={<DoctorPrescriptionsTab key="new-prescription" doctorId={doctorId} doctorMeta={doctorMeta} patients={sharedPatients} initialBuilderOpen={true} hideHistory={true} onSavedRedirect={() => navigate('/doctor/prescriptions-history')} />} />
-            <Route path="prescriptions-history" element={<DoctorPrescriptionsTab key="prescriptions-history" doctorId={doctorId} doctorMeta={doctorMeta} patients={sharedPatients} initialBuilderOpen={false} hideHistory={false} />} />
-            <Route path="patients" element={<PhysicianPatientsTab doctorId={doctorId} doctorMeta={doctorMeta} onPatientsLoaded={setSharedPatients} />} />
-            <Route path="orders" element={<PhysicianOrdersTab doctorId={doctorId} patients={sharedPatients} />} />
-            <Route path="catalog-builder" element={<CatalogCreatorFlow ownerId={doctorId} ownerType="doctor" />} />
-            <Route path="messages" element={<DoctorMessagesTab doctorId={doctorId} />} />
-            <Route path="recommendations" element={<PhysicianRecommendationsTab doctorId={doctorId} doctorMeta={doctorMeta} patients={sharedPatients} />} />
-            <Route path="protocols" element={<PhysicianProtocolsTab doctorId={doctorId} doctorMeta={doctorMeta} patients={sharedPatients} />} />
-            <Route path="assistants" element={<PhysicianAssistantsTab doctorId={doctorId} doctorMeta={doctorMeta} />} />
-            <Route path="settings" element={<PhysicianSettingsTab />} />
-            <Route path="*" element={<Navigate to="" replace />} />
-          </Routes>
+          <Outlet context={{ doctorId, doctorMeta, sharedPatients, setSharedPatients, navigate }} />
         </AdminTabErrorBoundary>
       </div>
     </AppPortalLayout>

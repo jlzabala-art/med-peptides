@@ -1,11 +1,37 @@
 import React from 'react';
 import BaseImportTab from './BaseImportTab';
 import { getStatusColor } from './utils';
+import { db } from '../../../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function ImportRFQTab() {
   const handleSave = async (data) => {
     console.log("Saving RFQ...", data);
-    // TODO: Connect to Firestore
+    try {
+      await addDoc(collection(db, 'agency_rfqs'), {
+        clientName: 'Magenta Compounding Pharmacy', // Default client name
+        supplierName: 'LotusLand', // Default supplier name
+        items: data.map(item => ({
+          peptide_name: item.peptide_name || 'Unknown Item',
+          dosage: item.dosage || '',
+          quantity: parseInt(item.quantity, 10) || 1,
+          units: item.units || 'vials',
+          supplierUnitCost: 0,
+          marginPercent: 20,
+          clientUnitPrice: 0
+        })),
+        marginType: 'global',
+        globalMargin: 20,
+        poAttached: false,
+        poFileUrl: null,
+        sharedWithSupplier: false,
+        status: 'NEW',
+        createdAt: serverTimestamp()
+      });
+    } catch (err) {
+      console.error("Error saving RFQ:", err);
+      throw new Error("Failed to save RFQ to database: " + err.message);
+    }
   };
 
   const renderDiffTable = ({ parsedData, selectedRows, toggleRow, toggleAll, updateRow }) => (

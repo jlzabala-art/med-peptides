@@ -33,25 +33,28 @@ export const PORTAL_CONFIG = {
     { id: 'settings', label: 'Settings', icon: FiSettings, path: '/doctor/settings' },
   ],
   supplier: [
-    { id: 'dashboard', label: 'Dashboard', icon: FiHome, path: '/supplier' },
-    { id: 'inventory', label: 'Inventory', icon: FiBox, path: '/supplier/inventory' },
-    { id: 'shipping', label: 'Shipping', icon: FiTruck, path: '/supplier/shipping' },
-    { id: 'quality', label: 'QC & CoA', icon: FiShield, path: '/supplier/quality' },
-    { id: 'settings', label: 'Settings', icon: FiSettings, path: '/supplier/settings' },
+    { id: 'dashboard', label: 'Dashboard', icon: FiHome, path: '/supplier-dashboard' },
+    { id: 'catalog', label: 'Mass Catalog / APIs', icon: FiBox, path: '/supplier-dashboard/catalog' },
+    { id: 'orders', label: 'Wholesale Orders', icon: FiFileText, path: '/supplier-dashboard/orders' },
+    { id: 'clients', label: 'B2B Clients', icon: FiUsers, path: '/supplier-dashboard/clients' },
+    { id: 'shipments', label: 'Shipping Tracker', icon: FiTruck, path: '/supplier-dashboard/shipments' },
+    { id: 'messages', label: 'Messages', icon: FiMessageSquare, path: '/supplier-dashboard/messages' },
+    { id: 'settings', label: 'Settings', icon: FiSettings, path: '/supplier-dashboard/settings' },
   ],
   wholesaler: [
     { id: 'dashboard', label: 'Dashboard', icon: FiHome, path: '/wholesaler' },
-    { id: 'catalog', label: 'Bulk Catalog', icon: FiBox, path: '/wholesaler/catalog' },
-    { id: 'orders', label: 'My Orders', icon: FiFileText, path: '/wholesaler/orders' },
-    { id: 'invoices', label: 'Invoices', icon: FiDatabase, path: '/wholesaler/invoices' },
+    { id: 'catalogs', label: 'Bulk Catalogs', icon: FiBox, path: '/wholesaler/catalogs' },
+    { id: 'bulk-orders', label: 'Bulk Orders', icon: FiFileText, path: '/wholesaler/bulk-orders' },
+    { id: 'rx-inbox', label: 'Rx Inbox', icon: FiDatabase, path: '/wholesaler/rx-inbox' },
+    { id: 'messages', label: 'Messages', icon: FiMessageSquare, path: '/wholesaler/messages' },
     { id: 'settings', label: 'Settings', icon: FiSettings, path: '/wholesaler/settings' },
   ],
   patient: [
-    { id: 'dashboard', label: 'My Health', icon: FiHome, path: '/paciente' },
-    { id: 'prescriptions', label: 'Prescriptions', icon: FiFileText, path: '/paciente/prescriptions' },
-    { id: 'appointments', label: 'Appointments', icon: FiCalendar, path: '/paciente/appointments' },
-    { id: 'messages', label: 'Messages', icon: FiMessageSquare, path: '/paciente/messages' },
-    { id: 'settings', label: 'Settings', icon: FiSettings, path: '/settings' },
+    { id: 'dashboard', label: 'Dashboard', icon: FiHome, path: '/patient' },
+    { id: 'prescriptions', label: 'Prescriptions', icon: FiFileText, path: '/patient/prescriptions' },
+    { id: 'appointments', label: 'Appointments', icon: FiCalendar, path: '/patient/appointments' },
+    { id: 'messages', label: 'Messages', icon: FiMessageSquare, path: '/patient/messages' },
+    { id: 'settings', label: 'Settings', icon: FiSettings, path: '/patient/settings' },
   ]
 };
 
@@ -61,8 +64,8 @@ PORTAL_CONFIG.pharmacy = PORTAL_CONFIG.wholesaler;
 PORTAL_CONFIG.account_manager = [
   { id: 'dashboard', label: 'Dashboard', icon: FiHome, path: '/account-manager' },
   { id: 'clients', label: 'My Accounts', icon: FiUsers, path: '/account-manager/clients' },
-  { id: 'quotes', label: 'Quotes', icon: FiFileText, path: '/account-manager/quotes' },
-  { id: 'settings', label: 'Settings', icon: FiSettings, path: '/settings' },
+  { id: 'orders', label: 'Client Orders', icon: FiFileText, path: '/account-manager/orders' },
+  { id: 'settings', label: 'Settings', icon: FiSettings, path: '/account-manager/settings' },
 ];
 
 export const getPortalTabs = (role) => {

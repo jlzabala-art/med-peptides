@@ -10,6 +10,7 @@ import WholesalerHome, {
   PlaceholderTab
 } from '../templates/WholesalerHome';
 import DashboardEngine from '../engine/DashboardEngine';
+import UserSettings from '../templates/UserSettings';
 
 // ── Premium loading skeleton ──────────────────────────────────────────────────
 const TabSkeleton = () => (
@@ -122,7 +123,7 @@ export default function WholesalerRoutes() {
         } />
         <Route path="settings" element={
           <AdminTabErrorBoundary tabId="settings" tabLabel="Settings">
-            <PlaceholderTab title="Account Settings" description="Company details, contacts, and B2B preferences." />
+            <UserSettings onBack={() => navigate('/wholesaler')} />
           </AdminTabErrorBoundary>
         } />
       </Route>

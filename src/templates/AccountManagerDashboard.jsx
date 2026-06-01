@@ -101,7 +101,7 @@ export default function AccountManagerDashboard() {
           <Route path="referrals" element={<AdminTabErrorBoundary tabId="referrals"><ReferralTracking ownerId={user.uid} ownerType="wholesaler" /></AdminTabErrorBoundary>} />
           <Route path="co-branding" element={<AdminTabErrorBoundary tabId="co-branding"><CoBranding ownerId={user.uid} ownerType="wholesaler" /></AdminTabErrorBoundary>} />
 
-          <Route path="settings" element={<AdminTabErrorBoundary tabId="settings"><UserSettings /></AdminTabErrorBoundary>} />
+          <Route path="settings" element={<AdminTabErrorBoundary tabId="settings"><UserSettings onBack={() => navigate('/account-manager')} /></AdminTabErrorBoundary>} />
         </Routes>
       </div>
     </AppPortalLayout>

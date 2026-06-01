@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 
 import SupplierHome, { SupplierDashboardTab, PlaceholderTab } from '../templates/SupplierHome';
+import UserSettings from '../templates/UserSettings';
 
 // ── All tab components lazy-loaded for optimal code splitting ──────────────────
 const OrdersTab = React.lazy(() => import('../components/admin/OrdersTab'));
@@ -68,6 +69,11 @@ export default function SupplierRoutes() {
         <Route path="atlas-ai" element={
           <AdminTabErrorBoundary tabId="atlas-ai" tabLabel="Atlas Health">
             <ClinicalAIWidget role="supplier" />
+          </AdminTabErrorBoundary>
+        } />
+        <Route path="settings" element={
+          <AdminTabErrorBoundary tabId="settings" tabLabel="Settings">
+            <UserSettings onBack={() => navigate('/supplier-dashboard')} />
           </AdminTabErrorBoundary>
         } />
         <Route path="*" element={<PlaceholderTab />} />

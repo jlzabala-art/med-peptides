@@ -1,6 +1,7 @@
  
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
@@ -12,6 +13,8 @@ import {
 } from 'lucide-react';
 
 // ─── Searchable Country Picker ────────────────────────────────────────────────
+// ... rest of CountryPicker ...
+
 function CountryPicker({ name, value, onChange, placeholder = 'Search country…' }) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
@@ -202,7 +205,34 @@ function AccordionItem({ id, title, icon: Icon, openSections, setOpenSections, c
 }
 
 export default function UserSettings({ onBack }) {
-  const { user, userProfile, updateProfileData, isProfessional } = useAuth();
+  const { user, userProfile, updateProfileData, isProfessional, activeRole } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Redirect professional users if accessing global /settings route directly
+  useEffect(() => {
+    if (activeRole && activeRole !== 'patient' && activeRole !== 'professional' && location.pathname === '/settings') {
+      if (activeRole === 'admin') navigate('/admin/settings', { replace: true });
+      else if (activeRole === 'doctor') navigate('/doctor/settings', { replace: true });
+      else if (activeRole === 'wholesaler' || activeRole === 'clinic' || activeRole === 'pharmacy') navigate('/wholesaler/settings', { replace: true });
+      else if (activeRole === 'supplier') navigate('/supplier-dashboard/settings', { replace: true });
+      else if (activeRole === 'account_manager') navigate('/account-manager/settings', { replace: true });
+    }
+  }, [activeRole, location.pathname, navigate]);
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+      return;
+    }
+    // Fallback dynamic back path based on activeRole
+    if (activeRole === 'admin') navigate('/admin');
+    else if (activeRole === 'doctor') navigate('/doctor');
+    else if (activeRole === 'wholesaler' || activeRole === 'clinic' || activeRole === 'pharmacy') navigate('/wholesaler');
+    else if (activeRole === 'supplier') navigate('/supplier-dashboard');
+    else if (activeRole === 'account_manager') navigate('/account-manager');
+    else navigate('/patient');
+  };
 
   // ── Orders listener ──────────────────────────────────────────────────────
   const [orders, setOrders] = useState([]);
@@ -317,7 +347,7 @@ export default function UserSettings({ onBack }) {
         {/* Uniform Header */}
         <div style={{ marginBottom: '3rem' }}>
           <button 
-            onClick={onBack}
+            onClick={handleBack}
             style={{ 
               display: 'flex', alignItems: 'center', gap: '0.5rem', 
               background: 'rgba(0,0,0,0.03)', border: 'none', color: 'var(--text-muted)',

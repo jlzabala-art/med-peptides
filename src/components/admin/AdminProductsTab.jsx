@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { collection, query, getDocs, doc, updateDoc, deleteDoc, limit, startAfter, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
 import {
@@ -39,6 +39,7 @@ import AdminSupplyNotifierWidget from './gadgets/AdminSupplyNotifierWidget';
 import InlineEditField from '../ui/InlineEditField';
 import BulkOrderSelectionModal from './BulkOrders/BulkOrderSelectionModal';
 import TooltipWrapper from '../ui/TooltipWrapper';
+import AdminPageHeader from './AdminPageHeader';
 
 // ─── ProductMicrosite Component ────────────────────────────────────────────────
 function ProductMicrosite({ product, onUpdateProduct }) {
@@ -399,9 +400,20 @@ export default function AdminProductsTab({
 }) {
   const { isAdmin, user, userRole } = useAuth();
   const { toast } = useToast();
+  
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+  
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
+
+  useEffect(() => {
+    const searchVal = searchParams.get('search');
+    if (searchVal !== null) {
+      setSearchTerm(searchVal);
+    }
+  }, [searchParams]);
   const [filterCategory, setFilterCategory] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterStock, setFilterStock] = useState('All');
@@ -1118,6 +1130,11 @@ export default function AdminProductsTab({
 
   return (
     <div style={{ marginBottom: '2rem' }}>
+      <AdminPageHeader
+        title="Products & Catalog"
+        subtitle="Manage product details, pricing, inventory categories, and Zoho Catalog integrations."
+        icon={Package}
+      />
       {isAdmin && !readOnly && (
         <div style={{ marginBottom: '1.5rem' }}>
           <AdminSupplyNotifierWidget />

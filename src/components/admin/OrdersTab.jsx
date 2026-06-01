@@ -43,6 +43,7 @@ import DataTable from '../ui/DataTable';
 import AppActionGroup from '../ui/AppActionGroup';
 import AppStatusChip from '../ui/AppStatusChip';
 import AppFilterBar from '../ui/AppFilterBar';
+import AdminPageHeader from './AdminPageHeader';
 
 const EMAILJS_SERVICE_ID = 'service_vstbe8f';
 const EMAILJS_PUBLIC_KEY = 'rO_f_X4uBvFf3u_3u';
@@ -647,26 +648,11 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
       )}
 
       {/* ── Header ── */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '2rem',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}
-      >
-        <div>
-          <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <ShoppingCart size={24} color="var(--primary)" />
-            Sales Orders
-          </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-            Review, confirm, and manage your sales orders.
-          </p>
-        </div>
-      </div>
+      <AdminPageHeader
+        title="Sales Orders"
+        subtitle="Review, confirm, and manage your sales orders."
+        icon={ShoppingCart}
+      />
 
 
       {/* ── Table ── */}

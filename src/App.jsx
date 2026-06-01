@@ -53,17 +53,18 @@ const RoleDashboard = lazy(() => import('./templates/RoleDashboard'));
 const AccountManagerDashboard = lazy(() => import('./templates/AccountManagerDashboard'));
 const DoctorHome = lazy(() => import('./templates/DoctorHome'));
 const DoctorDashboard = lazy(() => import('./templates/DoctorDashboard'));
+const DoctorRoutes = lazy(() => import('./routes/DoctorRoutes'));
 const WholesalerRoutes = lazy(() => import('./routes/WholesalerRoutes'));
 const SupplierRoutes = lazy(() => import('./routes/SupplierRoutes'));
 const WholesalerHome = lazy(() => import('./templates/WholesalerHome'));
 const PublicCatalogView = lazy(() => import('./templates/PublicCatalogView'));
 const CatalogEmailTracker = lazy(() => import('./templates/CatalogEmailTracker'));
-const ClinicHome = lazy(() => import('./templates/ClinicHome'));
-const PharmacyHome = lazy(() => import('./templates/PharmacyHome'));
+const ClinicRoutes = lazy(() => import('./routes/ClinicRoutes'));
+const PharmacyRoutes = lazy(() => import('./routes/PharmacyRoutes'));
 const SupplierHome = lazy(() => import('./templates/SupplierHome'));
 const PublicSupplierQuote = lazy(() => import('./components/public/PublicSupplierQuote'));
 const PublicClientQuote = lazy(() => import('./components/public/PublicClientQuote'));
-const PatientHome = lazy(() => import('./templates/PatientHome'));
+const PatientRoutes = lazy(() => import('./routes/PatientRoutes'));
 const PatientAppointments = lazy(() => import('./templates/PatientAppointments'));
 const DoctorPatients = lazy(() => import('./templates/DoctorPatients'));
 const DoctorAppointments = lazy(() => import('./templates/DoctorAppointments'));
@@ -937,14 +938,14 @@ function App() {
         />
       } />
       <Route path="settings" element={
-        <UserSettings onBack={() => tenantNavigate('/paciente')} />
+        <UserSettings onBack={() => tenantNavigate('/patient')} />
       } />
-      <Route path="orders" element={<Navigate to="../paciente" replace />} />
-      <Route path="orders/history" element={<Navigate to="../paciente" replace />} />
-      <Route path="saved" element={<Navigate to="../paciente" replace />} />
-      <Route path="saved/protocols" element={<Navigate to="../paciente" replace />} />
-      <Route path="saved/products" element={<Navigate to="../paciente" replace />} />
-      <Route path="my-protocols" element={<Navigate to="../paciente" replace />} />
+      <Route path="orders" element={<Navigate to="../patient" replace />} />
+      <Route path="orders/history" element={<Navigate to="../patient" replace />} />
+      <Route path="saved" element={<Navigate to="../patient" replace />} />
+      <Route path="saved/protocols" element={<Navigate to="../patient" replace />} />
+      <Route path="saved/products" element={<Navigate to="../patient" replace />} />
+      <Route path="my-protocols" element={<Navigate to="../patient" replace />} />
     </>
   );
 
@@ -1114,15 +1115,15 @@ function App() {
             </Route>
             <Route element={<ProtectedRoute allowedRoles={['professional', 'patient', 'doctor', 'admin']} />}>
               <Route element={<DoctorProvider><Outlet /></DoctorProvider>}>
-                <Route path="/doctor/*" element={<DoctorDashboard />} />
-                <Route path="/doctor-dashboard/*" element={<DoctorDashboard />} />
+                <Route path="/doctor/*" element={<DoctorRoutes />} />
+                <Route path="/doctor-dashboard/*" element={<DoctorRoutes />} />
 
                 {/* Account Manager Routing */}
                 <Route path="/account-manager/*" element={<AccountManagerDashboard />} />
               </Route>
             </Route>
             <Route element={<ProtectedRoute allowedRoles={['professional', 'patient', 'doctor', 'admin']} />}>
-              <Route path="/patient/*" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><PatientHome /></Suspense>} />
+              <Route path="/patient/*" element={<Suspense fallback={<div className="page-loader"><div className="spinner"></div></div>}><PatientRoutes /></Suspense>} />
             </Route>
             
             {/* /paciente and dashboard: unified under GlobalAppLayout */}
@@ -1153,8 +1154,8 @@ function App() {
             <Route path="/catalog/:catalogSlug" element={<PublicCatalogView />} />
             <Route path="/partner/:tenantSlug/catalog/:catalogSlug" element={<PublicCatalogView />} />
             <Route path="/catalog/track/:eventId" element={<CatalogEmailTracker />} />
-            <Route path="/clinic-dashboard/*" element={activeRole === 'clinic' || activeRole === 'admin' ? <ClinicHome /> : <Navigate to="/paciente" replace />} />
-            <Route path="/pharmacy-dashboard/*" element={activeRole === 'compounding_pharmacy' || activeRole === 'admin' ? <PharmacyHome /> : <Navigate to="/paciente" replace />} />
+            <Route path="/clinic-dashboard/*" element={activeRole === 'clinic' || activeRole === 'admin' ? <ClinicRoutes /> : <Navigate to="/paciente" replace />} />
+            <Route path="/pharmacy-dashboard/*" element={activeRole === 'compounding_pharmacy' || activeRole === 'admin' ? <PharmacyRoutes /> : <Navigate to="/paciente" replace />} />
             <Route path="/supplier-dashboard/*" element={activeRole === 'supplier' || activeRole === 'admin' ? <SupplierRoutes /> : <Navigate to="/paciente" replace />} />
             {/* --- PUBLIC SHOP LAYOUT (continued for Settings & Redirects - Standard) --- */}
             <Route element={

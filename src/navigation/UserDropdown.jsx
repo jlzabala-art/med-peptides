@@ -24,6 +24,12 @@ const PATH_ICONS = {
   '/orders':                             <Package size={15} />,
   '/orders/history':                     <History size={15} />,
   '/settings':                           <Settings size={15} />,
+  '/admin/settings':                     <Settings size={15} />,
+  '/doctor/settings':                    <Settings size={15} />,
+  '/wholesaler/settings':                <Settings size={15} />,
+  '/supplier-dashboard/settings':        <Settings size={15} />,
+  '/account-manager/settings':           <Settings size={15} />,
+  '/patient/settings':                   <Settings size={15} />,
   '/login':                              <LogIn size={15} />,
   '/login?tab=register':                 <UserPlus size={15} />,
   // Intelligence
@@ -122,7 +128,20 @@ export default function UserDropdown({ user, userProfile: propUserProfile, isPro
   const isImpersonating = activeRole !== baseRole;
   const menuRoleKey = activeRole === 'admin' ? 'admin' : ['clinic', 'doctor', 'wholesaler', 'compounding_pharmacy', 'supplier', 'staff'].includes(activeRole) ? 'professional' : 'guest';
   
-  const items       = USER_MENU[menuRoleKey] ?? USER_MENU.guest;
+  const rawItems    = USER_MENU[menuRoleKey] ?? USER_MENU.guest;
+  const items = rawItems.map(item => {
+    if (item.path === '/settings') {
+      let dynamicPath = '/settings';
+      if (activeRole === 'admin') dynamicPath = '/admin/settings';
+      else if (activeRole === 'doctor') dynamicPath = '/doctor/settings';
+      else if (activeRole === 'wholesaler' || activeRole === 'clinic' || activeRole === 'pharmacy') dynamicPath = '/wholesaler/settings';
+      else if (activeRole === 'supplier') dynamicPath = '/supplier-dashboard/settings';
+      else if (activeRole === 'account_manager') dynamicPath = '/account-manager/settings';
+      else if (activeRole === 'patient') dynamicPath = '/patient/settings';
+      return { ...item, path: dynamicPath };
+    }
+    return item;
+  });
   const adminItems  = items.filter((i) => i.section === 'admin');
   const mainItems   = items.filter((i) => !i.section).filter(item => {
     // Hide 'Admin Dashboard' redundant link if already on /admin

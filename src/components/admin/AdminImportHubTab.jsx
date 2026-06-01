@@ -222,7 +222,12 @@ export default function AdminImportHubTab() {
               <tr>
                 <th>Status</th>
                 <th>Extracted Item</th>
-                {context === 'RFQ' && <th>Requested Qty</th>}
+                {context === 'RFQ' && (
+                  <>
+                    <th style={{ textAlign: 'right', width: '90px' }}>Quantity</th>
+                    <th style={{ textAlign: 'center', width: '90px' }}>Units</th>
+                  </>
+                )}
                 {context === 'PriceList' && <th>Unit Cost</th>}
                 {context === 'COA' && <th>Purity / Batch</th>}
                 <th>Original Text</th>
@@ -247,7 +252,10 @@ export default function AdminImportHubTab() {
                     </td>
                     
                     {context === 'RFQ' && (
-                      <td>{item.quantity}</td>
+                      <>
+                        <td style={{ textAlign: 'right' }}>{item.quantity}</td>
+                        <td style={{ textAlign: 'center', color: 'var(--text-muted)' }}>{item.units || 'vials'}</td>
+                      </>
                     )}
                     
                     {context === 'PriceList' && (
