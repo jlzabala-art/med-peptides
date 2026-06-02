@@ -514,18 +514,39 @@ export default function AdminOverviewTab({
                   >
                     <UserPlus size={18} style={{ color: 'var(--error)' }} /> Account Approvals
                   </h4>
-                  <span
-                    style={{
-                      fontSize: '0.7rem',
-                      fontWeight: 700,
-                      padding: '0.2rem 0.6rem',
-                      borderRadius: '99px',
-                      backgroundColor: '#fee2e2',
-                      color: 'var(--error)',
-                    }}
-                  >
-                    {pendingUsers} pending
-                  </span>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <button
+                      onClick={() => {
+                        window.dispatchEvent(new CustomEvent('open-clinical-ai', {
+                          detail: {
+                            message: `I have ${pendingUsers} pending account approvals. Can you summarize what to look out for when approving new clinic or wholesaler accounts?`,
+                            autoSend: true
+                          }
+                        }));
+                      }}
+                      title="Ask Atlas for approval guidance"
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '0.25rem',
+                        padding: '0.2rem 0.5rem', borderRadius: '4px',
+                        backgroundColor: 'rgba(37,99,235,0.1)', color: 'var(--primary)',
+                        border: '1px solid rgba(37,99,235,0.3)', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer'
+                      }}
+                    >
+                      <Brain size={12} /> Ask Atlas
+                    </button>
+                    <span
+                      style={{
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        padding: '0.2rem 0.6rem',
+                        borderRadius: '99px',
+                        backgroundColor: '#fee2e2',
+                        color: 'var(--error)',
+                      }}
+                    >
+                      {pendingUsers} pending
+                    </span>
+                  </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {pendingUsersList.slice(0, 3).map((u) => (
@@ -619,18 +640,39 @@ export default function AdminOverviewTab({
                   >
                     <AlertTriangle size={18} style={{ color: 'var(--warning)' }} /> Low Stock
                   </h4>
-                  <span
-                    style={{
-                      fontSize: '0.7rem',
-                      fontWeight: 700,
-                      padding: '0.2rem 0.6rem',
-                      borderRadius: '99px',
-                      backgroundColor: '#fef3c7',
-                      color: 'var(--warning)',
-                    }}
-                  >
-                    {lowStockItems} item{lowStockItems > 1 ? 's' : ''}
-                  </span>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <button
+                      onClick={() => {
+                        window.dispatchEvent(new CustomEvent('open-clinical-ai', {
+                          detail: {
+                            message: `I have ${lowStockItems} items with low stock. Can you suggest a restock strategy or highlight which ones are most critical for clinical protocols?`,
+                            autoSend: true
+                          }
+                        }));
+                      }}
+                      title="Ask Atlas for a restock strategy"
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '0.25rem',
+                        padding: '0.2rem 0.5rem', borderRadius: '4px',
+                        backgroundColor: 'rgba(245,158,11,0.1)', color: '#d97706',
+                        border: '1px solid rgba(245,158,11,0.3)', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer'
+                      }}
+                    >
+                      <Brain size={12} /> Ask Atlas
+                    </button>
+                    <span
+                      style={{
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        padding: '0.2rem 0.6rem',
+                        borderRadius: '99px',
+                        backgroundColor: '#fef3c7',
+                        color: 'var(--warning)',
+                      }}
+                    >
+                      {lowStockItems} item{lowStockItems > 1 ? 's' : ''}
+                    </span>
+                  </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {lowStockList.slice(0, 3).map((p) => (

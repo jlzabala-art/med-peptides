@@ -1132,6 +1132,49 @@ export default function ProductDetail({
               </button>
 
               <button
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('open-clinical-ai', {
+                    detail: {
+                      message: `I am considering ${activeProduct?.name || 'this product'}. Can you ask me a few questions about my health goals and symptoms to see if this is right for me?`,
+                      autoSend: true
+                    }
+                  }));
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.backgroundColor = 'rgba(139, 92, 246, 0.12)';
+                  e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.55)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(139,92,246,0.15)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.backgroundColor = 'rgba(139, 92, 246, 0.06)';
+                  e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.3)';
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+                style={{
+                  width: '100%',
+                  padding: '0.6rem 1rem',
+                  borderRadius: '10px',
+                  border: '1.5px solid rgba(139, 92, 246, 0.3)',
+                  backgroundColor: 'rgba(139, 92, 246, 0.06)',
+                  color: '#8b5cf6',
+                  fontWeight: 700,
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.18s ease',
+                  letterSpacing: '0.01em',
+                }}
+              >
+                <Sparkles size={14} />
+                Is this right for me?
+              </button>
+
+              <button
                 className="btn"
                 disabled={!priceDisplay || priceDisplay === 'unavailable'}
                 onClick={() => {

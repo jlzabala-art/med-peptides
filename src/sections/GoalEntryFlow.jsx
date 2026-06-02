@@ -176,6 +176,54 @@ export default function GoalEntryFlow({ onOpenAI, onSeedSearch }) {
           </p>
         </div>
 
+        {/* Free Text Matchmaker (New AI Onboarding) */}
+        <div style={{
+          maxWidth: '600px', margin: '0 auto 3rem auto',
+          background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(165,180,252,0.3)',
+          borderRadius: '16px', padding: '1.5rem',
+          boxShadow: '0 8px 32px rgba(99,102,241,0.05)',
+          display: 'flex', flexDirection: 'column', gap: '1rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#a5b4fc', fontWeight: 600 }}>
+            <Bot size={18} />
+            Describe how you feel in your own words
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+            <textarea
+              id="matchmaker-input"
+              placeholder="E.g., I've been feeling extremely tired lately, my joints ache when I run, and I'm struggling to build muscle..."
+              style={{
+                flex: 1, minHeight: '80px', padding: '0.75rem',
+                background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '8px', color: '#f1f5f9', fontSize: '0.95rem',
+                resize: 'vertical', fontFamily: 'inherit'
+              }}
+            />
+            <button
+              onClick={() => {
+                const input = document.getElementById('matchmaker-input');
+                if (input && input.value.trim()) {
+                  const message = `I am a new patient. Here is how I feel and what I'm struggling with: "${input.value}". Can you analyze this and suggest which specific health goals, peptides, or supplements I should explore first?`;
+                  window.dispatchEvent(new CustomEvent('open-clinical-ai', { detail: { message, autoSend: true } }));
+                  onOpenAI?.(message);
+                }
+              }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.4rem',
+                padding: '0.75rem 1.25rem', borderRadius: '8px',
+                background: '#6366f1', color: 'white', fontWeight: 700,
+                border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
+                transition: 'background 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#4f46e5'}
+              onMouseLeave={(e) => e.currentTarget.style.background = '#6366f1'}
+            >
+              <Sparkles size={16} />
+              Find My Match
+            </button>
+          </div>
+        </div>
+
         {/* Goal Cards Grid */}
         <div
           role="list"

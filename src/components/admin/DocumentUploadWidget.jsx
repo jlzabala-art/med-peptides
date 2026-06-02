@@ -3,7 +3,7 @@ import { db, storage } from '../../firebase';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { useAuth } from '../../context/AuthContext';
-import { FileText, UploadCloud, CheckCircle, Clock, AlertCircle, X, ExternalLink, Database } from 'lucide-react';
+import { FileText, UploadCloud, CheckCircle, Clock, AlertCircle, X, ExternalLink, Database, Bot } from 'lucide-react';
 
 /**
  * DocumentUploadWidget
@@ -209,6 +209,26 @@ export default function DocumentUploadWidget({
                   </div>
                   {/* Actions */}
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      onClick={() => {
+                        const isLab = docData.documentType === 'LAB_RESULT';
+                        const message = isLab
+                          ? `Please analyze this patient lab result PDF: ${docData.url}. Extract the key out-of-range biomarkers and suggest a peptide protocol.`
+                          : `Please analyze this uploaded document: ${docData.url}. Give me a summary of its contents.`;
+                        window.dispatchEvent(new CustomEvent('open-clinical-ai', {
+                          detail: { message, autoSend: true }
+                        }));
+                      }}
+                      title="Analyze with Atlas"
+                      style={{
+                        padding: '0.5rem 0.75rem', color: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.1)',
+                        borderRadius: '8px', border: 'none', cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', gap: '0.35rem',
+                        fontWeight: 700, fontSize: '0.75rem'
+                      }}
+                    >
+                      <Bot size={16} /> Analyze
+                    </button>
                     <a href={docData.url} target="_blank" rel="noopener noreferrer" style={{ padding: '0.5rem', color: 'var(--primary)', backgroundColor: 'rgba(0,113,189,0.05)', borderRadius: '8px', display: 'flex', alignItems: 'center' }} title="View Document">
                       <ExternalLink size={16} />
                     </a>

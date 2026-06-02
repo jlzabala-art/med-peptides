@@ -314,12 +314,13 @@ export default function DataTable({
                   </div>
                 </td>
               </tr>
-            ) : sortedData.map((row) => {
-              const isExpanded = expandedId === row[keyField];
-              const isSelected = selectedIds.includes(row[keyField]);
+            ) : sortedData.map((row, rowIndex) => {
+              const rowKey = (row && row[keyField] !== undefined && row[keyField] !== null) ? row[keyField] : `fallback-key-${rowIndex}`;
+              const isExpanded = expandedId === rowKey;
+              const isSelected = selectedIds.includes(rowKey);
               
               return (
-                <React.Fragment key={row[keyField]}>
+                <React.Fragment key={rowKey}>
                   <tr 
                     style={{ 
                       borderBottom: '1px solid var(--color-border)', 
@@ -339,7 +340,7 @@ export default function DataTable({
                         <input 
                           type="checkbox" 
                           checked={isSelected}
-                          onChange={(e) => handleSelectRow(row[keyField], e.target.checked)}
+                          onChange={(e) => handleSelectRow(rowKey, e.target.checked)}
                           style={{ cursor: 'pointer' }}
                         />
                       </td>
@@ -347,7 +348,7 @@ export default function DataTable({
                     {expandableRender && (
                       <td 
                         style={{ padding: '0', width: '48px', minWidth: '48px', whiteSpace: 'nowrap', cursor: 'pointer', color: 'var(--text-muted)', verticalAlign: 'middle', textAlign: 'center' }}
-                        onClick={() => setExpandedId(isExpanded ? null : row[keyField])}
+                        onClick={() => setExpandedId(isExpanded ? null : rowKey)}
                       >
                         {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </td>

@@ -17,7 +17,7 @@ import { db } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
 import {
   ClipboardList, ShoppingCart, ChevronDown, ChevronUp, Clock,
-  User, Stethoscope, CheckCircle2, FlaskConical, PackageSearch, ArrowRight
+  User, Stethoscope, CheckCircle2, FlaskConical, PackageSearch, ArrowRight, Sparkles
 } from 'lucide-react';
 import { RX_STATUS, RX_STATUS_META } from '../../config/prescriptionConfig';
 
@@ -202,6 +202,36 @@ function PrescriptionCard({ rx, onPay }) {
               </button>
             );
           })()}
+
+          {/* AI Clinical Assist button for the patient */}
+          <div style={{ marginTop: '0.85rem' }}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const itemNames = (rx.items || []).map(i => i.name).join(', ');
+                window.dispatchEvent(new CustomEvent('open-clinical-ai', {
+                  detail: {
+                    message: `Can you explain my prescription from ${rx.doctorName || 'my doctor'}? It includes: ${itemNames}. How should I take this and what should I expect?`,
+                    patientContext: true,
+                    autoSend: true
+                  }
+                }));
+              }}
+              className="btn"
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                padding: '0.8rem', borderRadius: '10px',
+                background: 'linear-gradient(135deg, rgba(139,92,246,0.1), rgba(59,130,246,0.1))',
+                color: '#8b5cf6', fontWeight: 700, fontSize: '0.85rem',
+                border: '1px solid rgba(139,92,246,0.2)', cursor: 'pointer', transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(59,130,246,0.15))'}
+              onMouseLeave={e => e.currentTarget.style.background = 'linear-gradient(135deg, rgba(139,92,246,0.1), rgba(59,130,246,0.1))'}
+            >
+              <Sparkles size={16} />
+              <span>Ask Atlas about this prescription</span>
+            </button>
+          </div>
 
           {isOrdered && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center',

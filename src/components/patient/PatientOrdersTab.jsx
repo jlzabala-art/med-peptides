@@ -6,7 +6,7 @@ import Card from '../ui/Card';
 import DataTable from '../ui/DataTable';
 import StatusChip from '../ui/StatusChip';
 import Spinner from '../ui/Spinner';
-import { Package, Clock, Truck, CheckCircle2 } from 'lucide-react';
+import { Package, Clock, Truck, CheckCircle2, Sparkles } from 'lucide-react';
 
 const getStatusConfig = (status) => {
   const s = status?.toLowerCase();
@@ -87,6 +87,33 @@ export default function PatientOrdersTab({ userId }) {
         const config = getStatusConfig(row.status);
         return <StatusChip status={row.status || 'Pending'} variant={config.color} icon={config.icon} />;
       }
+    },
+    {
+      header: 'Actions',
+      key: 'actions',
+      align: 'right',
+      render: (row) => (
+        <button
+          onClick={() => {
+            window.dispatchEvent(new CustomEvent('open-clinical-ai', {
+              detail: {
+                message: `Can you check the status of my order #${row.orderId || row.id.slice(0, 8)}? It is currently marked as ${row.status || 'Pending'}.`,
+                patientContext: true,
+                autoSend: true
+              }
+            }));
+          }}
+          title="Ask Atlas about this order"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
+            padding: '0.35rem 0.65rem', borderRadius: '6px',
+            border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(139,92,246,0.1)', color: '#8b5cf6',
+            fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer'
+          }}
+        >
+          <Sparkles size={14} /> Ask Atlas
+        </button>
+      )
     }
   ];
 

@@ -12,7 +12,8 @@ import {
   LayoutDashboard, Layers, Package, TrendingUp, Settings,
   LogOut, ChevronRight, ArrowRight, Clock, CheckCircle2,
   AlertCircle, Truck, Box, BarChart3, Laptop, Bell,
-  MapPin, Paintbrush, Globe, MessageSquare, Brain, Mail
+  MapPin, Paintbrush, Globe, MessageSquare, Brain, Mail,
+  Sparkles, ChevronUp, ChevronDown, ClipboardList, Zap, Users, FileText
 } from 'lucide-react';
 
 import WholesalerBulkOrderBuilder from '../components/wholesaler/WholesalerBulkOrderBuilder';
@@ -139,8 +140,38 @@ function SimpleRxRow({ rx }) {
       <ClipboardList size={16} color="var(--color-text-secondary)" />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#0f172a' }}>
+          <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#0f172a', display: 'flex', alignItems: 'center' }}>
             {rx.patient?.name || rx.patient?.email || 'Patient'} — {rx.doctorName || 'Dr.'}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                window.dispatchEvent(new CustomEvent('OPEN_ATLAS_CLINICAL_MODE', {
+                  detail: {
+                    contextType: 'prescription',
+                    data: rx,
+                    prompt: `Analiza la receta de ${rx.patient?.name || 'paciente'}. Sugiere recomendaciones de dispensación y analiza rentabilidad/demanda de estos productos.`
+                  }
+                }));
+              }}
+              style={{
+                background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.1))',
+                border: '1px solid rgba(99,102,241,0.2)',
+                borderRadius: '6px',
+                padding: '0.2rem 0.5rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                color: '#6366f1',
+                cursor: 'pointer',
+                marginLeft: '0.5rem'
+              }}
+              title="Analizar Receta con Atlas"
+            >
+              <Sparkles size={12} color="#6366f1" />
+              Atlas
+            </button>
           </div>
           <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', marginTop: '0.1rem' }}>
             {rx.items?.length || 0} item{(rx.items?.length || 0) !== 1 ? 's' : ''} · {date}
@@ -345,9 +376,39 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
         
         <div style={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
           <div>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#202124' }}>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#202124', display: 'flex', alignItems: 'center' }}>
               {rx.patient?.name || rx.patient?.email || 'Patient'} 
               <span style={{ fontWeight: 400, color: '#5f6368', marginLeft: '0.4rem' }}>— Dr/a. {rx.doctorName || 'Médico'}</span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.dispatchEvent(new CustomEvent('OPEN_ATLAS_CLINICAL_MODE', {
+                    detail: {
+                      contextType: 'prescription',
+                      data: rx,
+                      prompt: `Analiza la receta detallada de ${rx.patient?.name || 'paciente'}. Proporciona consejos para la gestión de este pedido b2b o evalúa requerimientos logísticos de los péptidos incluidos.`
+                    }
+                  }));
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.1))',
+                  border: '1px solid rgba(99,102,241,0.2)',
+                  borderRadius: '6px',
+                  padding: '0.2rem 0.5rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  color: '#6366f1',
+                  cursor: 'pointer',
+                  marginLeft: '0.75rem'
+                }}
+                title="Analizar con Atlas"
+              >
+                <Sparkles size={12} color="#6366f1" />
+                Atlas AI
+              </button>
             </div>
             <div style={{ fontSize: '0.7rem', color: '#5f6368', marginTop: '0.1rem' }}>
               {rx.items?.length || 0} item{(rx.items?.length || 0) !== 1 ? 's' : ''} · Creado el {date}

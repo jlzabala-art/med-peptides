@@ -11,7 +11,7 @@ import {
   ChevronRight, ChevronDown, ClipboardList, Zap, Globe, Wrench,
   FlaskConical, Box, Tag, DollarSign, FileText, Eye, EyeOff, Mail,
   Activity, BookOpen, Cpu, LogOut, Menu, X, Building2, TrendingUp, Truck,
-  Building, Stethoscope, HeartPulse, UserPlus, Lock, Briefcase, LayoutTemplate, Network, ScrollText, MessageSquare, Calendar, UploadCloud, Settings2, CheckCircle
+  Building, Stethoscope, HeartPulse, UserPlus, Lock, Briefcase, LayoutTemplate, Network, ScrollText, MessageSquare, Calendar, UploadCloud, Settings2, CheckCircle, PieChart, CreditCard, ShieldAlert
 } from 'lucide-react';
 import PortalLayout from '../components/ui/PortalLayout';
 
@@ -145,7 +145,12 @@ const NAV_GROUPS = [
     id: 'finance-management',
     label: 'Finance & Billing',
     items: [
-      { id: 'finance',          label: 'Financial Dashboard', icon: DollarSign },
+      { id: 'finance-overview',   label: 'Overview & Projections', icon: LayoutDashboard },
+      { id: 'finance-budget',     label: 'Budgets & Variances',    icon: PieChart },
+      { id: 'finance-payables',   label: 'Payables & Payouts',     icon: CreditCard },
+      { id: 'finance-approvals',  label: 'Control & Approvals',    icon: ShieldAlert },
+      { id: 'finance-economics',  label: 'Unit Economics',         icon: TrendingUp },
+      { id: 'finance-reporting',  label: 'Reporting & Data Room',  icon: FileText }
     ],
   },
   {
@@ -276,6 +281,7 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
           <AdminZohoCRMWidget fullHeight={false} />
         </div>
       )}
+      {tab.startsWith('finance-') && <AdminFinanceTab activeSubTab={tab.replace('finance-', '')} />}
       {tab === 'deploy' && (
         <AdminPlaceholderTab title="Deploy & Hosting"
           description="Monitor application deployments, environment variables, hosting status, and trigger builds."

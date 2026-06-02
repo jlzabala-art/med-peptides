@@ -3,63 +3,12 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const { getFirestore } = require("firebase-admin/firestore");
 const { defineSecret } = require("firebase-functions/params");
-const {
-  ZOHO_ORG_ID,
-  ZOHO_BOOKS_BASE_URL,
-  ZOHO_BOOKS_BASE_URL_GLOBAL,
-  ZOHO_OAUTH_URL,
-  ZOHO_OAUTH_URL_GLOBAL,
-  ZOHO_SECRETS,
-} = require("../lib/zoho_config");
+const { ZOHO_SECRETS } = require("../lib/zoho_config");
+const zoho = require("../lib/zoho_client");
 
 const zohoClientId = defineSecret(ZOHO_SECRETS.CLIENT_ID);
 const zohoClientSecret = defineSecret(ZOHO_SECRETS.CLIENT_SECRET);
 const zohoRefreshToken = defineSecret(ZOHO_SECRETS.REFRESH_TOKEN);
-
-async function getAccessToken(clientId, clientSecret, refreshToken) {
-  const urls = [ZOHO_OAUTH_URL, ZOHO_OAUTH_URL_GLOBAL];
-  for (const url of urls) {
-    try {
-      const params = new URLSearchParams({
-        grant_type: "refresh_token",
-        client_id: clientId,
-        client_secret: clientSecret.replace(/\n/g, ""),
-        refresh_token: refreshToken.replace(/\n/g, ""),
-      });
-      const res = await fetch(`${url}?${params}`, { method: "POST", signal: AbortSignal.timeout(6000) });
-      if (!res.ok) continue;
-      const data = await res.json();
-      if (data.access_token) return data.access_token;
-    } catch (err) {
-      console.warn(`[Zoho OAuth] Failed for URL ${url}:`, err.message);
-    }
-  }
-  throw new Error("Could not obtain Zoho access token");
-}
-
-async function booksGet(accessToken, path, params = {}) {
-  const bases = [ZOHO_BOOKS_BASE_URL, ZOHO_BOOKS_BASE_URL_GLOBAL];
-  const qs = new URLSearchParams({ organization_id: ZOHO_ORG_ID, ...params });
-  
-  for (const base of bases) {
-    try {
-      const url = `${base}${path}?${qs}`;
-      const res = await fetch(url, {
-        headers: { Authorization: `Zoho-oauthtoken ${accessToken}` },
-        signal: AbortSignal.timeout(8000)
-      });
-      if (res.status === 404 || res.status === 204) return null;
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Books API failed: ${res.status} ${text}`);
-      }
-      return await res.json();
-    } catch (err) {
-      console.warn(`[Books API] Request failed for ${base}${path}:`, err.message);
-    }
-  }
-  return null;
-}
 
 exports.fetchFinanceDashboard = onRequest(
   { secrets: [zohoClientId, zohoClientSecret, zohoRefreshToken], cors: true, region: "europe-west1" },
@@ -85,21 +34,17 @@ exports.fetchFinanceDashboard = onRequest(
     }
 
     try {
-      const accessToken = await getAccessToken(zohoClientId.value(), zohoClientSecret.value(), zohoRefreshToken.value());
-
       // 1. P&L
       const date = new Date();
       const firstDay = fromDate || new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
       const lastDay = toDate || new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0];
       
-      const pnlData = await booksGet(accessToken, "/reports/profitandloss", { from_date: firstDay, to_date: lastDay });
+      const pnlData = await zoho._request("GET", "/reports/profitandloss", { params: { from_date: firstDay, to_date: lastDay } });
       const profitAndLoss = pnlData?.profitandloss || {};
 
       // 2. Unpaid Invoices
-      const unpaidInvoicesRes = await booksGet(accessToken, "/invoices", { status: "unpaid" });
-      const overdueInvoicesRes = await booksGet(accessToken, "/invoices", { status: "overdue" });
-      const unpaidInvoices = unpaidInvoicesRes?.invoices || [];
-      const overdueInvoices = overdueInvoicesRes?.invoices || [];
+      const unpaidInvoices = await zoho.listInvoices({ status: "unpaid" });
+      const overdueInvoices = await zoho.listInvoices({ status: "overdue" });
       
       // Combine unpaid + overdue and remove duplicates just in case
       const allPendingInvoices = [...unpaidInvoices, ...overdueInvoices];
@@ -109,22 +54,22 @@ exports.fetchFinanceDashboard = onRequest(
 
       // 3. Lotusland
       let lotuslandData = { id: null, invoices: [], totalBilled: 0 };
-      const lotusContacts = await booksGet(accessToken, "/contacts", { contact_name_contains: "Lotusland" });
+      const lotusContacts = await zoho._request("GET", "/contacts", { params: { contact_name_contains: "Lotusland" } });
       if (lotusContacts?.contacts?.length > 0) {
         const id = lotusContacts.contacts[0].contact_id;
         lotuslandData.id = id;
-        const lotusInvoices = await booksGet(accessToken, "/invoices", { customer_id: id });
-        lotuslandData.invoices = lotusInvoices?.invoices || [];
+        const lotusInvoices = await zoho.listInvoices({ customer_id: id });
+        lotuslandData.invoices = lotusInvoices || [];
         lotuslandData.totalBilled = lotuslandData.invoices.reduce((acc, inv) => acc + inv.total, 0);
       }
 
       // 4. NPLAB
       let nplabData = { id: null, bills: [], totalPaid: 0 };
-      const nplabContacts = await booksGet(accessToken, "/contacts", { contact_name_contains: "NPLAB" });
+      const nplabContacts = await zoho._request("GET", "/contacts", { params: { contact_name_contains: "NPLAB" } });
       if (nplabContacts?.contacts?.length > 0) {
         const id = nplabContacts.contacts[0].contact_id;
         nplabData.id = id;
-        const nplabBills = await booksGet(accessToken, "/bills", { vendor_id: id });
+        const nplabBills = await zoho._request("GET", "/bills", { params: { vendor_id: id } });
         nplabData.bills = nplabBills?.bills || [];
         nplabData.totalPaid = nplabData.bills.reduce((acc, b) => acc + b.total, 0);
       }

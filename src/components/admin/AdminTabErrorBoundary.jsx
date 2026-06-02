@@ -1,4 +1,5 @@
-import { Component } from 'react';
+import React, { Component } from 'react';
+import ScreenPermissionGuard from '../auth/ScreenPermissionGuard';
 
 /**
  * AdminTabErrorBoundary
@@ -56,7 +57,11 @@ export default class AdminTabErrorBoundary extends Component {
 
   render() {
     if (!this.state.hasError) {
-      return this.props.children;
+      return (
+        <ScreenPermissionGuard tabId={this.props.tabId}>
+          {this.props.children}
+        </ScreenPermissionGuard>
+      );
     }
 
     const { tabLabel = 'This section', error, errorInfo, showDetail } = this.state;

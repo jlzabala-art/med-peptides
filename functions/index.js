@@ -57,6 +57,10 @@ exports.generatePaymentLink        = require("./src/http/generatePaymentLink").g
 const { fetchZohoCRMIntelligence } = require("./src/zoho/fetchZohoCRMIntelligence");
 exports.fetchZohoCRMIntelligence = fetchZohoCRMIntelligence; // Zoho Books contacts + invoices → CRM cache (admin only)
 
+// ── Finance / CFO Advanced Functions ─────────────────────────────────────────
+exports.predictiveCashFlow = require("./src/http/predictiveCashFlow").predictiveCashFlow;
+exports.stripeWebhook = require("./src/http/stripe_webhook").stripeWebhook;
+
 const { fetchZohoBiginWholesaler } = require("./src/zoho/fetchZohoBiginWholesaler");
 exports.fetchZohoBiginWholesaler = fetchZohoBiginWholesaler;
 

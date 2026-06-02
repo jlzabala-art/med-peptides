@@ -6,7 +6,7 @@ import Card from '../ui/Card';
 import DataTable from '../ui/DataTable';
 import StatusChip from '../ui/StatusChip';
 import Spinner from '../ui/Spinner';
-import { Check, X, FileText } from 'lucide-react';
+import { Check, X, FileText, Sparkles } from 'lucide-react';
 
 export default function PatientRecommendationsTab({ userId, acceptRecommendation }) {
   const queryClient = useQueryClient();
@@ -99,6 +99,27 @@ export default function PatientRecommendationsTab({ userId, acceptRecommendation
         if (row.status !== 'pending' && row.status) return null;
         return (
           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+            <button
+              onClick={() => {
+                const itemNames = Array.isArray(row.peptides) ? row.peptides.join(', ') : row.peptides;
+                window.dispatchEvent(new CustomEvent('open-clinical-ai', {
+                  detail: {
+                    message: `Can you explain the recommendation "${row.title || row.protocolName || 'Custom Recommendation'}" from ${row.doctorName || 'my doctor'}? It includes: ${itemNames}. How will this help me?`,
+                    patientContext: true,
+                    autoSend: true
+                  }
+                }));
+              }}
+              title="Ask Atlas about this recommendation"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.25rem',
+                padding: '0.4rem 0.75rem', borderRadius: '6px',
+                border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(139,92,246,0.1)', color: '#8b5cf6',
+                fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer'
+              }}
+            >
+              <Sparkles size={14} /> Ask Atlas
+            </button>
             <button
               onClick={() => handleAccept(row)}
               disabled={mutation.isPending}

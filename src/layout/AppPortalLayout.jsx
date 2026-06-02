@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import PortalSidebar from './PortalSidebar';
@@ -63,6 +63,16 @@ function AtlasLoadingScreen() {
 export default function AppPortalLayout({ allowedRoles = [], children }) {
   const { user, activeRole, loading } = useAuth();
   const [isAIOpen, setIsAIOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpenAI = () => setIsAIOpen(true);
+    window.addEventListener('open-clinical-ai', handleOpenAI);
+    window.addEventListener('OPEN_ATLAS_CLINICAL_MODE', handleOpenAI);
+    return () => {
+      window.removeEventListener('open-clinical-ai', handleOpenAI);
+      window.removeEventListener('OPEN_ATLAS_CLINICAL_MODE', handleOpenAI);
+    };
+  }, []);
 
   if (loading) return <AtlasLoadingScreen />;
 

@@ -12,6 +12,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 import App from './App.jsx';
 import { trackEvent } from './hooks/useAnalytics';
+import { PermissionsProvider } from './contexts/PermissionsContext';
 
 // Core Web Vitals → GA4 (non-blocking, fires after paint)
 import { onCLS, onINP, onLCP, onFCP, onTTFB } from 'web-vitals';
@@ -140,18 +141,20 @@ if (rootElement) {
           <BrowserRouter>
             {/* Es mejor envolver el AuthProvider aquí para que App tenga acceso a todo */}
             <AuthProvider>
-            <TenantProvider>
-            <ShopProvider>
-              <ModalProvider>
-                <CartProvider>
-                  <HelmetProvider>
-                    <App />
-                  </HelmetProvider>
-                </CartProvider>
-              </ModalProvider>
-            </ShopProvider>
-            </TenantProvider>
-          </AuthProvider>
+              <PermissionsProvider>
+              <TenantProvider>
+              <ShopProvider>
+                <ModalProvider>
+                  <CartProvider>
+                    <HelmetProvider>
+                      <App />
+                    </HelmetProvider>
+                  </CartProvider>
+                </ModalProvider>
+              </ShopProvider>
+              </TenantProvider>
+              </PermissionsProvider>
+            </AuthProvider>
           </BrowserRouter>
         </QueryClientProvider>
       </ErrorBoundary>
