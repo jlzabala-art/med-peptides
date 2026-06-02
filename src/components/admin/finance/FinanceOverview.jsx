@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../ui/Card';
 import { TrendingUp, DollarSign, Activity, Bot } from 'lucide-react';
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import { db, functions } from '../../../firebase';
+import { httpsCallable } from 'firebase/functions';
 
 export default function FinanceOverview({ dashboardData, totalBalance, activeSubs }) {
   const [supplierMarkup, setSupplierMarkup] = useState(5); // +5%
@@ -30,7 +31,6 @@ export default function FinanceOverview({ dashboardData, totalBalance, activeSub
   const generateForecast = async () => {
     setForecastLoading(true);
     try {
-      const functions = getFunctions();
       const predictiveCashFlow = httpsCallable(functions, 'predictiveCashFlow');
       const response = await predictiveCashFlow({ currentCash: totalBalance, mrr: mrr });
       setForecastResult(response.data);
@@ -48,7 +48,6 @@ export default function FinanceOverview({ dashboardData, totalBalance, activeSub
   const runMonteCarlo = async () => {
     setSimLoading(true);
     try {
-      const functions = getFunctions();
       const mcSim = httpsCallable(functions, 'runMonteCarloSimulations');
       const response = await mcSim({
         supplierMarkup,

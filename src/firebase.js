@@ -67,10 +67,18 @@ export const logErrorToAnalytics = (error, context = {}) => {
 
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-export const db = initializeFirestore(app, {
-  localCache: memoryLocalCache(),
-  experimentalForceLongPolling: true
-});
+import { getFirestore } from 'firebase/firestore';
+
+let dbInstance;
+try {
+  dbInstance = initializeFirestore(app, {
+    localCache: memoryLocalCache(),
+    experimentalForceLongPolling: true
+  });
+} catch (e) {
+  dbInstance = getFirestore(app);
+}
+export const db = dbInstance;
 
 if (typeof window !== 'undefined') {
   window.db = db;
@@ -80,7 +88,7 @@ if (typeof window !== 'undefined') {
 }
 
 export const storage = getStorage(app);
-export const functions = getFunctions(app);
+export const functions = getFunctions(app, "europe-west1");
 export { ref, uploadBytes, getDownloadURL };
 
 export default app;

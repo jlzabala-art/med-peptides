@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { db } from '../../firebase';
+import { db, functions } from '../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import { httpsCallable } from 'firebase/functions';
 import FinanceBudget from './finance/FinanceBudget';
 import FinancePayables from './finance/FinancePayables';
 import FinanceApprovals from './finance/FinanceApprovals';
@@ -22,7 +22,6 @@ export default function AdminFinanceTab({ activeSubTab }) {
     async function fetchFinancials() {
       setLoading(true);
       try {
-        const functions = getFunctions();
         const fetchDashboard = httpsCallable(functions, 'fetchFinanceDashboard');
         const res = await fetchDashboard();
         const data = res.data;

@@ -11,8 +11,8 @@ import {
   signInWithPopup
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, collection, query, where, getDocs, updateDoc, arrayUnion, onSnapshot } from 'firebase/firestore';
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { auth, db } from '../firebase';
+import { httpsCallable } from 'firebase/functions';
+import { db, functions, auth, storage } from '../firebase';
 import { setAnalyticsUserId, setUserProperties, setAnalyticsUserRole } from '../hooks/useAnalytics';
 import { getActiveTenantForResolution } from '../utils/resolvePrice';
 
@@ -446,7 +446,6 @@ export function AuthProvider({ children }) {
     // If there was an invitation, mark it as accepted securely via Cloud Function
     if (invitationId) {
       try {
-        const functions = getFunctions();
         const acceptInv = httpsCallable(functions, 'acceptInvitation');
         await acceptInv({ inviteId: invitationId });
       } catch (e) {
