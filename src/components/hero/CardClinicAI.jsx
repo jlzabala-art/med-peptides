@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { Bot, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useResponsive } from '../../hooks/useResponsive';
 import '../../styles/hero_card.css';
 
-const AI_SUGGESTIONS = [
-  'Build a recovery protocol',
-  'Compare BPC-157 and TB-500',
-  'Protocol for sleep and cognitive focus'
-];
-
 export default function CardClinicAI({ onAsk }) {
+  const { t } = useTranslation();
+  const AI_SUGGESTIONS = [
+    t('hero.ai.suggestions.recovery', 'Build a recovery protocol'),
+    t('hero.ai.suggestions.compare', 'Compare BPC-157 and TB-500'),
+    t('hero.ai.suggestions.sleep', 'Protocol for sleep and cognitive focus')
+  ];
   const [query, setQuery] = useState('');
   const isMobile = useResponsive('(max-width: 768px)');
 
@@ -32,24 +33,24 @@ export default function CardClinicAI({ onAsk }) {
   return (
     <div className="hero-card card-clinicai">
       <div className="icon-box"><Bot size={24} /></div>
-      <h3 className="card-title">Help me choose</h3>
-      <p className="card-desc">Describe your objective and let ClinicAI guide you.</p>
+      <h3 className="card-title">{t('hero.ai.title', 'Help me choose')}</h3>
+      <p className="card-desc">{t('hero.ai.desc', 'Describe your objective and let ClinicAI guide you.')}</p>
       
       <div className="card-input-wrapper">
         <input
           className="card-input"
           type="text"
-          placeholder="Describe your goal"
+          placeholder={t('hero.ai.placeholder', 'Describe your goal')}
           value={query}
           onChange={e => setQuery(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSubmit()}
         />
       </div>
 
-      <button className="card-cta" onClick={() => handleSubmit()} title="Ask ClinicAI">
-        Ask <ArrowRight size={16} />
+      <button className="card-cta" onClick={() => handleSubmit()} title={t('hero.ai.btnTitle', 'Ask ClinicAI')}>
+        {t('hero.ai.btn', 'Ask')} <ArrowRight size={16} />
       </button>
-      <small className="card-helper">Personalized guidance</small>
+      <small className="card-helper">{t('hero.ai.helper', 'Personalized guidance')}</small>
 
       {!isMobile && (
         <div className="suggestions-list">

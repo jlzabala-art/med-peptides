@@ -1,10 +1,12 @@
 import React from 'react';
 import { FileText, Lock, UploadCloud, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/hero_card.css';
 
 export default function CardPrescription() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -28,22 +30,22 @@ export default function CardPrescription() {
   return (
     <div className="hero-card card-prescription">
       <div className="icon-box"><FileText size={24} /></div>
-      <h3 className="card-title">I already have a prescription</h3>
-      <p className="card-desc">Match prescriptions with catalog and compounded formulations.</p>
+      <h3 className="card-title">{t('hero.prescription.title', 'I already have a prescription')}</h3>
+      <p className="card-desc">{t('hero.prescription.desc', 'Match prescriptions with catalog and compounded formulations.')}</p>
 
       {!user ? (
         <>
           <button className="card-cta secondary" onClick={handleLoginRedirect}>
-            <Lock size={14} style={{ marginRight: '6px' }} /> Login
+            <Lock size={14} style={{ marginRight: '6px' }} /> {t('hero.prescription.loginBtn', 'Login')}
           </button>
-          <small className="card-helper">Professional access required</small>
+          <small className="card-helper">{t('hero.prescription.loginHelper', 'Professional access required')}</small>
         </>
       ) : (
         <>
           <button className="card-cta" onClick={handleUploadTrigger}>
-            <UploadCloud size={14} style={{ marginRight: '6px' }} /> Upload
+            <UploadCloud size={14} style={{ marginRight: '6px' }} /> {t('hero.prescription.uploadBtn', 'Upload')}
           </button>
-          <small className="card-helper">Prescription analysis</small>
+          <small className="card-helper">{t('hero.prescription.uploadHelper', 'Prescription analysis')}</small>
         </>
       )}
     </div>
