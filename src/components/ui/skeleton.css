@@ -1,0 +1,14 @@
+@keyframes skeleton-pulse {
+  0% {
+    opacity: 1;
+    background-color: #e2e8f0;
+  }
+  50% {
+    opacity: 0.7;
+    background-color: #cbd5e1;
+  }
+  100% {
+    opacity: 1;
+    background-color: #e2e8f0;
+  }
+}

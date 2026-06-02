@@ -38,13 +38,32 @@ export default function PortalHeader({ onToggleAI }) {
 
         {/* AI Assistant Trigger */}
         <button 
-          className="icon-btn" 
           onClick={onToggleAI}
-          title="Open AI Assistant"
-          aria-label="Ask AI"
-          style={{ color: 'var(--color-primary, #003666)' }}
+          aria-label="Open Atlas AI"
+          style={{
+            background: 'rgba(66, 133, 244, 0.1)',
+            border: '1px solid rgba(66, 133, 244, 0.3)',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            color: '#4285F4',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0.4rem 0.6rem',
+            transition: 'all 0.2s ease',
+            gap: '0.35rem'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = 'rgba(66, 133, 244, 0.2)';
+            e.currentTarget.style.transform = 'scale(1.05)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = 'rgba(66, 133, 244, 0.1)';
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
         >
-          <FiCpu />
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#4285F4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>Atlas AI</span>
         </button>
 
         {/* User Profile */}

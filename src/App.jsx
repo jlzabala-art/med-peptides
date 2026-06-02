@@ -24,6 +24,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import GlobalAppLayout from './components/shared/GlobalAppLayout';
 import ShopLayout from './layout/ShopLayout';
 import { HeaderProvider } from './context/HeaderContext';
+import { PreferencesProvider } from './context/PreferencesContext';
 import AdminLayout from './layout/AdminLayout';
 import ClinicalLayout from './layout/ClinicalLayout';
 import { useCart } from './context/CartProvider';
@@ -986,7 +987,8 @@ function App() {
   }
 
   return (
-    <HeaderProvider>
+    <PreferencesProvider>
+      <HeaderProvider>
       <div className="app">
         <PageTransition locationKey={location.pathname}>
           <Suspense fallback={<ClinicalLoader />}>
@@ -1349,7 +1351,8 @@ function App() {
       )}
 
       </div>
-    </HeaderProvider>
+        </HeaderProvider>
+      </PreferencesProvider>
   );
 }
 

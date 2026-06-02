@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "catalog": "Catalog",
+    "patients": "Patients",
+    "orders": "Orders",
+    "documents": "Documents",
+    "wallet": "Wallet",
+    "admin": "Admin Panel",
+    "logout": "Logout"
+  },
+  "header": {
+    "welcome": "Welcome back",
+    "search": "Search...",
+    "notifications": "Notifications",
+    "language": "Language",
+    "theme": "Theme"
+  },
+  "onboarding": {
+    "title": "Welcome to ReGen PEPT",
+    "subtitle": "Let's set up your profile to get started.",
+    "step1": "Basic Information",
+    "step2": "Medical License",
+    "step3": "Preferences",
+    "complete": "Complete Setup",
+    "next": "Next",
+    "back": "Back"
+  }
+}

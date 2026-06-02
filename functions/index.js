@@ -52,14 +52,21 @@ exports.reconcileSupplierInvoice   = require("./src/http/reconcile_supplier_invo
 
 exports.acceptInvitation           = require("./src/http/acceptInvitation").acceptInvitation; // Secure invitation acceptance
 exports.generatePaymentLink        = require("./src/http/generatePaymentLink").generatePaymentLink; // Stripe Payment Links
+exports.sendEmail                  = require("./src/http/sendEmail").sendEmail; // Secure EmailJS Backend Dispatch
 
 // ── Zoho CRM Intelligence ────────────────────────────────────────────────────
 const { fetchZohoCRMIntelligence } = require("./src/zoho/fetchZohoCRMIntelligence");
 exports.fetchZohoCRMIntelligence = fetchZohoCRMIntelligence; // Zoho Books contacts + invoices → CRM cache (admin only)
 
+// ── Email / Notifications ────────────────────────────────────────────────────
+exports.sendEmail = require("./src/http/sendEmail").sendEmail;
+
 // ── Finance / CFO Advanced Functions ─────────────────────────────────────────
 exports.predictiveCashFlow = require("./src/http/predictiveCashFlow").predictiveCashFlow;
 exports.stripeWebhook = require("./src/http/stripe_webhook").stripeWebhook;
+exports.monitorMarginHealth = require("./src/triggers/monitorMarginHealth").monitorMarginHealth;
+exports.auditSupplierPayouts = require("./src/triggers/auditSupplierPayouts").auditSupplierPayouts;
+exports.runMonteCarloSimulations = require("./src/http/runMonteCarloSimulations").runMonteCarloSimulations;
 
 const { fetchZohoBiginWholesaler } = require("./src/zoho/fetchZohoBiginWholesaler");
 exports.fetchZohoBiginWholesaler = fetchZohoBiginWholesaler;
@@ -101,3 +108,6 @@ exports.scheduledFirestoreExport = require('./src/triggers/scheduled_backups').s
 const backupEndpoints = require('./src/http/backup_endpoints');
 exports.triggerManualBackup = backupEndpoints.triggerManualBackup;
 exports.logGitBackup = backupEndpoints.logGitBackup;
+
+// -- Archiving --
+exports.archiveOldLogs = require('./src/cron/archiveLogs').archiveOldLogs;

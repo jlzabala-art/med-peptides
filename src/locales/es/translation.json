@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "dashboard": "Panel de Control",
+    "catalog": "Catálogo",
+    "patients": "Pacientes",
+    "orders": "Pedidos",
+    "documents": "Documentos",
+    "wallet": "Cartera",
+    "admin": "Panel de Admin",
+    "logout": "Cerrar Sesión"
+  },
+  "header": {
+    "welcome": "Bienvenido/a de nuevo",
+    "search": "Buscar...",
+    "notifications": "Notificaciones",
+    "language": "Idioma",
+    "theme": "Tema"
+  },
+  "onboarding": {
+    "title": "Bienvenido a ReGen PEPT",
+    "subtitle": "Configuremos tu perfil para empezar.",
+    "step1": "Información Básica",
+    "step2": "Licencia Médica",
+    "step3": "Preferencias",
+    "complete": "Completar Configuración",
+    "next": "Siguiente",
+    "back": "Atrás"
+  }
+}

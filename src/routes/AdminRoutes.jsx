@@ -46,6 +46,8 @@ const AdminGadgetRepositoryTab = React.lazy(() => import('../components/admin/Ad
 const CatalogList = React.lazy(() => import('../components/wholesaler/CatalogList'));
 const CatalogCreatorFlow = React.lazy(() => import('../components/wholesaler/CatalogCreatorFlow'));
 const EmailCampaignBuilder = React.lazy(() => import('../components/wholesaler/EmailCampaignBuilder'));
+const AdminAgencyDealsTab = React.lazy(() => import('../components/admin/AdminAgencyDealsTab'));
+const AdminLogisticsTab = React.lazy(() => import('../components/admin/AdminLogisticsTab'));
 const AdminFinanceTab = React.lazy(() => import('../components/admin/AdminFinanceTab'));
 const CouponsManager = React.lazy(() => import('../components/marketing/CouponsManager'));
 const ReferralTracking = React.lazy(() => import('../components/marketing/ReferralTracking'));
@@ -53,7 +55,6 @@ const CoBranding = React.lazy(() => import('../components/marketing/CoBranding')
 const DripMarketing = React.lazy(() => import('../components/marketing/DripMarketing'));
 const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
 const AdminCatalogEnrichmentTab = React.lazy(() => import('../components/admin/AdminCatalogEnrichmentTab'));
-const AdminAgencyDealsTab = React.lazy(() => import('../components/admin/AdminAgencyDealsTab'));
 const AdminRFQTab = React.lazy(() => import('../components/admin/AdminRFQTab'));
 const ImportPriceListsTab = React.lazy(() => import('../components/admin/imports/ImportPriceListsTab'));
 const ImportCoATab = React.lazy(() => import('../components/admin/imports/ImportCoATab'));
@@ -167,8 +168,13 @@ export default function AdminRoutes() {
         <Route path="ai-agents" element={<AdminTabErrorBoundary tabId="ai-agents" tabLabel="AI Agents"><AdminAIAgentsTab /></AdminTabErrorBoundary>} />
         <Route path="enrichment" element={<AdminTabErrorBoundary tabId="enrichment" tabLabel="Enrichment"><AdminCatalogEnrichmentTab /></AdminTabErrorBoundary>} />
         <Route path="agency-deals" element={<AdminTabErrorBoundary tabId="agency-deals" tabLabel="Agency Deals"><AdminAgencyDealsTab /></AdminTabErrorBoundary>} />
-        <Route path="shipping" element={<AdminTabErrorBoundary tabId="shipping" tabLabel="Shipping Tracker"><ShippingTrackerTab /></AdminTabErrorBoundary>} />
-        <Route path="finance" element={<AdminTabErrorBoundary tabId="finance" tabLabel="Financial Dashboard"><AdminFinanceTab /></AdminTabErrorBoundary>} />
+        <Route path="shipping" element={<AdminTabErrorBoundary tabId="shipping" tabLabel="Admin Logistics"><AdminLogisticsTab /></AdminTabErrorBoundary>} />
+        <Route path="finance-overview" element={<AdminTabErrorBoundary tabId="finance-overview" tabLabel="Overview & Projections"><AdminFinanceTab activeSubTab="overview" /></AdminTabErrorBoundary>} />
+        <Route path="finance-budget" element={<AdminTabErrorBoundary tabId="finance-budget" tabLabel="Budgets & Variances"><AdminFinanceTab activeSubTab="budget" /></AdminTabErrorBoundary>} />
+        <Route path="finance-payables" element={<AdminTabErrorBoundary tabId="finance-payables" tabLabel="Payables & Payouts"><AdminFinanceTab activeSubTab="payables" /></AdminTabErrorBoundary>} />
+        <Route path="finance-approvals" element={<AdminTabErrorBoundary tabId="finance-approvals" tabLabel="Control & Approvals"><AdminFinanceTab activeSubTab="approvals" /></AdminTabErrorBoundary>} />
+        <Route path="finance-economics" element={<AdminTabErrorBoundary tabId="finance-economics" tabLabel="Unit Economics"><AdminFinanceTab activeSubTab="economics" /></AdminTabErrorBoundary>} />
+        <Route path="finance-reporting" element={<AdminTabErrorBoundary tabId="finance-reporting" tabLabel="Reporting & Data Room"><AdminFinanceTab activeSubTab="reporting" /></AdminTabErrorBoundary>} />
         <Route path="my-profile" element={<AdminTabErrorBoundary tabId="my-profile" tabLabel="My Profile"><UserProfileTab /></AdminTabErrorBoundary>} />
         
         {/* Import Data Routes */}

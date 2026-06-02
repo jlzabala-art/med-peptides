@@ -481,6 +481,13 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ── audit_logs — Tamper-proof medical read/write tracking ──
+    match /audit_logs/{logId} {
+      allow create: if isAuthenticated();
+      allow update, delete: if false; // IMMUTABLE
+      allow read: if isAdmin();
+    }
+
     // Default catch-all: Admins only
     match /{document=**} {
       allow read, write: if isAdmin();

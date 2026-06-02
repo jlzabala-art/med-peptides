@@ -1,0 +1,93 @@
+{
+  "name": "projects/514143707883/config",
+  "signIn": {
+    "email": {
+      "enabled": true,
+      "passwordRequired": true
+    },
+    "hashConfig": {
+      "algorithm": "SCRYPT",
+      "signerKey": "xJ486uDTnvFLXcw65FhbOfprpgrHCdP4NUytPy3+o3OhoMToMns9JlyzTSTp/H+9pdmA+3O9+mLn0kAAN9YguQ==",
+      "saltSeparator": "Bw==",
+      "rounds": 8,
+      "memoryCost": 14
+    }
+  },
+  "notification": {
+    "sendEmail": {
+      "method": "DEFAULT",
+      "resetPasswordTemplate": {
+        "senderLocalPart": "noreply",
+        "subject": "Reset your password for %APP_NAME%",
+        "body": "<p>Hello,</p>\n<p>Follow this link to reset your %APP_NAME% password for your %EMAIL% account.</p>\n<p><a href='%LINK%'>%LINK%</a></p>\n<p>If you didn’t ask to reset your password, you can ignore this email.</p>\n<p>Thanks,</p>\n<p>Your %APP_NAME% team</p>",
+        "bodyFormat": "HTML",
+        "replyTo": "noreply"
+      },
+      "verifyEmailTemplate": {
+        "senderLocalPart": "noreply",
+        "subject": "Verify your email for %APP_NAME%",
+        "body": "<p>Hello %DISPLAY_NAME%,</p>\n<p>Follow this link to verify your email address.</p>\n<p><a href='%LINK%'>%LINK%</a></p>\n<p>If you didn’t ask to verify this address, you can ignore this email.</p>\n<p>Thanks,</p>\n<p>Your %APP_NAME% team</p>",
+        "bodyFormat": "HTML",
+        "replyTo": "noreply"
+      },
+      "changeEmailTemplate": {
+        "senderLocalPart": "noreply",
+        "subject": "Your sign-in email was changed for %APP_NAME%",
+        "body": "<p>Hello %DISPLAY_NAME%,</p>\n<p>Your sign-in email for %APP_NAME% was changed to %NEW_EMAIL%.</p>\n<p>If you didn’t ask to change your email, follow this link to reset your sign-in email.</p>\n<p><a href='%LINK%'>%LINK%</a></p>\n<p>Thanks,</p>\n<p>Your %APP_NAME% team</p>",
+        "bodyFormat": "HTML",
+        "replyTo": "noreply"
+      },
+      "callbackUri": "https://med-peptides-app-27a3a.firebaseapp.com/__/auth/action",
+      "dnsInfo": {
+        "customDomainState": "NOT_STARTED",
+        "domainVerificationRequestTime": "1970-01-01T00:00:00Z"
+      },
+      "revertSecondFactorAdditionTemplate": {
+        "senderLocalPart": "noreply",
+        "subject": "You've added 2 step verification to your %APP_NAME% account.",
+        "body": "<p>Hello %DISPLAY_NAME%,</p>\n<p>Your account in %APP_NAME% has been updated with %SECOND_FACTOR% for 2-step verification.</p>\n<p>If you didn't add this 2-step verification, click the link below to remove it.</p>\n<p><a href='%LINK%'>%LINK%</a></p>\n<p>Thanks,</p>\n<p>Your %APP_NAME% team</p>",
+        "bodyFormat": "HTML",
+        "replyTo": "noreply"
+      }
+    },
+    "sendSms": {
+      "smsTemplate": {
+        "content": "%LOGIN_CODE% is your verification code for %APP_NAME%."
+      }
+    },
+    "defaultLocale": "en"
+  },
+  "quota": {},
+  "monitoring": {
+    "requestLogging": {}
+  },
+  "multiTenant": {},
+  "authorizedDomains": [
+    "med-peptides-app-27a3a.firebaseapp.com",
+    "med-peptides-app-27a3a.web.app",
+    "www.med-peptides.com",
+    "med-peptides.com",
+    "med-peptides-app-27a3a--dev-9vqv1qmp.web.app",
+    "localhost"
+  ],
+  "subtype": "IDENTITY_PLATFORM",
+  "client": {
+    "apiKey": "AIzaSyDOV2zFeLGtPsE_O2b-gR3NHZygPspiSws",
+    "permissions": {},
+    "firebaseSubdomain": "med-peptides-app-27a3a"
+  },
+  "mfa": {
+    "state": "DISABLED"
+  },
+  "blockingFunctions": {},
+  "smsRegionConfig": {
+    "allowlistOnly": {}
+  },
+  "emailPrivacyConfig": {
+    "enableImprovedEmailPrivacy": true
+  },
+  "mobileLinksConfig": {
+    "domain": "HOSTING_DOMAIN"
+  },
+  "defaultHostingSite": "med-peptides-app-27a3a"
+}

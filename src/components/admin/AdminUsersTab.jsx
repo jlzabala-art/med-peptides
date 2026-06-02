@@ -43,7 +43,8 @@ import {
   Building2,
   ChevronDown,
 } from 'lucide-react';
-import emailjs from '@emailjs/browser';
+import { functions } from '../../firebase';
+import { httpsCallable } from 'firebase/functions';
 import { getApprovalEmailHtml } from '../../data/emailTemplate';
 import { useAuth } from '../../context/AuthContext';
 import AdminUsersTable from './AdminUsersTable';
@@ -56,9 +57,7 @@ import CreateUserModal from './CreateUserModal';
 import UserDetailsModal from './UserDetailsModal';
 import AppFilterBar from '../ui/AppFilterBar';
 
-const EMAILJS_SERVICE_ID = 'service_vstbe8f';
-const EMAILJS_TEMPLATE_ID = 'template_7unfks8';
-const EMAILJS_PUBLIC_KEY = 'rO_f_X4uBvFf3u_3u';
+const EMAILJS_TEMPLATE_ID = 'template_7unfks8'; // Used for backend call
 
 export default function AdminUsersTab({ defaultRole = null, readOnly = false, canApprove = true }) {
   const { user } = useAuth();
@@ -95,6 +94,12 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
   const [purchasedEmails, setPurchasedEmails] = useState(new Set());
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  useEffect(() => {
+    setCurrentPage(1);
+    setPageCursors({});
+    fetchUsers(1, pageSize);
+  }, [defaultRole, roleFilter, showArchived, purchaseFilter, pageSize]);
 
   const getWholesalerStats = (wholesalerId) => {
     const rels = allRelationships.filter((r) => r.doctorId === wholesalerId);
@@ -298,7 +303,7 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
     if (!editingUser || !peerId) return;
     try {
       const RELATIONSHIPS_COL = 'doctor_patient_relationships';
-      const relRef = collection(db, RELATIONSHIPS_COL);
+        const relRef = collection(db, RELATIONSHIPS_COL);
 
       const newRel = {
         patientId: peerId,
@@ -416,10 +421,12 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
       const usersRef = collection(db, 'users');
       let baseConstraints = [];
       
-      // If we have a role filter and it's not all, we can filter on the server if it's the primary role field
-      // However, roles are stored in an array `roles` or string `role`. 
-      // To keep it simple and avoid complex index requirements, we will just paginate the base collection.
-      // For a production app with complex filters, we would use Algolia or Typesense.
+      const appliedRole = defaultRole || (roleFilter !== 'all' ? roleFilter : null);
+      if (appliedRole) {
+        // Apply role filter on the server so pagination counts exactly 20 matching roles.
+        // This requires a composite index on roles (array) and createdAt (desc) which we added to firestore.indexes.json.
+        baseConstraints.push(where('roles', 'array-contains', appliedRole));
+      }
 
       // 1. Get total count for pagination math
       // getCountFromServer is now imported at the top
@@ -545,10 +552,6 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
     }
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
   async function handleToggleApproval(userId, currentStatus) {
     if (readOnly || !canApprove) return;
 
@@ -623,11 +626,6 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
   async function handleSendEmail(user) {
     if (readOnly) return;
 
-    if (!EMAILJS_PUBLIC_KEY || !EMAILJS_TEMPLATE_ID || !EMAILJS_SERVICE_ID) {
-      toast.warning('EmailJS configuration pending. Please enter your keys in the code.');
-      return;
-    }
-
     setSendingEmail(user.id);
     try {
       const templateParams = {
@@ -637,12 +635,11 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
         email_body_html: getApprovalEmailHtml(user.fullName || user.displayName),
       };
 
-      await emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        templateParams,
-        EMAILJS_PUBLIC_KEY
-      );
+      const sendEmail = httpsCallable(functions, 'sendEmail');
+      await sendEmail({
+        templateId: EMAILJS_TEMPLATE_ID,
+        templateParams
+      });
 
       toast.success(`Email sent successfully to ${user.email}`);
     } catch (error) {
@@ -656,11 +653,6 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
   async function handleSendWelcomeOffer(user) {
     if (readOnly) return;
 
-    if (!EMAILJS_PUBLIC_KEY || !EMAILJS_TEMPLATE_ID || !EMAILJS_SERVICE_ID) {
-      toast.warning('EmailJS configuration pending. Please enter your keys in the code.');
-      return;
-    }
-
     const confirmSend = window.confirm(`Send welcome/re-engagement offer email to ${user.email}?`);
     if (!confirmSend) return;
 
@@ -672,7 +664,7 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
             <h1 style="margin: 0; font-size: 20px;">Unlock Your Health Goals with Regenpept</h1>
           </div>
           <div style="padding: 20px; background-color: #fff;">
-            <p>Hello <strong>\${user.fullName || user.displayName || 'Customer'}</strong>,</p>
+            <p>Hello <strong>${user.fullName || user.displayName || 'Customer'}</strong>,</p>
             <p>We noticed you registered on Regenpept but haven't placed an order yet. We would love to help you get started on your peptide research or wellness journey!</p>
             <p><strong>Why choose Regenpept?</strong></p>
             <ul>
@@ -690,29 +682,26 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
             </div>
           </div>
           <div style="text-align: center; padding: 15px; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; margin-top: 20px;">
-            <p>© \${new Date().getFullYear()} Regenpept. For research use only.</p>
+            <p>&copy; 2024 Regenpept. All rights reserved.</p>
           </div>
         </div>
       `;
 
-      const templateParams = {
-        to_email: user.email,
-        to_name: user.fullName || user.displayName || 'Researcher',
-        reply_to: 'business@atlas-health.com',
-        email_body_html: welcomeBody,
-      };
+      const sendEmail = httpsCallable(functions, 'sendEmail');
+      await sendEmail({
+        templateId: EMAILJS_TEMPLATE_ID,
+        templateParams: {
+          to_email: user.email,
+          to_name: user.fullName || user.displayName || 'Customer',
+          reply_to: 'support@regenpept.com',
+          email_body_html: welcomeBody,
+        }
+      });
 
-      await emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        templateParams,
-        EMAILJS_PUBLIC_KEY
-      );
-
-      toast.success(`Re-engagement email sent successfully to ${user.email}`);
+      toast.success(`Welcome offer sent successfully to ${user.email}`);
     } catch (error) {
-      console.error('FAILED to send email...', error);
-      toast.error('Failed to send email. Check console for details.');
+      console.error('FAILED to send welcome email...', error);
+      toast.error('Failed to send offer. Check console for details.');
     } finally {
       setSendingEmail(null);
     }
@@ -797,28 +786,8 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
     if (u.isDeleted) return false;
     if (showArchived ? !u.isArchived : u.isArchived) return false;
 
-    // Check if we are inside a defaultRole scope
-    if (defaultRole) {
-      const userRoles = u.roles || (u.role ? [u.role] : ['patient']);
-      if (defaultRole === 'patient') {
-        // Must be either 'patient' or 'guest'
-        const isPatientOrGuest = userRoles.includes('patient') || userRoles.includes('guest');
-        if (!isPatientOrGuest) return false;
-
-        // If a subfilter (roleFilter) is selected, apply it too
-        if (roleFilter !== 'all' && !userRoles.includes(roleFilter)) return false;
-      } else {
-        // Wholesaler or doctor
-        if (!userRoles.includes(defaultRole)) return false;
-      }
-    } else {
-      // Normal filtering
-      if (roleFilter !== 'all') {
-        const userRoles = u.roles || (u.role ? [u.role] : ['patient']);
-        if (!userRoles.includes(roleFilter)) return false;
-      }
-    }
-
+    // Role filtering is now handled natively by the Firestore query in baseConstraints.
+    
     if (isPatientView && purchaseFilter !== 'all') {
       const hasPurchased =
         purchasedUserIds.has(u.id) ||

@@ -15,6 +15,28 @@ const AccessDenied = () => (
   </div>
 );
 
+const TAB_TO_PERMISSION_MAP = {
+  // Admin Panel mappings
+  'dashboard': 'canAccessAdminDashboard',
+  'finance': 'canAccessAdminDashboard',
+  'users': 'manageStaff',
+  'invitations': 'manageStaff',
+  'logistics': 'canBulkOrder',
+  'custom-synthesis': 'customSynthesis',
+  'catalogs': 'canAccessAdminDashboard',
+  'ai-builder': 'canAccessAdminDashboard',
+  'access-levels': 'canAccessAdminDashboard',
+  
+  // General views
+  'my-profile': 'canAccessAdminDashboard', // Everyone with admin access
+  'messages': 'canAccessAdminDashboard',
+  'calendar': 'canAccessAdminDashboard',
+  'products': 'canAccessAdminDashboard',
+  'stock': 'canAccessAdminDashboard',
+  'variants': 'canAccessAdminDashboard',
+  'shipping': 'canAccessAdminDashboard',
+};
+
 /**
  * A wrapper component that checks if the current user has permission to view the tab.
  * @param {string} tabId - The ID of the tab to check permissions for.
@@ -34,7 +56,9 @@ export default function ScreenPermissionGuard({ tabId, children }) {
     );
   }
 
-  if (!hasPermission(tabId)) {
+  const permissionKey = TAB_TO_PERMISSION_MAP[tabId] || 'canAccessAdminDashboard'; // default safe
+
+  if (!hasPermission(permissionKey)) {
     return <AccessDenied />;
   }
 

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, HelpCircle, User, ChevronDown, ShoppingCart, Menu, Sparkles } from 'lucide-react';
+import { Search, Bell, HelpCircle, User, ChevronDown, ShoppingCart, Menu, Sparkles, Globe, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { useHeaderContext } from '../../../context/HeaderContext';
+import { useTheme } from '../../../context/ThemeContext';
+import { useNotifications } from '../../../context/NotificationContext';
+import { useTranslation } from 'react-i18next';
 import './AppHeader.css';
 import UserDropdown from '../../../navigation/UserDropdown';
 import NotificationsPanel from './NotificationsPanel';
@@ -18,6 +21,16 @@ export default function AppHeader({
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isAIOpen, setIsAIOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  
+  const { theme, toggleTheme } = useTheme();
+  const { unreadCount } = useNotifications();
+  const { t, i18n } = useTranslation();
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'es' : 'en';
+    i18n.changeLanguage(newLang);
+    localStorage.setItem('language', newLang);
+  };
 
   // Escuchar el evento global para abrir el buscador (Cmd+K)
   useEffect(() => {
@@ -28,8 +41,10 @@ export default function AppHeader({
   
   // Try to get initials from the profile or user email
   const getInitials = () => {
-    if (userProfile?.firstName && userProfile?.lastName) {
-      return `${userProfile.firstName[0]}${userProfile.lastName[0]}`.toUpperCase();
+    if (userProfile?.firstName) {
+      const first = userProfile.firstName.charAt(0);
+      const last = userProfile.lastName ? userProfile.lastName.charAt(0) : '';
+      return `${first}${last}`.toUpperCase();
     }
     if (userProfile?.name) {
       return userProfile.name.substring(0, 2).toUpperCase();
@@ -55,7 +70,7 @@ export default function AppHeader({
         )}
         <div className="app-header-title-group">
           <div className="app-header-title">
-            {title || 'Dashboard'}
+            {title || t('nav.dashboard')}
           </div>
           {subtitle && (
             <div className="app-header-subtitle">
@@ -75,7 +90,7 @@ export default function AppHeader({
             <input 
               type="text" 
               className="app-header-search" 
-              placeholder="Search patients, protocols, products..." 
+              placeholder={t('header.search')} 
               onClick={() => setIsSearchOpen(true)}
               readOnly 
             />
@@ -111,6 +126,27 @@ export default function AppHeader({
         
         <button 
           className="app-header-action" 
+          aria-label="Toggle Theme"
+          onClick={toggleTheme}
+          title={t('header.theme')}
+        >
+          {theme === 'dark' ? <Sun size={20} strokeWidth={1.8} /> : <Moon size={20} strokeWidth={1.8} />}
+        </button>
+
+        <button 
+          className="app-header-action" 
+          aria-label="Toggle Language"
+          onClick={toggleLanguage}
+          title={t('header.language')}
+        >
+          <Globe size={20} strokeWidth={1.8} />
+          <span style={{ fontSize: '10px', position: 'absolute', top: 5, right: 5, fontWeight: 'bold' }}>
+            {i18n.language.toUpperCase()}
+          </span>
+        </button>
+
+        <button 
+          className="app-header-action" 
           aria-label="Help & Support"
           onClick={() => setIsAIOpen(true)}
         >
@@ -125,8 +161,9 @@ export default function AppHeader({
           onClick={() => setIsNotifOpen(!isNotifOpen)}
         >
           <Bell size={20} strokeWidth={1.8} />
-          {/* Mock notification badge */}
-          <div className="app-header-badge cart-badge">3</div>
+          {unreadCount > 0 && (
+            <div className="app-header-badge cart-badge">{unreadCount > 99 ? '99+' : unreadCount}</div>
+          )}
           
           {isNotifOpen && (
             <NotificationsPanel onClose={() => setIsNotifOpen(false)} />

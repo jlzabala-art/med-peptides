@@ -1,8 +1,36 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../ui/Card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { usePreferences } from '../../../context/PreferencesContext';
+import SkeletonLoader from '../../ui/SkeletonLoader';
+import AnimatedNumber from '../../ui/AnimatedNumber';
 
-export default function FinanceBudget() {
+export default function FinanceBudget({ dashboardData }) {
+  const { formatCurrency, density } = usePreferences();
+  // Use Zoho P&L data if available, otherwise mock
+  const [budgetMap, setBudgetMap] = React.useState({
+    'Marketing': { actual: 15400, limit: 25000, color: '#2563eb' },
+    'R&D': { actual: 8200, limit: 10000, color: '#f97316' },
+    'Software/Ops': { actual: 12500, limit: 10000, color: '#ef4444' }
+  });
+
+  React.useEffect(() => {
+    if (dashboardData && dashboardData.profitAndLoss) {
+      const expenses = dashboardData.profitAndLoss.expenses || {};
+      // This is an example of mapping Zoho categories. 
+      // Replace with your actual Zoho expense account names later.
+      const mktg = expenses['Marketing'] || 15400;
+      const rnd = expenses['Research and Development'] || 8200;
+      const ops = expenses['Software'] || 12500;
+      
+      setBudgetMap({
+        'Marketing': { actual: mktg, limit: 25000, color: '#2563eb' },
+        'R&D': { actual: rnd, limit: 10000, color: '#f97316' },
+        'Software/Ops': { actual: ops, limit: 10000, color: '#ef4444' }
+      });
+    }
+  }, [dashboardData]);
+
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-bold mb-4">Budget vs Actual (Zoho Books Sync)</h3>
@@ -13,35 +41,39 @@ export default function FinanceBudget() {
             <CardDescription>Tracked against approved quarterly limits</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="font-medium">Marketing & Sales</span>
-                  <span>$15,400 / $25,000 (61%)</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                  <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: '61%' }}></div>
-                </div>
+            {!dashboardData ? (
+              <div className="space-y-4">
+                <SkeletonLoader height="40px" />
+                <SkeletonLoader height="40px" />
+                <SkeletonLoader height="40px" />
               </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="font-medium">R&D / Lab Testing</span>
-                  <span>$8,200 / $10,000 (82%)</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                  <div className="bg-orange-500 h-2.5 rounded-full" style={{ width: '82%' }}></div>
-                </div>
+            ) : (
+              <div className="space-y-4">
+                {Object.entries(budgetMap).map(([name, data]) => {
+                  const pct = Math.min(Math.round((data.actual / data.limit) * 100), 100);
+                  const isOver = data.actual > data.limit;
+                  const isNearLimit = data.actual > (data.limit * 0.75); // Lowered alarm limit (75%)
+                  
+                  let textColor = '';
+                  if (isOver) textColor = 'text-red-500 font-bold';
+                  else if (isNearLimit) textColor = 'text-amber-500 font-bold';
+
+                  return (
+                    <div key={name} className={density === 'compact' ? 'mb-2' : 'mb-4'}>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="font-medium">{name}</span>
+                        <span className={textColor}>
+                          <AnimatedNumber value={data.actual} isCurrency={true} /> / Limit: {formatCurrency(data.limit)} ({Math.round((data.actual / data.limit) * 100)}%)
+                        </span>
+                      </div>
+                      <div className={`w-full bg-gray-200 rounded-full ${density === 'compact' ? 'h-1.5' : 'h-2.5'}`}>
+                        <div className={`h-full rounded-full ${isOver ? 'bg-red-500' : ''}`} style={{ width: `${pct}%`, backgroundColor: !isOver ? data.color : undefined }}></div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="font-medium">Software & Logistics</span>
-                  <span className="text-red-500 font-bold">$12,500 / $10,000 (125%)</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                  <div className="bg-red-500 h-2.5 rounded-full" style={{ width: '100%' }}></div>
-                </div>
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
@@ -54,18 +86,12 @@ export default function FinanceBudget() {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={[
-                      { name: 'Marketing', value: 15400, color: '#2563eb' },
-                      { name: 'R&D', value: 8200, color: '#f97316' },
-                      { name: 'Software/Ops', value: 12500, color: '#ef4444' },
-                      { name: 'Remaining', value: 8900, color: '#e5e7eb' },
-                    ]}
+                    data={Object.entries(budgetMap).map(([name, data]) => ({ name, value: data.actual, color: data.color }))}
                     cx="50%" cy="50%" innerRadius={60} outerRadius={80} dataKey="value"
                   >
-                    <Cell fill="#2563eb" />
-                    <Cell fill="#f97316" />
-                    <Cell fill="#ef4444" />
-                    <Cell fill="#e5e7eb" />
+                    {Object.values(budgetMap).map((data, idx) => (
+                      <Cell key={idx} fill={data.color} />
+                    ))}
                   </Pie>
                   <Tooltip formatter={(v) => '$'+v.toLocaleString()} />
                 </PieChart>

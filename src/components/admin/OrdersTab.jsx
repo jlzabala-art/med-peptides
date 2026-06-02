@@ -39,15 +39,14 @@ import {
 } from 'lucide-react';
 import { exportToCSV } from '../../utils/exportUtils';
 import { useLocation, useNavigate } from 'react-router-dom';
-import emailjs from '@emailjs/browser';
+import { functions } from '../../firebase';
+import { httpsCallable } from 'firebase/functions';
 import DataTable from '../ui/DataTable';
 import AppActionGroup from '../ui/AppActionGroup';
 import AppStatusChip from '../ui/AppStatusChip';
 import AppFilterBar from '../ui/AppFilterBar';
 import AdminPageHeader from './AdminPageHeader';
 
-const EMAILJS_SERVICE_ID = 'service_vstbe8f';
-const EMAILJS_PUBLIC_KEY = 'rO_f_X4uBvFf3u_3u';
 // Template for admin-side order confirmation email to customer/doctor
 const EMAILJS_CONFIRM_TEMPLATE = 'template_7unfks8';
 
@@ -175,8 +174,9 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
         { previousStatus: confirmModal.status, newStatus: 'Confirmed' }
       );
 
-      // 2. Send emails via EmailJS
+      // 2. Send emails via Cloud Function
       const orderId = confirmModal.orderId || confirmModal.id;
+      const sendEmail = httpsCallable(functions, 'sendEmail');
       const recipients = [];
       if (sendTo.customer && confirmModal.customer?.email) {
         recipients.push({
@@ -192,18 +192,16 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
       }
 
       for (const r of recipients) {
-        await emailjs.send(
-          EMAILJS_SERVICE_ID,
-          EMAILJS_CONFIRM_TEMPLATE,
-          {
+        await sendEmail({
+          templateId: EMAILJS_CONFIRM_TEMPLATE,
+          templateParams: {
             to_email: r.to,
             to_name: r.name,
             order_id: orderId,
             order_total: `$${parseFloat(confirmModal.total || 0).toFixed(2)}`,
             order_date: formatDate(confirmModal.createdAt),
-          },
-          EMAILJS_PUBLIC_KEY
-        );
+          }
+        });
       }
 
       // 3. Update local state

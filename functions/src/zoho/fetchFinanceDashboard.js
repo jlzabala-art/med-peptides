@@ -1,6 +1,6 @@
 "use strict";
 
-const { onRequest } = require("firebase-functions/v2/https");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { getFirestore } = require("firebase-admin/firestore");
 const { defineSecret } = require("firebase-functions/params");
 const { ZOHO_SECRETS } = require("../lib/zoho_config");
@@ -10,11 +10,10 @@ const zohoClientId = defineSecret(ZOHO_SECRETS.CLIENT_ID);
 const zohoClientSecret = defineSecret(ZOHO_SECRETS.CLIENT_SECRET);
 const zohoRefreshToken = defineSecret(ZOHO_SECRETS.REFRESH_TOKEN);
 
-exports.fetchFinanceDashboard = onRequest(
+exports.fetchFinanceDashboard = onCall(
   { secrets: [zohoClientId, zohoClientSecret, zohoRefreshToken], cors: true, region: "europe-west1" },
-  async (req, res) => {
-    if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
-    const { forceRefresh, fromDate, toDate } = req.body || {};
+  async (request) => {
+    const { forceRefresh, fromDate, toDate } = request.data || {};
 
     const db = getFirestore();
     const cacheRef = db.collection("system").doc("finance_dashboard_cache");
@@ -28,7 +27,7 @@ exports.fetchFinanceDashboard = onRequest(
         const now = Date.now();
         // 4 hours cache
         if (now - cacheData.timestamp < 4 * 60 * 60 * 1000) {
-          return res.json({ cached: true, ...cacheData.payload });
+          return { cached: true, ...cacheData.payload };
         }
       }
     }
@@ -85,11 +84,10 @@ exports.fetchFinanceDashboard = onRequest(
       if (!isCustomDate) {
         await cacheRef.set({ timestamp: Date.now(), payload });
       }
-      return res.json({ cached: false, ...payload });
+      return { cached: false, ...payload };
 
     } catch (err) {
-      console.error("[fetchFinanceDashboard] Error:", err);
-      return res.status(500).json({ error: err.message });
+      throw new HttpsError('internal', err.message);
     }
   }
 );

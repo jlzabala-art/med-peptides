@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../../ui/Card';
 import { Download, FileText, CheckCircle } from 'lucide-react';
 
-export default function FinanceReporting({ totalBalance, activeSubs }) {
+export default function FinanceReporting({ dashboardData, totalBalance, activeSubs }) {
   const [generating, setGenerating] = useState(false);
   const [reportReady, setReportReady] = useState(false);
 
   const mrr = activeSubs * 299;
   const arr = mrr * 12;
-  const ebitda = arr * 0.45;
+  const ebitda = dashboardData?.profitAndLoss?.net_profit || (arr * 0.45);
+  const totalIncome = dashboardData?.profitAndLoss?.total_income || mrr;
+  const totalExpenses = dashboardData?.profitAndLoss?.total_expenses || 0;
+  const netProfit = dashboardData?.profitAndLoss?.net_profit || ebitda;
 
   const handleGeneratePDF = async () => {
     setGenerating(true);
@@ -50,8 +53,9 @@ export default function FinanceReporting({ totalBalance, activeSubs }) {
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(51, 65, 85);
       const summaryText = `This month, Atlas Health achieved an MRR of $${mrr.toLocaleString()} (ARR: $${arr.toLocaleString()}). ` +
-        `Our total cash reserves stand at $${totalBalance.toLocaleString()}, providing a strong runway for continuous operational growth. ` +
-        `EBITDA margin is currently maintained at the target 45%, projecting $${ebitda.toLocaleString()} annually.`;
+        `Total Income recorded in Zoho is $${totalIncome.toLocaleString()} against expenses of $${totalExpenses.toLocaleString()}, ` +
+        `resulting in a Net Profit (EBITDA approx.) of $${netProfit.toLocaleString()}. ` +
+        `Our total cash reserves stand at $${(dashboardData?.profitAndLoss?.net_profit || totalBalance).toLocaleString()}, providing a strong runway for continuous operational growth.`;
       
       const splitSummary = doc.splitTextToSize(summaryText, 182);
       doc.text(splitSummary, 14, 52);
@@ -63,11 +67,12 @@ export default function FinanceReporting({ totalBalance, activeSubs }) {
       doc.text("Key Financial Metrics", 14, 80);
 
       const metricsData = [
-        ["Total Cash Balance", `$${totalBalance.toLocaleString()}`],
+        ["Total Cash Balance / Net Profit", `$${(dashboardData?.profitAndLoss?.net_profit || totalBalance).toLocaleString()}`],
+        ["Total Billed Income (Zoho)", `$${totalIncome.toLocaleString()}`],
+        ["Total Operating Expenses", `$${totalExpenses.toLocaleString()}`],
+        ["Net Profit (Zoho)", `$${netProfit.toLocaleString()}`],
         ["Monthly Recurring Revenue (MRR)", `$${mrr.toLocaleString()}`],
         ["Annual Recurring Revenue (ARR)", `$${arr.toLocaleString()}`],
-        ["Target EBITDA Margin", "45.0%"],
-        ["Projected Annual EBITDA", `$${ebitda.toLocaleString()}`],
         ["Active Subscriptions", String(activeSubs)]
       ];
 

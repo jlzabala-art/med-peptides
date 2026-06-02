@@ -1,4 +1,3 @@
- 
 import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -10,9 +9,12 @@ import { CartProvider } from './context/CartProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
+import './i18n'; // Initialize i18next
 import App from './App.jsx';
 import { trackEvent } from './hooks/useAnalytics';
 import { PermissionsProvider } from './contexts/PermissionsContext';
+import { ThemeProvider } from './context/ThemeContext';
+import { NotificationProvider } from './context/NotificationContext';
 
 // Core Web Vitals → GA4 (non-blocking, fires after paint)
 import { onCLS, onINP, onLCP, onFCP, onTTFB } from 'web-vitals';
@@ -147,7 +149,11 @@ if (rootElement) {
                 <ModalProvider>
                   <CartProvider>
                     <HelmetProvider>
-                      <App />
+                      <ThemeProvider>
+                        <NotificationProvider>
+                          <App />
+                        </NotificationProvider>
+                      </ThemeProvider>
                     </HelmetProvider>
                   </CartProvider>
                 </ModalProvider>

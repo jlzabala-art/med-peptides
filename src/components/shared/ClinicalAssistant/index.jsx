@@ -189,7 +189,17 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
     const handleContextEvent = (e) => {
       const product = e.detail?.product;
       const sku = e.detail?.sku;
-      if (product && typeof setMessages === 'function') {
+      const prompt = e.detail?.prompt;
+
+      if (prompt && typeof setInput === 'function') {
+        if (typeof handleSend === 'function') {
+          // Si el Assistant está listo, enviamos el prompt automáticamente
+          handleSend(prompt);
+        } else {
+          setInput(prompt);
+        }
+        setIsPulsing(true);
+      } else if (product && typeof setMessages === 'function') {
         setTimeout(() => {
           setMessages(prev => {
             const lastMessage = prev[prev.length - 1];

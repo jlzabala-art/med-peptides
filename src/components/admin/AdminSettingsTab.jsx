@@ -3,6 +3,7 @@ import { collection, query, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Globe, Truck, HardDrive, Trash2, GitCommit } from 'lucide-react';
 import DataTable from '../ui/DataTable';
+import ScreenPermissionsSettings from './ScreenPermissionsSettings';
 
 export default function AdminSettingsTab({ readOnly = false }) {
   const [settings, setSettings] = useState({
@@ -463,6 +464,9 @@ export default function AdminSettingsTab({ readOnly = false }) {
           </div>
         </div>
       </div>
+      
+      {/* Dynamic Role Permissions */}
+      <ScreenPermissionsSettings />
     
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: AdminSettingsTab | Props: none

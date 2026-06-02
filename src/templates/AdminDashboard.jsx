@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import RefillReminderBanner from '../components/shared/RefillReminderBanner';
 import { db } from '../firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import {
@@ -67,9 +68,39 @@ function MailPlus2(props) { return <UserPlus {...props} />; }
 // ── Always-visible pinned items (not inside accordion groups) ─────────────────
 const PINNED_ITEMS = [
   { id: 'dashboard', label: 'Dashboard KPIs', icon: LayoutDashboard },
-  { id: 'messages',  label: 'Messages',        icon: MessageSquare, pulse: true },
+  { id: 'messages',  label: 'Messages',        icon: MessageSquare },
   { id: 'calendar',  label: 'Calendar',        icon: Calendar },
 ];
+
+// ── Hooks ──────────────────────────────────────────────────────────────────────
+function useUnreadMessagesCount() {
+  const { user, isAdmin, userRole } = useAuth();
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    
+    const effectiveRole = userRole;
+    const effectiveId = user.uid;
+    const q = (effectiveRole === 'admin' || isAdmin)
+      ? query(collection(db, 'conversations'))
+      : query(collection(db, 'conversations'), where('participants', 'array-contains', effectiveId));
+      
+    const unsub = onSnapshot(q, (snap) => {
+      let count = 0;
+      snap.forEach(doc => {
+        const data = doc.data();
+        if (data.unreadCount?.[effectiveId] > 0) {
+          count++;
+        }
+      });
+      setUnread(count);
+    });
+    return unsub;
+  }, [user, isAdmin, userRole]);
+
+  return unread;
+}
 
 // ── Intent-based navigation groups ────────────────────────────────────────────
 const NAV_GROUPS = [
@@ -145,7 +176,6 @@ const NAV_GROUPS = [
     id: 'finance-management',
     label: 'Finance & Billing',
     items: [
-      { id: 'finance-overview',   label: 'Overview & Projections', icon: LayoutDashboard },
       { id: 'finance-budget',     label: 'Budgets & Variances',    icon: PieChart },
       { id: 'finance-payables',   label: 'Payables & Payouts',     icon: CreditCard },
       { id: 'finance-approvals',  label: 'Control & Approvals',    icon: ShieldAlert },
@@ -300,8 +330,25 @@ export default function AdminDashboard() {
   const { isAdmin, loading: authLoading, logout, userProfile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const unreadMessages = useUnreadMessagesCount();
+
+  const dynamicPinnedItems = React.useMemo(() => {
+    return PINNED_ITEMS.map(item => {
+      if (item.id === 'messages') {
+        return { 
+          ...item, 
+          badge: unreadMessages > 0 ? unreadMessages : null,
+          badgeColor: '#25D366' // WhatsApp green
+        };
+      }
+      return item;
+    });
+  }, [unreadMessages]);
 
   const filteredNavGroups = React.useMemo(() => {
+    if (isAdmin || userProfile?.role === 'admin') {
+      return NAV_GROUPS;
+    }
     if (!userProfile?.allowedAdminTabs || userProfile.allowedAdminTabs.length === 0) {
       return NAV_GROUPS;
     }
@@ -309,7 +356,7 @@ export default function AdminDashboard() {
       ...group,
       items: group.items.filter(item => userProfile.allowedAdminTabs.includes(item.id))
     })).filter(group => group.items.length > 0);
-  }, [userProfile?.allowedAdminTabs]);
+  }, [userProfile?.allowedAdminTabs, isAdmin, userProfile?.role]);
 
   // Derive active tab from the URL path instead of query params.
   // E.g., /admin/users -> 'users', /admin -> 'dashboard'
@@ -317,6 +364,8 @@ export default function AdminDashboard() {
   const activeTab = pathParts.length > 1 ? pathParts[1] : 'dashboard';
 
   React.useEffect(() => {
+    if (isAdmin || userProfile?.role === 'admin') return; // Admins bypass restrictions
+    
     if (userProfile?.allowedAdminTabs && userProfile.allowedAdminTabs.length > 0) {
       if (!userProfile.allowedAdminTabs.includes(activeTab) && activeTab !== 'dashboard' && activeTab !== 'my-profile') {
         // Not allowed to access this tab
@@ -341,7 +390,7 @@ export default function AdminDashboard() {
   return (
     <PortalLayout 
       sidebarNavGroups={filteredNavGroups}
-      sidebarPinnedItems={PINNED_ITEMS}
+      sidebarPinnedItems={dynamicPinnedItems}
       activeNavId={activeTab}
       onNavigate={navToTab}
       portalTitle="Control Center"

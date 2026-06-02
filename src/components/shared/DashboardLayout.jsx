@@ -3,6 +3,7 @@ import SidebarGadget from './AppSidebar/SidebarGadget';
 import AppHeader from './AppHeader/index';
 import RefillReminderBanner from './RefillReminderBanner';
 import ClinicalAssistant from './ClinicalAssistant';
+import OnboardingWizard from '../onboarding/OnboardingWizard';
 import { useAuth } from '../../context/AuthContext';
 
 export default function DashboardLayout({ 
@@ -18,6 +19,15 @@ export default function DashboardLayout({
   const [isMobileAIOpen, setIsMobileAIOpen] = useState(false);
   const [isDesktopAIOpen, setIsDesktopAIOpen] = useState(true);
   const [overrideContextMode, setOverrideContextMode] = useState(null);
+  const { userProfile } = useAuth();
+  
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    if (userProfile && userProfile.onboardingCompleted === false) {
+      setShowOnboarding(true);
+    }
+  }, [userProfile]);
 
   // Show ClinicalAssistant as a 3rd column for doctors, patients and admins on desktop
   const showRightSidebar = !isMobile && ['doctor', 'patient', 'admin'].includes(roleContext) && isDesktopAIOpen;
@@ -46,6 +56,7 @@ export default function DashboardLayout({
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--background, #F4F8FB)' }}>
+      {showOnboarding && <OnboardingWizard onClose={() => setShowOnboarding(false)} />}
       
       {/* Universal App Sidebar Gadget */}
       <SidebarGadget 

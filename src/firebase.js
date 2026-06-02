@@ -68,7 +68,8 @@ export const logErrorToAnalytics = (error, context = {}) => {
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export const db = initializeFirestore(app, {
-  localCache: memoryLocalCache()
+  localCache: memoryLocalCache(),
+  experimentalForceLongPolling: true
 });
 
 if (typeof window !== 'undefined') {

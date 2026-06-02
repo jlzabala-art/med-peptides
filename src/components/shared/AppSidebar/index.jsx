@@ -321,13 +321,17 @@ export default function AppSidebar({
               <Menu size={18} />
             </button>
           )}
-          <div className="sb-brand" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '16px 0', width: '100%' }}>
+          <div className="sb-brand" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: expanded ? '24px 0' : '16px 0', width: '100%', transition: 'margin 0.2s' }}>
             {header.title && (
               <img 
                 src="/favicon.svg" 
                 alt="Atlas Health Logo" 
-                style={{ width: '64px', height: '64px', objectFit: 'contain', transition: 'width 0.2s, height 0.2s' }} 
-                className={expanded ? '' : 'collapsed-logo'}
+                style={{ 
+                  width: expanded ? '96px' : '48px', 
+                  height: expanded ? '96px' : '48px', 
+                  objectFit: 'contain', 
+                  transition: 'width 0.2s, height 0.2s' 
+                }} 
               />
             )}
           </div>

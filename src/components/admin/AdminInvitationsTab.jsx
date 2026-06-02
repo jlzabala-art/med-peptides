@@ -12,6 +12,7 @@ import {
   where,
   limit,
   startAfter,
+  getCountFromServer,
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import {
@@ -27,7 +28,8 @@ import {
   ArrowUpDown,
   Search,
 } from 'lucide-react';
-import emailjs from '@emailjs/browser';
+import { functions } from '../../firebase';
+import { httpsCallable } from 'firebase/functions';
 import { getInvitationEmailHtml } from '../../data/emailTemplate';
 
 import DataTable from '../ui/DataTable';
@@ -37,9 +39,7 @@ import AppActionGroup from '../ui/AppActionGroup';
 import AppFilterBar from '../ui/AppFilterBar';
 import { useToast } from '../../hooks/useToast';
 
-const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_vstbe8f';
-const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_7unfks8';
-const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'rO_f_X4uBvFf3u_3u';
+const EMAILJS_TEMPLATE_ID = 'template_7unfks8'; // Still needed as param for backend
 
 export default function AdminInvitationsTab({ restrictedRoles = null, readOnly = false, tenantId = null }) {
   const { toast } = useToast();
@@ -52,7 +52,11 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
 
   const [lastVisible, setLastVisible] = useState(null);
   const [hasMore, setHasMore] = useState(false);
-  const PAGE_SIZE = 50;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [pageCursors, setPageCursors] = useState({});
+  const PAGE_SIZE = 20;
 
   // Modal states
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -89,37 +93,44 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
     fetchInvitations();
   }, [tenantId]);
 
-  async function fetchInvitations(loadMore = false) {
+  async function fetchInvitations(page = 1) {
     try {
       setLoading(true);
       let qBuilder = collection(db, 'invitations');
       if (tenantId) {
         qBuilder = query(qBuilder, where('tenantId', '==', tenantId));
       }
+
+      // 1. Get total count for exact pagination math
+      const countSnap = await getCountFromServer(qBuilder);
+      const total = countSnap.data().count;
+      setTotalItems(total);
+      setTotalPages(Math.ceil(total / PAGE_SIZE));
       
-      let q;
-      if (loadMore && lastVisible) {
-        q = query(qBuilder, orderBy('invitedAt', 'desc'), startAfter(lastVisible), limit(PAGE_SIZE));
-      } else {
-        q = query(qBuilder, orderBy('invitedAt', 'desc'), limit(PAGE_SIZE));
+      // 2. Fetch data
+      let qConstraints = [orderBy('invitedAt', 'desc'), limit(PAGE_SIZE)];
+      
+      if (page > 1 && pageCursors[page]) {
+        qConstraints.push(startAfter(pageCursors[page]));
       }
       
+      const q = query(qBuilder, ...qConstraints);
       const querySnapshot = await getDocs(q);
+      
       const list = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
       
-      if (loadMore) {
-        setInvitations(prev => [...prev, ...list]);
-      } else {
-        setInvitations(list);
-      }
+      setInvitations(list);
       
+      // Store cursor for next page
       if (querySnapshot.docs.length > 0) {
-        setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+        setPageCursors(prev => ({
+          ...prev,
+          [page + 1]: querySnapshot.docs[querySnapshot.docs.length - 1]
+        }));
       }
-      setHasMore(querySnapshot.docs.length === PAGE_SIZE);
     } catch (err) {
       console.error('Error fetching invitations:', err);
     } finally {
@@ -134,12 +145,6 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
       return;
     }
 
-    if (!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID) {
-      toast.warning('EmailJS configuration pending.');
-      return;
-    }
-
-    setSendingInvite(true);
     try {
       const docRef = await addDoc(collection(db, 'invitations'), {
         name,
@@ -151,19 +156,17 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
         ...(tenantId ? { tenantId } : {})
       });
 
-      await emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        {
+      const sendEmail = httpsCallable(functions, 'sendEmail');
+      await sendEmail({
+        templateId: EMAILJS_TEMPLATE_ID,
+        templateParams: {
           to_email: email,
           to_name: name,
-          custom_message:
-            message.trim() || 'You have been invited to join the ReGen PEPT professional platform.',
+          custom_message: message.trim() || 'You have been invited to join the ReGen PEPT professional platform.',
           invite_link: `https://med-peptides-app.web.app/?ref=invite&id=${docRef.id}`,
           reply_to: 'business@atlas-health.com',
-        },
-        EMAILJS_PUBLIC_KEY
-      );
+        }
+      });
 
       setInviteForm({ name: '', email: '', message: '', roles: [] });
       setShowInviteModal(false);
@@ -180,19 +183,17 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
     if (!window.confirm(`Resend invitation email to ${inv.email}?`)) return;
 
     try {
-      await emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        {
+      const sendEmail = httpsCallable(functions, 'sendEmail');
+      await sendEmail({
+        templateId: EMAILJS_TEMPLATE_ID,
+        templateParams: {
           to_email: inv.email,
           to_name: inv.name,
-          custom_message:
-            inv.message || 'You have been invited to join the ReGen PEPT professional platform.',
+          custom_message: inv.message || 'You have been invited to join the ReGen PEPT professional platform.',
           invite_link: `https://med-peptides-app.web.app/?ref=invite&id=${inv.id}`,
           reply_to: 'business@atlas-health.com',
-        },
-        EMAILJS_PUBLIC_KEY
-      );
+        }
+      });
 
       // Update invitedAt to now
       await updateDoc(doc(db, 'invitations', inv.id), {
@@ -373,6 +374,11 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
         filters={getActiveFilters()}
         onFilterRemove={handleFilterRemove}
         renderCustomFilters={renderCustomFilters}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        rowsPerPage={PAGE_SIZE}
+        onPageChange={(page) => { setCurrentPage(page); fetchInvitations(page); }}
         renderBatchActions={(selected) => (
           <button
             onClick={async () => {
@@ -506,19 +512,6 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
           </div>
         )}
       />
-
-      {hasMore && (
-        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-          <button
-            onClick={() => fetchInvitations(true)}
-            disabled={loading}
-            className="btn btn-outline"
-            style={{ fontSize: '0.85rem' }}
-          >
-            {loading ? 'Loading...' : 'Load More'}
-          </button>
-        </div>
-      )}
 
       {/* Modal: New Invitation */}
       {showInviteModal && (

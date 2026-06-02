@@ -97,6 +97,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [manualActiveRole, setManualActiveRole] = useState(() => sessionStorage.getItem('activeRole'));
   const [rolePermissions, setRolePermissions] = useState(DEFAULT_ROLE_PERMISSIONS);
+  const [isMfaEnrolled, setIsMfaEnrolled] = useState(false);
 
   // Sync role permissions in real-time from Firestore /settings/permissions
   useEffect(() => {
@@ -116,6 +117,7 @@ export function AuthProvider({ children }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
+        setIsMfaEnrolled(firebaseUser.multiFactor?.enrolledFactors?.length > 0);
         setAnalyticsUserId(firebaseUser.uid);
         // Fetch the user's profile from Firestore
         try {
@@ -148,6 +150,7 @@ export function AuthProvider({ children }) {
         }
       } else {
         setUserProfile(null);
+        setIsMfaEnrolled(false);
         setAnalyticsUserId(null); // Clear on logout
         setAnalyticsUserRole('guest', null); // Reset to guest role
       }
@@ -543,6 +546,7 @@ export function AuthProvider({ children }) {
     isProfessionalPending,
     isVerified,
     isAdmin,
+    isMfaEnrolled,
     // ── B2B Portal roles ──
     isPatient,
     isPhysician,
@@ -566,6 +570,7 @@ export function AuthProvider({ children }) {
     isProfessionalPending, 
     isVerified, 
     isAdmin,
+    isMfaEnrolled,
     isPatient,
     isPhysician,
     isStaff,

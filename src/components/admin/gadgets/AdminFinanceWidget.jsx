@@ -205,6 +205,7 @@ export default function AdminFinanceWidget({
           message: SNAPSHOT_QUERY,
           currency: 'usd',
           format: 'structured',
+          userProfile: { role: 'admin' }
         }),
       });
 

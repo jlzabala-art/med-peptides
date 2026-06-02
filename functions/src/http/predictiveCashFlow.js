@@ -28,9 +28,9 @@ exports.predictiveCashFlow = onCall({ cors: true, maxInstances: 5 }, async (requ
   const recentApprovals = approvalsSnap.docs.map(d => d.data());
   const recentOrders = ordersSnap.docs.map(d => d.data());
 
-  // Aggregate current state
-  const currentCash = 245600; // From Zoho or global state
-  const mrr = 42000;
+  // Aggregate current state from request data (provided by FinanceDashboard)
+  const currentCash = request.data?.currentCash || 245600;
+  const mrr = request.data?.mrr || 42000;
   
   // 2. Use Gemini AI to forecast next 6 months
   try {

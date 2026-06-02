@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, Search, Bell, HelpCircle, User, Bot, X, Sparkles } from 'lucide-react';
+import { Menu, Search, Bell, HelpCircle, User, Bot, X, Sparkles, Maximize2, List } from 'lucide-react';
 import ClinicalAssistant from '../shared/ClinicalAssistant';
 import SidebarGadget from '../shared/AppSidebar/SidebarGadget';
 import { db } from '../../firebase';
@@ -8,6 +8,7 @@ import CommandPalette from '../CommandPalette';
 import useSessionTracking from '../../hooks/useSessionTracking';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { usePreferences } from '../../context/PreferencesContext.jsx';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import AvatarGenerator from './AvatarGenerator';
 
@@ -85,8 +86,9 @@ export default function PortalLayout({
   useSessionTracking(); // Start tracking session for the current user
   const routerNavigate = useNavigate();
   const { user, userProfile } = useAuth();
+  const { currency, updateCurrency, density, updateDensity } = usePreferences();
 
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isAiOpen, setAiOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   // Holds live data injected by admin tab components via 'admin-context-update' events
@@ -346,6 +348,31 @@ export default function PortalLayout({
 
         {/* Right Side */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          
+          {/* Preferences Toggles */}
+          {!isMobile && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginRight: '0.5rem', padding: '0.2rem', backgroundColor: 'rgba(255,255,255,0.4)', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.05)' }}>
+              <select 
+                value={currency} 
+                onChange={(e) => updateCurrency(e.target.value)}
+                style={{ background: 'transparent', border: 'none', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-secondary)', cursor: 'pointer', outline: 'none' }}
+                title="Global Currency"
+              >
+                <option value="USD">USD</option>
+                <option value="AED">AED</option>
+                <option value="DUAL">DUAL</option>
+              </select>
+              <div style={{ width: '1px', height: '12px', background: 'rgba(0,0,0,0.1)' }}></div>
+              <button 
+                onClick={() => updateDensity(density === 'compact' ? 'comfortable' : 'compact')}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0 4px' }}
+                title={density === 'compact' ? "Switch to Comfortable View" : "Switch to Compact View"}
+              >
+                {density === 'compact' ? <List size={14} color="var(--color-text-secondary)" /> : <Maximize2 size={14} color="var(--color-text-secondary)" />}
+              </button>
+            </div>
+          )}
+
           {headerActions}
           <button 
             onClick={() => setAiOpen(!isAiOpen)} 
@@ -470,7 +497,7 @@ export default function PortalLayout({
 
           <div style={{ marginLeft: '0.75rem' }}>
             <AvatarGenerator 
-              name={userProfile?.fullName || userProfile?.displayName}
+              name={(userProfile?.firstName && userProfile?.lastName) ? `${userProfile.firstName} ${userProfile.lastName}` : (userProfile?.fullName || userProfile?.displayName)}
               email={userProfile?.email || user?.email}
               size={36}
               onClick={() => routerNavigate(`/${roleContext}/my-profile`)}

@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { getPortalTabs } from '../config/portalConfig';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Pin, PinOff, Star } from 'lucide-react';
+import { Pin, PinOff, Star, ChevronDown } from 'lucide-react';
 import AtlasHealthLogo from '../components/brand/AtlasHealthLogo';
 
 const STORAGE_KEY = (uid, role) => `atlas_pinned_${uid}_${role}`;
@@ -66,16 +66,29 @@ export default function PortalSidebar() {
   const uid = user?.uid || 'anon';
   const tabs = getPortalTabs(activeRole);
   const { pinned, toggle } = usePinnedTabs(uid, activeRole);
+  
+  const [openCategory, setOpenCategory] = useState(null);
 
   const pinnedTabs = tabs.filter(t => pinned.includes(t.id));
   const restTabs   = tabs.filter(t => !pinned.includes(t.id));
 
+  // Group restTabs by category
+  const categories = restTabs.reduce((acc, tab) => {
+    const cat = tab.category || 'General';
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(tab);
+    return acc;
+  }, {});
+
+  const toggleCategory = (cat) => {
+    setOpenCategory(prev => prev === cat ? null : cat);
+  };
+
   return (
     <aside className="portal-sidebar">
       {/* ── Brand header ─────────────────────────────────── */}
-      <div className="sidebar-header">
-        <AtlasHealthLogo size={28} style={{ marginRight: 10, flexShrink: 0 }} />
-        <span className="sidebar-brand">Atlas Health</span>
+      <div className="sidebar-header" style={{ justifyContent: 'center' }}>
+        <AtlasHealthLogo size={42} style={{ flexShrink: 0 }} />
       </div>
 
       <nav className="sidebar-nav">
@@ -106,15 +119,50 @@ export default function PortalSidebar() {
           )}
         </AnimatePresence>
 
-        {/* ── All other tabs ────────────────────────────── */}
-        {restTabs.map(tab => (
-          <SidebarNavItem
-            key={tab.id}
-            tab={tab}
-            onPin={toggle}
-            isPinned={false}
-          />
-        ))}
+        {/* ── Categories Accordion ────────────────────────────── */}
+        {Object.keys(categories).map(catName => {
+          const catTabs = categories[catName];
+          const isOpen = openCategory === catName;
+          return (
+            <div key={catName} className="sidebar-category">
+              <button 
+                className="sidebar-category-header" 
+                onClick={() => toggleCategory(catName)}
+              >
+                <span className="sidebar-category-title">{catName}</span>
+                <ChevronDown 
+                  size={14} 
+                  style={{ 
+                    transform: isOpen ? 'rotate(180deg)' : 'rotate(0)', 
+                    transition: 'transform 0.2s ease',
+                    color: '#94a3b8' 
+                  }} 
+                />
+              </button>
+              <AnimatePresence>
+                {isOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    style={{ overflow: 'hidden' }}
+                  >
+                    <div className="sidebar-category-content">
+                      {catTabs.map(tab => (
+                        <SidebarNavItem
+                          key={tab.id}
+                          tab={tab}
+                          onPin={toggle}
+                          isPinned={false}
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
       </nav>
 
       <style>{`
@@ -173,6 +221,43 @@ export default function PortalSidebar() {
           height: 1px;
           background: rgba(0,54,102,0.07);
           margin: 0.5rem 0.5rem 0.65rem;
+        }
+
+        .sidebar-category {
+          margin-bottom: 0.25rem;
+        }
+
+        .sidebar-category-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          background: none;
+          border: none;
+          padding: 0.6rem 0.75rem;
+          cursor: pointer;
+          border-radius: 6px;
+          transition: background 0.15s ease;
+        }
+
+        .sidebar-category-header:hover {
+          background: rgba(0,54,102,0.03);
+        }
+
+        .sidebar-category-title {
+          font-size: 0.65rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: #64748b;
+        }
+
+        .sidebar-category-content {
+          padding-left: 0.25rem;
+          padding-top: 0.25rem;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
         }
 
         .sidebar-item-wrapper {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { collection, query, where, onSnapshot, orderBy, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, doc, updateDoc, limit, startAfter, getCountFromServer } from 'firebase/firestore';
 import { db } from '../../firebase';
 import ShipmentStepper from '../ui/ShipmentStepper';
 import Card from '../ui/Card';
@@ -56,27 +56,49 @@ export default function ShippingTrackerTab({ supplierId }) {
       setSuggestion('Error fetching insight');
     },
   });
-  // Listen to Firestore in real time
-  useEffect(() => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageCursors, setPageCursors] = useState({});
+  const PAGE_SIZE = 20;
+
+  const fetchShipments = async (page = 1) => {
     if (!supplierId) return;
-    const q = query(
-      collection(db, 'supplier_shipments'),
-      where('supplierId', '==', supplierId),
-      orderBy('createdAt', 'desc')
-    );
-    const unsub = onSnapshot(
-      q,
-      (snap) => {
-        const data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        setShipments(data);
-        setLoading(false);
-      },
-      (err) => {
-        console.error('Error loading shipments:', err);
-        setLoading(false);
+    setLoading(true);
+    try {
+      const baseQ = query(
+        collection(db, 'supplier_shipments'),
+        where('supplierId', '==', supplierId)
+      );
+
+      const countSnap = await getCountFromServer(baseQ);
+      const total = countSnap.data().count;
+      setTotalPages(Math.ceil(total / PAGE_SIZE));
+
+      let qConstraints = [orderBy('createdAt', 'desc'), limit(PAGE_SIZE)];
+      if (page > 1 && pageCursors[page]) {
+        qConstraints.push(startAfter(pageCursors[page]));
       }
-    );
-    return () => unsub();
+
+      const q = query(baseQ, ...qConstraints);
+      const snap = await getDocs(q);
+      const data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setShipments(data);
+
+      if (snap.docs.length > 0) {
+        setPageCursors((prev) => ({
+          ...prev,
+          [page + 1]: snap.docs[snap.docs.length - 1],
+        }));
+      }
+    } catch (err) {
+      console.error('Error loading shipments:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchShipments();
   }, [supplierId]);
 
   const statusFlow = ['ordered', 'packed', 'shipped', 'in_transit', 'delivered'];
@@ -173,6 +195,35 @@ export default function ShippingTrackerTab({ supplierId }) {
           </div>
         );
       })}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '2rem' }}>
+          <button
+            onClick={() => {
+              setCurrentPage((p) => p - 1);
+              fetchShipments(currentPage - 1);
+            }}
+            disabled={currentPage === 1 || loading}
+            className="btn btn-outline"
+          >
+            Anterior
+          </button>
+          <span style={{ display: 'flex', alignItems: 'center', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+            Página {currentPage} de {totalPages}
+          </span>
+          <button
+            onClick={() => {
+              setCurrentPage((p) => p + 1);
+              fetchShipments(currentPage + 1);
+            }}
+            disabled={currentPage >= totalPages || loading}
+            className="btn btn-outline"
+          >
+            Siguiente
+          </button>
+        </div>
+      )}
     </div>
   );
 }
