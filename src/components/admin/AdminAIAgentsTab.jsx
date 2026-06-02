@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Bot,
   RefreshCw,
   CheckCircle,
   XCircle,
@@ -14,6 +13,7 @@ import {
   ToggleRight,
   ChevronDown,
   ChevronUp,
+  Sparkles,
 } from 'lucide-react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
@@ -246,20 +246,8 @@ function AgentCard({ agentKey, agent, onEdit, isActive, saving, onToggle }) {
         }}
       >
         <div style={{ display: 'flex', gap: '1rem', flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: '4px',
-              flexShrink: 0,
-              background: 'var(--bg-app)',
-              color: 'var(--text-muted)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Bot size={20} />
+          <div style={{ padding: '0.8rem', background: 'var(--color-bg-app)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-primary)' }}>
+            <Sparkles size={20} />
           </div>
           <div>
             <div
@@ -707,19 +695,8 @@ export default function AdminAIAgentsTab() {
           background: 'var(--surface)',
         }}
       >
-        <div
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 'var(--radius-sm)',
-            background: '#1a73e8',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
-          <Bot size={22} color="var(--color-bg-surface)" />
+        <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,113,189,0.2)' }}>
+          <Sparkles size={22} color="var(--color-bg-surface)" />
         </div>
         <div style={{ flex: 1 }}>
           <h2

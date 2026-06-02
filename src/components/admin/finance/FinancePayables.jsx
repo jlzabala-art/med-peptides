@@ -1,8 +1,8 @@
+import React, { useState, useEffect } from 'react';
 import PayoutManagerWidget from '../gadgets/PayoutManagerWidget';
 import { Card, CardHeader, CardTitle, CardContent } from '../../ui/Card';
 import { db } from '../../../firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../../firebase';
 import { ShieldAlert, FileWarning, CheckCircle } from 'lucide-react';
 import { usePreferences } from '../../../context/PreferencesContext';
 import SkeletonLoader from '../../ui/SkeletonLoader';

@@ -146,7 +146,12 @@ function SortableSidebarItem({ item, isActive, handleItemClick, expanded, isEdit
         </span>
         <span className="sb-item-label">{item.label}</span>
         {!!item.badge && (
-          <span className="sb-item-badge">{item.badge > 99 ? '99+' : item.badge}</span>
+          <span 
+            className="sb-item-badge"
+            style={item.badgeColor ? { backgroundColor: item.badgeColor, boxShadow: `0 1px 3px ${item.badgeColor}55` } : {}}
+          >
+            {item.badge > 99 ? '99+' : item.badge}
+          </span>
         )}
       </button>
       
@@ -358,7 +363,12 @@ export default function AppSidebar({
                     </span>
                     <span className="sb-item-label">{item.label}</span>
                     {!!item.badge && (
-                      <span className="sb-item-badge">{item.badge > 99 ? '99+' : item.badge}</span>
+                      <span 
+                        className="sb-item-badge"
+                        style={item.badgeColor ? { backgroundColor: item.badgeColor, boxShadow: `0 1px 3px ${item.badgeColor}55` } : {}}
+                      >
+                        {item.badge > 99 ? '99+' : item.badge}
+                      </span>
                     )}
                   </button>
                 );

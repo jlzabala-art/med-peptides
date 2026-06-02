@@ -19,7 +19,14 @@ export default function CommandPalette({ isOpen, onClose, navGroups = [], pinned
   // Flatten all navigable items
   const allItems = [
     ...pinnedItems,
-    ...navGroups.flatMap(group => group.items)
+    ...navGroups.flatMap(group => group.items || [])
+  ];
+
+  // Additional quick actions specific to Finance
+  const quickActions = [
+    { id: 'finance-budget', label: 'Finance: View Operating Budget', icon: ArrowRight, type: 'action' },
+    { id: 'finance-payables', label: 'Finance: Manage Accounts Payable', icon: ArrowRight, type: 'action' },
+    { id: 'finance-approvals', label: 'Finance: Pending Approvals', icon: ArrowRight, type: 'action' }
   ];
 
   // Filter items based on query
@@ -28,7 +35,6 @@ export default function CommandPalette({ isOpen, onClose, navGroups = [], pinned
     item.id.toLowerCase().includes(query.toLowerCase())
   );
 
-  // Add AI Actions as an option
   const isAskAI = query.toLowerCase().startsWith('/ask') || query.length > 5;
   const aiAction = isAskAI ? [{
     type: 'ai',
@@ -37,7 +43,11 @@ export default function CommandPalette({ isOpen, onClose, navGroups = [], pinned
     icon: Command
   }] : [];
 
-  const results = [...filteredNavItems, ...aiAction];
+  const filteredQuickActions = quickActions.filter(action =>
+    action.label.toLowerCase().includes(query.toLowerCase())
+  );
+
+  const results = [...filteredNavItems, ...filteredQuickActions, ...aiAction];
 
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') {

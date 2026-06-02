@@ -22,6 +22,7 @@ const DEFAULT_PERMISSIONS = {
     canAccessAcademy: true,
     canAccessClinicalAI: true,
     canAccessCustomSynthesis: true,
+    canAccessCRM: true,
   },
   doctor: {
     canRecommend: true,
@@ -33,7 +34,7 @@ const DEFAULT_PERMISSIONS = {
 };
 
 export const PermissionsProvider = ({ children }) => {
-  const { user, profile } = useAuth();
+  const { user, userProfile: profile } = useAuth();
   const [permissions, setPermissions] = useState(DEFAULT_PERMISSIONS);
   const [loadingPermissions, setLoadingPermissions] = useState(true);
 

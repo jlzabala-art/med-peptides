@@ -121,6 +121,7 @@ export default function AdminSkuMappingTab() {
   }, [deepLinkSearch]);
 
   const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedFamilyProductId, setSelectedFamilyProductId] = useState(null);
   const [expandedRowIds, setExpandedRowIds] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
@@ -682,42 +683,59 @@ export default function AdminSkuMappingTab() {
 
                       {/* Quick Actions */}
                       <td style={styles.td}>
-                        {m.status === 'pending' ? (
-                          <div style={styles.actionBtns}>
-                            <button
-                              style={styles.quickConfirmBtn}
-                              onClick={() => handleAction(m.id, 'confirm')}
-                              disabled={isActing}
-                              title="Confirm Match"
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          {m.status === 'pending' && (
+                            <div style={styles.actionBtns}>
+                              <button
+                                style={styles.quickConfirmBtn}
+                                onClick={() => handleAction(m.id, 'confirm')}
+                                disabled={isActing}
+                                title="Confirm Match"
+                              >
+                                <Check size={14} />
+                              </button>
+                              <button
+                                style={styles.quickRejectBtn}
+                                onClick={() => handleAction(m.id, 'reject')}
+                                disabled={isActing}
+                                title="Reject Match"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          )}
+                          {m.status === 'confirmed' && (
+                            <span style={{ color: '#1a73e8', fontSize: 11, fontWeight: 500 }}>
+                              Ready
+                            </span>
+                          )}
+                          {m.status === 'synced' && (
+                            <span
+                              style={{ color: 'var(--color-success)', fontSize: 11, fontWeight: 500 }}
                             >
-                              <Check size={14} />
-                            </button>
-                            <button
-                              style={styles.quickRejectBtn}
-                              onClick={() => handleAction(m.id, 'reject')}
-                              disabled={isActing}
-                              title="Reject Match"
+                              Synced
+                            </span>
+                          )}
+                          {m.status === 'error' && (
+                            <span
+                              style={{ color: 'var(--color-danger)', fontSize: 11, fontWeight: 500 }}
                             >
-                              <X size={14} />
+                              Error
+                            </span>
+                          )}
+                          {m.firebase_product_id && (
+                            <button
+                              style={styles.btnAlignFamily}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedFamilyProductId(m.firebase_product_id);
+                              }}
+                              title="Align Product Family Variants"
+                            >
+                              Align Family
                             </button>
-                          </div>
-                        ) : m.status === 'confirmed' ? (
-                          <span style={{ color: '#1a73e8', fontSize: 11, fontWeight: 500 }}>
-                            Ready
-                          </span>
-                        ) : m.status === 'synced' ? (
-                          <span
-                            style={{ color: 'var(--color-success)', fontSize: 11, fontWeight: 500 }}
-                          >
-                            Synced
-                          </span>
-                        ) : (
-                          <span
-                            style={{ color: 'var(--color-danger)', fontSize: 11, fontWeight: 500 }}
-                          >
-                            Error
-                          </span>
-                        )}
+                          )}
+                        </div>
                       </td>
                     </tr>
 
@@ -1115,9 +1133,373 @@ export default function AdminSkuMappingTab() {
           </div>
         </div>
       )}
+      {selectedFamilyProductId && (
+        <ResolveFamilyModal
+          firebaseProductId={selectedFamilyProductId}
+          onClose={() => {
+            setSelectedFamilyProductId(null);
+            loadStatus();
+          }}
+          getToken={getToken}
+          agentBody={agentBody}
+          addLog={addLog}
+        />
+      )}
     </div>
   );
 }
+
+function ResolveFamilyModal({ firebaseProductId, onClose, getToken, agentBody, addLog }) {
+  const [loading, setLoading] = useState(false);
+  const [familyData, setFamilyData] = useState(null);
+  const [actionInProgress, setActionInProgress] = useState(null);
+
+  const fetchFamilyDetails = useCallback(async () => {
+    setLoading(true);
+    try {
+      const token = await getToken();
+      const res = await callAgent('get_family_details', agentBody('get_family_details', { firebaseProductId }), token);
+      if (res.extras) {
+        setFamilyData(res.extras);
+      } else {
+        throw new Error('No details returned');
+      }
+    } catch (e) {
+      addLog(`Failed to fetch family details: ${e.message}`, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [firebaseProductId, getToken, agentBody, addLog]);
+
+  useEffect(() => {
+    fetchFamilyDetails();
+  }, [fetchFamilyDetails]);
+
+  const handleCreateInZoho = async (variant) => {
+    setActionInProgress(`zoho-${variant.firebase_variant_id}`);
+    try {
+      const token = await getToken();
+      await callAgent('create_variant_in_zoho', agentBody('create_variant_in_zoho', {
+        firebaseProductId,
+        firebaseVariantId: variant.firebase_variant_id,
+        aedRate: 3.67
+      }), token);
+      addLog(`Successfully created variant "${variant.name}" in Zoho`, 'success');
+      await fetchFamilyDetails();
+    } catch (e) {
+      addLog(`Failed to create variant in Zoho: ${e.message}`, 'error');
+    } finally {
+      setActionInProgress(null);
+    }
+  };
+
+  const handleCreateInFirebase = async (item) => {
+    setActionInProgress(`firebase-${item.item_id}`);
+    try {
+      const token = await getToken();
+      await callAgent('create_variant_in_firebase', agentBody('create_variant_in_firebase', {
+        zohoItemId: item.item_id,
+        firebaseProductId,
+        aedRate: 3.67
+      }), token);
+      addLog(`Successfully created Firebase variant from Zoho item "${item.name}"`, 'success');
+      await fetchFamilyDetails();
+    } catch (e) {
+      addLog(`Failed to create variant in Firebase: ${e.message}`, 'error');
+    } finally {
+      setActionInProgress(null);
+    }
+  };
+
+  if (!familyData && loading) {
+    return (
+      <div style={modalStyles.backdrop}>
+        <div style={modalStyles.modalCompact}>
+          <div style={{ padding: '24px', textAlign: 'center', color: '#5f6368' }}>
+            <RefreshCw size={24} style={{ animation: 'spin 1s linear infinite', marginBottom: 12 }} />
+            <div>Loading family details...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const { firebaseVariants = [], zohoItems = [] } = familyData || {};
+
+  return (
+    <div style={modalStyles.backdrop}>
+      <div style={modalStyles.modal}>
+        {/* Header */}
+        <div style={modalStyles.header}>
+          <div>
+            <h3 style={modalStyles.title}>Align Product Family</h3>
+            <p style={modalStyles.subtitle}>Firebase ID: {firebaseProductId}</p>
+          </div>
+          <button style={modalStyles.closeBtn} onClick={onClose}>
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div style={modalStyles.content}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', height: '100%', overflow: 'hidden' }}>
+            
+            {/* Left Column: Firebase Variants */}
+            <div style={modalStyles.column}>
+              <h4 style={modalStyles.columnTitle}>Firebase Variants ({firebaseVariants.length})</h4>
+              <div style={modalStyles.list}>
+                {firebaseVariants.map((v, i) => {
+                  const hasZohoMatch = zohoItems.some(z => z.sku && z.sku.toLowerCase() === v.sku.toLowerCase());
+                  const isDoing = actionInProgress === `zoho-${v.firebase_variant_id}`;
+
+                  return (
+                    <div key={v.firebase_variant_id || i} style={modalStyles.itemCard}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div>
+                          <div style={modalStyles.itemName}>{v.name}</div>
+                          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                            <code style={modalStyles.itemSku}>{v.sku || 'No SKU'}</code>
+                            <span style={modalStyles.itemPrice}>${v.guest_usd.toFixed(2)}</span>
+                          </div>
+                        </div>
+                        <div>
+                          {hasZohoMatch ? (
+                            <span style={modalStyles.statusBadgeSuccess}>Aligned</span>
+                          ) : (
+                            <button
+                              style={modalStyles.actionBtnPrimary}
+                              onClick={() => handleCreateInZoho(v)}
+                              disabled={actionInProgress !== null || !v.sku}
+                              title={!v.sku ? "SKU required to align with Zoho" : "Create this variant in Zoho Books"}
+                            >
+                              {isDoing ? 'Creating...' : '+ Create in Zoho'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Right Column: Zoho Items */}
+            <div style={modalStyles.column}>
+              <h4 style={modalStyles.columnTitle}>Zoho Items Search ({zohoItems.length})</h4>
+              <div style={modalStyles.list}>
+                {zohoItems.length === 0 ? (
+                  <div style={modalStyles.emptyText}>No matching Zoho items found for this product name.</div>
+                ) : (
+                  zohoItems.map((item) => {
+                    const hasFirebaseMatch = firebaseVariants.some(v => v.sku && v.sku.toLowerCase() === item.sku.toLowerCase());
+                    const isDoing = actionInProgress === `firebase-${item.item_id}`;
+
+                    return (
+                      <div key={item.item_id} style={modalStyles.itemCard}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <div>
+                            <div style={modalStyles.itemName}>{item.name}</div>
+                            <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                              <code style={modalStyles.itemSku}>{item.sku || 'No SKU'}</code>
+                              <span style={modalStyles.itemPrice}>{item.rate} AED</span>
+                            </div>
+                          </div>
+                          <div>
+                            {hasFirebaseMatch ? (
+                              <span style={modalStyles.statusBadgeSuccess}>Aligned</span>
+                            ) : (
+                              <button
+                                style={modalStyles.actionBtnSecondary}
+                                onClick={() => handleCreateInFirebase(item)}
+                                disabled={actionInProgress !== null}
+                              >
+                                {isDoing ? 'Creating...' : '+ Create in Firebase'}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={modalStyles.footer}>
+          <button style={styles.btnGcpSecondary} onClick={onClose} disabled={actionInProgress !== null}>
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const modalStyles = {
+  backdrop: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(32,33,36,0.6)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+    backdropFilter: 'blur(2px)',
+  },
+  modal: {
+    backgroundColor: 'var(--color-bg-surface)',
+    border: '1px solid #dadce0',
+    borderRadius: 8,
+    width: '90%',
+    maxWidth: '1000px',
+    height: '80vh',
+    display: 'flex',
+    flexDirection: 'column',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+    overflow: 'hidden',
+  },
+  modalCompact: {
+    backgroundColor: 'var(--color-bg-surface)',
+    border: '1px solid #dadce0',
+    borderRadius: 8,
+    width: '300px',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+  },
+  header: {
+    padding: '16px 24px',
+    borderBottom: '1px solid #dadce0',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'var(--color-bg-app)',
+  },
+  title: {
+    margin: 0,
+    fontSize: 16,
+    fontWeight: 700,
+    color: '#202124',
+  },
+  subtitle: {
+    margin: '4px 0 0',
+    fontSize: 12,
+    color: '#5f6368',
+  },
+  closeBtn: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    color: '#5f6368',
+    padding: 4,
+    borderRadius: 4,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  content: {
+    flex: 1,
+    padding: '24px',
+    overflowY: 'auto',
+    backgroundColor: 'var(--color-bg-surface)',
+  },
+  column: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    overflow: 'hidden',
+  },
+  columnTitle: {
+    margin: '0 0 12px 0',
+    fontSize: 14,
+    fontWeight: 600,
+    color: '#202124',
+    borderBottom: '2px solid #1a73e8',
+    paddingBottom: '6px',
+  },
+  list: {
+    flex: 1,
+    overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    paddingRight: '4px',
+  },
+  itemCard: {
+    border: '1px solid #dadce0',
+    borderRadius: '6px',
+    padding: '12px',
+    backgroundColor: 'var(--color-bg-app)',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+  },
+  itemName: {
+    fontSize: 13,
+    fontWeight: 600,
+    color: '#202124',
+  },
+  itemSku: {
+    fontSize: 11,
+    fontFamily: 'monospace',
+    backgroundColor: '#f1f3f4',
+    padding: '2px 6px',
+    borderRadius: '4px',
+    color: '#3c4043',
+  },
+  itemPrice: {
+    fontSize: 12,
+    fontWeight: 500,
+    color: '#5f6368',
+  },
+  actionBtnPrimary: {
+    padding: '6px 12px',
+    backgroundColor: '#1a73e8',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '4px',
+    fontSize: 12,
+    fontWeight: 500,
+    cursor: 'pointer',
+    boxShadow: '0 1px 2px rgba(60,64,67,0.3)',
+  },
+  actionBtnSecondary: {
+    padding: '6px 12px',
+    backgroundColor: 'rgba(26,115,232,0.08)',
+    color: '#1a73e8',
+    border: '1px solid #1a73e8',
+    borderRadius: '4px',
+    fontSize: 12,
+    fontWeight: 500,
+    cursor: 'pointer',
+  },
+  statusBadgeSuccess: {
+    fontSize: 11,
+    fontWeight: 600,
+    color: '#137333',
+    backgroundColor: '#e6f4ea',
+    padding: '4px 8px',
+    borderRadius: '12px',
+    display: 'inline-block',
+  },
+  emptyText: {
+    fontSize: 13,
+    color: '#80868b',
+    textAlign: 'center',
+    padding: '24px 0',
+  },
+  footer: {
+    padding: '16px 24px',
+    borderTop: '1px solid #dadce0',
+    display: 'flex',
+    justifyContent: 'flex-end',
+    backgroundColor: 'var(--color-bg-app)',
+  }
+};
+
 
 // ── Styles (Google Cloud Console Light Design Tokens) ────────────────────────
 const styles = {
@@ -1330,6 +1712,19 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  btnAlignFamily: {
+    padding: '4px 8px',
+    borderRadius: 4,
+    border: '1px solid #1a73e8',
+    background: 'rgba(26,115,232,0.04)',
+    color: '#1a73e8',
+    cursor: 'pointer',
+    fontWeight: 500,
+    fontSize: 11,
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 4,
   },
   detailPanel: {
     padding: '16px 24px',

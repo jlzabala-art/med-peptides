@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, test, vi, expect } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 import AdminUsersTab from '../AdminUsersTab.jsx';
 
 vi.mock('firebase/firestore', () => {
@@ -62,6 +63,10 @@ vi.mock('firebase/firestore', () => {
     initializeFirestore: () => ({}),
     persistentLocalCache: () => ({}),
     persistentSingleTabManager: () => ({}),
+    getCountFromServer: () => Promise.resolve({ data: () => ({ count: 3 }) }),
+    limit: () => ({}),
+    startAfter: () => ({}),
+    orderBy: () => ({}),
   };
 });
 
@@ -73,7 +78,11 @@ vi.mock('../../../context/AuthContext', () => ({
 
 describe('AdminUsersTab', () => {
   test('renders without crashing with defaultRole="patient" and mock data', async () => {
-    render(<AdminUsersTab defaultRole="patient" />);
+    render(
+      <MemoryRouter>
+        <AdminUsersTab defaultRole="patient" />
+      </MemoryRouter>
+    );
     await waitFor(() => {
       expect(screen.getByText('Patient One')).toBeInTheDocument();
     });

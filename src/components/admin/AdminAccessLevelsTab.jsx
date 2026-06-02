@@ -110,6 +110,11 @@ const VIEW_PERMISSIONS = [
     label: 'Custom Synthesis Portal',
     desc: 'Request customized sequence synthesis',
   },
+  {
+    key: 'canAccessCRM',
+    label: 'CRM Intelligence (Zoho Bigin)',
+    desc: 'Access CRM sync metrics and assign users',
+  },
 ];
 
 export default function AdminAccessLevelsTab() {
@@ -192,6 +197,7 @@ export default function AdminAccessLevelsTab() {
         canAccessAcademy: true,
         canAccessClinicalAI: true,
         canAccessCustomSynthesis: true,
+        canAccessCRM: true,
       },
       clinic: {
         canRecommend: true,

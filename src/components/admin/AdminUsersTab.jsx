@@ -95,6 +95,12 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+  const [pageSize, setPageSize] = useState(20);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalUsersCount, setTotalUsersCount] = useState(0);
+  const [pageCursors, setPageCursors] = useState({}); // map page number to its starting doc
+
   useEffect(() => {
     setCurrentPage(1);
     setPageCursors({});
@@ -403,12 +409,6 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
       toast.error('Failed to revoke relationship.');
     }
   };
-
-  const [pageSize, setPageSize] = useState(20);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalUsersCount, setTotalUsersCount] = useState(0);
-  const [pageCursors, setPageCursors] = useState({}); // map page number to its starting doc
 
   async function fetchUsers(page = 1, newPageSize = pageSize) {
     try {

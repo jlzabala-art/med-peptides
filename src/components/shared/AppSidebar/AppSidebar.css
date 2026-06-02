@@ -286,23 +286,18 @@
   color: var(--sb-active-color);
 }
 
-/* Pulse animation for Messages / live items */
 .sb-item.pulse .sb-item-icon::after {
   content: '';
   display: block;
   position: absolute;
   top: 5px;
   left: 22px;
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #22c55e;
-  border: 2px solid white;
-  animation: sb-pulse 2s ease-in-out infinite;
-}
-@keyframes sb-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.6; transform: scale(0.85); }
+  background: #10b981;
+  border: 1.5px solid white;
+  box-shadow: 0 0 4px rgba(16, 185, 129, 0.45);
 }
 
 .sb-item-icon {

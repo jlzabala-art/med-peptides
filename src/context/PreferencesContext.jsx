@@ -37,11 +37,14 @@ export const PreferencesProvider = ({ children }) => {
 
   const AED_RATE = 3.6725;
 
-  const formatCurrency = (usdValue) => {
-    if (usdValue == null) return "0";
+  const formatCurrency = (valueInAed) => {
+    if (valueInAed == null) return "0";
+    
+    // Assume value from backend (Zoho Books) is in AED
+    const usdValue = valueInAed / AED_RATE;
     
     const usdFormatted = `$${usdValue.toLocaleString('en-US', {maximumFractionDigits:0})}`;
-    const aedFormatted = `${(usdValue * AED_RATE).toLocaleString('en-US', {maximumFractionDigits:0})} AED`;
+    const aedFormatted = `${Number(valueInAed).toLocaleString('en-US', {maximumFractionDigits:0})} AED`;
 
     if (currency === 'USD') return usdFormatted;
     if (currency === 'AED') return aedFormatted;

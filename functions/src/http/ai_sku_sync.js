@@ -1096,6 +1096,40 @@ const agent = createAgent({
         };
       }
 
+      case "get_family_details": {
+        const result = await getFamilyDetails(db, {
+          firebaseProductId: body.firebaseProductId
+        });
+        return {
+          reply: `Fetched family details for Firebase product ${body.firebaseProductId}.`,
+          extras: result,
+        };
+      }
+
+      case "create_variant_in_zoho": {
+        const result = await createVariantInZoho(db, {
+          firebaseProductId: body.firebaseProductId,
+          firebaseVariantId: body.firebaseVariantId,
+          aedRate: aedRate
+        });
+        return {
+          reply: `Created Zoho variant item for Firebase product/variant ${body.firebaseProductId}/${body.firebaseVariantId || 'base'}.`,
+          extras: result,
+        };
+      }
+
+      case "create_variant_in_firebase": {
+        const result = await createVariantInFirebase(db, {
+          zohoItemId: body.zohoItemId,
+          firebaseProductId: body.firebaseProductId,
+          aedRate: aedRate
+        });
+        return {
+          reply: `Created Firebase variant from Zoho item ${body.zohoItemId} under product ${body.firebaseProductId}.`,
+          extras: result,
+        };
+      }
+
       case "list_zoho_items": {
         const items = await zoho.listAllItems({ filter_by: "Status.Active" });
         // Return only what's needed for the UI dropdown

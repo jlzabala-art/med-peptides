@@ -52,7 +52,7 @@ export default function FinanceBudget({ dashboardData }) {
                 {Object.entries(budgetMap).map(([name, data]) => {
                   const pct = Math.min(Math.round((data.actual / data.limit) * 100), 100);
                   const isOver = data.actual > data.limit;
-                  const isNearLimit = data.actual > (data.limit * 0.75); // Lowered alarm limit (75%)
+                  const isNearLimit = data.actual > (data.limit * 0.50); // Lowered alarm limit (50%)
                   
                   let textColor = '';
                   if (isOver) textColor = 'text-red-500 font-bold';

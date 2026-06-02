@@ -76,6 +76,8 @@ export default function UserProfileTab() {
       return `${userProfile.firstName[0]}${userProfile.lastName[0]}`.toUpperCase();
     }
     if (userProfile?.name) {
+      const parts = userProfile.name.split(' ').filter(p => p.length > 0);
+      if (parts.length >= 2) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
       return userProfile.name.substring(0, 2).toUpperCase();
     }
     if (user?.email) {

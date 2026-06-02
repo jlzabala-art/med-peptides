@@ -550,7 +550,7 @@ export default function PortalLayout({
             {isMobile && (
               <div style={{ padding: '1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontWeight: 600, color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Bot size={18} /> Atlas AI
+                  <Sparkles size={18} /> Atlas AI
                 </span>
                 <button onClick={() => setAiOpen(false)} style={{ background: 'none', border: 'none' }}><X size={20} /></button>
               </div>
@@ -570,7 +570,14 @@ export default function PortalLayout({
         )}
       </div>
 
-      <CommandPalette isOpen={isPaletteOpen} onClose={() => setPaletteOpen(false)} />
+      <CommandPalette 
+        isOpen={isPaletteOpen} 
+        onClose={() => setPaletteOpen(false)}
+        navGroups={sidebarNavGroups}
+        pinnedItems={sidebarPinnedItems}
+        onNavigate={onNavigate}
+        onAskAI={(q) => { setPaletteOpen(false); setAiOpen(true); /* possibly pass q to AI */ }}
+      />
     </div>
   );
 }

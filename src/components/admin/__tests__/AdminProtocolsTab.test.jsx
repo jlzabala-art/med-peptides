@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 import AdminProtocolsTab from '../AdminProtocolsTab.jsx';
 import { getPaginatedProtocols, updateProtocolFull } from '../../../services/protocolStorage';
 
@@ -34,7 +35,11 @@ describe('AdminProtocolsTab', () => {
   });
 
   test('renders loading state and then shows empty list message', async () => {
-    render(<AdminProtocolsTab />);
+    render(
+      <MemoryRouter>
+        <AdminProtocolsTab />
+      </MemoryRouter>
+    );
     // Loading indicator should appear first
     expect(screen.getByText(/Loading all protocols…/i)).toBeInTheDocument();
     // Wait for the async fetch to finish
@@ -47,7 +52,11 @@ describe('AdminProtocolsTab', () => {
 
   test('displays an error message when getPaginatedProtocols rejects', async () => {
     vi.mocked(getPaginatedProtocols).mockRejectedValue(new Error('network failure'));
-    render(<AdminProtocolsTab />);
+    render(
+      <MemoryRouter>
+        <AdminProtocolsTab />
+      </MemoryRouter>
+    );
     await waitFor(() => expect(screen.getByText(/Failed to load protocols:/i)).toBeInTheDocument());
     expect(screen.getByRole('button', { name: /Retry/i })).toBeInTheDocument();
   });
@@ -69,7 +78,11 @@ describe('AdminProtocolsTab', () => {
       lastDoc: null,
       hasMore: false,
     });
-    render(<AdminProtocolsTab />);
+    render(
+      <MemoryRouter>
+        <AdminProtocolsTab />
+      </MemoryRouter>
+    );
     await waitFor(() => expect(screen.getByText('Test Protocol')).toBeInTheDocument());
 
     const toggleBtn = screen.getByRole('button', { name: /Expand protocol details/i });
