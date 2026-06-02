@@ -1,6 +1,8 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { FiSearch, FiBell, FiCpu } from 'react-icons/fi';
+import { Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AtlasHealthLogo from '../components/brand/AtlasHealthLogo';
@@ -9,6 +11,13 @@ export default function PortalHeader({ onToggleAI }) {
   const { userProfile, activeRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, i18n } = useTranslation();
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'es' : 'en';
+    i18n.changeLanguage(newLang);
+    localStorage.setItem('language', newLang);
+  };
 
   // Create a simple breadcrumb from the pathname
   const pathParts = location.pathname.split('/').filter(Boolean);
@@ -27,8 +36,33 @@ export default function PortalHeader({ onToggleAI }) {
         {/* Global Search */}
         <div className="search-bar">
           <FiSearch className="search-icon" />
-          <input type="text" placeholder="Search..." className="search-input" />
+          <input type="text" placeholder={t('header.search') || "Search..."} className="search-input" />
         </div>
+
+        {/* Language Toggle */}
+        <button 
+          className="icon-btn" 
+          aria-label="Toggle Language"
+          onClick={toggleLanguage}
+          title={t('header.language') || "Language"}
+          style={{ position: 'relative' }}
+        >
+          <Globe size={18} strokeWidth={1.8} />
+          <span style={{ 
+            fontSize: '8px', 
+            position: 'absolute', 
+            top: '2px', 
+            right: '2px', 
+            fontWeight: 'bold', 
+            background: 'var(--color-primary, #003666)', 
+            color: 'white', 
+            padding: '1px 3px', 
+            borderRadius: '4px',
+            lineHeight: '1'
+          }}>
+            {i18n.language.toUpperCase()}
+          </span>
+        </button>
 
         {/* Notifications */}
         <button className="icon-btn" aria-label="Notifications">
@@ -69,7 +103,25 @@ export default function PortalHeader({ onToggleAI }) {
         {/* User Profile */}
         <div className="user-profile" onClick={() => navigate('/profile')} title="Manage Account Settings">
           <div className="avatar">
-            {userProfile?.firstName?.charAt(0) || userProfile?.email?.charAt(0) || 'U'}
+            {(() => {
+              const first = userProfile?.firstName || '';
+              const last = userProfile?.lastName || '';
+              if (first && last) {
+                return (first.trim().charAt(0) + last.trim().charAt(0)).toUpperCase();
+              }
+              const fullName = first || '';
+              if (fullName) {
+                const parts = fullName.split(' ').filter(p => p.length > 0);
+                if (parts.length >= 2) {
+                  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+                }
+                return fullName.slice(0, 2).toUpperCase();
+              }
+              if (userProfile?.email) {
+                return userProfile.email.slice(0, 2).toUpperCase();
+              }
+              return 'U';
+            })()}
           </div>
           <div className="user-info">
             <span className="user-name">{userProfile?.firstName || 'User'}</span>

@@ -4,6 +4,7 @@ import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import RefillReminderBanner from '../components/shared/RefillReminderBanner';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import {
   collection, query, where, orderBy, limit, onSnapshot, doc, updateDoc, serverTimestamp, getDocs
 } from 'firebase/firestore';
@@ -191,6 +192,7 @@ function SimpleRxRow({ rx }) {
 
 // ── Interactive & Expandable RxRow in Wholesaler Rx Inbox ──────────────────────────
 function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [acting, setActing] = useState(false);
   
@@ -232,7 +234,7 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
       // Auto-set status metadata in timeline
       const timelineEvent = {
         event: `kit_status_${statusVal}`,
-        note: `Estado del kit actualizado a: ${KIT_STEPS.find(s => s.key === statusVal)?.label || statusVal} por distribuidora.`,
+        note: t('wholesaler.timeline_notes.kit_status_updated', { status: t(`wholesaler.kit_steps.${statusVal}`, { defaultValue: statusVal }) }),
         timestamp: new Date().toISOString()
       };
       
@@ -260,13 +262,13 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
           ...(rx.timeline || []),
           {
             event: 'kit_collection_label_sent',
-            note: 'Etiqueta de recogida PDF cargada por distribuidora.',
+            note: t('wholesaler.timeline_notes.label_uploaded'),
             timestamp: new Date().toISOString()
           }
         ]
       });
       setKitStatus('collection_label_sent');
-      alert('Etiqueta guardada correctamente y enviada al médico.');
+      alert(t('wholesaler.alerts.label_saved'));
     } catch (err) {
       console.error(err);
     } finally {
@@ -286,13 +288,13 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
           ...(rx.timeline || []),
           {
             event: 'kit_results_available',
-            note: 'Resultados diagnósticos PDF cargados por distribuidora.',
+            note: t('wholesaler.timeline_notes.results_uploaded'),
             timestamp: new Date().toISOString()
           }
         ]
       });
       setKitStatus('results_available');
-      alert('Resultados guardados y notificados al médico.');
+      alert(t('wholesaler.alerts.results_saved'));
     } catch (err) {
       console.error(err);
     } finally {
@@ -343,12 +345,12 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
           ...(rx.timeline || []),
           {
             event: 'kit_recommendations_updated',
-            note: 'Recomendaciones farmacológicas asociadas cargadas por distribuidora.',
+            note: t('wholesaler.timeline_notes.recommendations_uploaded'),
             timestamp: new Date().toISOString()
           }
         ]
       });
-      alert('Recomendaciones de prescripción guardadas correctamente.');
+      alert(t('wholesaler.alerts.recommendations_saved'));
     } catch (err) {
       console.error(err);
     } finally {

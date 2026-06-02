@@ -193,7 +193,7 @@ function buildCustomerRecord(contact, invoices) {
 
 // ── Main Cloud Function ────────────────────────────────────────────────────────
 exports.fetchZohoCRMIntelligence = onRequest(
-  { secrets: [zohoClientId, zohoClientSecret, zohoRefreshToken], cors: true, region: "europe-west1" },
+  { secrets: [zohoClientId, zohoClientSecret, zohoRefreshToken], cors: true, region: "europe-west1", memory: "512MiB" },
   async (req, res) => {
     if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
 

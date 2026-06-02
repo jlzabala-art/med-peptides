@@ -11,6 +11,7 @@ import { RX_STATUS_META } from '../../config/prescriptionConfig';
 import DoctorPrescriptionBuilder from './DoctorPrescriptionBuilder';
 import { Card, MetricCard } from '../ui';
 import Spinner from '../ui/Spinner';
+import { useTranslation } from 'react-i18next';
 
 const PIPELINE_STEPS = [
   { key: 'draft',                    label: 'Draft',       color: '#f59e0b', bg: '#fef9c3' },
@@ -21,6 +22,7 @@ const PIPELINE_STEPS = [
 ];
 
 function RxRow({ rx }) {
+  const { t } = useTranslation();
   const meta = RX_STATUS_META[rx.status] || RX_STATUS_META.draft;
   const isCorp = rx.type === 'clinic_supply';
   const date = rx.createdAt?.toDate ? rx.createdAt.toDate().toLocaleDateString() : '—';
@@ -33,10 +35,10 @@ function RxRow({ rx }) {
       <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>
-            {isCorp ? 'Suministro Clínica' : (rx.patient?.name || rx.patient?.email || 'Paciente')}
+            {isCorp ? t('doctor.prescriptions_list.clinic_supply') : (rx.patient?.name || rx.patient?.email || t('doctor.prescriptions_list.patient'))}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.15rem' }}>
-            {rx.items?.length || 0} ítems • {date}
+            {rx.items?.length || 0} {t('doctor.prescriptions_list.items')} • {date}
           </div>
         </div>
         <span style={{ padding: '0.25rem 0.5rem', borderRadius: '6px', background: `${meta.color}15`, color: meta.color, fontSize: '0.75rem', fontWeight: 600 }}>
@@ -63,6 +65,7 @@ function PipelineBar({ prescriptions }) {
 }
 
 export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [], onNavigate }) {
+  const { t } = useTranslation();
   const [showBuilder, setShowBuilder] = useState(false);
   const [patientCount, setPatientCount] = useState(0);
 
@@ -103,8 +106,8 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
       `}</style>
       <div className="overview-mobile-warn" style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem', textAlign: 'center', gap: '1rem', background: '#0f172a', borderRadius: '12px', color: 'var(--color-bg-surface)', minHeight: '60vh' }}>
         <div style={{ fontSize: '3rem' }}>💻</div>
-        <div style={{ fontSize: '1.2rem', fontWeight: 600 }}>Portal de Médico - Solo Escritorio</div>
-        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-tertiary)', maxWidth: '300px' }}>Por favor, acceda desde un ordenador para gestionar prescripciones.</div>
+        <div style={{ fontSize: '1.2rem', fontWeight: 600 }}>{t('doctor.overview.desktop_only')}</div>
+        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-tertiary)', maxWidth: '300px' }}>{t('doctor.overview.desktop_only_desc')}</div>
       </div>
 
       <div className="overview-content" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -113,42 +116,44 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.5rem', borderRadius: '8px', background: 'var(--color-warning-bg)', border: '1px solid #fcd34d' }}>
             <AlertCircle size={20} color="var(--color-warning)" />
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600, color: '#92400e', fontSize: '0.95rem' }}>Tienes {drafts} borrador{drafts > 1 ? 'es' : ''} pendiente{drafts > 1 ? 's' : ''}</div>
-              <div style={{ fontSize: '0.85rem', color: '#b45309' }}>Complétalos y envíalos para continuar el proceso.</div>
+              <div style={{ fontWeight: 600, color: '#92400e', fontSize: '0.95rem' }}>
+                {drafts === 1 ? t('doctor.overview.drafts_banner', { count: drafts }) : t('doctor.overview.drafts_banner_plural', { count: drafts })}
+              </div>
+              <div style={{ fontSize: '0.85rem', color: '#b45309' }}>{t('doctor.overview.drafts_banner_desc')}</div>
             </div>
             <button onClick={() => onNavigate?.('prescriptions')} className="btn" style={{ background: 'var(--color-warning)', color: 'var(--color-bg-surface)', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              Completar <ArrowRight size={14} />
+              {t('doctor.overview.complete')} <ArrowRight size={14} />
             </button>
           </div>
         )}
 
         <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-          <MetricCard title="Activas" value={isLoading ? '…' : active} subtitle="En proceso / tránsito" icon={Send} color="var(--color-primary)" onClick={() => onNavigate?.('prescriptions')} />
-          <MetricCard title="Borradores" value={isLoading ? '…' : drafts} subtitle="Requieren atención" icon={Clock} color="#f59e0b" alert={drafts > 0} onClick={() => onNavigate?.('prescriptions')} />
-          <MetricCard title="Entregadas" value={isLoading ? '…' : fulfilled} subtitle="Completadas" icon={CheckCircle2} color="var(--color-success)" onClick={() => onNavigate?.('prescriptions')} />
-          <MetricCard title="Mis Pacientes" value={patientCount || '—'} subtitle="Registrados" icon={Users} color="#8b5cf6" onClick={() => onNavigate?.('patients')} />
+          <MetricCard title={t('doctor.overview.stats_active')} value={isLoading ? '…' : active} subtitle={t('doctor.overview.stats_active_sub')} icon={Send} color="var(--color-primary)" onClick={() => onNavigate?.('prescriptions')} />
+          <MetricCard title={t('doctor.overview.stats_drafts')} value={isLoading ? '…' : drafts} subtitle={t('doctor.overview.stats_drafts_sub')} icon={Clock} color="#f59e0b" alert={drafts > 0} onClick={() => onNavigate?.('prescriptions')} />
+          <MetricCard title={t('doctor.overview.stats_fulfilled')} value={isLoading ? '…' : fulfilled} subtitle={t('doctor.overview.stats_fulfilled_sub')} icon={CheckCircle2} color="var(--color-success)" onClick={() => onNavigate?.('prescriptions')} />
+          <MetricCard title={t('doctor.overview.stats_patients')} value={patientCount || '—'} subtitle={t('doctor.overview.stats_patients_sub')} icon={Users} color="#8b5cf6" onClick={() => onNavigate?.('patients')} />
         </div>
 
         <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
           <Card style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
               <Pill size={20} color="var(--primary)" />
-              <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Nueva Prescripción</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>{t('doctor.overview.new_rx')}</span>
             </div>
-            <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>Crea una prescripción para paciente o suministro clínico.</p>
+            <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>{t('doctor.overview.new_rx_desc')}</p>
             <button onClick={() => setShowBuilder(!showBuilder)} className="btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#0f172a', color: 'var(--color-bg-surface)', border: 'none', padding: '0.75rem 1.25rem', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', width: 'fit-content' }}>
-              <Plus size={16} /> {showBuilder ? 'Cerrar Formulario' : 'Crear Prescripción'}
+              <Plus size={16} /> {showBuilder ? t('doctor.overview.close_form') : t('doctor.overview.create_rx')}
             </button>
           </Card>
 
           <Card style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
               <Package size={20} color="var(--primary)" />
-              <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Catálogos</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>{t('doctor.overview.catalogs')}</span>
             </div>
-            <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>Genera catálogos de productos para compartir.</p>
+            <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>{t('doctor.overview.catalogs_desc')}</p>
             <button onClick={() => onNavigate?.('catalog-builder')} className="btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'var(--color-bg-app)', color: '#0f172a', border: '1px solid #cbd5e1', padding: '0.75rem 1.25rem', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', width: 'fit-content' }}>
-              Abrir Generador <ArrowRight size={16} />
+              {t('doctor.overview.open_generator')} <ArrowRight size={16} />
             </button>
           </Card>
         </div>
@@ -159,8 +164,8 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <ClipboardList size={20} color="var(--primary)" />
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>Formulario de Prescripción</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>Completa los datos y guárdala.</div>
+                  <div style={{ fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>{t('doctor.overview.builder_form')}</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>{t('doctor.overview.builder_form_desc')}</div>
                 </div>
               </div>
               <button onClick={() => setShowBuilder(false)} className="btn" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-tertiary)' }}>✕</button>
@@ -174,12 +179,14 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <TrendingUp size={20} color="var(--primary)" />
               <div>
-                <div style={{ fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>Estado de Prescripciones</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>{prescriptions.length} total • {active} en tránsito</div>
+                <div style={{ fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>{t('doctor.overview.rx_status')}</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+                  {t('doctor.overview.rx_status_sub', { count: prescriptions.length, active: active })}
+                </div>
               </div>
             </div>
             <button onClick={() => onNavigate?.('prescriptions')} className="btn" style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              Ver todas <ArrowRight size={14} />
+              {t('doctor.overview.view_all')} <ArrowRight size={14} />
             </button>
           </div>
 
@@ -199,14 +206,14 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
                   })}
                 </div>
               </>
-            ) : <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>No hay datos para mostrar en la barra.</div>}
+            ) : <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>{t('doctor.overview.no_data_bar')}</div>}
           </div>
 
           {isLoading ? (
-            <Spinner text="Cargando prescripciones recientes..." />
+            <Spinner text={t('doctor.overview.loading_recent')} />
           ) : prescriptions.length === 0 ? (
             <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
-              No hay prescripciones recientes.
+              {t('doctor.overview.no_recent')}
             </div>
           ) : (
             <div>

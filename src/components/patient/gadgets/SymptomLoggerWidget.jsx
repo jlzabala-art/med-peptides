@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { Activity, Battery, Moon, Activity as PainIcon, CheckCircle2 } from 'lucide-react';
 
 export default function SymptomLoggerWidget() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [energy, setEnergy] = useState(5);
   const [sleep, setSleep] = useState(5);
   const [pain, setPain] = useState(0);
@@ -33,7 +35,7 @@ export default function SymptomLoggerWidget() {
 
   const handleLog = async () => {
     if (!selectedPhysician) {
-      alert("Selecciona un médico al que enviar el reporte.");
+      alert(t('patient.symptoms.alert_select_physician') || "Selecciona un médico al que enviar el reporte.");
       return;
     }
     setLoading(true);
@@ -81,35 +83,35 @@ export default function SymptomLoggerWidget() {
   return (
     <div className="card" style={{ padding: '2rem', background: 'white', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column' }}>
       <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <Activity size={18} color="var(--primary)" /> Diario de Síntomas
+        <Activity size={18} color="var(--primary)" /> {t('patient.symptoms.title')}
       </h3>
       
       {success ? (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--color-success)', gap: '1rem', padding: '1rem 0' }}>
           <CheckCircle2 size={40} />
           <div style={{ textAlign: 'center' }}>
-            <h4 style={{ margin: 0, fontWeight: 800 }}>Reporte Guardado</h4>
-            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>Tu médico verá este progreso en su monitor.</p>
+            <h4 style={{ margin: 0, fontWeight: 800 }}>{t('patient.symptoms.success_title')}</h4>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>{t('patient.symptoms.success_desc')}</p>
           </div>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
           <div style={{ marginBottom: '0.5rem' }}>
             <select value={selectedPhysician} onChange={e => setSelectedPhysician(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.85rem' }}>
-              <option value="">-- Médico a Notificar --</option>
+              <option value="">{t('patient.symptoms.select_physician')}</option>
               {doctors.map(d => <option key={d.id} value={d.doctorId}>Dr. {d.doctorName}</option>)}
             </select>
           </div>
 
-          {renderSlider("Nivel de Energía", energy, setEnergy, <Battery size={14} />, 1, 10)}
-          {renderSlider("Calidad del Sueño", sleep, setSleep, <Moon size={14} />, 1, 10)}
-          {renderSlider("Nivel de Dolor", pain, setPain, <PainIcon size={14} />, 0, 10)}
+          {renderSlider(t('patient.symptoms.energy_label'), energy, setEnergy, <Battery size={14} />, 1, 10)}
+          {renderSlider(t('patient.symptoms.sleep_label'), sleep, setSleep, <Moon size={14} />, 1, 10)}
+          {renderSlider(t('patient.symptoms.pain_label'), pain, setPain, <PainIcon size={14} />, 0, 10)}
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--color-text-secondary)', marginBottom: '0.4rem', textTransform: 'uppercase' }}>Efectos Secundarios (Opcional)</label>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--color-text-secondary)', marginBottom: '0.4rem', textTransform: 'uppercase' }}>{t('patient.symptoms.side_effects_label')}</label>
             <textarea 
               value={sideEffects} onChange={e => setSideEffects(e.target.value)} 
-              placeholder="Ej: Náuseas leves en la mañana..."
+              placeholder={t('patient.symptoms.side_effects_placeholder')}
               style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1.5px solid #e2e8f0', outline: 'none', resize: 'vertical', minHeight: '50px', boxSizing: 'border-box' }}
             />
           </div>
@@ -124,7 +126,7 @@ export default function SymptomLoggerWidget() {
               cursor: selectedPhysician && !loading ? 'pointer' : 'not-allowed', transition: 'background 0.2s'
             }}
           >
-            {loading ? 'Guardando...' : 'Save Reporte Diario'}
+            {loading ? t('patient.symptoms.submit_loading') : t('patient.symptoms.submit_btn')}
           </button>
         </div>
       )}

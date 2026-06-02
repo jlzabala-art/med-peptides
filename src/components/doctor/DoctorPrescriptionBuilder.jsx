@@ -20,6 +20,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { logAction } from '../../services/auditLogger';
 import {
   ClipboardList, Plus, Trash2, Send, Save, Search, User, Building,
@@ -486,6 +487,7 @@ const calculateCompoundPricing = (ingredients, servings, formatId, marginPct) =>
 };
 
 export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patients = [], onSaved, prefilledData }) {
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [ocrFile, setOcrFile] = useState(null);
   const [isUploadingOcr, setIsUploadingOcr] = useState(false);
@@ -662,7 +664,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
   const addItem = (item) => setRx(prev => {
     // Avoid duplicates in items list
     if (prev.items.some(i => i.id === item.id)) {
-      showToast('Este ítem ya está en la prescripción.');
+      showToast(t('doctor.builder.duplicate_item'));
       return prev;
     }
     return { ...prev, items: [...prev.items, item] };
@@ -682,7 +684,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
   const handleCreatePatient = async (e) => {
     e.preventDefault();
     if (!newPatientEmail.trim()) {
-      showToast('El correo electrónico es requerido.', false);
+      showToast(t('doctor.builder.email_req'), false);
       return;
     }
     setCreatingPatientLoading(true);
@@ -745,7 +747,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
       setField('patient.email', emailClean);
       setField('patient.phone', newPatientPhone.trim());
 
-      showToast('Paciente creado y seleccionado con éxito.');
+      showToast(t('doctor.builder.create_success'));
       setIsCreatingPatient(false);
       
       setNewPatientFirstName('');
@@ -755,7 +757,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
       
     } catch (err) {
       console.error('Error creating patient:', err);
-      showToast('Error al registrar paciente.', false);
+      showToast(t('doctor.builder.create_error'), false);
     } finally {
       setCreatingPatientLoading(false);
     }
@@ -763,7 +765,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
 
   // ── Save draft ─────────────────────────────────────────────────────────────
   const saveDraft = async () => {
-    if (rx.items.length === 0) { showToast('Añade al menos un producto o protocolo.', false); return; }
+    if (rx.items.length === 0) { showToast(t('doctor.builder.add_item_alert'), false); return; }
     setSaving(true);
     try {
       const payload = {
@@ -780,19 +782,19 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
       if (savedId) {
         await updateDoc(doc(db, 'prescriptions', savedId), payload);
         await logAction(user?.uid, 'doctor', 'PRESCRIPTION_UPDATE_DRAFT', savedId, { itemsCount: items.length });
-        showToast('Borrador guardado.');
+        showToast(t('doctor.builder.draft_saved'));
       } else {
         const ref = await addDoc(collection(db, 'prescriptions'), {
           ...payload, createdAt: serverTimestamp(),
         });
         setSavedId(ref.id);
         await logAction(user?.uid, 'doctor', 'PRESCRIPTION_CREATE_DRAFT', ref.id, { itemsCount: items.length });
-        showToast('Prescripción creada y guardada como borrador.');
+        showToast(t('doctor.builder.saved_draft_success'));
       }
       onSaved?.(true);
     } catch (err) {
       console.error('[DoctorPrescriptionBuilder] save error', err);
-      showToast('Error al guardar. Inténtalo de nuevo.', false);
+      showToast(t('doctor.builder.save_error'), false);
     } finally {
       setSaving(false);
     }
@@ -817,15 +819,15 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
 
   // ── Send (multi-recipient) ────────────────────────────────────────────────
   const send = () => {
-    if (rx.items.length === 0) { showToast('Añade al menos un ítem antes de enviar.', false); return; }
+    if (rx.items.length === 0) { showToast(t('doctor.builder.add_item_before_send'), false); return; }
 
     const hasPatient     = rx.shareWithPatient && (rx.patient.email || rx.patient.uid);
     const hasWholesalers = rx.wholesalerIds.length > 0;
     if (!hasPatient && !hasWholesalers) {
-      showToast('Selecciona al menos un destinatario (paciente o wholesaler).', false); return;
+      showToast(t('doctor.builder.select_recipient_alert'), false); return;
     }
     if (rx.shareWithPatient && !rx.patient.email && !rx.patient.uid) {
-      showToast('Especifica el paciente (email o registro) antes de enviar.', false); return;
+      showToast(t('doctor.builder.specify_patient_alert'), false); return;
     }
 
     // Trigger margin configuration modal
@@ -869,11 +871,15 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
 
       setRx(prev => ({ ...prev, status: newStatus, markupMargin: Number(markupMargin) }));
       const total = (hasPatient ? 1 : 0) + rx.wholesalerIds.length;
-      showToast(`✅ Prescripción enviada a ${total} destinatario${total > 1 ? 's' : ''}.`);
+      showToast(
+        total > 1
+          ? t('doctor.builder.sent_success_plural', { count: total })
+          : t('doctor.builder.sent_success', { count: total })
+      );
       onSaved?.(false);
     } catch (err) {
       console.error('[DoctorPrescriptionBuilder] send error', err);
-      showToast('Error al enviar.', false);
+      showToast(t('doctor.builder.send_error'), false);
     } finally {
       setSending(false);
     }
@@ -921,10 +927,10 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
           </div>
           <div>
             <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#202124' }}>
-              Creador de Prescripciones
+              {t('doctor.builder.title')}
             </h2>
             <p style={{ margin: 0, fontSize: '0.72rem', color: '#5f6368' }}>
-              {savedId ? `ID Borrador: ${savedId.slice(0, 8)}…` : 'Nueva orden de prescripción'}
+              {savedId ? t('doctor.builder.draft_id', { id: savedId.slice(0, 8) }) : t('doctor.builder.new_rx_order')}
             </p>
           </div>
         </div>
@@ -935,8 +941,8 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
 
       <div style={{ display: 'flex', gap: '0.5rem' }}>
         {[
-          { id: RX_TYPE.PATIENT,       label: 'Prescripción Paciente',   icon: User,       color: '#1a73e8' },
-          { id: RX_TYPE.CLINIC_SUPPLY, label: 'Suministro de Clínica', icon: Building, color: '#137333' },
+          { id: RX_TYPE.PATIENT,       label: t('doctor.builder.rx_patient'),   icon: User,       color: '#1a73e8' },
+          { id: RX_TYPE.CLINIC_SUPPLY, label: t('doctor.builder.clinic_supply'), icon: Building, color: '#137333' },
         ].map(t => {
           const active = rx.type === t.id;
           return (
@@ -957,10 +963,10 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
       {/* --- Stepper UI --- */}
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', marginTop: '0.5rem', background: 'var(--color-bg-surface)', padding: '1rem', borderRadius: '8px', border: '1px solid #dadce0', flexWrap: 'wrap', gap: '0.5rem' }}>
         {[
-          { step: 1, label: "Origin" },
-          { step: 2, label: "Prescription" },
-          { step: 3, label: "Logistics" },
-          { step: 4, label: "Summary" }
+          { step: 1, label: t('doctor.builder.step_origin') },
+          { step: 2, label: t('doctor.builder.step_prescription') },
+          { step: 3, label: t('doctor.builder.step_logistics') },
+          { step: 4, label: t('doctor.builder.step_summary') }
         ].map(s => (
           <div key={s.step} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: currentStep === s.step ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setCurrentStep(s.step)}>
             <div style={{ width: 24, height: 24, borderRadius: '50%', background: currentStep === s.step ? '#1a73e8' : 'var(--color-border)', color: currentStep === s.step ? 'var(--color-bg-surface)' : 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 600 }}>
@@ -974,13 +980,13 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
 
       {currentStep === 1 && (
         <div className="gcp-card" style={{ marginBottom: '1rem', border: '1.5px dashed #cbd5e1', background: 'var(--color-bg-app)' }}>
-          <div className="gcp-header" style={{ color: '#0f172a' }}>📷 Scan Prescription (OCR)</div>
+          <div className="gcp-header" style={{ color: '#0f172a' }}>📷 {t('doctor.builder.scan_ocr')}</div>
           <p style={{ fontSize: '0.75rem', color: '#5f6368', marginBottom: '1rem' }}>
-            If you have a handwritten or printed prescription, upload it here. The system will attempt to auto-fill patient data and medications.
+            {t('doctor.builder.scan_desc')}
           </p>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <label style={{ cursor: 'pointer' }} className="gcp-btn-secondary">
-              <UploadCloud size={14} /> Select File
+              <UploadCloud size={14} /> {t('doctor.builder.select_file')}
               <input type="file" style={{ display: 'none' }} accept="image/*,.pdf" onChange={(e) => {
                 if(e.target.files && e.target.files[0]) {
                   setOcrFile(e.target.files[0]);
@@ -992,7 +998,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
             </label>
             {ocrFile && (
               <span style={{ fontSize: '0.8rem', color: 'var(--color-success)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                {isUploadingOcr ? <><Loader2 size={14} style={{ animation: 'rxSpin 1s linear infinite' }} /> Analyzing...</> : <><CheckCircle2 size={14} /> File uploaded and processed</>}
+                {isUploadingOcr ? <><Loader2 size={14} style={{ animation: 'rxSpin 1s linear infinite' }} /> {t('doctor.builder.analyzing')}</> : <><CheckCircle2 size={14} /> {t('doctor.builder.file_processed')}</>}
               </span>
             )}
           </div>
@@ -1004,7 +1010,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
       {rx.type === RX_TYPE.PATIENT && (
         <div className="gcp-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div className="gcp-header"><User size={14} /> Destinatario / Paciente</div>
+            <div className="gcp-header"><User size={14} /> {t('doctor.builder.recipient_patient')}</div>
             <button 
               onClick={() => setIsCreatingPatient(!isCreatingPatient)}
               style={{
@@ -1012,46 +1018,46 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                 fontSize: '0.72rem', cursor: 'pointer', fontFamily: 'inherit'
               }}
             >
-              {isCreatingPatient ? '← Volver a Selector' : '+ Registrar Nuevo Paciente'}
+              {isCreatingPatient ? t('doctor.builder.back_selector') : t('doctor.builder.register_new')}
             </button>
           </div>
 
           {isCreatingPatient ? (
             <form onSubmit={handleCreatePatient} className="form-grid-2col" style={{ gap: '0.75rem' }}>
               <label className="gcp-label">
-                Nombre
+                {t('doctor.builder.first_name')}
                 <input required value={newPatientFirstName} onChange={e => setNewPatientFirstName(e.target.value)}
                   placeholder="Ej: Juan" className="gcp-input" />
               </label>
               <label className="gcp-label">
-                Apellido
+                {t('doctor.builder.last_name')}
                 <input required value={newPatientLastName} onChange={e => setNewPatientLastName(e.target.value)}
                   placeholder="Ej: Pérez" className="gcp-input" />
               </label>
               <label className="gcp-label">
-                Email (ID del usuario)
+                {t('doctor.builder.email')}
                 <input required type="email" value={newPatientEmail} onChange={e => setNewPatientEmail(e.target.value)}
                   placeholder="juan.perez@ejemplo.com" className="gcp-input" />
               </label>
               <label className="gcp-label">
-                Teléfono / WhatsApp
+                {t('doctor.builder.phone')}
                 <input value={newPatientPhone} onChange={e => setNewPatientPhone(e.target.value)}
                   placeholder="+34 600 000 000" className="gcp-input" />
               </label>
               <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.25rem' }}>
                 <button type="button" onClick={() => setIsCreatingPatient(false)} className="gcp-btn-secondary">
-                  Cancelar
+                  {t('doctor.prescriptions_list.cancel')}
                 </button>
                 <button type="submit" disabled={creatingPatientLoading} className="gcp-btn-primary">
                   {creatingPatientLoading && <Loader2 size={12} className="animate-spin" />}
-                  Registrar y Seleccionar
+                  {t('doctor.builder.register_btn')}
                 </button>
               </div>
             </form>
           ) : (
             <div className="form-grid-2col" style={{ gap: '0.75rem' }}>
               <label className="gcp-label">
-                Seleccionar de tus pacientes
+                {t('doctor.builder.select_from_patients')}
                 <select value={rx.patient.uid || ''} onChange={e => {
                   const p = patients.find(pt => pt.uid === e.target.value);
                   if (p) {
@@ -1061,7 +1067,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                     setField('patient.phone', p.phone||'');
                   } else { setField('patient.uid', ''); }
                 }} className="gcp-input">
-                  <option value="">— Escribe los datos a continuación —</option>
+                  <option value="">— {t('doctor.builder.select_from_patients')} —</option>
                   {patients.map(p => (
                     <option key={p.uid} value={p.uid}>
                       {`${p.firstName||''} ${p.lastName||''}`.trim() || p.email}
@@ -1070,17 +1076,17 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                 </select>
               </label>
               <label className="gcp-label">
-                Nombre del paciente
+                {t('doctor.builder.patient_name')}
                 <input value={rx.patient.name} onChange={e => setField('patient.name', e.target.value)}
                   placeholder="Nombre y Apellidos" className="gcp-input" />
               </label>
               <label className="gcp-label">
-                Email
+                {t('doctor.builder.email')}
                 <input value={rx.patient.email} type="email" onChange={e => setField('patient.email', e.target.value)}
                   placeholder="paciente@correo.com" className="gcp-input" />
               </label>
               <label className="gcp-label">
-                Teléfono / WhatsApp
+                {t('doctor.builder.phone')}
                 <input value={rx.patient.phone} onChange={e => setField('patient.phone', e.target.value)}
                   placeholder="+34 600 000 000" className="gcp-input" />
               </label>
@@ -1111,13 +1117,13 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
 
           {/* Assistant delegation select */}
           <label className="gcp-label">
-            Delegar gestión a Asistente
+            {t('doctor.builder.delegate_to_assistant')}
             <select 
               value={rx.delegatedAssistantId || ''} 
               onChange={e => setRx(p => ({ ...p, delegatedAssistantId: e.target.value }))}
               className="gcp-input"
             >
-              <option value="">— Sin delegar —</option>
+              <option value="">— {t('doctor.builder.no_delegation')} —</option>
               {assistantsList.map(ass => (
                 <option key={ass.id} value={ass.id}>
                   {ass.firstName} {ass.lastName} ({ass.email})
@@ -1140,7 +1146,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
               fontSize: '0.75rem',
               color: '#b45309'
             }}>
-              <span>⚠️ El paciente no tiene dirección completa en el borrador actual. ¿Deseas enviar a la Clínica?</span>
+              <span>{t('doctor.builder.no_full_address_warning')}</span>
               <button 
                 type="button"
                 onClick={() => setRx(p => ({ ...p, shippingAddressType: 'clinic' }))}
@@ -1149,7 +1155,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                   padding: '0.2rem 0.5rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.7rem'
                 }}
               >
-                Enviar a Clínica
+                {t('doctor.builder.ship_to_clinic_btn')}
               </button>
             </div>
           )}
@@ -1158,7 +1164,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
           {rx.shippingAddressType === 'patient' && (
             <div className="address-grid-4col" style={{ gridColumn: '1 / -1', gap: '0.5rem', background: 'var(--color-bg-app)', padding: '0.75rem', borderRadius: '6px', border: '1px solid #dadce0' }}>
               <label className="gcp-label">
-                Dirección
+                {t('doctor.builder.patient_address_lbl')}
                 <input 
                   value={rx.shippingAddress?.address || ''} 
                   onChange={e => setRx(p => ({ ...p, shippingAddress: { ...(p.shippingAddress || {}), address: e.target.value } }))}
@@ -1167,7 +1173,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                 />
               </label>
               <label className="gcp-label">
-                Ciudad
+                {t('doctor.builder.city_lbl')}
                 <input 
                   value={rx.shippingAddress?.city || ''} 
                   onChange={e => setRx(p => ({ ...p, shippingAddress: { ...(p.shippingAddress || {}), city: e.target.value } }))}
@@ -1176,7 +1182,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                 />
               </label>
               <label className="gcp-label">
-                Cód. Postal
+                {t('doctor.builder.zip_lbl')}
                 <input 
                   value={rx.shippingAddress?.zip || ''} 
                   onChange={e => setRx(p => ({ ...p, shippingAddress: { ...(p.shippingAddress || {}), zip: e.target.value } }))}
@@ -1185,11 +1191,11 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                 />
               </label>
               <label className="gcp-label">
-                País
+                {t('doctor.builder.country_lbl')}
                 <input 
-                  value={rx.shippingAddress?.country || 'España'} 
+                  value={rx.shippingAddress?.country || t('doctor.builder.spain_lbl')} 
                   onChange={e => setRx(p => ({ ...p, shippingAddress: { ...(p.shippingAddress || {}), country: e.target.value } }))}
-                  placeholder="España"
+                  placeholder={t('doctor.builder.spain_lbl')}
                   className="gcp-input"
                 />
               </label>
@@ -1207,7 +1213,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
               fontSize: '0.75rem',
               color: '#1e40af'
             }}>
-              ℹ️ **Envío a Clínica**: Los productos de esta prescripción serán entregados en la dirección física de la clínica médica del doctor supervisor.
+              {t('doctor.builder.clinic_ship_info')}
             </div>
           )}
         </div>
@@ -1215,9 +1221,9 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
 
       {/* ── COMPARTIR CON (multi-recipient) ── */}
       <div className="gcp-card">
-        <div className="gcp-header">📤 Compartir prescripción con</div>
+        <div className="gcp-header">📤 {t('doctor.builder.share_rx_with')}</div>
         <div style={{ fontSize: '0.68rem', color: '#5f6368', marginTop: '-0.25rem' }}>
-          El médico decide explícitamente quién recibe esta prescripción. Puede ser paciente, uno o varios wholesalers, o ambos.
+          {t('doctor.builder.share_rx_desc')}
         </div>
 
         {/* Patient toggle */}
@@ -1240,12 +1246,12 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 600, fontSize: '0.8rem', color: rx.shareWithPatient ? '#1a73e8' : '#3c4043' }}>
-                👤 Compartir con el paciente
+                👤 {t('doctor.builder.share_with_patient_checkbox')}
               </div>
               <div style={{ fontSize: '0.68rem', color: '#5f6368', marginTop: '0.05rem' }}>
                 {rx.shareWithPatient
                   ? (rx.patient.name || rx.patient.email || 'Ver y pagar aparecerá en su perfil')
-                  : 'El paciente no verá esta prescripción'}
+                  : t('doctor.builder.patient_wont_see_rx')}
               </div>
             </div>
           </div>
@@ -1255,11 +1261,11 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
         <div>
           <div style={{ fontSize: '0.65rem', fontWeight: 600, color: '#70757a',
             textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
-            🏭 Wholesalers ({rx.wholesalerIds.length} seleccionados)
+            🏭 {t('doctor.builder.wholesalers_lbl', { count: rx.wholesalerIds.length })}
           </div>
           {wholesalers.length === 0 ? (
             <div style={{ fontSize: '0.75rem', color: '#9aa0a6', fontStyle: 'italic', padding: '0.25rem 0' }}>
-              No hay wholesalers registrados en la plataforma.
+              {t('doctor.builder.no_wholesalers_registered')}
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
@@ -1301,7 +1307,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
       {/* ── RECETAS ANTERIORES DEL HISTORIAL ── */}
       <div className="gcp-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div className="gcp-header"><Clock size={14} /> Recetas Anteriores y Plantillas del Historial</div>
+          <div className="gcp-header"><Clock size={14} /> {t('doctor.builder.history_and_templates')}</div>
           <button 
             type="button"
             onClick={() => setShowHistoryPanel(v => !v)}
@@ -1310,7 +1316,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
               fontSize: '0.72rem', cursor: 'pointer', fontFamily: 'inherit'
             }}
           >
-            {showHistoryPanel ? 'Ocultar Historial' : 'Mostrar Historial (Duplicar)'}
+            {showHistoryPanel ? t('doctor.builder.hide_history') : t('doctor.builder.show_history')}
           </button>
         </div>
         
@@ -1318,11 +1324,11 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {loadingRecentRx ? (
               <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', textAlign: 'center', padding: '0.5rem' }}>
-                Cargando historial de recetas...
+                {t('doctor.builder.loading_history')}
               </div>
             ) : recentPrescriptions.length === 0 ? (
               <div style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)', fontStyle: 'italic', textAlign: 'center', padding: '0.5rem' }}>
-                No se encontraron recetas previas para este médico.
+                {t('doctor.builder.no_history_found')}
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '200px', overflowY: 'auto' }}>
@@ -1363,7 +1369,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                           if (prevRx.diagnosis) {
                             setRx(prev => ({ ...prev, diagnosis: prevRx.diagnosis }));
                           }
-                          showToast('Items de receta anterior cargados en el borrador.');
+                          showToast(t('doctor.builder.previous_items_loaded'));
                         }
                       }}
                       style={{
@@ -1372,7 +1378,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                         flexShrink: 0
                       }}
                     >
-                      Duplicar
+                      {t('doctor.builder.duplicate_btn')}
                     </button>
                   </div>
                 ))}
@@ -1396,7 +1402,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
               transition: 'all 0.15s'
             }}
           >
-            📦 Catálogo de Productos y Protocolos
+            📦 {t('doctor.builder.catalog_tab')}
           </button>
           <button
             type="button"
@@ -1408,14 +1414,14 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
               transition: 'all 0.15s'
             }}
           >
-            🧪 Formulación Magistral (Suplementos)
+            🧪 {t('doctor.builder.compounding_tab')}
           </button>
         </div>
 
         {builderTab === 'compounding' ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', background: '#f0fdfa', border: '1px solid #99f6e4', padding: '1rem', borderRadius: '8px' }}>
             <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>🔬 Compositor de Fórmulas Magistrales</span>
+              <span>🔬 {t('doctor.builder.compounding_title')}</span>
               <span style={{ fontSize: '0.68rem', color: '#115e59', background: '#ccfbf1', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>Compounding</span>
             </div>
 
@@ -1473,7 +1479,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                       setCompoundServings(tmpl.servings);
                       setCompoundInstructions(tmpl.instructions);
                       setCompoundIngredients(tmpl.ingredients);
-                      showToast(`Plantilla "${tmpl.name}" cargada.`);
+                      showToast(t('doctor.builder.template_loaded', { name: tmpl.name }));
                     }}
                     style={{
                       background: '#e6fffa', color: '#0d9488', border: '1px solid #99f6e4',
@@ -1661,15 +1667,15 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                     type="button"
                     onClick={() => {
                       if (!compoundName.trim()) {
-                        showToast('Por favor, indica un nombre para la fórmula.', false);
+                        showToast(t('doctor.builder.formula_name_req'), false);
                         return;
                       }
                       if (compoundIngredients.length === 0) {
-                        showToast('Por favor, añade al menos un ingrediente activo.', false);
+                        showToast(t('doctor.builder.formula_ingredient_req'), false);
                         return;
                       }
                       if (compoundIngredients.some(ing => !ing.dose || isNaN(Number(ing.dose)) || Number(ing.dose) <= 0)) {
-                        showToast('Por favor, indica dosis válidas para todos los ingredientes.', false);
+                        showToast(t('doctor.builder.formula_dose_req'), false);
                         return;
                       }
 
@@ -1711,7 +1717,7 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                       setCompoundName('');
                       setCompoundIngredients([]);
                       setCompoundInstructions('');
-                      showToast('Fórmula magistral añadida al carrito de prescripción.');
+                      showToast(t('doctor.builder.formula_added'));
                     }}
                     style={{
                       background: '#0d9488', color: 'white', border: 'none', borderRadius: '4px',

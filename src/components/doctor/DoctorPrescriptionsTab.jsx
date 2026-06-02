@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { RX_STATUS_META, RX_TYPE, DELIVERY_METHOD, RX_STATUS, rxEvent } from '../../config/prescriptionConfig';
 import DoctorPrescriptionBuilder from './DoctorPrescriptionBuilder';
+import { useTranslation } from 'react-i18next';
 import Card from '../ui/Card';
 import DataTable from '../ui/DataTable';
 import Spinner from '../ui/Spinner';
@@ -25,6 +26,7 @@ const KIT_STEPS = [
 ];
 
 export default function DoctorPrescriptionsTab({ doctorId, doctorMeta, patients = [], initialBuilderOpen = false, hideHistory = false, onSavedRedirect }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [builderData, setBuilderData] = useState(initialBuilderOpen ? {} : null);
   const [filterStatus, setFilterStatus] = useState('all');
@@ -56,7 +58,7 @@ export default function DoctorPrescriptionsTab({ doctorId, doctorMeta, patients 
   });
 
   const doCancel = (rx) => {
-    if (!window.confirm('¿Cancelar esta prescripción?')) return;
+    if (!window.confirm(t('doctor.prescriptions_list.cancel_confirm'))) return;
     updateRxMutation.mutate({
       id: rx.id,
       updates: {
@@ -75,7 +77,7 @@ export default function DoctorPrescriptionsTab({ doctorId, doctorMeta, patients 
         updatedAt: serverTimestamp(),
         timeline: [
           ...(rx.timeline || []),
-          { event: 'kit_sample_ready', note: 'Muestra lista para recogida.', timestamp: new Date().toISOString() }
+          { event: 'kit_sample_ready', note: t('doctor.prescriptions_list.sample_ready_timeline'), timestamp: new Date().toISOString() }
         ]
       }
     });
@@ -113,7 +115,7 @@ export default function DoctorPrescriptionsTab({ doctorId, doctorMeta, patients 
 
   const columns = [
     {
-      header: 'Paciente / Destinatario',
+      header: t('doctor.prescriptions_list.patient_dest'),
       key: 'patient',
       render: (rx) => {
         const isCorp = rx.type === RX_TYPE.CLINIC_SUPPLY;
@@ -124,7 +126,7 @@ export default function DoctorPrescriptionsTab({ doctorId, doctorMeta, patients 
             </div>
             <div>
               <div style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                {isCorp ? 'Suministro Clínica' : (rx.patient?.name || 'Paciente sin nombre')}
+                {isCorp ? t('doctor.prescriptions_list.clinic_supply') : (rx.patient?.name || t('doctor.prescriptions_list.patient_no_name'))}
               </div>
               {!isCorp && rx.patient?.email && <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>{rx.patient.email}</div>}
             </div>
@@ -133,29 +135,29 @@ export default function DoctorPrescriptionsTab({ doctorId, doctorMeta, patients 
       }
     },
     {
-      header: 'Tipo',
+      header: t('doctor.prescriptions_list.type'),
       key: 'type',
       render: (rx) => (
         <span style={{ padding: '4px 8px', background: rx.type === RX_TYPE.CLINIC_SUPPLY ? '#f1f5f9' : '#dcfce7', color: rx.type === RX_TYPE.CLINIC_SUPPLY ? 'var(--color-text-secondary)' : 'var(--color-success)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
-          {rx.type === RX_TYPE.CLINIC_SUPPLY ? 'Clínica' : 'Paciente'}
+          {rx.type === RX_TYPE.CLINIC_SUPPLY ? t('doctor.prescriptions_list.clinic') : t('doctor.prescriptions_list.patient')}
         </span>
       )
     },
     {
-      header: 'Fecha',
+      header: t('doctor.prescriptions_list.date'),
       key: 'createdAt',
       render: (rx) => rx.createdAt?.toDate ? rx.createdAt.toDate().toLocaleDateString() : '—'
     },
     {
-      header: 'Items',
+      header: t('doctor.prescriptions_list.items'),
       key: 'items',
       render: (rx) => {
         const itemsSummary = (rx.items || []).map(i => `${i.name} (${i.quantity} ${i.unit || 'uds'})`).join(', ');
-        return <div style={{ maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>{itemsSummary || 'Sin ítems'}</div>;
+        return <div style={{ maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>{itemsSummary || t('doctor.prescriptions_list.no_items')}</div>;
       }
     },
     {
-      header: 'Estado',
+      header: t('doctor.prescriptions_list.status'),
       key: 'status',
       render: (rx) => {
         const m = RX_STATUS_META[rx.status] || { label: rx.status };
@@ -163,7 +165,7 @@ export default function DoctorPrescriptionsTab({ doctorId, doctorMeta, patients 
       }
     },
     {
-      header: 'Acciones',
+      header: t('doctor.prescriptions_list.actions'),
       key: 'actions',
       align: 'right',
       render: (rx) => {
@@ -172,7 +174,7 @@ export default function DoctorPrescriptionsTab({ doctorId, doctorMeta, patients 
         return (
           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
             <button
-              title="Copiar Prescripción"
+              title={t('doctor.prescriptions_list.copy_rx')}
               onClick={(e) => { e.stopPropagation(); setBuilderData({ items: rx.items || [], patient: rx.patient || null, type: rx.type || 'patient', diagnosis: rx.diagnosis || '', clinicalNotes: rx.clinicalNotes || '', delivery: rx.delivery || { method: 'direct_patient' } }); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
               className="btn"
               style={{ padding: '6px', background: '#e0e7ff', color: 'var(--primary)', border: 'none', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
@@ -181,7 +183,7 @@ export default function DoctorPrescriptionsTab({ doctorId, doctorMeta, patients 
             </button>
             {!isFinal && !isDraft && (
               <button
-                title="Cancelar"
+                title={t('doctor.prescriptions_list.cancel')}
                 onClick={(e) => { e.stopPropagation(); doCancel(rx); }}
                 disabled={updateRxMutation.isPending}
                 className="btn"
@@ -205,22 +207,22 @@ export default function DoctorPrescriptionsTab({ doctorId, doctorMeta, patients 
           <div style={{ background: 'var(--color-bg-surface)', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                <Activity size={18} color="#f59e0b" /> Seguimiento de Kit Diagnóstico
+                <Activity size={18} color="#f59e0b" /> {t('doctor.prescriptions_list.kit_tracking')}
               </div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 {(rx.kitStatus === 'kit_dispatched' || !rx.kitStatus || rx.kitStatus === 'none') && (
                   <button onClick={() => markSampleReady(rx)} disabled={updateRxMutation.isPending} className="btn" style={{ padding: '6px 12px', borderRadius: '6px', background: '#e0e7ff', color: 'var(--primary)', border: 'none', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}>
-                    🧪 Marcar Kit Listo
+                    🧪 {t('doctor.prescriptions_list.mark_kit_ready')}
                   </button>
                 )}
                 {rx.collectionLabelUrl && (
                   <button onClick={() => window.open(rx.collectionLabelUrl, '_blank')} className="btn" style={{ padding: '6px 12px', borderRadius: '6px', background: '#dcfce7', color: 'var(--color-success)', border: 'none', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}>
-                    🏷️ Descargar Etiqueta
+                    🏷️ {t('doctor.prescriptions_list.download_label')}
                   </button>
                 )}
                 {rx.labResultsUrl && (
                   <button onClick={() => window.open(rx.labResultsUrl, '_blank')} className="btn" style={{ padding: '6px 12px', borderRadius: '6px', background: '#fee2e2', color: '#b91c1c', border: 'none', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}>
-                    📋 Ver Resultados
+                    📋 {t('doctor.prescriptions_list.view_results')}
                   </button>
                 )}
               </div>
@@ -241,7 +243,9 @@ export default function DoctorPrescriptionsTab({ doctorId, doctorMeta, patients 
                           <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: isCompleted ? 'var(--primary)' : 'white', border: `2px solid ${isCompleted ? 'var(--primary)' : 'var(--color-border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: isCompleted ? 'white' : 'var(--color-text-secondary)' }}>
                             {step.icon}
                           </div>
-                          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: isCompleted ? 'var(--primary)' : 'var(--color-text-secondary)', marginTop: '0.5rem' }}>{step.label}</span>
+                          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: isCompleted ? 'var(--primary)' : 'var(--color-text-secondary)', marginTop: '0.5rem' }}>
+                            {t(`wholesaler.kit_steps.${step.key}`) || step.label}
+                          </span>
                         </div>
                       );
                     })}
@@ -254,44 +258,44 @@ export default function DoctorPrescriptionsTab({ doctorId, doctorMeta, patients 
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
           <div style={{ background: 'var(--color-bg-surface)', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '1rem' }}><FileText size={16} color="var(--primary)" /> Diagnóstico y Notas</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '1rem' }}><FileText size={16} color="var(--primary)" /> {t('doctor.prescriptions_list.diagnosis_notes')}</div>
             <div style={{ marginBottom: '1rem' }}>
-              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', fontWeight: 600, marginBottom: '0.25rem' }}>Diagnóstico</div>
-              <div style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>{rx.diagnosis || <span style={{ color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>No especificado</span>}</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', fontWeight: 600, marginBottom: '0.25rem' }}>{t('doctor.prescriptions_list.diagnosis')}</div>
+              <div style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>{rx.diagnosis || <span style={{ color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>{t('doctor.prescriptions_list.unspecified')}</span>}</div>
             </div>
             {rx.clinicalNotes && (
               <div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', fontWeight: 600, marginBottom: '0.25rem' }}>Notas</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', fontWeight: 600, marginBottom: '0.25rem' }}>{t('doctor.prescriptions_list.notes')}</div>
                 <div style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)', whiteSpace: 'pre-wrap' }}>{rx.clinicalNotes}</div>
               </div>
             )}
           </div>
 
           <div style={{ background: 'var(--color-bg-surface)', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '1rem' }}><Activity size={16} color="var(--color-success)" /> Ítems Prescritos</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '1rem' }}><Activity size={16} color="var(--color-success)" /> {t('doctor.prescriptions_list.prescribed_items')}</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {rx.items?.map((item, idx) => (
                 <div key={idx} style={{ padding: '0.75rem', background: 'var(--color-bg-app)', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
                   <div style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '0.9rem' }}>{item.name}</div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
-                    Cantidad: <strong style={{ color: 'var(--color-text-primary)' }}>{item.quantity} {item.unit || 'uds'}</strong>
-                    {item.dosage && ` | Dosis: ${item.dosage}`}
+                    {t('doctor.prescriptions_list.quantity')}: <strong style={{ color: 'var(--color-text-primary)' }}>{item.quantity} {item.unit || t('doctor.prescriptions_list.uds')}</strong>
+                    {item.dosage && ` | ${t('doctor.prescriptions_list.dosage')}: ${item.dosage}`}
                   </div>
                 </div>
               ))}
-              {(!rx.items || rx.items.length === 0) && <div style={{ fontSize: '0.85rem', color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>Sin items</div>}
+              {(!rx.items || rx.items.length === 0) && <div style={{ fontSize: '0.85rem', color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>{t('doctor.prescriptions_list.no_items')}</div>}
             </div>
           </div>
 
           <div style={{ background: 'var(--color-bg-surface)', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '1rem' }}><Clock size={16} color="#ea580c" /> Historial</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '1rem' }}><Clock size={16} color="#ea580c" /> {t('doctor.prescriptions_list.timeline')}</div>
             <div style={{ maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {(rx.timeline || []).slice().reverse().map((t, idx) => (
+              {(rx.timeline || []).slice().reverse().map((tItem, idx) => (
                 <div key={idx} style={{ fontSize: '0.8rem', display: 'flex', gap: '0.5rem' }}>
-                  <span style={{ color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>{t.timestamp ? new Date(t.timestamp).toLocaleDateString() : ''}</span>
+                  <span style={{ color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>{tItem.timestamp ? new Date(tItem.timestamp).toLocaleDateString() : ''}</span>
                   <div>
-                    <strong style={{ color: 'var(--color-text-primary)' }}>{t.event.replace(/_/g, ' ')}</strong>
-                    {t.note && <div style={{ color: 'var(--color-text-secondary)' }}>{t.note}</div>}
+                    <strong style={{ color: 'var(--color-text-primary)' }}>{tItem.event.replace(/_/g, ' ')}</strong>
+                    {tItem.note && <div style={{ color: 'var(--color-text-secondary)' }}>{tItem.note}</div>}
                   </div>
                 </div>
               ))}
@@ -307,14 +311,14 @@ export default function DoctorPrescriptionsTab({ doctorId, doctorMeta, patients 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <ClipboardList size={24} color="var(--primary)" /> Historial de Prescripciones
+            <ClipboardList size={24} color="var(--primary)" /> {t('doctor.prescriptions_list.rx_history')}
           </h2>
           <p style={{ color: 'var(--color-text-secondary)', marginTop: '0.25rem', margin: 0 }}>
-            {stats.total} registradas · {stats.draft} borradores · {stats.active} en proceso
+            {t('doctor.prescriptions_list.stats_registered', { count: stats.total })} · {t('doctor.prescriptions_list.stats_drafts_count', { count: stats.draft })} · {t('doctor.prescriptions_list.stats_active_count', { count: stats.active })}
           </p>
         </div>
         <button onClick={() => setBuilderData(builderData ? null : {})} className="btn" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--primary)', color: 'white', border: 'none', padding: '0.75rem 1.25rem', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}>
-          <Plus size={16} /> {builderData !== null ? 'Ocultar Formulario' : 'Nueva Prescripción'}
+          <Plus size={16} /> {builderData !== null ? t('doctor.prescriptions_list.hide_form') : t('doctor.prescriptions_list.new_rx')}
         </button>
       </div>
 
@@ -327,7 +331,7 @@ export default function DoctorPrescriptionsTab({ doctorId, doctorMeta, patients 
       <Card noPadding>
         <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', background: 'var(--color-bg-app)' }}>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            {[ { key: 'all', label: `Todas (${stats.total})` }, { key: 'draft', label: 'Borrador' }, { key: 'sent', label: 'Enviadas' }, { key: 'fulfilled', label: 'Entregadas' } ].map(f => (
+            {[ { key: 'all', label: t('doctor.prescriptions_list.all_filter') }, { key: 'draft', label: t('doctor.prescriptions_list.draft_filter') }, { key: 'sent', label: t('doctor.prescriptions_list.sent_filter') }, { key: 'fulfilled', label: t('doctor.prescriptions_list.fulfilled_filter') } ].map(f => (
               <button key={f.key} onClick={() => setFilterStatus(f.key)} style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', background: filterStatus === f.key ? '#e0e7ff' : 'transparent', color: filterStatus === f.key ? 'var(--primary)' : 'var(--color-text-secondary)', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>
                 {f.label}
               </button>
@@ -335,20 +339,20 @@ export default function DoctorPrescriptionsTab({ doctorId, doctorMeta, patients 
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <select value={filterType} onChange={e => setFilterType(e.target.value)} style={{ padding: '0.6rem 1rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }}>
-              <option value="all">Todos los tipos</option>
-              <option value="patient">Para paciente</option>
-              <option value="clinic_supply">Suministro clínica</option>
+              <option value="all">{t('doctor.prescriptions_list.all_types')}</option>
+              <option value="patient">{t('doctor.prescriptions_list.for_patient')}</option>
+              <option value="clinic_supply">{t('doctor.prescriptions_list.clinic_supply_opt')}</option>
             </select>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filtrar prescripciones..." style={{ padding: '0.6rem 1rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none', width: '200px' }} />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('doctor.prescriptions_list.filter_placeholder')} style={{ padding: '0.6rem 1rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none', width: '200px' }} />
           </div>
         </div>
 
         {isLoading ? (
-          <Spinner text="Cargando prescripciones..." />
+          <Spinner text="Loading prescriptions..." />
         ) : filtered.length === 0 ? (
           <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>
             <ClipboardList size={48} color="var(--color-border)" style={{ margin: '0 auto 1rem' }} />
-            <p style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '1.1rem', margin: '0 0 0.5rem' }}>No se encontraron prescripciones.</p>
+            <p style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '1.1rem', margin: '0 0 0.5rem' }}>{t('doctor.prescriptions_list.no_rx_found')}</p>
           </div>
         ) : (
           <DataTable columns={columns} data={filtered} expandableRender={renderExpandable} />

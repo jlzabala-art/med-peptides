@@ -4,11 +4,13 @@ import { motion } from 'framer-motion';
 import { db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { Settings, X } from 'lucide-react';
 import DashboardCustomizer from './DashboardCustomizer';
 
 export default function DashboardEngine({ role, dataContext }) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [config, setConfig] = useState(null);
   const [isCustomizing, setIsCustomizing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -64,7 +66,7 @@ export default function DashboardEngine({ role, dataContext }) {
   };
 
   if (loading || !config) {
-    return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Cargando Panel...</div>;
+    return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>{t('dashboard.loading')}</div>;
   }
 
   const activeWidgets = config.widgets
@@ -98,7 +100,7 @@ export default function DashboardEngine({ role, dataContext }) {
             boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
           }}
         >
-          <Settings size={16} /> Personalizar Panel
+          <Settings size={16} /> {t('dashboard.customize')}
         </button>
       </div>
 

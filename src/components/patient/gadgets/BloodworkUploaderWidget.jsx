@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { FileUp, FileText, CheckCircle2 } from 'lucide-react';
 
 export default function BloodworkUploaderWidget() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [doctors, setPhysicians] = useState([]);
   const [selectedPhysician, setSelectedPhysician] = useState('');
   const [notes, setNotes] = useState('');
@@ -31,7 +33,7 @@ export default function BloodworkUploaderWidget() {
 
   const handleUpload = async () => {
     if (!selectedPhysician || !fileAttached) {
-      alert("Por favor, selecciona un médico y adjunta el archivo.");
+      alert(t('patient.bloodwork.alert_missing_fields') || "Por favor, selecciona un médico y adjunta el archivo.");
       return;
     }
     setLoading(true);
@@ -61,7 +63,7 @@ export default function BloodworkUploaderWidget() {
       }, 4000);
     } catch (err) {
       console.error(err);
-      alert("Error al enviar los resultados.");
+      alert(t('patient.bloodwork.error_uploading') || "Error al enviar los resultados.");
     } finally {
       setLoading(false);
     }
@@ -70,25 +72,25 @@ export default function BloodworkUploaderWidget() {
   return (
     <div className="card" style={{ padding: '2rem', background: 'white', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column' }}>
       <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <FileUp size={18} color="var(--primary)" /> Subir Analíticas
+        <FileUp size={18} color="var(--primary)" /> {t('patient.bloodwork.title')}
       </h3>
       
       {success ? (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--color-success)', gap: '1rem', padding: '1rem 0' }}>
           <CheckCircle2 size={40} />
           <div style={{ textAlign: 'center' }}>
-            <h4 style={{ margin: 0, fontWeight: 800 }}>Resultados Enviados</h4>
-            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>Tu médico ha sido notificado.</p>
+            <h4 style={{ margin: 0, fontWeight: 800 }}>{t('patient.bloodwork.success_title')}</h4>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>{t('patient.bloodwork.success_desc')}</p>
           </div>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
-          <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>Envía tus resultados de sangre más recientes para que tu médico pueda ajustar tu tratamiento.</p>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>{t('patient.bloodwork.description')}</p>
           
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--color-text-secondary)', marginBottom: '0.4rem', textTransform: 'uppercase' }}>Enviar a Médico</label>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--color-text-secondary)', marginBottom: '0.4rem', textTransform: 'uppercase' }}>{t('patient.bloodwork.send_to')}</label>
             <select value={selectedPhysician} onChange={e => setSelectedPhysician(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1.5px solid #e2e8f0', outline: 'none' }}>
-              <option value="">-- Selecciona Médico --</option>
+              <option value="">{t('patient.bloodwork.select_physician')}</option>
               {doctors.map(d => <option key={d.id} value={d.doctorId}>Dr. {d.doctorName}</option>)}
             </select>
           </div>
@@ -102,14 +104,14 @@ export default function BloodworkUploaderWidget() {
             }}
           >
             <FileText size={24} />
-            <span style={{ fontSize: '0.9rem', fontWeight: 700 }}>{fileAttached ? 'Archivo adjuntado (PDF)' : 'Haz clic para adjuntar PDF'}</span>
+            <span style={{ fontSize: '0.9rem', fontWeight: 700 }}>{fileAttached ? t('patient.bloodwork.file_attached') : t('patient.bloodwork.attach_pdf')}</span>
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--color-text-secondary)', marginBottom: '0.4rem', textTransform: 'uppercase' }}>Notas Adicionales (Opcional)</label>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--color-text-secondary)', marginBottom: '0.4rem', textTransform: 'uppercase' }}>{t('patient.bloodwork.notes_label')}</label>
             <textarea 
               value={notes} onChange={e => setNotes(e.target.value)} 
-              placeholder="Ej: Análisis en ayunas..."
+              placeholder={t('patient.bloodwork.notes_placeholder')}
               style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1.5px solid #e2e8f0', outline: 'none', resize: 'vertical', minHeight: '60px', boxSizing: 'border-box' }}
             />
           </div>
@@ -124,7 +126,7 @@ export default function BloodworkUploaderWidget() {
               cursor: (fileAttached && selectedPhysician) && !loading ? 'pointer' : 'not-allowed', transition: 'background 0.2s'
             }}
           >
-            {loading ? 'Enviando...' : 'Enviar Resultados'}
+            {loading ? t('patient.bloodwork.submit_loading') : t('patient.bloodwork.submit_btn')}
           </button>
         </div>
       )}

@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { db, functions } from '../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
+import FinanceOverview from './finance/FinanceOverview';
 import FinanceBudget from './finance/FinanceBudget';
 import FinancePayables from './finance/FinancePayables';
 import FinanceApprovals from './finance/FinanceApprovals';
@@ -64,6 +65,7 @@ export default function AdminFinanceTab({ activeSubTab }) {
     <div className="flex flex-col gap-6 w-full">
       {/* Finance Content Area (Full Width) */}
       <div className="w-full bg-white dark:bg-slate-900 p-6 rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm min-h-[600px]">
+        {activeTab === 'overview' && <FinanceOverview dashboardData={dashboardData} totalBalance={totalBalance} activeSubs={activeSubs} />}
         {activeTab === 'budget' && <FinanceBudget dashboardData={dashboardData} />}
         {activeTab === 'payables' && <FinancePayables dashboardData={dashboardData} />}
         {activeTab === 'approvals' && <FinanceApprovals dashboardData={dashboardData} />}

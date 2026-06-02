@@ -15,6 +15,7 @@ export function Card({
   padding = 'md',
   className = '',
   onClick,
+  noPadding,
   ...rest
 }) {
   const isClickable = typeof onClick === 'function';
@@ -53,33 +54,67 @@ export function Card({
   );
 }
 
-export function CardHeader({ className = '', children, ...rest }) {
+export function CardHeader({ className = '', children, style, ...rest }) {
   return (
-    <div className={`px-6 py-4 border-b ${className}`} {...rest}>
+    <div 
+      className={className} 
+      style={{ 
+        padding: '1rem 1.5rem', 
+        borderBottom: '1px solid var(--color-border, #dadce0)', 
+        ...style 
+      }} 
+      {...rest}
+    >
       {children}
     </div>
   );
 }
 
-export function CardTitle({ className = '', children, ...rest }) {
+export function CardTitle({ className = '', children, style, ...rest }) {
   return (
-    <h3 className={`text-lg font-semibold ${className}`} {...rest}>
+    <h3 
+      className={className} 
+      style={{ 
+        margin: 0, 
+        fontSize: '1.1rem', 
+        fontWeight: 600, 
+        color: 'var(--color-text-primary, #202124)', 
+        ...style 
+      }} 
+      {...rest}
+    >
       {children}
     </h3>
   );
 }
 
-export function CardDescription({ className = '', children, ...rest }) {
+export function CardDescription({ className = '', children, style, ...rest }) {
   return (
-    <p className={`text-sm text-gray-500 ${className}`} {...rest}>
+    <p 
+      className={className} 
+      style={{ 
+        margin: '0.25rem 0 0 0', 
+        fontSize: '0.85rem', 
+        color: 'var(--color-text-secondary, #5f6368)', 
+        ...style 
+      }} 
+      {...rest}
+    >
       {children}
     </p>
   );
 }
 
-export function CardContent({ className = '', children, ...rest }) {
+export function CardContent({ className = '', children, style, ...rest }) {
   return (
-    <div className={`p-6 ${className}`} {...rest}>
+    <div 
+      className={className} 
+      style={{ 
+        padding: '1.5rem', 
+        ...style 
+      }} 
+      {...rest}
+    >
       {children}
     </div>
   );

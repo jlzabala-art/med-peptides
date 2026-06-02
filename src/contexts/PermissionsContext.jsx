@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { useAuth } from "../context/AuthContext";
+import { useAuth, ADMIN_EMAILS } from "../context/AuthContext";
 
 const PermissionsContext = createContext();
 
@@ -69,7 +69,7 @@ export const PermissionsProvider = ({ children }) => {
   }, [user]);
 
   const hasPermission = (permissionKey) => {
-    if (user?.email === 'jose@mediluxeme.com') return true;
+    if (user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) return true;
     
     const role = profile?.role || 'user';
     if (role === 'admin') return true;

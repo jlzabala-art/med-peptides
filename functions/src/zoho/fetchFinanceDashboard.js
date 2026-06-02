@@ -11,7 +11,7 @@ const zohoClientSecret = defineSecret(ZOHO_SECRETS.CLIENT_SECRET);
 const zohoRefreshToken = defineSecret(ZOHO_SECRETS.REFRESH_TOKEN);
 
 exports.fetchFinanceDashboard = onCall(
-  { secrets: [zohoClientId, zohoClientSecret, zohoRefreshToken], cors: true, region: "europe-west1" },
+  { secrets: [zohoClientId, zohoClientSecret, zohoRefreshToken], cors: true, region: "europe-west1", memory: "512MiB" },
   async (request) => {
     const { forceRefresh, fromDate, toDate } = request.data || {};
 

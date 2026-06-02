@@ -67,7 +67,7 @@ export default function FinanceOverview({ dashboardData, totalBalance, activeSub
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="finance-grid-3">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-gray-500 font-medium">Total Cash Balance (or Net Profit)</CardTitle>
@@ -114,7 +114,7 @@ export default function FinanceOverview({ dashboardData, totalBalance, activeSub
       </div>
       
       <Card className="border-red-100 shadow-sm">
-        <CardContent className="pt-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <CardContent className="pt-6 finance-grid-2">
           <div>
             <p className="text-sm text-gray-500 mb-6">
               Adjust extreme market conditions below. The AI will run 1,000 randomized financial quarters to determine the probability of insolvency.
@@ -142,7 +142,7 @@ export default function FinanceOverview({ dashboardData, totalBalance, activeSub
                   </span>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="finance-grid-mini mb-4">
                   <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
                     <p className="text-xs text-gray-500 font-medium">Mean EBITDA</p>
                     <p className={`text-xl font-black ${simResults.meanEbitda < 0 ? 'text-red-600' : 'text-emerald-600'}`}>
@@ -196,7 +196,7 @@ export default function FinanceOverview({ dashboardData, totalBalance, activeSub
             <ul className="list-disc pl-5 mb-6 space-y-1 text-sm text-gray-700">
               {forecastResult.recommendations?.map((rec, i) => <li key={i}>{rec}</li>)}
             </ul>
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+            <div className="finance-grid-6">
               {forecastResult.forecast?.map((f, i) => (
                 <div key={i} className="bg-white p-3 rounded shadow-sm text-center">
                   <div className="text-xs font-bold text-gray-500 mb-1">{f.month}</div>

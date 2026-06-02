@@ -117,7 +117,7 @@ function createAgent({
     {
       region: "europe-west1",
       timeoutSeconds: timeout,
-      memory: 1024,
+      memory: "1GiB",
       secrets: ALL_SECRETS,
     },
     async (req, res) => {

@@ -1,13 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import Module from "module";
 
+// Define mock environment variables for Zoho client secret loading
+process.env.ZOHO_CLIENT_ID = "mock-client-id";
+process.env.ZOHO_CLIENT_SECRET = "mock-client-secret";
+process.env.ZOHO_REFRESH_TOKEN = "mock-refresh-token";
+
 // Clean require.cache for the modules under test to ensure they load fresh
 Object.keys(require.cache).forEach((key) => {
   if (
     key.includes("fetchZohoCRMIntelligence") ||
     key.includes("zohoBooksWebhook") ||
     key.includes("fetchFinanceDashboard") ||
-    key.includes("users_bigin_sync")
+    key.includes("users_bigin_sync") ||
+    key.includes("zoho_client")
   ) {
     delete require.cache[key];
   }
@@ -292,6 +298,7 @@ describe("Extended Zoho and Bigin Integrations", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGet.mockReset();
+    mockGet.mockResolvedValue({ exists: false });
     mockSet.mockReset();
     mockAdd.mockReset();
     mockQueryGet.mockReset();

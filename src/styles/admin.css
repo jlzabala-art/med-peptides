@@ -522,3 +522,134 @@
   }
 }
 
+/* --- CFO Finance Dashboard Styling --- */
+.finance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.finance-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.finance-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.finance-progress-bg {
+  width: 100%;
+  background-color: var(--color-bg-hover, #f1f3f4);
+  border-radius: 9999px;
+  height: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.finance-progress-bar {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.finance-text-red {
+  color: var(--color-danger, #d93025) !important;
+  font-weight: 700;
+}
+
+.finance-text-amber {
+  color: var(--color-warning, #f9ab00) !important;
+  font-weight: 700;
+}
+
+.finance-text-emerald {
+  color: var(--color-success, #1e8e3e) !important;
+  font-weight: 700;
+}
+
+.finance-text-muted {
+  color: var(--color-text-secondary, #5f6368);
+  font-size: 0.85rem;
+}
+
+.finance-card-title {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #5f6368);
+  font-weight: 500;
+  margin: 0;
+}
+
+.finance-metric-val {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: var(--color-text-primary, #202124);
+  line-height: 1.2;
+  margin: 0.5rem 0;
+}
+
+.finance-metric-sub {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.finance-section-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 2rem 0 1rem;
+  color: var(--color-text-primary, #202124);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.finance-alert-box {
+  padding: 1.5rem;
+  background-color: var(--color-success-bg, #e6f4ea);
+  border-radius: 12px;
+  border: 1px solid rgba(30, 142, 62, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-success, #1e8e3e);
+}
+
+.finance-alert-danger {
+  background-color: var(--color-danger-bg, #fce8e6);
+  border-color: rgba(217, 48, 37, 0.15);
+  color: var(--color-danger, #d93025);
+}
+
+.finance-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.finance-grid-6 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .finance-grid-6 {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.finance-grid-mini {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+
+

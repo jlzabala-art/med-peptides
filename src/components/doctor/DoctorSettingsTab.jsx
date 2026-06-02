@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { User, Building2, AlertCircle, Save, CheckCircle2, Loader2 } from 'lucide-react';
 import Card from '../ui/Card';
+import { useTranslation } from 'react-i18next';
 
 export default function DoctorSettingsTab() {
+  const { t } = useTranslation();
   const { userProfile, updateProfileData } = useAuth();
   const [form, setForm] = useState({
     firstName: '', lastName: '', specialty: '', institution: '', licenseNo: '', phone: ''
@@ -28,7 +30,7 @@ export default function DoctorSettingsTab() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.firstName.trim()) { setError('El nombre es obligatorio.'); return; }
+    if (!form.firstName.trim()) { setError(t('doctor.settings.first_name_req')); return; }
     setSaving(true);
     setError(null);
     try {
@@ -44,7 +46,7 @@ export default function DoctorSettingsTab() {
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
       console.error('[Settings] save', err);
-      setError('Error guardando el perfil. Intenta de nuevo.');
+      setError(t('doctor.settings.save_error'));
     } finally {
       setSaving(false);
     }
@@ -63,8 +65,8 @@ export default function DoctorSettingsTab() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '800px', padding: '2rem 0' }}>
       
       <div>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-text-primary)', margin: '0 0 0.5rem' }}>Configuración de Perfil</h2>
-        <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>Actualiza tu información personal y profesional.</p>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-text-primary)', margin: '0 0 0.5rem' }}>{t('doctor.settings.profile_title')}</h2>
+        <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>{t('doctor.settings.profile_desc')}</p>
       </div>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -72,21 +74,21 @@ export default function DoctorSettingsTab() {
         <Card>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid #e2e8f0' }}>
             <User size={20} color="var(--primary)" />
-            <h3 style={{ margin: 0, fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>Información Personal</h3>
+            <h3 style={{ margin: 0, fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>{t('doctor.settings.personal_info')}</h3>
           </div>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
             <div>
-              <label style={labelStyle}>Nombre *</label>
-              <input style={inputStyle} value={form.firstName} onChange={handleChange('firstName')} placeholder='Tu nombre' required />
+              <label style={labelStyle}>{t('doctor.settings.first_name')}</label>
+              <input style={inputStyle} value={form.firstName} onChange={handleChange('firstName')} placeholder={t('doctor.settings.first_name')} required />
             </div>
             <div>
-              <label style={labelStyle}>Apellido</label>
-              <input style={inputStyle} value={form.lastName} onChange={handleChange('lastName')} placeholder='Tu apellido' />
+              <label style={labelStyle}>{t('doctor.settings.last_name')}</label>
+              <input style={inputStyle} value={form.lastName} onChange={handleChange('lastName')} placeholder={t('doctor.settings.last_name')} />
             </div>
           </div>
           <div>
-            <label style={labelStyle}>Teléfono</label>
+            <label style={labelStyle}>{t('doctor.settings.phone')}</label>
             <input style={inputStyle} value={form.phone} onChange={handleChange('phone')} placeholder='+1 555 000 000' type='tel' />
           </div>
         </Card>
@@ -94,22 +96,22 @@ export default function DoctorSettingsTab() {
         <Card>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid #e2e8f0' }}>
             <Building2 size={20} color="var(--primary)" />
-            <h3 style={{ margin: 0, fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>Información Profesional</h3>
+            <h3 style={{ margin: 0, fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>{t('doctor.settings.prof_info')}</h3>
           </div>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
             <div>
-              <label style={labelStyle}>Especialidad</label>
-              <input style={inputStyle} value={form.specialty} onChange={handleChange('specialty')} placeholder='Ej. Medicina Deportiva' />
+              <label style={labelStyle}>{t('doctor.settings.specialty')}</label>
+              <input style={inputStyle} value={form.specialty} onChange={handleChange('specialty')} placeholder={t('doctor.settings.specialty')} />
             </div>
             <div>
-              <label style={labelStyle}>Licencia Médica</label>
-              <input style={inputStyle} value={form.licenseNo} onChange={handleChange('licenseNo')} placeholder='Número de licencia' />
+              <label style={labelStyle}>{t('doctor.settings.license')}</label>
+              <input style={inputStyle} value={form.licenseNo} onChange={handleChange('licenseNo')} placeholder={t('doctor.settings.license')} />
             </div>
           </div>
           <div>
-            <label style={labelStyle}>Clínica / Hospital</label>
-            <input style={inputStyle} value={form.institution} onChange={handleChange('institution')} placeholder='Nombre de la institución' />
+            <label style={labelStyle}>{t('doctor.settings.clinic_hosp')}</label>
+            <input style={inputStyle} value={form.institution} onChange={handleChange('institution')} placeholder={t('doctor.settings.clinic_hosp')} />
           </div>
         </Card>
 
@@ -132,12 +134,12 @@ export default function DoctorSettingsTab() {
               }}
             >
               {saving ? <Loader2 size={18} className="spin" /> : <Save size={18} />}
-              {saving ? 'Guardando...' : 'Guardar Cambios'}
+              {saving ? t('doctor.settings.saving') : t('doctor.settings.save_changes')}
             </button>
             
             {saved && (
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', color: 'var(--color-success)', fontWeight: 600 }}>
-                <CheckCircle2 size={18} /> Cambios guardados
+                <CheckCircle2 size={18} /> {t('doctor.settings.changes_saved')}
               </span>
             )}
           </div>

@@ -34,7 +34,7 @@ export default function FinanceBudget({ dashboardData }) {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-bold mb-4">Budget vs Actual (Zoho Books Sync)</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="finance-grid-2">
         <Card>
           <CardHeader>
             <CardTitle>Q3 Operating Budget</CardTitle>

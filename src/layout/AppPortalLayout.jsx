@@ -6,9 +6,11 @@ import PortalHeader from './PortalHeader';
 import PortalAIDrawer from './PortalAIDrawer';
 import { motion, AnimatePresence } from 'framer-motion';
 import AtlasHealthLogo from '../components/brand/AtlasHealthLogo';
+import { useTranslation } from 'react-i18next';
 
 /* ── Branded loading screen ─────────────────────────────────────────────────── */
 function AtlasLoadingScreen() {
+  const { t } = useTranslation();
   return (
     <div style={{
       position: 'fixed', inset: 0,
@@ -37,7 +39,7 @@ function AtlasLoadingScreen() {
         Atlas Health
       </p>
       <p style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 500 }}>
-        Cargando…
+        {t('common.loading') || 'Loading...'}
       </p>
 
       {/* Shimmer bar */}
