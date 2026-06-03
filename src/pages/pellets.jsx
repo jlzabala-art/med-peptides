@@ -2,9 +2,11 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { getHormonePellets } from '../lib/firestoreHelpers';
 import PelletCard from '../components/PelletCard';
+import { useTranslation } from 'react-i18next';
 import '../styles/pellets.css';
 
 export default function PelletsPage() {
+  const { t } = useTranslation();
   const [pellets, setPellets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -65,8 +67,8 @@ export default function PelletsPage() {
   return (
     <div className="pellets-page-wrapper">
       <Helmet>
-        <title>Hormone Pellets Catalog | Atlas Health</title>
-        <meta name="description" content="Explore our premium range of hormone replacement pellets." />
+        <title>{t('pelletsPage.metaTitle', 'Hormone Pellets Catalog | Atlas Health')}</title>
+        <meta name="description" content={t('pelletsPage.metaDesc', 'Explore our premium range of hormone replacement pellets.')} />
       </Helmet>
 
       {/* Hero Banner */}
@@ -75,11 +77,11 @@ export default function PelletsPage() {
           <div className="pellets-hero-content">
             <div className="pellets-hero-badge">
               <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-              Clinical Grade
+              {t('pelletsPage.badge', 'Clinical Grade')}
             </div>
-            <h1 className="pellets-hero-title">Hormone <span>Pellets</span></h1>
+            <h1 className="pellets-hero-title">{t('pelletsPage.title1', 'Hormone')} <span>{t('pelletsPage.title2', 'Pellets')}</span></h1>
             <p className="pellets-hero-subtitle">
-              Advanced hormone replacement therapy options designed for sustained release and optimal physiological balance.
+              {t('pelletsPage.subtitle', 'Advanced hormone replacement therapy options designed for sustained release and optimal physiological balance.')}
             </p>
           </div>
           <div className="pellets-hero-visual">
@@ -101,7 +103,7 @@ export default function PelletsPage() {
           <input
             type="text"
             className="pellets-search-input"
-            placeholder="Search by name, objective, or keyword..."
+            placeholder={t('pelletsPage.searchPlaceholder', 'Search by name, objective, or keyword...')}
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
@@ -113,7 +115,7 @@ export default function PelletsPage() {
               className={`pellets-chip ${selectedGoal === goal ? 'active' : ''}`}
               onClick={() => setSelectedGoal(goal)}
             >
-              {goal}
+              {goal === 'All' ? t('pelletsPage.allGoals', 'All') : goal}
             </button>
           ))}
         </div>
@@ -123,7 +125,7 @@ export default function PelletsPage() {
       <main className="pellets-content">
         <div className="pellets-results-bar">
           <div className="pellets-results-count">
-            Showing <strong>{filteredPellets.length}</strong> {filteredPellets.length === 1 ? 'result' : 'results'}
+            {t('pelletsPage.showing', 'Showing')} <strong>{filteredPellets.length}</strong> {filteredPellets.length === 1 ? t('pelletsPage.result', 'result') : t('pelletsPage.results', 'results')}
           </div>
         </div>
 
@@ -142,8 +144,8 @@ export default function PelletsPage() {
             <svg className="pellets-empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <h3>No pellets found</h3>
-            <p>Try adjusting your search or filters.</p>
+            <h3>{t('pelletsPage.noPelletsFound', 'No pellets found')}</h3>
+            <p>{t('pelletsPage.adjustSearch', 'Try adjusting your search or filters.')}</p>
           </div>
         )}
       </main>

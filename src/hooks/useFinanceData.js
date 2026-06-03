@@ -1,70 +1,44 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../firebase';
-
-// In-memory singleton cache to persist data across component remounts
-let financeCache = null;
-let cacheTimestamp = null;
-const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export function useFinanceData() {
-  const [data, setData] = useState(financeCache);
-  const [loading, setLoading] = useState(!financeCache);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
 
-  const fetchFinancials = useCallback(async (force = false) => {
-    const now = Date.now();
+  const fetchFinancials = async () => {
+    const fetchDashboard = httpsCallable(functions, 'fetchFinanceDashboard');
+    const res = await fetchDashboard();
     
-    // If not forcing, and cache is valid, use it
-    if (!force && financeCache && cacheTimestamp && (now - cacheTimestamp < CACHE_TTL_MS)) {
-      setData(financeCache);
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
+    const dashboardData = res.data;
     
-    try {
-      const fetchDashboard = httpsCallable(functions, 'fetchFinanceDashboard');
-      const res = await fetchDashboard();
-      
-      const dashboardData = res.data;
-      
-      // Compute total balance based on P&L data or simply mock if not available in Zoho payload yet
-      // In the future this should come from Zoho Bank feeds, using 245600.50 for now
-      const newData = {
-        dashboardData,
-        totalBalance: 245600.50,
-        activeSubs: 150
-      };
+    // Compute total balance based on P&L data or simply mock if not available in Zoho payload yet
+    // In the future this should come from Zoho Bank feeds, using 245600.50 for now
+    return {
+      dashboardData,
+      totalBalance: 245600.50,
+      activeSubs: 150
+    };
+  };
 
-      financeCache = newData;
-      cacheTimestamp = Date.now();
-      
-      setData(newData);
-    } catch(err) {
-      console.error('Error fetching financial data:', err);
-      setError(err);
-      
-      // Fallback in case of error
-      const fallbackData = {
-        dashboardData: null,
-        totalBalance: 245600.50,
-        activeSubs: 150
-      };
-      
-      setData(fallbackData);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['financeDashboardData'],
+    queryFn: fetchFinancials,
+    staleTime: 15 * 60 * 1000, // 15 minutes
+    refetchOnWindowFocus: false, // Don't refetch on every window focus to save Zoho API limits
+    retry: 1,
+  });
 
-  useEffect(() => {
-    fetchFinancials(false);
-  }, [fetchFinancials]);
+  const forceRefresh = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
-  const forceRefresh = () => fetchFinancials(true);
+  // Fallback data structure if query hasn't run or errored out completely without cached data
+  const safeData = data || {
+    dashboardData: null,
+    totalBalance: 245600.50,
+    activeSubs: 150
+  };
 
-  return { data, loading, error, forceRefresh };
+  return { data: safeData, loading: isLoading, error, forceRefresh };
 }

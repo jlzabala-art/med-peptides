@@ -5,60 +5,198 @@
       "science": "Ciencia",
       "clinical": "Datos Clínicos",
       "protocols": "Protocolos",
-      "login": "Acceso Médico"
+      "login": "Iniciar Sesión"
     },
     "hero": {
-      "badge": "Plataforma de Agentes de Google Cloud",
+      "badge": "Plataforma de Agentes Google Cloud",
       "title_line1": "Optimiza por Objetivo",
-      "subtitle": "Péptidos, suplementos y vías guiadas — impulsado por ClinicAI.",
-      "supporting": "Explora vías basadas en evidencia para recuperación, cognición, sueño, metabolismo y envejecimiento saludable.",
-      "helper_text": "¿En qué te podemos ayudar hoy?",
+      "subtitle": "Péptidos, suplementos y rutas guiadas — impulsado por ClinicAI.",
+      "supporting": "Explora rutas basadas en evidencia para la recuperación, cognición, sueño, metabolismo y envejecimiento saludable.",
+      "helper_text": "¿Cómo podemos ayudarte hoy?",
       "find": {
-        "title": "Sé lo que busco",
-        "desc": "Busca objetivos, compuestos y vías de protocolo.",
-        "placeholder": "¿Qué intentas mejorar?",
+        "title": "Sé lo que quiero",
+        "desc": "Busca objetivos, compuestos y rutas de protocolo.",
+        "placeholder": "¿Qué estás intentando mejorar?",
         "cta": "Buscar",
-        "helper": "Buscar directamente"
+        "helper": "Búsqueda directa"
       },
       "chips": {
         "recovery": "Recuperación",
         "longevity": "Longevidad",
-        "cognitive": "Cognición",
+        "cognitive": "Cognitivo",
         "sleep": "Sueño",
-        "metabolic": "Metabolismo",
+        "metabolic": "Metabólico",
         "hormonal": "Hormonal",
         "athletic": "Atlético"
       },
       "ask": {
         "title": "Ayúdame a elegir",
-        "desc": "Habla con ClinicAI para descubrir vías relevantes.",
+        "desc": "Habla con ClinicAI para descubrir rutas relevantes.",
         "placeholder": "Describe tu objetivo",
         "cta": "Preguntar",
-        "suggestion1": "Crear protocolo de recuperación",
+        "suggestion1": "Crear un protocolo de recuperación",
         "suggestion2": "Comparar compuestos",
         "suggestion3": "Mejorar el sueño"
       },
       "professional": {
         "title": "Herramientas Profesionales",
-        "desc": "Análisis de recetas y emparejamiento de formulaciones.",
-        "req": "Se requiere acceso profesional.",
-        "flow": "Receta → Catálogo → Carrito",
+        "desc": "Análisis de prescripciones y coincidencia de formulaciones.",
+        "req": "Requiere acceso profesional.",
+        "flow": "Prescripción → Catálogo → Carrito",
         "upload": "Subir"
       },
       "trust": {
         "evidence": "Basado en evidencia",
         "global": "Acceso global",
         "documentation": "Documentación disponible",
-        "ai": "Asistencia por IA"
+        "ai": "Asistido por IA"
       },
       "cta_primary": "Explorar Protocolos",
       "cta_secondary": "Documentación Científica"
     },
     "footer": {
-      "rights": "Todos los derechos reservados. Exclusivamente para profesionales de la salud."
+      "rights": "Todos los derechos reservados. Solo para profesionales de la salud.",
+      "quickLinks": {
+        "title": "Enlaces Rápidos",
+        "portfolio": "Portafolio",
+        "consult": "Consulta Clínica",
+        "contact": "Contacto"
+      },
+      "auth": {
+        "title": "Autenticación",
+        "clientPortal": "Portal de Clientes",
+        "clinicalPortal": "Portal Clínico"
+      },
+      "company": {
+        "title": "Empresa",
+        "about": "Sobre Nosotros",
+        "careers": "Carreras",
+        "media": "Kit de Medios",
+        "social": "Redes Sociales"
+      },
+      "legal": {
+        "title": "Legal y Cumplimiento",
+        "terms": "Términos de Servicio",
+        "privacy": "Política de Privacidad",
+        "distributors": "Distribuidores Autorizados",
+        "regulatory": "Datos Regulatorios"
+      },
+      "copyright": "© {{year}} Atlas Health Group. Todos los Derechos Reservados.",
+      "disclaimer": "Información destinada exclusivamente a profesionales de la salud. No tiene el propósito de diagnosticar, tratar, curar o prevenir ninguna enfermedad."
     },
     "compliance": {
-      "banner": "Importante: Solo para uso clínico y de investigación. Estos productos están destinados a ser administrados por profesionales de la salud cualificados."
+      "banner": "Importante: Solo para Uso Clínico y de Investigación. Estos productos están destinados a ser administrados por profesionales de la salud calificados."
+    },
+    "costBreakdown": {
+      "standardVial": "Se recomienda vial estándar.",
+      "additionalVial": "Se requiere vial adicional debido al periodo de usabilidad de 28 días tras la apertura. (El vial rinde {{weeksCoveredByOneVial}} sem. pero expira en {{stabilityWeeks}} sem.)",
+      "singleVial": "Un solo vial cubre la duración requerida del protocolo de forma segura.",
+      "title": "Auditoría Económica",
+      "qty": "Cant:",
+      "vials": "Viales",
+      "vial": "Vial",
+      "rate": "Tarifa:",
+      "unit": "unidad",
+      "stabilityCompliant": "Cumple con el periodo de estabilidad.",
+      "totalUnits": "Total de Unidades Requeridas",
+      "products": "Productos",
+      "estimatedTotal": "Total Estimado",
+      "acknowledge": "Reconocer y Guardar"
+    },
+    "trustStrip": {
+      "purity": "≥98% Pureza — Verificada",
+      "labTested": "Probado en Laboratorio Independiente",
+      "shipping": "Envío con Seguimiento Mundial",
+      "fastShipping": "Se Envía el Mismo Día"
+    },
+    "quote": {
+      "notFound": "Cotización no encontrada o enlace inválido.",
+      "errorLoading": "Error al cargar la cotización.",
+      "accessDenied": "Acceso Denegado",
+      "portalTitle": "Portal de Cotización del Cliente",
+      "quoteNumber": "Cotización #{{id}}",
+      "preparedFor": "Preparado para:",
+      "approved": "APROBADA",
+      "rejected": "RECHAZADA",
+      "tableItem": "Artículo",
+      "tableQty": "Cant.",
+      "tableUnitPrice": "Precio Unitario",
+      "tableTotal": "Total",
+      "totalQuote": "Cotización Total:",
+      "trackingInfo": "Información de Seguimiento",
+      "carrier": "Transportista",
+      "trackingAWB": "Seguimiento (AWB)",
+      "estDelivery": "Entrega Est.",
+      "rejectBtn": "Rechazar Cotización",
+      "acceptBtn": "Aceptar Cotización",
+      "errorAction": "Error al procesar la acción."
+    },
+    "supplierQuote": {
+      "noLongerAccepting": "Esta cotización ya no acepta actualizaciones de precios.",
+      "errorSubmitting": "Error al enviar los precios.",
+      "pricingSubmitted": "¡Precios Enviados!",
+      "thankYou": "Gracias. El Gerente de Cuenta ha sido notificado y revisará tus costos unitarios.",
+      "shipmentLogged": "¡Envío Registrado!",
+      "shipmentLoggedDesc": "Gracias por proporcionar los detalles de envío. El cliente ha sido notificado.",
+      "awb": "AWB",
+      "eta": "ETA",
+      "provideCarrierAwb": "Por favor, proporciona el Transportista y el Número de Seguimiento AWB.",
+      "errorSavingShipment": "Error al guardar el envío.",
+      "shippingPortal": "Portal de Envíos del Proveedor",
+      "logisticsOrder": "Logística para Orden #{{id}}",
+      "provideTracking": "Por favor, proporciona la información de seguimiento para este envío. Es obligatorio subir los COA de cada producto.",
+      "trackingAwb": "AWB de Seguimiento",
+      "productCoas": "COA de Productos",
+      "product": "Producto",
+      "action": "Acción",
+      "uploadCoa": "Subir COA (PDF)",
+      "confirmShipment": "Confirmar Envío",
+      "securePortal": "Portal Seguro del Proveedor",
+      "requestForQuote": "Solicitud de Cotización #{{id}}",
+      "provideBestCost": "Por favor, proporciona tu mejor costo unitario para los artículos solicitados a continuación. La identidad del cliente está protegida por tu bróker.",
+      "productDesc": "Descripción del Producto",
+      "reqQty": "Cant. Requerida",
+      "unitCost": "Tu Costo Unitario (USD)",
+      "submitPricing": "Enviar Precios"
+    },
+    "pelletsPage": {
+      "metaTitle": "Catálogo de Pellets Hormonales | Atlas Health",
+      "metaDesc": "Explora nuestra gama premium de pellets de reemplazo hormonal.",
+      "badge": "Calidad Clínica",
+      "title1": "Pellets",
+      "title2": "Hormonales",
+      "subtitle": "Opciones avanzadas de terapia de reemplazo hormonal diseñadas para una liberación sostenida y un equilibrio fisiológico óptimo.",
+      "searchPlaceholder": "Buscar por nombre, objetivo o palabra clave...",
+      "allGoals": "Todos",
+      "showing": "Mostrando",
+      "result": "resultado",
+      "results": "resultados",
+      "noPelletsFound": "No se encontraron pellets",
+      "adjustSearch": "Intenta ajustar tu búsqueda o filtros."
+    },
+    "pelletDetail": {
+      "loading": "Cargando…",
+      "notFound": "Pellet no encontrado.",
+      "metaTitle": "Atlas Health Pellets",
+      "back": "Volver a Pellets",
+      "home": "Inicio",
+      "pellets": "Pellets",
+      "hormonePellet": "Pellet Hormonal",
+      "general": "General",
+      "standardDose": "Dosis Estándar",
+      "tbd": "Por Definir",
+      "halfLife": "Vida Media:",
+      "overview": "Descripción General",
+      "clinicalBrief": "Resumen Clínico",
+      "therapeuticGoals": "Objetivos Terapéuticos",
+      "mechanismsOfAction": "Mecanismos de Acción",
+      "pharmacology": "Farmacología",
+      "molWeight": "Peso Mol.",
+      "bioavailability": "Biodisponibilidad",
+      "route": "Vía",
+      "actions": "Acciones",
+      "addToCart": "Añadir al Carrito",
+      "contactProfessional": "Contactar a un Profesional"
     }
   }
 }

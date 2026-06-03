@@ -4,10 +4,12 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Card } from '../ui';
 import { Loader2, Send, ShieldCheck, CheckCircle, Truck, FileCheck } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function PublicSupplierQuote() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [rfq, setRfq] = useState(null);
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
@@ -26,7 +28,7 @@ export default function PublicSupplierQuote() {
         if (docSnap.exists()) {
           const data = docSnap.data();
           if (data.status === 'APPROVED_BY_CLIENT' || data.status === 'AWAITING_INVOICE') {
-             setError("This quote is no longer accepting pricing updates.");
+             setError(t('supplierQuote.noLongerAccepting', "This quote is no longer accepting pricing updates."));
           } else if (data.status === 'SHIPPED' || data.status === 'DELIVERED') {
              setRfq({ id: docSnap.id, ...data });
              setItems(data.items || []);
@@ -40,16 +42,16 @@ export default function PublicSupplierQuote() {
              }
           }
         } else {
-          setError("Quote not found or invalid link.");
+          setError(t('quote.notFound', "Quote not found or invalid link."));
         }
       } catch (err) {
         console.error(err);
-        setError("Error loading quote.");
+        setError(t('quote.errorLoading', "Error loading quote."));
       }
       setLoading(false);
     };
     fetchRFQ();
-  }, [id]);
+  }, [id, t]);
 
   const handleCostChange = (index, cost) => {
     const updated = [...items];
@@ -81,7 +83,7 @@ export default function PublicSupplierQuote() {
       setSubmitted(true);
     } catch (err) {
       console.error(err);
-      alert("Error submitting prices.");
+      alert(t('supplierQuote.errorSubmitting', "Error submitting prices."));
     }
     setLoading(false);
   };
@@ -91,7 +93,7 @@ export default function PublicSupplierQuote() {
   if (error) return (
     <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
       <Card style={{ padding: '3rem', textAlign: 'center', maxWidth: '500px' }}>
-        <h2 style={{ color: '#b91c1c' }}>Access Denied</h2>
+        <h2 style={{ color: '#b91c1c' }}>{t('quote.accessDenied', "Access Denied")}</h2>
         <p>{error}</p>
       </Card>
     </div>
@@ -101,8 +103,8 @@ export default function PublicSupplierQuote() {
     <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
       <Card style={{ padding: '3rem', textAlign: 'center', maxWidth: '500px' }}>
         <CheckCircle size={48} color="#16a34a" style={{ margin: '0 auto 1rem' }} />
-        <h2 style={{ color: '#166534', margin: '0 0 1rem' }}>Pricing Submitted!</h2>
-        <p style={{ color: 'var(--text-muted)' }}>Thank you. The Account Manager has been notified and will review your unit costs.</p>
+        <h2 style={{ color: '#166534', margin: '0 0 1rem' }}>{t('supplierQuote.pricingSubmitted', "Pricing Submitted!")}</h2>
+        <p style={{ color: 'var(--text-muted)' }}>{t('supplierQuote.thankYou', "Thank you. The Account Manager has been notified and will review your unit costs.")}</p>
       </Card>
     </div>
   );
@@ -111,12 +113,12 @@ export default function PublicSupplierQuote() {
     <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
       <Card style={{ padding: '3rem', textAlign: 'center', maxWidth: '500px' }}>
         <Truck size={48} color="#3b82f6" style={{ margin: '0 auto 1rem' }} />
-        <h2 style={{ color: '#1d4ed8', margin: '0 0 1rem' }}>Shipment Logged!</h2>
-        <p style={{ color: 'var(--text-muted)' }}>Thank you for providing the shipping details. The client has been notified.</p>
+        <h2 style={{ color: '#1d4ed8', margin: '0 0 1rem' }}>{t('supplierQuote.shipmentLogged', "Shipment Logged!")}</h2>
+        <p style={{ color: 'var(--text-muted)' }}>{t('supplierQuote.shipmentLoggedDesc', "Thank you for providing the shipping details. The client has been notified.")}</p>
         <div style={{ marginTop: '1.5rem', background: '#eff6ff', padding: '1rem', borderRadius: '8px', textAlign: 'left', fontSize: '0.9rem', color: '#1e3a8a' }}>
-          <strong>Carrier:</strong> {shippingData.carrier || rfq?.shippingData?.carrier}<br/>
-          <strong>AWB:</strong> {shippingData.awb || rfq?.shippingData?.awb}<br/>
-          <strong>ETA:</strong> {shippingData.eta || rfq?.shippingData?.eta}
+          <strong>{t('quote.carrier', "Carrier")}:</strong> {shippingData.carrier || rfq?.shippingData?.carrier}<br/>
+          <strong>{t('supplierQuote.awb', "AWB")}:</strong> {shippingData.awb || rfq?.shippingData?.awb}<br/>
+          <strong>{t('supplierQuote.eta', "ETA")}:</strong> {shippingData.eta || rfq?.shippingData?.eta}
         </div>
       </Card>
     </div>
@@ -124,7 +126,7 @@ export default function PublicSupplierQuote() {
 
   const handleShippingSubmit = async () => {
     if (!shippingData.carrier || !shippingData.awb) {
-      alert("Please provide Carrier and AWB Tracking Number.");
+      alert(t('supplierQuote.provideCarrierAwb', "Please provide Carrier and AWB Tracking Number."));
       return;
     }
     setLoading(true);
@@ -136,7 +138,7 @@ export default function PublicSupplierQuote() {
       setShippingSubmitted(true);
     } catch (err) {
       console.error(err);
-      alert("Error saving shipment.");
+      alert(t('supplierQuote.errorSavingShipment', "Error saving shipment."));
     }
     setLoading(false);
   };
@@ -147,37 +149,37 @@ export default function PublicSupplierQuote() {
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', justifyContent: 'center', color: '#64748b' }}>
             <Truck size={20} />
-            <span style={{ fontSize: '0.9rem', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>Supplier Shipping Portal</span>
+            <span style={{ fontSize: '0.9rem', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>{t('supplierQuote.shippingPortal', "Supplier Shipping Portal")}</span>
           </div>
 
           <Card style={{ padding: '0', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.05)' }}>
             <div style={{ padding: '2rem', background: 'white', borderBottom: '1px solid #e2e8f0' }}>
-              <h1 style={{ margin: '0 0 0.5rem', fontSize: '1.5rem', color: '#0f172a' }}>Logistics for Order #{id.slice(0,6).toUpperCase()}</h1>
-              <p style={{ margin: 0, color: '#64748b' }}>Please provide the tracking information for this shipment. Uploading COAs for each product is required.</p>
+              <h1 style={{ margin: '0 0 0.5rem', fontSize: '1.5rem', color: '#0f172a' }}>{t('supplierQuote.logisticsOrder', "Logistics for Order #{{id}}", { id: id.slice(0,6).toUpperCase() })}</h1>
+              <p style={{ margin: 0, color: '#64748b' }}>{t('supplierQuote.provideTracking', "Please provide the tracking information for this shipment. Uploading COAs for each product is required.")}</p>
             </div>
 
             <div style={{ padding: '2rem', background: '#fafafa' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Carrier</label>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>{t('quote.carrier', "Carrier")}</label>
                   <input type="text" value={shippingData.carrier} onChange={e => setShippingData({...shippingData, carrier: e.target.value})} placeholder="e.g. DHL, FedEx" style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Tracking AWB</label>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>{t('supplierQuote.trackingAwb', "Tracking AWB")}</label>
                   <input type="text" value={shippingData.awb} onChange={e => setShippingData({...shippingData, awb: e.target.value})} placeholder="AWB Number" style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Est. Delivery</label>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>{t('quote.estDelivery', "Est. Delivery")}</label>
                   <input type="date" value={shippingData.eta} onChange={e => setShippingData({...shippingData, eta: e.target.value})} style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
                 </div>
               </div>
 
-              <h3 style={{ fontSize: '1.1rem', color: '#1e293b', marginBottom: '1rem' }}>Product COAs</h3>
+              <h3 style={{ fontSize: '1.1rem', color: '#1e293b', marginBottom: '1rem' }}>{t('supplierQuote.productCoas', "Product COAs")}</h3>
               <table className="gcp-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.95rem' }}>
                 <thead>
                   <tr>
-                    <th style={{ textAlign: 'left', padding: '1rem', background: '#f8fafc' }}>Product</th>
-                    <th style={{ textAlign: 'right', padding: '1rem', background: '#f8fafc' }}>Action</th>
+                    <th style={{ textAlign: 'left', padding: '1rem', background: '#f8fafc' }}>{t('supplierQuote.product', "Product")}</th>
+                    <th style={{ textAlign: 'right', padding: '1rem', background: '#f8fafc' }}>{t('supplierQuote.action', "Action")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -188,7 +190,7 @@ export default function PublicSupplierQuote() {
                       </td>
                       <td style={{ textAlign: 'right', padding: '1rem' }}>
                         <button style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', border: '1px solid #3b82f6', borderRadius: '4px', background: '#eff6ff', color: '#1d4ed8', cursor: 'pointer' }}>
-                          Upload COA (PDF)
+                          {t('supplierQuote.uploadCoa', "Upload COA (PDF)")}
                         </button>
                       </td>
                     </tr>
@@ -203,7 +205,7 @@ export default function PublicSupplierQuote() {
                 className="gcp-btn gcp-btn--primary" 
                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', fontSize: '1rem', background: '#3b82f6' }}
               >
-                <Send size={18} /> Confirm Shipment
+                <Send size={18} /> {t('supplierQuote.confirmShipment', "Confirm Shipment")}
               </button>
             </div>
           </Card>
@@ -218,22 +220,22 @@ export default function PublicSupplierQuote() {
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', justifyContent: 'center', color: '#64748b' }}>
           <ShieldCheck size={20} />
-          <span style={{ fontSize: '0.9rem', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>Secure Supplier Portal</span>
+          <span style={{ fontSize: '0.9rem', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>{t('supplierQuote.securePortal', "Secure Supplier Portal")}</span>
         </div>
 
         <Card style={{ padding: '0', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.05)' }}>
           <div style={{ padding: '2rem', background: 'white', borderBottom: '1px solid #e2e8f0' }}>
-            <h1 style={{ margin: '0 0 0.5rem', fontSize: '1.5rem', color: '#0f172a' }}>Request For Quote #{id.slice(0,6).toUpperCase()}</h1>
-            <p style={{ margin: 0, color: '#64748b' }}>Please provide your best unit cost for the items requested below. The client's identity is protected by your broker.</p>
+            <h1 style={{ margin: '0 0 0.5rem', fontSize: '1.5rem', color: '#0f172a' }}>{t('supplierQuote.requestForQuote', "Request For Quote #{{id}}", { id: id.slice(0,6).toUpperCase() })}</h1>
+            <p style={{ margin: 0, color: '#64748b' }}>{t('supplierQuote.provideBestCost', "Please provide your best unit cost for the items requested below. The client's identity is protected by your broker.")}</p>
           </div>
 
           <div style={{ padding: '2rem', background: '#fafafa' }}>
             <table className="gcp-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.95rem' }}>
               <thead>
                 <tr>
-                  <th style={{ textAlign: 'left', padding: '1rem', background: '#f8fafc' }}>Product Description</th>
-                  <th style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc' }}>Required Qty</th>
-                  <th style={{ textAlign: 'right', padding: '1rem', background: '#f8fafc' }}>Your Unit Cost (USD)</th>
+                  <th style={{ textAlign: 'left', padding: '1rem', background: '#f8fafc' }}>{t('supplierQuote.productDesc', "Product Description")}</th>
+                  <th style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc' }}>{t('supplierQuote.reqQty', "Required Qty")}</th>
+                  <th style={{ textAlign: 'right', padding: '1rem', background: '#f8fafc' }}>{t('supplierQuote.unitCost', "Your Unit Cost (USD)")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -268,7 +270,7 @@ export default function PublicSupplierQuote() {
               className="gcp-btn gcp-btn--primary" 
               style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', fontSize: '1rem' }}
             >
-              <Send size={18} /> Submit Pricing
+              <Send size={18} /> {t('supplierQuote.submitPricing', "Submit Pricing")}
             </button>
           </div>
         </Card>

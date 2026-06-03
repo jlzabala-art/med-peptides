@@ -27,6 +27,11 @@ export default function AdminFinanceTab({ activeSubTab }) {
   useEffect(() => {
     if (loading) return;
     const mrr = activeSubs * 299;
+    
+    // Inject unpaid invoices context for AI
+    const unpaidInvoices = dashboardData?.pendingInvoices || [];
+    const topUnpaid = unpaidInvoices.slice(0, 5).map(inv => `${inv.customer_name} (${inv.balance} AED due ${inv.due_date})`);
+    
     const payload = {
       financial_context: {
         total_cash_balance: totalBalance,
@@ -34,12 +39,19 @@ export default function AdminFinanceTab({ activeSubTab }) {
         mrr: mrr,
         arr: mrr * 12,
         budget_alerts: 'Software category is over budget at 125%',
-        cash_runway_months: (totalBalance / 35000).toFixed(1)
-      }
+        cash_runway_months: (totalBalance / 35000).toFixed(1),
+        unpaid_invoices_count: unpaidInvoices.length,
+        unpaid_invoices_top_5: topUnpaid
+      },
+      ai_suggested_prompts: [
+        { label: 'Risk Analysis', prompt: 'Which unpaid invoices are at highest risk of default based on history?' },
+        { label: 'Draft Reminder', prompt: 'Draft a polite payment reminder email for the top unpaid invoice.' },
+        { label: 'Cash Flow Forecast', prompt: 'Based on pending invoices, what is our expected cash flow next week?' }
+      ]
     };
     window.dispatchEvent(new CustomEvent('UPDATE_GLOBAL_CONTEXT', { detail: payload }));
     return () => window.dispatchEvent(new CustomEvent('UPDATE_GLOBAL_CONTEXT', { detail: null }));
-  }, [loading, totalBalance, activeSubs]);
+  }, [loading, totalBalance, activeSubs, dashboardData]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);

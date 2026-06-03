@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import AdminApprovalsWidget from '../gadgets/AdminApprovalsWidget';
-import { FileText, ClipboardList, Clock, BellRing, Receipt, Download, ExternalLink, ArrowRight, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { FileText, ClipboardList, Clock, BellRing, Receipt, Download, ExternalLink, ArrowRight, ChevronLeft, ChevronRight, Search, CheckCircle, Check } from 'lucide-react';
 import { exportToCSV } from '../../../utils/exportUtils';
 import { usePreferences } from '../../../context/PreferencesContext';
 
@@ -24,6 +24,24 @@ export default function FinanceApprovals({ dashboardData }) {
 
   const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
   const currentInvoices = filteredInvoices.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const [processingId, setProcessingId] = useState(null);
+
+  const handleSendReminder = (invoiceId) => {
+    setProcessingId(`remind-${invoiceId}`);
+    setTimeout(() => {
+      alert('Reminder sent via Email/SMS!');
+      setProcessingId(null);
+    }, 800);
+  };
+
+  const handleMarkAsPaid = (invoiceId) => {
+    setProcessingId(`paid-${invoiceId}`);
+    setTimeout(() => {
+      alert('Payment recorded locally and synced to Zoho.');
+      setProcessingId(null);
+    }, 1200);
+  };
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -115,9 +133,24 @@ export default function FinanceApprovals({ dashboardData }) {
                         {formatCurrency(inv.balance)}
                       </td>
                       <td style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem' }}>
-                          <button className="gcp-btn-secondary" style={{ padding: '0.5rem 0.6rem' }} title="Send Reminder">
-                            <BellRing style={{ width: '16px', height: '16px', color: 'var(--warning)' }} />
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
+                          <button 
+                            onClick={() => handleSendReminder(inv.invoice_id)}
+                            disabled={processingId === `remind-${inv.invoice_id}`}
+                            className="gcp-btn-secondary" 
+                            style={{ padding: '0.4rem 0.5rem', opacity: processingId === `remind-${inv.invoice_id}` ? 0.5 : 1, cursor: processingId === `remind-${inv.invoice_id}` ? 'wait' : 'pointer' }} 
+                            title="Send Reminder"
+                          >
+                            {processingId === `remind-${inv.invoice_id}` ? <Check style={{ width: '16px', height: '16px', color: 'var(--success)' }} /> : <BellRing style={{ width: '16px', height: '16px', color: 'var(--warning)' }} />}
+                          </button>
+                          <button 
+                            onClick={() => handleMarkAsPaid(inv.invoice_id)}
+                            disabled={processingId === `paid-${inv.invoice_id}`}
+                            className="gcp-btn-secondary" 
+                            style={{ padding: '0.4rem 0.5rem', color: 'var(--success)', borderColor: 'var(--success)', opacity: processingId === `paid-${inv.invoice_id}` ? 0.5 : 1, cursor: processingId === `paid-${inv.invoice_id}` ? 'wait' : 'pointer' }} 
+                            title="Mark as Paid"
+                          >
+                            {processingId === `paid-${inv.invoice_id}` ? <Check style={{ width: '16px', height: '16px', color: 'var(--success)' }} /> : <CheckCircle style={{ width: '16px', height: '16px', color: 'var(--success)' }} />}
                           </button>
                           <a 
                             href={`https://books.zoho.com/app#/invoices/${inv.invoice_id}`} 

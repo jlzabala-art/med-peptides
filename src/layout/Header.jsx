@@ -14,6 +14,7 @@ import CatalogMegaMenu from '../navigation/CatalogMegaMenu';
 import ResourcesDropdown from '../navigation/ResourcesDropdown';
 import WorkplaceDropdown from '../navigation/WorkplaceDropdown';
 import UserDropdown from '../navigation/UserDropdown';
+import { useTranslation } from 'react-i18next';
 
 // ── Static style constants (allocated once, not per render) ──────────────────
 const S = {
@@ -92,6 +93,7 @@ function Header(props) {
   const { user, isProfessional, isAdmin, activeRole, logout } = useAuth();
   const { tenant } = useTenant();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const logoUrl = tenant?.branding?.logoUrl;
   const tenantName = tenant?.name;
@@ -181,9 +183,9 @@ function Header(props) {
       }}>
         {activeRole === 'guest' || !user ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-            <span>Guest View</span>
+            <span>{t('header.guestView', 'Guest View')}</span>
             <span style={{ opacity: 0.5 }}>|</span>
-            <span style={{ opacity: 0.9 }}>Log in to access professional portals</span>
+            <span style={{ opacity: 0.9 }}>{t('header.loginPrompt', 'Log in to access professional portals')}</span>
             <button 
               onClick={() => navigate('/login')}
               style={{
@@ -211,11 +213,11 @@ function Header(props) {
                 e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
               }}
             >
-              Log In
+              {t('header.logIn', 'Log In')}
             </button>
           </div>
         ) : (
-          <span>{ROLE_LABELS[activeRole] || `${activeRole.toUpperCase()} VIEW`}</span>
+          <span>{ROLE_LABELS[activeRole] ? t(`header.roles.${activeRole}`, ROLE_LABELS[activeRole]) : t('header.defaultView', `${activeRole.toUpperCase()} VIEW`)}</span>
         )}
       </div>
 
@@ -268,7 +270,7 @@ function Header(props) {
                     onMouseOver={(e) => { e.currentTarget.style.color = 'var(--secondary)'; }}
                     onMouseOut={(e) => { e.currentTarget.style.color = navColor; }}
                   >
-                    {nav.label}
+                    {t(`nav.${nav.label.replace(/\\s+/g, '')}`, nav.label)}
                   </Link>
                 );
               }
@@ -287,7 +289,7 @@ function Header(props) {
                     onMouseOver={(e) => { e.currentTarget.style.color = 'var(--secondary)'; }}
                     onMouseOut={(e) => { e.currentTarget.style.color = navColor; }}
                   >
-                    {nav.label}
+                    {t(`nav.${nav.label.replace(/\\s+/g, '')}`, nav.label)}
                     <ChevronDown size={13} style={{ transition: 'transform 0.2s', transform: isActive ? 'rotate(180deg)' : 'rotate(0)' }} />
                   </button>
 
@@ -320,9 +322,9 @@ function Header(props) {
                           onMouseOver={e => !item.soon && (e.currentTarget.style.background = 'var(--background)')}
                           onMouseOut={e => (e.currentTarget.style.background = 'transparent')}
                         >
-                          {item.label}
+                          {t(`nav.${item.label.replace(/\\s+/g, '')}`, item.label)}
                           {item.soon && (
-                            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--secondary)', background: 'var(--secondary-alpha, rgba(100,200,150,0.12))', padding: '2px 7px', borderRadius: '20px', letterSpacing: '0.05em' }}>COMING SOON</span>
+                            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--secondary)', background: 'var(--secondary-alpha, rgba(100,200,150,0.12))', padding: '2px 7px', borderRadius: '20px', letterSpacing: '0.05em' }}>{t('header.comingSoon', 'COMING SOON')}</span>
                           )}
                         </Link>
                       ))}
@@ -360,12 +362,12 @@ function Header(props) {
                 {user ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                     {isProfessional ? <ShieldCheck size={14} color="var(--success)" /> : <User size={14} />}
-                    <span>{user.displayName?.split(' ')[0] || 'Account'}</span>
+                    <span>{user.displayName?.split(' ')[0] || t('header.account', 'Account')}</span>
                   </div>
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                     <User size={14} />
-                    <span>Login</span>
+                    <span>{t('header.logIn', 'Login')}</span>
                   </div>
                 )}
                 <ChevronDown size={12} style={{ transform: activeDropdown === 'user' ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
@@ -421,7 +423,7 @@ function Header(props) {
               }}
             >
               <Sparkles size={18} fill="#4285F4" />
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>Atlas AI</span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>{t('header.atlasAI', 'Atlas AI')}</span>
             </button>
 
             {/* Search button — desktop AND mobile header */}
@@ -488,9 +490,9 @@ function Header(props) {
                       whiteSpace: 'nowrap',
                       lineHeight: 1.2,
                     }}>
-                      {protocols > 0 && <span title="Protocols">🧬{protocols}</span>}
-                      {kits > 0 && <span title="Kits" style={{ marginLeft: protocols > 0 ? '3px' : 0 }}>📦{kits}</span>}
-                      {peptides > 0 && <span title="Peptides" style={{ marginLeft: (protocols > 0 || kits > 0) ? '3px' : 0 }}>🧪{peptides}</span>}
+                      {protocols > 0 && <span title={t('header.protocols', 'Protocols')}>🧬{protocols}</span>}
+                      {kits > 0 && <span title={t('header.kits', 'Kits')} style={{ marginLeft: protocols > 0 ? '3px' : 0 }}>📦{kits}</span>}
+                      {peptides > 0 && <span title={t('header.peptides', 'Peptides')} style={{ marginLeft: (protocols > 0 || kits > 0) ? '3px' : 0 }}>🧪{peptides}</span>}
                     </span>
                   );
                 }

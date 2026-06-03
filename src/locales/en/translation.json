@@ -55,10 +55,148 @@
       "cta_secondary": "Scientific Documentation"
     },
     "footer": {
-      "rights": "All rights reserved. For healthcare professionals only."
+      "rights": "All rights reserved. For healthcare professionals only.",
+      "quickLinks": {
+        "title": "Quick Links",
+        "portfolio": "Portfolio",
+        "consult": "Clinical Consult",
+        "contact": "Contact"
+      },
+      "auth": {
+        "title": "Authentication",
+        "clientPortal": "Client Portal",
+        "clinicalPortal": "Clinical Portal"
+      },
+      "company": {
+        "title": "Company",
+        "about": "About Us",
+        "careers": "Careers",
+        "media": "Media Kit",
+        "social": "Social"
+      },
+      "legal": {
+        "title": "Legal & Compliance",
+        "terms": "Terms of Service",
+        "privacy": "Privacy Policy",
+        "distributors": "Authorized Distributors",
+        "regulatory": "Regulatory Data"
+      },
+      "copyright": "© {{year}} Atlas Health Group. All Rights Reserved.",
+      "disclaimer": "Information intended for healthcare professionals only. Not intended to diagnose, treat, cure, or prevent any disease."
     },
     "compliance": {
       "banner": "Important: For Research & Clinical Use Only. These products are intended for administration by qualified healthcare professionals."
+    },
+    "costBreakdown": {
+      "standardVial": "Standard vial recommended.",
+      "additionalVial": "Additional vial required due to 28-day opened-vial usability window. (Vial lasts {{weeksCoveredByOneVial}}w but expires in {{stabilityWeeks}}w)",
+      "singleVial": "Single vial covers the required protocol window safely.",
+      "title": "Economic Audit",
+      "qty": "Qty:",
+      "vials": "Vials",
+      "vial": "Vial",
+      "rate": "Rate:",
+      "unit": "unit",
+      "stabilityCompliant": "Stability window compliant.",
+      "totalUnits": "Total Units Required",
+      "products": "Products",
+      "estimatedTotal": "Estimated Total",
+      "acknowledge": "Acknowledge & Save"
+    },
+    "trustStrip": {
+      "purity": "≥98% Purity — Verified",
+      "labTested": "Independently Lab Tested",
+      "shipping": "Worldwide Tracked Shipping",
+      "fastShipping": "Ships the Same Day"
+    },
+    "quote": {
+      "notFound": "Quote not found or invalid link.",
+      "errorLoading": "Error loading quote.",
+      "accessDenied": "Access Denied",
+      "portalTitle": "Client Quote Portal",
+      "quoteNumber": "Quote #{{id}}",
+      "preparedFor": "Prepared for:",
+      "approved": "APPROVED",
+      "rejected": "REJECTED",
+      "tableItem": "Item",
+      "tableQty": "Qty",
+      "tableUnitPrice": "Unit Price",
+      "tableTotal": "Total",
+      "totalQuote": "Total Quote:",
+      "trackingInfo": "Tracking Information",
+      "carrier": "Carrier",
+      "trackingAWB": "Tracking (AWB)",
+      "estDelivery": "Est. Delivery",
+      "rejectBtn": "Reject Quote",
+      "acceptBtn": "Accept Quote",
+      "errorAction": "Error processing action."
+    },
+    "supplierQuote": {
+      "noLongerAccepting": "This quote is no longer accepting pricing updates.",
+      "errorSubmitting": "Error submitting prices.",
+      "pricingSubmitted": "Pricing Submitted!",
+      "thankYou": "Thank you. The Account Manager has been notified and will review your unit costs.",
+      "shipmentLogged": "Shipment Logged!",
+      "shipmentLoggedDesc": "Thank you for providing the shipping details. The client has been notified.",
+      "awb": "AWB",
+      "eta": "ETA",
+      "provideCarrierAwb": "Please provide Carrier and AWB Tracking Number.",
+      "errorSavingShipment": "Error saving shipment.",
+      "shippingPortal": "Supplier Shipping Portal",
+      "logisticsOrder": "Logistics for Order #{{id}}",
+      "provideTracking": "Please provide the tracking information for this shipment. Uploading COAs for each product is required.",
+      "trackingAwb": "Tracking AWB",
+      "productCoas": "Product COAs",
+      "product": "Product",
+      "action": "Action",
+      "uploadCoa": "Upload COA (PDF)",
+      "confirmShipment": "Confirm Shipment",
+      "securePortal": "Secure Supplier Portal",
+      "requestForQuote": "Request For Quote #{{id}}",
+      "provideBestCost": "Please provide your best unit cost for the items requested below. The client's identity is protected by your broker.",
+      "productDesc": "Product Description",
+      "reqQty": "Required Qty",
+      "unitCost": "Your Unit Cost (USD)",
+      "submitPricing": "Submit Pricing"
+    },
+    "pelletsPage": {
+      "metaTitle": "Hormone Pellets Catalog | Atlas Health",
+      "metaDesc": "Explore our premium range of hormone replacement pellets.",
+      "badge": "Clinical Grade",
+      "title1": "Hormone",
+      "title2": "Pellets",
+      "subtitle": "Advanced hormone replacement therapy options designed for sustained release and optimal physiological balance.",
+      "searchPlaceholder": "Search by name, objective, or keyword...",
+      "allGoals": "All",
+      "showing": "Showing",
+      "result": "result",
+      "results": "results",
+      "noPelletsFound": "No pellets found",
+      "adjustSearch": "Try adjusting your search or filters."
+    },
+    "pelletDetail": {
+      "loading": "Loading…",
+      "notFound": "Pellet not found.",
+      "metaTitle": "Atlas Health Pellets",
+      "back": "Back to Pellets",
+      "home": "Home",
+      "pellets": "Pellets",
+      "hormonePellet": "Hormone Pellet",
+      "general": "General",
+      "standardDose": "Standard Dose",
+      "tbd": "TBD",
+      "halfLife": "Half-life:",
+      "overview": "Overview",
+      "clinicalBrief": "Clinical Brief",
+      "therapeuticGoals": "Therapeutic Goals",
+      "mechanismsOfAction": "Mechanisms of Action",
+      "pharmacology": "Pharmacology",
+      "molWeight": "Mol. Weight",
+      "bioavailability": "Bioavailability",
+      "route": "Route",
+      "actions": "Actions",
+      "addToCart": "Add to Cart",
+      "contactProfessional": "Contact Professional"
     }
   }
 }

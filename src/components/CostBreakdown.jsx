@@ -8,8 +8,10 @@ import {
   Package, 
   DollarSign 
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function CostBreakdown({ protocol = {}, products = [], onClose, items: directItems }) {
+  const { t } = useTranslation();
   // Support both passing the full protocol object OR individual props
   const formData = protocol.formData || {};
   const timelineCache = directItems || protocol.timelineCache || [];
@@ -19,7 +21,7 @@ export default function CostBreakdown({ protocol = {}, products = [], onClose, i
   // Logic: Calculate vials needed based on dose, concentration, and 28-day stability window
   const calculateVials = (item) => {
     const product = products.find(p => p.name === item.name);
-    if (!product) return { count: 1, explanation: "Standard vial recommended." };
+    if (!product) return { count: 1, explanation: t('costBreakdown.standardVial', "Standard vial recommended.") };
 
     // Standard stability window (28 days / 4 weeks)
     const STABILITY_WEEKS = 4;
@@ -29,22 +31,18 @@ export default function CostBreakdown({ protocol = {}, products = [], onClose, i
     // If protocol duration > stability window, we check if we need more vials 
     // even if 1 vial has enough total volume.
     
-    // Let's assume 1 vial covers X weeks based on dosage.
-    // If dosage logic isn't fully available here, we'll use a heuristic for demonstration
-    // as per the prompt's requirement for the UI.
-    
     const weeksCoveredByOneVial = item.weeksCovered || 6; // Mocking or from item
     
     if (weeksCoveredByOneVial > STABILITY_WEEKS && protocolDurationWeeks > STABILITY_WEEKS) {
       return {
         count: 2,
-        explanation: `Additional vial required due to 28-day opened-vial usability window. (Vial lasts ${weeksCoveredByOneVial}w but expires in ${STABILITY_WEEKS}w)`
+        explanation: t('costBreakdown.additionalVial', `Additional vial required due to 28-day opened-vial usability window. (Vial lasts {{weeksCoveredByOneVial}}w but expires in {{stabilityWeeks}}w)`, { weeksCoveredByOneVial, stabilityWeeks: STABILITY_WEEKS })
       };
     }
 
     return {
       count: 1,
-      explanation: "Single vial covers the required protocol window safely."
+      explanation: t('costBreakdown.singleVial', "Single vial covers the required protocol window safely.")
     };
   };
 
@@ -74,7 +72,7 @@ export default function CostBreakdown({ protocol = {}, products = [], onClose, i
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-             <TrendingUp size={24} color="var(--primary)" /> Economic Audit
+             <TrendingUp size={24} color="var(--primary)" /> {t('costBreakdown.title', 'Economic Audit')}
           </h2>
           <button onClick={onClose} style={{ border: 'none', background: 'none', cursor: 'pointer' }}>
             <X size={24} />
@@ -105,11 +103,11 @@ export default function CostBreakdown({ protocol = {}, products = [], onClose, i
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.75rem', fontSize: '0.85rem' }}>
                    <div style={{ color: 'var(--text-muted)' }}>
                      <Package size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> 
-                     Qty: {count} {count > 1 ? 'Vials' : 'Vial'}
+                     {t('costBreakdown.qty', 'Qty:')} {count} {count > 1 ? t('costBreakdown.vials', 'Vials') : t('costBreakdown.vial', 'Vial')}
                    </div>
                    <div style={{ color: 'var(--text-muted)' }}>
                      <DollarSign size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> 
-                     Rate: ${unitPrice}/unit
+                     {t('costBreakdown.rate', 'Rate:')} ${unitPrice}/{t('costBreakdown.unit', 'unit')}
                    </div>
                 </div>
 
@@ -131,7 +129,7 @@ export default function CostBreakdown({ protocol = {}, products = [], onClose, i
                 )}
                 {count === 1 && (
                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.8rem', color: 'var(--color-success)' }}>
-                     <Info size={14} /> <span>Stability window compliant.</span>
+                     <Info size={14} /> <span>{t('costBreakdown.stabilityCompliant', 'Stability window compliant.')}</span>
                    </div>
                 )}
               </div>
@@ -141,11 +139,11 @@ export default function CostBreakdown({ protocol = {}, products = [], onClose, i
 
         <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: 'var(--color-bg-app)', borderRadius: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Total Units Required</span>
-            <span style={{ fontWeight: 800 }}>{timelineCache?.reduce((acc, p) => acc + (p.items?.length || 0), 0) || 0} Products</span>
+            <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{t('costBreakdown.totalUnits', 'Total Units Required')}</span>
+            <span style={{ fontWeight: 800 }}>{timelineCache?.reduce((acc, p) => acc + (p.items?.length || 0), 0) || 0} {t('costBreakdown.products', 'Products')}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #e2e8f0' }}>
-            <span style={{ fontSize: '1.1rem', fontWeight: 800 }}>Estimated Total</span>
+            <span style={{ fontSize: '1.1rem', fontWeight: 800 }}>{t('costBreakdown.estimatedTotal', 'Estimated Total')}</span>
             <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)' }}>
               ${costCache?.totalEstimatedCost || '0.00'}
             </span>
@@ -156,7 +154,7 @@ export default function CostBreakdown({ protocol = {}, products = [], onClose, i
             style={{ width: '100%', padding: '1.1rem', fontSize: '1rem' }}
             onClick={onClose}
           >
-            Acknowledge & Save
+            {t('costBreakdown.acknowledge', 'Acknowledge & Save')}
           </button>
         </div>
       </div>

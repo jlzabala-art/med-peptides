@@ -1,13 +1,15 @@
- 
 import React from 'react';
 import { ShieldCheck, Zap, Globe, FlaskConical } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const TrustStrip = () => {
+  const { t } = useTranslation();
+
   const items = [
-    { icon: <ShieldCheck size={18} />, text: "≥98% Purity — Verified" },
-    { icon: <FlaskConical size={18} />, text: "Independently Lab Tested" },
-    { icon: <Globe size={18} />, text: "Worldwide Tracked Shipping" },
-    { icon: <Zap size={18} />, text: "Ships the Same Day" }
+    { icon: <ShieldCheck size={18} />, text: t('trustStrip.purity', "≥98% Purity — Verified") },
+    { icon: <FlaskConical size={18} />, text: t('trustStrip.labTested', "Independently Lab Tested") },
+    { icon: <Globe size={18} />, text: t('trustStrip.shipping', "Worldwide Tracked Shipping") },
+    { icon: <Zap size={18} />, text: t('trustStrip.fastShipping', "Ships the Same Day") }
   ];
 
   return (
