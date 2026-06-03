@@ -388,6 +388,35 @@ function ProductMicrosite({ product, onUpdateProduct }) {
             </button>
           </form>
         </div>
+      {/* Accordion 4: Competitor Tracking */}
+      <AccordionHeader title="Análisis de Competencia (Track Pricing)" id="competitors" />
+      <div 
+        id="accordion-content-competitors"
+        style={{ 
+          display: expandedAccordion === 'competitors' ? 'block' : 'none',
+          padding: '1.5rem', 
+          borderBottom: '1px solid #e2e8f0',
+          animation: 'fadeIn 0.3s ease-in-out',
+          backgroundColor: '#f8fafc'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'white', padding: '1rem 1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+          <div style={{ flex: 1 }}>
+            <h4 style={{ margin: '0 0 0.25rem 0', color: '#0f172a' }}>Monitoreo Activo de Precios</h4>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
+              Si activas esta opción, el scraper buscará los precios de este producto en los catálogos de los competidores cada noche.
+            </p>
+          </div>
+          <AppStatusToggle 
+            isActive={!!product.trackCompetitors}
+            onToggle={() => {
+              if (onUpdateProduct) {
+                onUpdateProduct(product.id, { trackCompetitors: !product.trackCompetitors });
+              }
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
