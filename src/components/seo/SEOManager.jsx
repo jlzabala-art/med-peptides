@@ -127,7 +127,7 @@ const SEOManager = ({
       "@type": "Organization",
       "name": "Atlas Health",
       "url": window.location.origin,
-      "logo": `${window.location.origin}/logo.png`,
+      "logo": `${window.location.origin}/atlas-health-logo.png`,
       "description": "Premium Research Peptides & Clinical Protocols",
       "contactPoint": {
         "@type": "ContactPoint",

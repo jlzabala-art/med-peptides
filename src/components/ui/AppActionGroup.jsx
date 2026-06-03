@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Eye, Edit, Link, DollarSign, Mail, Archive, Trash2, CheckCircle, XCircle, MoreHorizontal, EyeOff, Download, Package, ClipboardList, Bot } from 'lucide-react';
+import { Search, Eye, Edit, Link, DollarSign, Mail, Archive, Trash2, CheckCircle, XCircle, MoreHorizontal, EyeOff, Download, Package, ClipboardList, Bot } from 'lucide-react';
 
 const ACTION_CONFIG = {
   view: { icon: Eye, label: 'View', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-primary)' },
@@ -18,6 +18,7 @@ const ACTION_CONFIG = {
   ai: { icon: Bot, label: 'AI Consult', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-primary)' },
   delete: { icon: Trash2, label: 'Delete', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-danger)' },
   contact: { icon: Mail, label: 'Contact', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-primary)' },
+  search: { icon: Search, label: 'Search Competitors', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-primary)' },
 };
 
 export default function AppActionGroup({ actions, maxVisible = 2 }) {

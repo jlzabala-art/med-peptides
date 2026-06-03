@@ -353,7 +353,7 @@ useEffect(() => {
               "name": "Atlas Health",
               "logo": {
                 "@type": "ImageObject",
-                "url": "https://Atlas Health.com/logo.png"
+                "url": "https://Atlas Health.com/atlas-health-logo.png"
               }
             },
             "mainEntityOfPage": {

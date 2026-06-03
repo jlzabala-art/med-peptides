@@ -25,7 +25,11 @@ import {
   Bot,
   ShoppingCart,
   MessageSquare,
-  DollarSign
+  DollarSign,
+  Activity,
+  FileText,
+  LineChart,
+  Stethoscope
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import DataTable from '../ui/DataTable';
@@ -40,6 +44,8 @@ import InlineEditField from '../ui/InlineEditField';
 import BulkOrderSelectionModal from './BulkOrders/BulkOrderSelectionModal';
 import TooltipWrapper from '../ui/TooltipWrapper';
 import AdminPageHeader from './AdminPageHeader';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../../firebase';
 
 // ─── ProductMicrosite Component ────────────────────────────────────────────────
 function ProductMicrosite({ product, onUpdateProduct }) {
@@ -139,7 +145,7 @@ function ProductMicrosite({ product, onUpdateProduct }) {
 
   const materia = product.materia_medica;
 
-  const AccordionHeader = ({ title, id }) => {
+  const AccordionHeader = ({ title, subtitle, icon: Icon, id }) => {
     const isExpanded = expandedAccordion === id;
     return (
       <button 
@@ -156,8 +162,6 @@ function ProductMicrosite({ product, onUpdateProduct }) {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          fontWeight: 600,
-          color: isExpanded ? '#0f172a' : '#475569',
           transition: 'all 0.2s ease',
           outline: 'none',
           border: 'none',
@@ -168,8 +172,22 @@ function ProductMicrosite({ product, onUpdateProduct }) {
         onMouseEnter={(e) => { if (!isExpanded) e.target.style.backgroundColor = '#f8fafc'; }}
         onMouseLeave={(e) => { if (!isExpanded) e.target.style.backgroundColor = '#ffffff'; }}
       >
-        <span style={{ fontSize: '0.95rem' }}>{title}</span>
-        <span style={{ color: '#94a3b8', display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: '40px', height: '40px', borderRadius: '8px',
+            backgroundColor: isExpanded ? '#eff6ff' : '#f1f5f9',
+            color: isExpanded ? '#2563eb' : '#64748b',
+            transition: 'all 0.2s ease'
+          }}>
+            {Icon && <Icon size={20} />}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: '1rem', fontWeight: 600, color: isExpanded ? '#0f172a' : '#334155' }}>{title}</span>
+            {subtitle && <span style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>{subtitle}</span>}
+          </div>
+        </div>
+        <span style={{ color: '#94a3b8', display: 'flex', alignItems: 'center', padding: '0.5rem', borderRadius: '50%', backgroundColor: isExpanded ? '#e2e8f0' : 'transparent' }}>
           {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
         </span>
       </button>
@@ -192,7 +210,12 @@ function ProductMicrosite({ product, onUpdateProduct }) {
 
 
       {/* Accordion 1: Clinical Information */}
-      <AccordionHeader title="Información Clínica (Materia Medica)" id="clinical" />
+      <AccordionHeader 
+        title="Clinical Information" 
+        subtitle="Materia Medica, MOA, and contraindications"
+        icon={Stethoscope}
+        id="clinical" 
+      />
       <div 
         id="accordion-content-clinical"
         style={{ 
@@ -266,7 +289,7 @@ function ProductMicrosite({ product, onUpdateProduct }) {
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#334155'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#0f172a'; }}
               >
-                <MessageSquare size={18} /> Solicitar Información Adicional
+                <MessageSquare size={18} /> Request Additional Information
               </button>
             </div>
           </div>
@@ -285,7 +308,12 @@ function ProductMicrosite({ product, onUpdateProduct }) {
       </div>
 
       {/* Accordion 2: Batches & CoAs */}
-      <AccordionHeader title="Lotes y CoAs" id="batches" />
+      <AccordionHeader 
+        title="Batches & CoAs" 
+        subtitle="Quality control and laboratory certificates"
+        icon={FileText}
+        id="batches" 
+      />
       <div 
         id="accordion-content-batches"
         style={{ 
@@ -297,7 +325,7 @@ function ProductMicrosite({ product, onUpdateProduct }) {
         }}
       >
         {loadingBatches ? (
-          <div style={{ color: '#64748b', fontSize: '0.9rem' }}>Cargando lotes...</div>
+          <div style={{ color: '#64748b', fontSize: '0.9rem' }}>Loading batches...</div>
         ) : batches.length === 0 ? (
           <div style={{ color: '#64748b', fontSize: '0.9rem', textAlign: 'center', padding: '1rem' }}>No batches or CoAs registered for this product.</div>
         ) : (
@@ -305,7 +333,7 @@ function ProductMicrosite({ product, onUpdateProduct }) {
             {batches.map(batch => (
               <div key={batch.id} style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem' }}>
-                  <h4 style={{ margin: 0, fontSize: '1rem', color: '#0f172a', fontWeight: 700 }}>Documento: {batch.fileName || batch.id}</h4>
+                  <h4 style={{ margin: 0, fontSize: '1rem', color: '#0f172a', fontWeight: 700 }}>Document: {batch.fileName || batch.id}</h4>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', backgroundColor: '#e2e8f0', color: '#475569', borderRadius: '4px', fontWeight: 600 }}>{batch.documentType || 'CoA'}</span>
                   </div>
@@ -313,17 +341,19 @@ function ProductMicrosite({ product, onUpdateProduct }) {
                 
                 {batch.extractedData && (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', fontSize: '0.85rem' }}>
-                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Péptido</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.peptide_name || 'N/A'}</span></div>
-                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Dosis</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.dosage || 'N/A'}</span></div>
-                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Pureza HPLC</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.purity_percentage || batch.extractedData.purityHPLC ? `${batch.extractedData.purity_percentage || batch.extractedData.purityHPLC}` : 'N/A'}</span></div>
-                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Net Peptide Content</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.netPeptideContent ? `${batch.extractedData.netPeptideContent}` : 'N/A'}</span></div>
-                    <div><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Resultado / Status</span><span style={{ fontWeight: 600, color: batch.extractedData.conclusion === 'Pass' || batch.extractedData.conclusion === 'Approved' ? '#10b981' : '#f59e0b' }}>{batch.extractedData.conclusion || 'N/A'}</span></div>
+                    <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px' }}><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>Peptide</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.peptide_name || 'N/A'}</span></div>
+                    <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px' }}><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>Dosage</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.dosage || 'N/A'}</span></div>
+                    <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px' }}><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>HPLC Purity</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.purity_percentage || batch.extractedData.purityHPLC ? `${batch.extractedData.purity_percentage || batch.extractedData.purityHPLC}` : 'N/A'}</span></div>
+                    <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px' }}><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>Net Content</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.netPeptideContent ? `${batch.extractedData.netPeptideContent}` : 'N/A'}</span></div>
+                    <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px' }}><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>Result / Status</span><span style={{ fontWeight: 700, color: batch.extractedData.conclusion === 'Pass' || batch.extractedData.conclusion === 'Approved' ? '#10b981' : '#f59e0b' }}>{batch.extractedData.conclusion || 'N/A'}</span></div>
                   </div>
                 )}
                 
                 {batch.url && (
                   <div style={{ marginTop: '1rem', borderTop: '1px solid #e2e8f0', paddingTop: '0.75rem' }}>
-                    <a href={batch.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>Ver Documento Original (PDF) &rarr;</a>
+                    <a href={batch.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: '#3b82f6', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <FileText size={14} /> View Original Document (PDF) &rarr;
+                    </a>
                   </div>
                 )}
               </div>
@@ -333,7 +363,12 @@ function ProductMicrosite({ product, onUpdateProduct }) {
       </div>
 
       {/* Accordion 3: AI Access */}
-      <AccordionHeader title="Acceso al AI (ClinicDAG Asistente)" id="ai" />
+      <AccordionHeader 
+        title="AI Access (ClinicDAG Assistant)" 
+        subtitle="Chat with AI about this specific product"
+        icon={Bot}
+        id="ai" 
+      />
       <div 
         id="accordion-content-ai"
         style={{ 
@@ -380,7 +415,7 @@ function ProductMicrosite({ product, onUpdateProduct }) {
               type="text" 
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
-              placeholder="Pregunta algo sobre el perfil clínico..."
+              placeholder="Ask something about the clinical profile..."
               style={{ flex: 1, padding: '1rem 1.5rem', border: 'none', backgroundColor: 'transparent', outline: 'none', fontSize: '0.9rem', color: '#0f172a' }}
             />
             <button type="submit" disabled={!chatInput.trim() || isTyping} style={{ padding: '0 1.5rem', backgroundColor: 'transparent', border: 'none', color: '#3b82f6', fontWeight: 600, cursor: 'pointer', opacity: (!chatInput.trim() || isTyping) ? 0.5 : 1 }}>
@@ -389,7 +424,12 @@ function ProductMicrosite({ product, onUpdateProduct }) {
           </form>
         </div>
       {/* Accordion 4: Competitor Tracking */}
-      <AccordionHeader title="Análisis de Competencia (Track Pricing)" id="competitors" />
+      <AccordionHeader 
+        title="Competitor Analysis (Track Pricing)" 
+        subtitle="Monitor competitor prices daily"
+        icon={LineChart}
+        id="competitors" 
+      />
       <div 
         id="accordion-content-competitors"
         style={{ 
@@ -402,9 +442,9 @@ function ProductMicrosite({ product, onUpdateProduct }) {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'white', padding: '1rem 1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
           <div style={{ flex: 1 }}>
-            <h4 style={{ margin: '0 0 0.25rem 0', color: '#0f172a' }}>Monitoreo Activo de Precios</h4>
+            <h4 style={{ margin: '0 0 0.25rem 0', color: '#0f172a' }}>Active Price Monitoring</h4>
             <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
-              Si activas esta opción, el scraper buscará los precios de este producto en los catálogos de los competidores cada noche.
+              If you enable this option, the scraper will search for this product's prices in competitors' catalogs every night.
             </p>
           </div>
           <AppStatusToggle 
@@ -949,6 +989,7 @@ export default function AdminProductsTab({
         detail: { product: p.name, sku: p.sku }
       }));
     } },
+    { type: 'search', label: 'Search Competitors', onClick: () => handleScrapeCompetitor(p) },
     { type: 'delete', onClick: () => handleDeleteProduct(p.id) }
   ];
   return (
@@ -962,6 +1003,29 @@ export default function AdminProductsTab({
       },
     });
   }
+
+  const handleScrapeCompetitor = async (p) => {
+    toast.info(`Buscando precios para ${p.name}...`);
+    try {
+      // Using fetch directly since forceScrapeCompetitors is an onRequest (HTTP) function
+      const url = `https://us-central1-med-peptides-app.cloudfunctions.net/forceScrapeCompetitors?productId=${encodeURIComponent(p.id)}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: { productId: p.id } })
+      });
+      
+      if (!res.ok) throw new Error('Network response was not ok');
+      const data = await res.json();
+      
+      toast.success(`Precios actualizados para ${p.name}`);
+      // Navigate to pricing tab as requested
+      navigate(`/admin/prices?sku=${encodeURIComponent(p.sku || '')}&productId=${encodeURIComponent(p.id || '')}`);
+    } catch (error) {
+      console.error('Error scraping:', error);
+      toast.error('Error al buscar precios.');
+    }
+  };
 
   const handleAddToBulkOrder = async (selectedIds) => {
     const selectedProducts = products.filter(p => selectedIds.includes(p.id));

@@ -764,11 +764,10 @@ function App() {
 
 
   const routerProps = {
-    location, navigate, tenantNavigate, activeRole, isProfessional, isAdmin, userProfile,
-    handleCategorySelect, handleProductSelect, visibleProducts, searchQuery, setSearchQuery,
-    setSearchInitialTab, setActiveModal, activeModal, region, setRegion, cart, setCart, updateCart,
-    toggleCompare, compareList, setPendingQuote, settings, allFaqs, scrolled, setManualRegionChange,
-    cartCount, isHome, pendingQuote,
+    location, navigate, tenantNavigate,
+    handleCategorySelect, handleProductSelect, visibleProducts,
+    setPendingQuote, allFaqs,
+    isHome, pendingQuote,
   };
 
   // Public auth routes (/login, /login?tab=register) must NEVER be blocked by the loading gate.

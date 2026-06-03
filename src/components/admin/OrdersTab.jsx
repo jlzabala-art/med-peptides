@@ -50,7 +50,7 @@ import AdminPageHeader from './AdminPageHeader';
 // Template for admin-side order confirmation email to customer/doctor
 const EMAILJS_CONFIRM_TEMPLATE = 'template_7unfks8';
 
-export default function OrdersTab({ buyerId = null, accountManagerId = null, doctorId = null, readOnly = false }) {
+export default function OrdersTab({ buyerId = null, accountManagerId = null, doctorId = null, readOnly = false, viewMode = 'admin' }) {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);

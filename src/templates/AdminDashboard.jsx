@@ -165,6 +165,7 @@ const NAV_GROUPS = [
     label: 'Marketing & Brand',
     items: [
       { id: 'email-campaigns',  label: 'Email Campaigns',     icon: Mail },
+      { id: 'marketing',         label: 'Content / Social',    icon: Globe },
       { id: 'newsletter',       label: 'Newsletter Signups',  icon: Mail },
       { id: 'email-templates',  label: 'Email Templates',     icon: FileText },
       { id: 'drip-marketing',   label: 'Drip Sequences',      icon: Zap },

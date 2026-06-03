@@ -118,3 +118,16 @@ exports.logGitBackup = backupEndpoints.logGitBackup;
 
 // -- Archiving --
 exports.archiveOldLogs = require('./src/cron/archiveLogs').archiveOldLogs;
+
+// -- LinkedIn --
+const linkedinAuth = require('./src/http/linkedinAuth');
+exports.generateLinkedinAuthUrl = linkedinAuth.generateAuthUrl;
+exports.handleLinkedinAuthCallback = linkedinAuth.handleAuthCallback;
+
+exports.linkedinAutoPost = require('./src/triggers/linkedinAutoPost').linkedinAutoPost;
+
+// -- Trending Topics Blog Cron --
+exports.trendingTopicsBlog = require('./src/cron/trendingTopicsBlog').trendingTopicsBlog;
+
+// -- LinkedIn Token Refresh Cron --
+exports.linkedinTokenRefresh = require('./src/cron/linkedinTokenRefresh').linkedinTokenRefresh;

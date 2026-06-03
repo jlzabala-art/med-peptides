@@ -62,6 +62,7 @@ const ImportCoATab = React.lazy(() => import('../components/admin/imports/Import
 const ImportCatalogsTab = React.lazy(() => import('../components/admin/imports/ImportCatalogsTab'));
 const ImportRFQTab = React.lazy(() => import('../components/admin/imports/ImportRFQTab'));
 const ShippingTrackerTab = React.lazy(() => import('../components/supplier/ShippingTrackerTab'));
+const AdminMarketingTab = React.lazy(() => import('../components/admin/AdminMarketingTab'));
 // ── Premium loading skeleton for lazy-loaded admin tabs ────────────────────────
 const AdminTabSkeleton = () => (
   <div style={{ padding: '2rem' }}>
@@ -120,6 +121,7 @@ export default function AdminRoutes() {
         <Route path="drip-marketing" element={<AdminTabErrorBoundary tabId="drip-marketing" tabLabel="Drip Marketing"><DripMarketing ownerId="admin" ownerType="admin" /></AdminTabErrorBoundary>} />
         <Route path="pricing-visibility" element={<AdminTabErrorBoundary tabId="pricing-visibility" tabLabel="Pricing Visibility"><AdminPlaceholderTab title="Pricing Visibility" description="Configure regional pricing walls and product visibility." tags={['Pricing', 'Access']} color="var(--color-primary)" /></AdminTabErrorBoundary>} />
         <Route path="leads" element={<AdminTabErrorBoundary tabId="leads" tabLabel="Leads"><AdminLeadsTab /></AdminTabErrorBoundary>} />
+        <Route path="marketing" element={<AdminTabErrorBoundary tabId="marketing" tabLabel="Marketing & Content"><AdminMarketingTab /></AdminTabErrorBoundary>} />
         <Route path="messages" element={<AdminTabErrorBoundary tabId="messages" tabLabel="Messages"><MessagingWidget role="admin" ownerId="admin" /></AdminTabErrorBoundary>} />
         <Route path="home-layout" element={<AdminTabErrorBoundary tabId="home-layout" tabLabel="Home Layout"><AdminHomeLayoutTab /></AdminTabErrorBoundary>} />
         <Route path="protocols" element={<AdminTabErrorBoundary tabId="protocols" tabLabel="Protocols"><AdminProtocolsTab /></AdminTabErrorBoundary>} />

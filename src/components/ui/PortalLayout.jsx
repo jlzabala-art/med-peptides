@@ -11,6 +11,8 @@ import { useAuth } from '../../context/AuthContext';
 import { usePreferences } from '../../context/PreferencesContext.jsx';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import AvatarGenerator from './AvatarGenerator';
+import AdminPortalSwitcher from '../shared/AppHeader/AdminPortalSwitcher';
+import GlobalPreferencesDropdown from '../shared/AppHeader/GlobalPreferencesDropdown';
 
 // ── Atlas AI — Suggested Prompts per Role ──────────────────────────────────────
 const ROLE_SUGGESTED_PROMPTS = {
@@ -302,7 +304,7 @@ export default function PortalLayout({
           )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <img 
-              src="/logo-icon-only.png" 
+              src="/atlas-health-logo.png" 
               alt="Atlas Health" 
               style={{ height: '48px', width: 'auto', objectFit: 'contain' }} 
               onError={(e) => { e.target.onerror = null; e.target.src = '/logo.png'; }} 
@@ -351,29 +353,13 @@ export default function PortalLayout({
           
           {/* Preferences Toggles */}
           {!isMobile && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginRight: '0.5rem', padding: '0.2rem', backgroundColor: 'rgba(255,255,255,0.4)', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.05)' }}>
-              <select 
-                value={currency} 
-                onChange={(e) => updateCurrency(e.target.value)}
-                style={{ background: 'transparent', border: 'none', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-secondary)', cursor: 'pointer', outline: 'none' }}
-                title="Global Currency"
-              >
-                <option value="USD">USD</option>
-                <option value="AED">AED</option>
-                <option value="DUAL">DUAL</option>
-              </select>
-              <div style={{ width: '1px', height: '12px', background: 'rgba(0,0,0,0.1)' }}></div>
-              <button 
-                onClick={() => updateDensity(density === 'compact' ? 'comfortable' : 'compact')}
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0 4px' }}
-                title={density === 'compact' ? "Switch to Comfortable View" : "Switch to Compact View"}
-              >
-                {density === 'compact' ? <List size={14} color="var(--color-text-secondary)" /> : <Maximize2 size={14} color="var(--color-text-secondary)" />}
-              </button>
+            <div style={{ display: 'flex', alignItems: 'center', marginRight: '0.5rem' }}>
+              <GlobalPreferencesDropdown />
             </div>
           )}
 
           {headerActions}
+          <AdminPortalSwitcher />
           <button 
             onClick={() => setAiOpen(!isAiOpen)} 
             style={iconBtnStyle} 

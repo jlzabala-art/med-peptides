@@ -167,7 +167,7 @@ export default function AccessCatalogOverlay({
           </button>
 
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-            <img src="/logo.png" alt="Atlas Health Logo" style={{ width: '60px', height: '60px', borderRadius: '16px' }} />
+            <img src="/atlas-health-logo.png" alt="Atlas Health Logo" style={{ width: '60px', height: '60px', borderRadius: '16px' }} />
           </div>
           
           <h2 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>

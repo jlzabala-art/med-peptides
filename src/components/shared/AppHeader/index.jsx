@@ -10,6 +10,8 @@ import UserDropdown from '../../../navigation/UserDropdown';
 import NotificationsPanel from './NotificationsPanel';
 import AdminAIAssistant from './AdminAIAssistant';
 import GlobalSearchModal from './GlobalSearchModal';
+import AdminPortalSwitcher from './AdminPortalSwitcher';
+import GlobalPreferencesDropdown from './GlobalPreferencesDropdown';
 
 export default function AppHeader({ 
   title, subtitle, onSearchClick, cartCount = 0, onOpenCart, onToggleSidebar,
@@ -126,6 +128,8 @@ export default function AppHeader({
           </button>
         )}
         
+        <AdminPortalSwitcher />
+        
         <button 
           className="app-header-action" 
           aria-label="Toggle Theme"
@@ -135,17 +139,7 @@ export default function AppHeader({
           {theme === 'dark' ? <Sun size={20} strokeWidth={1.8} /> : <Moon size={20} strokeWidth={1.8} />}
         </button>
 
-        <button 
-          className="app-header-action" 
-          aria-label="Toggle Language"
-          onClick={toggleLanguage}
-          title={t('header.language')}
-        >
-          <Globe size={20} strokeWidth={1.8} />
-          <span style={{ fontSize: '10px', position: 'absolute', top: 5, right: 5, fontWeight: 'bold' }}>
-            {i18n.language.toUpperCase()}
-          </span>
-        </button>
+        <GlobalPreferencesDropdown />
 
         <button 
           className="app-header-action" 
