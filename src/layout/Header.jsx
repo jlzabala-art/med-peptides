@@ -639,12 +639,12 @@ function Header(props) {
             <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
 
               {/* ── Main links ─────────────────────────────────── */}
-              <span style={S.sectionTitle}>Navigation</span>
+              <span style={S.sectionTitle}>{t('header.navigation', 'Navigation')}</span>
               <button
                   className="mobile-nav-link"
                   onClick={() => { onOpenSearch(); setMobileMenuOpen(false); }}
                 >
-                  <Search size={18} /> Search
+                  <Search size={18} /> {t('header.search', 'Search')}
               </button>
 
               {/* DYNAMIC ROLE-BASED MOBILE NAV */}
@@ -678,7 +678,7 @@ function Header(props) {
                             style={S.drawerLink} 
                             onClick={() => setMobileMenuOpen(false)}
                           >
-                            <IconComponent size={18} /> {item.label}
+                            <IconComponent size={18} /> {t(`nav.${item.label.replace(/\\s+/g, '')}`, item.label)}
                           </Link>
                         );
                       }
@@ -691,7 +691,7 @@ function Header(props) {
                               onClick={() => toggleMobile('catalog')}
                               aria-expanded={mobileExpanded === 'catalog'}
                             >
-                              <BookOpen size={18} /> {item.label}
+                              <BookOpen size={18} /> {t(`nav.${item.label.replace(/\\s+/g, '')}`, item.label)}
                               <ChevronDown size={16} style={{ marginLeft: 'auto', transform: mobileExpanded === 'catalog' ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.25s' }} />
                             </button>
                             {mobileExpanded === 'catalog' && (
@@ -708,7 +708,7 @@ function Header(props) {
                                     }}
                                     onClick={() => setMobileMenuOpen(false)}
                                   >
-                                    {subItem.label}
+                                    {t(`nav.${subItem.label.replace(/\\s+/g, '')}`, subItem.label)}
                                   </Link>
                                 ))}
                               </div>
@@ -725,7 +725,7 @@ function Header(props) {
                               onClick={() => toggleMobile('academia')}
                               aria-expanded={mobileExpanded === 'academia'}
                             >
-                              <GraduationCap size={18} /> {item.label}
+                              <GraduationCap size={18} /> {t(`nav.${item.label.replace(/\\s+/g, '')}`, item.label)}
                               <ChevronDown size={16} style={{ marginLeft: 'auto', transform: mobileExpanded === 'academia' ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.25s' }} />
                             </button>
                             {mobileExpanded === 'academia' && (
@@ -744,9 +744,9 @@ function Header(props) {
                                     }}
                                     onClick={() => !subItem.soon && setMobileMenuOpen(false)}
                                   >
-                                    {subItem.label}
+                                    {t(`nav.${subItem.label.replace(/\\s+/g, '')}`, subItem.label)}
                                     {subItem.soon && (
-                                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--secondary)', background: 'var(--secondary-alpha, rgba(100,200,150,0.12))', padding: '2px 7px', borderRadius: '20px', letterSpacing: '0.05em' }}>COMING SOON</span>
+                                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--secondary)', background: 'var(--secondary-alpha, rgba(100,200,150,0.12))', padding: '2px 7px', borderRadius: '20px', letterSpacing: '0.05em' }}>{t('header.comingSoon', 'COMING SOON')}</span>
                                     )}
                                   </Link>
                                 ))}
@@ -764,7 +764,7 @@ function Header(props) {
                               onClick={() => toggleMobile('resources')}
                               aria-expanded={mobileExpanded === 'resources'}
                             >
-                              <BookMarked size={18} /> {item.label}
+                              <BookMarked size={18} /> {t(`nav.${item.label.replace(/\\s+/g, '')}`, item.label)}
                               <ChevronDown size={16} style={{ marginLeft: 'auto', transform: mobileExpanded === 'resources' ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.25s' }} />
                             </button>
                             {mobileExpanded === 'resources' && (
@@ -776,7 +776,7 @@ function Header(props) {
                                     style={{ ...S.drawerLink, fontSize: '0.9rem', color: 'var(--text-muted)', paddingTop: '0.55rem', paddingBottom: '0.55rem' }}
                                     onClick={() => setMobileMenuOpen(false)}
                                   >
-                                    {subItem.label}
+                                    {t(`nav.${subItem.label.replace(/\\s+/g, '')}`, subItem.label)}
                                   </Link>
                                 ))}
                               </div>
@@ -794,14 +794,14 @@ function Header(props) {
                       onClick={() => toggleMobile('settings')}
                       aria-expanded={mobileExpanded === 'settings'}
                     >
-                      <Globe size={18} /> Regional Settings
+                      <Globe size={18} /> {t('header.regionalSettings', 'Regional Settings')}
                       <ChevronDown size={16} style={{ marginLeft: 'auto', transform: mobileExpanded === 'settings' ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.25s', opacity: 0.6 }} />
                     </button>
                     {mobileExpanded === 'settings' && (
                       <div style={{ margin: '0 0.5rem 0.5rem 0.5rem', padding: '1.25rem', backgroundColor: 'var(--background)', borderRadius: '16px', border: '1px solid var(--border)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                           <div>
-                            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Research Region</span>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>{t('header.researchRegion', 'Research Region')}</span>
                             <span style={{ fontSize: '0.95rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                               {displayFlag} {displayCountryName}
                             </span>
@@ -810,11 +810,11 @@ function Header(props) {
                             onClick={() => { onOpenRegion(); setMobileMenuOpen(false); }}
                             style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem', fontWeight: 700, borderRadius: '8px', border: '1px solid var(--primary)', background: 'white', color: 'var(--primary)' }}
                           >
-                            Change
+                            {t('header.change', 'Change')}
                           </button>
                         </div>
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                          Currency: <strong style={{ color: 'var(--text-main)' }}>USD</strong>
+                          {t('header.currency', 'Currency')}: <strong style={{ color: 'var(--text-main)' }}>USD</strong>
                         </div>
                       </div>
                     )}
@@ -823,7 +823,7 @@ function Header(props) {
               })()}
 
               {/* User Account Section */}
-              <span className="drawer-section-title">Professional Account</span>
+              <span className="drawer-section-title">{t('header.professionalAccount', 'Professional Account')}</span>
               <div style={{ padding: '0.5rem' }}>
                 {user ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -832,22 +832,22 @@ function Header(props) {
                         <User size={18} />
                       </div>
                       <div>
-                        <span style={{ display: 'block', fontSize: '0.95rem', fontWeight: 700 }}>{user.displayName || 'Authorized Scientist'}</span>
-                        <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--success)' }}>Active Session</span>
+                        <span style={{ display: 'block', fontSize: '0.95rem', fontWeight: 700 }}>{user.displayName || t('header.authorizedScientist', 'Authorized Scientist')}</span>
+                        <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--success)' }}>{t('header.activeSession', 'Active Session')}</span>
                       </div>
                     </div>
                     {activeRole === 'admin' ? (
                       <Link to="/admin" className="drawer-link" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--error, #ef4444)' }}>
-                        <LayoutDashboard size={18} /> Admin Board
+                        <LayoutDashboard size={18} /> {t('header.adminBoard', 'Admin Board')}
                       </Link>
                     ) : (
-                      <Link to="/paciente" className="drawer-link" onClick={() => setMobileMenuOpen(false)}><LayoutDashboard size={18} /> Dashboard</Link>
+                      <Link to="/paciente" className="drawer-link" onClick={() => setMobileMenuOpen(false)}><LayoutDashboard size={18} /> {t('header.dashboard', 'Dashboard')}</Link>
                     )}                    <button 
                       onClick={() => { logout(); setMobileMenuOpen(false); }}
                       style={{ width: '100%', background: 'none', border: 'none', color: 'var(--text-muted)', textAlign: 'left' }}
                       className="drawer-link"
                     >
-                      <LogOut size={18} /> Logout
+                      <LogOut size={18} /> {t('header.logout', 'Logout')}
                     </button>
                   </div>
                 ) : (

@@ -122,15 +122,17 @@ export default function FinanceApprovals({ dashboardData }) {
                         {inv.customer_name}
                       </td>
                       <td style={{ padding: '1.25rem 1.5rem', fontFamily: 'monospace', fontWeight: '600', color: 'var(--text-muted)' }}>
-                        {inv.invoice_number}
+                        <a href={`https://books.zoho.com/app#/invoices/${inv.invoice_id}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          {inv.invoice_number} <ExternalLink style={{ width: '12px', height: '12px' }} />
+                        </a>
                       </td>
                       <td style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', background: 'rgba(245, 158, 11, 0.1)', padding: '0.35rem 0.6rem', borderRadius: '4px', whiteSpace: 'nowrap' }}>
                           {inv.due_date}
                         </span>
                       </td>
-                      <td style={{ padding: '1.25rem 1.5rem', textAlign: 'right', fontWeight: '800', fontSize: '0.95rem', color: 'var(--warning)', letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
-                        {formatCurrency(inv.balance)}
+                      <td style={{ padding: '1.25rem 1.5rem', textAlign: 'right', fontWeight: '800', fontSize: '0.8rem', color: 'var(--warning)', letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
+                        {formatCurrency(typeof inv.balance === 'string' ? parseFloat(inv.balance.replace(/[^0-9.-]+/g,"")) : inv.balance)}
                       </td>
                       <td style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
@@ -159,7 +161,7 @@ export default function FinanceApprovals({ dashboardData }) {
                             className="gcp-btn-primary"
                             style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.8rem', fontSize: '0.75rem', fontWeight: '700', background: 'var(--warning)', color: '#fff', border: 'none', borderRadius: '6px' }}
                           >
-                            Manage <ExternalLink style={{ width: '14px', height: '14px' }} />
+                            Open Zoho <ExternalLink style={{ width: '14px', height: '14px' }} />
                           </a>
                         </div>
                       </td>

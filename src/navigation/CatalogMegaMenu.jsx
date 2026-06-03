@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { getNavigationMetadata } from '../repositories/navigationRepository';
 import { CATALOG_BROWSE } from './navConfig';
+import { useTranslation } from 'react-i18next';
 import '../styles/header.css';
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -43,6 +44,7 @@ export default function CatalogMegaMenu({ onClose }) {
   const [navData, setNavData] = useState(null);
   const [loading, setLoading] = useState(true);
   const panelRef = useRef(null);
+  const { t } = useTranslation();
 
   // Load metadata on mount (cache hit = instant)
   useEffect(() => {
@@ -84,12 +86,12 @@ export default function CatalogMegaMenu({ onClose }) {
         >
           {/* ── Column 1: Browse (static) ───────────────────────────── */}
           <div className="mega-menu-column">
-            <ColHeader title="Browse" />
+            <ColHeader title={t('nav.browse', 'Browse')} />
             <div className="mega-menu-links">
               {CATALOG_BROWSE.map((item) => (
                 <NavItem
                   key={item.path}
-                  label={item.label}
+                  label={t(`nav.${item.label.replace(/\\s+/g, '')}`, item.label)}
                   path={item.path}
                   highlight
                   onClick={onClose}
@@ -100,7 +102,7 @@ export default function CatalogMegaMenu({ onClose }) {
 
           {/* ── Column 2: Categories (dynamic) ─────────────────────── */}
           <div className="mega-menu-column">
-            <ColHeader title="Categories" />
+            <ColHeader title={t('nav.categories', 'Categories')} />
             <div className="mega-menu-links">
               {loading ? (
                 <SkeletonColumn rows={5} />
@@ -124,7 +126,7 @@ export default function CatalogMegaMenu({ onClose }) {
 
           {/* ── Column 3: Clinical Goals (dynamic) ─────────────────── */}
           <div className="mega-menu-column">
-            <ColHeader title="Clinical Goals" />
+            <ColHeader title={t('nav.clinicalGoals', 'Clinical Goals')} />
             <div className="mega-menu-links">
               {loading ? (
                 <SkeletonColumn rows={5} />
@@ -144,7 +146,7 @@ export default function CatalogMegaMenu({ onClose }) {
           {/* ── Column 4: Conditions (dynamic, hidden if empty) ─────── */}
           {showConditions && (
             <div className="mega-menu-column">
-              <ColHeader title="Conditions" />
+              <ColHeader title={t('nav.conditions', 'Conditions')} />
               <div className="mega-menu-links">
                 {conditions.map((cond) => (
                   <NavItem
@@ -166,14 +168,14 @@ export default function CatalogMegaMenu({ onClose }) {
             className="mega-menu-footer-link mega-menu-footer-link--primary"
             onClick={onClose}
           >
-            View Full Catalog →
+            {t('nav.viewFullCatalog', 'View Full Catalog →')}
           </Link>
           <Link
             to="/collection/protocols"
             className="mega-menu-footer-link"
             onClick={onClose}
           >
-            All Protocols
+            {t('nav.allProtocols', 'All Protocols')}
           </Link>
         </div>
       </div>

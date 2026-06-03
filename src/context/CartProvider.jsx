@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from './AuthContext';
-import { useModal } from './ModalProvider';
+import { useUIStore } from '../stores/uiStore';
 import { useFirestoreData } from '../hooks/useFirestoreData';
 import { useTenant } from './TenantContext';
 
@@ -9,7 +9,7 @@ const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const { isProfessional } = useAuth();
-  const { setActiveModal } = useModal();
+  const { setActiveModal } = useUIStore();
   const { supplementCatalogue } = useFirestoreData();
   const { tenantId, tenant } = useTenant();
 

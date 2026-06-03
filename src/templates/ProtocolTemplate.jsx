@@ -39,7 +39,9 @@ import { getProtocolTemplate, getTemplatesByObjective, getTemplatesByPrefix } fr
 import { trackEvent } from '../hooks/useAnalytics';
 import { generateClinicalProtocol, generatePatientGuide, getCachedProtocolPDF, cacheProtocolPDF, getProtocolFilename } from '../services/pdfService';
 import { toPng } from 'html-to-image';
-import { useModal } from '../context/ModalProvider';
+import { useShop } from '../context/ShopProvider';
+import { useCart } from '../context/CartProvider';
+import { useUIStore } from '../stores/uiStore';
 import { useAuth } from '../context/AuthContext';
 import { generateICS } from '../utils/calendarHelper';
 
@@ -890,7 +892,7 @@ export default function ProtocolTemplate({
   products,
   allFaqs,
 }) {
-  const { setActiveModal } = useModal();
+  const { setActiveModal } = useUIStore();
   const { isProfessional: authIsPro, isAdmin, isPhysician } = useAuth();
   const isMed = !!(authIsPro || isAdmin || isPhysician || isProfessional);
 
@@ -1409,6 +1411,8 @@ export default function ProtocolTemplate({
     || protocol.metadata?.references
     || [];
   const targetPatient  = protocol.target_patient || protocol.patient_profile || '';
+  const clinicalEvidence = protocol.clinical_evidence || protocol.evidence || '';
+  const logistics      = protocol.logistics || protocol.implementation_logistics || '';
   const keyOutcomes    = protocol.key_outcomes || protocol.outcomes || [];
   const safetyNotes    = protocol.safety_notes
     || protocol.safety

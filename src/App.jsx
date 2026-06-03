@@ -28,8 +28,8 @@ import { PreferencesProvider } from './context/PreferencesContext';
 import AdminLayout from './layout/AdminLayout';
 import ClinicalLayout from './layout/ClinicalLayout';
 import { useCart } from './context/CartProvider';
-import { useModal } from './context/ModalProvider';
 import { useShop } from './context/ShopProvider';
+import { useUIStore } from './stores/uiStore';
 import { AdminProvider } from './context/AdminProvider';
 import { DoctorProvider } from './context/DoctorProvider';
 // ── Lazy Loading Heavy Templates (Section 2: Performance) ────────────────────
@@ -195,7 +195,12 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const { tenantSlug } = useTenant();
-  const [scrolled, setScrolled] = useState(false);
+  const { scrolled, setScrolled } = useUIStore();
+  const { showCheckout, setShowCheckout } = useUIStore();
+  const { manualRegionChange, setManualRegionChange } = useUIStore();
+  const { searchQuery, setSearchQuery } = useUIStore();
+  const { searchInitialTab, setSearchInitialTab } = useUIStore();
+  const { activeModal, setActiveModal } = useUIStore();
 
   const tenantNavigate = (path, options) => {
     if (typeof path === 'string' && tenantSlug && path.startsWith('/') && !path.startsWith('/admin') && !path.startsWith('/login') && !path.startsWith('/session-ended')) {
@@ -214,7 +219,6 @@ function App() {
   // Lifted global state with safety catch for Private modes
   const { region, setRegion, settings, setSettings, products, compareList, setCompareList } = useShop();
   const { cart, setCart, cartMetadata, setCartMetadata, cartOwnership, setCartOwnership, updateCart, removeProtocolBundle, cartBreakdown, cartCount } = useCart();
-  const { activeModal, setActiveModal } = useModal();
   
   const { isProfessional, isAdmin, isPhysician, isPatient, user, userProfile, loading: authLoading, activeRole } = useAuth();
   // allFaqs and protocolIndex: read-only, session-cached — no products fetch inside hook
@@ -240,13 +244,7 @@ function App() {
   }, [products, isAdmin, isProfessional]);
 
   const [selectedShipping, setSelectedShipping] = useState('standard');
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchInitialTab, setSearchInitialTab] = useState('peptides');
-
-  const [showCheckout, setShowCheckout] = useState(false);
   const [pendingQuote, setPendingQuote] = useState(null);
-  const [manualRegionChange, setManualRegionChange] = useState(false);
   
   // Dynamic Settings are now from useShop
   useEffect(() => {
@@ -765,191 +763,13 @@ function App() {
 
 
 
-  const renderPublicShopRoutes = (isPartner) => (
-    <>
-      <Route path={isPartner ? "" : "/"} element={
-        activeRole === 'admin' && !isPartner
-          ? <Navigate to="/admin" replace />
-          : <HomeView 
-              isProfessional={isProfessional}
-              userProfile={userProfile}
-              onSelectCategory={handleCategorySelect}
-              onSelectProduct={handleProductSelect}
-              products={visibleProducts}
-              onOpenSearch={(q, tab) => {
-                if (q !== undefined) setSearchQuery(q);
-                if (tab) setSearchInitialTab(tab);
-                setActiveModal('search');
-              }}
-              onOpenCart={() => setActiveModal('cart')}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-            />
-      } />
-      {['clinic', 'sales_agent', 'staff'].map(role => (
-        <Route key={role} path={isPartner ? role : `/${role}`} element={
-          <HomeView 
-            forcedRole={role}
-            isProfessional={isProfessional}
-            userProfile={userProfile}
-            onSelectCategory={handleCategorySelect}
-            onSelectProduct={handleProductSelect}
-            products={visibleProducts}
-            onOpenSearch={(q, tab) => {
-              if (q !== undefined) setSearchQuery(q);
-              if (tab) setSearchInitialTab(tab);
-              setActiveModal('search');
-            }}
-            onOpenCart={() => setActiveModal('cart')}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
-        } />
-      ))}
-      <Route path="collection/hormone-pellets" element={<HormonePelletsPage />} />
-      <Route path="product/:slug" element={
-        <ProductTemplate 
-          region={region} 
-          isProfessional={isProfessional} 
-          isAdmin={isAdmin} 
-          cart={cart} 
-          onAddToCart={updateCart}
-          toggleCompare={toggleCompare}
-          compareList={compareList}
-          products={visibleProducts}
-        />
-      } />
-      <Route path="collection/:slug" element={
-        <CollectionTemplate
-          region={region}
-          isProfessional={isProfessional}
-          isAdmin={isAdmin}
-          cart={cart}
-          setCart={setCart}
-          updateCart={updateCart}
-          toggleCompare={toggleCompare}
-          setRegion={setRegion}
-          isCartOpen={activeModal === 'cart'}
-          setIsCartOpen={(val) => setActiveModal(val ? 'cart' : null)}
-          setPendingQuote={setPendingQuote}
-          onOpenSearch={(q, tab) => {
-            setSearchQuery(q);
-            setSearchInitialTab(tab || 'products');
-            setActiveModal('search');
-          }}
-          products={visibleProducts}
-          EXCHANGE_RATES={settings.exchangeRates}
-          allFaqs={allFaqs}
-        />
-      } />
-      <Route path="protocol/:slug" element={
-        <ProtocolTemplate 
-          region={region} 
-          isProfessional={isProfessional} 
-          cart={cart} 
-          updateCart={updateCart} 
-          setRegion={setRegion}
-          products={visibleProducts}
-        />
-      } />
-      <Route path="protocol-finder" element={<ProtocolFinderRedirect />} />
-      <Route path="about" element={<About />} />
-      <Route path="faq" element={<FAQTemplate />} />
-      <Route path="faq/:topic" element={<FAQTemplate />} />
-      <Route path="search" element={
-        <SearchTemplate products={visibleProducts} />
-      } />
-      <Route path="contact" element={
-        <ContactTemplate 
-          cart={cart}
-          region={region}
-          isProfessional={isProfessional}
-          products={visibleProducts}
-          pendingQuote={pendingQuote}
-          setPendingQuote={setPendingQuote}
-        />
-      } />
-      <Route path="privacy" element={<PrivacyPolicy />} />
-      <Route path="legal" element={<LegalConditions />} />
-      <Route path="terms" element={<TermsOfUse />} />
-      <Route path="what-are-peptides" element={<WhatArePeptides />} />
-      <Route path="blog" element={<BlogPage />} />
-      <Route path="blog/:slug" element={<BlogPostPage />} />
-      <Route path="what-are-protocols" element={<WhatAreProtocolsPage />} />
-      <Route path="reconstitution-guide" element={<ReconstitutionGuide />} />
-      <Route path="calculator" element={<Calculator onBack={() => window.history.back()} />} />
-      <Route path="compare" element={<CompoundComparator />} />
-      <Route path="compare/:slug1/:slug2" element={
-        <CompareTemplate products={visibleProducts} />
-      } />
-      <Route path="research/:slug" element={
-        <ResearchStudyTemplate 
-          region={region} 
-          isProfessional={isProfessional} 
-          cart={cart} 
-          updateCart={updateCart} 
-          setRegion={setRegion} 
-        />
-      } />
-      <Route path="supplements/:slug" element={<SupplementDetailPage onAddToCart={updateCart} region={region} />} />
-      <Route path="testing/:slug" element={<TestingDetailPage onAddToCart={updateCart} region={region} />} />
-      {isPartner && <Route path="*" element={<Navigate to="" replace />} />}
-    </>
-  );
-
-  const renderContinuedShopRoutes = () => (
-    <>
-      <Route path="academy" element={
-        <AcademyView onSelectCourse={(courseId) => tenantNavigate(`/academy/${courseId}`)} />
-      } />
-      <Route path="academy/:courseId" element={
-        <CourseDetailView onBack={() => tenantNavigate('/academy')} />
-      } />
-      <Route path="faqs" element={
-        <FAQDiscoveryView
-          onBack={() => tenantNavigate('/')}
-          products={visibleProducts}
-        />
-      } />
-      <Route path="quality" element={
-        <Quality onBack={() => window.history.back()} />
-      } />
-      <Route path="custom-synthesis" element={
-        <CustomSynthesis onBack={() => window.history.back()} />
-      } />
-      <Route path="api-dashboard" element={
-        <APIDashboard onBack={() => window.history.back()} isProfessional={isProfessional} />
-      } />
-      <Route path="objectives" element={
-        <ObjectivesView 
-          onBack={() => window.history.back()}
-          region={region}
-          setRegion={setRegion}
-          isProfessional={isProfessional}
-          EXCHANGE_RATES={settings.exchangeRates}
-          products={visibleProducts}
-          onSelectObjective={(objectiveId) => tenantNavigate(`/objective/${objectiveId.toLowerCase().replace(/ /g, '-')}`)}
-        />
-      } />
-      <Route path="objective/:objectiveId" element={
-        <ObjectiveDetailRouteWrapper
-          isProfessional={isProfessional}
-          visibleProducts={visibleProducts}
-          allFaqs={allFaqs}
-          onSelectProduct={handleProductSelect}
-        />
-      } />
-      <Route path="settings" element={
-        <UserSettings onBack={() => tenantNavigate('/patient')} />
-      } />
-      <Route path="orders" element={<Navigate to="../patient" replace />} />
-      <Route path="orders/history" element={<Navigate to="../patient" replace />} />
-      <Route path="saved" element={<Navigate to="../patient" replace />} />
-      <Route path="saved/protocols" element={<Navigate to="../patient" replace />} />
-      <Route path="saved/products" element={<Navigate to="../patient" replace />} />
-      <Route path="my-protocols" element={<Navigate to="../patient" replace />} />
-    </>
-  );
+  const routerProps = {
+    location, navigate, tenantNavigate, activeRole, isProfessional, isAdmin, userProfile,
+    handleCategorySelect, handleProductSelect, visibleProducts, searchQuery, setSearchQuery,
+    setSearchInitialTab, setActiveModal, activeModal, region, setRegion, cart, setCart, updateCart,
+    toggleCompare, compareList, setPendingQuote, settings, allFaqs, scrolled, setManualRegionChange,
+    cartCount, isHome, pendingQuote,
+  };
 
   // Public auth routes (/login, /login?tab=register) must NEVER be blocked by the loading gate.
   // We check the pathname directly so users can always access login/register.
@@ -987,246 +807,8 @@ function App() {
   }
 
   return (
-    <PreferencesProvider>
-      <HeaderProvider>
       <div className="app">
-        <PageTransition locationKey={location.pathname}>
-          <Suspense fallback={<ClinicalLoader />}>
-          <Routes>
-            {/* ── STANDALONE ROUTES ── */}
-            <Route path="/login" element={<AuthPage onBack={() => window.history.back()} />} />
-            <Route path="/session-ended" element={<ExitProfessionalMode onBack={() => navigate('/')} onLogin={() => navigate('/login')} />} />
-            
-            {/* ── MAGIC LINKS (No Auth Required) ── */}
-            <Route path="/supplier-quote/:id" element={<PublicSupplierQuote />} />
-            <Route path="/client-quote/:id" element={<PublicClientQuote />} />
-
-            {/* ── PUBLIC SHOP LAYOUT (Standard) ── */}
-            <Route element={
-              <ShopLayout 
-                scrolled={scrolled} 
-                region={region}
-                onOpenRegion={() => {
-                  setRegion(null);
-                  setManualRegionChange(true);
-                  // eslint-disable-next-line no-empty
-                  try { localStorage.removeItem('mp_region'); } catch (e) {}
-                }}
-                cartCount={cartCount}
-                onOpenCart={() => setActiveModal('cart')}
-                onOpenSearch={() => { setSearchInitialTab('peptides'); setActiveModal('search'); }}
-                activeModal={activeModal}
-                setActiveModal={setActiveModal}
-                isHome={isHome}
-                onGoHome={() => {
-                  tenantNavigate('/');
-                }}
-                onSelectProduct={handleProductSelect}
-                onSelectCategory={handleCategorySelect}
-                products={visibleProducts}
-              />
-            }>
-              {renderPublicShopRoutes(false)}
-            </Route>
-
-            {/* ── PUBLIC SHOP LAYOUT (Partner) ── */}
-            <Route path="/partner/:tenantSlug" element={
-              <ShopLayout 
-                scrolled={scrolled} 
-                region={region}
-                onOpenRegion={() => {
-                  setRegion(null);
-                  setManualRegionChange(true);
-                  // eslint-disable-next-line no-empty
-                  try { localStorage.removeItem('mp_region'); } catch (e) {}
-                }}
-                cartCount={cartCount}
-                onOpenCart={() => setActiveModal('cart')}
-                onOpenSearch={() => { setSearchInitialTab('peptides'); setActiveModal('search'); }}
-                activeModal={activeModal}
-                setActiveModal={setActiveModal}
-                isHome={isHome}
-                onGoHome={() => {
-                  tenantNavigate('/');
-                }}
-                onSelectProduct={handleProductSelect}
-                onSelectCategory={handleCategorySelect}
-                products={visibleProducts}
-              />
-            }>
-              {renderPublicShopRoutes(true)}
-            </Route>
-
-            {/* --- ZONA ADMIN (outside ShopLayout — no public header) --- */}
-            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-              <Route element={<AdminProvider><AdminLayout /></AdminProvider>}>
-                <Route path="/admin/*"            element={<AdminRoutes />} />
-                <Route path="/admin/patient/:id"  element={<PatientDetailAdmin />} />
-              </Route>
-            </Route>
-
-            {/* --- PUBLIC SHOP LAYOUT (continued below admin - Standard) --- */}
-            <Route element={
-              <ShopLayout 
-                scrolled={scrolled} 
-                region={region}
-                onOpenRegion={() => {
-                  setRegion(null);
-                  setManualRegionChange(true);
-                  // eslint-disable-next-line no-empty
-                  try { localStorage.removeItem('mp_region'); } catch (e) {}
-                }}
-                cartCount={cartCount}
-                onOpenCart={() => setActiveModal('cart')}
-                onOpenSearch={() => { setSearchInitialTab('peptides'); setActiveModal('search'); }}
-                activeModal={activeModal}
-                setActiveModal={setActiveModal}
-                isHome={isHome}
-                onGoHome={() => { tenantNavigate('/'); }}
-                onSelectProduct={handleProductSelect}
-                onSelectCategory={handleCategorySelect}
-                products={visibleProducts}
-              />
-            }>
-              {renderContinuedShopRoutes()}
-            </Route>
-
-            {/* --- PUBLIC SHOP LAYOUT (continued below admin - Partner) --- */}
-            <Route path="/partner/:tenantSlug" element={
-              <ShopLayout 
-                scrolled={scrolled} 
-                region={region}
-                onOpenRegion={() => {
-                  setRegion(null);
-                  setManualRegionChange(true);
-                  // eslint-disable-next-line no-empty
-                  try { localStorage.removeItem('mp_region'); } catch (e) {}
-                }}
-                cartCount={cartCount}
-                onOpenCart={() => setActiveModal('cart')}
-                onOpenSearch={() => { setSearchInitialTab('peptides'); setActiveModal('search'); }}
-                activeModal={activeModal}
-                setActiveModal={setActiveModal}
-                isHome={isHome}
-                onGoHome={() => { tenantNavigate('/'); }}
-                onSelectProduct={handleProductSelect}
-                onSelectCategory={handleCategorySelect}
-                products={visibleProducts}
-              />
-            }>
-              {renderContinuedShopRoutes()}
-            </Route>
-            <Route element={<ProtectedRoute allowedRoles={['professional', 'patient', 'doctor', 'admin']} />}>
-              <Route element={<DoctorProvider><Outlet /></DoctorProvider>}>
-                <Route path="/doctor/*" element={<DoctorRoutes />} />
-                <Route path="/doctor-dashboard/*" element={<DoctorRoutes />} />
-
-                {/* Account Manager Routing */}
-                <Route path="account-manager/*" element={<AccountManagerDashboard />} />
-              </Route>
-            </Route>
-
-            <Route path="/profile" element={
-              <AppErrorBoundary>
-                <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-                  <UserSettings onBack={() => window.history.back()} />
-                </div>
-              </AppErrorBoundary>
-            } />
-
-            <Route path="checkout" element={<Checkout />} />
-
-            <Route element={<ProtectedRoute allowedRoles={['professional', 'patient', 'doctor', 'admin']} />}>
-              <Route path="/patient/*" element={<Suspense fallback={<ClinicalLoader />}><PatientRoutes /></Suspense>} />
-            </Route>
-            
-            {/* /paciente and dashboard: unified under GlobalAppLayout */}
-            <Route element={
-              <GlobalAppLayout 
-                cartCount={cartCount}
-                onOpenCart={() => setActiveModal('cart')}
-              />
-            }>
-              <Route element={<ProtectedRoute allowedRoles={['professional', 'patient', 'doctor', 'admin']} />}>
-                <Route path="/paciente" element={<Suspense fallback={<ClinicalLoader />}><UserDashboard onOpenCart={() => setActiveModal('cart')} /></Suspense>} />
-                <Route path="/calendar" element={<Suspense fallback={<ClinicalLoader />}><CalendarPage /></Suspense>} />
-                <Route path="/account/supervisor" element={<Suspense fallback={<ClinicalLoader />}><UserDashboard onOpenCart={() => setActiveModal('cart')} /></Suspense>} />
-              </Route>
-            </Route>
-            {/* Sub-paths with ClinicalLayout (legacy tabs) */}
-            <Route element={<ProtectedRoute allowedRoles={['professional', 'patient', 'doctor', 'admin']} />}>
-              <Route element={<DoctorProvider><ClinicalLayout /></DoctorProvider>}>
-                <Route path="/doctor/patients" element={<DoctorPatients />} />
-                <Route path="/doctor/appointments" element={<DoctorAppointments />} />
-                <Route path="/doctor/lab-results" element={<DoctorLabResults />} />
-                <Route path="/doctor/research" element={<DoctorResearch />} />
-                <Route path="/doctor/profile" element={<DoctorProfile />} />
-              </Route>
-            </Route>
-            <Route path="/wholesaler/*" element={activeRole === 'wholesaler' || activeRole === 'admin' ? <WholesalerRoutes /> : <Navigate to="/paciente" replace />} />
-            <Route path="/wholeseller/*" element={<Navigate to="/wholesaler" replace />} />
-            <Route path="/catalog/:catalogSlug" element={<PublicCatalogView />} />
-            <Route path="/partner/:tenantSlug/catalog/:catalogSlug" element={<PublicCatalogView />} />
-            <Route path="/catalog/track/:eventId" element={<CatalogEmailTracker />} />
-            <Route path="/clinic-dashboard/*" element={activeRole === 'clinic' || activeRole === 'admin' ? <ClinicRoutes /> : <Navigate to="/paciente" replace />} />
-            <Route path="/pharmacy-dashboard/*" element={activeRole === 'compounding_pharmacy' || activeRole === 'admin' ? <PharmacyRoutes /> : <Navigate to="/paciente" replace />} />
-            <Route path="/supplier-dashboard/*" element={activeRole === 'supplier' || activeRole === 'admin' ? <SupplierRoutes /> : <Navigate to="/paciente" replace />} />
-            {/* --- PUBLIC SHOP LAYOUT (continued for Settings & Redirects - Standard) --- */}
-            <Route element={
-              <ShopLayout 
-                scrolled={scrolled} 
-                region={region}
-                onOpenRegion={() => {
-                  setRegion(null);
-                  setManualRegionChange(true);
-                  // eslint-disable-next-line no-empty
-                  try { localStorage.removeItem('mp_region'); } catch (e) {}
-                }}
-                cartCount={cartCount}
-                onOpenCart={() => setActiveModal('cart')}
-                onOpenSearch={() => { setSearchInitialTab('peptides'); setActiveModal('search'); }}
-                activeModal={activeModal}
-                setActiveModal={setActiveModal}
-                isHome={isHome}
-                onGoHome={() => { tenantNavigate('/'); }}
-                onSelectProduct={handleProductSelect}
-                onSelectCategory={handleCategorySelect}
-                products={visibleProducts}
-              />
-            }>
-              {renderContinuedShopRoutes()}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Route>
-
-            {/* --- PUBLIC SHOP LAYOUT (continued for Settings & Redirects - Partner) --- */}
-            <Route path="/partner/:tenantSlug" element={
-              <ShopLayout 
-                scrolled={scrolled} 
-                region={region}
-                onOpenRegion={() => {
-                  setRegion(null);
-                  setManualRegionChange(true);
-                  // eslint-disable-next-line no-empty
-                  try { localStorage.removeItem('mp_region'); } catch (e) {}
-                }}
-                cartCount={cartCount}
-                onOpenCart={() => setActiveModal('cart')}
-                onOpenSearch={() => { setSearchInitialTab('peptides'); setActiveModal('search'); }}
-                activeModal={activeModal}
-                setActiveModal={setActiveModal}
-                isHome={isHome}
-                onGoHome={() => { tenantNavigate('/'); }}
-                onSelectProduct={handleProductSelect}
-                onSelectCategory={handleCategorySelect}
-                products={visibleProducts}
-              />
-            }>
-              {renderContinuedShopRoutes()}
-              <Route path="*" element={<Navigate to="" replace />} />
-            </Route>
-          </Routes>
-        </Suspense>
-        </PageTransition>
+        <AppRouter {...routerProps} />
         <ClinicalAssistant 
           isOpen={activeModal === 'ai'} 
           setIsOpen={(val) => setActiveModal(val ? 'ai' : null)} 
@@ -1351,8 +933,6 @@ function App() {
       )}
 
       </div>
-        </HeaderProvider>
-      </PreferencesProvider>
   );
 }
 

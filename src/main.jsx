@@ -4,7 +4,6 @@ import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { TenantProvider } from './context/TenantContext';
 import { ShopProvider } from './context/ShopProvider';
-import { ModalProvider } from './context/ModalProvider';
 import { CartProvider } from './context/CartProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
@@ -15,6 +14,7 @@ import { trackEvent } from './hooks/useAnalytics';
 import { PermissionsProvider } from './contexts/PermissionsContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { NotificationProvider } from './context/NotificationContext';
+import AppProviders from './providers/AppProviders';
 
 // Core Web Vitals → GA4 (non-blocking, fires after paint)
 import { onCLS, onINP, onLCP, onFCP, onTTFB } from 'web-vitals';
@@ -139,30 +139,9 @@ if (rootElement) {
   root.render(
     <StrictMode>
       <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            {/* Es mejor envolver el AuthProvider aquí para que App tenga acceso a todo */}
-            <AuthProvider>
-              <PermissionsProvider>
-              <TenantProvider>
-              <ShopProvider>
-                <ModalProvider>
-                  <CartProvider>
-                    <HelmetProvider>
-                      <ThemeProvider>
-                        <NotificationProvider>
-                          <App />
-                        </NotificationProvider>
-                      </ThemeProvider>
-                    </HelmetProvider>
-                  </CartProvider>
-                </ModalProvider>
-              </ShopProvider>
-              </TenantProvider>
-              </PermissionsProvider>
-            </AuthProvider>
-          </BrowserRouter>
-        </QueryClientProvider>
+        <AppProviders>
+          <App />
+        </AppProviders>
       </ErrorBoundary>
     </StrictMode>
   );
