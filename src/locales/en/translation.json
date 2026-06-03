@@ -83,6 +83,24 @@
       "dashboard": "Dashboard",
       "logout": "Logout"
     },
+    "auth": {
+      "exit": {
+        "title": "Professional Session Ended",
+        "desc": "You have successfully exited the Professional Portal. You are now browsing as a guest.",
+        "guestTitle": "Guest Interface",
+        "guestDesc": "Information is now organized for general discovery. Some technical research sections may be restricted.",
+        "pricingTitle": "Pricing Differences",
+        "pricingDesc": "Guest pricing is standard. Institutional and research-grade volume discounts are only visible to verified professionals.",
+        "btnGuest": "Continue as Guest",
+        "btnSignIn": "Sign In Again",
+        "needAccess": "Need professional access?",
+        "applyHere": "Apply here"
+      },
+      "guard": {
+        "title": "Access Restricted",
+        "desc": "You do not have the required permissions to view this screen. If you believe this is an error, please contact your administrator."
+      }
+    },
     "hero": {
       "badge": "Google Cloud Agent Platform",
       "title_line1": "Optimize by Goal",

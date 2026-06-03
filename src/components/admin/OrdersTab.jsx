@@ -628,6 +628,25 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
             </code>
           </div>
         )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', display: 'block', fontWeight: 600 }}>Auto-Refill (Zoho Subscriptions)</span>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, color: o.isSubscription ? 'var(--success)' : 'var(--text-muted)' }}>
+            <input 
+              type="checkbox" 
+              checked={!!o.isSubscription} 
+              onChange={async (e) => {
+                const isSub = e.target.checked;
+                try {
+                  await updateDoc(doc(db, 'orders', o.id), { isSubscription: isSub });
+                  setOrders(prev => prev.map(order => order.id === o.id ? { ...order, isSubscription: isSub } : order));
+                } catch (err) {
+                  console.error('Error toggling subscription:', err);
+                }
+              }} 
+            />
+            {o.isSubscription ? 'Enabled (Monthly)' : 'Disabled'}
+          </label>
+        </div>
       </div>
     </div>
   );

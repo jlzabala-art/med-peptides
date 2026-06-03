@@ -28,6 +28,7 @@ const ImportCoATab = React.lazy(() => import('../components/admin/imports/Import
 const ImportRFQTab = React.lazy(() => import('../components/admin/imports/ImportRFQTab'));
 const AdminImportHistoryTab = React.lazy(() => import('../components/admin/imports/AdminImportHistoryTab'));
 const AdminProductsTab     = React.lazy(() => import('../components/admin/AdminProductsTab'));
+const AdminCompetitorsTab  = React.lazy(() => import('../components/admin/AdminCompetitorsTab'));
 const AdminSettingsTab     = React.lazy(() => import('../components/admin/AdminSettingsTab'));
 const AdminInvitationsTab  = React.lazy(() => import('../components/admin/AdminInvitationsTab'));
 const AdminCostsTab        = React.lazy(() => import('../components/admin/AdminCostsTab'));
@@ -110,6 +111,7 @@ const NAV_GROUPS = [
     items: [
       { id: 'products',        label: 'Products',        icon: Box },
       { id: 'stock',           label: 'Stock',           icon: FlaskConical },
+      { id: 'competitors',     label: 'Competitor Analysis', icon: Activity },
       { id: 'enrichment',      label: 'Catalog Enrichment', icon: Database },
       { id: 'lab-tests',       label: 'Lab Tests',       icon: ScrollText },
       { id: 'protocols',       label: 'Protocols',       icon: ClipboardList },
@@ -273,8 +275,9 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
       {tab === 'doctors'       && <AdminUsersTab defaultRole="doctor" readOnly={false} canApprove={true} />}
       {tab === 'patients'      && <AdminUsersTab defaultRole="patient" readOnly={false} canApprove={true} />}
       {tab === 'users'         && <AdminUsersTab readOnly={false} canApprove={true} />}
-      {tab === 'products'      && <AdminProductsTab readOnly={false} hideCosts={false} allowedCategories={['All']} />}
-      {tab === 'costs'         && <AdminCostsTab readOnly={false} />}
+      { tab === 'products'      && <AdminProductsTab readOnly={false} hideCosts={false} allowedCategories={['All']} />}
+      { tab === 'competitors'   && <AdminCompetitorsTab /> }
+      { tab === 'costs'         && <AdminCostsTab readOnly={false} />}
       {tab === 'prices'        && <AdminPricesTab />}
       {tab === 'relationships' && <AdminRelationshipsTab readOnly={false} />}
       {tab === 'semantic'      && <AdminSemanticTab readOnly={false} />}

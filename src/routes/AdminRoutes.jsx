@@ -14,6 +14,7 @@ const AdminUsersTab        = React.lazy(() => import('../components/admin/AdminU
 const AdminWholesellersTab = React.lazy(() => import('../components/admin/AdminWholesellersTab'));
 const AdminAccountManagersTab = React.lazy(() => import('../components/admin/AdminAccountManagersTab'));
 const AdminProductsTab     = React.lazy(() => import('../components/admin/AdminProductsTab'));
+const AdminCompetitorsTab  = React.lazy(() => import('../components/admin/AdminCompetitorsTab'));
 const AdminSettingsTab     = React.lazy(() => import('../components/admin/AdminSettingsTab'));
 const AdminInvitationsTab  = React.lazy(() => import('../components/admin/AdminInvitationsTab'));
 const AdminCostsTab        = React.lazy(() => import('../components/admin/AdminCostsTab'));
@@ -95,6 +96,7 @@ export default function AdminRoutes() {
         <Route path="rfq" element={<AdminTabErrorBoundary tabId="rfq" tabLabel="RFQ"><AdminRFQTab /></AdminTabErrorBoundary>} />
         <Route path="users" element={<AdminTabErrorBoundary tabId="users" tabLabel="Users"><AdminUsersTab readOnly={false} canApprove={true} /></AdminTabErrorBoundary>} />
         <Route path="products" element={<AdminTabErrorBoundary tabId="products" tabLabel="Products"><AdminProductsTab readOnly={false} hideCosts={false} allowedCategories={['All']} /></AdminTabErrorBoundary>} />
+        <Route path="competitors" element={<AdminTabErrorBoundary tabId="competitors" tabLabel="Competitor Analysis"><AdminCompetitorsTab /></AdminTabErrorBoundary>} />
         <Route path="costs" element={<AdminTabErrorBoundary tabId="costs" tabLabel="Costs"><AdminCostsTab readOnly={false} /></AdminTabErrorBoundary>} />
         <Route path="prices" element={<AdminTabErrorBoundary tabId="prices" tabLabel="Prices"><AdminPricesTab /></AdminTabErrorBoundary>} />
         <Route path="relationships" element={<AdminTabErrorBoundary tabId="relationships" tabLabel="Relationships"><AdminRelationshipsTab readOnly={false} /></AdminTabErrorBoundary>} />

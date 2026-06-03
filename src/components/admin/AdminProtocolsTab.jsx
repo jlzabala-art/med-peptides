@@ -28,6 +28,7 @@ import {
   Edit3,
 } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
+import CustomProtocolBuilder from './CustomProtocolBuilder';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const STATUS_OPTIONS = ['draft', 'active', 'archived'];
@@ -560,6 +561,19 @@ function PathwayBuilder({ onClose, onSave, onGenerateAI }) {
           />
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {showCustomBuilder && (
+          <CustomProtocolBuilder 
+            onClose={() => setShowCustomBuilder(false)} 
+            onSaved={() => {
+              setShowCustomBuilder(false);
+              fetchProtocols();
+              toast.success('Custom Protocol Kit saved successfully!');
+            }} 
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -580,6 +594,7 @@ export default function AdminProtocolsTab() {
   const [deleting, setDeleting] = useState(null);
   const [catalogProducts, setCatalog] = useState([]);
   const [showPathwayWizard, setShowPathwayWizard] = useState(false);
+  const [showCustomBuilder, setShowCustomBuilder] = useState(false);
 
   // Fetch initial protocols
   const fetchProtocols = useCallback(async () => {
@@ -889,6 +904,24 @@ export default function AdminProtocolsTab() {
             }}
           >
             <Plus size={15} /> Create Pathway
+          </button>
+          <button
+            onClick={() => setShowCustomBuilder(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '13px',
+              padding: '0.4rem 1rem',
+              backgroundColor: 'var(--primary)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px'
+            }}
+          >
+            <Package size={15} /> Build Custom Kit
           </button>
         </div>
 

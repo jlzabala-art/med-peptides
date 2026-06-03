@@ -2,18 +2,22 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { usePermissions } from '../../contexts/PermissionsContext';
 import { ShieldAlert } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-const AccessDenied = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: '2rem', textAlign: 'center' }}>
-    <div style={{ width: '4rem', height: '4rem', backgroundColor: 'var(--color-error-bg, #fef2f2)', color: 'var(--color-error, #ef4444)', borderRadius: '9999px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
-      <ShieldAlert size={32} />
+const AccessDenied = () => {
+  const { t } = useTranslation();
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: '2rem', textAlign: 'center' }}>
+      <div style={{ width: '4rem', height: '4rem', backgroundColor: 'var(--color-error-bg, #fef2f2)', color: 'var(--color-error, #ef4444)', borderRadius: '9999px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
+        <ShieldAlert size={32} />
+      </div>
+      <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--color-text-primary)', marginBottom: '0.5rem' }}>{t('auth.guard.title', 'Access Restricted')}</h2>
+      <p style={{ color: 'var(--color-text-secondary)', maxWidth: '28rem', margin: '0 auto' }}>
+        {t('auth.guard.desc', 'You do not have the required permissions to view this screen. If you believe this is an error, please contact your administrator.')}
+      </p>
     </div>
-    <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--color-text-primary)', marginBottom: '0.5rem' }}>Access Restricted</h2>
-    <p style={{ color: 'var(--color-text-secondary)', maxWidth: '28rem', margin: '0 auto' }}>
-      You do not have the required permissions to view this screen. If you believe this is an error, please contact your administrator.
-    </p>
-  </div>
-);
+  );
+};
 
 const TAB_TO_PERMISSION_MAP = {
   // Admin Panel mappings

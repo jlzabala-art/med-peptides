@@ -2,8 +2,10 @@
 import React, { useEffect } from 'react';
 import { ArrowLeft, LogIn, ShieldAlert, Globe, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function ExitProfessionalMode({ onBack, onLogin }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -49,7 +51,7 @@ export default function ExitProfessionalMode({ onBack, onLogin }) {
           marginBottom: '1rem',
           letterSpacing: '-0.02em'
         }}>
-          Professional Session Ended
+          {t('auth.exit.title', 'Professional Session Ended')}
         </h1>
         
         <p style={{ 
@@ -58,7 +60,7 @@ export default function ExitProfessionalMode({ onBack, onLogin }) {
           lineHeight: 1.6,
           marginBottom: '2.5rem'
         }}>
-          You have successfully exited the Professional Portal. You are now browsing as a guest.
+          {t('auth.exit.desc', 'You have successfully exited the Professional Portal. You are now browsing as a guest.')}
         </p>
 
         <div style={{ 
@@ -74,9 +76,9 @@ export default function ExitProfessionalMode({ onBack, onLogin }) {
           <div style={{ display: 'flex', gap: '1rem' }}>
             <div style={{ color: 'var(--secondary)', flexShrink: 0 }}><Globe size={20} /></div>
             <div>
-              <h4 style={{ margin: '0 0 0.25rem 0', fontWeight: 700, fontSize: '0.95rem' }}>Guest Interface</h4>
+              <h4 style={{ margin: '0 0 0.25rem 0', fontWeight: 700, fontSize: '0.95rem' }}>{t('auth.exit.guestTitle', 'Guest Interface')}</h4>
               <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                Information is now organized for general discovery. Some technical research sections may be restricted.
+                {t('auth.exit.guestDesc', 'Information is now organized for general discovery. Some technical research sections may be restricted.')}
               </p>
             </div>
           </div>
@@ -84,9 +86,9 @@ export default function ExitProfessionalMode({ onBack, onLogin }) {
           <div style={{ display: 'flex', gap: '1rem' }}>
             <div style={{ color: 'var(--secondary)', flexShrink: 0 }}><Info size={20} /></div>
             <div>
-              <h4 style={{ margin: '0 0 0.25rem 0', fontWeight: 700, fontSize: '0.95rem' }}>Pricing Differences</h4>
+              <h4 style={{ margin: '0 0 0.25rem 0', fontWeight: 700, fontSize: '0.95rem' }}>{t('auth.exit.pricingTitle', 'Pricing Differences')}</h4>
               <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                Guest pricing is standard. Institutional and research-grade volume discounts are only visible to verified professionals.
+                {t('auth.exit.pricingDesc', 'Guest pricing is standard. Institutional and research-grade volume discounts are only visible to verified professionals.')}
               </p>
             </div>
           </div>
@@ -98,7 +100,7 @@ export default function ExitProfessionalMode({ onBack, onLogin }) {
             onClick={handleBack}
             style={{ width: '100%', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
           >
-            <ArrowLeft size={18} /> Continue as Guest
+            <ArrowLeft size={18} /> {t('auth.exit.btnGuest', 'Continue as Guest')}
           </button>
           
           <button 
@@ -116,12 +118,12 @@ export default function ExitProfessionalMode({ onBack, onLogin }) {
               color: 'var(--text-main)'
             }}
           >
-            <LogIn size={18} /> Sign In Again
+            <LogIn size={18} /> {t('auth.exit.btnSignIn', 'Sign In Again')}
           </button>
         </div>
 
         <p style={{ marginTop: '2rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-          Need professional access? <span style={{ color: 'var(--secondary)', fontWeight: 600, cursor: 'pointer' }} onClick={handleLogin}>Apply here</span>
+          {t('auth.exit.needAccess', 'Need professional access?')} <span style={{ color: 'var(--secondary)', fontWeight: 600, cursor: 'pointer' }} onClick={handleLogin}>{t('auth.exit.applyHere', 'Apply here')}</span>
         </p>
       </div>
     </div>

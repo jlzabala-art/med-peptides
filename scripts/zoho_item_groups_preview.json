@@ -1,0 +1,2890 @@
+[
+  {
+    "group_name": "BPC-157",
+    "description": "A pentadecapeptide with potent cytoprotective, angiogenic, and wound-healing properties under experimental conditions.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "BPC-157 5mg/vial",
+        "sku": "PEP-BPC1-5MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "5mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "TB-500 (Thymosin β4)",
+    "description": "A synthetic version of the naturally occurring peptide present in all cellular components promoting endothelial cell differentiation and angiogenesis.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "TB-500 (Thymosin β4) 2mg/vial",
+        "sku": "PEP-TB50-2MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "2mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "GLOW (BPC-157/TB-500/GHK-Cu)",
+    "description": "A proprietary experimental blend combining cytoprotective properties, angiogenic stimulation, and tissue remodeling mechanisms.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "GLOW (BPC-157/TB-500/GHK-Cu) 10/10/75mg/vial",
+        "sku": "PEP-GLOW-101075MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10/10/75mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "KLOW (BPC-157/TB-500/GHK-Cu/KPV)",
+    "description": "A multifaceted blend incorporating anti-inflammatory KPV with tissue repair agents for comprehensive cellular research.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "KLOW (BPC-157/TB-500/GHK-Cu/KPV) 10/10/75/10mg/vial",
+        "sku": "PEP-KLOW-10107510MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10/10/75/10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "KPV",
+    "description": "A tripeptide (Lys-Pro-Val) featuring strong antimicrobial and anti-inflammatory properties.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "KPV 5mg/vial",
+        "sku": "PEP-KPV-5MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "5mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "ARA-290",
+    "description": "A non-erythropoietic peptide engineered to interact with the innate repair receptor, reducing inflammation and neurodegeneration.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "ARA-290 16mg/vial",
+        "sku": "PEP-ARA2-16MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "16mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Tirzepatide",
+    "description": "A dual GIP and GLP-1 receptor agonist fundamentally altering energy metabolism and insulin secretion profiles.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Tirzepatide 10mg/vial",
+        "sku": "PEP-TIRZ-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Tirzepatide",
+    "description": "A dual GIP and GLP-1 receptor agonist fundamentally altering energy metabolism and insulin secretion profiles.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Tirzepatide 15mg/vial",
+        "sku": "PEP-TIRZ-15MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "15mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Tirzepatide",
+    "description": "A dual GIP and GLP-1 receptor agonist fundamentally altering energy metabolism and insulin secretion profiles.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Tirzepatide 30mg/vial",
+        "sku": "PEP-TIRZ-30MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "30mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Retatrutide",
+    "description": "A novel triple hormone receptor agonist (GIP, GLP-1, and Glucagon) exhibiting pronounced metabolic regulatory effects.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Retatrutide 10mg/vial",
+        "sku": "PEP-RETA-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Semaglutide",
+    "description": "A selective GLP-1 receptor agonist with structural modifications to extend plasma half-life via albumin binding.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Semaglutide 5mg/vial",
+        "sku": "PEP-SEMA-5MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "5mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Cagrilintide",
+    "description": "A long-acting amylin analog investigated for its synergistic action in energy balance and satiation mechanisms.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Cagrilintide 5mg/vial",
+        "sku": "PEP-CAGR-5MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "5mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "AOD-9604",
+    "description": "A modified fragment of the C-terminal region of Human Growth Hormone noted for lipolytic stimulation.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "AOD-9604 2mg/vial",
+        "sku": "PEP-AOD9-2MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "2mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "5-AMINO 1 MQ",
+    "description": "An inhibitor of the enzyme nicotinamide N-methyltransferase (NNMT), implicated in cellular energy expenditure.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "5-AMINO 1 MQ 50mg/tablet",
+        "sku": "PEP-5AMI-50MGTABLET",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "50mg/tablet"
+      }
+    ]
+  },
+  {
+    "group_name": "MOTS-C",
+    "description": "A mitochondrial-derived peptide regulating metabolic homeostasis and preventing diet-induced obesity in models.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "MOTS-C 10mg/vial",
+        "sku": "PEP-MOTS-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "SLU PP-332",
+    "description": "An estrogen-related receptor (ERR) agonist simulating structural metabolic adaptations similar to endurance training.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "SLU PP-332 50mg/vial",
+        "sku": "PEP-SLUP-50MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "50mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "GW-501516",
+    "description": "A PPARδ receptor agonist evaluating alterations in fatty acid oxidation and exercise endurance mechanisms.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "GW-501516 10mg/vial",
+        "sku": "PEP-GW50-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Epithalon",
+    "description": "A synthetic tetrapeptide proven to upregulate telomerase activity and extend cellular lifespan in in-vitro models.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Epithalon 10mg/vial",
+        "sku": "PEP-EPIT-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "GHK-Cu (Copper Peptide)",
+    "description": "A naturally occurring copper complex involved in widespread remodeling, collagen stimulation, and anti-oxidant activity.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "GHK-Cu (Copper Peptide) 50mg/vial",
+        "sku": "PEP-GHKC-50MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "50mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "NAD+",
+    "description": "A crucial cellular coenzyme found in all living cells, essential in metabolic red-ox reactions and sirtuin function.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "NAD+ 500mg/vial",
+        "sku": "PEP-NAD-500MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "500mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "NAD+",
+    "description": "A crucial cellular coenzyme found in all living cells.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "NAD+ 1000mg/vial",
+        "sku": "PEP-NAD-1000MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "1000mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "NMN",
+    "description": "A direct precursor to NAD+, actively investigated for its capability to mitigate age-associated physiological decline.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "NMN 50mg/tablet",
+        "sku": "PEP-NMN-50MGTABLET",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "50mg/tablet"
+      }
+    ]
+  },
+  {
+    "group_name": "SS-31",
+    "description": "A mitochondria-targeted peptide (Elamipretide) that binds cardiolipin to restore mitochondrial bioenergetics.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "SS-31 10mg/vial",
+        "sku": "PEP-SS31-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Selank",
+    "description": "A synthetic heptapeptide derived from human tuftsin showcasing marked anxiolytic and nootropic potentials.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Selank 5mg/vial",
+        "sku": "PEP-SELA-5MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "5mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Semax",
+    "description": "An ACTH analog known for its neuroprotective, neuromodulatory and potent cognitive enhancement effects.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Semax 5mg/vial",
+        "sku": "PEP-SEMA-5MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "5mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Pinealon",
+    "description": "A short synthetic peptide influencing cerebral cortex functions and enhancing cellular resistance to hypoxia.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Pinealon 10mg/vial",
+        "sku": "PEP-PINE-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "DSIP",
+    "description": "Delta Sleep-Inducing Peptide, a neuropeptide affecting central neuroendocrine regulations and circadian rhythms.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "DSIP 2mg/vial",
+        "sku": "PEP-DSIP-2MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "2mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "PE-22 28",
+    "description": "A TREK-1 potassium channel antagonist under study for robust antidepressant-like mechanisms.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "PE-22 28 10mg/vial",
+        "sku": "PEP-PE22-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "CJC-1295 without DAC (Modified GRF 1-29)",
+    "description": "A synthetic GHRH analog that increases pulsatile growth hormone and IGF-1 secretions without altering cortisol levels.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "CJC-1295 without DAC (Modified GRF 1-29) 2mg/vial",
+        "sku": "PEP-CJC1-2MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "2mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "CJC-1295 with DAC",
+    "description": "A long-acting GHRH analog paired with a Drug Affinity Complex to maximize half-life and stimulate continuous GH release.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "CJC-1295 with DAC 2mg/vial",
+        "sku": "PEP-CJC1-2MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "2mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "FST-344 (Follistatin)",
+    "description": "A potent autocrine glycoprotein that acts as an antagonist to myostatin, substantially accelerating muscle hypertrophy.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "FST-344 (Follistatin) 1mg/vial",
+        "sku": "PEP-FST3-1MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "1mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "IGF-1 LR3",
+    "description": "A highly engineered variant of Insulin-like Growth Factor-1 with an extended half-life dictating profound cellular hyperplasia.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "IGF-1 LR3 0.1mg/vial",
+        "sku": "PEP-IGF1-01MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "0.1mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "PEG MGF",
+    "description": "Pegylated Mechano Growth Factor, a slice variant of IGF-1 promoting localized stem cell proliferation strictly in muscle tissue.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "PEG MGF 2mg/vial",
+        "sku": "PEP-PEGM-2MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "2mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "MK-677 (Ibutamoren)",
+    "description": "An orally active, non-peptide secretagogue of the ghrelin receptor elevating GH and IGF-1 secretion.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "MK-677 (Ibutamoren) 10mg/vial",
+        "sku": "PEP-MK67-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "HGH",
+    "description": "Recombinant Human Growth Hormone essential for systemic cellular regeneration, growth, and metabolic regulation.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "HGH 10iu/vial",
+        "sku": "PEP-HGH-10IUVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10iu/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "HCG",
+    "description": "Human Chorionic Gonadotropin; extensively utilized to stimulate the Leydig cells in the synthesis of endogenous testosterone.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "HCG 5000iu/vial",
+        "sku": "PEP-HCG-5000IUVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "5000iu/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "HMG",
+    "description": "Human Menopausal Gonadotropin used in advanced fertility research to stimulate follicular growth and spermatogenesis.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "HMG 75iu/vial",
+        "sku": "PEP-HMG-75IUVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "75iu/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Ipamorelin",
+    "description": "A highly selective and potent GHRP that stimulates massive growth hormone release safely without spiking cortisol or prolactin.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Ipamorelin 2mg/vial",
+        "sku": "PEP-IPAM-2MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "2mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "GHRP-2",
+    "description": "A hexapeptide acting as a strong growth hormone secretagogue and ghrelin receptor agonist.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "GHRP-2 5mg/vial",
+        "sku": "PEP-GHRP-5MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "5mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Hexarelin",
+    "description": "One of the most potent fast-acting GH secretagogues.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Hexarelin 2mg/vial",
+        "sku": "PEP-HEXA-2MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "2mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Sermorelin",
+    "description": "A 29-amino acid polypeptide representing the shortest functional fragment of endogenous GHRH.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Sermorelin 2mg/vial",
+        "sku": "PEP-SERM-2MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "2mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Tesamorelin",
+    "description": "A synthetically stabilized GHRH analog verified to reduce severe visceral adipose tissue accumulation.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Tesamorelin 2mg/vial",
+        "sku": "PEP-TESA-2MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "2mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Kisspeptin-10",
+    "description": "The active fragment of kisspeptin crucially stimulating the secretion of GnRH to reset the HPTA axis.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Kisspeptin-10 5mg/vial",
+        "sku": "PEP-KISS-5MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "5mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Oxytocin Acetate",
+    "description": "A neurohypophysial hormone mediating complex social, reproductive, and stress-regulating behaviors.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Oxytocin Acetate 2mg/vial",
+        "sku": "PEP-OXYT-2MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "2mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "MT2 (Melanotan II)",
+    "description": "A synthetic analog of alpha-MSH inducing remarkable melanogenesis and demonstrating robust aphrodisiac properties.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "MT2 (Melanotan II) 10mg/vial",
+        "sku": "PEP-MT2M-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "PT-141 (Bremelanotide)",
+    "description": "A cyclic heptapeptide functioning as an agonist at melanocortin receptors heavily researched for sexual dysfunction.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "PT-141 (Bremelanotide) 10mg/vial",
+        "sku": "PEP-PT14-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "PNC-27",
+    "description": "An investigative anti-cancer peptide binding strongly to MDM2 in cellular membranes orchestrating rapid tumor cell necrosis.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "PNC-27 5mg/vial",
+        "sku": "PEP-PNC2-5MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "5mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Snap-8",
+    "description": "An octapeptide acting as an elongation of Argireline, interfering with the SNARE complex to minimize topical wrinkle formation.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Snap-8 10mg/vial",
+        "sku": "PEP-SNAP-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Thymulin",
+    "description": "A nonapeptide requiring zinc for biological activity, involved fundamentally in T-cell differentiation and maturation.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Thymulin 10mg/vial",
+        "sku": "PEP-THYM-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Thymosin Alpha 1",
+    "description": "An endogenous modifier of immune response directly augmenting the operational efficiency of T-cell-mediated responses.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Thymosin Alpha 1 5mg/vial",
+        "sku": "PEP-THYM-5MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "5mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Cartalax",
+    "description": "A synthetic dipeptide targeting the normalization of metabolic processes in bone and cartilaginous tissues.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Cartalax 10mg/vial",
+        "sku": "PEP-CART-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Cardiogen",
+    "description": "A tetrapeptide clinically proven to stimulate cellular proliferation and reduce apoptosis within cardiovascular tissues.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Cardiogen 10mg/vial",
+        "sku": "PEP-CARD-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Thymagen",
+    "description": "A dipeptide immuno-modulator aimed at restoring optimal physiological ratios among T-lymphocyte sub-populations.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Thymagen 10mg/vial",
+        "sku": "PEP-THYM-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Prostamax",
+    "description": "A specialized bioregulator peptide targeting cellular regeneration precisely within prostate gland tissues.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Prostamax 10mg/vial",
+        "sku": "PEP-PROS-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Testagen",
+    "description": "A synthesized targeted peptide designed to correct morphological and functional parameters of the male reproductive system.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Testagen 10mg/vial",
+        "sku": "PEP-TEST-10MGVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "10mg/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Bacteriostatic Water",
+    "description": "Sterile water containing 0.9% benzyl alcohol. Essential for correctly reconstituting lyophilized peptides for long-term stability.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Bacteriostatic Water 30ml/vial",
+        "sku": "PEP-BACT-30MLVIAL",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "30ml/vial"
+      }
+    ]
+  },
+  {
+    "group_name": "Precision Insulin Syringes",
+    "description": "31G x 8mm sterile U-100 syringes tailored for painless, extremely precise subcutaneous dosing under research conditions.",
+    "unit": "Box",
+    "category_name": "Peptides (Single)",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Precision Insulin Syringes Box of 100",
+        "sku": "PEP-PREC-BOXOF100",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Vial Size",
+        "attribute_option_value1": "Box of 100"
+      }
+    ]
+  },
+  {
+    "group_name": "ETERNA® Longevity Platform",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "ETERNA® Longevity Platform Standard",
+        "sku": "SUP-ETER-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Ashwagandha",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Ashwagandha Standard",
+        "sku": "SUP-ASHW-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Ashwagandha",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Ashwagandha Standard",
+        "sku": "SUP-ASHW-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Rhodiola Rosea",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Rhodiola Rosea Standard",
+        "sku": "SUP-RHOD-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Rhodiola Rosea",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Rhodiola Rosea Standard",
+        "sku": "SUP-RHOD-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Ginkgo Biloba",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Ginkgo Biloba Standard",
+        "sku": "SUP-GINK-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Boswellia",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Boswellia Standard",
+        "sku": "SUP-BOSW-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Boswellia",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Boswellia Standard",
+        "sku": "SUP-BOSW-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Boswellia",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Boswellia Standard",
+        "sku": "SUP-BOSW-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Lion's Mane Mushroom",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Lion's Mane Mushroom Standard",
+        "sku": "SUP-LION-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Milk Thistle",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Milk Thistle Standard",
+        "sku": "SUP-MILK-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Magnolia",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Magnolia Standard",
+        "sku": "SUP-MAGN-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Magnolia",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Magnolia Standard",
+        "sku": "SUP-MAGN-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Acetyl-Carnitine",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Acetyl-Carnitine Standard",
+        "sku": "SUP-ACET-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "L-Arginine",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "L-Arginine Standard",
+        "sku": "SUP-LARG-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "L-Arginine",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "L-Arginine Standard",
+        "sku": "SUP-LARG-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "L-Citrulline",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "L-Citrulline Standard",
+        "sku": "SUP-LCIT-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "L-Tryptophan",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "L-Tryptophan Standard",
+        "sku": "SUP-LTRY-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Glutamine",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Glutamine Standard",
+        "sku": "SUP-GLUT-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Cystine",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Cystine Standard",
+        "sku": "SUP-CYST-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "5-HTP",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "5-HTP Standard",
+        "sku": "SUP-5HTP-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "5-HTP",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "5-HTP Standard",
+        "sku": "SUP-5HTP-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "5-HTP",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "5-HTP Standard",
+        "sku": "SUP-5HTP-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "A-Lipoic Acid",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "A-Lipoic Acid Standard",
+        "sku": "SUP-ALIP-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "A-Lipoic Acid",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "A-Lipoic Acid Standard",
+        "sku": "SUP-ALIP-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "A-Lipoic Acid",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "A-Lipoic Acid Standard",
+        "sku": "SUP-ALIP-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Co-Q10",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Co-Q10 Standard",
+        "sku": "SUP-COQ1-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Co-Q10",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Co-Q10 Standard",
+        "sku": "SUP-COQ1-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Co-Q10",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Co-Q10 Standard",
+        "sku": "SUP-COQ1-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Co-Q10",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Co-Q10 Standard",
+        "sku": "SUP-COQ1-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Co-Q10",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Co-Q10 Standard",
+        "sku": "SUP-COQ1-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Co-Q10",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Co-Q10 Standard",
+        "sku": "SUP-COQ1-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Co-Q10",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Co-Q10 Standard",
+        "sku": "SUP-COQ1-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Glutathione",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Glutathione Standard",
+        "sku": "SUP-GLUT-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Glutathione",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Glutathione Standard",
+        "sku": "SUP-GLUT-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "NAC",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "NAC Standard",
+        "sku": "SUP-NAC-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Quercetin",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Quercetin Standard",
+        "sku": "SUP-QUER-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Quercetin",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Quercetin Standard",
+        "sku": "SUP-QUER-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Pycnogenol",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Pycnogenol Standard",
+        "sku": "SUP-PYCN-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Grape Seed Extract",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Grape Seed Extract Standard",
+        "sku": "SUP-GRAP-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "NMN",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "NMN Standard",
+        "sku": "SUP-NMN-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "NMN",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "NMN Standard",
+        "sku": "SUP-NMN-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "NMN",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "NMN Standard",
+        "sku": "SUP-NMN-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "NMN",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "NMN Standard",
+        "sku": "SUP-NMN-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "NMN",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "NMN Standard",
+        "sku": "SUP-NMN-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Resveratrol",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Resveratrol Standard",
+        "sku": "SUP-RESV-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Spermidine",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Spermidine Standard",
+        "sku": "SUP-SPER-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Spermidine",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Spermidine Standard",
+        "sku": "SUP-SPER-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Urolithin",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Urolithin Standard",
+        "sku": "SUP-UROL-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Rapamycin",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Rapamycin Standard",
+        "sku": "SUP-RAPA-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Rapamycin",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Rapamycin Standard",
+        "sku": "SUP-RAPA-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Berberine",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Berberine Standard",
+        "sku": "SUP-BERB-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Metformin",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Metformin Standard",
+        "sku": "SUP-METF-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Fenbendazole",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Fenbendazole Standard",
+        "sku": "SUP-FENB-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Fenbendazole",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Fenbendazole Standard",
+        "sku": "SUP-FENB-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Hyaluronic Acid",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Hyaluronic Acid Standard",
+        "sku": "SUP-HYAL-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Bromelain",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Bromelain Standard",
+        "sku": "SUP-BROM-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Serrapeptase 300,000SPU",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Serrapeptase 300,000SPU Standard",
+        "sku": "SUP-SERR-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Curcumin",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Curcumin Standard",
+        "sku": "SUP-CURC-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "B-Complex",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "B-Complex Standard",
+        "sku": "SUP-BCOM-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Biotin",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Biotin Standard",
+        "sku": "SUP-BIOT-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Biotin",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Biotin Standard",
+        "sku": "SUP-BIOT-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Vit. D3",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Vit. D3 Standard",
+        "sku": "SUP-VITD-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Vit. D3",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Vit. D3 Standard",
+        "sku": "SUP-VITD-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Vit. D3",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Vit. D3 Standard",
+        "sku": "SUP-VITD-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Vit. D3",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Vit. D3 Standard",
+        "sku": "SUP-VITD-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Vit. D3 10,000IU + K2",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Vit. D3 10,000IU + K2 Standard",
+        "sku": "SUP-VITD-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Magnesium Citrate",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Magnesium Citrate Standard",
+        "sku": "SUP-MAGN-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Magnesium Glycinate",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Magnesium Glycinate Standard",
+        "sku": "SUP-MAGN-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Magnesium Threonate",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Magnesium Threonate Standard",
+        "sku": "SUP-MAGN-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Magnesium 5-Matrix",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Magnesium 5-Matrix Standard",
+        "sku": "SUP-MAGN-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Omega-3 Forte",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Omega-3 Forte Standard",
+        "sku": "SUP-OMEG-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Zinc Citrate",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Zinc Citrate Standard",
+        "sku": "SUP-ZINC-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Zinc Gluconate",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Zinc Gluconate Standard",
+        "sku": "SUP-ZINC-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Boron",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Boron Standard",
+        "sku": "SUP-BORO-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Melatonin",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Melatonin Standard",
+        "sku": "SUP-MELA-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Melatonin",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Melatonin Standard",
+        "sku": "SUP-MELA-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Melatonin",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Melatonin Standard",
+        "sku": "SUP-MELA-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Melatonin",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Melatonin Standard",
+        "sku": "SUP-MELA-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Sleep Support",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Sleep Support Standard",
+        "sku": "SUP-SLEE-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "L-Theanine",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "L-Theanine Standard",
+        "sku": "SUP-LTHE-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "5-HTP",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "5-HTP Standard",
+        "sku": "SUP-5HTP-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "LDN 0.5mg",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "LDN 0.5mg Standard",
+        "sku": "SUP-LDN0-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "LDN 1.5mg",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "LDN 1.5mg Standard",
+        "sku": "SUP-LDN1-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "LDN 2.5mg",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "LDN 2.5mg Standard",
+        "sku": "SUP-LDN2-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "LDN",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "LDN Standard",
+        "sku": "SUP-LDN-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "LDN 4.5mg",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "LDN 4.5mg Standard",
+        "sku": "SUP-LDN4-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Tadalafil",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Tadalafil Standard",
+        "sku": "SUP-TADA-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Tadalafil",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Tadalafil Standard",
+        "sku": "SUP-TADA-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Tadalafil",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Tadalafil Standard",
+        "sku": "SUP-TADA-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Phosphatidylserine",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Phosphatidylserine Standard",
+        "sku": "SUP-PHOS-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "DIM",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "DIM Standard",
+        "sku": "SUP-DIM-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Saw Palmetto",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Saw Palmetto Standard",
+        "sku": "SUP-SAWP-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Spironolactone",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Spironolactone Standard",
+        "sku": "SUP-SPIR-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  },
+  {
+    "group_name": "Lycopene",
+    "description": "",
+    "unit": "Bottle",
+    "category_name": "Nutraceuticals / Supplements",
+    "brand": "Atlas Health",
+    "is_taxable": true,
+    "items": [
+      {
+        "name": "Lycopene Standard",
+        "sku": "SUP-LYCO-STANDARD",
+        "rate": 0,
+        "purchase_rate": 0,
+        "product_type": "goods",
+        "attribute_option_name1": "Size/Count",
+        "attribute_option_value1": "Standard"
+      }
+    ]
+  }
+]

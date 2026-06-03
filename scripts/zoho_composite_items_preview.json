@@ -1,0 +1,407 @@
+[
+  {
+    "sku": "PROT-metabolicWeightLoss",
+    "description": {
+      "goal": "Reduce appetite, burn fat, and improve your metabolism safely.",
+      "duration": "16 weeks",
+      "benefits": [
+        "Control hunger",
+        "Reduce cravings",
+        "Burn body fat",
+        "Maintain long-term weight loss"
+      ]
+    },
+    "category_name": "Clinical Protocols",
+    "unit": "Kit",
+    "rate": 0,
+    "is_combo_product": true,
+    "mapped_items": [
+      {
+        "name": "Tirzepatide",
+        "quantity": 1
+      },
+      {
+        "name": "MOTS-C",
+        "quantity": 1
+      },
+      {
+        "name": "Tirzepatide",
+        "quantity": 1
+      },
+      {
+        "name": "AOD-9604",
+        "quantity": 1
+      },
+      {
+        "name": "MOTS-C",
+        "quantity": 1
+      },
+      {
+        "name": "Tirzepatide",
+        "quantity": 1
+      },
+      {
+        "name": "MOTS-C",
+        "quantity": 1
+      },
+      {
+        "name": "Bacteriostatic Water 30ml",
+        "quantity": 2
+      },
+      {
+        "name": "Insulin Syringes 100-pack",
+        "quantity": 1
+      },
+      {
+        "name": "Alcohol Swabs 100-pack",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "sku": "PROT-recoveryInjury",
+    "description": {
+      "goal": "Accelerate tissue repair, reduce systemic inflammation.",
+      "duration": "12 weeks",
+      "benefits": [
+        "Faster injury healing",
+        "Reduced systemic inflammation",
+        "Improved joint mobility",
+        "Muscle repair"
+      ]
+    },
+    "category_name": "Clinical Protocols",
+    "unit": "Kit",
+    "rate": 0,
+    "is_combo_product": true,
+    "mapped_items": [
+      {
+        "name": "BPC-157",
+        "quantity": 1
+      },
+      {
+        "name": "TB-500",
+        "quantity": 1
+      },
+      {
+        "name": "BPC-157",
+        "quantity": 1
+      },
+      {
+        "name": "GHK-Cu",
+        "quantity": 1
+      },
+      {
+        "name": "Bacteriostatic Water 30ml",
+        "quantity": 2
+      },
+      {
+        "name": "Insulin Syringes 100-pack",
+        "quantity": 1
+      },
+      {
+        "name": "Alcohol Swabs 100-pack",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "sku": "PROT-cognitiveSupport",
+    "description": {
+      "goal": "Enhance focus, memory, and neuroplasticity.",
+      "duration": "8 weeks",
+      "benefits": [
+        "Sharper focus",
+        "Better memory retention",
+        "Reduced brain fog",
+        "Neuroprotection"
+      ]
+    },
+    "category_name": "Clinical Protocols",
+    "unit": "Kit",
+    "rate": 0,
+    "is_combo_product": true,
+    "mapped_items": [
+      {
+        "name": "Semax",
+        "quantity": 1
+      },
+      {
+        "name": "Cerebrolysin",
+        "quantity": 1
+      },
+      {
+        "name": "Selank",
+        "quantity": 1
+      },
+      {
+        "name": "Dihexa",
+        "quantity": 1
+      },
+      {
+        "name": "Bacteriostatic Water 30ml",
+        "quantity": 2
+      },
+      {
+        "name": "Insulin Syringes 100-pack",
+        "quantity": 1
+      },
+      {
+        "name": "Alcohol Swabs 100-pack",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "sku": "PROT-sleepSupport",
+    "description": {
+      "goal": "Restore natural circadian rhythms and enhance deep sleep.",
+      "duration": "6 weeks",
+      "benefits": [
+        "Faster sleep onset",
+        "Increased REM/Deep sleep",
+        "Better morning energy"
+      ]
+    },
+    "category_name": "Clinical Protocols",
+    "unit": "Kit",
+    "rate": 0,
+    "is_combo_product": true,
+    "mapped_items": [
+      {
+        "name": "DSIP",
+        "quantity": 1
+      },
+      {
+        "name": "Epitalon",
+        "quantity": 1
+      },
+      {
+        "name": "Epitalon",
+        "quantity": 1
+      },
+      {
+        "name": "Bacteriostatic Water 30ml",
+        "quantity": 2
+      },
+      {
+        "name": "Insulin Syringes 100-pack",
+        "quantity": 1
+      },
+      {
+        "name": "Alcohol Swabs 100-pack",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "sku": "PROT-hormonalSupport",
+    "description": {
+      "goal": "Naturally stimulate growth hormone and optimize systemic hormones.",
+      "duration": "16 weeks",
+      "benefits": [
+        "Improved body composition",
+        "Better skin/hair",
+        "Increased vitality"
+      ]
+    },
+    "category_name": "Clinical Protocols",
+    "unit": "Kit",
+    "rate": 0,
+    "is_combo_product": true,
+    "mapped_items": [
+      {
+        "name": "Ipamorelin",
+        "quantity": 1
+      },
+      {
+        "name": "CJC-1295 (No DAC)",
+        "quantity": 1
+      },
+      {
+        "name": "Tesamorelin",
+        "quantity": 1
+      },
+      {
+        "name": "Bacteriostatic Water 30ml",
+        "quantity": 2
+      },
+      {
+        "name": "Insulin Syringes 100-pack",
+        "quantity": 1
+      },
+      {
+        "name": "Alcohol Swabs 100-pack",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "sku": "PROT-skinAntiAging",
+    "description": {
+      "goal": "Promote collagen synthesis and cellular youth.",
+      "duration": "10 weeks",
+      "benefits": [
+        "Thicker, more elastic skin",
+        "Reduced wrinkles",
+        "Telomere support"
+      ]
+    },
+    "category_name": "Clinical Protocols",
+    "unit": "Kit",
+    "rate": 0,
+    "is_combo_product": true,
+    "mapped_items": [
+      {
+        "name": "GHK-Cu",
+        "quantity": 1
+      },
+      {
+        "name": "Epitalon",
+        "quantity": 1
+      },
+      {
+        "name": "FoxO4-DRI",
+        "quantity": 1
+      },
+      {
+        "name": "Bacteriostatic Water 30ml",
+        "quantity": 2
+      },
+      {
+        "name": "Insulin Syringes 100-pack",
+        "quantity": 1
+      },
+      {
+        "name": "Alcohol Swabs 100-pack",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "sku": "PROT-immuneInflammation",
+    "description": {
+      "goal": "Balance immune response and fight systemic pathogens.",
+      "duration": "8 weeks",
+      "benefits": [
+        "Enhanced immunity",
+        "Reduced autoimmune flares",
+        "Antimicrobial support"
+      ]
+    },
+    "category_name": "Clinical Protocols",
+    "unit": "Kit",
+    "rate": 0,
+    "is_combo_product": true,
+    "mapped_items": [
+      {
+        "name": "Thymosin Alpha-1 (TA1)",
+        "quantity": 1
+      },
+      {
+        "name": "LL-37",
+        "quantity": 1
+      },
+      {
+        "name": "Thymosin Alpha-1 (TA1)",
+        "quantity": 1
+      },
+      {
+        "name": "Bacteriostatic Water 30ml",
+        "quantity": 2
+      },
+      {
+        "name": "Insulin Syringes 100-pack",
+        "quantity": 1
+      },
+      {
+        "name": "Alcohol Swabs 100-pack",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "sku": "PROT-energyMitochondrial",
+    "description": {
+      "goal": "Enhance ATP production and mitochondrial efficiency.",
+      "duration": "12 weeks",
+      "benefits": [
+        "More stamina",
+        "Reduced chronic fatigue",
+        "Better metabolic flexibility"
+      ]
+    },
+    "category_name": "Clinical Protocols",
+    "unit": "Kit",
+    "rate": 0,
+    "is_combo_product": true,
+    "mapped_items": [
+      {
+        "name": "MOTS-C",
+        "quantity": 1
+      },
+      {
+        "name": "SS-31 (Elamipretide)",
+        "quantity": 1
+      },
+      {
+        "name": "NAD+",
+        "quantity": 1
+      },
+      {
+        "name": "MOTS-C",
+        "quantity": 1
+      },
+      {
+        "name": "Bacteriostatic Water 30ml",
+        "quantity": 2
+      },
+      {
+        "name": "Insulin Syringes 100-pack",
+        "quantity": 1
+      },
+      {
+        "name": "Alcohol Swabs 100-pack",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "sku": "PROT-generalSupport",
+    "description": {
+      "goal": "Baseline systemic improvement for overall health.",
+      "duration": "8 weeks",
+      "benefits": [
+        "Balanced recovery",
+        "Mild anti-aging",
+        "General vitality"
+      ]
+    },
+    "category_name": "Clinical Protocols",
+    "unit": "Kit",
+    "rate": 0,
+    "is_combo_product": true,
+    "mapped_items": [
+      {
+        "name": "BPC-157",
+        "quantity": 1
+      },
+      {
+        "name": "CJC-1295 / Ipamorelin",
+        "quantity": 1
+      },
+      {
+        "name": "Bacteriostatic Water 30ml",
+        "quantity": 2
+      },
+      {
+        "name": "Insulin Syringes 100-pack",
+        "quantity": 1
+      },
+      {
+        "name": "Alcohol Swabs 100-pack",
+        "quantity": 1
+      }
+    ]
+  }
+]

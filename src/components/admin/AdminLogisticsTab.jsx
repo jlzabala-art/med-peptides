@@ -4,6 +4,7 @@ import { db } from '../../firebase';
 import { Card, CardContent } from '../ui/Card';
 import { PackageSearch, FileCheck, Truck, Clock, CheckCircle, Package } from 'lucide-react';
 import DataTable from '../ui/DataTable';
+import KittingRiskAnalysis from './KittingRiskAnalysis';
 
 export default function AdminLogisticsTab() {
   const [activeTab, setActiveTab] = useState('supplier_shipments'); // 'supplier_shipments' or 'agency_rfqs'
@@ -155,6 +156,8 @@ export default function AdminLogisticsTab() {
           Agency RFQs
         </button>
       </div>
+
+      <KittingRiskAnalysis />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
         <Card style={{ borderLeft: '4px solid var(--color-primary, #4f46e5)', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>

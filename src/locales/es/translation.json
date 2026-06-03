@@ -83,6 +83,24 @@
       "dashboard": "Panel de Control",
       "logout": "Cerrar Sesión"
     },
+    "auth": {
+      "exit": {
+        "title": "Sesión Profesional Finalizada",
+        "desc": "Has salido exitosamente del Portal Profesional. Ahora estás navegando como invitado.",
+        "guestTitle": "Interfaz de Invitado",
+        "guestDesc": "La información ahora está organizada para el descubrimiento general. Algunas secciones de investigación técnica pueden estar restringidas.",
+        "pricingTitle": "Diferencias de Precios",
+        "pricingDesc": "Los precios para invitados son estándar. Los descuentos por volumen a nivel institucional y de investigación solo son visibles para profesionales verificados.",
+        "btnGuest": "Continuar como Invitado",
+        "btnSignIn": "Iniciar Sesión Nuevamente",
+        "needAccess": "¿Necesitas acceso profesional?",
+        "applyHere": "Aplica aquí"
+      },
+      "guard": {
+        "title": "Acceso Restringido",
+        "desc": "No tienes los permisos requeridos para ver esta pantalla. Si crees que esto es un error, por favor contacta a tu administrador."
+      }
+    },
     "hero": {
       "badge": "Plataforma de Agentes Google Cloud",
       "title_line1": "Optimiza por Objetivo",

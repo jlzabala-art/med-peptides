@@ -44,6 +44,9 @@ exports.emailIngestWebhook = require('./src/http/email_ingest_webhook').emailIng
 
 // CRON JOBS
 exports.checkInventoryLevels = require('./src/cron/check_inventory_levels').checkInventoryLevels; 
+const scrapeCompetitors = require('./src/cron/scrapeCompetitors');
+exports.scheduledScrapeCompetitors = scrapeCompetitors.scheduledScrapeCompetitors;
+exports.forceScrapeCompetitors = scrapeCompetitors.forceScrapeCompetitors;
 
 // TRIGGERS
 exports.scoreNewLead = require('./src/triggers/on_lead_created').scoreNewLead;

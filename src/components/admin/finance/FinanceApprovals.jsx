@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import AdminApprovalsWidget from '../gadgets/AdminApprovalsWidget';
+import AtlasAIFinanceInsights from './AtlasAIFinanceInsights';
 import { FileText, ClipboardList, Clock, BellRing, Receipt, Download, ExternalLink, ArrowRight, ChevronLeft, ChevronRight, Search, CheckCircle, Check } from 'lucide-react';
 import { exportToCSV } from '../../../utils/exportUtils';
 import { usePreferences } from '../../../context/PreferencesContext';
@@ -56,6 +57,9 @@ export default function FinanceApprovals({ dashboardData }) {
       <div>
         <AdminApprovalsWidget />
       </div>
+
+      {/* Atlas AI Finance Insights */}
+      <AtlasAIFinanceInsights pendingInvoices={filteredInvoices} />
 
       {/* Full Width Table for Unpaid Invoices */}
       <div className="glass-card-premium" style={{ display: 'flex', flexDirection: 'column', borderTop: '4px solid var(--warning)' }}>

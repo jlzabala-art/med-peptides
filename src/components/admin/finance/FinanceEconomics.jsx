@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { AlertTriangle, TrendingUp, DollarSign, CheckCircle, PieChart, Landmark } from 'lucide-react';
+import ProfitMarginAnalysis from './ProfitMarginAnalysis';
 
 export default function FinanceEconomics({ dashboardData }) {
   const lotusBilled = dashboardData?.lotuslandData?.totalBilled || 0;
@@ -105,6 +106,9 @@ export default function FinanceEconomics({ dashboardData }) {
         </div>
         
       </div>
+
+      {/* Protocol Margin Analysis */}
+      <ProfitMarginAnalysis />
 
       {/* Margin Alerts */}
       <div className="glass-card-premium" style={{ borderTop: '4px solid var(--warning)', position: 'relative', overflow: 'hidden' }}>
