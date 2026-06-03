@@ -4,6 +4,7 @@ import { collection, query, where, orderBy, limit, onSnapshot, doc, updateDoc, w
 import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import './NotificationBell.css'; // Use external CSS instead of Tailwind
 
 const NotificationBell = () => {
   const { user } = useAuth();
@@ -77,67 +78,60 @@ const NotificationBell = () => {
   if (!user) return null;
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div className="notif-bell-container" ref={menuRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-full text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+        className="notif-bell-btn"
         aria-label="Notifications"
       >
         <Bell size={20} strokeWidth={1.8} />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full ring-2 ring-white">
+          <span className="notif-bell-badge">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 flex flex-col max-h-[85vh]">
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-            <h3 className="font-semibold text-slate-800">Notifications</h3>
+        <div className="notif-dropdown">
+          <div className="notif-dropdown-header">
+            <h3>Notifications</h3>
             {unreadCount > 0 && (
-              <button 
-                onClick={markAllAsRead}
-                className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1"
-              >
+              <button onClick={markAllAsRead} className="notif-mark-all">
                 <Check size={14} />
                 Mark all as read
               </button>
             )}
           </div>
           
-          <div className="overflow-y-auto flex-1">
+          <div className="notif-dropdown-body">
             {notifications.length === 0 ? (
-              <div className="p-8 text-center text-slate-400">
-                <Bell size={24} className="mx-auto mb-2 opacity-30" />
-                <p className="text-sm">No notifications yet</p>
+              <div className="notif-empty">
+                <Bell size={24} className="notif-empty-icon" />
+                <p>No notifications yet</p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="notif-list">
                 {notifications.map(notif => (
                   <div 
                     key={notif.id}
                     onClick={() => handleNotificationClick(notif)}
-                    className={`p-4 hover:bg-slate-50 transition-colors cursor-pointer flex gap-3 ${!notif.read ? 'bg-blue-50/30' : ''}`}
+                    className={`notif-item ${!notif.read ? 'notif-unread' : ''}`}
                   >
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm ${!notif.read ? 'font-semibold text-slate-900' : 'text-slate-700'}`}>
-                        {notif.title}
-                      </p>
-                      <p className="text-sm text-slate-500 mt-1 line-clamp-2">
-                        {notif.message}
-                      </p>
-                      <p className="text-xs text-slate-400 mt-2 font-medium">
+                    <div className="notif-content">
+                      <p className="notif-title">{notif.title}</p>
+                      <p className="notif-message">{notif.message}</p>
+                      <p className="notif-time">
                         {notif.createdAt?.toDate ? notif.createdAt.toDate().toLocaleString(undefined, {
                           month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                         }) : 'Just now'}
                       </p>
                     </div>
                     {!notif.read && (
-                      <div className="flex items-start">
+                      <div className="notif-actions">
                         <button 
                           onClick={(e) => markAsRead(notif.id, e)}
-                          className="p-1 text-blue-600 hover:bg-blue-100 rounded-full transition-colors tooltip-trigger"
+                          className="notif-action-btn"
                           title="Mark as read"
                         >
                           <Check size={16} />
@@ -150,13 +144,8 @@ const NotificationBell = () => {
             )}
           </div>
           
-          <div className="p-3 border-t border-slate-100 text-center bg-slate-50">
-            <button 
-              onClick={() => setIsOpen(false)}
-              className="text-sm font-medium text-slate-500 hover:text-slate-800"
-            >
-              Close
-            </button>
+          <div className="notif-dropdown-footer">
+            <button onClick={() => setIsOpen(false)}>Close</button>
           </div>
         </div>
       )}

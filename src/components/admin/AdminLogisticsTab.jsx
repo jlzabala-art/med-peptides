@@ -88,6 +88,17 @@ export default function AdminLogisticsTab() {
     }
   };
 
+  const getStatusStyle = (status) => {
+    const s = status?.toUpperCase();
+    if (['DELIVERED', 'COMPLETED'].includes(s)) {
+      return { background: 'var(--color-success-bg, #dcfce7)', color: 'var(--color-success, #166534)' };
+    }
+    if (['SHIPPED', 'IN_TRANSIT'].includes(s)) {
+      return { background: 'var(--color-info-bg, #dbeafe)', color: 'var(--color-info, #1e40af)' };
+    }
+    return { background: 'var(--color-warning-bg, #ffedd5)', color: 'var(--color-warning, #9a3412)' };
+  };
+
   const columns = [
     { key: 'id', label: 'ID', render: (val) => val.slice(0, 8).toUpperCase() },
     { 
@@ -95,15 +106,14 @@ export default function AdminLogisticsTab() {
       label: activeTab === 'agency_rfqs' ? 'Client' : 'Supplier',
       render: (val, item) => val || item.supplierName || 'Unknown'
     },
-    { key: 'status', label: 'Status', render: (val) => (
-      <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${
-        ['DELIVERED', 'COMPLETED'].includes(val) ? 'bg-green-100 text-green-800' :
-        ['SHIPPED', 'in_transit'].includes(val) ? 'bg-blue-100 text-blue-800' :
-        'bg-orange-100 text-orange-800'
-      }`}>
-        {val?.replace('_', ' ') || 'PENDING'}
-      </span>
-    )},
+    { key: 'status', label: 'Status', render: (val) => {
+      const style = getStatusStyle(val);
+      return (
+        <span style={{ ...style, padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase' }}>
+          {val?.replace('_', ' ') || 'PENDING'}
+        </span>
+      );
+    }},
     ...(activeTab === 'supplier_shipments' ? [
       { key: 'trackingNumber', label: 'Tracking' },
       { key: 'carrier', label: 'Carrier' }
@@ -112,7 +122,7 @@ export default function AdminLogisticsTab() {
     { key: 'actions', label: 'Actions', render: (_, item) => (
       <button 
         onClick={() => setEditingItem(item)}
-        className="text-indigo-600 hover:text-indigo-900 font-medium text-sm"
+        style={{ color: 'var(--color-primary, #4f46e5)', fontWeight: '500', fontSize: '0.875rem', background: 'none', border: 'none', cursor: 'pointer' }}
       >
         Manage
       </button>
@@ -120,48 +130,48 @@ export default function AdminLogisticsTab() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between mb-4">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Truck className="text-indigo-600" />
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--color-text-primary, #111827)', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+            <Truck style={{ color: 'var(--color-primary, #4f46e5)' }} />
             Admin Logistics & Shipping
           </h1>
-          <p className="text-gray-500">Global control center for tracking and managing operations.</p>
+          <p style={{ color: 'var(--color-text-secondary, #6b7280)', margin: '0.25rem 0 0' }}>Global control center for tracking and managing operations.</p>
         </div>
       </div>
 
-      <div className="flex gap-4 border-b border-gray-200">
+      <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--color-border, #e5e7eb)' }}>
         <button
-          className={`py-2 px-4 font-bold border-b-2 transition-colors ${activeTab === 'supplier_shipments' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-800'}`}
+          style={{ padding: '0.5rem 1rem', fontWeight: 'bold', borderBottom: activeTab === 'supplier_shipments' ? '2px solid var(--color-primary, #4f46e5)' : '2px solid transparent', color: activeTab === 'supplier_shipments' ? 'var(--color-primary, #4f46e5)' : 'var(--color-text-secondary, #6b7280)', background: 'none', cursor: 'pointer', transition: 'colors 0.2s' }}
           onClick={() => setActiveTab('supplier_shipments')}
         >
           Supplier Shipments
         </button>
         <button
-          className={`py-2 px-4 font-bold border-b-2 transition-colors ${activeTab === 'agency_rfqs' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-800'}`}
+          style={{ padding: '0.5rem 1rem', fontWeight: 'bold', borderBottom: activeTab === 'agency_rfqs' ? '2px solid var(--color-primary, #4f46e5)' : '2px solid transparent', color: activeTab === 'agency_rfqs' ? 'var(--color-primary, #4f46e5)' : 'var(--color-text-secondary, #6b7280)', background: 'none', cursor: 'pointer', transition: 'colors 0.2s' }}
           onClick={() => setActiveTab('agency_rfqs')}
         >
           Agency RFQs
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-l-4 border-l-indigo-600 shadow-sm">
-          <CardContent className="p-4 flex justify-between items-center">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+        <Card style={{ borderLeft: '4px solid var(--color-primary, #4f46e5)', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
+          <CardContent style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Total Records</p>
-              <p className="text-2xl font-black text-gray-900">{kpiStats.total}</p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary, #6b7280)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>Total Records</p>
+              <p style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--color-text-primary, #111827)', margin: 0 }}>{kpiStats.total}</p>
             </div>
-            <Package className="w-8 h-8 text-gray-200" />
+            <Package style={{ width: '2rem', height: '2rem', color: 'var(--color-border, #e5e7eb)' }} />
           </CardContent>
         </Card>
       </div>
 
-      <Card className="shadow-sm">
-        <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-          <h3 className="font-bold text-lg">{activeTab === 'supplier_shipments' ? 'Supplier Logistics' : 'RFQ Logistics'}</h3>
-          <button onClick={() => loadData(1)} className="text-sm font-semibold text-indigo-600 hover:underline">
+      <Card style={{ boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
+        <div style={{ padding: '1rem', borderBottom: '1px solid var(--color-border, #f3f4f6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ fontWeight: 'bold', fontSize: '1.125rem', margin: 0 }}>{activeTab === 'supplier_shipments' ? 'Supplier Logistics' : 'RFQ Logistics'}</h3>
+          <button onClick={() => loadData(1)} style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--color-primary, #4f46e5)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'none' }}>
             Refresh Data
           </button>
         </div>
@@ -180,16 +190,16 @@ export default function AdminLogisticsTab() {
 
       {/* Edit Modal */}
       {editingItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in-95">
-            <h3 className="text-xl font-bold mb-4">Manage Status</h3>
-            <form onSubmit={handleUpdateStatus} className="space-y-4">
+        <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: '1rem' }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '0.75rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', maxWidth: '28rem', width: '100%', padding: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem', marginTop: 0 }}>Manage Status</h3>
+            <form onSubmit={handleUpdateStatus} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
-                <label className="block text-sm font-semibold mb-1">Status</label>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem' }}>Status</label>
                 <select 
                   value={editingItem.status || ''}
                   onChange={(e) => setEditingItem({...editingItem, status: e.target.value})}
-                  className="w-full p-2 border rounded"
+                  style={{ width: '100%', padding: '0.5rem', border: '1px solid var(--color-border)', borderRadius: '0.25rem' }}
                 >
                   <option value="ordered">Ordered</option>
                   <option value="packed">Packed</option>
@@ -208,29 +218,29 @@ export default function AdminLogisticsTab() {
               {activeTab === 'supplier_shipments' && (
                 <>
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Tracking Number</label>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem' }}>Tracking Number</label>
                     <input 
                       type="text" 
                       value={editingItem.trackingNumber || ''}
                       onChange={(e) => setEditingItem({...editingItem, trackingNumber: e.target.value})}
-                      className="w-full p-2 border rounded" 
+                      style={{ width: '100%', padding: '0.5rem', border: '1px solid var(--color-border)', borderRadius: '0.25rem' }} 
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Carrier</label>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem' }}>Carrier</label>
                     <input 
                       type="text" 
                       value={editingItem.carrier || ''}
                       onChange={(e) => setEditingItem({...editingItem, carrier: e.target.value})}
-                      className="w-full p-2 border rounded" 
+                      style={{ width: '100%', padding: '0.5rem', border: '1px solid var(--color-border)', borderRadius: '0.25rem' }} 
                     />
                   </div>
                 </>
               )}
 
-              <div className="flex justify-end gap-2 pt-4">
-                <button type="button" onClick={() => setEditingItem(null)} className="px-4 py-2 border rounded font-semibold">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded font-bold">Save Changes</button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '1rem' }}>
+                <button type="button" onClick={() => setEditingItem(null)} style={{ padding: '0.5rem 1rem', border: '1px solid var(--color-border)', borderRadius: '0.25rem', fontWeight: '600', background: 'transparent', cursor: 'pointer' }}>Cancel</button>
+                <button type="submit" style={{ padding: '0.5rem 1rem', backgroundColor: 'var(--color-primary, #4f46e5)', color: 'white', borderRadius: '0.25rem', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>Save Changes</button>
               </div>
             </form>
           </div>

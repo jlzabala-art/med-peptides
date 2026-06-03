@@ -99,7 +99,8 @@ async function sendDigestEmail(data) {
     return;
   }
 
-  const transporter = nodemailer.createTransport({
+  try {
+    const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: { user, pass }
   });
@@ -107,56 +108,94 @@ async function sendDigestEmail(data) {
   const formatter = new Intl.NumberFormat('en-AE', { style: 'currency', currency: 'AED' });
   const totalInvoicedFormatted = formatter.format(data.totalInvoiced);
 
-  const topDoctorsHtml = data.topDoctors.length > 0
-    ? data.topDoctors.map((doc, idx) => `<li>${idx+1}. Dr. ${doc.name}: <strong>${doc.minutes} min</strong></li>`).join("")
-    : "<li>No hubo actividad de doctores registrada.</li>";
-    
-  const lowStockHtml = data.lowStockItems.length > 0
-    ? data.lowStockItems.slice(0, 5).map(item => `<li>${item.name} (SKU: ${item.sku}) - Stock: <strong style="color:red;">${item.stock_on_hand}</strong></li>`).join("")
-    : "<li>Todo el stock está en niveles óptimos.</li>";
+    const baseUrl = 'https://med-peptides-app-27a3a.web.app';
+    const logoUrl = `${baseUrl}/logo.png`; // assuming logo.png is the main logo
 
-  const html = `
-    <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; line-height: 1.6;">
-      <h2 style="color: #2c3e50; border-bottom: 2px solid #eaeaea; padding-bottom: 10px;">☀️ Admin Daily Digest</h2>
-      <p>Hola José,</p>
-      <p>Aquí tienes el resumen de actividad de la plataforma correspondiente al <strong>${data.yesterdayStr}</strong>.</p>
+    const topDoctorsHtml = data.topDoctors.length > 0
+      ? data.topDoctors.map((doc, idx) => `<li>${idx+1}. Dr. ${doc.name}: <strong>${doc.minutes} min</strong></li>`).join("")
+      : "<li>No hubo actividad de doctores registrada.</li>";
       
-      <h3 style="color: #3b82f6;">💰 Resumen Financiero (Zoho Books)</h3>
-      <ul style="background: #f8f9fa; padding: 15px 30px; border-radius: 8px;">
-        <li>Nuevas facturas emitidas: <strong>${data.invoicesCount}</strong></li>
-        <li>Volumen facturado: <strong>${totalInvoicedFormatted}</strong></li>
-      </ul>
+    const lowStockHtml = data.lowStockItems.length > 0
+      ? data.lowStockItems.slice(0, 5).map(item => `<li>${item.name} (SKU: ${item.sku}) - Stock: <strong style="color:red;">${item.stock_on_hand}</strong></li>`).join("")
+      : "<li>Todo el stock está en niveles óptimos.</li>";
 
-      <h3 style="color: #10b981;">👨‍⚕️ Top Doctores Conectados</h3>
-      <p>Los especialistas que pasaron más tiempo en la plataforma ayer:</p>
-      <ul>
-        ${topDoctorsHtml}
-      </ul>
+    const html = `
+      <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; line-height: 1.6; background-color: #ffffff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <div style="text-align: center; border-bottom: 2px solid #eaeaea; padding-bottom: 20px; margin-bottom: 20px;">
+          <img src="${logoUrl}" alt="Mediluxe Logo" style="max-height: 60px; margin-bottom: 10px;" onerror="this.src='https://ui-avatars.com/api/?name=Mediluxe&background=0D8ABC&color=fff&size=100'"/>
+          <h2 style="color: #2c3e50; margin: 0;">Admin Daily Digest</h2>
+        </div>
+        
+        <p>Hola José,</p>
+        <p>Aquí tienes el resumen de actividad de la plataforma correspondiente al <strong>${data.yesterdayStr}</strong>.</p>
+        
+        <div style="margin-bottom: 25px;">
+          <h3 style="color: #3b82f6; display: flex; align-items: center; justify-content: space-between;">
+            <span>💰 Resumen Financiero</span>
+            <a href="${baseUrl}/admin?tab=finance" style="font-size: 12px; background: #3b82f6; color: white; padding: 4px 10px; border-radius: 12px; text-decoration: none;">Ver Dashboard</a>
+          </h3>
+          <ul style="background: #f8f9fa; padding: 15px 30px; border-radius: 8px;">
+            <li>Nuevas facturas emitidas: <strong>${data.invoicesCount}</strong></li>
+            <li>Volumen facturado: <strong>${totalInvoicedFormatted}</strong></li>
+            <li>Balance de Caja (Estimado): <strong>Ver detalles en App</strong></li>
+          </ul>
+        </div>
 
-      <h3 style="color: #f59e0b;">📋 Tareas Pendientes</h3>
-      <ul>
-        <li>Pacientes esperando aprobación: <strong>${data.pendingPatients}</strong></li>
-      </ul>
+        <div style="margin-bottom: 25px;">
+          <h3 style="color: #10b981; display: flex; align-items: center; justify-content: space-between;">
+            <span>👨‍⚕️ Top Doctores Conectados</span>
+            <a href="${baseUrl}/admin?tab=users" style="font-size: 12px; background: #10b981; color: white; padding: 4px 10px; border-radius: 12px; text-decoration: none;">Gestionar Usuarios</a>
+          </h3>
+          <ul style="background: #f8f9fa; padding: 15px 30px; border-radius: 8px;">
+            ${topDoctorsHtml}
+          </ul>
+        </div>
 
-      <h3 style="color: #ef4444;">⚠️ Alertas Médicas (Stock Bajo)</h3>
-      <p>Productos con menos de 10 unidades en inventario:</p>
-      <ul>
-        ${lowStockHtml}
-        ${data.lowStockItems.length > 5 ? `<li>... y ${data.lowStockItems.length - 5} más (Ver Zoho)</li>` : ""}
-      </ul>
+        <div style="margin-bottom: 25px;">
+          <h3 style="color: #f59e0b; display: flex; align-items: center; justify-content: space-between;">
+            <span>📋 Tareas Pendientes</span>
+            <a href="${baseUrl}/admin?tab=users" style="font-size: 12px; background: #f59e0b; color: white; padding: 4px 10px; border-radius: 12px; text-decoration: none;">Revisar Solicitudes</a>
+          </h3>
+          <ul style="background: #f8f9fa; padding: 15px 30px; border-radius: 8px;">
+            <li>Pacientes esperando aprobación: <strong>${data.pendingPatients}</strong></li>
+            <li>Tickets de soporte abiertos: <strong>Ver en App</strong></li>
+          </ul>
+        </div>
 
-      <p style="margin-top: 40px; font-size: 12px; color: #888;">
-        Este es un mensaje generado automáticamente por Mediluxe System Administration.
-      </p>
-    </div>
-  `;
+        <div style="margin-bottom: 25px;">
+          <h3 style="color: #ef4444; display: flex; align-items: center; justify-content: space-between;">
+            <span>⚠️ Alertas Médicas (Stock Bajo)</span>
+            <a href="${baseUrl}/admin?tab=products" style="font-size: 12px; background: #ef4444; color: white; padding: 4px 10px; border-radius: 12px; text-decoration: none;">Ver Inventario</a>
+          </h3>
+          <div style="background: #fdf2f2; padding: 15px 30px; border-radius: 8px; border: 1px solid #fee2e2;">
+            <p style="margin-top: 0; font-weight: bold; color: #b91c1c;">Productos con menos de 10 unidades en inventario:</p>
+            <ul>
+              ${lowStockHtml}
+              ${data.lowStockItems.length > 5 ? `<li>... y ${data.lowStockItems.length - 5} más (Ver App)</li>` : ""}
+            </ul>
+          </div>
+        </div>
 
-  await transporter.sendMail({
-    from: `"Mediluxe Admin" <${user}>`,
-    to: "jose@mediluxeme.com",
-    subject: `☀️ Admin Daily Digest: ${data.yesterdayStr}`,
-    html: html
-  });
-  
-  console.log(`[adminDailyDigest] Email digest sent for ${data.yesterdayStr}.`);
+        <div style="text-align: center; margin-top: 30px;">
+          <a href="${baseUrl}/admin" style="display: inline-block; background-color: #0f172a; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; letter-spacing: 0.5px;">Abrir Panel de Administración</a>
+        </div>
+
+        <p style="margin-top: 40px; font-size: 12px; color: #888; text-align: center; border-top: 1px solid #eaeaea; padding-top: 20px;">
+          Este es un mensaje generado automáticamente por Mediluxe System Administration.<br/>
+          Si no deseas recibir estos correos, puedes ajustar tus preferencias en tu perfil.
+        </p>
+      </div>
+    `;
+
+    await transporter.sendMail({
+      from: `"Mediluxe Admin" <${user}>`,
+      to: "jose@mediluxeme.com",
+      subject: `Mediluxe Admin Daily Digest: ${data.yesterdayStr}`,
+      html: html
+    });
+    
+    console.log(`[adminDailyDigest] Email digest sent for ${data.yesterdayStr}.`);
+  } catch (error) {
+    console.error("[adminDailyDigest] Failed to construct/send email:", error);
+  }
 }

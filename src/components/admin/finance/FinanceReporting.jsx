@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '../../ui/Card';
-import { Download, FileText, CheckCircle } from 'lucide-react';
+import { Download, FileText, CheckCircle, BarChart3, TrendingUp, Presentation, Briefcase, Zap } from 'lucide-react';
 
 export default function FinanceReporting({ dashboardData, totalBalance, activeSubs }) {
   const [generating, setGenerating] = useState(false);
@@ -18,7 +17,6 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
     setReportReady(false);
     
     try {
-      // Lazy load jsPDF to avoid blocking the main thread
       const [jsPdfModule, autoTableModule] = await Promise.all([
         import('jspdf'),
         import('jspdf-autotable')
@@ -30,18 +28,18 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
       
       // Branding Header
       doc.setFontSize(22);
-      doc.setTextColor(0, 54, 102);
+      doc.setTextColor(15, 23, 42); // slate-900
       doc.setFont('helvetica', 'bold');
-      doc.text("Atlas Health - Investor Report", 14, 22);
+      doc.text("CFO Intelligence Hub - Monthly Report", 14, 22);
       
       doc.setFontSize(10);
-      doc.setTextColor(100, 116, 139);
+      doc.setTextColor(100, 116, 139); // slate-500
       doc.setFont('helvetica', 'normal');
-      doc.text(`Generated: ${new Date().toLocaleDateString('en-US')}`, 14, 28);
+      doc.text(`Generated: ${new Date().toLocaleDateString('en-US')} • System Verified Data`, 14, 28);
       
-      doc.setDrawColor(0, 54, 102);
+      doc.setDrawColor(226, 232, 240); // slate-200
       doc.setLineWidth(0.5);
-      doc.line(14, 32, 196, 32);
+      doc.line(14, 34, 196, 34);
 
       // Executive Summary
       doc.setFontSize(14);
@@ -51,11 +49,11 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
 
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
-      doc.setTextColor(51, 65, 85);
-      const summaryText = `This month, Atlas Health achieved an MRR of $${mrr.toLocaleString()} (ARR: $${arr.toLocaleString()}). ` +
-        `Total Income recorded in Zoho is $${totalIncome.toLocaleString()} against expenses of $${totalExpenses.toLocaleString()}, ` +
+      doc.setTextColor(51, 65, 85); // slate-700
+      const summaryText = `This month, the organization achieved an MRR of $${mrr.toLocaleString()} (ARR: $${arr.toLocaleString()}). ` +
+        `Total Income recorded in Zoho Books is $${totalIncome.toLocaleString()} against expenses of $${totalExpenses.toLocaleString()}, ` +
         `resulting in a Net Profit (EBITDA approx.) of $${netProfit.toLocaleString()}. ` +
-        `Our total cash reserves stand at $${(dashboardData?.profitAndLoss?.net_profit || totalBalance).toLocaleString()}, providing a strong runway for continuous operational growth.`;
+        `Total cash reserves stand at $${(dashboardData?.profitAndLoss?.net_profit || totalBalance).toLocaleString()}, providing a strong runway for continuous operational growth.`;
       
       const splitSummary = doc.splitTextToSize(summaryText, 182);
       doc.text(splitSummary, 14, 52);
@@ -81,8 +79,9 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
         head: [['Metric', 'Current Value']],
         body: metricsData,
         theme: 'grid',
-        headStyles: { fillColor: [0, 54, 102], textColor: [255, 255, 255] },
-        styles: { fontSize: 10, cellPadding: 4 }
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] },
+        styles: { fontSize: 10, cellPadding: 5 },
+        alternateRowStyles: { fillColor: [248, 250, 252] }
       });
 
       const finalY = doc.lastAutoTable.finalY || 150;
@@ -103,10 +102,10 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
       // Footer
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
-      doc.text("CONFIDENTIAL - Do not distribute without permission. Atlas Health internal use only.", 14, 285);
+      doc.text("CONFIDENTIAL - Do not distribute without permission. Internal CFO Hub Use Only.", 14, 285);
 
       // Download
-      doc.save(`Atlas_Health_Financial_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.save(`CFO_Hub_Financial_Report_${new Date().toISOString().split('T')[0]}.pdf`);
       
       setReportReady(true);
     } catch (error) {
@@ -118,61 +117,104 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
   };
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">Board-Ready Investor Reporting</h2>
-        <p className="text-gray-500 mt-1">Generate one-click PDF data rooms for investors and monthly board meetings.</p>
+    <div className="anim-fade-up" style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      
+      <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', justifyItems: 'center', padding: '1rem', background: 'rgba(79, 70, 229, 0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
+          <Presentation style={{ width: '40px', height: '40px', color: '#4f46e5' }} />
+        </div>
+        <h2 style={{ fontSize: '1.875rem', fontWeight: '800', color: 'var(--primary)', marginBottom: '0.5rem', letterSpacing: '-0.025em' }}>Board-Ready Investor Reporting</h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.125rem', maxWidth: '600px', margin: '0 auto', lineHeight: 1.6 }}>Generate single-click PDF data rooms for investors and monthly board meetings, fully synced with live data.</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-blue-600" />
-            Monthly Executive Summary
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-gray-600 mb-6">
-            This report automatically aggregates real-time metrics including Cash Balance, MRR, ARR, and EBITDA projections.
-            It formats them into a branded, confidential PDF ready for distribution.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 items-center p-6 bg-slate-50 rounded-lg border border-slate-200">
-            <div className="flex-1">
-              <h4 className="font-semibold text-gray-900">Financial Data Room (Current Month)</h4>
-              <ul className="mt-2 text-sm text-gray-500 space-y-1">
-                <li>• Includes MRR / ARR updates</li>
-                <li>• Includes EBITDA analysis</li>
-                <li>• Includes Operational Compliance checks</li>
-              </ul>
+      <div className="glass-card-premium" style={{ overflow: 'hidden' }}>
+        
+        {/* Header Area */}
+        <div style={{ background: 'var(--primary)', color: 'white', padding: '2rem', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: '-6rem', right: '-6rem', width: '256px', height: '256px', background: 'rgba(99, 102, 241, 0.3)', filter: 'blur(80px)', borderRadius: '50%', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', bottom: '-6rem', left: '-6rem', width: '256px', height: '256px', background: 'rgba(16, 185, 129, 0.2)', filter: 'blur(80px)', borderRadius: '50%', pointerEvents: 'none' }} />
+          
+          <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
+            <div style={{ flex: '1 1 auto', maxWidth: '600px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.25rem 0.75rem', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '999px', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <Zap style={{ width: '14px', height: '14px', color: '#fbbf24' }} />
+                Live Automated Sync
+              </div>
+              <h3 style={{ fontSize: '1.875rem', fontWeight: '800', marginBottom: '0.5rem', letterSpacing: '-0.025em' }}>Monthly Executive Summary</h3>
+              <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.875rem', lineHeight: 1.6, margin: 0 }}>
+                This report automatically aggregates real-time metrics including Cash Balance, MRR, ARR, and EBITDA projections. It formats them into a branded, confidential PDF ready for distribution.
+              </p>
             </div>
+            
             <button
               onClick={handleGeneratePDF}
               disabled={generating}
-              className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              style={{
+                background: 'white', color: 'var(--primary)', padding: '1rem 2rem', borderRadius: '16px', fontWeight: '800', 
+                border: 'none', cursor: generating ? 'not-allowed' : 'pointer', opacity: generating ? 0.5 : 1,
+                display: 'flex', alignItems: 'center', gap: '0.75rem', whiteSpace: 'nowrap', boxShadow: '0 0 40px rgba(255, 255, 255, 0.2)'
+              }}
+              className="hover-lift"
             >
               {generating ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span className="spinner-icon" style={{ borderColor: 'var(--primary)', borderTopColor: 'transparent' }}></span>
               ) : (
-                <Download className="w-5 h-5" />
+                <Download style={{ width: '20px', height: '20px' }} />
               )}
-              {generating ? 'Compiling PDF...' : 'Generate PDF'}
+              {generating ? 'Compiling Report...' : 'Generate PDF Report'}
             </button>
           </div>
-
+        </div>
+        
+        {/* Features / Details */}
+        <div style={{ padding: '2rem', background: 'var(--surface-raised)' }}>
+          
           {reportReady && (
-            <div className="mt-4 p-4 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-emerald-600 mt-0.5" />
+            <div className="anim-fade-up" style={{ marginBottom: '2rem', padding: '1.5rem', background: 'var(--success)', color: 'white', borderRadius: '16px', display: 'flex', alignItems: 'flex-start', gap: '1rem', boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.2)' }}>
+              <CheckCircle style={{ width: '32px', height: '32px', flexShrink: 0 }} />
               <div>
-                <h4 className="font-semibold">Report Generated Successfully</h4>
-                <p className="text-sm mt-1">
+                <h4 style={{ fontWeight: '800', fontSize: '1.125rem', marginBottom: '0.25rem' }}>Report Generated Successfully</h4>
+                <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600', margin: 0 }}>
                   Your PDF report has been downloaded to your device. This report contains confidential data; please ensure secure distribution.
                 </p>
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+
+          <div className="finance-grid-3" style={{ gap: '1.5rem' }}>
+            <div className="glass-card-premium" style={{ padding: '1.5rem' }}>
+              <div style={{ background: 'rgba(37, 99, 235, 0.1)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                <BarChart3 style={{ width: '24px', height: '24px', color: '#2563eb' }} />
+              </div>
+              <h4 style={{ fontWeight: '800', color: 'var(--primary)', marginBottom: '0.5rem' }}>EBITDA & Margins</h4>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
+                Aggregates Zoho Books P&L data to project adjusted EBITDA and operational margins.
+              </p>
+            </div>
+            
+            <div className="glass-card-premium" style={{ padding: '1.5rem' }}>
+              <div style={{ background: 'rgba(16, 185, 129, 0.1)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                <TrendingUp style={{ width: '24px', height: '24px', color: 'var(--success)' }} />
+              </div>
+              <h4 style={{ fontWeight: '800', color: 'var(--primary)', marginBottom: '0.5rem' }}>Growth Metrics</h4>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
+                Includes real-time MRR, ARR, and active subscription counts directly from Stripe.
+              </p>
+            </div>
+            
+            <div className="glass-card-premium" style={{ padding: '1.5rem' }}>
+              <div style={{ background: 'rgba(234, 88, 12, 0.1)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                <Briefcase style={{ width: '24px', height: '24px', color: '#ea580c' }} />
+              </div>
+              <h4 style={{ fontWeight: '800', color: 'var(--primary)', marginBottom: '0.5rem' }}>Compliance Checks</h4>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
+                Provides an audit trail summary of manual overrides, tax liabilities, and flagged invoices.
+              </p>
+            </div>
+          </div>
+          
+        </div>
+      </div>
     </div>
   );
 }

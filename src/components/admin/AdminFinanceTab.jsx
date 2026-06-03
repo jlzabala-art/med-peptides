@@ -1,46 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { db, functions } from '../../firebase';
-import { doc, getDoc } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
+import { useFinanceData } from '../../hooks/useFinanceData';
 import FinanceOverview from './finance/FinanceOverview';
 import FinanceBudget from './finance/FinanceBudget';
 import FinancePayables from './finance/FinancePayables';
 import FinanceApprovals from './finance/FinanceApprovals';
 import FinanceEconomics from './finance/FinanceEconomics';
 import FinanceReporting from './finance/FinanceReporting';
-import { LayoutDashboard, PieChart, CreditCard, ShieldAlert, TrendingUp, FileText } from 'lucide-react';
+import UploadInvoiceModal from './finance/UploadInvoiceModal';
+import { RefreshCw, TrendingUp, Calendar, PlusCircle, FileUp, Settings2 } from 'lucide-react';
+import SkeletonLoader from '../ui/SkeletonLoader';
 
 export default function AdminFinanceTab({ activeSubTab }) {
   const { user } = useAuth();
-  const [totalBalance, setTotalBalance] = useState(0);
-  const [activeSubs, setActiveSubs] = useState(150); // Mock
-  const [loading, setLoading] = useState(true);
-  const [dashboardData, setDashboardData] = useState(null);
+  const { data, loading, forceRefresh, error } = useFinanceData();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [dateRange, setDateRange] = useState('YTD');
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const activeTab = activeSubTab || 'budget';
 
-  useEffect(() => {
-    async function fetchFinancials() {
-      setLoading(true);
-      try {
-        const fetchDashboard = httpsCallable(functions, 'fetchFinanceDashboard');
-        const res = await fetchDashboard();
-        const data = res.data;
-        setDashboardData(data);
-        
-        // Compute total balance based on P&L data or simply mock if not available in Zoho payload yet
-        // In the future this should come from Zoho Bank feeds, using 245600.50 for now
-        setTotalBalance(245600.50);
-      } catch(err) {
-        console.error(err);
-        // Fallback
-        setTotalBalance(245600.50);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchFinancials();
-  }, []);
+  // We unpack the cached data or default to empty values to prevent crashes while loading
+  const dashboardData = data?.dashboardData || null;
+  const totalBalance = data?.totalBalance || 0;
+  const activeSubs = data?.activeSubs || 0;
 
   useEffect(() => {
     if (loading) return;
@@ -59,19 +41,128 @@ export default function AdminFinanceTab({ activeSubTab }) {
     return () => window.dispatchEvent(new CustomEvent('UPDATE_GLOBAL_CONTEXT', { detail: null }));
   }, [loading, totalBalance, activeSubs]);
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading CFO Dashboard...</div>;
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await forceRefresh();
+    setIsRefreshing(false);
+  };
+
+  const renderContent = () => {
+    if (loading && !data) {
+      return (
+        <div className="p-8 space-y-4">
+          <SkeletonLoader height="40px" />
+          <SkeletonLoader height="200px" />
+          <SkeletonLoader height="300px" />
+        </div>
+      );
+    }
+    
+    if (error && !data) {
+      return <div className="p-8 text-center text-red-500 font-medium">Failed to load CFO Dashboard. Please refresh.</div>;
+    }
+
+    switch(activeTab) {
+      case 'overview': return <FinanceOverview dashboardData={dashboardData} totalBalance={totalBalance} activeSubs={activeSubs} />;
+      case 'budget': return <FinanceBudget dashboardData={dashboardData} />;
+      case 'payables': return <FinancePayables dashboardData={dashboardData} />;
+      case 'approvals': return <FinanceApprovals dashboardData={dashboardData} />;
+      case 'economics': return <FinanceEconomics dashboardData={dashboardData} />;
+      case 'reporting': return <FinanceReporting dashboardData={dashboardData} totalBalance={totalBalance} activeSubs={activeSubs} />;
+      default: return null;
+    }
+  };
 
   return (
-    <div className="flex flex-col gap-6 w-full">
-      {/* Finance Content Area (Full Width) */}
-      <div className="w-full bg-white dark:bg-slate-900 p-6 rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm min-h-[600px]">
-        {activeTab === 'overview' && <FinanceOverview dashboardData={dashboardData} totalBalance={totalBalance} activeSubs={activeSubs} />}
-        {activeTab === 'budget' && <FinanceBudget dashboardData={dashboardData} />}
-        {activeTab === 'payables' && <FinancePayables dashboardData={dashboardData} />}
-        {activeTab === 'approvals' && <FinanceApprovals dashboardData={dashboardData} />}
-        { activeTab === 'economics' && <FinanceEconomics dashboardData={dashboardData} /> }
-        { activeTab === 'reporting' && <FinanceReporting dashboardData={dashboardData} totalBalance={totalBalance} activeSubs={activeSubs} /> }
+    <div className="admin-finance-root anim-fade-up">
+      
+      {/* Premium Glassmorphism Header */}
+      <div className="glass-card-premium" style={{ marginBottom: '1.5rem', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ 
+              padding: '0.75rem', 
+              background: 'rgba(255, 255, 255, 0.1)', 
+              borderRadius: '12px', 
+              border: '1px solid var(--glass-border)' 
+            }}>
+              <TrendingUp style={{ width: '32px', height: '32px', color: 'var(--primary)' }} />
+            </div>
+            <div>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: '800', margin: 0, color: 'var(--primary)' }}>CFO Intelligence Hub</h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: '0.25rem 0 0 0' }}>Real-time financial synchronization and predictive modeling</p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600' }}>System Status</div>
+              <div style={{ fontSize: '0.875rem', color: 'var(--success)', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span className="admin-pill-status-dot admin-pill-status-dot--pulse" />
+                Zoho Books Synced
+              </div>
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface-raised)', borderRadius: '8px', padding: '0.25rem 0.5rem', border: '1px solid var(--border)' }}>
+              <Calendar style={{ width: '16px', height: '16px', color: 'var(--text-muted)', marginRight: '0.5rem' }} />
+              <select 
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value)}
+                className="admin-premium-select"
+                style={{ border: 'none', background: 'transparent', padding: '0', cursor: 'pointer' }}
+              >
+                <option value="THIS_MONTH">This Month</option>
+                <option value="Q1">Q1 2026</option>
+                <option value="Q2">Q2 2026</option>
+                <option value="YTD">Year to Date (YTD)</option>
+                <option value="LAST_12">Last 12 Months</option>
+              </select>
+            </div>
+
+            <button 
+              onClick={handleRefresh}
+              disabled={loading || isRefreshing}
+              className="admin-quick-btn"
+            >
+              <RefreshCw style={{ width: '16px', height: '16px' }} className={isRefreshing ? 'spinner-icon' : ''} />
+              <span>{isRefreshing ? 'Syncing...' : 'Force Sync'}</span>
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Financial Quick Action Bar */}
+      <div className="glass-card-premium" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem', padding: '1rem', marginBottom: '2rem' }}>
+        <button className="gcp-btn-secondary" style={{ color: 'var(--primary)', borderColor: 'var(--primary)' }}>
+          <PlusCircle style={{ width: '16px', height: '16px' }} />
+          Log Manual Payment
+        </button>
+        <button 
+          onClick={() => setShowUploadModal(true)}
+          className="gcp-btn-secondary" style={{ color: 'var(--success)', borderColor: 'var(--success)' }}
+        >
+          <FileUp style={{ width: '16px', height: '16px' }} />
+          Upload Invoice
+        </button>
+        <button className="gcp-btn-secondary" style={{ marginLeft: 'auto' }}>
+          <Settings2 style={{ width: '16px', height: '16px' }} />
+          Adjust Budget
+        </button>
+      </div>
+
+      {/* Finance Content Area */}
+      <div className="admin-table-container" style={{ padding: '2rem', minHeight: '600px' }}>
+        {renderContent()}
+      </div>
+
+      {showUploadModal && (
+        <UploadInvoiceModal 
+          onClose={() => setShowUploadModal(false)} 
+          onComplete={() => {
+            handleRefresh();
+          }} 
+        />
+      )}
     </div>
   );
 }

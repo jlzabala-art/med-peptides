@@ -17,16 +17,16 @@ const TechnicalSection = ({ title, items = [], icon: Icon = Beaker }) => {
   if (!items || items.length === 0) return null;
 
   return (
-    <div className="technical-section mt-8 mb-12">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+    <div style={{ marginTop: '2rem', marginBottom: '3rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+        <div style={{ padding: '0.5rem', borderRadius: '0.5rem', backgroundColor: 'rgba(6, 182, 212, 0.1)', color: 'var(--color-primary, #22d3ee)' }}>
           <Icon size={24} />
         </div>
-        <h2 className="text-2xl font-bold text-white tracking-tight">{title}</h2>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--color-text-primary, #ffffff)', letterSpacing: '-0.025em', margin: 0 }}>{title}</h2>
       </div>
 
       {isMobile ? (
-        <div className="accordion-group space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {items.map((item, idx) => (
             <AccordionItem 
               key={item.peptide_id || item.id || idx}
@@ -37,27 +37,35 @@ const TechnicalSection = ({ title, items = [], icon: Icon = Beaker }) => {
           ))}
         </div>
       ) : (
-        <div className="tabs-container rounded-2xl bg-black/30 border border-white/5 overflow-hidden">
-          <div className="tabs-header flex border-b border-white/5 bg-white/5">
+        <div style={{ borderRadius: '1rem', backgroundColor: 'rgba(0, 0, 0, 0.3)', border: '1px solid rgba(255, 255, 255, 0.05)', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
             {items.map((item, idx) => (
               <button
                 key={item.peptide_id || item.id || idx}
                 onClick={() => setActiveIndex(idx)}
-                className={`px-6 py-4 text-sm font-medium transition-all relative ${
-                  activeIndex === idx ? 'text-cyan-400' : 'text-gray-400 hover:text-gray-200'
-                }`}
+                style={{
+                  padding: '1rem 1.5rem',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  transition: 'all 0.2s',
+                  position: 'relative',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: activeIndex === idx ? 'var(--color-primary, #22d3ee)' : 'var(--color-text-secondary, #9ca3af)'
+                }}
               >
                 {item.name}
                 {activeIndex === idx && (
                   <motion.div 
                     layoutId="activeTab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-400"
+                    style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '2px', backgroundColor: 'var(--color-primary, #22d3ee)' }}
                   />
                 )}
               </button>
             ))}
           </div>
-          <div className="tab-content p-8 min-h-[300px]">
+          <div style={{ padding: '2rem', minHeight: '300px' }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeIndex}
@@ -78,18 +86,31 @@ const TechnicalSection = ({ title, items = [], icon: Icon = Beaker }) => {
 
 const AccordionItem = ({ item, isOpen, onClick }) => {
   return (
-    <div className={`rounded-xl border transition-all duration-300 ${
-      isOpen ? 'bg-white/10 border-cyan-500/30' : 'bg-black/20 border-white/5 hover:border-white/10'
-    }`}>
+    <div style={{
+      borderRadius: '0.75rem',
+      border: isOpen ? '1px solid rgba(6, 182, 212, 0.3)' : '1px solid rgba(255, 255, 255, 0.05)',
+      backgroundColor: isOpen ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.2)',
+      transition: 'all 0.3s'
+    }}>
       <button 
         onClick={onClick}
-        className="w-full px-5 py-4 flex justify-between items-center text-left"
+        style={{
+          width: '100%',
+          padding: '1rem 1.25rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          textAlign: 'left',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer'
+        }}
       >
-        <span className={`font-semibold ${isOpen ? 'text-cyan-400' : 'text-gray-200'}`}>
+        <span style={{ fontWeight: '600', color: isOpen ? 'var(--color-primary, #22d3ee)' : 'var(--color-text-secondary, #e5e7eb)' }}>
           {item.name}
         </span>
         <motion.div animate={{ rotate: isOpen ? 180 : 0 }}>
-          <ChevronDown size={20} className="text-gray-500" />
+          <ChevronDown size={20} style={{ color: 'var(--color-text-tertiary, #6b7280)' }} />
         </motion.div>
       </button>
       
@@ -99,9 +120,9 @@ const AccordionItem = ({ item, isOpen, onClick }) => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
+            style={{ overflow: 'hidden' }}
           >
-            <div className="px-5 pb-6 pt-2 border-t border-white/5">
+            <div style={{ padding: '0.5rem 1.25rem 1.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
               <TechnicalDetails item={item} />
             </div>
           </motion.div>
@@ -113,45 +134,45 @@ const AccordionItem = ({ item, isOpen, onClick }) => {
 
 const TechnicalDetails = ({ item }) => {
   return (
-    <div className="grid gap-8 md:grid-cols-2">
-      <div className="space-y-6">
+    <div style={{ display: 'grid', gap: '2rem', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         <div>
-          <h4 className="text-xs uppercase tracking-widest text-cyan-500 font-bold mb-3 flex items-center gap-2">
+          <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--color-primary, #06b6d4)', fontWeight: 'bold', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 0.75rem 0' }}>
             <Zap size={14} /> Mecanismo de Acción
           </h4>
-          <p className="text-gray-300 text-sm leading-relaxed">
+          <p style={{ color: 'var(--color-text-secondary, #d1d5db)', fontSize: '0.875rem', lineHeight: '1.625', margin: 0 }}>
             {item.rationale || "Información clínica en proceso de actualización por el equipo médico."}
           </p>
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-3 rounded-lg bg-white/5 border border-white/5">
-            <div className="text-[10px] text-gray-500 uppercase font-bold mb-1">Vía de Adm.</div>
-            <div className="text-cyan-100 text-sm">{item.route_term}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+          <div style={{ padding: '0.75rem', borderRadius: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary, #6b7280)', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '0.25rem' }}>Vía de Adm.</div>
+            <div style={{ color: 'var(--color-info-text, #cffafe)', fontSize: '0.875rem' }}>{item.route_term}</div>
           </div>
-          <div className="p-3 rounded-lg bg-white/5 border border-white/5">
-            <div className="text-[10px] text-gray-500 uppercase font-bold mb-1">Vida Media (Rec)</div>
-            <div className="text-cyan-100 text-sm">{item.post_reconstitution_half_life} días</div>
+          <div style={{ padding: '0.75rem', borderRadius: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary, #6b7280)', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '0.25rem' }}>Vida Media (Rec)</div>
+            <div style={{ color: 'var(--color-info-text, #cffafe)', fontSize: '0.875rem' }}>{item.post_reconstitution_half_life} días</div>
           </div>
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         <div>
-          <h4 className="text-xs uppercase tracking-widest text-emerald-500 font-bold mb-3 flex items-center gap-2">
+          <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--color-success, #10b981)', fontWeight: 'bold', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 0.75rem 0' }}>
             <ShieldCheck size={14} /> Consideraciones Clinics
           </h4>
-          <ul className="space-y-2 text-sm text-gray-400">
-            <li className="flex gap-2">
-              <span className="text-emerald-500">•</span>
+          <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-secondary, #9ca3af)', margin: 0, padding: 0, listStyle: 'none' }}>
+            <li style={{ display: 'flex', gap: '0.5rem' }}>
+              <span style={{ color: 'var(--color-success, #10b981)' }}>•</span>
               Mantener refrigerado entre 2-8°C tras su reconstitución.
             </li>
-            <li className="flex gap-2">
-              <span className="text-emerald-500">•</span>
+            <li style={{ display: 'flex', gap: '0.5rem' }}>
+              <span style={{ color: 'var(--color-success, #10b981)' }}>•</span>
               Evitar la exposición directa a la luz solar.
             </li>
-            <li className="flex gap-2">
-              <span className="text-emerald-500">•</span>
+            <li style={{ display: 'flex', gap: '0.5rem' }}>
+              <span style={{ color: 'var(--color-success, #10b981)' }}>•</span>
               No agitar el vial; realizar movimientos circulares suaves.
             </li>
           </ul>

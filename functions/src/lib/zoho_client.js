@@ -258,6 +258,11 @@ async function createInventoryItemGroup(groupData) {
   return data.itemgroup;
 }
 
+async function createCompositeItem(itemData) {
+  const data = await requestInventory("POST", "/compositeitems", { body: itemData });
+  return data.composite_item;
+}
+
 // ── Custom Fields ─────────────────────────────────────────────────────────────
 
 async function setItemCustomField(itemId, fieldLabel, value) {
@@ -278,6 +283,16 @@ async function listCustomerPayments(filters = {}) {
   return data.customerpayments || [];
 }
 
+async function createInvoice(invoiceData) {
+  const data = await request("POST", "/invoices", { body: invoiceData });
+  return data.invoice;
+}
+
+async function createBill(billData) {
+  const data = await request("POST", "/bills", { body: billData });
+  return data.bill;
+}
+
 // ── Sync audit log ────────────────────────────────────────────────────────────
 
 async function logSyncEvent(event) {
@@ -293,14 +308,18 @@ async function logSyncEvent(event) {
 module.exports = {
   listAllItems,
   getItem,
+  requestInventory,
   updateItem,
   createItem,
   searchItems,
-  setItemCustomField,
   listInventoryItemGroups,
   createInventoryItemGroup,
+  createCompositeItem,
+  setItemCustomField,
   listInvoices,
   listCustomerPayments,
+  createInvoice,
+  createBill,
   logSyncEvent,
   _request: request,
 };

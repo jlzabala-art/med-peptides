@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Menu, ChevronDown, LogOut, GripVertical, Star } from 'lucide-react';
 import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import AtlasHealthLogo from '../../brand/AtlasHealthLogo';
 import './AppSidebar.css';
 
 // ─── Sortable Group Wrapper ────────────────────────────────────────────────
@@ -328,13 +329,9 @@ export default function AppSidebar({
           )}
           <div className="sb-brand" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: expanded ? '24px 0' : '16px 0', width: '100%', transition: 'margin 0.2s' }}>
             {header.title && (
-              <img 
-                src="/favicon.svg" 
-                alt="Atlas Health Logo" 
+              <AtlasHealthLogo 
+                size={expanded ? 48 : 32} 
                 style={{ 
-                  width: expanded ? '96px' : '48px', 
-                  height: expanded ? '96px' : '48px', 
-                  objectFit: 'contain', 
                   transition: 'width 0.2s, height 0.2s' 
                 }} 
               />

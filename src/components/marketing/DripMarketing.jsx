@@ -3,74 +3,80 @@ import { Mail, Play, Pause, Plus, Clock, Users } from 'lucide-react';
 
 const DripMarketing = () => {
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
-      <div className="flex justify-between items-center">
+    <div style={{ padding: '1.5rem', maxWidth: '72rem', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Drip Marketing & Automations</h1>
-          <p className="text-slate-500 text-sm mt-1">Manage email sequences and automated patient journeys</p>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--rp-theme-text, #1e293b)', margin: 0 }}>Drip Marketing & Automations</h1>
+          <p style={{ color: 'var(--rp-theme-text-muted, #64748b)', fontSize: '0.875rem', marginTop: '0.25rem', marginBottom: 0 }}>Manage email sequences and automated patient journeys</p>
         </div>
-        <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium">
+        <button style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#2563eb', color: 'white', padding: '0.5rem 1rem', borderRadius: '0.5rem', transition: 'background-color 0.2s', fontSize: '0.875rem', fontWeight: '500', border: 'none', cursor: 'pointer' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}>
           <Plus size={16} />
           <span>New Campaign</span>
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
-          <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
+        <div style={{ backgroundColor: 'var(--rp-theme-surface, #ffffff)', padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid var(--rp-theme-border, #e2e8f0)', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ padding: '0.75rem', backgroundColor: '#eff6ff', color: '#2563eb', borderRadius: '0.5rem' }}>
             <Mail size={24} />
           </div>
           <div>
-            <p className="text-sm text-slate-500 font-medium">Active Campaigns</p>
-            <p className="text-2xl font-bold text-slate-800">3</p>
+            <p style={{ fontSize: '0.875rem', color: 'var(--rp-theme-text-muted, #64748b)', fontWeight: '500', margin: 0 }}>Active Campaigns</p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--rp-theme-text, #1e293b)', margin: 0 }}>3</p>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
+        <div style={{ backgroundColor: 'var(--rp-theme-surface, #ffffff)', padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid var(--rp-theme-border, #e2e8f0)', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ padding: '0.75rem', backgroundColor: '#ecfdf5', color: '#059669', borderRadius: '0.5rem' }}>
             <Users size={24} />
           </div>
           <div>
-            <p className="text-sm text-slate-500 font-medium">Enrolled Patients</p>
-            <p className="text-2xl font-bold text-slate-800">142</p>
+            <p style={{ fontSize: '0.875rem', color: 'var(--rp-theme-text-muted, #64748b)', fontWeight: '500', margin: 0 }}>Enrolled Patients</p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--rp-theme-text, #1e293b)', margin: 0 }}>142</p>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
-          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-lg">
+        <div style={{ backgroundColor: 'var(--rp-theme-surface, #ffffff)', padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid var(--rp-theme-border, #e2e8f0)', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ padding: '0.75rem', backgroundColor: '#eef2ff', color: '#4f46e5', borderRadius: '0.5rem' }}>
             <Clock size={24} />
           </div>
           <div>
-            <p className="text-sm text-slate-500 font-medium">Avg. Open Rate</p>
-            <p className="text-2xl font-bold text-slate-800">46.2%</p>
+            <p style={{ fontSize: '0.875rem', color: 'var(--rp-theme-text-muted, #64748b)', fontWeight: '500', margin: 0 }}>Avg. Open Rate</p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--rp-theme-text, #1e293b)', margin: 0 }}>46.2%</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-200">
-          <h2 className="text-lg font-semibold text-slate-800">Active Sequences</h2>
+      <div style={{ backgroundColor: 'var(--rp-theme-surface, #ffffff)', borderRadius: '0.75rem', border: '1px solid var(--rp-theme-border, #e2e8f0)', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', overflow: 'hidden' }}>
+        <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--rp-theme-border, #e2e8f0)' }}>
+          <h2 style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--rp-theme-text, #1e293b)', margin: 0 }}>Active Sequences</h2>
         </div>
-        <div className="divide-y divide-slate-100">
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
           {[
             { id: 1, name: 'Welcome Series (New Patients)', status: 'active', steps: 4, enrolled: 45, openRate: '52%' },
             { id: 2, name: 'Post-Purchase BPC-157 Guide', status: 'active', steps: 3, enrolled: 89, openRate: '61%' },
             { id: 3, name: 'Reactivation (60 days inactive)', status: 'paused', steps: 2, enrolled: 210, openRate: '28%' }
-          ].map((campaign) => (
-            <div key={campaign.id} className="p-6 flex items-center justify-between hover:bg-slate-50 transition-colors">
-              <div className="flex items-center space-x-4">
-                <div className={`p-2 rounded-full ${campaign.status === 'active' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-600'}`}>
+          ].map((campaign, index) => (
+            <div key={campaign.id} style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'background-color 0.2s', borderTop: index > 0 ? '1px solid var(--rp-theme-border, #f1f5f9)' : 'none' }}
+                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--rp-theme-surface-hover, #f8fafc)'}
+                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ padding: '0.5rem', borderRadius: '9999px', backgroundColor: campaign.status === 'active' ? '#d1fae5' : '#f1f5f9', color: campaign.status === 'active' ? '#059669' : '#475569' }}>
                   {campaign.status === 'active' ? <Play size={16} /> : <Pause size={16} />}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-800">{campaign.name}</h3>
-                  <p className="text-sm text-slate-500">{campaign.steps} steps • {campaign.enrolled} currently enrolled</p>
+                  <h3 style={{ fontWeight: '600', color: 'var(--rp-theme-text, #1e293b)', margin: 0 }}>{campaign.name}</h3>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--rp-theme-text-muted, #64748b)', margin: 0 }}>{campaign.steps} steps • {campaign.enrolled} currently enrolled</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-8">
-                <div className="text-right">
-                  <p className="text-sm font-medium text-slate-800">{campaign.openRate}</p>
-                  <p className="text-xs text-slate-500">Open Rate</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'var(--rp-theme-text, #1e293b)', margin: 0 }}>{campaign.openRate}</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--rp-theme-text-muted, #64748b)', margin: 0 }}>Open Rate</p>
                 </div>
-                <button className="text-sm text-blue-600 font-medium hover:text-blue-700">
+                <button style={{ fontSize: '0.875rem', color: '#2563eb', fontWeight: '500', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = '#1d4ed8'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = '#2563eb'}>
                   Edit Sequence
                 </button>
               </div>

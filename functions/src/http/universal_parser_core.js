@@ -34,8 +34,20 @@ Rules:
 5. Summarize 'test_results' briefly (e.g., "Pass - HPLC > 99%, MS conforms").
 6. Provide a 'confidence_score' (integer 0-100) reflecting how certain you are of the extracted values based on the original document's clarity and formatting.
 Output a JSON array of objects: { "batch_number": "str", "peptide_name": "str", "purity_percentage": number, "manufacture_date": "YYYY-MM-DD|null", "expiration_date": "YYYY-MM-DD|null", "test_results": "str", "confidence_score": number }. Return ONLY a valid JSON array.`;
+  } else if (context === "Invoice") {
+    systemInstruction = `You are a specialized Financial Data Extraction AI. Your task is to extract invoice or bill details from the provided document to integrate with Zoho Books.
+Rules:
+1. Identify if it is a Supplier Bill (money you owe) or Customer Invoice (money owed to you). Return 'type' as "Bill" or "Invoice".
+2. Extract 'vendor_name' or 'customer_name' (the other party).
+3. Extract 'invoice_number' or 'bill_number'.
+4. Extract 'date' and 'due_date' in "YYYY-MM-DD".
+5. Extract 'total_amount' as a number (strip currencies).
+6. Extract 'currency' (e.g. USD, EUR, AED).
+7. Extract 'line_items' as an array of objects: { "description": "str", "quantity": number, "rate": number, "amount": number }.
+8. Provide a 'confidence_score' (integer 0-100).
+Output a JSON array containing a SINGLE object representing the invoice: { "type": "str", "entity_name": "str", "invoice_number": "str", "date": "YYYY-MM-DD", "due_date": "YYYY-MM-DD", "total_amount": number, "currency": "str", "line_items": [...], "confidence_score": number }. Return ONLY a valid JSON array.`;
   } else {
-    throw new Error("Invalid context. Allowed: RFQ, PriceList, COA");
+    throw new Error("Invalid context. Allowed: RFQ, PriceList, COA, Invoice");
   }
 
   if (aiInstructions && aiInstructions.trim() !== '') {

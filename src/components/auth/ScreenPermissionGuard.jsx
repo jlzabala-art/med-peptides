@@ -4,12 +4,12 @@ import { usePermissions } from '../../contexts/PermissionsContext';
 import { ShieldAlert } from 'lucide-react';
 
 const AccessDenied = () => (
-  <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center">
-    <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-6">
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: '2rem', textAlign: 'center' }}>
+    <div style={{ width: '4rem', height: '4rem', backgroundColor: 'var(--color-error-bg, #fef2f2)', color: 'var(--color-error, #ef4444)', borderRadius: '9999px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
       <ShieldAlert size={32} />
     </div>
-    <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Restricted</h2>
-    <p className="text-gray-500 max-w-md">
+    <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--color-text-primary)', marginBottom: '0.5rem' }}>Access Restricted</h2>
+    <p style={{ color: 'var(--color-text-secondary)', maxWidth: '28rem', margin: '0 auto' }}>
       You do not have the required permissions to view this screen. If you believe this is an error, please contact your administrator.
     </p>
   </div>
@@ -47,10 +47,10 @@ export default function ScreenPermissionGuard({ tabId, children }) {
 
   if (loadingPermissions) {
     return (
-      <div className="p-8 flex items-center justify-center">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="h-8 w-8 bg-gray-200 rounded-full mb-4"></div>
-          <div className="h-4 w-32 bg-gray-200 rounded"></div>
+      <div style={{ padding: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
+          <div style={{ height: '2rem', width: '2rem', backgroundColor: 'var(--color-border)', borderRadius: '9999px', marginBottom: '1rem' }}></div>
+          <div style={{ height: '1rem', width: '8rem', backgroundColor: 'var(--color-border)', borderRadius: '0.25rem' }}></div>
         </div>
       </div>
     );

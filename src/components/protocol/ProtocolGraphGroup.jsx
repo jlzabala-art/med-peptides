@@ -24,10 +24,10 @@ const ProtocolGraphGroup = ({ protocol, phaseBlocks, compounds, dominantUnit, is
   const supplementCompounds = compounds.filter(c => !peptideCompounds.includes(c));
 
   const renderPeptides = () => (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between px-1">
-        <h4 className="text-sm font-bold text-cyan-400/80 uppercase tracking-widest">Peptide Kinetics</h4>
-        <span className="text-[10px] text-slate-500 font-mono">Dose Escalation / Clearance</span>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 0.25rem' }}>
+        <h4 style={{ fontSize: '0.875rem', fontWeight: 'bold', color: 'rgba(34, 211, 238, 0.8)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Peptide Kinetics</h4>
+        <span style={{ fontSize: '10px', color: 'var(--color-text-tertiary, #6b7280)', fontFamily: 'monospace' }}>Dose Escalation / Clearance</span>
       </div>
       <ProtocolHeaderCharts 
         protocol={protocol}
@@ -38,10 +38,10 @@ const ProtocolGraphGroup = ({ protocol, phaseBlocks, compounds, dominantUnit, is
   );
 
   const renderSupplements = () => (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between px-1">
-        <h4 className="text-sm font-bold text-emerald-400/80 uppercase tracking-widest">Supplement Support</h4>
-        <span className="text-[10px] text-slate-500 font-mono">Daily Foundation</span>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 0.25rem' }}>
+        <h4 style={{ fontSize: '0.875rem', fontWeight: 'bold', color: 'rgba(52, 211, 153, 0.8)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Supplement Support</h4>
+        <span style={{ fontSize: '10px', color: 'var(--color-text-tertiary, #6b7280)', fontFamily: 'monospace' }}>Daily Foundation</span>
       </div>
       {supplementCompounds.length > 0 ? (
         <ProtocolHeaderCharts 
@@ -50,8 +50,8 @@ const ProtocolGraphGroup = ({ protocol, phaseBlocks, compounds, dominantUnit, is
           compact={true}
         />
       ) : (
-        <div className="bg-slate-900/50 rounded-xl p-8 border border-dashed border-slate-800 text-center">
-          <p className="text-slate-500 text-sm italic">No supplementary compounds defined for this protocol.</p>
+        <div style={{ backgroundColor: 'rgba(15, 23, 42, 0.5)', borderRadius: '0.75rem', padding: '2rem', border: '1px dashed rgba(30, 41, 59, 0.8)', textAlign: 'center' }}>
+          <p style={{ color: 'var(--color-text-tertiary, #6b7280)', fontSize: '0.875rem', fontStyle: 'italic', margin: 0 }}>No supplementary compounds defined for this protocol.</p>
         </div>
       )}
     </div>
@@ -59,32 +59,32 @@ const ProtocolGraphGroup = ({ protocol, phaseBlocks, compounds, dominantUnit, is
 
   if (isMobile) {
     return (
-      <div className="space-y-6">
-        <div className="bg-slate-900/40 rounded-2xl border border-slate-800 p-4">
-          <details open className="group">
-            <summary className="list-none cursor-pointer flex items-center justify-between text-slate-200 font-bold py-2">
-              <span className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.5)]"></span>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div style={{ backgroundColor: 'rgba(15, 23, 42, 0.4)', borderRadius: '1rem', border: '1px solid rgba(30, 41, 59, 0.8)', padding: '1rem' }}>
+          <details open style={{ display: 'block' }}>
+            <summary style={{ listStyle: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--color-text-secondary, #e2e8f0)', fontWeight: 'bold', padding: '0.5rem 0' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ width: '0.5rem', height: '0.5rem', borderRadius: '9999px', backgroundColor: 'var(--color-primary, #22d3ee)', boxShadow: '0 0 8px rgba(34,211,238,0.5)' }}></span>
                 Peptides
               </span>
-              <span className="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+              <span style={{ color: 'var(--color-text-tertiary, #6b7280)' }}>▼</span>
             </summary>
-            <div className="mt-4 pt-4 border-t border-slate-800/50">
+            <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(30, 41, 59, 0.5)' }}>
               {renderPeptides()}
             </div>
           </details>
         </div>
 
-        <div className="bg-slate-900/40 rounded-2xl border border-slate-800 p-4">
-          <details className="group">
-            <summary className="list-none cursor-pointer flex items-center justify-between text-slate-200 font-bold py-2">
-              <span className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]"></span>
+        <div style={{ backgroundColor: 'rgba(15, 23, 42, 0.4)', borderRadius: '1rem', border: '1px solid rgba(30, 41, 59, 0.8)', padding: '1rem' }}>
+          <details style={{ display: 'block' }}>
+            <summary style={{ listStyle: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--color-text-secondary, #e2e8f0)', fontWeight: 'bold', padding: '0.5rem 0' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ width: '0.5rem', height: '0.5rem', borderRadius: '9999px', backgroundColor: 'var(--color-success, #34d399)', boxShadow: '0 0 8px rgba(52,211,153,0.5)' }}></span>
                 Supplements
               </span>
-              <span className="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+              <span style={{ color: 'var(--color-text-tertiary, #6b7280)' }}>▼</span>
             </summary>
-            <div className="mt-4 pt-4 border-t border-slate-800/50">
+            <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(30, 41, 59, 0.5)' }}>
               {renderSupplements()}
             </div>
           </details>
@@ -94,31 +94,45 @@ const ProtocolGraphGroup = ({ protocol, phaseBlocks, compounds, dominantUnit, is
   }
 
   return (
-    <div className="bg-slate-900/40 rounded-3xl border border-slate-800 p-6 backdrop-blur-xl shadow-2xl">
-      <div className="flex gap-2 p-1 bg-slate-950/50 rounded-2xl border border-slate-800 mb-8 w-fit mx-auto">
+    <div style={{ backgroundColor: 'rgba(15, 23, 42, 0.4)', borderRadius: '1.5rem', border: '1px solid rgba(30, 41, 59, 0.8)', padding: '1.5rem', backdropFilter: 'blur(24px)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', padding: '0.25rem', backgroundColor: 'rgba(2, 6, 23, 0.5)', borderRadius: '1rem', border: '1px solid rgba(30, 41, 59, 0.8)', marginBottom: '2rem', width: 'fit-content', margin: '0 auto 2rem auto' }}>
         <button
           onClick={() => setActiveTab('peptides')}
-          className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${
-            activeTab === 'peptides'
-              ? 'bg-cyan-500 text-slate-950 shadow-[0_0_20px_rgba(34,211,238,0.3)]'
-              : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
-          }`}
+          style={{
+            padding: '0.5rem 1.5rem',
+            borderRadius: '0.75rem',
+            fontSize: '0.875rem',
+            fontWeight: 'bold',
+            transition: 'all 0.2s',
+            background: activeTab === 'peptides' ? 'var(--color-primary, #22d3ee)' : 'transparent',
+            color: activeTab === 'peptides' ? 'var(--color-bg-primary, #020617)' : 'var(--color-text-tertiary, #6b7280)',
+            boxShadow: activeTab === 'peptides' ? '0 0 20px rgba(34,211,238,0.3)' : 'none',
+            border: 'none',
+            cursor: 'pointer'
+          }}
         >
           Peptides
         </button>
         <button
           onClick={() => setActiveTab('supplements')}
-          className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${
-            activeTab === 'supplements'
-              ? 'bg-emerald-500 text-slate-950 shadow-[0_0_20px_rgba(52,211,153,0.3)]'
-              : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
-          }`}
+          style={{
+            padding: '0.5rem 1.5rem',
+            borderRadius: '0.75rem',
+            fontSize: '0.875rem',
+            fontWeight: 'bold',
+            transition: 'all 0.2s',
+            background: activeTab === 'supplements' ? 'var(--color-success, #10b981)' : 'transparent',
+            color: activeTab === 'supplements' ? 'var(--color-bg-primary, #020617)' : 'var(--color-text-tertiary, #6b7280)',
+            boxShadow: activeTab === 'supplements' ? '0 0 20px rgba(52,211,153,0.3)' : 'none',
+            border: 'none',
+            cursor: 'pointer'
+          }}
         >
           Supplements
         </button>
       </div>
 
-      <div className="min-h-[300px] transition-all duration-300">
+      <div style={{ minHeight: '300px', transition: 'all 0.3s' }}>
         {activeTab === 'peptides' ? renderPeptides() : renderSupplements()}
       </div>
     </div>

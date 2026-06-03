@@ -111,69 +111,69 @@ export default function AdminWorkflowsTab() {
   };
 
   if (loading) {
-    return <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-fuchsia-500" /></div>;
+    return <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}><Loader2 size={32} style={{ animation: 'spin 1s linear infinite', color: 'var(--color-primary)' }} /></div>;
   }
 
   return (
-    <div className="space-y-6 pb-20">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="p-3 bg-fuchsia-500/20 text-fuchsia-400 rounded-xl">
+    <div style={{ paddingBottom: '5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
+        <div style={{ padding: '0.75rem', backgroundColor: 'rgba(139, 92, 246, 0.1)', color: 'var(--color-primary)', borderRadius: '12px' }}>
           <Settings2 size={24} />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-white">Automation Engine</h1>
-          <p className="text-gray-400">Global settings for B2B brokerage and compounding autonomous agents.</p>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--color-text-primary)', margin: 0 }}>Automation Engine</h1>
+          <p style={{ color: 'var(--color-text-secondary)', margin: '0.25rem 0 0' }}>Global settings for B2B brokerage and compounding autonomous agents.</p>
         </div>
       </div>
 
-      <div className="grid gap-6">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {Object.values(workflows).map(wf => (
-          <Card key={wf.id} className="p-6 bg-gray-900 border-gray-800">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-4">
-                <div className={`p-3 rounded-xl ${wf.enabled ? 'bg-fuchsia-500/20 text-fuchsia-400' : 'bg-gray-800 text-gray-500'}`}>
+          <Card key={wf.id} style={{ padding: '1.5rem', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                <div style={{ padding: '0.75rem', borderRadius: '12px', backgroundColor: wf.enabled ? 'rgba(139, 92, 246, 0.1)' : 'var(--color-bg-tertiary)', color: wf.enabled ? 'var(--color-primary)' : 'var(--color-text-tertiary)' }}>
                   <wf.icon size={24} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white flex items-center gap-3">
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '0.75rem', margin: 0 }}>
                     {wf.name}
-                    <button onClick={() => toggleWorkflow(wf.id)} className="focus:outline-none">
+                    <button onClick={() => toggleWorkflow(wf.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', outline: 'none', padding: 0 }}>
                       {wf.enabled ? (
-                        <ToggleRight className="w-8 h-8 text-fuchsia-500" />
+                        <ToggleRight style={{ width: '2rem', height: '2rem', color: 'var(--color-primary)' }} />
                       ) : (
-                        <ToggleLeft className="w-8 h-8 text-gray-600" />
+                        <ToggleLeft style={{ width: '2rem', height: '2rem', color: 'var(--color-text-tertiary)' }} />
                       )}
                     </button>
                   </h3>
-                  <p className="text-sm text-gray-400 mt-1 max-w-2xl">{wf.description}</p>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem', maxWidth: '42rem' }}>{wf.description}</p>
                 </div>
               </div>
               <button 
                 onClick={() => handleSave(wf.id)}
                 disabled={savingId === wf.id}
-                className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 border border-gray-700 transition-colors"
+                style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)', padding: '0.5rem 1rem', borderRadius: '8px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid var(--color-border)', cursor: 'pointer', transition: 'background-color 0.2s' }}
               >
-                {savingId === wf.id ? <Loader2 size={16} className="animate-spin"/> : <Save size={16}/>}
+                {savingId === wf.id ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }}/> : <Save size={16}/>}
                 Save Config
               </button>
             </div>
 
             {/* Configurable Parameters */}
-            <div className={`mt-6 pt-6 border-t border-gray-800 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-opacity ${wf.enabled ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
+            <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--color-border)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', opacity: wf.enabled ? 1 : 0.4, pointerEvents: wf.enabled ? 'auto' : 'none', transition: 'opacity 0.2s' }}>
               {Object.keys(wf.params).map(paramKey => {
                 const val = wf.params[paramKey];
                 const type = typeof val;
                 
                 return (
-                  <div key={paramKey} className="bg-gray-800/50 p-4 rounded-lg border border-gray-700/50">
-                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                  <div key={paramKey} style={{ backgroundColor: 'var(--color-bg-secondary)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '600', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
                       {paramKey.replace(/_/g, ' ')}
                     </label>
                     {type === 'boolean' ? (
                       <select 
                         value={val.toString()} 
                         onChange={(e) => updateParam(wf.id, paramKey, e.target.value === 'true')}
-                        className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white text-sm"
+                        style={{ width: '100%', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.5rem', color: 'var(--color-text-primary)', fontSize: '0.875rem' }}
                       >
                         <option value="true">Enabled (Yes)</option>
                         <option value="false">Disabled (No)</option>
@@ -183,14 +183,14 @@ export default function AdminWorkflowsTab() {
                         type="number" 
                         value={val}
                         onChange={(e) => updateParam(wf.id, paramKey, parseFloat(e.target.value))}
-                        className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white text-sm"
+                        style={{ width: '100%', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.5rem', color: 'var(--color-text-primary)', fontSize: '0.875rem' }}
                       />
                     ) : (
                       <input 
                         type="text" 
                         value={val}
                         onChange={(e) => updateParam(wf.id, paramKey, e.target.value)}
-                        className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white text-sm"
+                        style={{ width: '100%', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.5rem', color: 'var(--color-text-primary)', fontSize: '0.875rem' }}
                       />
                     )}
                   </div>

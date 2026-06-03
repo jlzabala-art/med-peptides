@@ -4,18 +4,25 @@ import { initReactI18next } from 'react-i18next';
 import enTranslations from './locales/en/translation.json';
 import esTranslations from './locales/es/translation.json';
 
+const resources = {
+  en: {
+    translation: enTranslations
+  },
+  es: {
+    translation: esTranslations
+  }
+};
+
 i18n
   .use(initReactI18next)
   .init({
-    resources: {
-      en: { translation: enTranslations },
-      es: { translation: esTranslations },
-    },
-    lng: localStorage.getItem('language') || 'en', // default language
+    resources,
+    lng: 'en', // default language (source of truth)
     fallbackLng: 'en',
+    
     interpolation: {
-      escapeValue: false, // react already safes from xss
-    },
+      escapeValue: false // react already safes from xss
+    }
   });
 
 export default i18n;

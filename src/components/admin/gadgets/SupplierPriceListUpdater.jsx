@@ -76,62 +76,62 @@ export default function SupplierPriceListUpdater() {
   };
 
   return (
-    <Card className="p-6 border border-gray-800 bg-gray-900 text-white mt-8">
-      <div className="flex items-center justify-between mb-6">
+    <Card style={{ padding: '1.5rem', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)', color: 'var(--color-text-primary)', marginTop: '2rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <div>
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-fuchsia-400" />
+          <h2 style={{ fontSize: '1.25rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+            <Sparkles style={{ width: '1.25rem', height: '1.25rem', color: 'var(--color-primary)' }} />
             Supplier Price List AI Parser
           </h2>
-          <p className="text-sm text-gray-400">Upload a supplier's raw catalog to automatically update baseline costs in the system.</p>
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', margin: '0.25rem 0 0' }}>Upload a supplier's raw catalog to automatically update baseline costs in the system.</p>
         </div>
       </div>
 
       {!parsedItems ? (
-        <div className="border-2 border-dashed border-gray-700 rounded-xl p-10 flex flex-col items-center justify-center text-center">
+        <div style={{ border: '2px dashed var(--color-border)', borderRadius: '0.75rem', padding: '2.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
           {isParsing ? (
-            <div className="flex flex-col items-center gap-3">
-              <Loader2 className="w-10 h-10 text-fuchsia-400 animate-spin" />
-              <p className="text-gray-300 font-medium">Gemini 2.5 Flash is extracting prices...</p>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+              <Loader2 style={{ width: '2.5rem', height: '2.5rem', color: 'var(--color-primary)', animation: 'spin 1s linear infinite' }} />
+              <p style={{ color: 'var(--color-text-secondary)', fontWeight: '500', margin: 0 }}>Gemini 2.5 Flash is extracting prices...</p>
             </div>
           ) : (
             <>
-              <Upload className="w-12 h-12 text-gray-500 mb-4" />
-              <h3 className="text-lg font-medium text-gray-200 mb-2">Upload Price List (Excel/CSV)</h3>
-              <p className="text-sm text-gray-400 mb-6 max-w-sm">The AI will extract items, dosages, and unit costs, then match them to your catalog.</p>
-              <label className="bg-white text-black px-6 py-2.5 rounded-lg font-medium cursor-pointer hover:bg-gray-200 transition-colors">
+              <Upload style={{ width: '3rem', height: '3rem', color: 'var(--color-text-tertiary)', marginBottom: '1rem' }} />
+              <h3 style={{ fontSize: '1.125rem', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '0.5rem', marginTop: 0 }}>Upload Price List (Excel/CSV)</h3>
+              <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '1.5rem', maxWidth: '24rem' }}>The AI will extract items, dosages, and unit costs, then match them to your catalog.</p>
+              <label style={{ backgroundColor: 'var(--color-text-primary)', color: 'var(--color-surface)', padding: '0.625rem 1.5rem', borderRadius: '0.5rem', fontWeight: '500', cursor: 'pointer', transition: 'background-color 0.2s', display: 'inline-block' }}>
                 Select File
-                <input type="file" accept=".xlsx, .xls, .csv" className="hidden" onChange={handleFileUpload} />
+                <input type="file" accept=".xlsx, .xls, .csv" style={{ display: 'none' }} onChange={handleFileUpload} />
               </label>
             </>
           )}
-          {successMsg && <div className="mt-6 flex items-center gap-2 text-green-400"><CheckCircle className="w-5 h-5"/> {successMsg}</div>}
+          {successMsg && <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-success, #4ade80)' }}><CheckCircle style={{ width: '1.25rem', height: '1.25rem' }}/> {successMsg}</div>}
         </div>
       ) : (
-        <div className="space-y-6">
-          <div className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-gray-400 uppercase bg-gray-900/50">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ backgroundColor: 'var(--color-bg-secondary)', borderRadius: '0.5rem', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
+            <table style={{ width: '100%', fontSize: '0.875rem', textAlign: 'left', borderCollapse: 'collapse' }}>
+              <thead style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', backgroundColor: 'var(--color-bg-tertiary)' }}>
                 <tr>
-                  <th className="px-6 py-4">Original Text</th>
-                  <th className="px-6 py-4">Extracted Name</th>
-                  <th className="px-6 py-4">Matched Catalog ID</th>
-                  <th className="px-6 py-4">New Base Cost</th>
+                  <th style={{ padding: '1rem 1.5rem' }}>Original Text</th>
+                  <th style={{ padding: '1rem 1.5rem' }}>Extracted Name</th>
+                  <th style={{ padding: '1rem 1.5rem' }}>Matched Catalog ID</th>
+                  <th style={{ padding: '1rem 1.5rem' }}>New Base Cost</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-700">
+              <tbody>
                 {parsedItems.map((item, i) => (
-                  <tr key={i} className="hover:bg-gray-750">
-                    <td className="px-6 py-4 font-mono text-xs text-gray-400">{item.original_text}</td>
-                    <td className="px-6 py-4 font-medium">{item.peptide_name} {item.dosage}</td>
-                    <td className="px-6 py-4">
+                  <tr key={i} style={{ borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
+                    <td style={{ padding: '1rem 1.5rem', fontFamily: 'monospace', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>{item.original_text}</td>
+                    <td style={{ padding: '1rem 1.5rem', fontWeight: '500' }}>{item.peptide_name} {item.dosage}</td>
+                    <td style={{ padding: '1rem 1.5rem' }}>
                       {item.productId ? (
-                        <span className="text-green-400 flex items-center gap-1"><CheckCircle className="w-3 h-3"/> {item.productId}</span>
+                        <span style={{ color: 'var(--color-success, #4ade80)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><CheckCircle style={{ width: '0.75rem', height: '0.75rem' }}/> {item.productId}</span>
                       ) : (
-                        <span className="text-yellow-400 flex items-center gap-1"><AlertTriangle className="w-3 h-3"/> Requires Creation</span>
+                        <span style={{ color: 'var(--color-warning, #facc15)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><AlertTriangle style={{ width: '0.75rem', height: '0.75rem' }}/> Requires Creation</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 font-medium text-fuchsia-400">
+                    <td style={{ padding: '1rem 1.5rem', fontWeight: '500', color: 'var(--color-primary)' }}>
                       ${Number(item.new_cost).toFixed(2)}
                     </td>
                   </tr>
@@ -140,19 +140,19 @@ export default function SupplierPriceListUpdater() {
             </table>
           </div>
 
-          <div className="flex items-center gap-4 justify-end">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'flex-end' }}>
             <button 
               onClick={() => setParsedItems(null)}
-              className="px-4 py-2 text-gray-300 hover:text-white font-medium
+              style={{ padding: '0.5rem 1rem', color: 'var(--color-text-secondary)', fontWeight: '500', background: 'none', border: 'none', cursor: 'pointer' }}
             >
               Cancel
             </button>
             <button 
               onClick={handleCommitChanges}
               disabled={isSaving}
-              className="bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2 disabled:opacity-50
+              style={{ backgroundColor: 'var(--color-primary)', color: 'white', padding: '0.5rem 1.5rem', borderRadius: '0.5rem', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '0.5rem', border: 'none', cursor: 'pointer', opacity: isSaving ? 0.5 : 1 }}
             >
-              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              {isSaving ? <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} /> : <Sparkles style={{ width: '1rem', height: '1rem' }} />}
               {isSaving ? 'Updating Catalog...' : 'Confirm & Update Base Costs'}
             </button>
           </div>
@@ -161,4 +161,3 @@ export default function SupplierPriceListUpdater() {
     </Card>
   );
 }
-

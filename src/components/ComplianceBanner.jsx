@@ -1,15 +1,16 @@
- 
 import React from 'react';
 import { ShieldAlert } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const ComplianceBanner = () => {
+  const { t } = useTranslation();
   return (
-    <div className="compliance-banner bg-primary py-s">
+    <div style={{ backgroundColor: 'var(--color-primary, #0f172a)', padding: '0.75rem 0' }}>
       <div className="container">
-        <div className="flex items-center justify-center gap-m text-dark font-bold">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 'bold' }}>
           <ShieldAlert size={20} />
-          <span className="p-s tracking-wide uppercase">
-            ATTENTION: ALL PRODUCTS ARE STRICTLY FOR LABORATORY RESEARCH USE ONLY. NOT FOR HUMAN CONSUMPTION.
+          <span style={{ fontSize: '0.75rem', letterSpacing: '0.05em', textTransform: 'uppercase', padding: '0 0.5rem' }}>
+            {t('compliance.banner', 'ATTENTION: ALL PRODUCTS ARE STRICTLY FOR LABORATORY RESEARCH USE ONLY. NOT FOR HUMAN CONSUMPTION.')}
           </span>
           <ShieldAlert size={20} />
         </div>

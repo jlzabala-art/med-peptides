@@ -57,6 +57,7 @@ exports.sendEmail                  = require("./src/http/sendEmail").sendEmail; 
 // ── Zoho CRM Intelligence ────────────────────────────────────────────────────
 const { fetchZohoCRMIntelligence } = require("./src/zoho/fetchZohoCRMIntelligence");
 exports.fetchZohoCRMIntelligence = fetchZohoCRMIntelligence; // Zoho Books contacts + invoices → CRM cache (admin only)
+exports.pushZohoInvoice = require("./src/http/push_zoho_invoice").pushZohoInvoice;
 
 // ── Email / Notifications ────────────────────────────────────────────────────
 exports.sendEmail = require("./src/http/sendEmail").sendEmail;
