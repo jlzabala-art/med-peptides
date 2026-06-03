@@ -1,17 +1,19 @@
  
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import blogPosts from '../data/blogData';
+import { useBlogPosts } from '../hooks/useBlogPosts';
 import BlogCard from '../components/blog/BlogCard';
 import { ArrowRight, BookOpen } from 'lucide-react';
 import './LatestArticles.css';
 
 export default function LatestArticles() {
+  const { posts: blogPosts } = useBlogPosts();
+
   const latestPosts = useMemo(() => {
     return [...blogPosts]
       .sort((a, b) => new Date(b.publishDate) - new Date(a.publishDate))
       .slice(0, 2);
-  }, []);
+  }, [blogPosts]);
 
   if (latestPosts.length === 0) return null;
 

@@ -48,6 +48,9 @@ const scrapeCompetitors = require('./src/cron/scrapeCompetitors');
 exports.scheduledScrapeCompetitors = scrapeCompetitors.scheduledScrapeCompetitors;
 exports.forceScrapeCompetitors = scrapeCompetitors.forceScrapeCompetitors;
 
+const weeklyCompetitorDigest = require('./src/cron/weeklyCompetitorDigest');
+exports.weeklyCompetitorDigest = weeklyCompetitorDigest.weeklyCompetitorDigest;
+
 // TRIGGERS
 exports.scoreNewLead = require('./src/triggers/on_lead_created').scoreNewLead;
 exports.onProductCreated = require('./src/triggers/products').onProductCreated;

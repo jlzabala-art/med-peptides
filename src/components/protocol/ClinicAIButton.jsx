@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Sparkles, MessageSquare, X } from 'lucide-react';
 import './ClinicAIButton.css';
 import BlogCard from '../blog/BlogCard';
-import blogPosts from '../../data/blogData';
+import { useBlogPosts } from '../../hooks/useBlogPosts';
 
 /**
  * ClinicAIButton – now displays a modal with a related blog post card
@@ -15,6 +15,7 @@ import blogPosts from '../../data/blogData';
 export default function ClinicAIButton({ protocol, variant = 'sidebar', style = {} }) {
   const [showModal, setShowModal] = useState(false);
   const [relatedPost, setRelatedPost] = useState(null);
+  const { posts: blogPosts } = useBlogPosts();
 
   const handleOpenClinicAI = () => {
     // Find a blog post that references this protocol via `relatedPosts`

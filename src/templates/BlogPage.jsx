@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { Search } from 'lucide-react';
-import blogPosts from '../data/blogData';
+import { useBlogPosts } from '../hooks/useBlogPosts';
 import BlogCard from '../components/blog/BlogCard';
 import blogHeroImg from '../assets/images/blog_hero_knowledge.png';
 import '../styles/blog.css';
@@ -28,6 +28,8 @@ export default function BlogPage() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+  
+  const { posts: blogPosts } = useBlogPosts();
 
   const filteredPosts = useMemo(() => {
     return blogPosts.filter(post => {

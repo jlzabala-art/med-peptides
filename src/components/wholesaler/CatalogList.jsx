@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { catalogRepository } from '../../repositories/catalogRepository';
 import { 
   FileText, Plus, Eye, Edit3, Copy, Trash2, ExternalLink, 
-  BarChart2, Users, FileDown, Search, ArrowLeft, Send, Check, X, Globe, Lock
+  BarChart2, Users, FileDown, Search, ArrowLeft, Send, Check, X, Globe, Lock, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { getProtocolTemplates } from '../../repositories/protocolRepository';
 import { getDocs, collection } from 'firebase/firestore';
 import { db } from '../../firebase';
+import ExpandableTableRow from '../common/ExpandableTableRow';
 
 export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelectCatalogToEdit }) {
   const [catalogs, setCatalogs] = useState([]);
@@ -211,105 +212,28 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
           <table style={tableStyle}>
             <thead>
               <tr style={theadRowStyle}>
-                <th style={thStyle}>Catalog Name</th>
-                <th style={thStyle}>Slug / Route</th>
-                <th style={thStyle}>Visibility</th>
-                <th style={thStyle}>Audience</th>
-                <th style={thStyle}>Status</th>
-                <th style={thStyle}>Views</th>
-                <th style={thStyle}>Leads</th>
-                <th style={thStyle}>Last Updated</th>
+                <th style={thStyle}>Catalog / Route</th>
+                <th style={thStyle}>Status / Visibility</th>
                 <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredCatalogs.map(catalog => {
-                const publicUrl = `/catalog/${catalog.slug}`;
-                const isOwner = catalog.ownerId === ownerId || ownerType === 'admin';
-                return (
-                  <tr key={catalog.id} style={tbodyRowStyle}>
-                    <td style={{ ...tdStyle, fontWeight: 600, color: '#1a73e8' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span>{catalog.title}</span>
-                        <span style={{ fontSize: '0.75rem', color: '#5f6368', fontWeight: 400 }}>{catalog.goal}</span>
-                      </div>
-                    </td>
-                    <td style={tdStyle}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <a href={publicUrl} target="_blank" rel="noopener noreferrer" style={linkStyle} title="Open in new tab">
-                          {catalog.slug} <ExternalLink size={12} />
-                        </a>
-                        <button 
-                          onClick={() => handleCopyLink(catalog)} 
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: copiedId === catalog.id ? '#137333' : '#5f6368' }}
-                          title="Copy Link"
-                        >
-                          {copiedId === catalog.id ? <Check size={14} /> : <Copy size={14} />}
-                        </button>
-                      </div>
-                    </td>
-                    <td style={tdStyle}>
-                      {catalog.visibility === 'public' ? (
-                        <span style={{...badgeStyle, backgroundColor: '#e8f0fe', color: '#1a73e8', display: 'inline-flex', alignItems: 'center'}}>
-                          <Globe size={12} style={{marginRight: 4}}/> Public
-                        </span>
-                      ) : (
-                        <span style={{...badgeStyle, backgroundColor: '#f1f3f4', color: '#5f6368', display: 'inline-flex', alignItems: 'center'}}>
-                          <Lock size={12} style={{marginRight: 4}}/> Private
-                        </span>
-                      )}
-                    </td>
-                    <td style={tdStyle}>
-                      <span style={badgeStyle}>{catalog.audience}</span>
-                    </td>
-                    <td style={tdStyle}>
-                      <span style={{
-                        ...statusBadgeStyle,
-                        backgroundColor: catalog.status === 'published' ? '#e6f4ea' : '#f1f3f4',
-                        color: catalog.status === 'published' ? '#137333' : '#5f6368'
-                      }}>
-                        {catalog.status}
-                      </span>
-                    </td>
-                    <td style={tdStyle}>{catalog.views || 0}</td>
-                    <td style={tdStyle}>
-                      {catalog.leadCaptureCount > 0 && isOwner ? (
-                        <button onClick={() => handleViewLeads(catalog)} style={leadsLinkButtonStyle}>
-                          <Users size={12} /> {catalog.leadCaptureCount} leads
-                        </button>
-                      ) : (
-                        catalog.leadCaptureCount || '0'
-                      )}
-                    </td>
-                    <td style={tdStyle}>{new Date(catalog.updatedAt).toLocaleDateString()}</td>
-                    <td style={{ ...tdStyle, textAlign: 'right' }}>
-                      <div style={actionButtonsGroupStyle}>
-                        <button onClick={() => setPreviewCatalog(catalog)} title="Preview Catalog" style={actionButtonStyle}>
-                          <Eye size={14} />
-                        </button>
-                        {isOwner && (
-                          <button onClick={() => handleShareCRM(catalog)} title="Share to CRM" style={{ ...actionButtonStyle, color: '#1a73e8' }}>
-                            <Send size={14} />
-                          </button>
-                        )}
-                        {isOwner && (
-                          <button onClick={() => onSelectCatalogToEdit(catalog)} title="Edit Catalog" style={actionButtonStyle}>
-                            <Edit3 size={14} />
-                          </button>
-                        )}
-                        <button onClick={() => handleDuplicate(catalog)} title={isOwner ? "Duplicate" : "Clone for my clinic"} style={actionButtonStyle}>
-                          <Copy size={14} />
-                        </button>
-                        {isOwner && (
-                          <button onClick={() => handleDelete(catalog.id)} title="Delete" style={{ ...actionButtonStyle, color: '#d93025' }}>
-                            <Trash2 size={14} />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+              {filteredCatalogs.map(catalog => (
+                <ExpandableCatalogRow 
+                  key={catalog.id}
+                  catalog={catalog}
+                  ownerId={ownerId}
+                  ownerType={ownerType}
+                  handleCopyLink={handleCopyLink}
+                  copiedId={copiedId}
+                  handleViewLeads={handleViewLeads}
+                  setPreviewCatalog={setPreviewCatalog}
+                  handleShareCRM={handleShareCRM}
+                  onSelectCatalogToEdit={onSelectCatalogToEdit}
+                  handleDuplicate={handleDuplicate}
+                  handleDelete={handleDelete}
+                />
+              ))}
             </tbody>
           </table>
         </div>
@@ -341,6 +265,119 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
         </div>
       )}
     </div>
+  );
+}
+
+// ── Internal Component for Expandable Row ────────────────────────────────────
+function ExpandableCatalogRow({ 
+  catalog, ownerId, ownerType, handleCopyLink, copiedId, handleViewLeads, 
+  setPreviewCatalog, handleShareCRM, onSelectCatalogToEdit, handleDuplicate, handleDelete 
+}) {
+  const publicUrl = `/catalog/${catalog.slug}`;
+  const isOwner = catalog.ownerId === ownerId || ownerType === 'admin';
+
+  const mainContent = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <span style={{ fontWeight: 600, color: '#1a73e8', fontSize: '0.9rem' }}>{catalog.title}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <a href={publicUrl} target="_blank" rel="noopener noreferrer" style={{ ...linkStyle, fontSize: '0.8rem' }} title="Open in new tab">
+          {catalog.slug} <ExternalLink size={10} />
+        </a>
+        <button 
+          onClick={() => handleCopyLink(catalog)} 
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: copiedId === catalog.id ? '#137333' : '#5f6368', padding: 0 }}
+          title="Copy Link"
+        >
+          {copiedId === catalog.id ? <Check size={12} /> : <Copy size={12} />}
+        </button>
+      </div>
+      {catalog.goal && <span style={{ fontSize: '0.75rem', color: '#5f6368', fontWeight: 400 }}>{catalog.goal}</span>}
+    </div>
+  );
+
+  const subContent = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start' }}>
+      <span style={{
+        ...statusBadgeStyle,
+        backgroundColor: catalog.status === 'published' ? '#e6f4ea' : '#f1f3f4',
+        color: catalog.status === 'published' ? '#137333' : '#5f6368'
+      }}>
+        {catalog.status}
+      </span>
+      {catalog.visibility === 'public' ? (
+        <span style={{...badgeStyle, backgroundColor: '#e8f0fe', color: '#1a73e8', display: 'inline-flex', alignItems: 'center'}}>
+          <Globe size={12} style={{marginRight: 4}}/> Public
+        </span>
+      ) : (
+        <span style={{...badgeStyle, backgroundColor: '#f1f3f4', color: '#5f6368', display: 'inline-flex', alignItems: 'center'}}>
+          <Lock size={12} style={{marginRight: 4}}/> Private
+        </span>
+      )}
+    </div>
+  );
+
+  const actions = (
+    <>
+      <button onClick={() => setPreviewCatalog(catalog)} title="Preview Catalog" style={actionButtonStyle}>
+        <Eye size={14} />
+      </button>
+      {isOwner && (
+        <button onClick={() => handleShareCRM(catalog)} title="Share to CRM" style={{ ...actionButtonStyle, color: '#1a73e8' }}>
+          <Send size={14} />
+        </button>
+      )}
+      {isOwner && (
+        <button onClick={() => onSelectCatalogToEdit(catalog)} title="Edit Catalog" style={actionButtonStyle}>
+          <Edit3 size={14} />
+        </button>
+      )}
+      <button onClick={() => handleDuplicate(catalog)} title={isOwner ? "Duplicate" : "Clone for my clinic"} style={actionButtonStyle}>
+        <Copy size={14} />
+      </button>
+      {isOwner && (
+        <button onClick={() => handleDelete(catalog.id)} title="Delete" style={{ ...actionButtonStyle, color: '#d93025' }}>
+          <Trash2 size={14} />
+        </button>
+      )}
+    </>
+  );
+
+  const expandedContent = (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+      <div>
+        <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 600 }}>Audience</div>
+        <span style={badgeStyle}>{catalog.audience}</span>
+      </div>
+      <div>
+        <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 600 }}>Views</div>
+        <div style={{ fontSize: '0.85rem', color: '#202124', fontWeight: 500 }}>{catalog.views || 0}</div>
+      </div>
+      <div>
+        <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 600 }}>Leads</div>
+        <div style={{ fontSize: '0.85rem', color: '#202124', fontWeight: 500 }}>
+          {catalog.leadCaptureCount > 0 && isOwner ? (
+            <button onClick={() => handleViewLeads(catalog)} style={leadsLinkButtonStyle}>
+              <Users size={12} /> {catalog.leadCaptureCount} leads
+            </button>
+          ) : (
+            catalog.leadCaptureCount || '0'
+          )}
+        </div>
+      </div>
+      <div>
+        <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 600 }}>Last Updated</div>
+        <div style={{ fontSize: '0.85rem', color: '#202124', fontWeight: 500 }}>{new Date(catalog.updatedAt).toLocaleDateString()}</div>
+      </div>
+    </div>
+  );
+
+  return (
+    <ExpandableTableRow 
+      mainContent={mainContent}
+      subContent={subContent}
+      actions={actions}
+      expandedContent={expandedContent}
+    />
   );
 }
 

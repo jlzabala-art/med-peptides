@@ -21,7 +21,7 @@ import {
   ShoppingCart
 } from 'lucide-react';
 import { usePageMeta } from '../hooks/usePageMeta';
-import blogPosts from '../data/blogData';
+import { useBlogPosts } from '../hooks/useBlogPosts';
 import { products } from '../data/products';
 import { supplements } from '../data/supplements';
 import { PROTOCOL_BLUEPRINTS } from '../data/protocolBlueprints';
@@ -311,11 +311,12 @@ const InteractiveResourceCard = ({ link, accentColor, bgColor }) => {
 export default function BlogPostPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { posts: blogPosts, loading } = useBlogPosts();
 
   // Find current post
   const post = useMemo(() => {
     return blogPosts.find(p => p.slug === slug);
-  }, [slug]);
+  }, [slug, blogPosts]);
 useEffect(() => {
   if (slug) {
     trackBlogView(slug);
@@ -326,7 +327,7 @@ useEffect(() => {
   const relatedPosts = useMemo(() => {
     if (!post || !post.relatedPosts) return [];
     return blogPosts.filter(p => post.relatedPosts.includes(p.slug));
-  }, [post]);
+  }, [post, blogPosts]);
 
   // Handle page meta & structured data for SEO
   usePageMeta(
@@ -442,6 +443,10 @@ useEffect(() => {
     transition: 'background 0.15s ease, border-color 0.15s ease',
     textAlign: 'left'
   });
+
+  if (loading) {
+    return <div style={{ height: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading article...</div>;
+  }
 
   if (!post) {
     return (

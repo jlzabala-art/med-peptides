@@ -1,80 +1,77 @@
-import React, { useState, useEffect } from 'react';
-import { collection, getDocs, doc, setDoc, getDoc, query, orderBy, limit } from 'firebase/firestore';
-import { db, functions } from '../../firebase';
-import { httpsCallable } from 'firebase/functions';
-import { ShieldAlert, RefreshCw, Plus, X, Globe, DollarSign, Activity, TrendingDown, TrendingUp, Save } from 'lucide-react';
+/* eslint-disable react-hooks/set-state-in-effect */
+import React, { useState, useEffect, useMemo } from 'react';
+import { collection, doc, setDoc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { ShieldAlert, RefreshCw, Plus, X, Globe, Save, Activity, CheckCircle, AlertCircle, Settings } from 'lucide-react';
 import AdminPageHeader from './AdminPageHeader';
+import { useToast } from '../../hooks/useToast';
+import CompetitorAnalysisWidget from './CompetitorAnalysisWidget';
 
 export default function AdminCompetitorsTab() {
-  const [competitorData, setCompetitorData] = useState([]);
-  const [ourProducts, setOurProducts] = useState([]);
+  const [cacheData, setCacheData] = useState({ matches: [], lastUpdated: null });
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
+  const [selectedTier, setSelectedTier] = useState('retail');
+  
+  const { toast } = useToast();
 
   // Settings State
   const [showSettings, setShowSettings] = useState(false);
   const [competitorUrls, setCompetitorUrls] = useState([
-    { name: "UAE Peptides", url: "https://uaepeptides.com/collections/all" },
-    { name: "Peptide Sciences", url: "https://www.peptidesciences.com/peptides" },
-    { name: "Limitless Life Nootropics", url: "https://limitlesslifenootropics.com/product-category/peptides/" }
+    { name: "UAE Peptides", url: "https://uaepeptides.com/collections/all" }
   ]);
+  const [scrapeFrequency, setScrapeFrequency] = useState("Diario");
+  
   const [newCompName, setNewCompName] = useState('');
   const [newCompUrl, setNewCompUrl] = useState('');
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = React.useCallback(async () => {
     setLoading(true);
     try {
-      // 1. Fetch Competitor Prices
-      const compSnap = await getDocs(query(collection(db, 'competitor_prices'), orderBy('scraped_at', 'desc'), limit(500)));
-      const cData = compSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const cacheDoc = await getDoc(doc(db, 'settings', 'competitor_cache'));
+      if (cacheDoc.exists()) {
+        setCacheData(cacheDoc.data());
+      }
       
-      // 2. Fetch our products (vials)
-      const ourSnap = await getDocs(query(collection(db, 'products')));
-      const oData = ourSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-      
-      // 3. Fetch Settings
       const settingsDoc = await getDoc(doc(db, 'settings', 'competitor_analysis'));
-      if (settingsDoc.exists() && settingsDoc.data().urls) {
-        setCompetitorUrls(settingsDoc.data().urls);
+      if (settingsDoc.exists()) {
+        const data = settingsDoc.data();
+        if (data.urls) setCompetitorUrls(data.urls);
+        else if (data.targetUrls) {
+          setCompetitorUrls(data.targetUrls.map(url => ({ name: new URL(url).hostname.replace('www.',''), url })));
+        }
+        if (data.frequency) setScrapeFrequency(data.frequency);
       }
 
-      setCompetitorData(cData);
-      setOurProducts(oData);
     } catch (err) {
       console.error('Error fetching competitor data', err);
+      toast?.error('Error fetching competitor data');
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const forceScan = async () => {
     setScanning(true);
     try {
-      // Call the HTTP function via fetch since it's an onRequest function
-      // Or if it was a callable, we would use httpsCallable. It's onRequest, so we need the URL.
-      // Wait, in React we can just call it via standard fetch or if we define it as callable.
-      // Let's assume we can fetch the local emulator or prod URL.
-      // For safety, we will just simulate or call a known endpoint.
-      // Since it's onRequest, let's just trigger a toast for now and simulate fetch if we don't have the exact URL.
-      alert("Triggering Background Scan. This may take up to 2 minutes.");
-      
-      // Attempting to hit the default firebase function route structure (assuming us-central1)
-      const projectId = "med-peptides-app"; // Using the known project ID
+      toast?.info("Background Scan Triggered. This may take a minute.");
+      const projectId = "med-peptides-app"; 
       const url = `https://us-central1-${projectId}.cloudfunctions.net/forceScrapeCompetitors`;
       await fetch(url, { method: 'POST' });
       
       setTimeout(() => {
         fetchData();
         setScanning(false);
-      }, 5000); // Poll after 5s
+        toast?.success("Scan completed. Data refreshed.");
+      }, 7000); 
 
     } catch (err) {
       console.error(err);
-      alert('Error triggering scan');
+      toast?.error('Error triggering scan');
       setScanning(false);
     }
   };
@@ -82,13 +79,14 @@ export default function AdminCompetitorsTab() {
   const handleSaveSettings = async () => {
     try {
       await setDoc(doc(db, 'settings', 'competitor_analysis'), {
-        urls: competitorUrls
+        urls: competitorUrls,
+        frequency: scrapeFrequency
       }, { merge: true });
       setShowSettings(false);
-      alert('Settings saved successfully!');
+      toast?.success('Settings saved successfully!');
     } catch (err) {
       console.error(err);
-      alert('Error saving settings');
+      toast?.error('Error saving settings');
     }
   };
 
@@ -103,42 +101,109 @@ export default function AdminCompetitorsTab() {
     setCompetitorUrls(competitorUrls.filter((_, i) => i !== idx));
   };
 
-  // Process data for comparison
-  // Group competitor data by Product Name
-  const comparisonMap = {};
-  
-  ourProducts.forEach(prod => {
-    // Only focus on Vials/Peptides if possible, but we'll include all products for now
-    if (!prod.displayName && !prod.name) return;
-    const name = (prod.displayName || prod.name).toLowerCase();
-    
-    // Find matching competitor entries
-    const matches = competitorData.filter(c => c.product_name && c.product_name.toLowerCase().includes(name) || name.includes(c.product_name.toLowerCase()));
-    
-    // Only add if we have competitor data to compare
-    if (matches.length > 0) {
-      comparisonMap[prod.id] = {
-        ourProduct: prod,
-        competitors: matches
-      };
-    }
-  });
+  const kpiStats = useMemo(() => {
+    let cheaperCount = 0;
+    let expensiveCount = 0;
+    let totalMatches = cacheData.matches ? cacheData.matches.length : 0;
+
+    (cacheData.matches || []).forEach(match => {
+      const myPPM = match.myPPMs ? match.myPPMs[selectedTier] : null;
+      let isOverallCheaper = true;
+      let isOverallExpensive = true;
+      
+      if (!myPPM) return;
+
+      match.competitors.forEach(comp => {
+        const compPPM = comp.ppm;
+        if (!compPPM) return;
+        const diff = myPPM - compPPM;
+        if (diff > 0.05) isOverallCheaper = false; // We are more expensive
+        if (diff < -0.05) isOverallExpensive = false; // We are cheaper
+      });
+
+      if (isOverallCheaper && !isOverallExpensive) cheaperCount++;
+      if (isOverallExpensive && !isOverallCheaper) expensiveCount++;
+    });
+
+    return { cheaperCount, expensiveCount, totalMatches };
+  }, [cacheData, selectedTier]);
+
+  // Inject AI Context
+  useEffect(() => {
+    const contextStr = (cacheData.matches || []).map(m => {
+      const myPPM = m.myPPMs ? m.myPPMs[selectedTier] : 0;
+      const comps = m.competitors.map(c => `${c.competitor_name} ($${c.ppm ? c.ppm.toFixed(2) : 0}/mg)`).join(', ');
+      return `Product: ${m.productName} (Our ${selectedTier} PPM: $${myPPM ? myPPM.toFixed(2) : 0}). Competitors: ${comps}`;
+    }).join('; ');
+
+    window.dispatchEvent(new CustomEvent('admin-context-update', {
+      detail: {
+        page: 'competitor_analysis',
+        summary: `Competitor pricing analysis active for tier ${selectedTier}. Found matches for ${kpiStats.totalMatches} products. We are cheaper on ${kpiStats.cheaperCount} products and more expensive on ${kpiStats.expensiveCount}. Detail: ${contextStr}`,
+        suggestedActions: [
+          `Based on competitors, suggest optimal pricing for our expensive products in the ${selectedTier} tier.`,
+          'Summarize our market positioning.',
+          'Are there any competitors undercutting our prices?'
+        ]
+      }
+    }));
+  }, [cacheData, selectedTier, kpiStats]);
+
+  const lastUpdatedStr = cacheData.lastUpdated ? new Date(cacheData.lastUpdated).toLocaleString() : 'Never';
 
   return (
-    <div style={{ marginBottom: '2rem' }}>
+    <div style={{ marginBottom: '2rem', animation: 'fadeIn 0.3s ease-in-out' }}>
       <AdminPageHeader 
         title="Market & Competitor Analysis" 
         subtitle="Monitor competitor pricing for Vials and Peptides to maintain strategic advantage."
         icon={Activity}
       />
 
+      {/* KPI Dashboard */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+        <div style={{ background: 'var(--bg-surface)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Total Matches</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '0.5rem', borderRadius: '8px' }}><Activity size={20} /></div>
+            <span style={{ fontSize: '1.75rem', fontWeight: 700 }}>{kpiStats.totalMatches}</span>
+          </div>
+        </div>
+        <div style={{ background: 'var(--bg-surface)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Highly Competitive</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '0.5rem', borderRadius: '8px' }}><CheckCircle size={20} /></div>
+            <span style={{ fontSize: '1.75rem', fontWeight: 700 }}>{kpiStats.cheaperCount}</span>
+          </div>
+        </div>
+        <div style={{ background: 'var(--bg-surface)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Needs Adjustment</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '0.5rem', borderRadius: '8px' }}><AlertCircle size={20} /></div>
+            <span style={{ fontSize: '1.75rem', fontWeight: 700 }}>{kpiStats.expensiveCount}</span>
+          </div>
+        </div>
+      </div>
+
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          
+          <select 
+            value={selectedTier} 
+            onChange={(e) => setSelectedTier(e.target.value)}
+            style={{ padding: '0.6rem 1.25rem', borderRadius: '8px', border: '1px solid var(--primary)', background: 'rgba(59, 130, 246, 0.05)', color: 'var(--primary)', fontWeight: 700, outline: 'none' }}
+          >
+            <option value="retail">Compare: RETAIL Price</option>
+            <option value="clinic">Compare: CLINIC Price</option>
+            <option value="wholesaler">Compare: WHOLESALER Price</option>
+            <option value="distributor">Compare: DISTRIBUTOR Price</option>
+            <option value="master">Compare: MASTER Price</option>
+          </select>
+
           <button 
             onClick={forceScan}
             disabled={scanning}
             className="btn btn-primary"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.25rem', borderRadius: '8px', fontWeight: 600, transition: 'all 0.2s', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}
           >
             <RefreshCw size={16} className={scanning ? 'spin' : ''} /> 
             {scanning ? 'Scanning...' : 'Force Scan Now'}
@@ -147,140 +212,142 @@ export default function AdminCompetitorsTab() {
           <button 
             onClick={() => setShowSettings(!showSettings)}
             className="btn btn-outline"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.25rem', borderRadius: '8px', fontWeight: 600 }}
           >
-            <Globe size={16} /> Manage Target URLs
+            <Settings size={16} /> Config
           </button>
         </div>
         
-        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-          Data last updated: {competitorData.length > 0 ? new Date(competitorData[0].scraped_at).toLocaleString() : 'Never'}
+        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)' }}></div>
+          Data last updated: {lastUpdatedStr}
         </div>
       </div>
 
       {showSettings && (
-        <div style={{ background: 'var(--bg-surface)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--border)', marginBottom: '2rem' }}>
-          <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem' }}>Competitor Target URLs</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
+        <div style={{ background: 'var(--bg-surface)', padding: '2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', marginBottom: '2rem', boxShadow: '0 10px 40px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.05)', animation: 'slideDown 0.3s ease-out', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, background: 'var(--primary)', filter: 'blur(100px)', opacity: 0.1, pointerEvents: 'none' }}></div>
+          <div style={{ position: 'absolute', bottom: -50, left: -50, width: 200, height: 200, background: '#00BCD4', filter: 'blur(100px)', opacity: 0.1, pointerEvents: 'none' }}></div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', position: 'relative' }}>
+            <div style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '0.6rem', borderRadius: '10px' }}><Settings size={20} /></div>
+            <div>
+              <h3 style={{ margin: '0', fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em' }}>Configuración del Scraper</h3>
+              <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>Administra las URLs de la competencia y la frecuencia de búsqueda automática.</p>
+            </div>
+          </div>
+          
+          <div style={{ marginBottom: '2rem', background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
+            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.5rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Frecuencia de Exploración</label>
+            <select 
+              value={scrapeFrequency}
+              onChange={(e) => setScrapeFrequency(e.target.value)}
+              style={{ padding: '0.75rem 1rem', width: '100%', maxWidth: '300px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-default)', outline: 'none' }}
+            >
+              <option value="Diario">Diario</option>
+              <option value="Cada 3 días">Cada 3 días</option>
+              <option value="Semanal">Semanal</option>
+              <option value="Quincenal">Quincenal</option>
+            </select>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem', position: 'relative' }}>
+            <h4 style={{ fontSize: '0.95rem', margin: '0 0 0.5rem 0' }}>URLs de Competidores</h4>
             {competitorUrls.map((comp, idx) => (
-              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--bg-app)', padding: '0.5rem 1rem', borderRadius: '6px' }}>
-                <span style={{ fontWeight: 600, minWidth: '150px' }}>{comp.name}</span>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', flex: 1 }}>{comp.url}</span>
-                <button onClick={() => removeCompetitor(idx)} style={{ color: 'var(--error)', background: 'none', border: 'none', cursor: 'pointer' }}><X size={16} /></button>
+              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', padding: '1rem 1.25rem', borderRadius: '12px', transition: 'all 0.2s', ':hover': { borderColor: 'var(--primary)', transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' } }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--bg-default)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', fontSize: '1rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                    {comp.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.15rem' }}>{comp.name}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{comp.url}</div>
+                  </div>
+                </div>
+                <button onClick={() => removeCompetitor(idx)} style={{ color: 'var(--text-muted)', background: 'var(--bg-default)', border: '1px solid var(--border)', cursor: 'pointer', padding: '0.5rem', borderRadius: '8px', transition: 'all 0.2s' }}><X size={16} /></button>
               </div>
             ))}
           </div>
           
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', marginTop: '1rem' }}>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', background: 'rgba(255,255,255,0.01)', padding: '1.25rem', borderRadius: '12px', border: '1px dashed var(--border)', position: 'relative' }}>
             <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.25rem' }}>Name</label>
-              <input type="text" value={newCompName} onChange={e => setNewCompName(e.target.value)} placeholder="e.g. Acme Peptides" style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)' }} />
+              <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Store Name</label>
+              <input type="text" value={newCompName} onChange={e => setNewCompName(e.target.value)} placeholder="e.g. Acme Peptides" style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-default)', outline: 'none' }} />
             </div>
             <div style={{ flex: 2 }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.25rem' }}>URL</label>
-              <input type="text" value={newCompUrl} onChange={e => setNewCompUrl(e.target.value)} placeholder="https://..." style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)' }} />
+              <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Target URL</label>
+              <input type="text" value={newCompUrl} onChange={e => setNewCompUrl(e.target.value)} placeholder="https://..." style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-default)', outline: 'none' }} />
             </div>
-            <button onClick={addCompetitor} className="btn btn-secondary" style={{ padding: '0.5rem 1rem', display: 'flex', gap: '0.5rem' }}>
-              <Plus size={16} /> Add
+            <button onClick={addCompetitor} className="btn btn-secondary" style={{ padding: '0.75rem 1.5rem', display: 'flex', gap: '0.5rem', borderRadius: '8px', fontWeight: 700, alignItems: 'center' }}>
+              <Plus size={16} /> Add Store
             </button>
           </div>
           
-          <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border)', paddingTop: '1rem', textAlign: 'right' }}>
-            <button onClick={handleSaveSettings} className="btn btn-primary" style={{ display: 'inline-flex', gap: '0.5rem' }}>
-              <Save size={16} /> Save Settings
+          <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border)', paddingTop: '1.5rem', display: 'flex', justifyContent: 'flex-end', position: 'relative' }}>
+            <button onClick={handleSaveSettings} className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 2rem', borderRadius: '8px', fontWeight: 700, boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)' }}>
+              <Save size={18} /> Save Settings
             </button>
           </div>
         </div>
       )}
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>Loading analysis...</div>
-      ) : Object.keys(comparisonMap).length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '4rem', background: 'var(--bg-surface)', borderRadius: '8px', border: '1px dashed var(--border)' }}>
-          <ShieldAlert size={48} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '1rem' }} />
-          <h3>No Match Data Found</h3>
-          <p style={{ color: 'var(--text-muted)' }}>Try forcing a scan to retrieve the latest competitor pricing, or verify that your product names align with standard peptide nomenclature.</p>
+        <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+          <div className="spinner-border text-primary" style={{ width: '2rem', height: '2rem' }}></div>
+          Loading rapid analysis...
+        </div>
+      ) : (!cacheData.matches || cacheData.matches.length === 0) ? (
+        <div style={{ textAlign: 'center', padding: '5rem 2rem', background: 'var(--bg-surface)', borderRadius: '12px', border: '1px dashed var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <ShieldAlert size={48} color="var(--text-muted)" style={{ opacity: 0.3, marginBottom: '1.5rem' }} />
+          <h3 style={{ margin: '0 0 0.5rem 0', fontWeight: 700 }}>No Match Data Found</h3>
+          <p style={{ color: 'var(--text-muted)', maxWidth: '400px' }}>Try forcing a scan to retrieve the latest competitor pricing, or verify that your product names align with standard nomenclature.</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {Object.values(comparisonMap).map((match, idx) => {
-            const prod = match.ourProduct;
-            const myPrice = parseFloat(prod.price || 0);
-            const myDosage = prod.dosage_mg || 1; // Default to 1 to avoid Infinity
-            const myPPM = myPrice / myDosage;
-
+        <div style={{ display: 'grid', gap: '1.5rem' }}>
+          {cacheData.matches.map((match, idx) => {
+            const myPPM = match.myPPMs ? match.myPPMs[selectedTier] : 0;
+            
             return (
-              <div key={idx} style={{ background: 'var(--bg-surface)', borderRadius: '8px', border: '1px solid var(--border)', overflow: 'hidden' }}>
-                <div style={{ padding: '1rem 1.5rem', background: 'var(--bg-app)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div key={idx} style={{ 
+                background: 'var(--bg-surface)', 
+                borderRadius: '12px', 
+                border: '1px solid var(--border)', 
+                overflow: 'hidden',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.02)',
+                transition: 'transform 0.2s',
+              }}>
+                <div style={{ 
+                  padding: '1.25rem 1.5rem', 
+                  background: 'linear-gradient(to right, rgba(0,0,0,0.02), transparent)', 
+                  borderBottom: '1px solid var(--border)', 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center' 
+                }}>
                   <div>
-                    <h4 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)' }}>{prod.displayName || prod.name}</h4>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Our Price: ${myPrice.toFixed(2)} ({prod.dosage_mg ? `${prod.dosage_mg}mg` : 'N/A'})</span>
+                    <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.15rem', color: 'var(--text-primary)', fontWeight: 700 }}>{match.productName}</h4>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Base Dosage: {match.myMg ? `${match.myMg}mg` : 'N/A'}</span>
                   </div>
-                  <div style={{ background: 'var(--primary)', color: 'white', padding: '0.25rem 0.75rem', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 600 }}>
-                    Our PPM: ${myPPM.toFixed(2)}/mg
+                  <div style={{ 
+                    background: 'linear-gradient(135deg, var(--primary), #00BCD4)', 
+                    color: 'white', 
+                    padding: '0.4rem 1rem', 
+                    borderRadius: '999px', 
+                    fontSize: '0.85rem', 
+                    fontWeight: 700,
+                    boxShadow: '0 2px 8px rgba(0, 188, 212, 0.3)'
+                  }}>
+                    Our {selectedTier.toUpperCase()} PPM: ${myPPM ? myPPM.toFixed(2) : '0'}/mg
                   </div>
                 </div>
                 
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
-                  <thead>
-                    <tr style={{ background: 'rgba(0,0,0,0.02)' }}>
-                      <th style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--border)', fontWeight: 600, color: 'var(--text-secondary)' }}>Competitor</th>
-                      <th style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--border)', fontWeight: 600, color: 'var(--text-secondary)' }}>Product Name</th>
-                      <th style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--border)', fontWeight: 600, color: 'var(--text-secondary)' }}>Dosage</th>
-                      <th style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--border)', fontWeight: 600, color: 'var(--text-secondary)' }}>Price</th>
-                      <th style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--border)', fontWeight: 600, color: 'var(--text-secondary)' }}>Price per Mg (PPM)</th>
-                      <th style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--border)', fontWeight: 600, color: 'var(--text-secondary)' }}>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {match.competitors.map(comp => {
-                      const compPrice = parseFloat(comp.price_usd || 0);
-                      const compDosage = comp.dosage_mg || 1;
-                      const compPPM = compPrice / compDosage;
-                      const diffPPM = myPPM - compPPM;
-                      
-                      // If diffPPM > 0, we are MORE expensive. If diffPPM < 0, we are CHEAPER.
-                      const isMoreExpensive = diffPPM > 0.5; // Threshold of 50 cents
-                      const isCheaper = diffPPM < -0.5;
-
-                      return (
-                        <tr key={comp.id}>
-                          <td style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--border)' }}>
-                            <span style={{ fontWeight: 600 }}>{comp.competitor_name}</span>
-                          </td>
-                          <td style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--border)' }}>{comp.product_name}</td>
-                          <td style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--border)' }}>{comp.dosage_mg ? `${comp.dosage_mg}mg` : 'N/A'}</td>
-                          <td style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--border)' }}>${compPrice.toFixed(2)}</td>
-                          <td style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--border)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                              <span style={{ fontWeight: 600 }}>${compPPM.toFixed(2)}</span>
-                              {isMoreExpensive ? (
-                                <span style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--error)', fontSize: '0.75rem', background: 'rgba(239,68,68,0.1)', padding: '2px 6px', borderRadius: '4px' }}>
-                                  <TrendingDown size={12} style={{ marginRight: '2px' }}/> They are cheaper
-                                </span>
-                              ) : isCheaper ? (
-                                <span style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--success)', fontSize: '0.75rem', background: 'rgba(16,185,129,0.1)', padding: '2px 6px', borderRadius: '4px' }}>
-                                  <TrendingUp size={12} style={{ marginRight: '2px' }}/> We are cheaper
-                                </span>
-                              ) : (
-                                <span style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--text-muted)', fontSize: '0.75rem', background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px' }}>
-                                  Equal
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          <td style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--border)' }}>
-                            {comp.in_stock ? (
-                              <span style={{ color: 'var(--success)', fontSize: '0.8rem', fontWeight: 600 }}>In Stock</span>
-                            ) : (
-                              <span style={{ color: 'var(--error)', fontSize: '0.8rem', fontWeight: 600 }}>Out of Stock</span>
-                            )}
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
+                <div style={{ padding: '1rem 1.5rem' }}>
+                  <CompetitorAnalysisWidget 
+                    matchData={match.competitors} 
+                    selectedTier={selectedTier}
+                    myPPMs={match.myPPMs}
+                  />
+                </div>
               </div>
             );
           })}
