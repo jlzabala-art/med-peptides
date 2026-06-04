@@ -364,7 +364,8 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
       animation: 'smFadeIn 0.18s ease-out',
       overflow: isMobile ? 'hidden' : 'auto'
     }} onClick={onClose}>
-      <style>{`
+      {useMemo(() => (
+        <style>{`
         @keyframes smFadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes smSlideDown { from { transform: translateY(-8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes smSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -386,6 +387,7 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
         .smInput::-webkit-search-results-button,
         .smInput::-webkit-search-results-decoration { display: none; }
       `}</style>
+      ), [THEME, isProfessional])}
 
       <div style={{
         width: '100%',

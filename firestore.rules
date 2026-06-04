@@ -488,6 +488,11 @@ service cloud.firestore {
       allow read: if isAdmin();
     }
 
+    // ── PURCHASING (B2B Buy Side) ──
+    match /purchase_rfqs/{id} { allow read, write: if isAdmin(); }
+    match /purchaseOrders/{id} { allow read, write: if isAdmin(); }
+    match /purchaseBills/{id} { allow read, write: if isAdmin(); }
+
     // Default catch-all: Admins only
     match /{document=**} {
       allow read, write: if isAdmin();

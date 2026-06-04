@@ -13,6 +13,7 @@ import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import AvatarGenerator from './AvatarGenerator';
 import AdminPortalSwitcher from '../shared/AppHeader/AdminPortalSwitcher';
 import GlobalPreferencesDropdown from '../shared/AppHeader/GlobalPreferencesDropdown';
+import useAdminNotifications from '../../hooks/useAdminNotifications';
 
 // ── Atlas AI — Suggested Prompts per Role ──────────────────────────────────────
 const ROLE_SUGGESTED_PROMPTS = {
@@ -97,7 +98,6 @@ export default function PortalLayout({
   const [enrichedContext, setEnrichedContext] = useState(null);
   
   // Real-time attention notifications state
-  const [notifications, setNotifications] = useState([]);
   const [isNotificationsOpen, setNotificationsOpen] = useState(false);
   
   // Command Palette
@@ -115,85 +115,15 @@ export default function PortalLayout({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Fetch real-time attention alerts (all 10 sources)
+  // Listen for custom event from Sidebar to open the command palette
   useEffect(() => {
-    if (roleContext !== 'admin') return;
+    const openFromSidebar = () => setPaletteOpen(true);
+    window.addEventListener('sidebar:open-palette', openFromSidebar);
+    return () => window.removeEventListener('sidebar:open-palette', openFromSidebar);
+  }, []);
 
-    const unsubscribes = [];
-    const stateMap = new Map();
-
-    const updateState = (type, items) => {
-      stateMap.set(type, items);
-      const allItems = Array.from(stateMap.values()).flat();
-      setNotifications(allItems);
-    };
-
-    // 1. Doctors pending verification
-    unsubscribes.push(onSnapshot(query(collection(db, 'users'), where('role', '==', 'doctor'), where('approved', '==', false)), (snap) => {
-      updateState('VERIFICATION', snap.docs.map(d => ({ id: d.id, type: 'VERIFICATION', title: `Médico pendiente: ${d.data().fullName || 'Profesional'}`, description: 'Requiere revisión.', severity: 'critical', actionPath: `doctors?search=${encodeURIComponent(d.data().fullName || d.id)}` })));
-    }));
-
-    // 2. Orders pending dispatch
-    unsubscribes.push(onSnapshot(query(collection(db, 'orders'), where('status', '==', 'pending')), (snap) => {
-      updateState('ORDER', snap.docs.map(d => ({ id: d.id, type: 'ORDER', title: `Pedido #${d.id.slice(0, 6)}`, description: `Esperando validación.`, severity: 'warning', actionPath: `orders?orderId=${d.id}` })));
-    }));
-
-    // 3. Low stock products
-    unsubscribes.push(onSnapshot(query(collection(db, 'products'), where('status', '==', 'active')), (snap) => {
-      const lowStock = [];
-      snap.docs.forEach(doc => {
-        const data = doc.data();
-        (Array.isArray(data.variants) ? data.variants : []).forEach((v, index) => {
-          if ((v?.stock ?? v?.quantity ?? 100) <= 10) {
-            lowStock.push({ id: `${doc.id}_${index}`, type: 'STOCK', title: `Stock Bajo: ${data.displayName || data.name}`, description: `Quedan ${v?.stock ?? v?.quantity ?? 0} unidades.`, severity: 'critical', actionPath: `stock?search=${encodeURIComponent(data.displayName || data.name || '')}` });
-          }
-        });
-      });
-      updateState('STOCK', lowStock);
-    }));
-
-    // 4. Leads new
-    unsubscribes.push(onSnapshot(query(collection(db, 'leads'), where('status', '==', 'new')), (snap) => {
-      updateState('LEAD', snap.docs.map(d => ({ id: d.id, type: 'LEAD', title: `Nuevo Lead: ${d.data().name || d.data().email || d.id}`, description: 'Lead sin contactar.', severity: 'warning', actionPath: `leads?search=${d.id}` })));
-    }));
-
-    // 5. Invitations pending
-    unsubscribes.push(onSnapshot(query(collection(db, 'invitations'), where('status', '==', 'pending')), (snap) => {
-      updateState('INVITE', snap.docs.map(d => ({ id: d.id, type: 'INVITE', title: `Invitación Pdte: ${d.data().email}`, description: 'Sin aceptar aún.', severity: 'info', actionPath: `invitations?search=${encodeURIComponent(d.data().email || '')}` })));
-    }));
-
-    // 6. Agency RFQs
-    unsubscribes.push(onSnapshot(query(collection(db, 'agency_rfqs'), where('status', 'in', ['NEW', 'PENDING_REVIEW'])), (snap) => {
-      updateState('RFQ', snap.docs.map(d => ({ id: d.id, type: 'RFQ', title: `Nuevo RFQ B2B`, description: `RFQ de agencia pendiente.`, severity: 'critical', actionPath: `agency-deals?rfqId=${d.id}` })));
-    }));
-
-    // 7. Bulk orders pending
-    unsubscribes.push(onSnapshot(query(collection(db, 'bulk_orders'), where('status', '==', 'pending_admin_approval')), (snap) => {
-      updateState('BULK', snap.docs.map(d => ({ id: d.id, type: 'BULK', title: `Pedido B2B: ${d.id.slice(0,6)}`, description: 'Requiere aprobación.', severity: 'warning', actionPath: `bulk-orders?search=${d.id}` })));
-    }));
-
-    // 8. SKU Mappings pending
-    unsubscribes.push(onSnapshot(query(collection(db, 'sku_mappings'), where('status', '==', 'pending')), (snap) => {
-      updateState('SKU', snap.docs.map(d => ({ id: d.id, type: 'SKU', title: `SKU Sync: ${d.data().firebase_sku}`, description: 'Mapeo pendiente.', severity: 'info', actionPath: `sku-sync?search=${encodeURIComponent(d.data().firebase_sku || '')}` })));
-    }));
-
-    // 9. Wholesalers pending
-    unsubscribes.push(onSnapshot(query(collection(db, 'users'), where('role', '==', 'wholesaler'), where('approved', '==', false)), (snap) => {
-      updateState('WHOLESALER', snap.docs.map(d => ({ id: d.id, type: 'WHOLESALER', title: `Mayorista Pdte: ${d.data().fullName || 'Usuario'}`, description: 'Requiere aprobación.', severity: 'critical', actionPath: `wholesellers?search=${encodeURIComponent(d.data().fullName || d.id)}` })));
-    }));
-
-    // 10. Failed payments
-    unsubscribes.push(onSnapshot(query(collection(db, 'orders'), where('status', '==', 'payment_failed')), (snap) => {
-      updateState('PAYMENT', snap.docs.map(d => ({ id: d.id, type: 'PAYMENT', title: `Failed Payment: #${d.id.slice(0,6)}`, description: 'Review order details.', severity: 'critical', actionPath: `orders?orderId=${d.id}` })));
-    }));
-
-    // 11. High Value Orders (>= 1000)
-    unsubscribes.push(onSnapshot(query(collection(db, 'orders'), where('status', '==', 'pending'), where('total', '>=', 1000)), (snap) => {
-      updateState('HIGH_VALUE', snap.docs.map(d => ({ id: d.id, type: 'HIGH_VALUE', title: `High Value Order: #${d.id.slice(0,6)}`, description: `Total: $${d.data().total}. Requires attention.`, severity: 'critical', actionPath: `orders?orderId=${d.id}` })));
-    }));
-
-    return () => unsubscribes.forEach(unsub => unsub());
-  }, [roleContext]);
+  // Fetch real-time attention alerts using the custom polling hook
+  const { data: notifications = [] } = useAdminNotifications(roleContext);
 
   // Derived state: Filter out read notifications and sort
   const readIds = userProfile?.read_notifications || [];
@@ -283,40 +213,43 @@ export default function PortalLayout({
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
-        display: 'flex',
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr auto' : 'minmax(auto, 1fr) minmax(200px, 500px) minmax(auto, 1fr)',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        gap: '1rem',
         padding: '0 1.5rem',
         zIndex: 50,
         color: 'var(--color-text-primary)',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)'
       }}>
         {/* Left Side */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: 0 }}>
           {isMobile && (
             <button 
               onClick={() => setSidebarOpen(!isSidebarOpen)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
               title="Toggle Menu"
             >
               <Menu size={20} color="var(--color-text-primary)" />
             </button>
           )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, overflowX: 'auto', scrollbarWidth: 'none' }}>
             <img 
               src="/atlas-health-logo.png" 
               alt="Atlas Health" 
-              style={{ height: '48px', width: 'auto', objectFit: 'contain' }} 
+              style={{ height: '48px', width: 'auto', objectFit: 'contain', flexShrink: 0 }} 
               onError={(e) => { e.target.onerror = null; e.target.src = '/logo.png'; }} 
             />
             {portalTitle && (
               <>
-                <span style={{ color: '#e2e8f0', fontSize: '1.4rem', fontWeight: 300 }}>|</span>
-                <span style={{ fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-secondary)', letterSpacing: '-0.2px' }}>
+                <span style={{ color: '#e2e8f0', fontSize: '1.4rem', fontWeight: 300, flexShrink: 0 }}>|</span>
+                <span style={{ fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-secondary)', letterSpacing: '-0.2px', whiteSpace: 'nowrap' }}>
                   {portalTitle}
                 </span>
-                <span style={{ color: '#e2e8f0', fontSize: '1.4rem', fontWeight: 300, margin: '0 0.25rem' }}>|</span>
-                <AdminPortalSwitcher />
+                <span style={{ color: '#e2e8f0', fontSize: '1.4rem', fontWeight: 300, margin: '0 0.25rem', flexShrink: 0 }}>|</span>
+                <div style={{ flexShrink: 0 }}>
+                  <AdminPortalSwitcher />
+                </div>
               </>
             )}
           </div>
@@ -324,7 +257,7 @@ export default function PortalLayout({
 
         {/* Center - Global Search (Optional) */}
         {!isMobile && (
-          <div style={{ flex: '0 1 500px', margin: '0 auto', minWidth: '200px' }}>
+          <div style={{ width: '100%' }}>
             <div style={{ position: 'relative', width: '100%' }}>
               <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-secondary)' }} />
               <input 
@@ -351,11 +284,11 @@ export default function PortalLayout({
         )}
 
         {/* Right Side */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem', minWidth: 0 }}>
           
           {/* Preferences Toggles */}
           {!isMobile && (
-            <div style={{ display: 'flex', alignItems: 'center', marginRight: '0.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginRight: '0.25rem', flexShrink: 0 }}>
               <GlobalPreferencesDropdown />
             </div>
           )}
@@ -565,7 +498,17 @@ export default function PortalLayout({
         navGroups={sidebarNavGroups}
         pinnedItems={sidebarPinnedItems}
         onNavigate={onNavigate}
-        onAskAI={(q) => { setPaletteOpen(false); setAiOpen(true); /* possibly pass q to AI */ }}
+        portalType={roleContext}
+        onAskAI={(q) => {
+          setPaletteOpen(false);
+          setAiOpen(true);
+          // Dispatch after a tick so the panel is mounted before receiving the event
+          if (q && q.trim()) {
+            setTimeout(() => {
+              window.dispatchEvent(new CustomEvent('ATLAS_PREFILL_QUERY', { detail: { query: q } }));
+            }, 150);
+          }
+        }}
       />
     </div>
   );

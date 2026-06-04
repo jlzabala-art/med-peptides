@@ -714,10 +714,10 @@ export default function ProductDetail({
 
           /* Sticky mobile CTA replaces floating bar on mobile */
           .pd-floating-bar {
-            bottom: 0;
+            bottom: calc(56px + env(safe-area-inset-bottom));
             width: 100%;
             border-radius: 20px 20px 0 0;
-            padding: 1.25rem 1.5rem calc(1.25rem + env(safe-area-inset-bottom));
+            padding: 1.25rem 1.5rem;
             flex-direction: column;
             align-items: stretch;
             gap: 0.75rem;

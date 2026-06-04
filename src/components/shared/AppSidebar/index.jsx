@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Menu, ChevronDown, LogOut, GripVertical, Star } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Menu, ChevronDown, LogOut, GripVertical, Star, Search, PanelLeftClose, PanelLeftOpen, Command } from 'lucide-react';
 import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import AtlasHealthLogo from '../../brand/AtlasHealthLogo';
 import './AppSidebar.css';
+
 
 // ─── Sortable Group Wrapper ────────────────────────────────────────────────
 function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, handleItemClick, isEditing, isMobile, onToggleFavorite, isFavoritesGroup, favoritesSet }) {
@@ -37,11 +38,13 @@ function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, 
           className="sb-group-header"
           onClick={() => !isEditing && toggleGroup(group.id)}
           aria-expanded={isOpen}
-          data-tooltip={!expanded ? group.label : undefined}
-          title={!expanded ? group.label : undefined}
+          data-tooltip={undefined}
+          title={undefined}
           style={{ flex: 1, pointerEvents: isEditing ? 'none' : 'auto' }}
         >
-          <span className="sb-group-emoji" aria-hidden="true">{group.emoji}</span>
+          <span className="sb-group-emoji" aria-hidden="true">
+            {group.icon ? <group.icon size={16} strokeWidth={1.5} /> : group.emoji}
+          </span>
           <span className="sb-group-label">{group.label}</span>
           {group.badge && expanded && (
             <span style={{
@@ -67,6 +70,11 @@ function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, 
         className="sb-group-items"
         style={{ maxHeight: isOpen ? '999px' : '0px', overflow: isEditing ? 'visible' : 'hidden' }}
       >
+        {!expanded && (
+          <div className="sb-flyout-header">
+            {group.label}
+          </div>
+        )}
         <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
           {items.map(item => (
             <SortableSidebarItem 
@@ -248,6 +256,32 @@ export default function AppSidebar({
     return new Set(['favorites']);
   });
 
+  // ── Phase 1: Sidebar Search ──────────────────────────────────────────────
+  const [searchTerm, setSearchTerm] = useState('');
+  const searchInputRef = useRef(null);
+
+  // Fuzzy filter: returns groups with only matching items
+  const filteredGroups = useMemo(() => {
+    if (!searchTerm.trim()) return groups;
+    const q = searchTerm.toLowerCase().trim();
+    return groups
+      .map(group => ({
+        ...group,
+        items: (group.items || []).filter(item =>
+          item.label?.toLowerCase().includes(q)
+        )
+      }))
+      .filter(group => group.items.length > 0);
+  }, [groups, searchTerm]);
+
+  // When searching, force all matching groups open
+  const effectiveOpenGroups = useMemo(() => {
+    if (searchTerm.trim()) {
+      return new Set(filteredGroups.map(g => g.id));
+    }
+    return openGroups;
+  }, [searchTerm, filteredGroups, openGroups]);
+
   useEffect(() => {
     localStorage.setItem(`${storageKey}:expanded`, JSON.stringify(expanded));
   }, [expanded, storageKey]);
@@ -322,9 +356,13 @@ export default function AppSidebar({
               className="sb-hamburger"
               onClick={() => !isEditing && setExpanded(e => !e)}
               aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
+              title={expanded ? 'Collapse menu' : 'Expand menu'}
               style={{ visibility: isEditing ? 'hidden' : 'visible' }}
             >
-              <Menu size={18} />
+              {expanded
+                ? <PanelLeftClose size={18} />
+                : <PanelLeftOpen size={18} />
+              }
             </button>
           )}
           <div className="sb-brand" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: expanded ? '24px 0' : '16px 0', width: '100%', transition: 'margin 0.2s' }}>
@@ -338,6 +376,34 @@ export default function AppSidebar({
             )}
           </div>
         </div>
+
+        {/* ── Phase 1: Search bar (visible only when expanded & not editing) ── */}
+        {expanded && !isEditing && (
+          <div className="sb-search-wrap">
+            <Search size={14} className="sb-search-icon" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              className="sb-search-input"
+              placeholder="Filter menu..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Escape') { setSearchTerm(''); searchInputRef.current?.blur(); }
+              }}
+              aria-label="Filter sidebar navigation"
+            />
+            {searchTerm && (
+              <button
+                className="sb-search-clear"
+                onClick={() => { setSearchTerm(''); searchInputRef.current?.focus(); }}
+                aria-label="Clear search"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        )}
 
         <nav className="sb-scroll" role="navigation">
           {/* ── Pinned items — always visible ── */}
@@ -374,13 +440,19 @@ export default function AppSidebar({
             </div>
           )}
 
-          {/* ── Accordion groups ── */}
-          <SortableContext items={groups.map(g => g.id)} strategy={verticalListSortingStrategy}>
-            {groups.map((group, gi) => (
+          {/* ── Accordion groups (filtered when searching) ── */}
+          {searchTerm && filteredGroups.length === 0 && (
+            <div className="sb-search-empty">
+              <Search size={20} style={{ opacity: 0.3 }} />
+              <span>No results for "{searchTerm}"</span>
+            </div>
+          )}
+          <SortableContext items={filteredGroups.map(g => g.id)} strategy={verticalListSortingStrategy}>
+            {filteredGroups.map((group, gi) => (
               <React.Fragment key={group.id}>
                 <SortableSidebarGroup 
                   group={group}
-                  isOpen={openGroups.has(group.id) || isEditing}
+                  isOpen={effectiveOpenGroups.has(group.id) || isEditing}
                   expanded={expanded}
                   toggleGroup={toggleGroup}
                   activeId={activeId}
@@ -391,7 +463,7 @@ export default function AppSidebar({
                   isFavoritesGroup={group.id === 'favorites'}
                   favoritesSet={favoritesSet}
                 />
-                {gi < groups.length - 1 && <div className="sb-divider" />}
+                {gi < filteredGroups.length - 1 && <div className="sb-divider" />}
               </React.Fragment>
             ))}
           </SortableContext>
@@ -418,6 +490,26 @@ export default function AppSidebar({
             </button>
             {footer.onReset && (expanded || isEditing) && (
               <InlineConfirmReset onReset={footer.onReset} />
+            )}
+
+            {/* ── Phase 3: ⌘K Command Palette shortcut button ── */}
+            {!isEditing && (
+              <button
+                className="sb-item sb-cmd-btn"
+                onClick={() => window.dispatchEvent(new CustomEvent('sidebar:open-palette'))}
+                data-tooltip={!expanded ? '⌘K' : undefined}
+                title="Open Command Palette (⌘K)"
+                style={{
+                  flex: expanded ? '0 0 auto' : 1,
+                  width: 'auto',
+                  color: 'var(--sb-muted)',
+                  justifyContent: 'center',
+                  gap: '4px',
+                }}
+              >
+                <span className="sb-item-icon"><Command size={14} /></span>
+                {expanded && <span className="sb-item-label" style={{ fontSize: '11px' }}>⌘K</span>}
+              </button>
             )}
           </div>
         )}

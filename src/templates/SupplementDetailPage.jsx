@@ -1262,12 +1262,11 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
         }
         @media (max-width: 768px) {
           .pd-floating-bar {
-            bottom: 0;
-            left: 0;
-            right: 0;
-            transform: none;
-            border-radius: 0;
-            padding: 1rem 1.5rem calc(1rem + env(safe-area-inset-bottom));
+            bottom: calc(56px + env(safe-area-inset-bottom));
+            width: 100%;
+            border-radius: 20px 20px 0 0;
+            padding: 1.25rem 1.5rem;
+            flex-direction: column;
             justify-content: space-between;
           }
           .sdp-desktop-only-btn { display: none !important; }

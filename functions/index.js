@@ -137,3 +137,23 @@ exports.trendingTopicsBlog = require('./src/cron/trendingTopicsBlog').trendingTo
 
 // -- LinkedIn Token Refresh Cron --
 exports.linkedinTokenRefresh = require('./src/cron/linkedinTokenRefresh').linkedinTokenRefresh;
+
+// ── Purchasing (P2P) Placeholder Functions ───────────────────────────────────
+const functions = require('firebase-functions');
+exports.syncPurchaseOrderToZoho = functions.https.onCall(async (data, context) => {
+  console.log("Placeholder: Sync PO to Zoho", data);
+  return { success: true, message: "Placeholder only" };
+});
+exports.syncSupplierBillToZoho = functions.https.onCall(async (data, context) => {
+  console.log("Placeholder: Sync Bill to Zoho", data);
+  return { success: true, message: "Placeholder only" };
+});
+
+// ── AI Operations ───────────────────────────────────────────────────────────
+const aiOperations = require("./src/http/aiOperations");
+exports.threeWayMatching = aiOperations.threeWayMatching;
+exports.analyzeRFQEndpoint = aiOperations.analyzeRFQEndpoint;
+
+// ── Webhooks ────────────────────────────────────────────────────────────────
+const zohoWebhooks = require("./src/http/zohoWebhooks");
+exports.zohoWebhooks = zohoWebhooks.zohoWebhooks;

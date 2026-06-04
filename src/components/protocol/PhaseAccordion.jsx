@@ -1,21 +1,11 @@
- 
 import React, { useState, memo } from 'react';
-import { 
-  ChevronDown, 
-  ChevronUp, 
-  Calendar, 
-  Clock, 
-  FlaskConical, 
-  Activity, 
-  BookOpen 
-} from 'lucide-react';
-import { safeStr } from '../../utils/textUtils';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar, Clock, ChevronDown, ChevronUp, FlaskConical, Activity } from 'lucide-react';
 
-const PhaseAccordion = memo(function PhaseAccordion({ phase, index, weekRange, clinicalGoal }) {
-
+export const PhaseAccordion = memo(function PhaseAccordion({ phase, index, weekRange, clinicalGoal }) {
   const [open, setOpen] = useState(index === 0);
   const [showDetails, setShowDetails] = useState(false);
-  const drugs = phase.drugs || phase.compounds || phase.medications || phase.drugs_used || [];
+  const drugs = phase.drugs || phase.compounds || phase.medications || [];
   const hasDetails = phase.monitoring || phase.notes;
   const phaseName = phase.name || phase.phase_name || `Phase ${index + 1}`;
   const goal = clinicalGoal || phase.objective || '';
@@ -60,7 +50,15 @@ const PhaseAccordion = memo(function PhaseAccordion({ phase, index, weekRange, c
         </div>
       </button>
 
+      <AnimatePresence initial={false}>
       {open && (
+        <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            style={{ overflow: 'hidden' }}
+        >
         <div className="proto-phase__body">
           {phase.objective && (
             <p className="proto-phase__objective">{phase.objective}</p>
@@ -84,7 +82,7 @@ const PhaseAccordion = memo(function PhaseAccordion({ phase, index, weekRange, c
                 {drugs.map((d, i) => (
                   <div key={i} className="proto-compound-table__row">
                     <span className="proto-compound-table__name">
-                      {safeStr(d.name || d.product_name || d.compound || d.product_slug)}
+                      {d.name || d.product_name || d.compound || d.product_slug || '—'}
                     </span>
                     <span className="proto-compound-table__dose" style={{ fontFamily: "'JetBrains Mono', 'Courier New', monospace", fontSize: '0.8rem', fontWeight: 600 }}>
                       {d.weekly_dose_amount != null
@@ -93,15 +91,15 @@ const PhaseAccordion = memo(function PhaseAccordion({ phase, index, weekRange, c
                           ? `${d.dose_logic.starting_weekly_dose} ${d.dose_logic.dose_unit || ''}`
                           : d.dose_logic?.dose_per_administration != null
                             ? `${d.dose_logic.dose_per_administration} ${d.dose_logic.dose_unit || ''}`
-                            : safeStr(d.weekly_dose ?? d.dose)}
+                            : d.weekly_dose || d.dose || '—'}
                     </span>
                     <span className="proto-compound-table__freq">
                       {d.dose_logic?.administration_frequency
-                        ? safeStr(d.dose_logic.administration_frequency).replace(/_/g, ' ')
-                        : safeStr(d.frequency || d.frequency_of_use || d.administration_schedule)}
+                        ? d.dose_logic.administration_frequency.replace(/_/g, ' ')
+                        : (d.frequency || d.frequency_of_use || d.administration_schedule || '—')}
                     </span>
                     <span className="proto-compound-table__route">
-                      {safeStr(d.dose_logic?.route_of_administration || d.route || d.administration_route || d.route_of_administration)}
+                      {d.dose_logic?.route_of_administration || d.route || d.administration_route || d.route_of_administration || '—'}
                     </span>
                   </div>
                 ))}
@@ -109,39 +107,48 @@ const PhaseAccordion = memo(function PhaseAccordion({ phase, index, weekRange, c
             </div>
           )}
 
-          {/* PROGRESSIVE DISCLOSURE — Monitoring + Notes */}
           {hasDetails && (
-            <button
-              onClick={() => setShowDetails(v => !v)}
-              className="proto-phase__details-toggle"
-            >
-              {showDetails ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-              {showDetails ? 'Collapse Details' : 'View Clinical Details'}
-            </button>
-          )}
-
-          {showDetails && (
-            <div className="proto-phase__details-panel">
-              {phase.monitoring && (
-                <div className="proto-phase__detail-block">
-                  <div className="proto-phase__detail-label">
-                    <Activity size={11} /> Monitoring Protocol
-                  </div>
-                  <p className="proto-phase__monitoring-text">{safeStr(phase.monitoring)}</p>
+            <div className="proto-phase__footer">
+              <button
+                className="proto-phase__details-toggle"
+                onClick={() => setShowDetails((d) => !d)}
+              >
+                <Activity size={12} />
+                {showDetails ? 'Hide Monitoring Details' : 'Show Monitoring & Notes'}
+              </button>
+              
+              <AnimatePresence initial={false}>
+              {showDetails && (
+                <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    style={{ overflow: 'hidden' }}
+                >
+                <div className="proto-phase__details-content">
+                  {phase.monitoring && (
+                    <div className="proto-phase__block">
+                      <h4 className="proto-phase__block-title">Clinical Monitoring</h4>
+                      <div className="proto-phase__block-text" dangerouslySetInnerHTML={{ __html: phase.monitoring }} />
+                    </div>
+                  )}
+                  {phase.notes && (
+                    <div className="proto-phase__block">
+                      <h4 className="proto-phase__block-title">Phase Notes</h4>
+                      <div className="proto-phase__block-text" dangerouslySetInnerHTML={{ __html: phase.notes }} />
+                    </div>
+                  )}
                 </div>
+                </motion.div>
               )}
-              {phase.notes && (
-                <div className="proto-phase__detail-block">
-                  <div className="proto-phase__detail-label">
-                    <BookOpen size={11} /> Clinical Notes
-                  </div>
-                  <p className="proto-phase__notes">{safeStr(phase.notes)}</p>
-                </div>
-              )}
+              </AnimatePresence>
             </div>
           )}
         </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 });

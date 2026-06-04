@@ -187,6 +187,38 @@ export default function AdminRFQTab() {
     }
   };
 
+  const convertToPO = async (rfq) => {
+    if (!window.confirm('Convert this RFQ to a Purchase Order?')) return;
+    try {
+      const items = rfq.items.map(i => ({
+        itemName: i.itemName || i.productName || i.name,
+        quantity: i.quantity || 1,
+        unit: i.units || 'vial',
+        unitPrice: parseFloat(i.supplierUnitCost) || 0
+      }));
+      const totalAmount = items.reduce((s, i) => s + (i.quantity * i.unitPrice), 0);
+
+      const payload = {
+        supplierName: rfq.supplierName || 'Unknown Supplier',
+        poNumber: `PO-${Date.now().toString().slice(-6)}`,
+        status: 'open',
+        items,
+        totalAmount,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        linkedRfqId: rfq.id
+      };
+      
+      await addDoc(collection(db, 'purchaseOrders'), payload);
+      await updateDoc(doc(db, 'agency_rfqs', rfq.id), { status: 'PO_CREATED', poAttached: true });
+      alert('Purchase Order successfully created!');
+      loadRfqs();
+    } catch (e) {
+      console.error(e);
+      alert('Error creating Purchase Order');
+    }
+  };
+
   const generateSupplierMagicLink = async (id) => {
     const magicLink = `${window.location.origin}/supplier-quote/${id}?token=secure_${Date.now()}`;
     await navigator.clipboard.writeText(magicLink);
@@ -401,6 +433,14 @@ export default function AdminRFQTab() {
                 <Receipt size={14} /> Upload Invoice (AI Audit)
               </label>
             </div>
+          )}
+          {(!r.poAttached || r.status === 'APPROVED') && r.status !== 'PO_CREATED' && (
+            <button 
+              onClick={() => convertToPO(r)}
+              style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', border: '1px solid #2563eb', borderRadius: '4px', background: '#2563eb', color: 'white', cursor: 'pointer' }}
+            >
+              Convert to PO
+            </button>
           )}
           {r.status === 'DISCREPANCY_FLAGGED' && (
             <div style={{ display: 'flex', gap: '0.5rem' }}>

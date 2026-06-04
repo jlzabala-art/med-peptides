@@ -37,6 +37,34 @@ exports.zohoBooksWebhook = onRequest(
         }
       }
 
+      // Check if this is an Invoice Event
+      if (payload?.invoice) {
+        const invoice = payload.invoice;
+        const invoiceNumber = invoice.invoice_number;
+        const status = invoice.status; // e.g., "paid"
+        
+        console.log(`[Zoho Webhook] Invoice Event received: ${invoiceNumber} is ${status}`);
+        
+        if (invoiceNumber) {
+          const invQuery = await db.collection("b2b_invoices")
+            .where("documentNumber", "==", invoiceNumber)
+            .limit(1)
+            .get();
+            
+          if (!invQuery.empty) {
+            let newStatus = status;
+            if (status.toLowerCase() === 'paid') newStatus = 'Paid';
+            await invQuery.docs[0].ref.update({
+              status: newStatus,
+              updatedAt: FieldValue.serverTimestamp()
+            });
+            console.log(`[Zoho Webhook] Invoice ${invoiceNumber} updated to ${newStatus} in Firestore`);
+          }
+        }
+        
+        return res.status(200).json({ success: true, type: "invoice" });
+      }
+
       // Extract contact object (could be nested under contact or top-level)
       const contact = payload?.contact || payload?.contacts?.[0] || payload;
 

@@ -1,38 +1,48 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db, functions } from '../../firebase';
+import { collection, addDoc, query, orderBy, limit, doc, updateDoc, getDocs, serverTimestamp } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 import B2BDocumentsLayout from './B2BDocumentsLayout';
 import ZohoPaperPreview from './ZohoPaperPreview';
 import B2BOrderBuilderTable from './B2BOrderBuilderTable';
 import { useAuth } from '../../context/AuthContext';
-import { Save, Send, Trash, Edit, CheckCircle } from 'lucide-react';
+import { Plus, Search, FileText, CheckCircle, Edit, Send, X, Link, Save, Trash, Bot, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export default function QuotationsModule() {
   const { user } = useAuth();
-  const [documents, setDocuments] = useState([]);
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [aiLoading, setAiLoading] = useState(false);
 
   // Form State for new Quotation
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [items, setItems] = useState([]);
   const [notes, setNotes] = useState('');
+  const [isDropship, setIsDropship] = useState(false);
 
-  // 1. Subscribe to Quotations
+  const queryClient = useQueryClient();
+
+  // 1. Fetch Quotations with React Query
+  const { data: documents = [], isLoading: loading } = useQuery({
+    queryKey: ['b2b_quotations'],
+    queryFn: async () => {
+      const q = query(collection(db, 'b2b_quotations'), orderBy('createdAt', 'desc'), limit(50));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    },
+    staleTime: 60000,
+    refetchInterval: 60000, // Poll every minute
+  });
+
+  // Auto-select first document when loaded if none is selected
   useEffect(() => {
-    const q = query(collection(db, 'b2b_quotations'), orderBy('createdAt', 'desc'), limit(50));
-    const unsub = onSnapshot(q, (snap) => {
-      const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      setDocuments(docs);
-      if (!selectedDoc && docs.length > 0 && !isCreatingNew) {
-        setSelectedDoc(docs[0]);
-      }
-      setLoading(false);
-    });
-    return unsub;
-  }, [isCreatingNew, selectedDoc]);
+    if (!selectedDoc && documents.length > 0 && !isCreatingNew) {
+      setSelectedDoc(documents[0]);
+    }
+  }, [documents, selectedDoc, isCreatingNew]);
 
   const handleCreateNew = () => {
     setIsCreatingNew(true);
@@ -41,10 +51,11 @@ export default function QuotationsModule() {
     setCustomerEmail('');
     setItems([]);
     setNotes('');
+    setIsDropship(false);
   };
 
   const handleSaveDraft = async () => {
-    if (!customerName || items.length === 0) return alert("Falta cliente o artículos");
+    if (!customerName || items.length === 0) return toast.error("Falta cliente o artículos");
     
     const subTotal = items.reduce((acc, item) => acc + ((parseFloat(item.rate) || 0) * (parseInt(item.quantity) || 0)), 0);
     const taxTotal = subTotal * 0.21; // 21% IVA por defecto (ajustable)
@@ -59,6 +70,7 @@ export default function QuotationsModule() {
       taxTotal,
       grandTotal,
       notes,
+      isDropship,
       status: 'Draft',
       createdAt: serverTimestamp(),
       createdBy: user?.uid
@@ -66,20 +78,67 @@ export default function QuotationsModule() {
 
     try {
       await addDoc(collection(db, 'b2b_quotations'), payload);
+      toast.success("Presupuesto guardado exitosamente");
       setIsCreatingNew(false);
+      queryClient.invalidateQueries({ queryKey: ['b2b_quotations'] });
     } catch (e) {
       console.error(e);
-      alert("Error al guardar presupuesto");
+      toast.error("Error al guardar presupuesto");
     }
+  };
+
+  const handleAnalyzeRFQ = async () => {
+    const text = window.prompt("Pega aquí el contenido del email o texto del RFQ:");
+    if (!text) return;
+    
+    setAiLoading(true);
+    try {
+      const url = window.location.hostname === 'localhost'
+        ? 'http://127.0.0.1:5001/med-peptides-app/us-central1/analyzeRFQEndpoint'
+        : 'https://us-central1-med-peptides-app.cloudfunctions.net/analyzeRFQEndpoint';
+        
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rfqText: text })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'AI Failed');
+      
+      const r = data.result;
+      setCustomerName(r.customerName || '');
+      setCustomerEmail(r.customerEmail || '');
+      if (r.items && Array.isArray(r.items)) {
+        setItems(r.items.map(i => ({ name: i.name, quantity: i.quantity, rate: 0 })));
+      }
+      setNotes(r.notes || '');
+      setIsCreatingNew(true);
+      setSelectedDoc(null);
+      toast.success("RFQ Analizado con éxito. Por favor revisa y ajusta los precios.");
+    } catch (e) {
+      console.error(e);
+      toast.error("Error analizando RFQ: " + e.message);
+    }
+    setAiLoading(false);
+  };
+
+  const handleCopyLink = () => {
+    if (!selectedDoc) return;
+    const url = `${window.location.origin}/b2b-quote/${selectedDoc.id}`;
+    navigator.clipboard.writeText(url);
+    toast.success('Enlace copiado al portapapeles');
   };
 
   const markAsAccepted = async () => {
     if (!selectedDoc) return;
     try {
       await updateDoc(doc(db, 'b2b_quotations', selectedDoc.id), { status: 'Accepted' });
-      alert("Presupuesto marcado como Aceptado");
+      toast.success("Presupuesto marcado como Aceptado");
+      queryClient.invalidateQueries({ queryKey: ['b2b_quotations'] });
     } catch (e) {
       console.error(e);
+      toast.error("Error al actualizar estado");
     }
   };
 
@@ -95,6 +154,7 @@ export default function QuotationsModule() {
         taxTotal: selectedDoc.taxTotal,
         grandTotal: selectedDoc.grandTotal,
         notes: selectedDoc.notes,
+        isDropship: selectedDoc.isDropship || false,
         status: 'Confirmed',
         linkedDocumentId: selectedDoc.id,
         linkedDocumentNumber: selectedDoc.documentNumber,
@@ -102,10 +162,11 @@ export default function QuotationsModule() {
         createdBy: user?.uid
       };
       await addDoc(collection(db, 'b2b_sales_orders'), payload);
-      alert("Sales Order generado con éxito.");
+      toast.success("Sales Order generado con éxito.");
+      queryClient.invalidateQueries({ queryKey: ['b2b_quotations'] });
     } catch (e) {
       console.error(e);
-      alert("Error al generar Sales Order");
+      toast.error("Error al generar Sales Order");
     }
   };
 
@@ -120,7 +181,10 @@ export default function QuotationsModule() {
     return (
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
-          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}>{doc.customerName}</span>
+          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}>
+            {doc.customerName}
+            {doc.isDropship && <span style={{ marginLeft: '6px', fontSize: '0.65rem', padding: '0.1rem 0.3rem', background: '#fef08a', color: '#854d0e', borderRadius: '4px' }}>DROPSHIP</span>}
+          </span>
           <span style={{ fontSize: '0.85rem', fontWeight: 800 }}>€{(doc.grandTotal || 0).toFixed(2)}</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -148,6 +212,9 @@ export default function QuotationsModule() {
             <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>Nuevo Presupuesto</h2>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button onClick={() => setIsCreatingNew(false)} style={{ padding: '0.5rem 1rem', background: '#f1f5f9', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cancelar</button>
+              <button onClick={handleAnalyzeRFQ} disabled={aiLoading} style={{ padding: '0.5rem 1rem', background: '#e0e7ff', color: '#4f46e5', border: '1px solid #6366f1', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                {aiLoading ? <Loader2 size={16} className="spin" /> : <Bot size={16} />} Analizar RFQ (IA)
+              </button>
               <button onClick={handleSaveDraft} style={{ padding: '0.5rem 1rem', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <Save size={16} /> Guardar Borrador
               </button>
@@ -162,6 +229,17 @@ export default function QuotationsModule() {
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '0.3rem' }}>Email (Opcional)</label>
               <input value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)' }} placeholder="Email para enviar" />
+            </div>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', paddingTop: '1.2rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, color: '#0f172a' }}>
+                <input 
+                  type="checkbox" 
+                  checked={isDropship} 
+                  onChange={e => setIsDropship(e.target.checked)} 
+                  style={{ width: '16px', height: '16px' }}
+                />
+                Pedido Dropshipping (Envío directo de Proveedor a Cliente)
+              </label>
             </div>
           </div>
 
@@ -190,6 +268,9 @@ export default function QuotationsModule() {
             <button style={{ padding: '0.4rem 0.8rem', background: '#f8fafc', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
               <Send size={14} /> Enviar por Email
             </button>
+            <button onClick={handleCopyLink} style={{ padding: '0.4rem 0.8rem', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 600 }}>
+              <Link size={14} /> Magic Link
+            </button>
             {docData.status !== 'Accepted' && (
               <button onClick={markAsAccepted} style={{ padding: '0.4rem 0.8rem', background: '#10b981', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
                 <CheckCircle size={14} /> Marcar como Aceptado
@@ -216,6 +297,7 @@ export default function QuotationsModule() {
   };
 
   return (
+    <>
     <B2BDocumentsLayout
       title="Quotations"
       documents={documents}
@@ -226,5 +308,10 @@ export default function QuotationsModule() {
       renderSidebarItem={renderSidebarItem}
       loading={loading}
     />
+    <style>{`
+      .spin { animation: spin 1s linear infinite; }
+      @keyframes spin { 100% { transform: rotate(360deg); } }
+    `}</style>
+    </>
   );
 }

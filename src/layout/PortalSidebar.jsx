@@ -61,7 +61,7 @@ function SidebarNavItem({ tab, isActive, onPin, isPinned, showPin }) {
   );
 }
 
-export default function PortalSidebar() {
+export default function PortalSidebar({ isOpen, onClose }) {
   const { activeRole, user } = useAuth();
   const uid = user?.uid || 'anon';
   const tabs = getPortalTabs(activeRole);
@@ -85,7 +85,21 @@ export default function PortalSidebar() {
   };
 
   return (
-    <aside className="portal-sidebar">
+    <>
+      {/* Mobile overlay */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="sidebar-overlay"
+            onClick={onClose}
+          />
+        )}
+      </AnimatePresence>
+
+      <aside className={`portal-sidebar ${isOpen ? 'open' : ''}`}>
       {/* ── Brand header ─────────────────────────────────── */}
       <div className="sidebar-header" style={{ justifyContent: 'center' }}>
         <AtlasHealthLogo size={42} style={{ flexShrink: 0 }} />
@@ -177,8 +191,12 @@ export default function PortalSidebar() {
           box-shadow: 2px 0 20px rgba(0,0,0,0.04);
           display: flex;
           flex-direction: column;
-          z-index: 1000;
-          transition: transform 0.3s ease;
+          z-index: 10001; /* Higher than header */
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-overlay {
+          display: none;
         }
 
         .sidebar-header {
@@ -334,8 +352,18 @@ export default function PortalSidebar() {
 
         @media (max-width: 1024px) {
           .portal-sidebar { transform: translateX(-100%); }
+          .portal-sidebar.open { transform: translateX(0); }
+          .sidebar-overlay {
+            display: block;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 30, 60, 0.4);
+            backdrop-filter: blur(2px);
+            z-index: 10000;
+          }
         }
       `}</style>
     </aside>
+    </>
   );
 }

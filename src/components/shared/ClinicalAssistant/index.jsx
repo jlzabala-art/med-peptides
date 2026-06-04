@@ -241,9 +241,26 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
     };
     window.addEventListener('ai-shortcut-prompt', handleShortcutPrompt);
 
+    const handleAtlasPrefillQuery = (e) => {
+      const query = e.detail?.query;
+      if (query && typeof setInput === 'function') {
+        setInput(query);
+        setIsPulsing(true);
+        setIsOpen(true);
+        setTimeout(() => {
+          const inputEl = document.querySelector('.clinical-assistant-container input[type="text"], .clinical-assistant-container textarea');
+          if (inputEl) {
+            inputEl.focus();
+          }
+        }, 400);
+      }
+    };
+    window.addEventListener('ATLAS_PREFILL_QUERY', handleAtlasPrefillQuery);
+
     return () => {
       window.removeEventListener('OPEN_ATLAS_CLINICAL_MODE', handleContextEvent);
       window.removeEventListener('ai-shortcut-prompt', handleShortcutPrompt);
+      window.removeEventListener('ATLAS_PREFILL_QUERY', handleAtlasPrefillQuery);
     };
   }, [setIsOpen, setMessages, setInput]);
 

@@ -1382,13 +1382,52 @@
 
 /* ── Responsive: compound table on mobile ───────────── */
 @media (max-width: 520px) {
-  .proto-compound-table__head,
-  .proto-compound-table__row {
-    grid-template-columns: 1fr 1fr;
+  .proto-compound-table {
+    border: none;
+    background: transparent;
   }
-  .proto-compound-table__freq,
+  .proto-compound-table__head {
+    display: none; /* Hide headers on mobile */
+  }
+  .proto-compound-table__row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+  }
+  .proto-compound-table__row:hover {
+    background: #f8fafc;
+  }
+  .proto-compound-table__name {
+    font-size: 0.95rem;
+    color: var(--primary);
+    margin-bottom: 0.25rem;
+    white-space: normal;
+  }
+  .proto-compound-table__dose::before {
+    content: 'Dose: ';
+    color: #64748b;
+    font-weight: 500;
+  }
+  .proto-compound-table__freq {
+    display: block;
+  }
+  .proto-compound-table__freq::before {
+    content: 'Freq: ';
+    color: #64748b;
+    font-weight: 500;
+  }
   .proto-compound-table__route {
-    display: none;
+    display: block;
+  }
+  .proto-compound-table__route::before {
+    content: 'Route: ';
+    color: #64748b;
+    font-weight: 500;
   }
 }
 

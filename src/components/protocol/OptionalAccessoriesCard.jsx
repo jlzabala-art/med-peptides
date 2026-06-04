@@ -1,6 +1,6 @@
-/* eslint-disable no-unused-vars */
-import React, { memo, useState } from 'react';
-import { Droplets, Syringe, Package, ChevronUp, ChevronDown } from 'lucide-react';
+import React, { useState, memo } from 'react';
+import { ChevronDown, Droplets, Package, Syringe } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const OPTIONAL_ACCESSORIES = [
   { id: 'bac_water_10ml',  label: 'Bacteriostatic Water 10 mL', detail: '1 vial per compound reconstituted', Icon: Droplets,  color: '#0369a1' },
@@ -8,9 +8,8 @@ const OPTIONAL_ACCESSORIES = [
   { id: 'alcohol_pads',    label: 'Alcohol Prep Pads (x50)',    detail: '70% isopropyl, sterile',            Icon: Package,   color: '#047857' },
 ];
 
-const OptionalAccessoriesCard = memo(function OptionalAccessoriesCard() {
+export const OptionalAccessoriesCard = memo(function OptionalAccessoriesCard() {
   const [open, setOpen] = useState(false);
-  
   return (
     <div className="proto-sidebar-card" style={{ padding: 0, overflow: 'hidden' }}>
       {/* Header / toggle */}
@@ -22,50 +21,36 @@ const OptionalAccessoriesCard = memo(function OptionalAccessoriesCard() {
           padding: '0.85rem 1rem',
           color: 'var(--color-text-primary)',
         }}
-        aria-expanded={open}
       >
-        <span style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 700, fontSize: '0.82rem' }}>
-          <Syringe size={15} style={{ color: '#7c3aed' }} />
-          Optional Accessories
-        </span>
-        <span style={{
-          display: 'flex', alignItems: 'center', gap: '0.3rem',
-          fontSize: '0.68rem', fontWeight: 600, color: 'var(--color-text-tertiary)',
-        }}>
-          {open ? 'Hide' : 'Show'} {open ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-        </span>
+        <span style={{ fontSize: '0.82rem', fontWeight: 700 }}>Recommended Accessories</span>
+        <ChevronDown size={14} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
       </button>
 
-      {/* Collapsible body */}
+      <AnimatePresence initial={false}>
       {open && (
-        <div style={{ borderTop: '1px solid #f1f5f9', padding: '0.6rem 1rem 0.9rem' }}>
-          <p style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', marginBottom: '0.7rem', lineHeight: 1.5 }}>
-            Recommended consumables for subcutaneous administration and reconstitution.
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-            {OPTIONAL_ACCESSORIES.map(({ id, label, detail, Icon, color }) => (
-              <div key={id} style={{
-                display: 'flex', alignItems: 'flex-start', gap: '0.65rem',
-                borderRadius: 8, background: `${color}08`,
-                border: `1px solid ${color}22`,
-                padding: '0.55rem 0.7rem',
-              }}>
-                <Icon size={15} style={{ color, flexShrink: 0, marginTop: '0.1rem' }} />
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.78rem', color: '#0f172a' }}>{label}</div>
-                  <div style={{ fontSize: '0.67rem', color: 'var(--color-text-secondary)', marginTop: '0.1rem' }}>{detail}</div>
-                </div>
+        <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            style={{ overflow: 'hidden' }}
+        >
+        <div style={{ padding: '0 1rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+          {OPTIONAL_ACCESSORIES.map(acc => (
+            <div key={acc.id} style={{ display: 'flex', gap: '0.65rem', alignItems: 'flex-start', padding: '0.65rem', background: 'var(--color-bg-app)', borderRadius: 8, border: '1px solid rgba(0,0,0,0.06)' }}>
+              <div style={{ width: 26, height: 26, borderRadius: 6, background: `${acc.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <acc.Icon size={13} color={acc.color} />
               </div>
-            ))}
-          </div>
-          <p style={{
-            fontSize: '0.63rem', color: 'var(--color-text-tertiary)', marginTop: '0.75rem', lineHeight: 1.4,
-            borderTop: '1px solid #f1f5f9', paddingTop: '0.6rem',
-          }}>
-            These items are included in the full bundle calculator above.
-          </p>
+              <div style={{ flex: 1, marginTop: '-2px' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '0.15rem' }}>{acc.label}</div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-secondary)', lineHeight: 1.3 }}>{acc.detail}</div>
+              </div>
+            </div>
+          ))}
         </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 });

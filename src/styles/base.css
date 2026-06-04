@@ -406,10 +406,27 @@ button:focus-visible, a:focus-visible {
 }
 
 /* Responsive Table */
-/* Responsive Table helper */
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
 .responsive-table {
   width: 100%;
+  min-width: 600px; /* Ensure table forces scroll on tiny screens */
 }
+
+/* Global table scroll behavior for mobile without wrappers */
+@media (max-width: 768px) {
+  table, .gcp-table {
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    white-space: nowrap !important;
+    width: 100% !important;
+  }
+}
+
 /* Footer Enhancements */
 .footer-grid {
   display: grid;

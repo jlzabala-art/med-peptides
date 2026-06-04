@@ -35,7 +35,9 @@ const CatalogEmailTracker = lazy(() => import('../templates/CatalogEmailTracker'
 const ClinicRoutes = lazy(() => import('./ClinicRoutes'));
 const PharmacyRoutes = lazy(() => import('./PharmacyRoutes'));
 const PublicSupplierQuote = lazy(() => import('../components/public/PublicSupplierQuote'));
+const B2BSupplierPOView = lazy(() => import('../components/b2b/B2BSupplierPOView'));
 const PublicClientQuote = lazy(() => import('../components/public/PublicClientQuote'));
+const B2BClientQuoteView = lazy(() => import('../components/b2b/B2BClientQuoteView'));
 const PatientRoutes = lazy(() => import('./PatientRoutes'));
 const HormonePelletsPage = lazy(() => import('../pages/pellets.jsx'));
 const PatientDetailAdmin = lazy(() => import('../templates/PatientDetailAdmin'));
@@ -86,13 +88,14 @@ export default function AppRouter(props) {
 
 
   return (
-    <PageTransition locationKey={location.pathname}>
-      <Suspense fallback={<ClinicalLoader />}>
-        <Routes>
+    <Suspense fallback={<ClinicalLoader />}>
+      <Routes>
           <Route path="/login" element={<AuthPage onBack={() => window.history.back()} />} />
           <Route path="/session-ended" element={<ExitProfessionalMode onBack={() => navigate('/')} onLogin={() => navigate('/login')} />} />
           <Route path="/supplier-quote/:id" element={<PublicSupplierQuote />} />
+          <Route path="/b2b-po/:poId" element={<B2BSupplierPOView />} />
           <Route path="/client-quote/:id" element={<PublicClientQuote />} />
+          <Route path="/b2b-quote/:quoteId" element={<B2BClientQuoteView />} />
 
           <Route path="/*" element={
             <ShopLayout 
@@ -203,8 +206,7 @@ export default function AppRouter(props) {
           <Route path="/supplier-dashboard/*" element={activeRole === 'supplier' || activeRole === 'admin' ? <SupplierRoutes /> : <Navigate to="/paciente" replace />} />
           
 
-        </Routes>
-      </Suspense>
-    </PageTransition>
+      </Routes>
+    </Suspense>
   );
 }

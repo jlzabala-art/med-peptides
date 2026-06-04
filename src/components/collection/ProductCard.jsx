@@ -15,6 +15,7 @@ export default function ProductCard({
   onCompareClick,    // compare action
   primaryLabel   = 'ClinicAI',
   secondaryLabel = 'Details',
+  additionalCapabilities = null,
 }) {
   const isList = viewMode === 'list';
 
@@ -93,11 +94,23 @@ export default function ProductCard({
       <div className="col-card-body">
         <div className="col-card-header">
           <h3 className="col-card-title">{title}</h3>
-          {badgeText && (
-            <span className={`col-card-badge ${badgeType}`}>
-              {badgeText}
-            </span>
-          )}
+          <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
+            {badgeText && (
+              <span className={`col-card-badge ${badgeType}`}>
+                {badgeText}
+              </span>
+            )}
+            {additionalCapabilities?.aiInterpretationService && (
+              <span className="col-card-badge ai" style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)', color: 'white', border: 'none' }}>
+                <Bot size={10} style={{ marginRight: '2px', display: 'inline' }} /> AI Powered
+              </span>
+            )}
+            {additionalCapabilities?.requiresPrescription && (
+              <span className="col-card-badge rx" style={{ background: '#EF4444', color: 'white', border: 'none' }}>
+                Rx Required
+              </span>
+            )}
+          </div>
         </div>
         
         {subtitle && (

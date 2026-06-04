@@ -33,20 +33,32 @@
   display: flex;
   flex-direction: column;
   background: var(--sb-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid var(--sb-group-divider);
   height: 100%;
   width: var(--sb-w-full);
   min-width: var(--sb-w-full);
   position: sticky;
   top: 0;
-  overflow: hidden;
+  /* NOTE: do NOT set overflow:hidden here — it clips position:fixed tooltips */
+  overflow: visible;
   box-shadow: var(--sb-shadow);
   transition: width var(--sb-duration) var(--sb-easing),
               min-width var(--sb-duration) var(--sb-easing);
   z-index: 100;
   flex-shrink: 0;
+  /* backdrop-filter creates a stacking context, so apply only to an inner pseudo */
+}
+
+/* Apply blur only to a pseudo-element so the stacking context stays contained */
+.app-sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--sb-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .app-sidebar.collapsed {
@@ -123,7 +135,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: visible;  /* allow tooltips to escape horizontally */
   padding: 6px 0 12px;
   scrollbar-width: thin;
   scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
@@ -208,7 +220,8 @@
   font-size: 13px;
   min-width: 18px;
   flex-shrink: 0;
-  opacity: 0.7;
+  opacity: 1; /* increased contrast */
+  color: var(--sb-text);
 }
 
 .sb-group-label {
@@ -342,7 +355,8 @@
 
 /* ── Collapsed mode tooltips ─────────────────────────────────────────────────── */
 .sb-item[data-tooltip]:hover::after,
-.sb-group-header[data-tooltip]:hover::after {
+.sb-pinned-section .sb-item[data-tooltip]:hover::after,
+.sb-group:not(:hover) .sb-group-header[data-tooltip]:hover::after {
   content: attr(data-tooltip);
   position: fixed;
   left: calc(var(--sb-w-mini, 56px) + 8px);
@@ -360,8 +374,15 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   letter-spacing: 0.01em;
 }
+/* Disable tooltip for items inside the flyout menu */
+.app-sidebar.collapsed .sb-group-items .sb-item::after,
+.app-sidebar.collapsed .sb-group-items .sb-item::before {
+  display: none !important;
+}
+
 .sb-item[data-tooltip]:hover::before,
-.sb-group-header[data-tooltip]:hover::before {
+.sb-pinned-section .sb-item[data-tooltip]:hover::before,
+.sb-group:not(:hover) .sb-group-header[data-tooltip]:hover::before {
   content: '';
   position: fixed;
   left: calc(var(--sb-w-mini, 56px) + 3px);
@@ -504,3 +525,133 @@
 
 /* ── Edit / drag mode ────────────────────────────────────────────────────────── */
 /* Managed via inline styles on draggable items so footer buttons remain clickable */
+
+/* ── Phase 1: Sidebar Search ─────────────────────────────────────────────────── */
+.sb-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 8px 6px;
+  padding: 6px 10px;
+  background: var(--sb-hover-bg);
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: border-color 180ms, background 180ms;
+  position: relative;
+}
+.sb-search-wrap:focus-within {
+  border-color: rgba(26, 115, 232, 0.35);
+  background: rgba(26, 115, 232, 0.04);
+}
+
+.sb-search-icon {
+  color: var(--sb-muted);
+  flex-shrink: 0;
+  transition: color 180ms;
+}
+.sb-search-wrap:focus-within .sb-search-icon {
+  color: var(--sb-active-color);
+}
+
+.sb-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 12.5px;
+  color: var(--sb-text);
+  min-width: 0;
+  line-height: 1;
+}
+.sb-search-input::placeholder {
+  color: var(--sb-muted);
+  font-weight: 400;
+}
+
+.sb-search-clear {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  color: var(--sb-muted);
+  font-size: 14px;
+  line-height: 1;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: background 150ms, color 150ms;
+}
+.sb-search-clear:hover {
+  background: rgba(0,0,0,0.06);
+  color: var(--sb-text);
+}
+
+.sb-search-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 2rem 1rem;
+  color: var(--sb-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* ── Phase 3: ⌘K footer button ───────────────────────────────────────────────── */
+.sb-cmd-btn {
+  border-radius: var(--sb-item-radius);
+  opacity: 0.75;
+  transition: opacity 150ms, background 150ms;
+}
+.sb-cmd-btn:hover {
+  opacity: 1;
+  background: var(--sb-hover-bg);
+}
+/* ── Flyout Menu for Collapsed Sidebar ───────────────────────────────────── */
+.app-sidebar.collapsed .sb-group-items {
+  display: none !important;
+}
+
+.app-sidebar.collapsed .sb-group:hover .sb-group-items {
+  display: block !important;
+  position: fixed;
+  left: var(--sb-w-mini, 56px); /* Touch sidebar exactly */
+  /* top is inherited from static position */
+  width: 240px;
+  background: var(--sb-bg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--sb-group-divider);
+  border-left: none; /* Combine visually */
+  border-radius: 0 var(--sb-item-radius) var(--sb-item-radius) 0;
+  padding: 8px;
+  z-index: 100000;
+  max-height: calc(100vh - 100px) !important;
+  overflow-y: auto !important;
+  /* Make sure labels are visible in the flyout */
+}
+
+/* Flyout header */
+.sb-flyout-header {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--sb-active-color, #0ea5e9);
+  padding: 4px 8px 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--sb-group-divider);
+}
+
+.app-sidebar.collapsed .sb-group:hover .sb-group-items .sb-item-label {
+  opacity: 1 !important;
+  max-width: none !important;
+}
+
+/* Bridge the hover gap to prevent flyout from closing */
+.app-sidebar.collapsed .sb-group-items::before {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 0;
+  width: 24px;
+  height: 100%;
+}

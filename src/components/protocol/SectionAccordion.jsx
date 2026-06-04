@@ -1,19 +1,10 @@
-/* eslint-disable no-unused-vars */
 import React, { useState, useCallback } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-export function SectionAccordion({ id, title, icon: Icon, defaultOpen = false, children, accentColor = 'var(--color-primary)' }) {
-  // Always start closed on page load — intentionally ignore any stored state
+export function SectionAccordion({ title, icon: Icon, defaultOpen = false, children, accentColor = 'var(--color-primary)' }) {
   const [open, setOpen] = useState(defaultOpen);
-  const [rendered, setRendered] = useState(defaultOpen); // lazy: only render once opened
-
-  const toggle = useCallback(() => {
-    setOpen(prev => {
-      const next = !prev;
-      if (next) setRendered(true); // ensure content is rendered when opening
-      return next;
-    });
-  }, []);
+  const toggle = useCallback(() => setOpen(prev => !prev), []);
 
   return (
     <div
@@ -51,7 +42,7 @@ export function SectionAccordion({ id, title, icon: Icon, defaultOpen = false, c
           background: `${accentColor}12`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          <Icon size={16} color={accentColor} strokeWidth={2.2} />
+          {Icon && <Icon size={16} color={accentColor} strokeWidth={2.2} />}
         </span>
         <span style={{
           flex: 1,
@@ -76,20 +67,24 @@ export function SectionAccordion({ id, title, icon: Icon, defaultOpen = false, c
         </span>
       </button>
 
-      {/* Body — lazy-rendered */}
-      {(open || rendered) && (
-        <div
-          style={{
-            padding: open ? '1.35rem' : '0 1.35rem',
-            maxHeight: open ? '9999px' : 0,
-            overflow: 'hidden',
-            opacity: open ? 1 : 0,
-            transition: 'opacity 0.2s ease, padding 0.2s ease',
-          }}
-        >
-          {children}
-        </div>
-      )}
+      {/* Body — animated */}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div style={{ padding: '0 1.35rem 1.35rem' }}>
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
+export default SectionAccordion;

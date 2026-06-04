@@ -448,6 +448,7 @@ function Header(props) {
 
             {/* Search button — desktop AND mobile header */}
             <button 
+              className="desktop-only"
               onClick={onOpenSearch}
               aria-label="Open search"
               style={{
@@ -468,6 +469,7 @@ function Header(props) {
             </button>
 
             <button 
+              className="desktop-only"
               onClick={onOpenCart}
               style={{
                 position: 'relative',

@@ -9,12 +9,13 @@ import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import {
   ShieldCheck, ArrowLeft, Settings, Users, Database, Layers,
   PackageSearch, LayoutDashboard, Bot, Link2, BarChart3,
-  ChevronRight, ChevronDown, ClipboardList, Zap, Globe, Wrench,
+  ChevronRight, ChevronDown, ClipboardList, Zap, Globe, Wrench, ShoppingCart, Receipt,
   FlaskConical, Box, Tag, DollarSign, FileText, Eye, EyeOff, Mail,
   Activity, BookOpen, Cpu, LogOut, Menu, X, Building2, TrendingUp, Truck,
-  Building, Stethoscope, HeartPulse, UserPlus, Lock, Briefcase, LayoutTemplate, Network, ScrollText, MessageSquare, Calendar, UploadCloud, Settings2, CheckCircle, PieChart, CreditCard, ShieldAlert
+  Building, Stethoscope, HeartPulse, UserPlus, Lock, Briefcase, LayoutTemplate, Network, ScrollText, MessageSquare, Calendar, UploadCloud, Settings2, CheckCircle, PieChart, CreditCard, ShieldAlert, Pill, FilePlus, ArrowLeftRight, UserCog, BarChart4, Workflow, GraduationCap, PackageOpen, Package
 } from 'lucide-react';
 import PortalLayout from '../components/ui/PortalLayout';
+import PageTransition from '../components/PageTransition';
 
 // ── Lazy tab components ────────────────────────────────────────────────────────
 const AdminUsersTab        = React.lazy(() => import('../components/admin/AdminUsersTab'));
@@ -62,6 +63,11 @@ const CatalogList = React.lazy(() => import('../components/wholesaler/CatalogLis
 const CatalogCreatorFlow = React.lazy(() => import('../components/wholesaler/CatalogCreatorFlow'));
 const EmailCampaignBuilder = React.lazy(() => import('../components/wholesaler/EmailCampaignBuilder'));
 const AdminFinanceTab = React.lazy(() => import('../components/admin/AdminFinanceTab'));
+const AdminRFQTab = React.lazy(() => import('../components/admin/AdminRFQTab'));
+const AdminPOTab = React.lazy(() => import('../components/admin/AdminPOTab'));
+const AdminBillsTab = React.lazy(() => import('../components/admin/AdminBillsTab'));
+const AdminPaymentsMadeTab = React.lazy(() => import('../components/admin/AdminPaymentsMadeTab'));
+const AdminPaymentsReceivedTab = React.lazy(() => import('../components/admin/AdminPaymentsReceivedTab'));
 
 // icon alias (lucide doesn't export MailPlus2 — must be before NAV_GROUPS)
 function MailPlus2(props) { return <UserPlus {...props} />; }
@@ -107,10 +113,14 @@ function useUnreadMessagesCount() {
 const NAV_GROUPS = [
   {
     id: 'catalog-pim',
-    label: 'Catalog & PIM',
+    label: 'Items & Catalog',
+    icon: Box,
     items: [
-      { id: 'products',        label: 'Products',        icon: Box },
-      { id: 'stock',           label: 'Stock & Variants',icon: FlaskConical },
+      { id: 'products',        label: 'All Items',       icon: Box },
+      { id: 'products?category=Peptides', label: 'Finished Peptides', icon: Package },
+      { id: 'products?category=APIs',     label: 'APIs & Raw Mats',   icon: FlaskConical },
+      { id: 'products?category=Supplements', label: 'Supplements',    icon: Pill },
+      { id: 'stock',           label: 'Stock & Variants',icon: Activity },
       { id: 'prices',          label: 'Pricing Matrix',  icon: Tag },
       { id: 'costs',           label: 'Costs',           icon: DollarSign },
       { id: 'pricing-visibility', label: 'Pricing Visibility',  icon: EyeOff },
@@ -124,39 +134,55 @@ const NAV_GROUPS = [
   },
   {
     id: 'sales-operations',
-    label: 'Sales & B2B',
+    label: 'Sales (O2C)',
+    icon: TrendingUp,
     items: [
-      { id: 'quotations',       label: 'Quotations (B2B)',    icon: FileText },
-      { id: 'sales-orders',     label: 'Sales Orders (B2B)',  icon: Box },
-      { id: 'invoices',         label: 'Invoices (B2B)',      icon: DollarSign },
+      { id: 'quotations',       label: 'Quotations',          icon: FileText },
+      { id: 'sales-orders',     label: 'Sales Orders',        icon: Box },
+      { id: 'invoices',         label: 'Invoices',            icon: DollarSign },
+      { id: 'payments-received',label: 'Payments Received',   icon: DollarSign },
       { id: 'orders',           label: 'B2C Orders',          icon: PackageSearch },
       { id: 'bulk-orders',      label: 'Bulk Orders',         icon: Box },
-      { id: 'wholesellers',     label: 'Wholesellers',        icon: Building2 },
       { id: 'agency-deals',     label: 'Agency Deals',        icon: Briefcase },
-      { id: 'account-managers', label: 'Account Managers',    icon: ShieldCheck },
-      { id: 'territory-rules',  label: 'Territory Rules',     icon: ShieldCheck },
       { id: 'logistics',        label: 'Logistics Tracker',   icon: Truck },
       { id: 'shipping',         label: 'Shipping Network',    icon: Globe },
     ],
   },
   {
+    id: 'purchasing-operations',
+    label: 'Purchases (P2P)',
+    icon: ShoppingCart,
+    items: [
+      { id: 'wholesellers',      label: 'Suppliers/Wholesalers', icon: Building2 },
+      { id: 'purchase-rfqs',     label: 'Requests for Quotation',icon: FileText },
+      { id: 'purchase-orders',   label: 'Purchase Orders',       icon: ShoppingCart },
+      { id: 'purchase-bills',    label: 'Supplier Bills',        icon: Receipt },
+      { id: 'payments-made',     label: 'Payments Made',         icon: DollarSign },
+    ],
+  },
+  {
     id: 'crm-users',
     label: 'CRM & Users',
+    icon: Users,
     items: [
-      { id: 'clinics',          label: 'Clinics',              icon: Building },
-      { id: 'geography-areas',  label: 'Geography Areas',     icon: Globe },
       { id: 'leads',            label: 'Leads',               icon: Users },
-      { id: 'doctors',          label: 'Doctors',              icon: Stethoscope },
-      { id: 'patients',         label: 'Patients',             icon: HeartPulse },
+      { id: 'clinics',          label: 'Clinics',             icon: Building },
+      { id: 'doctors',          label: 'Doctors',             icon: Stethoscope },
+      { id: 'patients',         label: 'Patients',            icon: HeartPulse },
+      { id: 'account-managers', label: 'Account Managers',    icon: ShieldCheck },
+      { id: 'geography-areas',  label: 'Geography Areas',     icon: Globe },
+      { id: 'territory-rules',  label: 'Territory Rules',     icon: ShieldCheck },
       { id: 'access-levels',    label: 'Access Levels',       icon: Lock },
-      { id: 'invitations',      label: 'Invitations',          icon: UserPlus },
+      { id: 'invitations',      label: 'Invitations',         icon: UserPlus },
     ],
   },
   {
     id: 'finance-management',
-    label: 'Finance & Billing',
+    label: 'Finance & Accounting',
+    icon: DollarSign,
     items: [
       { id: 'finance-budget',     label: 'Budgets & Variances',    icon: PieChart },
+      { id: 'approvals',          label: 'Approvals',              icon: ShieldCheck },
       { id: 'finance-payables',   label: 'Payables & Payouts',     icon: CreditCard },
       { id: 'finance-approvals',  label: 'Control & Approvals',    icon: ShieldAlert },
       { id: 'finance-economics',  label: 'Unit Economics',         icon: TrendingUp },
@@ -166,6 +192,7 @@ const NAV_GROUPS = [
   {
     id: 'marketing-integrations',
     label: 'Marketing & External',
+    icon: Globe,
     items: [
       { id: 'email-campaigns',  label: 'Email Campaigns',     icon: Mail },
       { id: 'marketing',        label: 'Content / Social',    icon: Globe },
@@ -183,6 +210,7 @@ const NAV_GROUPS = [
   {
     id: 'system-ai',
     label: 'System & AI',
+    icon: Settings2,
     badge: 'LIVE',
     badgeColor: 'var(--color-success)',
     items: [
@@ -194,13 +222,6 @@ const NAV_GROUPS = [
       { id: 'analytics',         label: 'Analytics',           icon: BarChart3 },
       { id: 'ai-logs',           label: 'AI Logs',             icon: ScrollText },
       { id: 'audit-logs',        label: 'Audit Logs',          icon: ShieldCheck },
-      { id: 'import-catalogs',   label: 'Import Catalogs',     icon: BookOpen },
-      { id: 'import-prices',     label: 'Import Price Lists',  icon: Tag },
-      { id: 'import-coa',        label: 'Import Certificates', icon: CheckCircle },
-      { id: 'import-rfq',        label: 'Import RFQs',         icon: FileText },
-      { id: 'import-prescriptions', label: 'Import Prescriptions',icon: ClipboardList },
-      { id: 'import-bloodworks', label: 'Import Bloodworks',   icon: Activity },
-      { id: 'import-history',    label: 'Import History',      icon: Database },
       { id: 'relationships',     label: 'Relationships',       icon: Network },
       { id: 'views',             label: 'Views',               icon: Layers },
       { id: 'home-layout',       label: 'Home Layout',         icon: LayoutTemplate },
@@ -208,6 +229,20 @@ const NAV_GROUPS = [
       { id: 'settings',          label: 'General Settings',    icon: Settings },
       { id: 'deploy',            label: 'Deploy & Hosting',    icon: Globe },
     ],
+  },
+  {
+    id: 'import-data',
+    label: 'Import Data',
+    icon: UploadCloud,
+    items: [
+      { id: 'import-catalogs',   label: 'Import Catalogs',     icon: BookOpen },
+      { id: 'import-prices',     label: 'Import Price Lists',  icon: Tag },
+      { id: 'import-coa',        label: 'Import Certificates', icon: CheckCircle },
+      { id: 'import-rfq',        label: 'Import RFQs',         icon: FileText },
+      { id: 'import-prescriptions', label: 'Import Prescriptions',icon: ClipboardList },
+      { id: 'import-bloodworks', label: 'Import Bloodworks',   icon: Activity },
+      { id: 'import-history',    label: 'Import History',      icon: Database },
+    ]
   }
 ];
 
@@ -267,6 +302,11 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
       {tab === 'orders'        && <OrdersTab readOnly={false} />}
       {tab === 'bulk-orders'   && <AdminBulkOrdersTab />}
       {tab === 'access-levels' && <AdminAccessLevelsTab />}
+      {tab === 'purchase-rfqs' && <AdminRFQTab />}
+      {tab === 'purchase-orders' && <AdminPOTab />}
+      {tab === 'purchase-bills' && <AdminBillsTab />}
+      {tab === 'payments-made' && <AdminPaymentsMadeTab />}
+      {tab === 'payments-received' && <AdminPaymentsReceivedTab />}
       {tab === 'clinical-ai'   && <ClinicalAIWidget />}
       {tab === 'prescription-agent' && <AdminPlaceholderTab title="Prescription Agent" description="Manage logic for AI prescription recommendations." tags={['AI', 'Medical']} color="var(--color-primary)" />}
       {tab === 'analytics'     && <AdminAnalyticsTab /> }
@@ -395,7 +435,9 @@ export default function AdminDashboard() {
     >
       <div style={{ padding: '1rem' }}>
         <React.Suspense fallback={<AdminLoadingFallback />}>
-          <Outlet />
+          <PageTransition locationKey={location.pathname}>
+            <Outlet />
+          </PageTransition>
         </React.Suspense>
       </div>
     </PortalLayout>

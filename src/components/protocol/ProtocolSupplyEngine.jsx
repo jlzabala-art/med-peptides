@@ -249,10 +249,10 @@ const ProtocolSupplyEngine = React.memo(function ProtocolSupplyEngine({
   const [localTier, setLocalTier] = useState(tier);
   // Sync if parent prop changes
   const prevTierRef = React.useRef(tier);
-  if (prevTierRef.current !== tier) {
-    prevTierRef.current = tier;
+  // React 18: removed ref check during render in favor of useEffect
+  React.useEffect(() => {
     setLocalTier(tier);
-  }
+  }, [tier]);
 
   // ── Living Calculator: Duration Scale ──
   const [durationScale, setDurationScale] = useState(1);
@@ -397,16 +397,15 @@ const ProtocolSupplyEngine = React.memo(function ProtocolSupplyEngine({
   // Re-sync accessory quantities when manifest accessories change (avoiding object reference loops)
   const manifestAccessoriesKey = JSON.stringify(manifest.accessories.map(a => ({ id: a.id, qty: a.qty })));
   const prevAccessoriesKeyRef = React.useRef(manifestAccessoriesKey);
-  if (prevAccessoriesKeyRef.current !== manifestAccessoriesKey) {
-    prevAccessoriesKeyRef.current = manifestAccessoriesKey;
-    // Merge new quantities into existing checked state
+  // React 18: removed ref check during render in favor of useEffect
+  React.useEffect(() => {
     setAccessories(prev =>
       manifest.accessories.map(a => {
         const existing = prev.find(p => p.id === a.id);
         return { ...a, checked: existing ? existing.checked : true };
       })
     );
-  }
+  }, [manifestAccessoriesKey, manifest.accessories]);
 
   // Totals
   const compoundTotal = useMemo(

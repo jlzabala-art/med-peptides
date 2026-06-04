@@ -761,3 +761,100 @@
 
 
 
+
+/* Protocol Template Layout */
+.pt-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr 340px;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.pt-toc-col {
+  position: sticky;
+  top: 90px;
+  height: calc(100vh - 110px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.pt-ai-col {
+  position: sticky;
+  top: 90px;
+  height: calc(100vh - 110px);
+}
+
+@media (max-width: 1200px) {
+  .pt-grid { grid-template-columns: 220px 1fr 300px; gap: 2rem; }
+}
+@media (max-width: 1024px) {
+  .pt-grid { grid-template-columns: 220px 1fr; gap: 2rem; }
+  .pt-ai-col { display: none; }
+}
+@media (max-width: 768px) {
+  .pt-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .pt-toc-col { display: none; }
+}
+
+.mobile-toc-fab-container {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-toc-fab-container {
+    display: block;
+  }
+}
+
+/* ── B2B Portals Responsive Utilities ────────────────────────────── */
+.portal-header {
+  background: #fff;
+  padding: 1.5rem 2rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.portal-main-grid {
+  flex: 1;
+  padding: 2rem;
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.portal-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .portal-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+  
+  .portal-header > div:last-child {
+    width: 100%;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  
+  .portal-main-grid {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+  }
+}

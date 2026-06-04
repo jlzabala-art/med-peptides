@@ -65,6 +65,7 @@ function AtlasLoadingScreen() {
 export default function AppPortalLayout({ allowedRoles = [], children }) {
   const { user, activeRole, loading } = useAuth();
   const [isAIOpen, setIsAIOpen] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     const handleOpenAI = () => setIsAIOpen(true);
@@ -86,10 +87,16 @@ export default function AppPortalLayout({ allowedRoles = [], children }) {
 
   return (
     <div className="portal-container">
-      <PortalSidebar />
+      <PortalSidebar 
+        isOpen={isMobileSidebarOpen} 
+        onClose={() => setIsMobileSidebarOpen(false)} 
+      />
 
       <div className="portal-main-content">
-        <PortalHeader onToggleAI={() => setIsAIOpen(true)} />
+        <PortalHeader 
+          onToggleAI={() => setIsAIOpen(true)} 
+          onToggleSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+        />
 
         <main className="portal-page-wrapper">
           <AnimatePresence mode="wait">

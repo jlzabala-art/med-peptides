@@ -2,7 +2,7 @@
 import React, { useState, useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getTemplatesByObjective } from '../../services/templateService';
+import { getTemplatesByObjective } from '../../repositories/protocolRepository';
 
 const CategoryProtocolNavigator = memo(function CategoryProtocolNavigator({
   currentSlug,

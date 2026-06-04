@@ -17,7 +17,9 @@ import Cart from './snippets/Cart';
 import AccessCatalogOverlay from './layout/AccessCatalogOverlay';
 import ExitProfessionalMode from './components/auth/ExitProfessionalMode';
 import ClinicalAssistant from './components/shared/ClinicalAssistant';
-import ProductComparator from './components/discovery/ProductComparator';import { trackPageView } from './hooks/useAnalytics';
+import ProductComparator from './components/discovery/ProductComparator';
+import { trackPageView } from './hooks/useAnalytics';
+import { Toaster } from 'react-hot-toast';
 
 // --- Layouts and Contexts ---
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -32,6 +34,10 @@ import { useShop } from './context/ShopProvider';
 import { useUIStore } from './stores/uiStore';
 import { AdminProvider } from './context/AdminProvider';
 import { DoctorProvider } from './context/DoctorProvider';
+
+
+import B2BClientQuoteView from './components/b2b/B2BClientQuoteView';
+
 // ── Lazy Loading Heavy Templates (Section 2: Performance) ────────────────────
 const HomeView = lazy(() => import('./templates/HomeView'));
 const About = lazy(() => import('./templates/About'));
@@ -807,6 +813,7 @@ function App() {
 
   return (
       <div className="app">
+        <Toaster position="bottom-right" />
         <AppRouter {...routerProps} />
         <ClinicalAssistant 
           isOpen={activeModal === 'ai'} 

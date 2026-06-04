@@ -1,13 +1,13 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { FiSearch, FiBell, FiCpu } from 'react-icons/fi';
-import { Globe } from 'lucide-react';
+import { Globe, Menu } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AtlasHealthLogo from '../components/brand/AtlasHealthLogo';
 
-export default function PortalHeader({ onToggleAI }) {
+export default function PortalHeader({ onToggleAI, onToggleSidebar }) {
   const { userProfile, activeRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,7 +28,14 @@ export default function PortalHeader({ onToggleAI }) {
   return (
     <header className="portal-header">
       <div className="header-left">
-        <AtlasHealthLogo size={24} style={{ marginRight: '1rem', opacity: 0.8 }} />
+        <button 
+          className="mobile-menu-btn"
+          onClick={onToggleSidebar}
+          aria-label="Toggle Sidebar"
+        >
+          <Menu size={24} />
+        </button>
+        <AtlasHealthLogo size={24} style={{ marginRight: '1rem', opacity: 0.8 }} className="hide-on-mobile" />
         <h1 className="header-title">{breadcrumb}</h1>
       </div>
 
@@ -149,6 +156,16 @@ export default function PortalHeader({ onToggleAI }) {
         .header-left {
           display: flex;
           align-items: center;
+          gap: 1rem;
+        }
+        
+        .mobile-menu-btn {
+          display: none;
+          background: none;
+          border: none;
+          color: #4a5568;
+          cursor: pointer;
+          padding: 0.5rem;
         }
 
         .header-title {
@@ -283,6 +300,14 @@ export default function PortalHeader({ onToggleAI }) {
           animation: ring 2s infinite ease-in-out;
           transform-origin: top center;
           display: inline-block;
+        }
+        
+        @media (max-width: 1024px) {
+          .mobile-menu-btn { display: flex; }
+          .hide-on-mobile { display: none; }
+          .portal-header { padding: 0 1rem; }
+          .search-bar { display: none; }
+          .header-title { font-size: 1rem; }
         }
       `}</style>
     </header>

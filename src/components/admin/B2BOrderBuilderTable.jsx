@@ -98,6 +98,7 @@ export default function B2BOrderBuilderTable({ items, onChange }) {
       unit: productData.unit,
       isApiWithScore: productData.relativeCostScore !== null,
       rate: productData.price || 0,
+      stock: productData.stock || 0,
     };
     onChange(newItems);
   };
@@ -135,13 +136,18 @@ export default function B2BOrderBuilderTable({ items, onChange }) {
                   </span>
                 </td>
                 <td style={tdStyle}>
-                  <input 
-                    type="number" 
-                    min="1" 
-                    value={item.quantity} 
-                    onChange={(e) => updateItem(index, 'quantity', e.target.value)}
-                    style={inputStyle} 
-                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                    <input 
+                      type="number" 
+                      min="1" 
+                      value={item.quantity} 
+                      onChange={(e) => updateItem(index, 'quantity', e.target.value)}
+                      style={{ ...inputStyle, borderColor: item.stock !== undefined && item.quantity > item.stock ? '#ef4444' : 'var(--border)' }} 
+                    />
+                    {item.stock !== undefined && item.quantity > item.stock && (
+                      <span style={{ fontSize: '0.6rem', color: '#ef4444', fontWeight: 600 }}>Stock insuf. ({item.stock} disp.)</span>
+                    )}
+                  </div>
                 </td>
                 <td style={tdStyle}>
                   {item.isApiWithScore ? (

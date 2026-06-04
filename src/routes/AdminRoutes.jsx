@@ -51,7 +51,10 @@ const CatalogCreatorFlow = React.lazy(() => import('../components/wholesaler/Cat
 const EmailCampaignBuilder = React.lazy(() => import('../components/wholesaler/EmailCampaignBuilder'));
 const AdminAgencyDealsTab = React.lazy(() => import('../components/admin/AdminAgencyDealsTab'));
 const AdminLogisticsTab = React.lazy(() => import('../components/admin/AdminLogisticsTab'));
+const AdminPaymentsMadeTab = React.lazy(() => import('../components/admin/AdminPaymentsMadeTab'));
+const AdminPaymentsReceivedTab = React.lazy(() => import('../components/admin/AdminPaymentsReceivedTab'));
 const AdminFinanceTab = React.lazy(() => import('../components/admin/AdminFinanceTab'));
+const AdminApprovalsTab    = React.lazy(() => import('../components/admin/AdminApprovalsTab'));
 const CouponsManager = React.lazy(() => import('../components/marketing/CouponsManager'));
 const ReferralTracking = React.lazy(() => import('../components/marketing/ReferralTracking'));
 const CoBranding = React.lazy(() => import('../components/marketing/CoBranding'));
@@ -59,6 +62,9 @@ const DripMarketing = React.lazy(() => import('../components/marketing/DripMarke
 const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
 const AdminCatalogEnrichmentTab = React.lazy(() => import('../components/admin/AdminCatalogEnrichmentTab'));
 const AdminRFQTab = React.lazy(() => import('../components/admin/AdminRFQTab'));
+const PurchaseRFQList = React.lazy(() => import('../pages/Purchase/RFQList'));
+const PurchasePOList = React.lazy(() => import('../pages/Purchase/POList'));
+const PurchaseBillList = React.lazy(() => import('../pages/Purchase/BillList'));
 const ImportPriceListsTab = React.lazy(() => import('../components/admin/imports/ImportPriceListsTab'));
 const ImportCoATab = React.lazy(() => import('../components/admin/imports/ImportCoATab'));
 const ImportCatalogsTab = React.lazy(() => import('../components/admin/imports/ImportCatalogsTab'));
@@ -100,6 +106,7 @@ export default function AdminRoutes() {
         <Route path="doctors" element={<AdminTabErrorBoundary tabId="doctors" tabLabel="Doctors"><AdminUsersTab defaultRole="doctor" readOnly={false} canApprove={true} /></AdminTabErrorBoundary>} />
         <Route path="patients" element={<AdminTabErrorBoundary tabId="patients" tabLabel="Patients"><AdminUsersTab defaultRole="patient" readOnly={false} canApprove={true} /></AdminTabErrorBoundary>} />
         <Route path="rfq" element={<AdminTabErrorBoundary tabId="rfq" tabLabel="RFQ"><AdminRFQTab /></AdminTabErrorBoundary>} />
+        <Route path="approvals" element={<AdminTabErrorBoundary tabId="approvals" tabLabel="Approvals"><AdminApprovalsTab /></AdminTabErrorBoundary>} />
         <Route path="users" element={<AdminTabErrorBoundary tabId="users" tabLabel="Users"><AdminUsersTab readOnly={false} canApprove={true} /></AdminTabErrorBoundary>} />
         <Route path="products" element={<AdminTabErrorBoundary tabId="products" tabLabel="Products"><AdminProductsTab readOnly={false} hideCosts={false} allowedCategories={['All']} /></AdminTabErrorBoundary>} />
         <Route path="competitors" element={<AdminTabErrorBoundary tabId="competitors" tabLabel="Competitor Analysis"><AdminCompetitorsTab /></AdminTabErrorBoundary>} />
@@ -117,6 +124,9 @@ export default function AdminRoutes() {
         <Route path="stock" element={<AdminTabErrorBoundary tabId="stock" tabLabel="Stock & Inventory"><AdminVariantsTab /></AdminTabErrorBoundary>} />
         <Route path="bulk-orders" element={<AdminTabErrorBoundary tabId="bulk-orders" tabLabel="Bulk Orders"><AdminBulkOrdersTab /></AdminTabErrorBoundary>} />
         <Route path="access-levels" element={<AdminTabErrorBoundary tabId="access-levels" tabLabel="Access Levels"><AdminAccessLevelsTab /></AdminTabErrorBoundary>} />
+        <Route path="purchase-rfqs" element={<AdminTabErrorBoundary tabId="purchase-rfqs" tabLabel="Requests for Quotation"><PurchaseRFQList /></AdminTabErrorBoundary>} />
+        <Route path="purchase-orders" element={<AdminTabErrorBoundary tabId="purchase-orders" tabLabel="Purchase Orders"><PurchasePOList /></AdminTabErrorBoundary>} />
+        <Route path="purchase-bills" element={<AdminTabErrorBoundary tabId="purchase-bills" tabLabel="Supplier Bills"><PurchaseBillList /></AdminTabErrorBoundary>} />
         <Route path="clinical-ai" element={<AdminTabErrorBoundary tabId="clinical-ai" tabLabel="Clinical AI"><ClinicalAIWidget /></AdminTabErrorBoundary>} />
         <Route path="prescription-agent" element={<AdminTabErrorBoundary tabId="prescription-agent" tabLabel="Prescription Agent"><AdminPlaceholderTab title="Prescription Agent" description="Manage logic for AI prescription recommendations." tags={['AI', 'Medical']} color="var(--color-primary)" /></AdminTabErrorBoundary>} />
         <Route path="analytics" element={<AdminTabErrorBoundary tabId="analytics" tabLabel="Analytics"><AdminAnalyticsTab /></AdminTabErrorBoundary>} />
@@ -127,6 +137,8 @@ export default function AdminRoutes() {
         <Route path="coupons" element={<AdminTabErrorBoundary tabId="coupons" tabLabel="Coupons"><CouponsManager ownerId="admin" ownerType="admin" /></AdminTabErrorBoundary>} />
         <Route path="referrals" element={<AdminTabErrorBoundary tabId="referrals" tabLabel="Referrals"><ReferralTracking ownerId="admin" ownerType="admin" /></AdminTabErrorBoundary>} />
         <Route path="drip-marketing" element={<AdminTabErrorBoundary tabId="drip-marketing" tabLabel="Drip Marketing"><DripMarketing ownerId="admin" ownerType="admin" /></AdminTabErrorBoundary>} />
+        <Route path="payments-made" element={<AdminTabErrorBoundary tabId="payments-made" tabLabel="Payments Made"><AdminPaymentsMadeTab /></AdminTabErrorBoundary>} />
+        <Route path="payments-received" element={<AdminTabErrorBoundary tabId="payments-received" tabLabel="Payments Received"><AdminPaymentsReceivedTab /></AdminTabErrorBoundary>} />
         <Route path="pricing-visibility" element={<AdminTabErrorBoundary tabId="pricing-visibility" tabLabel="Pricing Visibility"><AdminPlaceholderTab title="Pricing Visibility" description="Configure regional pricing walls and product visibility." tags={['Pricing', 'Access']} color="var(--color-primary)" /></AdminTabErrorBoundary>} />
         <Route path="leads" element={<AdminTabErrorBoundary tabId="leads" tabLabel="Leads"><AdminLeadsTab /></AdminTabErrorBoundary>} />
         <Route path="marketing" element={<AdminTabErrorBoundary tabId="marketing" tabLabel="Marketing & Content"><AdminMarketingTab /></AdminTabErrorBoundary>} />

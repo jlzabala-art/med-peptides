@@ -1,21 +1,17 @@
- 
 import React from 'react';
 import { ShieldCheck, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
-import { safeStr } from '../../utils/textUtils';
 
-const fmt = (v) => safeStr(v);
+const fmt = (v) => (v !== undefined && v !== null ? v : '—');
 
-/**
- * EligibilityBlock — Displays inclusion and exclusion criteria.
- */
-export function EligibilityBlock({ eligibility }) {
+export default function EligibilityBlock({ eligibility }) {
   if (!eligibility) return null;
   const include = eligibility.inclusion_criteria || eligibility.include || [];
   const exclude = eligibility.exclusion_criteria || eligibility.exclude || [];
+
   if (!include.length && !exclude.length) return null;
-  
+
   return (
-    <div id="pm-s01b" className="proto-eligibility">
+    <div className="proto-eligibility">
       {include.length > 0 && (
         <div className="proto-eligibility__col">
           <h4><ShieldCheck size={15} color="#4ade80" /> Inclusion Criteria</h4>
@@ -43,5 +39,3 @@ export function EligibilityBlock({ eligibility }) {
     </div>
   );
 }
-
-export default EligibilityBlock;

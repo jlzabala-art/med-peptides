@@ -236,7 +236,7 @@ export default function SidebarGadget(props) {
           label: isOrderModalOpen ? "Save Menu" : "Customize Menu",
           icon: isOrderModalOpen ? Save : Settings,
           onClick: () => setIsOrderModalOpen(true),
-          onReset: null
+          onReset: resetToDefault
         }}
       />
     </>

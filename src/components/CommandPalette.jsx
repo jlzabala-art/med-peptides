@@ -1,96 +1,195 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Search, User, Box, Package, LayoutDashboard } from 'lucide-react';
+// Updated CommandPalette with premium glassmorphism, recent history, and keyboard hints
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Search, Box, LayoutDashboard, Sparkles, Zap, Command, ArrowUp, ArrowDown, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../firebase';
-import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
+import { useAuth } from '../context/AuthContext';
+import { useDebounce } from '../hooks/useDebounce';
+import { searchProductsAndProtocols, searchUsers, searchOrders } from '../services/searchProviders';
 
-const ADMIN_ROUTES = [
-  { id: 'route-1', label: 'Admin Dashboard', path: '/admin', icon: LayoutDashboard, type: 'Route' },
-  { id: 'route-2', label: 'Active Users', path: '/admin/users', icon: User, type: 'Route' },
-  { id: 'route-3', label: 'Products Catalog', path: '/admin/products', icon: Box, type: 'Route' },
-  { id: 'route-4', label: 'Orders & Billing', path: '/admin/orders', icon: Package, type: 'Route' },
-  { id: 'route-5', label: 'Prices & Offers', path: '/admin/prices', icon: Box, type: 'Route' },
-  { id: 'route-6', label: 'Protocols', path: '/admin/protocols', icon: Box, type: 'Route' },
-  { id: 'route-7', label: 'Analytics', path: '/admin/analytics', icon: LayoutDashboard, type: 'Route' },
-  { id: 'route-8', label: 'System Settings', path: '/admin/settings', icon: LayoutDashboard, type: 'Route' }
-];
+const fuzzyMatch = (q, text) => text?.toLowerCase().includes(q.toLowerCase());
 
-const fuzzyMatch = (q, text) => text.toLowerCase().includes(q.toLowerCase());
+// Complete portal configs with placeholders for missing portals
+const PORTAL_CONFIGS = {
+  admin: {
+    placeholder: 'Search items, orders, suppliers, RFQs, or commands…',
+    routePrefix: '/admin',
+    quickActions: [
+      { id: 'qa-ai',       label: 'Ask Atlas AI',           icon: Sparkles, type: 'Action', action: 'ask-ai' },
+      { id: 'qa-user',     label: 'Create New User',        icon: Sparkles, type: 'Action', path: '/admin/users?new=true' },
+      { id: 'qa-product',  label: 'Add New Item',           icon: Box,      type: 'Action', path: '/admin/products?new=true' },
+      { id: 'qa-rfq',      label: 'New Purchase RFQ',       icon: Sparkles, type: 'Action', path: '/admin/purchase-rfqs' },
+      { id: 'qa-po',       label: 'New Purchase Order',     icon: Sparkles, type: 'Action', path: '/admin/purchase-orders' },
+      { id: 'qa-bill',     label: 'New Supplier Bill',      icon: Sparkles, type: 'Action', path: '/admin/purchase-bills' },
+      { id: 'qa-quotation',label: 'New Sales Quotation',    icon: Sparkles, type: 'Action', path: '/admin/quotations' },
+    ],
+  },
+  doctor: {
+    placeholder: 'Search patients, products, protocols, or commands...',
+    routePrefix: '/doctor',
+    quickActions: [
+      { id: 'qa-ai', label: 'Ask Atlas AI', icon: Sparkles, type: 'Action', action: 'ask-ai' },
+      { id: 'qa-patient', label: 'Register New Patient', icon: Sparkles, type: 'Action', path: '/doctor/patients?new=true' },
+    ],
+  },
+  patient: {
+    placeholder: 'Search products, protocols, orders, or commands...',
+    routePrefix: '/patient',
+    quickActions: [
+      { id: 'qa-ai', label: 'Ask Atlas AI', icon: Sparkles, type: 'Action', action: 'ask-ai' },
+    ],
+  },
+  wholesaler: {
+    placeholder: 'Search products, orders, or commands...',
+    routePrefix: '/wholesaler',
+    quickActions: [
+      { id: 'qa-ai', label: 'Ask Atlas AI', icon: Sparkles, type: 'Action', action: 'ask-ai' },
+    ],
+  },
+  clinic: {
+    placeholder: 'Search patients, appointments, or commands...',
+    routePrefix: '/clinic',
+    quickActions: [
+      { id: 'qa-ai', label: 'Ask Atlas AI', icon: Sparkles, type: 'Action', action: 'ask-ai' },
+    ],
+  },
+  pharmacy: {
+    placeholder: 'Search products, prescriptions, or commands...',
+    routePrefix: '/pharmacy',
+    quickActions: [
+      { id: 'qa-ai', label: 'Ask Atlas AI', icon: Sparkles, type: 'Action', action: 'ask-ai' },
+    ],
+  },
+  supplier: {
+    placeholder: 'Search APIs, raw materials, or commands...',
+    routePrefix: '/supplier',
+    quickActions: [
+      { id: 'qa-ai', label: 'Ask Atlas AI', icon: Sparkles, type: 'Action', action: 'ask-ai' },
+    ],
+  },
+};
 
-export default function CommandPalette({ isOpen, onClose }) {
+const getActionIcon = (actionId) => {
+  if (actionId === 'qa-ai') return Sparkles;
+  if (actionId === 'qa-product') return Box;
+  return Sparkles;
+};
+
+export default function CommandPalette({ isOpen, onClose, navGroups = [], pinnedItems = [], onNavigate, onAskAI, portalType = 'admin' }) {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
-  const [results, setResults] = useState(ADMIN_ROUTES);
+  const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const navigate = useNavigate();
   const inputRef = useRef(null);
 
-  // Focus on open
+  const config = useMemo(() => PORTAL_CONFIGS[portalType] || PORTAL_CONFIGS.admin, [portalType]);
+  const QUICK_ACTIONS = useMemo(() => config.quickActions, [config]);
+
+  // Build system routes from pinned and groups (unchanged)
+  const systemRoutes = useMemo(() => {
+    const routes = [];
+    pinnedItems.forEach(item => {
+      routes.push({
+        id: `route-${item.id}`,
+        label: item.label,
+        path: `${config.routePrefix}/${item.id === 'dashboard' ? '' : item.id}`,
+        icon: item.icon || LayoutDashboard,
+        type: 'Module',
+      });
+    });
+    navGroups.forEach(group => {
+      group.items.forEach(item => {
+        routes.push({
+          id: `route-${item.id}`,
+          label: item.label,
+          path: `${config.routePrefix}/${item.id}`,
+          icon: item.icon || LayoutDashboard,
+          type: 'Module',
+        });
+      });
+    });
+    return routes;
+  }, [navGroups, pinnedItems, config]);
+
+  // ---------- RECENT HISTORY ----------
+  const [recent, setRecent] = useState(() => {
+    try {
+      const stored = localStorage.getItem('cmd-palette-recent');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const addToRecent = (item) => {
+    const entry = { id: item.id, label: item.label, path: item.path, type: 'Recent' };
+    setRecent(prev => {
+      const filtered = prev.filter(r => r.id !== entry.id);
+      const updated = [entry, ...filtered].slice(0, 5);
+      localStorage.setItem('cmd-palette-recent', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // ---------- EFFECTS ----------
   useEffect(() => {
     if (isOpen) {
       setSearchQuery('');
-      setResults(ADMIN_ROUTES);
+      const recentItems = recent.map(r => ({ ...r, type: 'Recent' }));
+      setResults([...recentItems, ...QUICK_ACTIONS, ...systemRoutes.slice(0, 5)]);
       setSelectedIndex(0);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [isOpen]);
+  }, [isOpen, systemRoutes, QUICK_ACTIONS, recent]);
 
   const performSearch = useCallback(async (q) => {
     if (!q.trim()) {
-      setResults(ADMIN_ROUTES);
+      const recentItems = recent.map(r => ({ ...r, type: 'Recent' }));
+      setResults([...recentItems, ...QUICK_ACTIONS, ...systemRoutes.slice(0, 5)]);
       return;
     }
-    
     setIsLoading(true);
     const lowerQ = q.toLowerCase();
-    const routeResults = ADMIN_ROUTES.filter(r => fuzzyMatch(lowerQ, r.label));
-    
+    const actionResults = QUICK_ACTIONS.filter(a => fuzzyMatch(lowerQ, a.label));
+    const routeResults = systemRoutes.filter(r => fuzzyMatch(lowerQ, r.label));
     try {
-      // Parallel fetch for basic prefix match or fetch all if small (using prefix for scalability)
-      const qPrefix = q.charAt(0).toUpperCase() + q.slice(1); // Basic capitalization
-      
-      const usersQuery = query(collection(db, 'users'), limit(20));
-      const productsQuery = query(collection(db, 'products'), limit(20));
-      const ordersQuery = query(collection(db, 'orders'), limit(10));
-      
-      const [uSnap, pSnap, oSnap] = await Promise.all([
-        getDocs(usersQuery),
-        getDocs(productsQuery),
-        getDocs(ordersQuery)
+      const [algoliaResults, userResults, orderResults] = await Promise.all([
+        searchProductsAndProtocols(q, config.routePrefix),
+        searchUsers(q, portalType, user),
+        searchOrders(q, portalType, user)
       ]);
-      
-      const foundUsers = uSnap.docs
-        .map(d => ({ id: d.id, ...d.data() }))
-        .filter(u => fuzzyMatch(lowerQ, u.fullName || u.email || ''))
-        .map(u => ({ id: u.id, label: u.fullName || u.email, path: `/admin/users?uid=${u.id}`, type: 'User', icon: User }));
-        
-      const foundProducts = pSnap.docs
-        .map(d => ({ id: d.id, ...d.data() }))
-        .filter(p => fuzzyMatch(lowerQ, p.name || ''))
-        .map(p => ({ id: p.id, label: p.name, path: `/admin/products?search=${encodeURIComponent(p.name)}`, type: 'Product', icon: Box }));
-        
-      const foundOrders = oSnap.docs
-        .map(d => ({ id: d.id, ...d.data() }))
-        .filter(o => fuzzyMatch(lowerQ, o.id) || fuzzyMatch(lowerQ, o.userEmail || ''))
-        .map(o => ({ id: o.id, label: `Order #${o.id.slice(0,8)} - ${o.userEmail}`, path: `/admin/orders?oid=${o.id}`, type: 'Order', icon: Package }));
-        
-      setResults([...routeResults, ...foundUsers, ...foundProducts, ...foundOrders]);
+      setResults([
+        ...actionResults,
+        ...routeResults,
+        ...algoliaResults.products,
+        ...algoliaResults.protocols,
+        ...userResults,
+        ...orderResults,
+      ]);
     } catch (err) {
       console.error('Omni-search error:', err);
     } finally {
       setIsLoading(false);
+      setSelectedIndex(0);
     }
-  }, []);
+  }, [QUICK_ACTIONS, systemRoutes, config, portalType, user, recent]);
+
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      performSearch(searchQuery);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery, performSearch]);
+    performSearch(debouncedSearchQuery);
+  }, [debouncedSearchQuery, performSearch]);
 
   const handleSelect = (item) => {
-    navigate(item.path);
+    if (item.type === 'Recent' && item.path) {
+      navigate(item.path);
+    } else if (item.action === 'ask-ai') {
+      if (onAskAI) onAskAI(searchQuery);
+    } else if (item.path) {
+      navigate(item.path);
+    }
+    addToRecent(item);
     onClose();
   };
 
@@ -103,9 +202,7 @@ export default function CommandPalette({ isOpen, onClose }) {
       setSelectedIndex(prev => (prev - 1 + results.length) % Math.max(results.length, 1));
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (results[selectedIndex]) {
-        handleSelect(results[selectedIndex]);
-      }
+      if (results[selectedIndex]) handleSelect(results[selectedIndex]);
     } else if (e.key === 'Escape') {
       onClose();
     }
@@ -113,70 +210,95 @@ export default function CommandPalette({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
+  // Group results by type, preserving order of defined groups
+  const grouped = results.reduce((acc, item) => {
+    const grp = item.type || 'Module';
+    if (!acc[grp]) acc[grp] = [];
+    acc[grp].push(item);
+    return acc;
+  }, {});
+  const groupOrder = ['Recent', 'Action', 'Module', 'Product', 'Protocol', 'User', 'Patient', 'Order'];
+
+  let globalIdx = 0;
+
   return (
-    <div 
+    <div
       style={{
         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)',
+        backgroundColor: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(4px)',
         zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', paddingTop: '10vh'
       }}
       onClick={onClose}
     >
-      <div 
+      <div
         style={{
-          width: '100%', maxWidth: '600px', backgroundColor: '#fff',
-          borderRadius: '12px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          overflow: 'hidden', border: '1px solid #e2e8f0',
-          display: 'flex', flexDirection: 'column'
+          width: '100%', maxWidth: '600px', background: 'rgba(15,23,42,0.85)',
+          borderRadius: '16px', boxShadow: '0 32px 64px rgba(0,0,0,0.4)',
+          overflow: 'hidden', backdropFilter: 'blur(12px)', color: '#fff', display: 'flex', flexDirection: 'column'
         }}
         onClick={e => e.stopPropagation()}
       >
-        <div style={{ display: 'flex', alignItems: 'center', padding: '1rem', borderBottom: '1px solid #e2e8f0' }}>
-          <Search size={20} color="#64748b" style={{ marginRight: '0.75rem' }} />
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+          <Search size={20} color="#cbd5e1" style={{ marginRight: '0.75rem' }} />
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search users, orders, products, or commands..."
+            placeholder={config.placeholder}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            style={{ flex: 1, border: 'none', outline: 'none', fontSize: '1rem', color: '#0f172a' }}
+            style={{ flex: 1, border: 'none', outline: 'none', fontSize: '1rem', background: 'transparent', color: '#fff' }}
+            aria-label="Command palette search"
           />
-          {isLoading && <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Searching...</span>}
+          {isLoading && <span style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Searching...</span>}
         </div>
-        
+        {/* Results */}
         <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '0.5rem' }}>
           {results.length === 0 && !isLoading && (
-            <div style={{ padding: '1.5rem', textAlign: 'center', color: '#64748b' }}>
-              No results found for "{searchQuery}"
+            <div style={{ padding: '1.5rem', textAlign: 'center', color: '#cbd5e1' }}>
+              No results for "{searchQuery}"
             </div>
           )}
-          
-          {results.map((item, idx) => {
-            const Icon = item.icon;
-            const isSelected = idx === selectedIndex;
+          {groupOrder.map(group => {
+            if (!grouped[group] || grouped[group].length === 0) return null;
             return (
-              <div 
-                key={item.id}
-                onClick={() => handleSelect(item)}
-                onMouseEnter={() => setSelectedIndex(idx)}
-                style={{
-                  display: 'flex', alignItems: 'center', padding: '0.75rem 1rem',
-                  cursor: 'pointer', borderRadius: '8px',
-                  backgroundColor: isSelected ? '#f1f5f9' : 'transparent',
-                  color: isSelected ? '#0f172a' : '#334155'
-                }}
-              >
-                <Icon size={18} style={{ marginRight: '1rem', color: isSelected ? '#3b82f6' : '#64748b' }} />
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontWeight: 500 }}>{item.label}</span>
+              <div key={group} style={{ marginBottom: '0.5rem' }}>
+                <div style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' }}>
+                  {group === 'Recent' ? 'Recientes' : group === 'Action' ? 'Acciones rápidas' : group}
                 </div>
-                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', backgroundColor: '#f8fafc', padding: '2px 6px', borderRadius: '4px' }}>
-                  {item.type}
-                </span>
+                {grouped[group].map(item => {
+                  const Icon = group === 'Action' ? getActionIcon(item.id) : (item.icon || Box);
+                  const isSel = globalIdx === selectedIndex;
+                  const curIdx = globalIdx;
+                  globalIdx++;
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => handleSelect(item)}
+                      onMouseEnter={() => setSelectedIndex(curIdx)}
+                      style={{
+                        display: 'flex', alignItems: 'center', padding: '0.75rem 1rem',
+                        cursor: 'pointer', borderRadius: '8px',
+                        backgroundColor: isSel ? 'rgba(255,255,255,0.1)' : 'transparent',
+                        color: isSel ? '#fff' : '#e2e8f0'
+                      }}
+                    >
+                      <Icon size={18} style={{ marginRight: '1rem', color: isSel ? '#3b82f6' : '#cbd5e1' }} />
+                      <div style={{ flex: 1 }}>{item.label}</div>
+                      {group === 'Action' && <Zap size={14} color="#f59e0b" style={{ marginLeft: '0.5rem' }} />}
+                    </div>
+                  );
+                })}
               </div>
             );
           })}
+        </div>
+        {/* Footer hints */}
+        <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid rgba(255,255,255,0.1)', fontSize: '0.75rem', color: '#cbd5e1', display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+          <span><ArrowUp size={12} /> ↑ / <ArrowDown size={12} /> ↓: Navegar</span>
+          <span><ArrowRight size={12} /> ↵: Seleccionar</span>
+          <span>Esc: Cerrar</span>
         </div>
       </div>
     </div>

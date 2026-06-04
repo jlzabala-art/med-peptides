@@ -36,6 +36,7 @@ const CATEGORY_COLOR = {
   'Sleep & Circadian':       '#4F46E5', // indigo-600
   'Immune Support':          'var(--color-success)', // emerald-600
   'Research Supplies':       '#DB2777', // pink-600 (admin)
+  'Testing':                 '#10B981', // emerald-500
   'Other Research Peptides': '#0096CC', // blue
 };
 const DEFAULT_COLOR = '#0096CC';
@@ -49,6 +50,7 @@ const CATEGORY_ICON = {
   'Sleep & Circadian':       Moon,
   'Immune Support':          Shield,
   'Research Supplies':       FlaskConical,
+  'Testing':                 Activity,
   'Other Research Peptides': Tag,
 };
 
@@ -105,6 +107,7 @@ const CATEGORY_INSIGHTS = {
   'Hormonal Optimization': 'Targeted research into peptide-driven endocrine signaling and growth hormone secretagogues.',
   'Sleep & Circadian': 'Modulation of GABAergic pathways and pineal gland signaling for homeostatic sleep regulation.',
   'Immune Support': 'Immunomodulatory research focused on thymic rejuvenation and adaptive response optimization.',
+  'Testing': 'Diagnostic panels, epigenetic testing, and AI-powered longevity analysis kits.',
   'Other Research Peptides': 'Broad-spectrum compounds for specialized biochemical and pharmacological research.',
 };
 
@@ -212,7 +215,8 @@ function normalizeProduct(doc) {
       'sleep':     'Sleep & Circadian',
       'immune':    'Immune Support',
       'supply':    'Research Supplies',
-      'supplies':  'Research Supplies'
+      'supplies':  'Research Supplies',
+      'testing':   'Testing'
     };
 
     const foundKey = Object.keys(mapping).find(key => rawCat.toLowerCase().includes(key));
@@ -271,6 +275,7 @@ function normalizeProduct(doc) {
     usage_score:           doc.usage_score           ?? 0,
     view_count:            doc.view_count            ?? 0,
     search_count:          doc.search_count          ?? 0,
+    additionalCapabilities: doc.additionalCapabilities || null,
   };
 }
 
@@ -611,6 +616,7 @@ export default function PeptideCollectionPage({ onNavigate, onBack, toggleCompar
                         tags={p.tags}
                         color={p.color}
                         badge={p.isPopular ? { text: 'Popular', type: 'popular' } : p.isNew ? { text: 'New', type: 'new' } : null}
+                        additionalCapabilities={p.additionalCapabilities}
                         footerLeft={p.dosage || ' '}
                         viewMode={viewMode}
                         onClick={() => handleCardClick(p)}

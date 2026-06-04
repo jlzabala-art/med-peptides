@@ -1,10 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Inbox, ArrowUp, ArrowDown, Search, X, Calendar } from 'lucide-react';
 
+import Skeleton from './Skeleton';
+
 export default function DataTable({ 
   columns, 
   data = [], 
   keyField = 'id',
+  isLoading = false,
   
   // Selection
   selectedIds = [],
@@ -284,7 +287,27 @@ export default function DataTable({
             </tr>
           </thead>
           <tbody>
-            {(!data || data.length === 0) ? (
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, rowIndex) => (
+                <tr key={`skeleton-${rowIndex}`} style={{ borderBottom: '1px solid var(--color-border)', minHeight: 'var(--row-min-height)' }}>
+                  {onSelectionChange && (
+                    <td style={{ padding: '12px', textAlign: 'center' }}>
+                      <Skeleton width="16px" height="16px" borderRadius="4px" />
+                    </td>
+                  )}
+                  {expandableRender && (
+                    <td style={{ padding: '12px', textAlign: 'center' }}>
+                      <Skeleton width="16px" height="16px" borderRadius="50%" />
+                    </td>
+                  )}
+                  {columns.map((col, colIndex) => (
+                    <td key={`skel-col-${colIndex}`} style={{ padding: '12px 16px' }}>
+                      <Skeleton width={colIndex === 0 ? "80%" : "60%"} height="16px" />
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : (!data || data.length === 0) ? (
               <tr>
                 <td colSpan={columns.length + (onSelectionChange ? 1 : 0) + (expandableRender ? 1 : 0)}>
                   <div style={{ 

@@ -74,12 +74,24 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const deepLinkSearch = params.get('search');
+  const deepLinkNew = params.get('new');
 
   useEffect(() => {
     if (deepLinkSearch) {
       setSearchQuery(deepLinkSearch);
     }
   }, [deepLinkSearch]);
+
+  // Auto-open Create User modal when navigated from Command Palette with ?new=true
+  useEffect(() => {
+    if (deepLinkNew === 'true') {
+      setIsCreateModalOpen(true);
+      // Clean up the URL param without reload
+      const url = new URL(window.location.href);
+      url.searchParams.delete('new');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [deepLinkNew]);
 
   const [roleFilter, setRoleFilter] = useState(defaultRole || 'all');
   const [selectedUserIds, setSelectedUserIds] = useState([]);
@@ -94,6 +106,25 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
   const [purchasedEmails, setPurchasedEmails] = useState(new Set());
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [allDoctors, setAllDoctors] = useState([]);
+  const [allWholesalers, setAllWholesalers] = useState([]);
+
+  useEffect(() => {
+    if (isCreateModalOpen) {
+      const fetchDoctorsAndWholesalers = async () => {
+        try {
+          const docQuery = query(collection(db, 'users'), where('roles', 'array-contains', 'doctor'));
+          const wsQuery = query(collection(db, 'users'), where('roles', 'array-contains', 'wholesaler'));
+          const [docSnap, wsSnap] = await Promise.all([getDocs(docQuery), getDocs(wsQuery)]);
+          setAllDoctors(docSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+          setAllWholesalers(wsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        } catch (e) {
+          console.error("Error loading doctors/wholesalers for creation modal:", e);
+        }
+      };
+      fetchDoctorsAndWholesalers();
+    }
+  }, [isCreateModalOpen]);
 
   const [pageSize, setPageSize] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
@@ -2767,6 +2798,17 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
           isOpen={!!detailsUser}
           onClose={() => setDetailsUser(null)}
           user={detailsUser}
+        />
+      )}
+
+      {isCreateModalOpen && (
+        <CreateUserModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          doctors={allDoctors}
+          wholesalers={allWholesalers}
+          onCreated={() => fetchUsers(1, pageSize)}
+          defaultRole={defaultRole || 'patient'}
         />
       )}
 

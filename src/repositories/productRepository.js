@@ -447,6 +447,48 @@ export async function getCatalog() {
 // ── Route & supplier variant queries ─────────────────────────────────────────
 
 /**
+ * Fetch testing products and optionally filter by capabilities or sample kit.
+ *
+ * @param {Object} filters
+ * @param {string} [filters.sampleKitType] - e.g., 'Saliva_Tube', 'Blood_Spot'
+ * @param {boolean} [filters.requiresPrescription]
+ * @param {boolean} [filters.aiInterpretationService]
+ * @returns {Promise<Array>}
+ */
+export async function getTestingCatalog(filters = {}) {
+  try {
+    const catalog = await getCatalog();
+    
+    // Filter down to testing products only
+    let testingProducts = catalog.filter((p) => p.category === 'Testing' || p.productType === 'testing');
+    
+    // Apply additional filters if provided
+    if (filters.sampleKitType) {
+      testingProducts = testingProducts.filter(
+        (p) => p.sampleKit?.type === filters.sampleKitType
+      );
+    }
+    
+    if (filters.requiresPrescription !== undefined) {
+      testingProducts = testingProducts.filter(
+        (p) => p.additionalCapabilities?.requiresPrescription === filters.requiresPrescription
+      );
+    }
+    
+    if (filters.aiInterpretationService !== undefined) {
+      testingProducts = testingProducts.filter(
+        (p) => p.additionalCapabilities?.aiInterpretationService === filters.aiInterpretationService
+      );
+    }
+    
+    return testingProducts;
+  } catch (err) {
+    console.error('[productRepository] getTestingCatalog:', err);
+    return [];
+  }
+}
+
+/**
  * Fetch all variants for a product filtered by administration route.
  *
  * @param {string} productId
@@ -579,6 +621,7 @@ export const productRepository = {
   getVariant,
   getProductWithVariants,
   getCatalog,
+  getTestingCatalog,
   // Phase 1 additions:
   getVariantsByRoute,
   getVariantsBySupplier,

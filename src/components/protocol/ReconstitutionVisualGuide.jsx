@@ -54,7 +54,7 @@ export default function ReconstitutionVisualGuide({ compounds = [] }) {
     return compounds.filter(c => c.compound && (c.strength || c.water));
   }, [compounds]);
 
-  if (validCompounds.length === 0) return null;
+  
 
   // Active compound tab index
   const [activeIdx, setActiveIdx] = useState(0);
