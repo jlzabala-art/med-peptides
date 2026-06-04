@@ -26,6 +26,9 @@ import {
   User,
   GripVertical,
   Edit3,
+  ExternalLink,
+  Pause,
+  Play,
 } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 import CustomProtocolBuilder from './CustomProtocolBuilder';
@@ -1118,8 +1121,10 @@ export default function AdminProtocolsTab() {
                       >
                         <td style={{ padding: '0.75rem 1rem' }}>
                           <button
-                            onClick={() => navigate(`/admin/protocols/${p.id}`)}
-                            aria-label="View protocol details"
+                            onClick={() => setExpanded((prev) => ({ ...prev, [p.id]: !isOpen }))}
+                            aria-label="Toggle details"
+                            className="admin-tooltip-target"
+                            data-tooltip={isOpen ? "Collapse" : "Expand"}
                             style={{
                               background: 'none',
                               border: 'none',
@@ -1228,6 +1233,8 @@ export default function AdminProtocolsTab() {
                               <button
                                 onClick={() => handleSave(p.id)}
                                 disabled={isSaving}
+                                className="admin-tooltip-target"
+                                data-tooltip="Save changes"
                                 style={{
                                   display: 'flex',
                                   alignItems: 'center',
@@ -1248,7 +1255,8 @@ export default function AdminProtocolsTab() {
                             ) : (
                               <button
                                 onClick={() => navigate(`/admin/protocols/${p.id}/edit`)}
-                                title="Edit Protocol"
+                                className="admin-tooltip-target"
+                                data-tooltip="Edit Protocol"
                                 style={{
                                   background: 'transparent',
                                   border: 'none',
@@ -1263,25 +1271,27 @@ export default function AdminProtocolsTab() {
 
                             <button
                               onClick={toggleActive}
-                              title={e.status === 'active' ? 'Deactivate' : 'Activate'}
+                              className="admin-tooltip-target"
+                              data-tooltip={e.status === 'active' ? 'Deactivate' : 'Activate'}
                               style={{
                                 background: 'transparent',
                                 border: 'none',
-                                color: e.status === 'active' ? '#137333' : '#b06000',
+                                color: e.status === 'active' ? '#b06000' : '#137333',
                                 cursor: 'pointer',
                                 padding: '4px',
                               }}
                             >
                               {e.status === 'active' ? (
-                                <Check size={16} />
+                                <Pause size={16} />
                               ) : (
-                                <AlertTriangle size={16} />
+                                <Check size={16} />
                               )}
                             </button>
 
                             <button
                               onClick={archiveProtocol}
-                              title="Archive Protocol"
+                              className="admin-tooltip-target"
+                              data-tooltip="Archive Protocol"
                               style={{
                                 background: 'transparent',
                                 border: 'none',
@@ -1295,6 +1305,68 @@ export default function AdminProtocolsTab() {
                           </div>
                         </td>
                       </tr>
+                      {isOpen && (
+                        <tr>
+                          <td colSpan={6} style={{ padding: 0, borderBottom: '1px solid var(--border)' }}>
+                            <div style={{ padding: '1.5rem 2.5rem', background: '#f8f9fa', borderLeft: '4px solid #1a73e8' }}>
+                              <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: '#1a73e8', fontWeight: 600 }}>Protocol Phases & Dosages</h4>
+                              {p.phases && p.phases.length > 0 ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                  {p.phases.map((phase, idx) => (
+                                    <div key={idx} style={{ padding: '1rem', background: 'white', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+                                      <div style={{ fontWeight: 600, color: '#0f172a', marginBottom: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span>{phase.label || `Phase ${idx+1}`} {phase.durationWeeks ? `(${phase.durationWeeks} weeks)` : ''}</span>
+                                        <span style={{ fontSize: '0.75rem', color: '#64748b', background: '#f1f5f9', padding: '2px 8px', borderRadius: '12px' }}>
+                                          {phase.items?.length || 0} Products
+                                        </span>
+                                      </div>
+                                      
+                                      {phase.items && phase.items.length > 0 ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                          {phase.items.map((item, j) => (
+                                            <div key={j} style={{ padding: '0.75rem 1rem', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                              <div style={{ flex: 1 }}>
+                                                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                  {item.productName || item.product_name || 'Unknown Product'}
+                                                  <button
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      const queryParams = item.productId ? `sku=${encodeURIComponent(item.productId)}` : `search=${encodeURIComponent(item.productName || item.product_name)}`;
+                                                      navigate(`/admin/products?${queryParams}`);
+                                                    }}
+                                                    title="View Product in Catalog"
+                                                    style={{ 
+                                                      background: 'transparent', border: 'none', cursor: 'pointer', color: '#3b82f6', 
+                                                      display: 'inline-flex', alignItems: 'center', padding: '2px', borderRadius: '4px' 
+                                                    }}
+                                                    onMouseOver={(e) => e.currentTarget.style.background = '#e0e7ff'}
+                                                    onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                                                  >
+                                                    <ExternalLink size={14} />
+                                                  </button>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.75rem', color: '#64748b' }}>
+                                                  <div><strong>Dose:</strong> {item.dosage || '-'}</div>
+                                                  <div><strong>Freq:</strong> {item.frequency || '-'}</div>
+                                                  <div><strong>Vials:</strong> {item.vialsNeeded || 1}</div>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      ) : (
+                                        <div style={{ fontSize: '0.8rem', color: '#94a3b8', fontStyle: 'italic' }}>No products in this phase.</div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div style={{ fontSize: '0.85rem', color: '#64748b', fontStyle: 'italic' }}>No phases defined for this protocol.</div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
                     </React.Fragment>
                   );
                 })}

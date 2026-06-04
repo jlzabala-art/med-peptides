@@ -26,7 +26,6 @@ const AdminVariantsTab     = React.lazy(() => import('../components/admin/AdminV
 const AdminProtocolsTab    = React.lazy(() => import('../components/admin/AdminProtocolsTab'));
 const AdminProtocolView    = React.lazy(() => import('../components/admin/AdminProtocolView'));
 const AdminProtocolEdit    = React.lazy(() => import('../components/admin/AdminProtocolEdit'));
-const AdminBlueprintsTab   = React.lazy(() => import('../components/admin/AdminBlueprintsTab'));
 const AdminMetricsDashboard= React.lazy(() => import('../components/admin/AdminMetricsDashboard'));
 const OrdersTab            = React.lazy(() => import('../components/admin/OrdersTab'));
 const AdminAccessLevelsTab = React.lazy(() => import('../components/admin/AdminAccessLevelsTab'));
@@ -151,7 +150,6 @@ export default function AdminRoutes() {
         <Route path="protocols/:id" element={<AdminTabErrorBoundary tabId="protocol-view" tabLabel="Protocol Details"><AdminProtocolView /></AdminTabErrorBoundary>} />
         <Route path="protocols/:id/edit" element={<AdminTabErrorBoundary tabId="protocol-edit" tabLabel="Edit Protocol"><AdminProtocolEdit /></AdminTabErrorBoundary>} />
 
-        <Route path="blueprints" element={<AdminTabErrorBoundary tabId="blueprints" tabLabel="Blueprints"><AdminBlueprintsTab /></AdminTabErrorBoundary>} />
         <Route path="variants" element={<AdminTabErrorBoundary tabId="variants" tabLabel="Variants"><AdminVariantsTab /></AdminTabErrorBoundary>} />
         <Route path="catalogs" element={
           <AdminTabErrorBoundary tabId="catalogs" tabLabel="Catalogs">

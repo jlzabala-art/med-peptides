@@ -248,9 +248,11 @@ export default function AppSidebar({
   onToggleFavorite
 }) {
   const [expanded, setExpanded] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(`${storageKey}:expanded`) ?? 'true'); }
-    catch { return true; }
+    if (isMobile) return false;
+    const saved = localStorage.getItem(`${storageKey}-expanded`);
+    return saved !== null ? JSON.parse(saved) : true;
   });
+  const [closingFlyout, setClosingFlyout] = useState(false);
 
   const [openGroups, setOpenGroups] = useState(() => {
     return new Set(['favorites']);
@@ -324,24 +326,17 @@ export default function AppSidebar({
 
   const handleItemClick = useCallback((itemId) => {
     onNavigate?.(itemId);
-    if (isMobile) onClose?.();
-  }, [onNavigate, isMobile, onClose]);
+    if (isMobile) {
+      onClose?.();
+    } else if (!expanded) {
+      setClosingFlyout(true);
+      setTimeout(() => setClosingFlyout(false), 200);
+    }
+  }, [onNavigate, isMobile, onClose, expanded]);
 
   const favoritesSet = React.useMemo(() => {
     return new Set(groups.find(g => g.id === 'favorites')?.items?.map(i => i.id) || []);
   }, [groups]);
-
-  const sidebarClasses = [
-    'app-sidebar',
-    !expanded && !isMobile ? 'collapsed' : '',
-    isOpen && isMobile ? 'mobile-open' : '',
-    isEditing ? 'editing-mode' : ''
-  ].filter(Boolean).join(' ');
-
-  const sidebarStyle = {
-    '--sb-active-color': accentColor,
-    '--sb-active-bg': `${accentColor}18`,
-  };
 
   return (
     <>
@@ -349,7 +344,15 @@ export default function AppSidebar({
         <div className="sb-overlay" onClick={onClose} />
       )}
 
-      <aside className={sidebarClasses} style={sidebarStyle} aria-label="Main navigation">
+      <aside 
+        className={`app-sidebar ${!expanded ? 'collapsed' : ''} ${closingFlyout ? 'force-close-flyout' : ''} ${isOpen && isMobile ? 'mobile-open' : ''} ${isEditing ? 'editing-mode' : ''}`}
+        style={{
+          '--sb-bg': accentColor ? `${accentColor}05` : undefined,
+          '--sb-active-color': accentColor,
+          '--sb-active-bg': `${accentColor}18`,
+        }} 
+        aria-label="Main navigation"
+      >
         <div className="sb-header">
           {!isMobile && (
             <button

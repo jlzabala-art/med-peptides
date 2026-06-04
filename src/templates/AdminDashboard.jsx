@@ -39,7 +39,6 @@ const AdminPricesTab       = React.lazy(() => import('../components/admin/AdminP
 const AdminViewsConfigTab  = React.lazy(() => import('../components/admin/AdminViewsConfigTab'));
 const AdminVariantsTab     = React.lazy(() => import('../components/admin/AdminVariantsTab'));
 const AdminProtocolsTab    = React.lazy(() => import('../components/admin/AdminProtocolsTab'));
-const AdminBlueprintsTab   = React.lazy(() => import('../components/admin/AdminBlueprintsTab'));
 const AdminMetricsDashboard= React.lazy(() => import('../components/admin/AdminMetricsDashboard'));
 const OrdersTab            = React.lazy(() => import('../components/admin/OrdersTab'));
 const AdminAccessLevelsTab = React.lazy(() => import('../components/admin/AdminAccessLevelsTab'));
@@ -125,7 +124,6 @@ const NAV_GROUPS = [
       { id: 'costs',           label: 'Costs',           icon: DollarSign },
       { id: 'pricing-visibility', label: 'Pricing Visibility',  icon: EyeOff },
       { id: 'protocols',       label: 'Protocols',       icon: ClipboardList },
-      { id: 'blueprints',      label: 'Blueprints',      icon: Database },
       { id: 'competitors',     label: 'Competitor Analysis', icon: Activity },
       { id: 'enrichment',      label: 'Catalog Enrichment', icon: Database },
       { id: 'lab-tests',       label: 'Lab Tests & COAs',icon: ScrollText },
@@ -319,7 +317,6 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
       {tab === 'leads'              && <AdminPlaceholderTab title="Lead Management" description="Global B2B/B2C lead routing and ownership rules." tags={['Sales', 'Leads']} color="var(--color-primary)" />}
       {tab === 'home-layout'   && <AdminHomeLayoutTab />}
       {tab === 'protocols'     && <AdminProtocolsTab />}
-      {tab === 'blueprints'    && <AdminBlueprintsTab />}
       {tab === 'stock'         && <AdminVariantsTab />}
       {tab === 'lab-tests'     && <AdminPlaceholderTab title="Lab Tests & COAs" description="Manage quality control, third-party tests, and Certificates of Analysis for your stock batches." tags={['Quality', 'Testing']} color="var(--color-primary)" />}
       {tab === 'catalogs'         && <CatalogList ownerId="admin" ownerType="admin" onOpenBuilder={() => { setCatalogToEdit(null); setActiveTab('catalog-builder'); }} onSelectCatalogToEdit={(cat) => { setCatalogToEdit(cat); setActiveTab('catalog-builder'); }} />}

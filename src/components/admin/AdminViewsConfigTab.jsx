@@ -23,7 +23,6 @@ export default function AdminViewsConfigTab() {
     { id: 'orders', label: 'Orders & History' },
     { id: 'protocols', label: 'Protocols Registry' },
     { id: 'doctor_protocols', label: 'Physician Protocols (B2B)' },
-    { id: 'blueprints', label: 'Blueprints Registry' },
     { id: 'variants', label: 'Product Variants' },
   ];
 
