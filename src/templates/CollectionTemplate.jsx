@@ -8,6 +8,7 @@ import PeptideCollectionPage from './PeptideCollectionPage';
 import ProtocolCollectionPage from './ProtocolCollectionPage';
 import SupplementCollectionPage from './SupplementCollectionPage';
 import SuppliesView from './SuppliesView';
+import RestrictedCatalogRoute from '../components/auth/RestrictedCatalogRoute';
 
 
 // Slug → exact category name mapping
@@ -73,49 +74,57 @@ export default function CollectionTemplate({
   // /collection/peptides → dedicated full-page collection
   if (s === 'peptides') {
     return (
-      <PeptideCollectionPage
-        onNavigate={(productSlug) => navigate(`/product/${productSlug}`)}
-        onBack={() => navigate(-1)}
-        toggleCompare={toggleCompare}
-      />
+      <RestrictedCatalogRoute catalogName="products">
+        <PeptideCollectionPage
+          onNavigate={(productSlug) => navigate(`/product/${productSlug}`)}
+          onBack={() => navigate(-1)}
+          toggleCompare={toggleCompare}
+        />
+      </RestrictedCatalogRoute>
     );
   }
 
   // /collection/protocols → protocol library
   if (s === 'protocols') {
     return (
-      <ProtocolCollectionPage
-        onNavigate={(slug) => navigate(`/protocol/${slug}`)}
-        onBack={() => navigate(-1)}
-      />
+      <RestrictedCatalogRoute catalogName="protocols">
+        <ProtocolCollectionPage
+          onNavigate={(slug) => navigate(`/protocol/${slug}`)}
+          onBack={() => navigate(-1)}
+        />
+      </RestrictedCatalogRoute>
     );
   }
 
   // /collection/supplements → supplement catalog
   if (s === 'supplements') {
     return (
-      <SupplementCollectionPage
-        onNavigate={(supplementSlug) => navigate(`/supplements/${supplementSlug}`)}
-        onBack={() => navigate(-1)}
-        toggleCompare={toggleCompare}
-      />
+      <RestrictedCatalogRoute catalogName="products">
+        <SupplementCollectionPage
+          onNavigate={(supplementSlug) => navigate(`/supplements/${supplementSlug}`)}
+          onBack={() => navigate(-1)}
+          toggleCompare={toggleCompare}
+        />
+      </RestrictedCatalogRoute>
     );
   }
 
   // /collection/research-supplies → research supplies catalog
   if (s === 'research-supplies') {
     return (
-      <SuppliesView
-        onBack={() => navigate(-1)}
-        onSelectProduct={handleProductSelect}
-        updateCart={updateCart}
-        cart={cart}
-        region={region}
-        setRegion={setRegion}
-        isProfessional={isProfessional}
-        EXCHANGE_RATES={EXCHANGE_RATES || {}}
-        products={products || []}
-      />
+      <RestrictedCatalogRoute catalogName="apis">
+        <SuppliesView
+          onBack={() => navigate(-1)}
+          onSelectProduct={handleProductSelect}
+          updateCart={updateCart}
+          cart={cart}
+          region={region}
+          setRegion={setRegion}
+          isProfessional={isProfessional}
+          EXCHANGE_RATES={EXCHANGE_RATES || {}}
+          products={products || []}
+        />
+      </RestrictedCatalogRoute>
     );
   }
 

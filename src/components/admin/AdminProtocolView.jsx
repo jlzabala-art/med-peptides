@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { ArrowLeft, Edit3, FlaskConical } from 'lucide-react';
-import ProtocolHeaderCharts from '../protocol/ProtocolHeaderCharts';
-import InjectionDoseChart from '../protocol/InjectionDoseChart';
-import ProtocolSupplyEngine from '../protocol/ProtocolSupplyEngine';
+const ProtocolHeaderCharts = lazy(() => import('../protocol/ProtocolHeaderCharts'));
+const ProtocolGanttChart = lazy(() => import('../protocol/ProtocolGanttChart'));
+const InjectionDoseChart = lazy(() => import('../protocol/InjectionDoseChart'));
+const ProtocolSupplyEngine = lazy(() => import('../protocol/ProtocolSupplyEngine'));
 
 export default function AdminProtocolView() {
   const { id } = useParams();
@@ -58,9 +59,19 @@ export default function AdminProtocolView() {
       {/* Main Content Layout */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <div style={{ background: '#1e293b', borderRadius: '12px', padding: '1.5rem' }}>
+          <div style={{ background: '#1e293b', borderRadius: '12px', padding: '1.5rem', minHeight: '300px' }}>
             <h3 style={{ color: 'white', margin: '0 0 1rem 0' }}>Efficacy Timeline</h3>
-            <ProtocolHeaderCharts protocol={protocol} />
+            <div className="apv-hero-charts">
+              <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Loading visualization...</div>}>
+                <ProtocolHeaderCharts protocol={protocol} />
+              </Suspense>
+            </div>
+            
+            <div className="apv-hero-gantt" style={{ marginTop: '1.5rem' }}>
+              <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Loading Gantt Timeline...</div>}>
+                <ProtocolGanttChart phases={protocol.phases || []} durationScale={1} />
+              </Suspense>
+            </div>
           </div>
 
           <div style={{ background: 'white', borderRadius: '12px', padding: '1.5rem', border: '1px solid #e2e8f0' }}>
@@ -74,12 +85,14 @@ export default function AdminProtocolView() {
               <div key={i} style={{ marginBottom: '1rem' }}>
                 <h4 style={{ margin: '0 0 0.5rem 0', color: '#3b82f6' }}>{phase.label}</h4>
                 {phase.items?.map((item, j) => (
-                  <div key={j} style={{ padding: '1rem', background: '#f8fafc', borderRadius: '8px', marginBottom: '0.5rem' }}>
-                    <InjectionDoseChart 
-                      item={item}
-                      vialSizeMg={protocol.reconstitution?.vialSizeMg || 5}
-                      bacWaterMl={protocol.reconstitution?.bacWaterMl || 2}
-                    />
+                  <div key={j} style={{ padding: '1rem', background: '#f8fafc', borderRadius: '8px', marginBottom: '0.5rem', minHeight: '150px' }}>
+                    <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Loading Math...</div>}>
+                      <InjectionDoseChart 
+                        item={item}
+                        vialSizeMg={protocol.reconstitution?.vialSizeMg || 5}
+                        bacWaterMl={protocol.reconstitution?.bacWaterMl || 2}
+                      />
+                    </Suspense>
                   </div>
                 ))}
               </div>
@@ -89,7 +102,9 @@ export default function AdminProtocolView() {
 
         {/* Sidebar */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <ProtocolSupplyEngine protocol={protocol} />
+          <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center', color: '#64748b', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>Loading Engine...</div>}>
+            <ProtocolSupplyEngine protocol={protocol} />
+          </Suspense>
         </div>
       </div>
     </div>

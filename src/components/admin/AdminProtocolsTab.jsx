@@ -1295,19 +1295,14 @@ export default function AdminProtocolsTab() {
                           </div>
                         </td>
                       </tr>
+                    </React.Fragment>
+                  );
+                })}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-                      {/* Expandable Phase Editor Row */}
-                      <AnimatePresence initial={false}>
-                        {isOpen && (
-                          <tr
-                            style={{
-                              borderBottom: isLast ? 'none' : '1px solid var(--border)',
-                              background: '#fafafa',
-                            }}
-                          >
-                            <td colSpan={6} style={{ padding: 0 }}>
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
         {/* Pagination Load More */}
         {hasMore && (
           <div

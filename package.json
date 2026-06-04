@@ -33,6 +33,7 @@
     "enrich:catalog": "node scripts/enrich_catalog_ai.mjs",
     "enrich:peptides": "node scripts/enrich_peptides_ai.mjs",
     "enrich:protocols": "node scripts/enrich_protocols_ai.mjs",
+    "enrich:ingredients": "node scripts/enrich_ingredients_ai.mjs",
     "audit:styles": "node scripts/audit_inline_styles.cjs",
     "cron": "node scripts/nightly_cron.mjs"
   },
@@ -48,6 +49,7 @@
     "@fullcalendar/timegrid": "^6.1.20",
     "@heroicons/react": "^2.2.0",
     "@tanstack/react-query": "^5.100.14",
+    "algoliasearch": "^5.53.0",
     "axios": "^1.16.1",
     "date-fns": "^4.4.0",
     "firebase": "^12.10.0",
@@ -68,6 +70,7 @@
     "react-helmet-async": "^3.0.0",
     "react-i18next": "^17.0.8",
     "react-icons": "^5.6.0",
+    "react-instantsearch": "^7.35.0",
     "react-router-dom": "^7.13.1",
     "react-select": "^5.10.2",
     "recharts": "^3.8.1",

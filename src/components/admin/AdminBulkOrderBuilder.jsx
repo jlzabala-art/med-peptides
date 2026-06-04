@@ -47,6 +47,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { BULK_STATUS, RX_STATUS, ITEM_UNITS } from '../../config/prescriptionConfig';
+import B2BOrderBuilderTable from './B2BOrderBuilderTable';
 
 // ── Date Formatter ────────────────────────────────────────────────────────────
 function fmtDate(ts) {
@@ -664,7 +665,26 @@ export default function AdminBulkOrderBuilder({ onBack, onSuccess }) {
     selectedOrdData.forEach((o) =>
       addItems(o.items || o.lineItems, { type: 'order', patientName: o.customerName })
     );
-    catalogItems.forEach((i) => addItems([i], { type: 'own' }));
+    catalogItems.forEach((i) => {
+      // Add custom rate explicitly for B2B Order Builder
+      const key = `${i.type || 'product'}__${i.id}`;
+      if (map.has(key)) {
+        const ex = map.get(key);
+        ex.quantity += Number(i.quantity) || 0;
+        ex.sources.push({ type: 'own', quantity: Number(i.quantity) || 0, rate: i.rate });
+      } else {
+        map.set(key, {
+          type: i.type || 'product',
+          id: i.id,
+          name: i.name || '',
+          sku: i.sku || '',
+          unit: i.unit || 'vials',
+          quantity: Number(i.quantity) || 0,
+          rate: i.rate,
+          sources: [{ type: 'own', quantity: Number(i.quantity) || 0, rate: i.rate }],
+        });
+      }
+    });
     return Array.from(map.values());
   })();
 
@@ -990,24 +1010,10 @@ export default function AdminBulkOrderBuilder({ onBack, onSuccess }) {
                   {/* Catalog / Custom Tab */}
                   {tab === 'catalog' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                      <CatalogSearchBar onAdd={addCatalogItem} />
-                      {catalogItems.length === 0 ? (
-                        <div style={emptyTab}>
-                          Busca productos o protocolos arriba para agregarlos directamente.
-                        </div>
-                      ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                          {catalogItems.map((item, i) => (
-                            <CatalogItemRow
-                              key={i}
-                              item={item}
-                              index={i}
-                              onChange={updateCatalogItem}
-                              onRemove={removeCatalogItem}
-                            />
-                          ))}
-                        </div>
-                      )}
+                      <B2BOrderBuilderTable 
+                        items={catalogItems} 
+                        onChange={setCatalogItems} 
+                      />
                     </div>
                   )}
                 </>

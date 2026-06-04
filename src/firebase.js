@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { initializeApp } from 'firebase/app';
 import { getAuth, setPersistence, browserLocalPersistence, browserSessionPersistence, signOut } from 'firebase/auth';
-import { initializeFirestore, memoryLocalCache } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 import { getFunctions } from 'firebase/functions';
 
@@ -72,7 +72,7 @@ import { getFirestore } from 'firebase/firestore';
 let dbInstance;
 try {
   dbInstance = initializeFirestore(app, {
-    localCache: memoryLocalCache(),
+    localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()}),
     experimentalForceLongPolling: true
   });
 } catch (e) {

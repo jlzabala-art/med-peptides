@@ -1,91 +1,14 @@
-import React, { useState, useRef } from 'react';
-import { FileUp, X, CheckCircle, Loader2, AlertTriangle, FileText } from 'lucide-react';
-import { storage, functions } from '../../../firebase';
-import { ref, uploadBytes } from 'firebase/storage';
-import { httpsCallable } from 'firebase/functions';
+import React from 'react';
+import { FileUp, X, CheckCircle, Loader2, AlertTriangle, FileText, Sparkles } from 'lucide-react';
+import { useInvoiceUpload } from '../../../hooks/useInvoiceUpload';
 import { useAuth } from '../../../context/AuthContext';
 
 export default function UploadInvoiceModal({ onClose, onComplete }) {
   const { user } = useAuth();
-  const [file, setFile] = useState(null);
-  const [docType, setDocType] = useState('Bill'); // 'Bill' or 'Invoice'
-  
-  const [step, setStep] = useState(1); // 1: Upload, 2: Parsing, 3: Review, 4: Success
-  const [parsedData, setParsedData] = useState(null);
-  const [isPushing, setIsPushing] = useState(false);
-  const [error, setError] = useState(null);
-  
-  const fileInputRef = useRef(null);
-
-  const handleFileChange = (e) => {
-    const selected = e.target.files[0];
-    if (selected) {
-      setFile(selected);
-      setError(null);
-    }
-  };
-
-  const handleParse = async () => {
-    if (!file) return;
-    setStep(2);
-    setError(null);
-
-    try {
-      // 1. Upload to temporary storage
-      const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-      const storagePath = `temp_imports/${user?.uid || 'anonymous'}/${Date.now()}_${safeName}`;
-      const storageRef = ref(storage, storagePath);
-      
-      await uploadBytes(storageRef, file);
-
-      // 2. Call parseUniversalDocument
-      const parseUniversalDocument = httpsCallable(functions, 'parseUniversalDocument');
-      const response = await parseUniversalDocument({
-        storagePath,
-        mimeType: file.type,
-        context: 'Invoice',
-        instructions: `Expected type: ${docType === 'Bill' ? 'Supplier Bill' : 'Customer Invoice'}. Pay attention to totals and line items.`
-      });
-
-      if (response.data && response.data.success && response.data.items && response.data.items.length > 0) {
-        let extracted = response.data.items[0];
-        // Ensure type matches user selection
-        extracted.type = docType; 
-        setParsedData(extracted);
-        setStep(3);
-      } else {
-        throw new Error("Failed to extract invoice data. The AI returned empty results.");
-      }
-    } catch (err) {
-      console.error(err);
-      setError(err.message || "An error occurred while parsing the document.");
-      setStep(1); // Go back to upload step
-    }
-  };
-
-  const handlePushToZoho = async () => {
-    setIsPushing(true);
-    setError(null);
-    try {
-      const pushZohoInvoice = httpsCallable(functions, 'pushZohoInvoice');
-      const response = await pushZohoInvoice(parsedData);
-      
-      if (response.data && response.data.success) {
-        setStep(4);
-      } else {
-        throw new Error("Failed to push to Zoho Books.");
-      }
-    } catch (err) {
-      console.error(err);
-      setError(err.message || "Error communicating with Zoho Books.");
-    } finally {
-      setIsPushing(false);
-    }
-  };
-
-  const handleFieldChange = (field, value) => {
-    setParsedData(prev => ({ ...prev, [field]: value }));
-  };
+  const {
+    file, docType, setDocType, step, setStep, parsedData, isPushing, error,
+    fileInputRef, handleFileChange, handleParse, handlePushToZoho, handleFieldChange, resetForm,
+  } = useInvoiceUpload({ userId: user?.uid });
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', padding: '1rem' }}>
@@ -233,6 +156,29 @@ export default function UploadInvoiceModal({ onClose, onComplete }) {
                     value={parsedData.total_amount || 0} 
                     onChange={(e) => handleFieldChange('total_amount', parseFloat(e.target.value))}
                     style={{ width: '100%', backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', borderRadius: '0.5rem', padding: '0.5rem 0.75rem', fontSize: '0.875rem', fontWeight: 'bold', color: 'var(--color-primary)', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Due Date</label>
+                  <input 
+                    type="date" 
+                    value={parsedData.due_date || ''} 
+                    onChange={(e) => handleFieldChange('due_date', e.target.value)}
+                    style={{ width: '100%', backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', borderRadius: '0.5rem', padding: '0.5rem 0.75rem', fontSize: '0.875rem', fontWeight: '500', outline: 'none', color: 'var(--color-text-primary)' }}
+                  />
+                </div>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>
+                    Accounting Category
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', backgroundColor: 'rgba(79, 70, 229, 0.1)', color: '#4f46e5', padding: '0.125rem 0.5rem', borderRadius: '999px', fontSize: '0.65rem' }}>
+                      <Sparkles style={{ width: '10px', height: '10px' }} /> Auto-Assigned by Atlas AI
+                    </span>
+                  </label>
+                  <input 
+                    type="text" 
+                    value={parsedData.accounting_category || ''} 
+                    onChange={(e) => handleFieldChange('accounting_category', e.target.value)}
+                    style={{ width: '100%', backgroundColor: 'rgba(79, 70, 229, 0.03)', border: '1px solid rgba(79, 70, 229, 0.2)', borderRadius: '0.5rem', padding: '0.5rem 0.75rem', fontSize: '0.875rem', fontWeight: '600', outline: 'none', color: 'var(--color-text-primary)' }}
                   />
                 </div>
               </div>

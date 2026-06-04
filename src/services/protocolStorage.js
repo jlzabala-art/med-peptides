@@ -109,7 +109,9 @@ export const saveProtocol = async (protocolData, formData, options = {}) => {
         constraints: formData.lifestyleConstraints || {}
       },
       
-      phases: protocolData.blueprint?.phases || protocolData.phases || [],
+      // Top level stats instead of massive array
+      phase_count: (protocolData.blueprint?.phases || protocolData.phases || []).length,
+      
       products: protocolData.costData?.aggregateVials || [],
       cost_summary: protocolData.costData || {},
       
@@ -152,6 +154,8 @@ export const saveProtocol = async (protocolData, formData, options = {}) => {
     console.log("Payload:", sanitizedPayload);
     
     try {
+        const phasesToSave = protocolData.blueprint?.phases || protocolData.phases || [];
+        
         if (prevId) {
             const batch = writeBatch(db);
             const prevRef = doc(db, COLLECTION_NAME, prevId);
@@ -159,6 +163,12 @@ export const saveProtocol = async (protocolData, formData, options = {}) => {
 
             const newDocRef = doc(collection(db, COLLECTION_NAME));
             batch.set(newDocRef, sanitizedPayload);
+
+            // Write phases to subcollection
+            phasesToSave.forEach((phase, index) => {
+                const phaseRef = doc(db, COLLECTION_NAME, newDocRef.id, 'phases', `phase_${index}`);
+                batch.set(phaseRef, sanitize({ ...phase, index }));
+            });
 
             await batch.commit();
             console.log("Success (Batch)! Document ID:", newDocRef.id);
@@ -169,13 +179,23 @@ export const saveProtocol = async (protocolData, formData, options = {}) => {
             });
             return newDocRef.id;
         } else {
-            const docRef = await addDoc(collection(db, COLLECTION_NAME), sanitizedPayload);
-            console.log("Success! Document ID:", docRef.id);
+            const batch = writeBatch(db);
+            const newDocRef = doc(collection(db, COLLECTION_NAME));
+            batch.set(newDocRef, sanitizedPayload);
+            
+            phasesToSave.forEach((phase, index) => {
+                const phaseRef = doc(db, COLLECTION_NAME, newDocRef.id, 'phases', `phase_${index}`);
+                batch.set(phaseRef, sanitize({ ...phase, index }));
+            });
+            
+            await batch.commit();
+            
+            console.log("Success! Document ID:", newDocRef.id);
             console.groupEnd();
-            await logAction(userId, role, 'PROTOCOL_CREATE', docRef.id, {
+            await logAction(userId, role, 'PROTOCOL_CREATE', newDocRef.id, {
               protocolName: sanitizedPayload.protocol_name
             });
-            return docRef.id;
+            return newDocRef.id;
         }
     } catch (fireError) {
         console.error("Firestore specific error:", fireError);
@@ -196,7 +216,18 @@ export const getProtocolById = async (id) => {
     const docRef = doc(db, COLLECTION_NAME, id);
     const snap = await getDoc(docRef);
     if (snap.exists()) {
-      return { id: snap.id, ...snap.data() };
+      const data = snap.data();
+      
+      // Fallback for subcollections (if phases isn't heavily populated inline)
+      if (!data.phases || data.phases.length === 0) {
+          const phasesSnap = await getDocs(collection(db, COLLECTION_NAME, id, 'phases'));
+          if (!phasesSnap.empty) {
+              const subPhases = phasesSnap.docs.map(d => d.data()).sort((a, b) => a.index - b.index);
+              data.phases = subPhases;
+          }
+      }
+      
+      return { id: snap.id, ...data };
     }
     return null;
   } catch (error) {
@@ -504,11 +535,31 @@ export const getPaginatedProtocols = async (lastDocSnap = null, pageSize = 20, o
  */
 export const updateProtocolFull = async (id, updates) => {
     try {
+        const { phases, ...topLevelUpdates } = updates;
         const docRef = doc(db, COLLECTION_NAME, id);
-        await updateDoc(docRef, {
-            ...updates,
-            updated_at: serverTimestamp(),
-        });
+        
+        if (phases && Array.isArray(phases)) {
+            const batch = writeBatch(db);
+            
+            batch.update(docRef, {
+                ...topLevelUpdates,
+                phase_count: phases.length, // Cache count on top level
+                updated_at: serverTimestamp(),
+            });
+
+            // Write each phase to the subcollection
+            phases.forEach((phase, index) => {
+                const phaseRef = doc(db, COLLECTION_NAME, id, 'phases', `phase_${index}`);
+                batch.set(phaseRef, { ...phase, index });
+            });
+            
+            await batch.commit();
+        } else {
+            await updateDoc(docRef, {
+                ...topLevelUpdates,
+                updated_at: serverTimestamp(),
+            });
+        }
         return true;
     } catch (error) {
         console.error('[protocolStorage] updateProtocolFull:', error);
@@ -516,3 +567,36 @@ export const updateProtocolFull = async (id, updates) => {
     }
 };
 
+/**
+ * Creates an immutable snapshot (Quote) of the protocol's pricing and supply manifest at a given moment in time.
+ * This ensures that if product prices change tomorrow, the historical quote remains accurate.
+ */
+export const createProtocolQuote = async (protocolId, costData, doctorId = null) => {
+    try {
+        const quoteRef = doc(collection(db, COLLECTION_NAME, protocolId, 'quotes'));
+        
+        const quoteSnapshot = {
+            created_at: serverTimestamp(),
+            created_by: doctorId,
+            expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days validity
+            status: 'valid',
+            
+            // The exact numbers at the time of creation
+            grand_total: costData.grandTotal || 0,
+            accessory_total: costData.accessoryTotal || 0,
+            vial_total_cost: costData.vialTotalCost || 0,
+            
+            // Full manifest of what was quoted and at what unit prices
+            manifest: {
+                compounds: costData.aggregateVials || [],
+                accessories: costData.accessories || []
+            }
+        };
+        
+        await setDoc(quoteRef, quoteSnapshot);
+        return { quoteId: quoteRef.id, ...quoteSnapshot };
+    } catch (error) {
+        console.error('[protocolStorage] createProtocolQuote:', error);
+        throw error;
+    }
+};

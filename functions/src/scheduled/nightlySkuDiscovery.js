@@ -51,37 +51,43 @@ async function sendEmailReport(result) {
   });
 
   const html = `
-    <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #2c3e50;">Atlas AI: Reporte de Sincronización Nocturna</h2>
-      <p>Hola José,</p>
-      <p>El proceso automático de emparejamiento de catálogos (Firebase ↔ Zoho Books) ha finalizado con éxito esta madrugada.</p>
+    <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #334155; max-width: 600px; margin: 0 auto; line-height: 1.6; background-color: #ffffff; border-radius: 12px; padding: 32px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+      <div style="text-align: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 24px; margin-bottom: 24px;">
+        <h1 style="color: #0f172a; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">ATLAS HEALTH</h1>
+        <p style="color: #64748b; margin: 4px 0 0 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Nightly Sync Report</p>
+      </div>
       
-      <div style="background-color: #f8f9fa; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
-        <h3 style="margin-top: 0; color: #3b82f6;">Resumen de Resultados</h3>
-        <ul style="font-size: 16px; line-height: 1.5;">
-          <li><strong>Total Emparejados:</strong> ${result.matched}</li>
-          <li><strong style="color: #10b981;">Confirmados Automáticamente (Confianza > 90%):</strong> ${result.auto_confirmed}</li>
-          <li><strong style="color: #f59e0b;">Pendientes de Revisión (Confianza 60-89%):</strong> ${result.needs_review}</li>
+      <p style="font-size: 16px;">Hi José,</p>
+      <p style="font-size: 16px;">The automatic catalog matching process (Firebase ↔ Zoho Books) has successfully completed tonight.</p>
+      
+      <div style="margin-bottom: 28px;">
+        <h3 style="color: #3b82f6; display: flex; align-items: center; justify-content: space-between; font-size: 18px; margin-bottom: 12px;">
+          <span>📋 Results Summary</span>
+        </h3>
+        <ul style="background: #f8fafc; padding: 16px 20px 16px 36px; border-radius: 8px; margin: 0; border: 1px solid #f1f5f9; list-style-type: disc;">
+          <li style="padding: 4px 0;"><strong>Total Matched:</strong> ${result.matched}</li>
+          <li style="padding: 4px 0;"><strong style="color: #10b981;">Auto-Confirmed (>90% confidence):</strong> ${result.auto_confirmed}</li>
+          <li style="padding: 4px 0;"><strong style="color: #f59e0b;">Needs Review (60-89% confidence):</strong> ${result.needs_review}</li>
         </ul>
       </div>
 
-      <p>Por favor, accede al panel de administración de la plataforma (Sección <strong>Settings > Integrations > Zoho Books</strong>) para revisar y aprobar los emparejamientos pendientes en la pestaña de <strong>SKU Sync</strong>.</p>
+      <p style="font-size: 16px;">Please access the platform admin panel (<strong>System & AI > Zoho Books</strong>) to review and approve pending matches in the <strong>SKU Sync</strong> tab.</p>
       
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="https://platform.regenpept.com/admin" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; font-size: 16px;">Revisar Productos</a>
+      <div style="text-align: center; margin-top: 40px; margin-bottom: 10px;">
+        <a href="https://platform.regenpept.com/admin/sku-sync" style="display: inline-block; background-color: #0f172a; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 16px; letter-spacing: 0.5px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">Review Products</a>
       </div>
       
-      <p style="margin-top: 30px; font-size: 12px; color: #888;">
-        Este es un mensaje automático generado por Atlas AI.<br>
-        Mediluxe System Administration
+      <p style="margin-top: 40px; font-size: 12px; color: #94a3b8; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 24px; line-height: 1.5;">
+        This is an automatically generated message by Atlas Health AI.<br/>
+        Atlas Health System Administration
       </p>
     </div>
   `;
 
   await transporter.sendMail({
-    from: `"Atlas AI" <${user}>`,
+    from: `"Atlas Health AI" <${user}>`,
     to: "jose@mediluxeme.com",
-    subject: "Atlas AI: Nuevos productos emparejados (Firebase ↔ Zoho)",
+    subject: "Atlas Health: New Products Matched (Firebase ↔ Zoho)",
     html: html
   });
   

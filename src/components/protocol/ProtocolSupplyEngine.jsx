@@ -867,7 +867,41 @@ const ProtocolSupplyEngine = React.memo(function ProtocolSupplyEngine({
         }
 
         /* ── CTA button ── */
+        .pse-sticky-bottom-bar {
+          position: sticky;
+          bottom: 0;
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          padding: 1rem;
+          margin: 1rem -1rem -1rem -1rem;
+          border-top: 1px solid var(--color-border);
+          border-radius: 0 0 12px 12px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          z-index: 10;
+          box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.03);
+          gap: 1rem;
+        }
+        .pse-sticky-total {
+          display: flex;
+          flex-direction: column;
+        }
+        .pse-sticky-label {
+          font-size: 0.7rem;
+          color: var(--color-text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          font-weight: 600;
+        }
+        .pse-sticky-value {
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: var(--color-text-primary);
+        }
         .pse-bundle-btn {
+          flex: 1;
           margin-top: 0.9rem;
           width: 100%;
           display: flex;
@@ -1330,11 +1364,41 @@ const ProtocolSupplyEngine = React.memo(function ProtocolSupplyEngine({
           border-right: 7px solid transparent;
           border-top: 7px solid #1e293b;
         }
+        .pse-sticky-footer {
+          position: sticky;
+          bottom: 0;
+          background: #fff;
+          padding: 1rem;
+          border-top: 1px solid #e2e8f0;
+          z-index: 50;
+        }
       `}</style>
 
-      <div className="pse-root">
+      <div className="pse-body">
+        
+        {/* ── Interactive Duration Slider ── */}
+        <div className="pse-duration-slider-container" style={{ padding: '0.5rem 0 1.5rem 0', borderBottom: '1px solid var(--color-border)', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Protocol Duration</span>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-brand)' }}>{durationScale === 1 ? 'Standard (4 Weeks)' : durationScale === 2 ? 'Extended (8 Weeks)' : durationScale === 3 ? 'Max (12 Weeks)' : `${durationScale * 4} Weeks`}</span>
+          </div>
+          <input 
+            type="range" 
+            min="1" 
+            max="3" 
+            step="1" 
+            value={durationScale} 
+            onChange={(e) => setDurationScale(parseInt(e.target.value, 10))}
+            style={{ width: '100%', accentColor: 'var(--color-brand)' }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--color-text-tertiary)', marginTop: '0.25rem' }}>
+            <span>4 wks</span>
+            <span>8 wks</span>
+            <span>12 wks</span>
+          </div>
+        </div>
 
-        {/* Tier badge */}
+        {/* ── Items (Compounds/Phases) ── */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.9rem' }}>
           <span className={`pse-tier-badge pse-tier-${tier}`} style={{ marginBottom: 0 }}>
             <Package size={10} />
@@ -1666,22 +1730,28 @@ const ProtocolSupplyEngine = React.memo(function ProtocolSupplyEngine({
         )}
 
 
-        {/* ── Add to Cart CTA ── */}
-        <button
-          className={`pse-bundle-btn pse-add-btn${added ? ' pse-bundle-btn--success' : ''}`}
-          onClick={() => handleLoadBundle()}
-          disabled={added}
-          style={{
-            background: added ? 'var(--color-success)' : 'linear-gradient(135deg, #003666 0%, #005aac 100%)',
-            boxShadow: '0 4px 15px rgba(0,54,102,0.2)',
-          }}
-        >
-          {added ? (
-            <><CheckCircle2 size={18} /> Added to Order</>
-          ) : (
-            <><ShoppingCart size={18} /> Add Protocol Bundle to Order</>
-          )}
-        </button>
+        {/* ── Add to Cart CTA (Sticky on Mobile) ── */}
+        <div className="pse-sticky-bottom-bar">
+          <div className="pse-sticky-total">
+            <span className="pse-sticky-label">Total Cost</span>
+            <span className="pse-sticky-value">${grandTotal.toFixed(0)}</span>
+          </div>
+          <button
+            className={`pse-bundle-btn pse-add-btn${added ? ' pse-bundle-btn--success' : ''}`}
+            onClick={() => handleLoadBundle()}
+            disabled={added}
+            style={{
+              background: added ? 'var(--color-success)' : 'linear-gradient(135deg, #003666 0%, #005aac 100%)',
+              boxShadow: '0 4px 15px rgba(0,54,102,0.2)',
+            }}
+          >
+            {added ? (
+              <><CheckCircle2 size={18} /> Added to Order</>
+            ) : (
+              <><ShoppingCart size={18} /> Add Protocol Bundle to Order</>
+            )}
+          </button>
+        </div>
 
         {/* RUO micro-note */}
         <p style={{

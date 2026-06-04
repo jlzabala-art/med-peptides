@@ -41,6 +41,7 @@ import AppEntityCell from '../ui/AppEntityCell';
 import { useToast } from '../../hooks/useToast';
 import { catalogRepository } from '../../repositories/catalogRepository';
 import AdminSupplyNotifierWidget from './gadgets/AdminSupplyNotifierWidget';
+import PredictiveInventoryAlerts from './gadgets/PredictiveInventoryAlerts';
 import ProductContextSwitcher from './ProductContextSwitcher';
 import InlineEditField from '../ui/InlineEditField';
 import BulkOrderSelectionModal from './BulkOrders/BulkOrderSelectionModal';
@@ -1574,7 +1575,8 @@ export default function AdminProductsTab({
       />
       
       {isAdmin && !readOnly && (
-        <div style={{ marginBottom: '1.5rem' }}>
+        <div style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <PredictiveInventoryAlerts products={products} />
           <AdminSupplyNotifierWidget />
         </div>
       )}

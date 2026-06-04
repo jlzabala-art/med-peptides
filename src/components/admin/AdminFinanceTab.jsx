@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useAIContext } from '../../context/AIContext';
 import { useFinanceData } from '../../hooks/useFinanceData';
 import FinanceOverview from './finance/FinanceOverview';
 import FinanceBudget from './finance/FinanceBudget';
@@ -13,6 +14,7 @@ import SkeletonLoader from '../ui/SkeletonLoader';
 
 export default function AdminFinanceTab({ activeSubTab }) {
   const { user } = useAuth();
+  const { setPageContext, clearPageContext } = useAIContext();
   const { data, loading, forceRefresh, error } = useFinanceData();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [dateRange, setDateRange] = useState('YTD');
@@ -32,8 +34,28 @@ export default function AdminFinanceTab({ activeSubTab }) {
     const unpaidInvoices = dashboardData?.pendingInvoices || [];
     const topUnpaid = unpaidInvoices.slice(0, 5).map(inv => `${inv.customer_name} (${inv.balance} AED due ${inv.due_date})`);
     
-    const payload = {
+    let currentPrompts = [];
+    if (activeTab === 'reporting') {
+      currentPrompts = [
+        { label: 'P&L Analysis', prompt: 'Analiza el Profit and Loss del 2026 e identifica tendencias de ingresos y gastos.' },
+        { label: 'Comparative Q1 vs Q2', prompt: 'Haz un análisis comparativo entre Q1 y Q2 de 2026, destacando la variación del beneficio neto.' }
+      ];
+    } else if (activeTab === 'payables' || activeTab === 'overview') {
+      currentPrompts = [
+        { label: 'Risk Analysis', prompt: 'Which unpaid invoices are at highest risk of default based on history?' },
+        { label: 'Draft Reminder', prompt: 'Draft a polite payment reminder email for the top unpaid invoice.' },
+        { label: 'Cash Flow Forecast', prompt: 'Based on pending invoices, what is our expected cash flow next week?' }
+      ];
+    } else {
+      currentPrompts = [
+        { label: 'Budget Overview', prompt: 'What is our current cash runway and MRR?' },
+        { label: 'Cost Optimization', prompt: 'Are there any budget categories where we are overspending?' }
+      ];
+    }
+
+    setPageContext({
       financial_context: {
+        active_tab: activeTab,
         total_cash_balance: totalBalance,
         active_subscriptions: activeSubs,
         mrr: mrr,
@@ -41,17 +63,13 @@ export default function AdminFinanceTab({ activeSubTab }) {
         budget_alerts: 'Software category is over budget at 125%',
         cash_runway_months: (totalBalance / 35000).toFixed(1),
         unpaid_invoices_count: unpaidInvoices.length,
-        unpaid_invoices_top_5: topUnpaid
+        unpaid_invoices_top_5: topUnpaid,
+        pnl2026_data: dashboardData?.pnl2026 || null
       },
-      ai_suggested_prompts: [
-        { label: 'Risk Analysis', prompt: 'Which unpaid invoices are at highest risk of default based on history?' },
-        { label: 'Draft Reminder', prompt: 'Draft a polite payment reminder email for the top unpaid invoice.' },
-        { label: 'Cash Flow Forecast', prompt: 'Based on pending invoices, what is our expected cash flow next week?' }
-      ]
-    };
-    window.dispatchEvent(new CustomEvent('UPDATE_GLOBAL_CONTEXT', { detail: payload }));
-    return () => window.dispatchEvent(new CustomEvent('UPDATE_GLOBAL_CONTEXT', { detail: null }));
-  }, [loading, totalBalance, activeSubs, dashboardData]);
+      ai_suggested_prompts: currentPrompts
+    });
+    return () => clearPageContext();
+  }, [loading, totalBalance, activeSubs, dashboardData, activeTab, setPageContext, clearPageContext]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);

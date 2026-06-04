@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GripVertical, Trash2, Plus } from 'lucide-react';
 
-export default function PhaseEditor({ phases, products: catalogProducts, onChange }) {
+const PhaseEditor = React.memo(({ phases, products: catalogProducts, onChange }) => {
   const navigate = useNavigate();
   const [productSearch, setProductSearch] = useState('');
 
@@ -164,4 +164,6 @@ export default function PhaseEditor({ phases, products: catalogProducts, onChang
       </button>
     </div>
   );
-}
+});
+
+export default PhaseEditor;

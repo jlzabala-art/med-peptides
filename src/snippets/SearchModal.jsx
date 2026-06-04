@@ -8,6 +8,7 @@ import { useResponsive } from '../hooks/useResponsive';
 import { trackToolUsage } from '../hooks/useAnalytics';
 import { trackSearchEmptyResult, trackSearchRepeated } from '../utils/analytics';
 import { lockScroll, unlockScroll } from '../utils/scrollLock';
+import { searchAlgolia, checkAlgoliaQuota } from '../services/algoliaSearch';
 
 // Cycling placeholder messages — shows users what the search can do
 const PLACEHOLDER_CYCLE = [
@@ -129,6 +130,10 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
   const seenQueriesRef = useRef(new Map()); // query → count
   // Track whether we just opened the modal to block the auto-tab from overriding initialTab
   const justOpenedRef = useRef(false);
+  // ── Algolia Cloud Fallback State ─────────────────────────────────────────
+  const [algoliaResults, setAlgoliaResults] = useState({ products: [], protocols: [] });
+  const [algoliaLoading, setAlgoliaLoading] = useState(false);
+  const algoliaTimerRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -227,6 +232,45 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
     }, 1500); // 1.5s delay to capture "intent" rather than every keystroke
     return () => clearTimeout(timer);
   }, [searchTerm, searchResults.length, supplementResults.length, protocolResults.length, activeTab]);
+
+  // ── Algolia Cloud Fallback: fires ONLY when local search returns 0 results ──
+  useEffect(() => {
+    // Clear previous Algolia timer
+    if (algoliaTimerRef.current) clearTimeout(algoliaTimerRef.current);
+
+    const localTotal = searchResults.length + supplementResults.length + protocolResults.length;
+    const term = searchTerm.trim();
+
+    // Only trigger Algolia when: local has 0 results, query is 3+ chars, and quota allows
+    if (localTotal > 0 || term.length < 3 || !isOpen) {
+      setAlgoliaResults({ products: [], protocols: [] });
+      setAlgoliaLoading(false);
+      return;
+    }
+
+    const quota = checkAlgoliaQuota();
+    if (!quota.allowed) {
+      return; // Free tier exhausted — silently skip
+    }
+
+    setAlgoliaLoading(true);
+
+    // 700ms debounce to save Algolia quota
+    algoliaTimerRef.current = setTimeout(async () => {
+      try {
+        const results = await searchAlgolia(term);
+        setAlgoliaResults(results);
+      } catch (e) {
+        console.error('[SearchModal] Algolia fallback failed:', e);
+      } finally {
+        setAlgoliaLoading(false);
+      }
+    }, 700);
+
+    return () => {
+      if (algoliaTimerRef.current) clearTimeout(algoliaTimerRef.current);
+    };
+  }, [searchTerm, searchResults.length, supplementResults.length, protocolResults.length, isOpen]);
 
   const searchThemes = useMemo(() => getSearchThemes(searchResults), [searchResults]);
   const questionMode = useMemo(() => isQuestion(searchTerm), [searchTerm]);
@@ -770,7 +814,57 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
                     )}
 
                     {!isLoading && searchResults.length === 0 && supplementResults.length === 0 && protocolResults.length === 0 && (
-                      <SearchEmptyState query={searchTerm} THEME={THEME} onClose={onClose} isMobile={isMobile} />
+                      <>
+                        {/* ── Algolia Cloud Fallback Results ── */}
+                        {algoliaLoading && (
+                          <div style={{ padding: '2rem', textAlign: 'center' }}>
+                            <div className="smSpinner" style={{ margin: '0 auto 1rem' }} />
+                            <p style={{ color: THEME.textMuted, fontSize: '0.85rem' }}>Searching cloud index...</p>
+                          </div>
+                        )}
+                        {!algoliaLoading && (algoliaResults.products.length > 0 || algoliaResults.protocols.length > 0) && (
+                          <div style={{ padding: isMobile ? '0.5rem 1rem' : '0.75rem 1.5rem', animation: 'smFadeIn 0.25s ease-out' }}>
+                            <div style={{ 
+                              fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', 
+                              color: THEME.accentA, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem'
+                            }}>
+                              <Sparkles size={12} /> Cloud Search Results
+                            </div>
+                            {algoliaResults.products.map(hit => (
+                              <div 
+                                key={hit.objectID} 
+                                className="srRow"
+                                onClick={() => { onSelectProduct({ id: hit.objectID, name: hit.name }); onClose(); }}
+                              >
+                                <FlaskConical size={16} color={THEME.accentA} />
+                                <div>
+                                  <div style={{ fontWeight: 600, color: THEME.textPrimary, fontSize: '0.9rem' }}>{hit.name}</div>
+                                  <div style={{ fontSize: '0.75rem', color: THEME.textSecondary }}>{hit.category}</div>
+                                </div>
+                              </div>
+                            ))}
+                            {algoliaResults.protocols.map(hit => (
+                              <div 
+                                key={hit.objectID} 
+                                className="srRow"
+                                onClick={() => { onClose(); navigate(`/protocol/${hit.objectID}`); }}
+                              >
+                                <ClipboardList size={16} color={THEME.accentB} />
+                                <div>
+                                  <div style={{ fontWeight: 600, color: THEME.textPrimary, fontSize: '0.9rem' }}>{hit.name}</div>
+                                  <div style={{ fontSize: '0.75rem', color: THEME.textSecondary }}>{hit.category}</div>
+                                </div>
+                              </div>
+                            ))}
+                            <div style={{ textAlign: 'right', marginTop: '0.5rem', fontSize: '0.65rem', color: THEME.textMuted }}>
+                              Powered by Algolia
+                            </div>
+                          </div>
+                        )}
+                        {!algoliaLoading && algoliaResults.products.length === 0 && algoliaResults.protocols.length === 0 && (
+                          <SearchEmptyState query={searchTerm} THEME={THEME} onClose={onClose} isMobile={isMobile} />
+                        )}
+                      </>
                     )}
                   </div>
                 )}

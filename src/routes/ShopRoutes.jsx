@@ -4,6 +4,7 @@ import { useUIStore } from '../stores/uiStore';
 import { useShop } from '../context/ShopProvider';
 import { useCart } from '../context/CartProvider';
 import { useAuth } from '../context/AuthContext';
+import RestrictedCatalogRoute from '../components/auth/RestrictedCatalogRoute';
 
 // Lazy Templates
 const HomeView = lazy(() => import('../templates/HomeView'));
@@ -223,7 +224,11 @@ export default function ShopRoutes({
         />
       } />
       <Route path="supplements/:slug" element={<SupplementDetailPage onAddToCart={updateCart} region={region} />} />
-      <Route path="testing/:slug" element={<TestingDetailPage onAddToCart={updateCart} region={region} />} />
+      <Route path="testing/:slug" element={
+        <RestrictedCatalogRoute catalogName="testing">
+          <TestingDetailPage onAddToCart={updateCart} region={region} />
+        </RestrictedCatalogRoute>
+      } />
       
       {/* Continued Routes */}
       <Route path="academy" element={<AcademyView onSelectCourse={(courseId) => tenantNavigate(`/academy/${courseId}`)} />} />
@@ -231,26 +236,34 @@ export default function ShopRoutes({
       <Route path="faqs" element={<FAQDiscoveryView onBack={() => tenantNavigate('/')} products={visibleProducts} />} />
       <Route path="quality" element={<Quality onBack={() => window.history.back()} />} />
       <Route path="custom-synthesis" element={<CustomSynthesis onBack={() => window.history.back()} />} />
-      <Route path="api-dashboard" element={<APIDashboard onBack={() => window.history.back()} isProfessional={isProfessional} />} />
+      <Route path="api-dashboard" element={
+        <RestrictedCatalogRoute catalogName="apis">
+          <APIDashboard onBack={() => window.history.back()} isProfessional={isProfessional} />
+        </RestrictedCatalogRoute>
+      } />
       <Route path="objectives" element={
-        <ObjectivesView 
-          onBack={() => window.history.back()}
-          region={region}
-          setRegion={setRegion}
-          isProfessional={isProfessional}
-          EXCHANGE_RATES={settings?.exchangeRates || {}}
-          products={visibleProducts}
-          onSelectObjective={(objectiveId) => tenantNavigate(`/objective/${objectiveId.toLowerCase().replace(/ /g, '-')}`)}
-        />
+        <RestrictedCatalogRoute catalogName="testing">
+          <ObjectivesView 
+            onBack={() => window.history.back()}
+            region={region}
+            setRegion={setRegion}
+            isProfessional={isProfessional}
+            EXCHANGE_RATES={settings?.exchangeRates || {}}
+            products={visibleProducts}
+            onSelectObjective={(objectiveId) => tenantNavigate(`/objective/${objectiveId.toLowerCase().replace(/ /g, '-')}`)}
+          />
+        </RestrictedCatalogRoute>
       } />
       <Route path="objective/:objectiveId" element={
-        <ObjectiveDetailRouteWrapper
-          isProfessional={isProfessional}
-          visibleProducts={visibleProducts}
-          allFaqs={allFaqs}
-          onSelectProduct={handleProductSelect}
-          tenantNavigate={tenantNavigate}
-        />
+        <RestrictedCatalogRoute catalogName="testing">
+          <ObjectiveDetailRouteWrapper
+            isProfessional={isProfessional}
+            visibleProducts={visibleProducts}
+            allFaqs={allFaqs}
+            onSelectProduct={handleProductSelect}
+            tenantNavigate={tenantNavigate}
+          />
+        </RestrictedCatalogRoute>
       } />
       <Route path="settings" element={<UserSettings onBack={() => tenantNavigate('/patient')} />} />
       

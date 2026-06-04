@@ -65,6 +65,9 @@ const ImportCatalogsTab = React.lazy(() => import('../components/admin/imports/I
 const ImportRFQTab = React.lazy(() => import('../components/admin/imports/ImportRFQTab'));
 const ShippingTrackerTab = React.lazy(() => import('../components/supplier/ShippingTrackerTab'));
 const AdminMarketingTab = React.lazy(() => import('../components/admin/AdminMarketingTab'));
+const QuotationsModule = React.lazy(() => import('../components/admin/QuotationsModule'));
+const SalesOrdersModule = React.lazy(() => import('../components/admin/SalesOrdersModule'));
+const InvoicesModule = React.lazy(() => import('../components/admin/InvoicesModule'));
 // ── Premium loading skeleton for lazy-loaded admin tabs ────────────────────────
 const AdminTabSkeleton = () => (
   <div style={{ padding: '2rem' }}>
@@ -107,7 +110,10 @@ export default function AdminRoutes() {
         <Route path="settings" element={<AdminTabErrorBoundary tabId="settings" tabLabel="Settings"><AdminSettingsTab readOnly={false} /></AdminTabErrorBoundary>} />
         <Route path="invitations" element={<AdminTabErrorBoundary tabId="invitations" tabLabel="Invitations"><AdminInvitationsTab readOnly={false} /></AdminTabErrorBoundary>} />
         <Route path="views" element={<AdminTabErrorBoundary tabId="views" tabLabel="Views"><AdminViewsConfigTab /></AdminTabErrorBoundary>} />
-        <Route path="orders" element={<AdminTabErrorBoundary tabId="orders" tabLabel="Orders"><OrdersTab readOnly={false} /></AdminTabErrorBoundary>} />
+        <Route path="orders" element={<AdminTabErrorBoundary tabId="orders" tabLabel="B2C Orders"><OrdersTab readOnly={false} /></AdminTabErrorBoundary>} />
+        <Route path="quotations" element={<AdminTabErrorBoundary tabId="quotations" tabLabel="Quotations (B2B)"><QuotationsModule /></AdminTabErrorBoundary>} />
+        <Route path="sales-orders" element={<AdminTabErrorBoundary tabId="sales-orders" tabLabel="Sales Orders (B2B)"><SalesOrdersModule /></AdminTabErrorBoundary>} />
+        <Route path="invoices" element={<AdminTabErrorBoundary tabId="invoices" tabLabel="Invoices (B2B)"><InvoicesModule /></AdminTabErrorBoundary>} />
         <Route path="stock" element={<AdminTabErrorBoundary tabId="stock" tabLabel="Stock & Inventory"><AdminVariantsTab /></AdminTabErrorBoundary>} />
         <Route path="bulk-orders" element={<AdminTabErrorBoundary tabId="bulk-orders" tabLabel="Bulk Orders"><AdminBulkOrdersTab /></AdminTabErrorBoundary>} />
         <Route path="access-levels" element={<AdminTabErrorBoundary tabId="access-levels" tabLabel="Access Levels"><AdminAccessLevelsTab /></AdminTabErrorBoundary>} />

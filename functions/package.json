@@ -16,6 +16,7 @@
   "dependencies": {
     "@google-analytics/data": "^4.12.1",
     "@google/genai": "^2.7.0",
+    "algoliasearch": "^5.53.0",
     "axios": "^1.17.0",
     "busboy": "^1.6.0",
     "firebase-admin": "^13.8.0",

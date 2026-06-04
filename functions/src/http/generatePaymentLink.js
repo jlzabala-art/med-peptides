@@ -63,7 +63,7 @@ exports.generatePaymentLink = onCall(async (request) => {
             currency: currency.toLowerCase(),
             product_data: {
               name: `Order #${orderId.slice(-6).toUpperCase()}`,
-              description: "Regenpept Medical Order",
+              description: "Atlas Health Medical Order",
             },
             unit_amount: unitAmount,
           },
@@ -76,8 +76,8 @@ exports.generatePaymentLink = onCall(async (request) => {
         generatedBy: callerUid
       },
       // Using a placeholder domain since we don't know the exact production URL here
-      success_url: `https://regen-pept.web.app/checkout/success?session_id={CHECKOUT_SESSION_ID}&order_id=${orderId}`,
-      cancel_url: `https://regen-pept.web.app/checkout/cancel?order_id=${orderId}`,
+      success_url: `https://atlas-health.com/checkout/success?session_id={CHECKOUT_SESSION_ID}&order_id=${orderId}`,
+      cancel_url: `https://atlas-health.com/checkout/cancel?order_id=${orderId}`,
     });
 
     // 4. Update Firestore Order

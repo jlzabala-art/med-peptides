@@ -55,6 +55,10 @@ exports.weeklyCompetitorDigest = weeklyCompetitorDigest.weeklyCompetitorDigest;
 // TRIGGERS
 exports.scoreNewLead = require('./src/triggers/on_lead_created').scoreNewLead;
 exports.onProductCreated = require('./src/triggers/products').onProductCreated;
+exports.protocolCompute = require('./src/triggers/protocolCompute').protocolCompute;
+exports.publicProtocols = require('./src/http/api_protocols').publicProtocols;
+exports.syncProductToAlgolia = require('./src/triggers/algoliaSync').syncProductToAlgolia;
+exports.syncProtocolToAlgolia = require('./src/triggers/algoliaSync').syncProtocolToAlgolia;
 exports.reconcileSupplierInvoice   = require("./src/http/reconcile_supplier_invoice").reconcileSupplierInvoice; // 3-way invoice matching
 
 exports.acceptInvitation           = require("./src/http/acceptInvitation").acceptInvitation;

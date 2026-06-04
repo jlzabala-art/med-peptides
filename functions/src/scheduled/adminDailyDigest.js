@@ -112,85 +112,85 @@ async function sendDigestEmail(data) {
     const logoUrl = `${baseUrl}/logo.png`; // assuming logo.png is the main logo
 
     const topDoctorsHtml = data.topDoctors.length > 0
-      ? data.topDoctors.map((doc, idx) => `<li>${idx+1}. Dr. ${doc.name}: <strong>${doc.minutes} min</strong></li>`).join("")
-      : "<li>No hubo actividad de doctores registrada.</li>";
+      ? data.topDoctors.map((doc, idx) => `<li style="padding: 4px 0;">${idx+1}. Dr. ${doc.name}: <strong style="color:#10b981;">${doc.minutes} min</strong></li>`).join("")
+      : "<li style='padding: 4px 0;'>No doctor activity recorded.</li>";
       
     const lowStockHtml = data.lowStockItems.length > 0
-      ? data.lowStockItems.slice(0, 5).map(item => `<li>${item.name} (SKU: ${item.sku}) - Stock: <strong style="color:red;">${item.stock_on_hand}</strong></li>`).join("")
-      : "<li>Todo el stock está en niveles óptimos.</li>";
+      ? data.lowStockItems.slice(0, 5).map(item => `<li style="padding: 4px 0;">${item.name} (SKU: ${item.sku}) - Stock: <strong style="color:red;">${item.stock_on_hand}</strong></li>`).join("")
+      : "<li style='padding: 4px 0;'>All stock levels are optimal.</li>";
 
     const html = `
-      <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; line-height: 1.6; background-color: #ffffff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-        <div style="text-align: center; border-bottom: 2px solid #eaeaea; padding-bottom: 20px; margin-bottom: 20px;">
-          <img src="${logoUrl}" alt="Mediluxe Logo" style="max-height: 60px; margin-bottom: 10px;" onerror="this.src='https://ui-avatars.com/api/?name=Mediluxe&background=0D8ABC&color=fff&size=100'"/>
-          <h2 style="color: #2c3e50; margin: 0;">Admin Daily Digest</h2>
+      <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #334155; max-width: 600px; margin: 0 auto; line-height: 1.6; background-color: #ffffff; border-radius: 12px; padding: 32px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+        <div style="text-align: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 24px; margin-bottom: 24px;">
+          <h1 style="color: #0f172a; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">ATLAS HEALTH</h1>
+          <p style="color: #64748b; margin: 4px 0 0 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Admin Daily Digest</p>
         </div>
         
-        <p>Hola José,</p>
-        <p>Aquí tienes el resumen de actividad de la plataforma correspondiente al <strong>${data.yesterdayStr}</strong>.</p>
+        <p style="font-size: 16px;">Hi José,</p>
+        <p style="font-size: 16px;">Here is your platform activity digest for <strong>${data.yesterdayStr}</strong>.</p>
         
-        <div style="margin-bottom: 25px;">
-          <h3 style="color: #3b82f6; display: flex; align-items: center; justify-content: space-between;">
-            <span>💰 Resumen Financiero</span>
-            <a href="${baseUrl}/admin?tab=finance" style="font-size: 12px; background: #3b82f6; color: white; padding: 4px 10px; border-radius: 12px; text-decoration: none;">Ver Dashboard</a>
+        <div style="margin-bottom: 28px;">
+          <h3 style="color: #3b82f6; display: flex; align-items: center; justify-content: space-between; font-size: 18px; margin-bottom: 12px;">
+            <span>💰 Financial Overview</span>
+            <a href="${baseUrl}/admin/finance-overview" style="font-size: 12px; background: #eff6ff; color: #3b82f6; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: 600; border: 1px solid #bfdbfe;">View Dashboard</a>
           </h3>
-          <ul style="background: #f8f9fa; padding: 15px 30px; border-radius: 8px;">
-            <li>Nuevas facturas emitidas: <strong>${data.invoicesCount}</strong></li>
-            <li>Volumen facturado: <strong>${totalInvoicedFormatted}</strong></li>
-            <li>Balance de Caja (Estimado): <strong>Ver detalles en App</strong></li>
+          <ul style="background: #f8fafc; padding: 16px 20px 16px 36px; border-radius: 8px; margin: 0; border: 1px solid #f1f5f9; list-style-type: disc;">
+            <li style="padding: 4px 0;">New invoices issued: <strong>${data.invoicesCount}</strong></li>
+            <li style="padding: 4px 0;">Invoiced volume: <strong>${totalInvoicedFormatted}</strong></li>
+            <li style="padding: 4px 0;">Cash Balance (Est.): <strong>View details in App</strong></li>
           </ul>
         </div>
 
-        <div style="margin-bottom: 25px;">
-          <h3 style="color: #10b981; display: flex; align-items: center; justify-content: space-between;">
-            <span>👨‍⚕️ Top Doctores Conectados</span>
-            <a href="${baseUrl}/admin?tab=users" style="font-size: 12px; background: #10b981; color: white; padding: 4px 10px; border-radius: 12px; text-decoration: none;">Gestionar Usuarios</a>
+        <div style="margin-bottom: 28px;">
+          <h3 style="color: #10b981; display: flex; align-items: center; justify-content: space-between; font-size: 18px; margin-bottom: 12px;">
+            <span>👨‍⚕️ Top Connected Doctors</span>
+            <a href="${baseUrl}/admin/doctors" style="font-size: 12px; background: #ecfdf5; color: #10b981; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: 600; border: 1px solid #a7f3d0;">Manage Users</a>
           </h3>
-          <ul style="background: #f8f9fa; padding: 15px 30px; border-radius: 8px;">
+          <ul style="background: #f8fafc; padding: 16px 20px 16px 36px; border-radius: 8px; margin: 0; border: 1px solid #f1f5f9;">
             ${topDoctorsHtml}
           </ul>
         </div>
 
-        <div style="margin-bottom: 25px;">
-          <h3 style="color: #f59e0b; display: flex; align-items: center; justify-content: space-between;">
-            <span>📋 Tareas Pendientes</span>
-            <a href="${baseUrl}/admin?tab=users" style="font-size: 12px; background: #f59e0b; color: white; padding: 4px 10px; border-radius: 12px; text-decoration: none;">Revisar Solicitudes</a>
+        <div style="margin-bottom: 28px;">
+          <h3 style="color: #f59e0b; display: flex; align-items: center; justify-content: space-between; font-size: 18px; margin-bottom: 12px;">
+            <span>📋 Pending Tasks</span>
+            <a href="${baseUrl}/admin/patients" style="font-size: 12px; background: #fffbeb; color: #f59e0b; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: 600; border: 1px solid #fde68a;">Review Requests</a>
           </h3>
-          <ul style="background: #f8f9fa; padding: 15px 30px; border-radius: 8px;">
-            <li>Pacientes esperando aprobación: <strong>${data.pendingPatients}</strong></li>
-            <li>Tickets de soporte abiertos: <strong>Ver en App</strong></li>
+          <ul style="background: #f8fafc; padding: 16px 20px 16px 36px; border-radius: 8px; margin: 0; border: 1px solid #f1f5f9; list-style-type: disc;">
+            <li style="padding: 4px 0;">Patients awaiting approval: <strong>${data.pendingPatients}</strong></li>
+            <li style="padding: 4px 0;">Open support tickets: <strong>View in App</strong></li>
           </ul>
         </div>
 
-        <div style="margin-bottom: 25px;">
-          <h3 style="color: #ef4444; display: flex; align-items: center; justify-content: space-between;">
-            <span>⚠️ Alertas Médicas (Stock Bajo)</span>
-            <a href="${baseUrl}/admin?tab=products" style="font-size: 12px; background: #ef4444; color: white; padding: 4px 10px; border-radius: 12px; text-decoration: none;">Ver Inventario</a>
+        <div style="margin-bottom: 28px;">
+          <h3 style="color: #ef4444; display: flex; align-items: center; justify-content: space-between; font-size: 18px; margin-bottom: 12px;">
+            <span>⚠️ Inventory Alerts (Low Stock)</span>
+            <a href="${baseUrl}/admin/stock" style="font-size: 12px; background: #fef2f2; color: #ef4444; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: 600; border: 1px solid #fecaca;">View Inventory</a>
           </h3>
-          <div style="background: #fdf2f2; padding: 15px 30px; border-radius: 8px; border: 1px solid #fee2e2;">
-            <p style="margin-top: 0; font-weight: bold; color: #b91c1c;">Productos con menos de 10 unidades en inventario:</p>
-            <ul>
+          <div style="background: #fef2f2; padding: 16px 20px 16px 20px; border-radius: 8px; border: 1px solid #fecaca;">
+            <p style="margin: 0 0 10px 0; font-weight: 700; color: #b91c1c;">Products with fewer than 10 units in stock:</p>
+            <ul style="margin: 0; padding-left: 16px;">
               ${lowStockHtml}
-              ${data.lowStockItems.length > 5 ? `<li>... y ${data.lowStockItems.length - 5} más (Ver App)</li>` : ""}
+              ${data.lowStockItems.length > 5 ? `<li style="padding: 4px 0; font-style: italic; color: #7f1d1d;">... and ${data.lowStockItems.length - 5} more (View App)</li>` : ""}
             </ul>
           </div>
         </div>
 
-        <div style="text-align: center; margin-top: 30px;">
-          <a href="${baseUrl}/admin" style="display: inline-block; background-color: #0f172a; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; letter-spacing: 0.5px;">Abrir Panel de Administración</a>
+        <div style="text-align: center; margin-top: 40px; margin-bottom: 10px;">
+          <a href="${baseUrl}/admin" style="display: inline-block; background-color: #0f172a; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 16px; letter-spacing: 0.5px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">Open Admin Dashboard</a>
         </div>
 
-        <p style="margin-top: 40px; font-size: 12px; color: #888; text-align: center; border-top: 1px solid #eaeaea; padding-top: 20px;">
-          Este es un mensaje generado automáticamente por Mediluxe System Administration.<br/>
-          Si no deseas recibir estos correos, puedes ajustar tus preferencias en tu perfil.
+        <p style="margin-top: 40px; font-size: 12px; color: #94a3b8; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 24px; line-height: 1.5;">
+          This is an automatically generated message from the Atlas Health System Administration.<br/>
+          If you no longer wish to receive these emails, you can adjust your preferences in your profile.
         </p>
       </div>
     `;
 
     await transporter.sendMail({
-      from: `"Mediluxe Admin" <${user}>`,
+      from: `"Atlas Health Admin" <${user}>`,
       to: "jose@mediluxeme.com",
-      subject: `Mediluxe Admin Daily Digest: ${data.yesterdayStr}`,
+      subject: `Atlas Health Admin Daily Digest: ${data.yesterdayStr}`,
       html: html
     });
     

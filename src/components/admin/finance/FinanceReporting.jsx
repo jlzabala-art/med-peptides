@@ -3,6 +3,7 @@ import { Download, FileText, CheckCircle, BarChart3, TrendingUp, Presentation, B
 
 import FinancePnL from './FinancePnL';
 import ComparativeAnalysisTool from './ComparativeAnalysisTool';
+import PredictivePnLSimulator from './PredictivePnLSimulator';
 
 export default function FinanceReporting({ dashboardData, totalBalance, activeSubs }) {
   const [generating, setGenerating] = useState(false);
@@ -222,6 +223,8 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
       </div>
       
       <FinancePnL pnl2026={pnl2026} />
+      
+      <PredictivePnLSimulator pnl2026={pnl2026} />
       
       <ComparativeAnalysisTool />
 
