@@ -1016,7 +1016,7 @@ export default function AdminProtocolsTab() {
             <Plus size={15} /> Create Pathway
           </button>
           <button
-            onClick={() => setShowCustomBuilder(true)}
+            onClick={() => navigate('/admin/protocols/new/edit')}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -1118,8 +1118,8 @@ export default function AdminProtocolsTab() {
                       >
                         <td style={{ padding: '0.75rem 1rem' }}>
                           <button
-                            onClick={() => setExpanded((prev) => ({ ...prev, [p.id]: !isOpen }))}
-                            aria-label="Expand protocol details"
+                            onClick={() => navigate(`/admin/protocols/${p.id}`)}
+                            aria-label="View protocol details"
                             style={{
                               background: 'none',
                               border: 'none',
@@ -1247,7 +1247,7 @@ export default function AdminProtocolsTab() {
                               </button>
                             ) : (
                               <button
-                                onClick={() => setEditField(p.id, 'protocol_name', e.protocol_name)}
+                                onClick={() => navigate(`/admin/protocols/${p.id}/edit`)}
                                 title="Edit Protocol"
                                 style={{
                                   background: 'transparent',
@@ -1308,88 +1308,6 @@ export default function AdminProtocolsTab() {
                             <td colSpan={6} style={{ padding: 0 }}>
                               <motion.div
                                 initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                                style={{ overflow: 'hidden' }}
-                              >
-                                <div style={{ padding: '1.5rem', borderTop: '1px solid #f1f3f4' }}>
-                                  <div
-                                    style={{
-                                      display: 'flex',
-                                      justifyContent: 'space-between',
-                                      alignItems: 'center',
-                                      marginBottom: '1rem',
-                                    }}
-                                  >
-                                    <h4 style={{ margin: 0, fontSize: '0.9rem', color: '#202124' }}>
-                                      Protocol Phases
-                                    </h4>
-                                    {isDirty && (
-                                      <span
-                                        style={{
-                                          fontSize: '0.75rem',
-                                          color: '#e53e3e',
-                                          fontWeight: 600,
-                                        }}
-                                      >
-                                        Unsaved changes
-                                      </span>
-                                    )}
-                                  </div>
-                                  <PhaseEditor
-                                    phases={e.phases ?? []}
-                                    products={catalogProducts}
-                                    onChange={(phases) => setEditPhases(p.id, phases)}
-                                  />
-                                  <SupplementsEditor
-                                    supplements={e.supplements ?? []}
-                                    onChange={(supplements) => setEditSupplements(p.id, supplements)}
-                                  />
-                                  {isDirty && (
-                                    <div
-                                      style={{
-                                        marginTop: '1rem',
-                                        display: 'flex',
-                                        justifyContent: 'flex-end',
-                                      }}
-                                    >
-                                      <button
-                                        onClick={() => handleSave(p.id)}
-                                        disabled={isSaving}
-                                        style={{
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          gap: '6px',
-                                          background: '#1a73e8',
-                                          color: 'white',
-                                          border: 'none',
-                                          padding: '6px 16px',
-                                          borderRadius: '4px',
-                                          fontSize: '0.8rem',
-                                          fontWeight: 600,
-                                          cursor: 'pointer',
-                                        }}
-                                      >
-                                        <Save size={14} />{' '}
-                                        {isSaving ? 'Saving...' : 'Save Protocol Changes'}
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
-                              </motion.div>
-                            </td>
-                          </tr>
-                        )}
-                      </AnimatePresence>
-                    </React.Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
         {/* Pagination Load More */}
         {hasMore && (
           <div

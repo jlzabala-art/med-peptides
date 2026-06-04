@@ -326,7 +326,13 @@ export default function DataTable({
                       borderBottom: '1px solid var(--color-border)', 
                       backgroundColor: isSelected ? 'var(--color-bg-selected)' : (isExpanded ? 'var(--color-bg-hover)' : 'transparent'),
                       transition: 'background-color 0.2s ease',
-                      minHeight: 'var(--row-min-height)'
+                      minHeight: 'var(--row-min-height)',
+                      cursor: expandableRender ? 'pointer' : 'default'
+                    }}
+                    onClick={() => {
+                      if (expandableRender) {
+                        setExpandedId(isExpanded ? null : rowKey);
+                      }
                     }}
                     onMouseEnter={(e) => {
                       if (!isSelected && !isExpanded) e.currentTarget.style.backgroundColor = 'var(--color-bg-hover)';

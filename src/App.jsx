@@ -48,7 +48,6 @@ const CustomSynthesis = lazy(() => import('./templates/CustomSynthesis'));
 const FAQDiscoveryView = lazy(() => import('./templates/FAQDiscoveryView'));
 const AcademyView = lazy(() => import('./templates/AcademyView'));
 const CourseDetailView = lazy(() => import('./templates/CourseDetailView'));
-const AuthPage = lazy(() => import('./templates/AuthPage'));
 const AdminRoutes = lazy(() => import('./routes/AdminRoutes'));
 const UserDashboard = lazy(() => import('./templates/UserDashboard'));
 const RoleDashboard = lazy(() => import('./templates/RoleDashboard'));
@@ -213,6 +212,7 @@ function App() {
   // Global scroll to top on route change
   useEffect(() => {
     window.scrollTo(0, 0);
+    setScrolled(false);
     trackPageView(location.pathname + location.search, document.title || 'Regenpept');
   }, [location.pathname, location.search]);
   

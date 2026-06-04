@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, doc, getDocs, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, getDoc, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getCatalog, getVariants } from '../../repositories/productRepository';
@@ -119,7 +119,10 @@ export default function AdminPricesTab() {
       // 2. Recalculate and update variants for products in this category
       const affectedProducts = products.filter((p) => p.category === category);
 
-      const updatePromises = [];
+      let batch = writeBatch(db);
+      let batchCount = 0;
+      let totalUpdated = 0;
+
       for (const p of affectedProducts) {
          const variants = await getVariants(p.id);
          for (const v of variants) {
@@ -138,12 +141,24 @@ export default function AdminPricesTab() {
             if (Object.keys(updates).length > 0) {
                updates.updatedAt = new Date().toISOString();
                const vRef = doc(db, 'products', p.id, 'variants', v.id);
-               updatePromises.push(updateDoc(vRef, updates));
+               batch.update(vRef, updates);
+               batchCount++;
+               totalUpdated++;
+
+               if (batchCount >= 400) {
+                 await batch.commit();
+                 batch = writeBatch(db);
+                 batchCount = 0;
+               }
             }
          }
       }
 
-      await Promise.all(updatePromises);
+      if (batchCount > 0) {
+        await batch.commit();
+      }
+      
+      console.log(`Successfully updated ${totalUpdated} variants for category ${category}`);
 
       // Update state
       setDiscounts(updatedDiscounts);
@@ -522,6 +537,27 @@ export default function AdminPricesTab() {
                   </div>
                 );
               }
+            },
+            {
+              key: 'actions',
+              header: '',
+              align: 'right',
+              render: (p) => (
+                <button
+                  style={{
+                    padding: '0.4rem 0.8rem',
+                    backgroundColor: 'var(--surface-raised)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: 'var(--text-main)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Edit Variants
+                </button>
+              )
             }
           ]}
           data={paginatedProducts}

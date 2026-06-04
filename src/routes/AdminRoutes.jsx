@@ -24,6 +24,8 @@ const AdminPricesTab       = React.lazy(() => import('../components/admin/AdminP
 const AdminViewsConfigTab  = React.lazy(() => import('../components/admin/AdminViewsConfigTab'));
 const AdminVariantsTab     = React.lazy(() => import('../components/admin/AdminVariantsTab'));
 const AdminProtocolsTab    = React.lazy(() => import('../components/admin/AdminProtocolsTab'));
+const AdminProtocolView    = React.lazy(() => import('../components/admin/AdminProtocolView'));
+const AdminProtocolEdit    = React.lazy(() => import('../components/admin/AdminProtocolEdit'));
 const AdminBlueprintsTab   = React.lazy(() => import('../components/admin/AdminBlueprintsTab'));
 const AdminMetricsDashboard= React.lazy(() => import('../components/admin/AdminMetricsDashboard'));
 const OrdersTab            = React.lazy(() => import('../components/admin/OrdersTab'));
@@ -124,7 +126,13 @@ export default function AdminRoutes() {
         <Route path="marketing" element={<AdminTabErrorBoundary tabId="marketing" tabLabel="Marketing & Content"><AdminMarketingTab /></AdminTabErrorBoundary>} />
         <Route path="messages" element={<AdminTabErrorBoundary tabId="messages" tabLabel="Messages"><MessagingWidget role="admin" ownerId="admin" /></AdminTabErrorBoundary>} />
         <Route path="home-layout" element={<AdminTabErrorBoundary tabId="home-layout" tabLabel="Home Layout"><AdminHomeLayoutTab /></AdminTabErrorBoundary>} />
+        
+        {/* Protocols Routing */}
         <Route path="protocols" element={<AdminTabErrorBoundary tabId="protocols" tabLabel="Protocols"><AdminProtocolsTab /></AdminTabErrorBoundary>} />
+        <Route path="protocols/new/edit" element={<AdminTabErrorBoundary tabId="protocols-new" tabLabel="New Protocol"><AdminProtocolEdit /></AdminTabErrorBoundary>} />
+        <Route path="protocols/:id" element={<AdminTabErrorBoundary tabId="protocol-view" tabLabel="Protocol Details"><AdminProtocolView /></AdminTabErrorBoundary>} />
+        <Route path="protocols/:id/edit" element={<AdminTabErrorBoundary tabId="protocol-edit" tabLabel="Edit Protocol"><AdminProtocolEdit /></AdminTabErrorBoundary>} />
+
         <Route path="blueprints" element={<AdminTabErrorBoundary tabId="blueprints" tabLabel="Blueprints"><AdminBlueprintsTab /></AdminTabErrorBoundary>} />
         <Route path="variants" element={<AdminTabErrorBoundary tabId="variants" tabLabel="Variants"><AdminVariantsTab /></AdminTabErrorBoundary>} />
         <Route path="catalogs" element={

@@ -6,10 +6,15 @@
   color: white;
   min-height: 80vh;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   position: relative;
   overflow: hidden;
   padding: 6.5rem 1.5rem 2.5rem;
+}
+
+.hero-section > * {
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 .hero-section__bg-glow {
@@ -343,7 +348,6 @@
 @media (min-width: 769px) {
   .hero-section {
     min-height: 750px;
-    max-height: 850px;
   }
   .hero-grid {
     grid-template-columns: repeat(2, 1fr);

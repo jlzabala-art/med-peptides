@@ -33,13 +33,24 @@ exports.fetchFinanceDashboard = onCall(
     }
 
     try {
-      // 1. P&L
+      // 1. P&L Current Period
       const date = new Date();
       const firstDay = fromDate || new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
       const lastDay = toDate || new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0];
       
       const pnlData = await zoho._request("GET", "/reports/profitandloss", { params: { from_date: firstDay, to_date: lastDay } });
       const profitAndLoss = pnlData?.profitandloss || {};
+
+      // 1.5 P&L 2026 by Months
+      const pnl2026Data = await zoho._request("GET", "/reports/profitandloss", { 
+        params: { 
+          filter_by: "CustomDate", 
+          from_date: "2026-01-01", 
+          to_date: "2026-12-31", 
+          compare_by: "Months" 
+        } 
+      });
+      const pnl2026 = pnl2026Data?.profitandloss || {};
 
       // 2. Unpaid Invoices
       const unpaidInvoices = await zoho.listInvoices({ status: "unpaid" });
@@ -75,6 +86,7 @@ exports.fetchFinanceDashboard = onCall(
 
       const payload = {
         profitAndLoss,
+        pnl2026,
         pendingInvoices: finalPendingInvoices,
         lotuslandData,
         nplabData,

@@ -1230,6 +1230,12 @@ export default function AdminProductsTab({
             <h5 style={{ margin: '0 0 0.5rem 0', fontSize: '0.8rem', color: '#334155' }}>Inventory Status</h5>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem', fontSize: '0.8rem', marginBottom: '1rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.25rem', borderBottom: '1px solid #e2e8f0' }}>
+                <span style={{ color: '#64748b' }}>Warehouse:</span> 
+                <strong style={{ color: '#0f172a' }}>
+                  {variant.warehouse || variant.stock?.warehouse || 'Primary Warehouse'}
+                </strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.25rem', borderBottom: '1px solid #e2e8f0' }}>
                 <span style={{ color: '#64748b' }}>Total Stock Qty:</span> 
                 <strong>{variant.stock?.qty ?? variant.stock ?? 0} units</strong>
               </div>

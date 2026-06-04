@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Download, FileText, CheckCircle, BarChart3, TrendingUp, Presentation, Briefcase, Zap } from 'lucide-react';
 
+import FinancePnL from './FinancePnL';
+import ComparativeAnalysisTool from './ComparativeAnalysisTool';
+
 export default function FinanceReporting({ dashboardData, totalBalance, activeSubs }) {
   const [generating, setGenerating] = useState(false);
   const [reportReady, setReportReady] = useState(false);
@@ -11,6 +14,8 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
   const totalIncome = dashboardData?.profitAndLoss?.total_income || mrr;
   const totalExpenses = dashboardData?.profitAndLoss?.total_expenses || 0;
   const netProfit = dashboardData?.profitAndLoss?.net_profit || ebitda;
+  
+  const pnl2026 = dashboardData?.pnl2026 || null;
 
   const handleGeneratePDF = async () => {
     setGenerating(true);
@@ -117,7 +122,7 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
   };
 
   return (
-    <div className="anim-fade-up" style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div className="anim-fade-up" style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
       <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', justifyItems: 'center', padding: '1rem', background: 'rgba(79, 70, 229, 0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
@@ -215,6 +220,11 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
           
         </div>
       </div>
+      
+      <FinancePnL pnl2026={pnl2026} />
+      
+      <ComparativeAnalysisTool />
+
     </div>
   );
 }

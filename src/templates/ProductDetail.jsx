@@ -4,7 +4,7 @@ import { trackPeptideView, trackPurchaseIntent } from '../hooks/useAnalytics';
 import { trackRecentView } from '../utils/recentViews';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, Check, FlaskConical, Beaker, FileText, ShieldCheck, Target, Layers, Plus, Minus, ChevronDown, ChevronUp, Maximize2, ExternalLink, Activity, Microscope, Truck, Lock, UserCheck, BookOpen, Zap, Thermometer, Scale, Bot, X } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Check, FlaskConical, Beaker, FileText, ShieldCheck, Target, Layers, Plus, Minus, ChevronDown, ChevronUp, Maximize2, ExternalLink, Activity, Microscope, Truck, Lock, UserCheck, BookOpen, Zap, Thermometer, Scale, Bot, X, Sparkles } from 'lucide-react';
 import ImageModal from '../snippets/ImageModal';
 import OptimizedImage from '../snippets/OptimizedImage';
 import FAQAccordion from '../components/discovery/FAQAccordion';
