@@ -15,6 +15,11 @@ import DoctorPrescriptionsTab      from '../components/doctor/DoctorPrescription
 import PhysicianAssistantsTab      from '../components/doctor/DoctorAssistantsTab';
 import DoctorMessagesTab           from '../components/doctor/DoctorMessagesTab';
 
+// ── Additional Templates ─────────────────────────────────────────────────────
+import DoctorAppointments from '../templates/DoctorAppointments';
+import DoctorLabResults from '../templates/DoctorLabResults';
+import DoctorResearch from '../templates/DoctorResearch';
+
 // ── Lazy ─────────────────────────────────────────────────────────────────────
 const CatalogCreatorFlow = React.lazy(() => import('../components/wholesaler/CatalogCreatorFlow'));
 const UserProfileTab = React.lazy(() => import('../components/shared/UserProfileTab'));
@@ -127,6 +132,18 @@ function SettingsWrapper() {
   return <UserSettings onBack={() => navigate('/doctor')} />;
 }
 
+function AppointmentsWrapper() {
+  return <DoctorAppointments />;
+}
+
+function LabResultsWrapper() {
+  return <DoctorLabResults />;
+}
+
+function ResearchWrapper() {
+  return <DoctorResearch />;
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function DoctorRoutes() {
   return (
@@ -176,6 +193,21 @@ export default function DoctorRoutes() {
           <Route path="messages" element={
             <AdminTabErrorBoundary tabId="messages" tabLabel="Messages">
               <MessagesWrapper />
+            </AdminTabErrorBoundary>
+          } />
+          <Route path="appointments" element={
+            <AdminTabErrorBoundary tabId="appointments" tabLabel="Appointments">
+              <AppointmentsWrapper />
+            </AdminTabErrorBoundary>
+          } />
+          <Route path="lab-results" element={
+            <AdminTabErrorBoundary tabId="lab-results" tabLabel="Lab Results">
+              <LabResultsWrapper />
+            </AdminTabErrorBoundary>
+          } />
+          <Route path="research" element={
+            <AdminTabErrorBoundary tabId="research" tabLabel="Research">
+              <ResearchWrapper />
             </AdminTabErrorBoundary>
           } />
           <Route path="assistants" element={

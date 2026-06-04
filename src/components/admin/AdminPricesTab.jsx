@@ -2,15 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { collection, doc, getDocs, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Percent, Search, Sliders, RefreshCw, CheckCircle, AlertCircle, BookOpen } from 'lucide-react';
+import { getCatalog, getVariants } from '../../repositories/productRepository';
+import { Percent, Search, Sliders, RefreshCw, CheckCircle, AlertCircle, BookOpen, TrendingDown, TrendingUp, Minus } from 'lucide-react';
 import DataTable from '../ui/DataTable';
 import AppEntityCell from '../ui/AppEntityCell';
+import ProductContextSwitcher from './ProductContextSwitcher';
+import VariantPricingEditor from './VariantPricingEditor';
 
 export default function AdminPricesTab() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [discounts, setDiscounts] = useState({});
+  const [competitorData, setCompetitorData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [savingStatus, setSavingStatus] = useState({ type: null, target: null, status: null });
   const [searchTerm, setSearchTerm] = useState(searchParams.get('sku') || '');
@@ -19,20 +23,22 @@ export default function AdminPricesTab() {
   const autoExpandProductId = searchParams.get('productId') || null;
   const [expandedRowIds, setExpandedRowIds] = useState(() => autoExpandProductId ? new Set([autoExpandProductId]) : new Set());
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
+
   useEffect(() => {
     fetchPricingData();
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory]);
+
   async function fetchPricingData() {
     setLoading(true);
     try {
-      // 1. Fetch products
-      const productsRef = collection(db, 'products');
-      const productsSnapshot = await getDocs(productsRef);
-      const productsList = [];
-      productsSnapshot.forEach((doc) => {
-        productsList.push({ id: doc.id, ...doc.data() });
-      });
+      // 1. Fetch products via Repository cache
+      const productsList = await getCatalog();
 
       // 2. Fetch global settings for discounts
       const globalRef = doc(db, 'settings', 'global');
@@ -57,6 +63,16 @@ export default function AdminPricesTab() {
 
       if (neededSave) {
         await setDoc(globalRef, { categoryDiscounts: updatedDiscounts }, { merge: true });
+      }
+
+      // 3. Fetch competitor cache
+      const compCacheRef = doc(db, 'settings', 'competitor_cache');
+      const compCacheSnap = await getDoc(compCacheRef);
+      if (compCacheSnap.exists()) {
+        const cache = compCacheSnap.data();
+        if (cache.matches) {
+          setCompetitorData(cache.matches);
+        }
       }
 
       setProducts(productsList);
@@ -100,43 +116,37 @@ export default function AdminPricesTab() {
       const globalRef = doc(db, 'settings', 'global');
       await setDoc(globalRef, { categoryDiscounts: updatedDiscounts }, { merge: true });
 
-      // 2. Recalculate and update pro prices for products in this category
+      // 2. Recalculate and update variants for products in this category
       const affectedProducts = products.filter((p) => p.category === category);
 
-      const updatePromises = affectedProducts.map((p) => {
-        const guestVial = parseFloat(p.guestVialPrice) || 0;
-        const guestKit = parseFloat(p.guestKitPrice) || 0;
-        const proVial = parseFloat((guestVial * (1 - discountVal / 100)).toFixed(2));
-        const proKit = parseFloat((guestKit * (1 - discountVal / 100)).toFixed(2));
-
-        const productRef = doc(db, 'products', p.id);
-        return updateDoc(productRef, {
-          proVialPrice: proVial,
-          proKitPrice: proKit,
-          updatedAt: new Date().toISOString(),
-        });
-      });
+      const updatePromises = [];
+      for (const p of affectedProducts) {
+         const variants = await getVariants(p.id);
+         for (const v of variants) {
+            const retail = v.pricing?.retailPrice?.base || 0;
+            const computedClinic = parseFloat((retail * (1 - discountVal / 100)).toFixed(2));
+            const computedWholesale = parseFloat((retail * (1 - discountVal / 100)).toFixed(2));
+            
+            const updates = {};
+            if (!v.pricing?.clinicPrice?.override) {
+               updates['pricing.clinicPrice.base'] = computedClinic;
+            }
+            if (!v.pricing?.wholesalePrice?.override) {
+               updates['pricing.wholesalePrice.base'] = computedWholesale;
+            }
+            
+            if (Object.keys(updates).length > 0) {
+               updates.updatedAt = new Date().toISOString();
+               const vRef = doc(db, 'products', p.id, 'variants', v.id);
+               updatePromises.push(updateDoc(vRef, updates));
+            }
+         }
+      }
 
       await Promise.all(updatePromises);
 
       // Update state
       setDiscounts(updatedDiscounts);
-      setProducts((prevProducts) =>
-        prevProducts.map((p) => {
-          if (p.category === category) {
-            const guestVial = parseFloat(p.guestVialPrice) || 0;
-            const guestKit = parseFloat(p.guestKitPrice) || 0;
-            const proVial = parseFloat((guestVial * (1 - discountVal / 100)).toFixed(2));
-            const proKit = parseFloat((guestKit * (1 - discountVal / 100)).toFixed(2));
-            return {
-              ...p,
-              proVialPrice: proVial,
-              proKitPrice: proKit,
-            };
-          }
-          return p;
-        })
-      );
 
       setSavingStatus({ type: 'discount', target: category, status: 'saved' });
       setTimeout(() => setSavingStatus({ type: null, target: null, status: null }), 3000);
@@ -146,59 +156,9 @@ export default function AdminPricesTab() {
     }
   };
 
-  async function handlePriceChange(productId, field, valueString) {
-    let priceVal = parseFloat(valueString);
-    if (isNaN(priceVal)) return;
-    if (priceVal < 0) priceVal = 0;
-
-    const product = products.find((p) => p.id === productId);
-    if (!product) return;
-
-    // Check if changed
-    if (parseFloat(product[field]) === priceVal) return;
-
-    const targetKey = `${productId}-${field}`;
-    setSavingStatus({ type: 'product', target: targetKey, status: 'saving' });
-
-    try {
-      const categoryDiscount = discounts[product.category] ?? 15;
-      const updates = {
-        [field]: priceVal,
-      };
-
-      // Recalculate Pro Price
-      if (field === 'guestVialPrice') {
-        updates.proVialPrice = parseFloat((priceVal * (1 - categoryDiscount / 100)).toFixed(2));
-      } else if (field === 'guestKitPrice') {
-        updates.proKitPrice = parseFloat((priceVal * (1 - categoryDiscount / 100)).toFixed(2));
-      }
-
-      const productRef = doc(db, 'products', productId);
-      await updateDoc(productRef, {
-        ...updates,
-        updatedAt: new Date().toISOString(),
-      });
-
-      // Update state
-      setProducts((prevProducts) =>
-        prevProducts.map((p) => {
-          if (p.id === productId) {
-            return {
-              ...p,
-              ...updates,
-            };
-          }
-          return p;
-        })
-      );
-
-      setSavingStatus({ type: 'product', target: targetKey, status: 'saved' });
-      setTimeout(() => setSavingStatus({ type: null, target: null, status: null }), 3000);
-    } catch (err) {
-      console.error('Error saving product price:', err);
-      setSavingStatus({ type: 'product', target: targetKey, status: 'error' });
-    }
-  };
+  // --------------------------------------------------------
+  // Filters & Pagination Setup
+  // --------------------------------------------------------
 
   if (loading) {
     return (
@@ -240,12 +200,7 @@ export default function AdminPricesTab() {
     return matchSearch && matchCategory;
   });
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(20);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, selectedCategory]);
 
   const totalItems = filteredProducts.length;
   const totalPages = Math.ceil(totalItems / rowsPerPage);
@@ -318,6 +273,16 @@ export default function AdminPricesTab() {
           <RefreshCw size={14} /> Refresh Data
         </button>
       </div>
+
+      <ProductContextSwitcher 
+        searchTerm={searchTerm} 
+        productId={autoExpandProductId}
+        currentTab="prices" 
+        onClear={() => {
+          setSearchTerm('');
+          navigate('/admin/prices', { replace: true });
+        }} 
+      />
 
       {/* 1. Global Category Wholesale Discounts */}
       <div
@@ -522,44 +487,42 @@ export default function AdminPricesTab() {
               ),
             },
             {
-              key: 'status',
-              header: 'Status',
-              align: 'right',
+              key: 'market',
+              header: 'Market Benchmark',
               render: (p) => {
-                const vialKey = `${p.id}-guestVialPrice`;
-                const kitKey = `${p.id}-guestKitPrice`;
-                const isSaving =
-                  (savingStatus.type === 'product' &&
-                    savingStatus.target === vialKey &&
-                    savingStatus.status === 'saving') ||
-                  (savingStatus.type === 'product' &&
-                    savingStatus.target === kitKey &&
-                    savingStatus.status === 'saving');
-                const isSaved =
-                  (savingStatus.type === 'product' &&
-                    savingStatus.target === vialKey &&
-                    savingStatus.status === 'saved') ||
-                  (savingStatus.type === 'product' &&
-                    savingStatus.target === kitKey &&
-                    savingStatus.status === 'saved');
-
+                const match = competitorData.find(m => m.productName === p.name || m.productName === p.displayName);
+                if (!match || !match.competitors || match.competitors.length === 0) {
+                  return <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>No data</div>;
+                }
+                const bestMatch = match.competitors[0];
+                
+                // Compare with our guestVialPrice
+                const myPrice = parseFloat(p.guestVialPrice) || 0;
+                const compPrice = parseFloat(bestMatch.price_usd) || 0;
+                const isExpensive = myPrice > compPrice && myPrice > 0;
+                const isCheaper = myPrice < compPrice && myPrice > 0;
+                
                 return (
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'flex-end',
-                      minHeight: '24px',
-                    }}
-                  >
-                    {isSaving && (
-                      <RefreshCw size={14} className="animate-spin" color="var(--text-muted)" />
-                    )}
-                    {isSaved && <CheckCircle size={14} color="var(--success)" />}
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                      ${compPrice.toFixed(2)}
+                    </div>
+                    <div style={{ 
+                      fontSize: '0.75rem', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.25rem',
+                      color: isExpensive ? 'var(--error)' : (isCheaper ? 'var(--success)' : 'var(--text-muted)') 
+                    }}>
+                      {bestMatch.competitor_name}
+                      {isExpensive && <span title="We are more expensive"><TrendingDown size={12} /></span>}
+                      {isCheaper && <span title="We are cheaper"><TrendingUp size={12} /></span>}
+                      {!isExpensive && !isCheaper && myPrice > 0 && <span title="Price matching"><Minus size={12} /></span>}
+                    </div>
                   </div>
                 );
-              },
-            },
+              }
+            }
           ]}
           data={paginatedProducts}
           keyField="id"
@@ -582,156 +545,16 @@ export default function AdminPricesTab() {
           renderCustomFilters={renderCustomFilters}
           expandableRender={(p) => {
             const categoryDiscount = discounts[p.category] ?? 15;
-            const vialKey = `${p.id}-guestVialPrice`;
-            const kitKey = `${p.id}-guestKitPrice`;
-
-            const isVialSaving =
-              savingStatus.type === 'product' &&
-              savingStatus.target === vialKey &&
-              savingStatus.status === 'saving';
-            const isVialSaved =
-              savingStatus.type === 'product' &&
-              savingStatus.target === vialKey &&
-              savingStatus.status === 'saved';
-
-            const isKitSaving =
-              savingStatus.type === 'product' &&
-              savingStatus.target === kitKey &&
-              savingStatus.status === 'saving';
-            const isKitSaved =
-              savingStatus.type === 'product' &&
-              savingStatus.target === kitKey &&
-              savingStatus.status === 'saved';
-
             return (
               <div
                 style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'flex-start',
-                  alignItems: 'flex-start',
-                  gap: '1.5rem',
+                  padding: '1rem',
                   borderLeft: '3px solid var(--primary)',
-                  paddingLeft: '1.25rem',
+                  backgroundColor: 'var(--surface-raised)',
+                  marginBottom: '1rem'
                 }}
               >
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '1.25rem',
-                    width: '100%',
-                    maxWidth: '400px',
-                  }}
-                >
-                  <div>
-                    <label
-                      style={{
-                        display: 'block',
-                        fontSize: '0.8rem',
-                        fontWeight: 700,
-                        color: 'var(--text-main)',
-                        marginBottom: '0.5rem',
-                      }}
-                    >
-                      Guest Vial Price
-                    </label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>$</span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        defaultValue={p.guestVialPrice}
-                        onBlur={(e) => handlePriceChange(p.id, 'guestVialPrice', e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter')
-                            handlePriceChange(p.id, 'guestVialPrice', e.target.value);
-                        }}
-                        style={{
-                          width: '120px',
-                          padding: '0.4rem 0.5rem',
-                          border: isVialSaved
-                            ? '1px solid var(--success)'
-                            : '1px solid var(--border)',
-                          borderRadius: 'var(--radius-sm)',
-                          textAlign: 'right',
-                          fontSize: '0.85rem',
-                          fontWeight: 800,
-                          color: 'var(--text-main)',
-                          backgroundColor: isVialSaving ? 'var(--surface-raised)' : 'transparent',
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        fontSize: '0.75rem',
-                        color: 'var(--text-muted)',
-                        marginTop: '0.25rem',
-                      }}
-                    >
-                      Pro Vial (Est):{' '}
-                      <span style={{ fontWeight: 800, color: 'var(--primary)' }}>
-                        ${parseFloat(p.proVialPrice || 0).toFixed(2)}
-                      </span>{' '}
-                      (-{categoryDiscount}%)
-                    </div>
-                  </div>
-
-                  <div>
-                    <label
-                      style={{
-                        display: 'block',
-                        fontSize: '0.8rem',
-                        fontWeight: 700,
-                        color: 'var(--text-main)',
-                        marginBottom: '0.5rem',
-                      }}
-                    >
-                      Guest Kit Price
-                    </label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>$</span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        defaultValue={p.guestKitPrice}
-                        onBlur={(e) => handlePriceChange(p.id, 'guestKitPrice', e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter')
-                            handlePriceChange(p.id, 'guestKitPrice', e.target.value);
-                        }}
-                        style={{
-                          width: '120px',
-                          padding: '0.4rem 0.5rem',
-                          border: isKitSaved
-                            ? '1px solid var(--success)'
-                            : '1px solid var(--border)',
-                          borderRadius: 'var(--radius-sm)',
-                          textAlign: 'right',
-                          fontSize: '0.85rem',
-                          fontWeight: 800,
-                          color: 'var(--text-main)',
-                          backgroundColor: isKitSaving ? 'var(--surface-raised)' : 'transparent',
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        fontSize: '0.75rem',
-                        color: 'var(--text-muted)',
-                        marginTop: '0.25rem',
-                      }}
-                    >
-                      Pro Kit (Est):{' '}
-                      <span style={{ fontWeight: 800, color: 'var(--secondary)' }}>
-                        ${parseFloat(p.proKitPrice || 0).toFixed(2)}
-                      </span>{' '}
-                      (-{categoryDiscount}%)
-                    </div>
-                  </div>
-                </div>
+                <VariantPricingEditor product={p} categoryDiscount={categoryDiscount} />
               </div>
             );
           }}

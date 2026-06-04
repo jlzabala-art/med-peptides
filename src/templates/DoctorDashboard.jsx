@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard, Users, ClipboardList, FlaskConical,
   Settings, ShoppingBag, Pill, LogOut, Bell, ChevronRight, Laptop, History, Plus,
-  MessageSquare, Blocks, FileText
+  MessageSquare, Blocks, FileText, Calendar, Beaker
 } from 'lucide-react';
 
 import DoctorOverviewTab         from '../components/doctor/DoctorOverviewTab';
@@ -30,6 +30,9 @@ const ALL_TABS = [
   { id: 'new-prescription',      label: 'New Prescription',      icon: Plus,            alwaysOn: true },
   { id: 'prescriptions-history', label: 'Prescriptions History', icon: History,         alwaysOn: true },
   { id: 'patients',              label: 'My Patients',           icon: Users,           alwaysOn: true },
+  { id: 'appointments',          label: 'Appointments',          icon: Calendar,        alwaysOn: true },
+  { id: 'lab-results',           label: 'Lab Results',           icon: Beaker,          alwaysOn: true },
+  { id: 'research',              label: 'Research',              icon: FlaskConical,    alwaysOn: true },
   { id: 'orders',                label: 'Orders',                icon: ShoppingBag,     perm: 'canBulkOrder' },
   { id: 'recommendations',       label: 'Recommendations',       icon: ClipboardList,   perm: 'canRecommend' },
   { id: 'protocols',             label: 'Protocols',             icon: FlaskConical,    alwaysOn: true },
@@ -55,7 +58,10 @@ const DOCTOR_NAV_GROUPS = [
     id: 'clinical', label: 'Clinical Work', emoji: '🧬',
     items: [
       { id: 'patients',        label: 'My Patients',     icon: Users },
+      { id: 'appointments',    label: 'Appointments',    icon: Calendar },
+      { id: 'lab-results',     label: 'Lab Results',     icon: Beaker },
       { id: 'recommendations', label: 'Recommendations', icon: ClipboardList },
+      { id: 'research',        label: 'Research',        icon: FlaskConical },
     ],
   },
   {

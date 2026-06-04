@@ -1,151 +1,185 @@
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
+import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { useAuth } from '../../context/AuthContext';
 import Card from '../ui/Card';
 import Spinner from '../ui/Spinner';
-import { FlaskConical, Calendar, BrainCircuit } from 'lucide-react';
+import { FlaskConical, Plus, Copy, Lock, User, CheckCircle, ArrowRight } from 'lucide-react';
+import { getPaginatedProtocols } from '../../services/protocolStorage';
+import CustomProtocolBuilder from '../admin/CustomProtocolBuilder';
 
-export default function DoctorProtocolsTab({ doctorId, doctorMeta, patients }) {
-  const { activePermissions } = useAuth();
-  const clinicalLogs = activePermissions?.clinicalLogs ?? true;
-  const [selectedPatient, setSelectedPatient] = useState('');
+export default function DoctorProtocolsTab({ doctorId }) {
+  const [activeTab, setActiveTab] = useState('public');
+  const [protocols, setProtocols] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showBuilder, setShowBuilder] = useState(false);
+  const [cloning, setCloning] = useState(null);
 
-  const { data: recs = [], isLoading, isError, refetch } = useQuery({
-    queryKey: ['protocols', doctorId, selectedPatient],
-    queryFn: async () => {
-      let q;
-      if (selectedPatient) {
-        q = query(collection(db, 'recommendations'), where('doctorId', '==', doctorId), where('patientId', '==', selectedPatient));
-      } else {
-        q = query(collection(db, 'recommendations'), where('doctorId', '==', doctorId));
-      }
-      const snap = await getDocs(q);
-      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      list.sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0));
-      return list;
-    },
-    enabled: !!doctorId,
-  });
-
-  const patientName = (id) => {
-    const p = patients?.find(p => p.id === id);
-    if (!p) return id;
-    return [p.firstName, p.lastName].filter(Boolean).join(' ') || p.email;
+  const fetchProts = async (type) => {
+    setLoading(true);
+    try {
+      const options = type === 'public' ? { visibility: 'public' } : { authorId: doctorId };
+      const res = await getPaginatedProtocols(null, 50, options);
+      setProtocols(res.protocols);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const activePatients = patients || [];
+  useEffect(() => {
+    fetchProts(activeTab);
+  }, [activeTab, doctorId]);
 
-  if (activePatients.length === 0) {
-    return (
-      <Card>
-        <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>
-          <FlaskConical size={48} color="var(--color-border)" style={{ margin: '0 auto 1rem' }} />
-          <p style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '1.1rem', margin: '0 0 0.5rem' }}>No protocols found</p>
-          <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>Recommendations you send will appear as protocols here.</p>
-        </div>
-      </Card>
-    );
-  }
+  const handleClone = async (protocol) => {
+    setCloning(protocol.id);
+    try {
+      const clone = {
+        ...protocol,
+        protocol_name: protocol.protocol_name + ' (Copy)',
+        visibility: 'private',
+        authorId: doctorId,
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+      delete clone.id;
+      await addDoc(collection(db, 'protocols'), clone);
+      if (activeTab === 'private') {
+        fetchProts('private');
+      } else {
+        setActiveTab('private');
+      }
+    } catch (err) {
+      console.error("Clone error", err);
+      alert('Error cloning protocol');
+    } finally {
+      setCloning(null);
+    }
+  };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '2rem 0' }}>
-      <Card>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
-          <div>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>Protocol Filter</h2>
-          </div>
-          <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--primary)', background: '#e0e7ff', padding: '0.25rem 0.75rem', borderRadius: '99px' }}>
-            {recs.length} protocol{recs.length !== 1 ? 's' : ''} {selectedPatient ? ` for ${patientName(selectedPatient)}` : ' in total'}
-          </div>
-        </div>
-        
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <select
-            value={selectedPatient}
-            onChange={e => setSelectedPatient(e.target.value)}
-            style={{ width: '100%', maxWidth: '500px', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.95rem', outline: 'none' }}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1rem 0' }}>
+      
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button 
+            onClick={() => setActiveTab('public')}
+            className="btn"
+            style={{ 
+              padding: '0.5rem 1rem', borderRadius: '8px', fontWeight: 600,
+              backgroundColor: activeTab === 'public' ? 'var(--primary)' : 'white',
+              color: activeTab === 'public' ? 'white' : 'var(--text-secondary)',
+              border: '1px solid var(--border)'
+            }}
           >
-            <option value=''>— All Patients —</option>
-            {activePatients.map(p => (
-              <option key={p.id} value={p.id}>{patientName(p.id)}</option>
-            ))}
-          </select>
-          <button onClick={() => refetch()} className="btn" style={{ padding: '0.75rem 1.25rem', borderRadius: '8px', background: 'var(--color-bg-app)', border: '1px solid #e2e8f0', color: 'var(--color-text-primary)', fontWeight: 600, cursor: 'pointer' }}>
-            Refresh
+            Atlas Health Protocols
+          </button>
+          <button 
+            onClick={() => setActiveTab('private')}
+            className="btn"
+            style={{ 
+              padding: '0.5rem 1rem', borderRadius: '8px', fontWeight: 600,
+              backgroundColor: activeTab === 'private' ? 'var(--primary)' : 'white',
+              color: activeTab === 'private' ? 'white' : 'var(--text-secondary)',
+              border: '1px solid var(--border)'
+            }}
+          >
+            My Custom Protocols
           </button>
         </div>
-      </Card>
 
-      {isLoading ? (
+        <button 
+          onClick={() => setShowBuilder(true)}
+          className="btn btn-primary"
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+        >
+          <Plus size={18} /> Create Custom Kit
+        </button>
+      </div>
+
+      {loading ? (
         <Spinner text="Loading protocols..." />
-      ) : isError ? (
-        <div style={{ color: 'red', padding: '1rem' }}>Failed to load protocols.</div>
-      ) : recs.length === 0 ? (
+      ) : protocols.length === 0 ? (
         <Card>
-          <div style={{ padding: '3rem 2rem', textAlign: 'center' }}>
-            <FlaskConical size={36} color="var(--color-border)" style={{ margin: '0 auto 1rem' }} />
-            <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>No protocols found for this filter.</p>
+          <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>
+            <FlaskConical size={48} color="var(--border)" style={{ margin: '0 auto 1rem' }} />
+            <p style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '1.1rem', margin: '0 0 0.5rem' }}>
+              No {activeTab === 'public' ? 'public protocols' : 'custom protocols'} found.
+            </p>
           </div>
         </Card>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
-          {recs.map(r => {
-            const date = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString() : '';
-            const pName = patientName(r.patientId);
-            return (
-              <Card key={r.id} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text-primary)', lineHeight: 1.3 }}>{r.title}</div>
-                    {!selectedPatient && (
-                      <span style={{ display: 'inline-block', marginTop: '0.4rem', fontSize: '0.75rem', padding: '2px 8px', borderRadius: '6px', background: '#f1f5f9', color: 'var(--color-text-secondary)' }}>
-                        {pName}
-                      </span>
-                    )}
-                  </div>
-                  {clinicalLogs && (
-                    <button
-                      title='Consult Clinic AI'
-                      onClick={() => {
-                        window.dispatchEvent(new CustomEvent('open-clinical-ai', {
-                          detail: {
-                            message: `Review this peptide protocol for patient ${pName}: "${r.title}". Peptides involved: ${r.peptides}. Clinical notes: ${r.notes}. What are the safety precautions and interactions?`,
-                            doctorContext: { doctorName: doctorMeta?.doctorName, specialty: doctorMeta?.specialty, patientName: pName, protocolName: r.title }
-                          }
-                        }));
-                      }}
-                      style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#e0e7ff', color: 'var(--primary)', border: 'none', padding: '6px 10px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}
-                    >
-                      <BrainCircuit size={14} /> AI
-                    </button>
-                  )}
-                </div>
-
-                {r.peptides && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                    {(typeof r.peptides === 'string' ? r.peptides.split(',') : Array.isArray(r.peptides) ? r.peptides : []).map(p => p.trim()).filter(Boolean).map(p => (
-                      <span key={p} style={{ fontSize: '0.75rem', fontWeight: 600, padding: '2px 10px', borderRadius: '20px', background: '#e0e7ff', color: 'var(--primary)' }}>
-                        {p}
-                      </span>
-                    ))}
-                  </div>
+          {protocols.map(p => (
+            <Card key={p.id} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)', lineHeight: 1.3 }}>
+                  {p.protocol_name || p.title}
+                </h3>
+                {p.visibility === 'public' ? (
+                  <Lock size={16} color="var(--text-muted)" title="Read-only Public Protocol" />
+                ) : (
+                  <User size={16} color="var(--primary)" title="Your Custom Protocol" />
                 )}
+              </div>
 
-                {r.notes && (
-                  <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, background: 'var(--color-bg-app)', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    {clinicalLogs ? r.notes : <span style={{ color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>[Restricted notes]</span>}
-                  </div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                {p.therapeutic_category || p.category || 'Uncategorized'}
+              </div>
+
+              <div style={{ background: 'var(--surface-raised)', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem' }}>
+                <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Phases & Products:</div>
+                <ul style={{ margin: 0, paddingLeft: '1.25rem', color: 'var(--text-secondary)' }}>
+                  {p.phases?.map((phase, idx) => (
+                    <li key={idx}>
+                      {phase.label || `Phase ${idx + 1}`} ({phase.durationWeeks || phase.duration_weeks || 4} wks)
+                      {phase.medications && phase.medications.length > 0 && (
+                        <ul style={{ paddingLeft: '1rem', marginTop: '0.25rem' }}>
+                          {phase.medications.map((m, mIdx) => (
+                            <li key={mIdx}>{m.name}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div style={{ marginTop: 'auto', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  {p.phases?.length || 0} Phase(s)
+                </span>
+                
+                {activeTab === 'public' && (
+                  <button 
+                    onClick={() => handleClone(p)}
+                    disabled={cloning === p.id}
+                    className="btn"
+                    style={{ 
+                      display: 'flex', alignItems: 'center', gap: '0.5rem', 
+                      fontSize: '0.8rem', padding: '0.4rem 0.75rem', 
+                      borderRadius: '6px', background: '#e0e7ff', color: 'var(--primary)',
+                      border: 'none', cursor: cloning === p.id ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    {cloning === p.id ? <Spinner size={14} /> : <Copy size={14} />} Duplicate
+                  </button>
                 )}
-
-                <div style={{ marginTop: 'auto', paddingTop: '0.75rem', borderTop: '1px dashed #e2e8f0', display: 'flex', alignItems: 'center', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                  {date && <><Calendar size={14} style={{ marginRight: '6px' }} /> {date}</>}
-                </div>
-              </Card>
-            );
-          })}
+              </div>
+            </Card>
+          ))}
         </div>
+      )}
+
+      {showBuilder && (
+        <CustomProtocolBuilder 
+          onClose={() => setShowBuilder(false)} 
+          onSaved={() => {
+            setShowBuilder(false);
+            if (activeTab === 'private') fetchProts('private');
+            else setActiveTab('private');
+          }} 
+        />
       )}
     </div>
   );

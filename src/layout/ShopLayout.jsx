@@ -6,15 +6,6 @@ import Footer from './Footer';
 import ResearchDrawer from '../components/shared/ResearchDrawer';
 
 export default function ShopLayout({
-  scrolled,
-  region,
-  onOpenRegion,
-  cartCount,
-  onOpenCart,
-  onOpenSearch,
-  activeModal,
-  setActiveModal,
-  isHome,
   onGoHome,
   onSelectProduct,
   onSelectCategory,
@@ -25,22 +16,13 @@ export default function ShopLayout({
   return (
     <>
       <Header 
-        scrolled={scrolled} 
-        region={region}
-        onOpenRegion={onOpenRegion}
-        cartCount={cartCount}
-        onOpenCart={onOpenCart}
-        onOpenSearch={onOpenSearch}
-        activeModal={activeModal}
-        setActiveModal={setActiveModal}
-        isHome={isHome}
         onGoHome={onGoHome}
         onSelectProduct={onSelectProduct}
         onSelectCategory={onSelectCategory}
         products={products}
       />
       
-      <div className={`view-container ${(!isHome) ? 'with-header-padding' : ''}`}>
+      <div className={`view-container ${(location.pathname !== '/') ? 'with-header-padding' : ''}`}>
         <Outlet />
       </div>
 

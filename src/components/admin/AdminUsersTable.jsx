@@ -13,6 +13,7 @@ import {
   Edit,
   Eye,
   DollarSign,
+  UserCheck,
 } from 'lucide-react';
 
 export default function AdminUsersTable({
@@ -36,6 +37,7 @@ export default function AdminUsersTable({
   handleSendEmail,
   sendingEmail,
   setFinancialWholesaler,
+  handleImpersonate,
 
   // Expansion state
   expandedPatientId,
@@ -194,6 +196,15 @@ export default function AdminUsersTable({
 
         if (u.role === 'wholesaler' || (u.roles && u.roles.includes('wholesaler'))) {
           actions.push({ type: 'pricing', onClick: () => setFinancialWholesaler(u) });
+        }
+
+        if (handleImpersonate && !u.isArchived) {
+          actions.push({ 
+            type: 'custom', 
+            icon: UserCheck, 
+            label: 'Login As', 
+            onClick: () => handleImpersonate(u.id) 
+          });
         }
 
         actions.push({ type: 'edit', onClick: () => setEditingUser(u) });

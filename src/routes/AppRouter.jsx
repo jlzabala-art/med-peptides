@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, Outlet, useNavigate, useParams } from 'react-r
 
 // Import Layouts & Auth
 import ProtectedRoute from '../components/auth/ProtectedRoute';
+import ExitProfessionalMode from '../components/auth/ExitProfessionalMode';
 import GlobalAppLayout from '../components/shared/GlobalAppLayout';
 import ShopLayout from '../layout/ShopLayout';
 import AdminLayout from '../layout/AdminLayout';
@@ -22,6 +23,9 @@ import ShopRoutes from './ShopRoutes';
 import AuthPage from '../templates/AuthPage';
 const AdminRoutes = lazy(() => import('./AdminRoutes'));
 const UserDashboard = lazy(() => import('../templates/UserDashboard'));
+const UserSettings = lazy(() => import('../templates/UserSettings'));
+const Checkout = lazy(() => import('../templates/Checkout'));
+const ImpersonateCallback = lazy(() => import('../pages/ImpersonateCallback'));
 const AccountManagerDashboard = lazy(() => import('../templates/AccountManagerDashboard'));
 const DoctorRoutes = lazy(() => import('./DoctorRoutes'));
 const WholesalerRoutes = lazy(() => import('./WholesalerRoutes'));
@@ -33,11 +37,6 @@ const PharmacyRoutes = lazy(() => import('./PharmacyRoutes'));
 const PublicSupplierQuote = lazy(() => import('../components/public/PublicSupplierQuote'));
 const PublicClientQuote = lazy(() => import('../components/public/PublicClientQuote'));
 const PatientRoutes = lazy(() => import('./PatientRoutes'));
-const DoctorPatients = lazy(() => import('../templates/DoctorPatients'));
-const DoctorAppointments = lazy(() => import('../templates/DoctorAppointments'));
-const DoctorLabResults = lazy(() => import('../templates/DoctorLabResults'));
-const DoctorResearch = lazy(() => import('../templates/DoctorResearch'));
-const DoctorProfile = lazy(() => import('../templates/DoctorProfile'));
 const HormonePelletsPage = lazy(() => import('../pages/pellets.jsx'));
 const PatientDetailAdmin = lazy(() => import('../templates/PatientDetailAdmin'));
 const CalendarPage = lazy(() => import('../components/calendar/CalendarPage'));
@@ -97,19 +96,6 @@ export default function AppRouter(props) {
 
           <Route path="/*" element={
             <ShopLayout 
-              scrolled={scrolled} 
-              region={region}
-              onOpenRegion={() => {
-                setRegion(null);
-                setManualRegionChange(true);
-                try { localStorage.removeItem('mp_region'); } catch (err) {}
-              }}
-              cartCount={cartCount}
-              onOpenCart={() => setActiveModal('cart')}
-              onOpenSearch={() => { setSearchInitialTab('peptides'); setActiveModal('search'); }}
-              activeModal={activeModal}
-              setActiveModal={setActiveModal}
-              isHome={isHome}
               onGoHome={() => {
                 tenantNavigate('/');
               }}
@@ -134,19 +120,6 @@ export default function AppRouter(props) {
 
           <Route path="/partner/:tenantSlug/*" element={
             <ShopLayout 
-              scrolled={scrolled} 
-              region={region}
-              onOpenRegion={() => {
-                setRegion(null);
-                setManualRegionChange(true);
-                try { localStorage.removeItem('mp_region'); } catch (err) {}
-              }}
-              cartCount={cartCount}
-              onOpenCart={() => setActiveModal('cart')}
-              onOpenSearch={() => { setSearchInitialTab('peptides'); setActiveModal('search'); }}
-              activeModal={activeModal}
-              setActiveModal={setActiveModal}
-              isHome={isHome}
               onGoHome={() => {
                 tenantNavigate('/');
               }}
@@ -168,6 +141,12 @@ export default function AppRouter(props) {
               />
             } />
           </Route>
+
+          <Route path="/impersonate" element={
+            <Suspense fallback={<div style={{display: 'flex', justifyContent: 'center', padding: '5rem'}}>Loading secure session...</div>}>
+              <ImpersonateCallback />
+            </Suspense>
+          } />
 
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
             <Route element={<AdminProvider><AdminLayout /></AdminProvider>}>
@@ -212,15 +191,7 @@ export default function AppRouter(props) {
             </Route>
           </Route>
           
-          <Route element={<ProtectedRoute allowedRoles={['professional', 'patient', 'doctor', 'admin']} />}>
-            <Route element={<DoctorProvider><ClinicalLayout /></DoctorProvider>}>
-              <Route path="/doctor/patients" element={<DoctorPatients />} />
-              <Route path="/doctor/appointments" element={<DoctorAppointments />} />
-              <Route path="/doctor/lab-results" element={<DoctorLabResults />} />
-              <Route path="/doctor/research" element={<DoctorResearch />} />
-              <Route path="/doctor/profile" element={<DoctorProfile />} />
-            </Route>
-          </Route>
+
           
           <Route path="/wholesaler/*" element={activeRole === 'wholesaler' || activeRole === 'admin' ? <WholesalerRoutes /> : <Navigate to="/paciente" replace />} />
           <Route path="/wholeseller/*" element={<Navigate to="/wholesaler" replace />} />

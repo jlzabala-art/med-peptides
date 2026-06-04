@@ -601,6 +601,32 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
     }
   };
 
+  async function handleImpersonate(userId) {
+    if (readOnly) return;
+    if (!window.confirm("Are you sure you want to log in as this user in a new tab?")) return;
+    
+    try {
+      const toastId = toast.loading('Generating secure session...', { position: 'bottom-right' });
+      const generateToken = httpsCallable(functions, 'generateImpersonationToken');
+      
+      const { data } = await generateToken({ targetUid: userId });
+      
+      if (data && data.customToken) {
+        toast.dismiss(toastId);
+        toast.success('Session generated! Opening in new tab.');
+        // Open the impersonation route with the token
+        const impersonateUrl = `${window.location.origin}/impersonate?token=${data.customToken}`;
+        window.open(impersonateUrl, '_blank');
+      } else {
+        throw new Error('No custom token returned');
+      }
+    } catch (err) {
+      console.error('Error generating impersonation token:', err);
+      toast.dismiss();
+      toast.error(err.message || 'Failed to impersonate user.');
+    }
+  }
+
   async function handleSaveUser(e) {
     e.preventDefault();
     try {
@@ -1055,6 +1081,7 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
             handleSendEmail={handleSendEmail}
             sendingEmail={sendingEmail}
             setFinancialWholesaler={setFinancialWholesaler}
+            handleImpersonate={handleImpersonate}
             expandedPatientId={expandedPatientId}
             setExpandedPatientId={setExpandedPatientId}
             fetchUserOrders={fetchUserOrders}

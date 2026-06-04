@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { memo, useState, useRef, useEffect, useCallback } from 'react';
 import { Menu, X, ShoppingCart, Search, ChevronDown, LogIn, LogOut, User, LayoutDashboard, Globe, Home, ShieldCheck, Calculator, BookOpen, Beaker, HelpCircle, FlaskConical, ClipboardList, Package, ShoppingBag, Brain, Users, Activity, BookCopy, GraduationCap, BookMarked, Sparkles } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import ReactDOM from 'react-dom';
 import { REGION_FLAGS } from '../data/regions';
 import { COUNTRIES } from '../data/countries';
@@ -14,7 +14,11 @@ import CatalogMegaMenu from '../navigation/CatalogMegaMenu';
 import ResourcesDropdown from '../navigation/ResourcesDropdown';
 import WorkplaceDropdown from '../navigation/WorkplaceDropdown';
 import UserDropdown from '../navigation/UserDropdown';
+import ImpersonationBanner from '../components/shared/AppHeader/ImpersonationBanner';
 import { useTranslation } from 'react-i18next';
+import { useUIStore } from '../stores/uiStore';
+import { useShop } from '../context/ShopProvider';
+import { useCart } from '../context/CartProvider';
 
 // ── Static style constants (allocated once, not per render) ──────────────────
 const S = {
@@ -88,11 +92,26 @@ const ROLE_LABELS = {
 };
 
 function Header(props) {
-  const { scrolled, cartCount, cartBreakdown = {}, onOpenCart, onOpenSearch, region, selectedCountryCode, onOpenRegion, onSelectProduct, onSelectCategory, isHome, onGoHome, products, setActiveModal } = props;
+  const { onGoHome, onSelectProduct, onSelectCategory, products } = props;
+  const { scrolled, activeModal, setActiveModal, searchInitialTab, setSearchInitialTab, setManualRegionChange } = useUIStore();
+  const { region, setRegion } = useShop();
+  const { cartCount, cartBreakdown = {} } = useCart();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isHome = location.pathname === '/';
+
+  const onOpenCart = () => setActiveModal('cart');
+  const onOpenSearch = () => { setSearchInitialTab('peptides'); setActiveModal('search'); };
+  const onOpenRegion = () => {
+    setRegion(null);
+    setManualRegionChange(true);
+    try { localStorage.removeItem('mp_region'); } catch (err) {}
+  };
+
+  const selectedCountryCode = region;
   const isOpaque = scrolled || !isHome;
   const { user, isProfessional, isAdmin, activeRole, logout } = useAuth();
   const { tenant } = useTenant();
-  const navigate = useNavigate();
   const { t } = useTranslation();
 
   const logoUrl = tenant?.branding?.logoUrl;
@@ -163,6 +182,7 @@ function Header(props) {
 
   return (
     <>
+    <ImpersonationBanner />
     <header className={`site-header ${isOpaque ? 'site-header--opaque' : ''}`}>
       {/* Disclaimer Top Bar */}
       <div style={{

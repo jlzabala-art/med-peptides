@@ -56,7 +56,7 @@ function PhaseEditor({ phases, products: catalogProducts, onChange }) {
     const newItem = {
       productId: product.id,
       productName: product.displayName ?? product.name,
-      dosageMg: product.defaultDosage ?? 0,
+      dosage: product.defaultDosage ?? 0,
       frequency: 'Weekly',
       vialsNeeded: 1,
     };
@@ -197,24 +197,26 @@ function PhaseEditor({ phases, products: catalogProducts, onChange }) {
                         type="number"
                         min="0"
                         step="0.1"
-                        value={item.dosageMg ?? 0}
-                        aria-label="Edit dosage in milligrams"
+                        value={item.dosage ?? 0}
+                        aria-label="Edit dosage"
                         onChange={(e) =>
-                          updateItem(pi, ii, { dosageMg: parseFloat(e.target.value) || 0 })
+                          updateItem(pi, ii, { dosage: parseFloat(e.target.value) || 0 })
                         }
                         className="admin-premium-input"
                         style={{ width: '75px', textAlign: 'center' }}
-                        placeholder="mg"
+                        placeholder="0"
                       />
-                      <span
-                        style={{
-                          fontSize: '0.8rem',
-                          color: 'var(--text-secondary)',
-                          fontWeight: 500,
-                        }}
+                      <select
+                        value={item.doseUnit ?? 'mg'}
+                        onChange={(e) => updateItem(pi, ii, { doseUnit: e.target.value })}
+                        className="admin-premium-select"
+                        style={{ width: '65px', padding: '0.3rem', fontSize: '0.8rem' }}
                       >
-                        mg
-                      </span>
+                        <option value="mg">mg</option>
+                        <option value="mcg">mcg</option>
+                        <option value="IU">IU</option>
+                        <option value="ml">ml</option>
+                      </select>
                     </div>
 
                     <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
@@ -373,6 +375,105 @@ function PhaseEditor({ phases, products: catalogProducts, onChange }) {
         onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--accent-soft)')}
       >
         <Plus size={15} /> Add Phase
+      </button>
+    </div>
+  );
+}
+
+// ── SupplementsEditor ────────────────────────────────────────────────────────
+function SupplementsEditor({ supplements, onChange }) {
+  const addSupplement = () =>
+    onChange([...supplements, { name: '', dosage: '', rationale: '', timing: '' }]);
+
+  const updateSupplement = (i, patch) =>
+    onChange(supplements.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
+
+  const removeSupplement = (i) => onChange(supplements.filter((_, idx) => idx !== i));
+
+  if (!supplements) return null;
+
+  return (
+    <div className="phase-editor-root" style={{ marginTop: '2rem' }}>
+      <h4 style={{ margin: '0 0 1rem', fontSize: '1rem', color: 'var(--primary)' }}>
+        Recommended Supplements
+      </h4>
+      <AnimatePresence initial={false}>
+        {supplements.map((sup, i) => (
+          <motion.div
+            key={i}
+            className="phase-card"
+            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+            animate={{ opacity: 1, height: 'auto', marginBottom: '1.25rem' }}
+            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            style={{ overflow: 'hidden', padding: '1rem', background: 'var(--surface)' }}
+          >
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.75rem' }}>
+              <div style={{ flex: 2 }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Name</label>
+                <input
+                  value={sup.name ?? ''}
+                  onChange={(e) => updateSupplement(i, { name: e.target.value })}
+                  className="admin-premium-input"
+                  style={{ width: '100%', marginTop: '0.25rem' }}
+                  placeholder="e.g. NMN (Nicotinamide Mononucleotide)"
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Dosage</label>
+                <input
+                  value={sup.dosage ?? ''}
+                  onChange={(e) => updateSupplement(i, { dosage: e.target.value })}
+                  className="admin-premium-input"
+                  style={{ width: '100%', marginTop: '0.25rem' }}
+                  placeholder="e.g. 500mg daily"
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Timing</label>
+                <input
+                  value={sup.timing ?? ''}
+                  onChange={(e) => updateSupplement(i, { timing: e.target.value })}
+                  className="admin-premium-input"
+                  style={{ width: '100%', marginTop: '0.25rem' }}
+                  placeholder="e.g. Morning with breakfast"
+                />
+              </div>
+              <button
+                onClick={() => removeSupplement(i)}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)',
+                  padding: '0.25rem', marginTop: '1.5rem', height: 'fit-content'
+                }}
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Rationale</label>
+              <textarea
+                value={sup.rationale ?? ''}
+                onChange={(e) => updateSupplement(i, { rationale: e.target.value })}
+                className="admin-premium-input"
+                style={{ width: '100%', marginTop: '0.25rem', resize: 'vertical', minHeight: '60px' }}
+                placeholder="Rationale for this supplement..."
+              />
+            </div>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+
+      <button
+        onClick={addSupplement}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1rem',
+          border: '1px dashed var(--primary)', borderRadius: 'var(--radius-sm)',
+          background: 'var(--accent-soft)', color: 'var(--primary)', cursor: 'pointer',
+          fontWeight: 700, fontSize: '0.83rem', width: '100%', justifyContent: 'center',
+          transition: 'all 0.2s ease',
+        }}
+      >
+        <Plus size={15} /> Add Supplement
       </button>
     </div>
   );
@@ -605,7 +706,7 @@ export default function AdminProtocolsTab() {
         protocols: data,
         lastDoc: last,
         hasMore: more,
-      } = await getPaginatedProtocols(null, 20);
+      } = await getPaginatedProtocols(null, 20, { visibility: 'public' });
       setProtocols(data);
       // Inject data context for Atlas AI
       const activeProtocols = data.filter(p => p.status === 'active');
@@ -636,7 +737,7 @@ export default function AdminProtocolsTab() {
         protocols: data,
         lastDoc: last,
         hasMore: more,
-      } = await getPaginatedProtocols(lastDoc, 20);
+      } = await getPaginatedProtocols(lastDoc, 20, { visibility: 'public' });
       setProtocols((prev) => [...prev, ...data]);
       setLastDoc(last);
       setHasMore(more);
@@ -679,6 +780,7 @@ export default function AdminProtocolsTab() {
         status: p.status ?? 'draft',
         complexity_level: comp,
         phases: JSON.parse(JSON.stringify(p.phases ?? [])),
+        supplements: JSON.parse(JSON.stringify(p.supplements ?? [])),
       }
     );
   };
@@ -693,6 +795,12 @@ export default function AdminProtocolsTab() {
     setEdits((prev) => ({
       ...prev,
       [id]: { ...getEdit(protocols.find((p) => p.id === id)), ...prev[id], phases },
+    }));
+
+  const setEditSupplements = (id, supplements) =>
+    setEdits((prev) => ({
+      ...prev,
+      [id]: { ...getEdit(protocols.find((p) => p.id === id)), ...prev[id], supplements },
     }));
 
   // Save
@@ -750,6 +858,8 @@ export default function AdminProtocolsTab() {
         created_at: new Date(),
         updated_at: new Date(),
         version_number: 1,
+        visibility: 'public',
+        authorId: 'system',
       });
       toast.success('Pathway created successfully!');
       fetchProtocols();
@@ -1231,6 +1341,10 @@ export default function AdminProtocolsTab() {
                                     phases={e.phases ?? []}
                                     products={catalogProducts}
                                     onChange={(phases) => setEditPhases(p.id, phases)}
+                                  />
+                                  <SupplementsEditor
+                                    supplements={e.supplements ?? []}
+                                    onChange={(supplements) => setEditSupplements(p.id, supplements)}
                                   />
                                   {isDirty && (
                                     <div

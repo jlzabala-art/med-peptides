@@ -8,6 +8,7 @@ initializeApp();
 exports.onNewOrder    = require("./src/triggers/orders")(gmailUser, gmailAppPass);
 exports.onUserCreated = require("./src/triggers/users")(gmailUser, gmailAppPass);
 exports.syncProfileToBigin = require("./src/triggers/users_bigin_sync");
+exports.generateImpersonationToken = require("./src/users/impersonate").generateImpersonationToken;
 
 // ── Prescription triggers ─────────────────────────────────────────────────────
 const prescriptionTriggers = require("./src/triggers/prescriptions");
@@ -56,7 +57,8 @@ exports.scoreNewLead = require('./src/triggers/on_lead_created').scoreNewLead;
 exports.onProductCreated = require('./src/triggers/products').onProductCreated;
 exports.reconcileSupplierInvoice   = require("./src/http/reconcile_supplier_invoice").reconcileSupplierInvoice; // 3-way invoice matching
 
-exports.acceptInvitation           = require("./src/http/acceptInvitation").acceptInvitation; // Secure invitation acceptance
+exports.acceptInvitation           = require("./src/http/acceptInvitation").acceptInvitation;
+exports.enrichProductData          = require("./src/http/enrich_product").enrichProductData; // Secure invitation acceptance
 exports.generatePaymentLink        = require("./src/http/generatePaymentLink").generatePaymentLink; // Stripe Payment Links
 exports.sendEmail                  = require("./src/http/sendEmail").sendEmail; // Secure EmailJS Backend Dispatch
 

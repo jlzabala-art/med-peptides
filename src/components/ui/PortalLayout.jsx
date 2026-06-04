@@ -315,6 +315,8 @@ export default function PortalLayout({
                 <span style={{ fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-secondary)', letterSpacing: '-0.2px' }}>
                   {portalTitle}
                 </span>
+                <span style={{ color: '#e2e8f0', fontSize: '1.4rem', fontWeight: 300, margin: '0 0.25rem' }}>|</span>
+                <AdminPortalSwitcher />
               </>
             )}
           </div>
@@ -322,7 +324,7 @@ export default function PortalLayout({
 
         {/* Center - Global Search (Optional) */}
         {!isMobile && (
-          <div style={{ flex: 1, maxWidth: '600px', margin: '0 2rem' }}>
+          <div style={{ flex: '0 1 500px', margin: '0 auto', minWidth: '200px' }}>
             <div style={{ position: 'relative', width: '100%' }}>
               <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-secondary)' }} />
               <input 
@@ -353,13 +355,11 @@ export default function PortalLayout({
           
           {/* Preferences Toggles */}
           {!isMobile && (
-            <div style={{ display: 'flex', alignItems: 'center', marginRight: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginRight: '0.25rem' }}>
               <GlobalPreferencesDropdown />
             </div>
           )}
 
-          {headerActions}
-          <AdminPortalSwitcher />
           <button 
             onClick={() => setAiOpen(!isAiOpen)} 
             style={iconBtnStyle} 
@@ -481,13 +481,16 @@ export default function PortalLayout({
             )}
           </div>
 
-          <div style={{ marginLeft: '0.75rem' }}>
+          <div style={{ marginLeft: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <AvatarGenerator 
               name={(userProfile?.firstName && userProfile?.lastName) ? `${userProfile.firstName} ${userProfile.lastName}` : (userProfile?.fullName || userProfile?.displayName)}
               email={userProfile?.email || user?.email}
               size={36}
               onClick={() => routerNavigate(`/${roleContext}/my-profile`)}
             />
+            
+            {/* Header Actions (Logout icon from AdminDashboard) */}
+            {headerActions}
           </div>
         </div>
       </header>

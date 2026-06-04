@@ -73,9 +73,6 @@ export default function AdminCatalogEnrichmentTab() {
       const baseName = itemName.split('(')[0].trim();
       
       // 1. Ask Gemini to enrich this peptide
-      // We use the generic clinicalAI assistant with a very specific prompt
-      const callAi = httpsCallable(functions, 'clinicalAiAssistant');
-      
       const prompt = `As an expert biochemist, provide a valid JSON object for the peptide "${baseName}".
       It MUST follow exactly this structure, output ONLY raw JSON without markdown formatting:
       {
@@ -87,11 +84,25 @@ export default function AdminCatalogEnrichmentTab() {
         "sideEffects": ["Effect 1", "Effect 2"]
       }`;
 
-      const res = await callAi({ message: prompt, history: [] });
+      const rawRes = await fetch('https://clinicalaiassistant-jtlgnxrofa-ew.a.run.app', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message: prompt, 
+          history: [],
+          context: { user_profile: { role: 'admin' } }
+        })
+      });
+
+      if (!rawRes.ok) {
+        throw new Error(`API Error: ${rawRes.statusText}`);
+      }
+
+      const resData = await rawRes.json();
       let enrichedData = {};
       
       try {
-        const text = res.data?.reply || res.data?.text || res.data?.result || res.data;
+        const text = resData?.reply || resData?.text || resData?.result || resData;
         const cleaned = typeof text === 'string' ? text.replace(/^\`\`\`json\s*/i, '').replace(/\s*\`\`\`$/i, '').trim() : '{}';
         enrichedData = JSON.parse(cleaned);
       } catch (parseErr) {

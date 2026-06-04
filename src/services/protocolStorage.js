@@ -464,10 +464,19 @@ export const getAllProtocols = async () => {
 /**
  * Fetch protocols with pagination
  */
-export const getPaginatedProtocols = async (lastDocSnap = null, pageSize = 20) => {
+export const getPaginatedProtocols = async (lastDocSnap = null, pageSize = 20, options = {}) => {
     try {
+        let constraints = [];
+        if (options.visibility) {
+            constraints.push(where('visibility', '==', options.visibility));
+        }
+        if (options.authorId) {
+            constraints.push(where('authorId', '==', options.authorId));
+        }
+        
         let q = query(
             collection(db, COLLECTION_NAME),
+            ...constraints,
             orderBy('created_at', 'desc'),
             limit(pageSize)
         );

@@ -4,7 +4,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { collection, query, getDocs, doc, updateDoc, deleteDoc, limit, startAfter, orderBy } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { httpsCallable } from 'firebase/functions';
+import { db, functions } from '../../firebase';
 import {
   Search,
   Copy,
@@ -40,12 +41,11 @@ import AppEntityCell from '../ui/AppEntityCell';
 import { useToast } from '../../hooks/useToast';
 import { catalogRepository } from '../../repositories/catalogRepository';
 import AdminSupplyNotifierWidget from './gadgets/AdminSupplyNotifierWidget';
+import ProductContextSwitcher from './ProductContextSwitcher';
 import InlineEditField from '../ui/InlineEditField';
 import BulkOrderSelectionModal from './BulkOrders/BulkOrderSelectionModal';
 import TooltipWrapper from '../ui/TooltipWrapper';
 import AdminPageHeader from './AdminPageHeader';
-import { httpsCallable } from 'firebase/functions';
-import { functions } from '../../firebase';
 
 // ─── ProductMicrosite Component ────────────────────────────────────────────────
 function ProductMicrosite({ product, onUpdateProduct }) {
@@ -57,11 +57,32 @@ function ProductMicrosite({ product, onUpdateProduct }) {
     { role: 'ai', text: `Hello! I'm Atlas AI. I've loaded the data for ${product.name}. What would you like to know about its clinical applications or interactions?` }
   ]);
   const [isTyping, setIsTyping] = useState(false);
-  const [expandedAccordion, setExpandedAccordion] = useState('clinical'); // 'clinical', 'inventory', 'protocols', 'ai'
+  const [expandedAccordion, setExpandedAccordion] = useState(null); // 'clinical', 'inventory', 'protocols', 'ai'
   const [relatedProtocols, setRelatedProtocols] = useState([]);
   const [loadingProtocols, setLoadingProtocols] = useState(false);
   const [batches, setBatches] = useState([]);
   const [loadingBatches, setLoadingBatches] = useState(false);
+  const [isEnriching, setIsEnriching] = useState(false);
+
+  const handleEnrichData = async () => {
+    setIsEnriching(true);
+    try {
+      const enrichProductData = httpsCallable(functions, 'enrichProductData');
+      const response = await enrichProductData({ productId: product.id });
+      if (response.data.success) {
+        if (onUpdateProduct) {
+          // Pass the enriched fields back up so the UI refreshes
+          onUpdateProduct({ ...product, ...response.data.data });
+        }
+        alert(`Data enriched successfully! Fields updated: ${response.data.enrichedFields.join(', ')}`);
+      }
+    } catch (error) {
+      console.error('Error enriching data:', error);
+      alert('Error enriching data: ' + error.message);
+    } finally {
+      setIsEnriching(false);
+    }
+  };
 
   useEffect(() => {
     async function fetchBatches() {
@@ -232,18 +253,64 @@ function ProductMicrosite({ product, onUpdateProduct }) {
           </div>
         ) : materia ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', fontSize: '0.95rem', color: '#334155', lineHeight: 1.6, paddingBottom: '1rem' }}>
-            
-            {/* CAS Number Header if present */}
-            {product.casNumber && (
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', backgroundColor: '#f1f5f9', padding: '0.5rem 1rem', borderRadius: '8px', width: 'fit-content', border: '1px solid #e2e8f0' }}>
-                <span style={{ fontWeight: 700, color: '#475569', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CAS Registry Number</span>
-                <span style={{ fontFamily: 'monospace', color: '#0f172a', fontWeight: 600, fontSize: '1rem' }}>{product.casNumber}</span>
-              </div>
-            )}
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              {/* CAS Number Header if present */}
+              {product.casNumber && (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', backgroundColor: '#f1f5f9', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <span style={{ fontWeight: 700, color: '#475569', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CAS Registry Number</span>
+                  <span style={{ fontFamily: 'monospace', color: '#0f172a', fontWeight: 600, fontSize: '1rem' }}>{product.casNumber}</span>
+                </div>
+              )}
+
+              {/* AI Enriched Badge */}
+              {product.lastEnrichedAt && (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#f0fdf4', color: '#166534', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+                  <Bot size={16} />
+                  <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>AI Enriched Data</span>
+                  <span style={{ fontSize: '0.75rem', color: '#15803d' }}>
+                    ({new Date(product.lastEnrichedAt).toLocaleDateString()})
+                  </span>
+                </div>
+              )}
+            </div>
 
             <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
-              <h4 style={{ margin: '0 0 1rem', fontSize: '1rem', color: '#0f172a', fontWeight: 700, borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>Mechanism of Action</h4>
-              <p style={{ margin: 0, textAlign: 'justify' }}>{materia.mechanism_of_action}</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
+                <h4 style={{ margin: 0, fontSize: '1rem', color: '#0f172a', fontWeight: 700 }}>Mechanism of Action</h4>
+                <button
+                  onClick={handleEnrichData}
+                  disabled={isEnriching}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '0.4rem',
+                    padding: '0.4rem 0.8rem', fontSize: '0.8rem', fontWeight: 600,
+                    backgroundColor: '#eff6ff', color: '#2563eb', border: 'none',
+                    borderRadius: '6px', cursor: isEnriching ? 'not-allowed' : 'pointer',
+                    opacity: isEnriching ? 0.7 : 1
+                  }}
+                >
+                  {isEnriching ? (
+                    <><span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '1rem', height: '1rem' }}></span> Enriching...</>
+                  ) : (
+                    <><Bot size={14} /> Enrich Data (AI)</>
+                  )}
+                </button>
+              </div>
+              {materia.mechanism_of_action && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  {(() => {
+                    const text = materia.mechanism_of_action;
+                    const sentences = text.split(/\.\s+/).filter(Boolean);
+                    if (sentences.length <= 1) return <p style={{ margin: 0, textAlign: 'justify', lineHeight: '1.5' }}>{text}</p>;
+                    return (
+                      <ul style={{ margin: 0, paddingLeft: '1.2rem', textAlign: 'justify', display: 'flex', flexDirection: 'column', gap: '0.5rem', lineHeight: '1.5' }}>
+                        {sentences.map((s, i) => (
+                          <li key={i}>{s.trim()}{s.trim().endsWith('.') ? '' : '.'}</li>
+                        ))}
+                      </ul>
+                    );
+                  })()}
+                </div>
+              )}
             </div>
             
             <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.5rem' }}>
@@ -449,6 +516,8 @@ function ProductMicrosite({ product, onUpdateProduct }) {
           </div>
           <AppStatusToggle 
             isActive={!!product.trackCompetitors}
+            activeLabel="Monitoring Active"
+            inactiveLabel="Monitoring Disabled"
             onToggle={() => {
               if (onUpdateProduct) {
                 onUpdateProduct(product.id, { trackCompetitors: !product.trackCompetitors });
@@ -469,6 +538,7 @@ export default function AdminProductsTab({
 }) {
   const { isAdmin, user, userRole } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const [searchParams] = useSearchParams();
   const initialSearch = searchParams.get('search') || '';
@@ -484,6 +554,8 @@ export default function AdminProductsTab({
     }
   }, [searchParams]);
   const [filterCategory, setFilterCategory] = useState('All');
+  const [filterSupplier, setFilterSupplier] = useState('All');
+  const [filterProductType, setFilterProductType] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterStock, setFilterStock] = useState('All');
   const [filterWarehouse, setFilterWarehouse] = useState('All');
@@ -517,7 +589,7 @@ export default function AdminProductsTab({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filterCategory, filterStatus, filterStock, filterWarehouse, filterZoho, filterSource, dateRange]);
+  }, [searchTerm, filterCategory, filterSupplier, filterProductType, filterStatus, filterStock, filterWarehouse, filterZoho, filterSource, dateRange]);
 
   useEffect(() => {
     fetchProducts();
@@ -529,19 +601,15 @@ export default function AdminProductsTab({
       
       let q;
       if (loadMore && lastVisible) {
-        q = query(collection(db, 'products'), orderBy('name'), startAfter(lastVisible), limit(50));
+        q = query(collection(db, 'products'), orderBy('name'), startAfter(lastVisible));
       } else {
-        q = query(collection(db, 'products'), orderBy('name'), limit(50));
+        q = query(collection(db, 'products'), orderBy('name'));
       }
       
       const querySnapshot = await getDocs(q);
       const newDocs = querySnapshot.docs;
       
-      if (newDocs.length < 50) {
-        setHasMore(false);
-      } else {
-        setHasMore(true);
-      }
+      setHasMore(false); // Fetched all
       
       if (newDocs.length > 0) {
         setLastVisible(newDocs[newDocs.length - 1]);
@@ -897,8 +965,10 @@ export default function AdminProductsTab({
 
   // Determine which categories to show in filter dropdown
   const categoriesToShow = allowedCategories.includes('All')
-    ? [...new Set(products.map((p) => p.category))]
+    ? [...new Set(products.map((p) => p.category).filter(Boolean))]
     : allowedCategories;
+
+  const suppliersToShow = [...new Set(products.map((p) => p.supplier).filter(Boolean))];
 
   const columns = [
     {
@@ -919,12 +989,29 @@ export default function AdminProductsTab({
             title={p.name}
             subtitle={
               <>
-                <span style={{ opacity: 0.5 }}>↳</span> {p.category} | {p.dosage}
+                <span style={{ opacity: 0.5 }}>↳</span> {p.category} | {p.isGroup ? `${p.variants.length} Variants` : p.dosage}
               </>
             }
           />
         </div>
       ),
+    },
+    {
+      key: 'product_type',
+      header: 'Type',
+      width: '120px',
+      render: (p) => {
+        return (
+          <InlineEditField
+            type="select"
+            value={p.product_type || 'Other'}
+            options={['Peptides', 'API Peptides', 'API Supplements', 'Other']}
+            onSave={(val) => {
+              handleUpdateProduct(p.id, { product_type: val });
+            }}
+          />
+        );
+      }
     },
     {
       key: 'status',
@@ -974,32 +1061,37 @@ export default function AdminProductsTab({
       align: 'right',
       width: '180px',
       render: (p) => {
-  const actions = [
-    { type: 'inventory', onClick: () => {
-      navigate(`/admin/sku-sync?sku=${encodeURIComponent(p.sku || '')}&productId=${encodeURIComponent(p.id || '')}`);
-    } },
-    { type: 'pricing', onClick: () => {
-      navigate(`/admin/prices?sku=${encodeURIComponent(p.sku || '')}&productId=${encodeURIComponent(p.id || '')}`);
-    } },
-    { type: 'protocols', onClick: () => {
-      navigate(`/admin/protocols`);
-    } },
-    { type: 'ai', onClick: () => {
-      window.dispatchEvent(new CustomEvent('OPEN_ATLAS_CLINICAL_MODE', {
-        detail: { product: p.name, sku: p.sku }
-      }));
-    } },
-    { type: 'search', label: 'Search Competitors', onClick: () => handleScrapeCompetitor(p) },
-    { type: 'delete', onClick: () => handleDeleteProduct(p.id) }
-  ];
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-      {savingProduct === p.id && (
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Saving...</span>
-      )}
-      <AppActionGroup actions={actions} />
-    </div>
-  );
+    const targetP = p.isGroup ? (p.variants && p.variants[0] ? p.variants[0] : p) : p;
+    const actions = [
+      { type: 'inventory', onClick: () => {
+        navigate(`/admin/sku-sync?sku=${encodeURIComponent(targetP.sku || '')}&productId=${encodeURIComponent(targetP.id || '')}`);
+      } },
+      { type: 'pricing', onClick: () => {
+        navigate(`/admin/prices?sku=${encodeURIComponent(targetP.sku || '')}&productId=${encodeURIComponent(targetP.id || '')}`);
+      } },
+      { type: 'protocols', onClick: () => {
+        navigate(`/admin/protocols`);
+      } },
+      { type: 'ai', onClick: () => {
+        window.dispatchEvent(new CustomEvent('OPEN_ATLAS_CLINICAL_MODE', {
+          detail: { product: targetP.name, sku: targetP.sku }
+        }));
+      } },
+      { type: 'search', label: 'Search Competitors', onClick: () => handleScrapeCompetitor(targetP) }
+    ];
+    
+    if (!p.isGroup) {
+      actions.push({ type: 'delete', onClick: () => handleDeleteProduct(p.id) });
+    }
+
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        {savingProduct === p.id && (
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Saving...</span>
+        )}
+        <AppActionGroup actions={actions} />
+      </div>
+    );
       },
     });
   }
@@ -1048,94 +1140,271 @@ export default function AdminProductsTab({
     }
   };
 
-  const renderExpandedRow = (product) => {
-    return <ProductMicrosite product={product} onUpdateProduct={handleUpdateProduct} />;
-  };
+  const VariantRow = ({ variant, navigate }) => {
+    const [expandedSection, setExpandedSection] = React.useState(null);
 
-  const filteredProducts = products.filter((p) => {
-    const matchesCategory = filterCategory === 'All' || p?.category === filterCategory;
-    const matchesStatus =
-      filterStatus === 'All' ||
-      (filterStatus === 'Active' && p?.isActive !== false) ||
-      (filterStatus === 'Inactive' && p?.isActive === false);
-    const matchesWarehouse = filterWarehouse === 'All' || p?.warehouse === filterWarehouse;
-
-    let matchesStock = true;
-    if (filterStock === 'Out of Stock') matchesStock = p?.stock < 1;
-    else if (filterStock === 'Low Stock') matchesStock = p?.stock >= 1 && p?.stock < 20;
-    else if (filterStock === 'In Stock') matchesStock = p?.stock >= 20;
-
-    const searchLower = searchTerm.toLowerCase();
-    const matchesSearch =
-      (p?.name || '').toLowerCase().includes(searchLower) ||
-      (p?.category || '').toLowerCase().includes(searchLower) ||
-      (p?.objective && p.objective.toLowerCase().includes(searchLower)) ||
-      (p?.dosage && p.dosage.toLowerCase().includes(searchLower));
-
-    let matchesDate = true;
-    if (dateRange.start || dateRange.end) {
-      // Fallback to createdAt if updatedAt is null
-      let updatedStr = p.updatedAt;
-      if (!updatedStr && p.createdAt) {
-        if (p.createdAt?.toDate) {
-          updatedStr = p.createdAt.toDate().toISOString();
-        } else if (typeof p.createdAt === 'string') {
-          updatedStr = p.createdAt;
-        }
-      }
-      
-      const updated = updatedStr ? new Date(updatedStr) : null;
-      if (updated) {
-        if (dateRange.start && updated < new Date(dateRange.start)) matchesDate = false;
-        if (dateRange.end) {
-          const endDate = new Date(dateRange.end);
-          endDate.setHours(23, 59, 59, 999);
-          if (updated > endDate) matchesDate = false;
-        }
-      } else {
-        matchesDate = false;
-      }
-    }
-
-    let matchesZoho = true;
-    if (filterZoho !== 'All') {
-      if (filterZoho === 'Synced') matchesZoho = !!p.zoho_item_id;
-      if (filterZoho === 'Not Synced') matchesZoho = !p.zoho_item_id;
-    }
-
-    let matchesSource = true;
-    if (filterSource === 'Recently Imported') {
-      let baseDateStr = p.updatedAt;
-      if (!baseDateStr && p.createdAt) {
-        if (p.createdAt?.toDate) {
-          baseDateStr = p.createdAt.toDate().toISOString();
-        } else if (typeof p.createdAt === 'string') {
-          baseDateStr = p.createdAt;
-        }
-      }
-      const importedAt = p.lastImportedAt ? new Date(p.lastImportedAt) : (baseDateStr ? new Date(baseDateStr) : null);
-      if (!importedAt) {
-        matchesSource = false;
-      } else {
-        const hoursSinceImport = (new Date() - importedAt) / (1000 * 60 * 60);
-        if (hoursSinceImport > 24) matchesSource = false;
-      }
-    }
+    const toggleSection = (section) => {
+      setExpandedSection(prev => prev === section ? null : section);
+    };
 
     return (
-      matchesCategory &&
-      matchesStatus &&
-      matchesWarehouse &&
-      matchesStock &&
-      matchesSearch &&
-      matchesDate &&
-      matchesZoho &&
-      matchesSource
+      <div style={{ padding: '0.75rem 1rem', backgroundColor: 'white', borderRadius: '6px', border: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: '0.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>{variant.name}</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+              SKU: {variant.sku || 'N/A'}
+              {(variant.dosage || variant.route || variant.form) && (
+                <span style={{ marginLeft: '8px', paddingLeft: '8px', borderLeft: '1px solid var(--color-border)' }}>
+                  {variant.dosage && <span style={{ marginRight: '6px', fontWeight: 500 }}>{variant.dosage}</span>}
+                  {variant.form && <span style={{ marginRight: '6px' }}>• {variant.form}</span>}
+                  {variant.route && <span>• {variant.route}</span>}
+                </span>
+              )}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button onClick={(e) => { e.stopPropagation(); toggleSection('pricing'); }} style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', fontWeight: 600, backgroundColor: expandedSection === 'pricing' ? '#0f172a' : 'var(--color-bg-hover)', color: expandedSection === 'pricing' ? 'white' : 'var(--color-text-secondary)', border: '1px solid var(--color-border)', borderRadius: '4px', cursor: 'pointer', transition: 'all 0.2s' }}>
+              Pricing {expandedSection === 'pricing' ? '▼' : '▶'}
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); toggleSection('inventory'); }} style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', fontWeight: 600, backgroundColor: expandedSection === 'inventory' ? '#0f172a' : 'var(--color-bg-hover)', color: expandedSection === 'inventory' ? 'white' : 'var(--color-text-secondary)', border: '1px solid var(--color-border)', borderRadius: '4px', cursor: 'pointer', transition: 'all 0.2s' }}>
+              Inventory {expandedSection === 'inventory' ? '▼' : '▶'}
+            </button>
+          </div>
+        </div>
+
+        {expandedSection === 'pricing' && (() => {
+          const retailUnit = variant.pricing?.retail?.perUnit || variant.guestVialPrice || 0;
+          const clinicUnit = variant.pricing?.clinic?.perUnit || variant.proVialPrice || 0;
+          const wholesaleUnit = variant.pricing?.wholesale?.perUnit || 0;
+          const masterUnit = variant.pricing?.master?.perUnit || 0;
+
+          const retailKit = variant.pricing?.retail?.kit || variant.guestKitPrice || 0;
+          const clinicKit = variant.pricing?.clinic?.kit || variant.proKitPrice || 0;
+          const wholesaleKit = variant.pricing?.wholesale?.kit || 0;
+          const masterKit = variant.pricing?.master?.kit || 0;
+
+          const hasKit = parseFloat(retailKit) > 0 || parseFloat(clinicKit) > 0 || parseFloat(wholesaleKit) > 0 || parseFloat(masterKit) > 0;
+
+          return (
+            <div style={{ marginTop: '0.5rem', padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <h5 style={{ margin: 0, fontSize: '0.8rem', color: '#334155' }}>Pricing Tiers Overview</h5>
+                <span style={{ fontSize: '0.7rem', fontWeight: 600, padding: '0.2rem 0.5rem', borderRadius: '12px', backgroundColor: hasKit ? '#dcfce7' : '#f1f5f9', color: hasKit ? '#166534' : '#64748b' }}>
+                  {hasKit ? '✓ Set of 10 Available' : '✗ No Set of 10'}
+                </span>
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr', gap: '0.5rem', fontSize: '0.8rem', marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+                <strong style={{ color: '#64748b' }}>Tier</strong>
+                <strong style={{ textAlign: 'right', color: '#64748b' }}>1 Unit</strong>
+                <strong style={{ textAlign: 'right', color: '#64748b' }}>Set of 10</strong>
+
+                <span style={{ color: '#0f172a', fontWeight: 500 }}>Retail</span>
+                <span style={{ textAlign: 'right' }}>${parseFloat(retailUnit).toFixed(2)}</span>
+                <span style={{ textAlign: 'right' }}>{parseFloat(retailKit) > 0 ? `$${parseFloat(retailKit).toFixed(2)}` : '-'}</span>
+
+                <span style={{ color: '#0f172a', fontWeight: 500 }}>Doctor / Clinic</span>
+                <span style={{ textAlign: 'right' }}>${parseFloat(clinicUnit).toFixed(2)}</span>
+                <span style={{ textAlign: 'right' }}>{parseFloat(clinicKit) > 0 ? `$${parseFloat(clinicKit).toFixed(2)}` : '-'}</span>
+
+                <span style={{ color: '#0f172a', fontWeight: 500 }}>Wholesaler</span>
+                <span style={{ textAlign: 'right' }}>${parseFloat(wholesaleUnit).toFixed(2)}</span>
+                <span style={{ textAlign: 'right' }}>{parseFloat(wholesaleKit) > 0 ? `$${parseFloat(wholesaleKit).toFixed(2)}` : '-'}</span>
+
+                <span style={{ color: '#0f172a', fontWeight: 500 }}>Master</span>
+                <span style={{ textAlign: 'right' }}>${parseFloat(masterUnit).toFixed(2)}</span>
+                <span style={{ textAlign: 'right' }}>{parseFloat(masterKit) > 0 ? `$${parseFloat(masterKit).toFixed(2)}` : '-'}</span>
+              </div>
+
+              <button onClick={(e) => { e.stopPropagation(); navigate(`/admin/prices?sku=${encodeURIComponent(variant.sku || '')}&productId=${encodeURIComponent(variant.id || '')}`); }} style={{ width: '100%', padding: '0.6rem', fontSize: '0.8rem', fontWeight: 600, backgroundColor: 'white', color: '#0f172a', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>Manage Pricing in Detail</span>
+                <span>→</span>
+              </button>
+            </div>
+          );
+        })()}
+
+        {expandedSection === 'inventory' && (
+          <div style={{ marginTop: '0.5rem', padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+            <h5 style={{ margin: '0 0 0.5rem 0', fontSize: '0.8rem', color: '#334155' }}>Inventory Status</h5>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem', fontSize: '0.8rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.25rem', borderBottom: '1px solid #e2e8f0' }}>
+                <span style={{ color: '#64748b' }}>Total Stock Qty:</span> 
+                <strong>{variant.stock?.qty ?? variant.stock ?? 0} units</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.25rem', borderBottom: '1px solid #e2e8f0' }}>
+                <span style={{ color: '#64748b' }}>Availability:</span> 
+                <strong style={{ color: (variant.stock?.available ?? true) ? '#10b981' : '#ef4444' }}>
+                  {(variant.stock?.available ?? true) ? 'In Stock' : 'Out of Stock'}
+                </strong>
+              </div>
+            </div>
+            <button onClick={(e) => { e.stopPropagation(); navigate(`/admin/sku-sync?sku=${encodeURIComponent(variant.sku || '')}&productId=${encodeURIComponent(variant.id || '')}`); }} style={{ width: '100%', padding: '0.6rem', fontSize: '0.8rem', fontWeight: 600, backgroundColor: 'white', color: '#0f172a', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Manage Inventory in Detail</span>
+              <span>→</span>
+            </button>
+          </div>
+        )}
+      </div>
     );
+  };
+
+  const renderExpandedRow = (groupItem) => {
+    const targetProduct = groupItem.isGroup ? (groupItem.variants && groupItem.variants[0] ? groupItem.variants[0] : groupItem) : groupItem;
+    
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1rem', backgroundColor: 'var(--color-bg-subtle)' }}>
+        
+        {groupItem.isGroup && (
+          <div>
+            <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-main)', fontSize: '0.95rem', fontWeight: 600 }}>Available Variants</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {groupItem.variants.map(variant => (
+                <VariantRow key={variant.id} variant={variant} navigate={navigate} />
+              ))}
+            </div>
+          </div>
+        )}
+        
+        <div>
+          <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-main)', fontSize: '0.95rem', fontWeight: 600 }}>General Information & Clinical Data</h4>
+          <ProductMicrosite product={targetProduct} onUpdateProduct={fetchProducts} />
+        </div>
+      </div>
+    );
+  };
+
+  const allGroupsMap = products.reduce((acc, p) => {
+    // Determine the group name
+    let gName = p.zoho_item_group_name || p.item_group_name || p.group_name;
+    if (!gName) {
+      // Fallback: remove dosage strings like 10mg/vial, 50mg/tablet, 5mg/vial
+      gName = p.name.replace(/\s*\d+(\.\d+)?(mg|mcg|iu|g)\/?[a-zA-Z]*/i, '').trim();
+    }
+    
+    if (!acc[gName]) {
+      acc[gName] = {
+        id: `group_${gName.replace(/\s+/g, '_')}`,
+        isGroup: true,
+        name: gName,
+        category: p.category,
+        variants: [],
+        totalStock: 0,
+        isActive: false // true if any variant is active
+      };
+    }
+    
+    acc[gName].variants.push(p);
+    acc[gName].totalStock += (p.stock || 0);
+    if (p.isActive !== false) acc[gName].isActive = true;
+    
+    // Pick the most relevant zoho_item_id or sku
+    if (!acc[gName].sku && p.sku) acc[gName].sku = p.sku.substring(0, 8); 
+    if (!acc[gName].zoho_item_id && p.zoho_item_id) acc[gName].zoho_item_id = p.zoho_item_id;
+    
+    return acc;
+  }, {});
+
+  const allGroups = Object.values(allGroupsMap);
+
+  const filteredGroups = allGroups.filter((group) => {
+    return group.variants.some((p) => {
+      const matchesCategory = filterCategory === 'All' || p?.category === filterCategory;
+      const matchesSupplier = filterSupplier === 'All' || p?.supplier === filterSupplier;
+      const matchesStatus =
+        filterStatus === 'All' ||
+        (filterStatus === 'Active' && p?.isActive !== false) ||
+        (filterStatus === 'Inactive' && p?.isActive === false);
+      const matchesWarehouse = filterWarehouse === 'All' || p?.warehouse === filterWarehouse;
+
+      let matchesStock = true;
+      if (filterStock === 'Out of Stock') matchesStock = p?.stock < 1;
+      else if (filterStock === 'Low Stock') matchesStock = p?.stock >= 1 && p?.stock < 20;
+      else if (filterStock === 'In Stock') matchesStock = p?.stock >= 20;
+
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch =
+        (p?.name || '').toLowerCase().includes(searchLower) ||
+        (p?.category || '').toLowerCase().includes(searchLower) ||
+        (p?.supplier || '').toLowerCase().includes(searchLower) ||
+        (p?.objective && p.objective.toLowerCase().includes(searchLower)) ||
+        (p?.dosage && p.dosage.toLowerCase().includes(searchLower));
+
+      let matchesDate = true;
+      if (dateRange.start || dateRange.end) {
+        // Fallback to createdAt if updatedAt is null
+        let updatedStr = p.updatedAt;
+        if (!updatedStr && p.createdAt) {
+          if (p.createdAt?.toDate) {
+            updatedStr = p.createdAt.toDate().toISOString();
+          } else if (typeof p.createdAt === 'string') {
+            updatedStr = p.createdAt;
+          }
+        }
+        
+        const updated = updatedStr ? new Date(updatedStr) : null;
+        if (updated) {
+          if (dateRange.start && updated < new Date(dateRange.start)) matchesDate = false;
+          if (dateRange.end) {
+            const endDate = new Date(dateRange.end);
+            endDate.setHours(23, 59, 59, 999);
+            if (updated > endDate) matchesDate = false;
+          }
+        } else {
+          matchesDate = false;
+        }
+      }
+
+      let matchesZoho = true;
+      if (filterZoho !== 'All') {
+        if (filterZoho === 'Synced') matchesZoho = !!p.zoho_item_id;
+        if (filterZoho === 'Not Synced') matchesZoho = !p.zoho_item_id;
+      }
+
+      let matchesSource = true;
+      if (filterSource === 'Recently Imported') {
+        let baseDateStr = p.updatedAt;
+        if (!baseDateStr && p.createdAt) {
+          if (p.createdAt?.toDate) {
+            baseDateStr = p.createdAt.toDate().toISOString();
+          } else if (typeof p.createdAt === 'string') {
+            baseDateStr = p.createdAt;
+          }
+        }
+        const importedAt = p.lastImportedAt ? new Date(p.lastImportedAt) : (baseDateStr ? new Date(baseDateStr) : null);
+        if (!importedAt) {
+          matchesSource = false;
+        } else {
+          const hoursSinceImport = (new Date() - importedAt) / (1000 * 60 * 60);
+          if (hoursSinceImport > 24) matchesSource = false;
+        }
+      }
+
+      let matchesProductType = true;
+      if (filterProductType !== 'All') {
+         matchesProductType = p.product_type === filterProductType;
+      }
+
+      return (
+        matchesCategory &&
+        matchesSupplier &&
+        matchesProductType &&
+        matchesStatus &&
+        matchesWarehouse &&
+        matchesStock &&
+        matchesSearch &&
+        matchesDate &&
+        matchesZoho &&
+        matchesSource
+      );
+    });
   });
 
   const activeFilters = [];
   if (filterCategory !== 'All') activeFilters.push({ label: 'Category', value: filterCategory, type: 'category' });
+  if (filterSupplier !== 'All') activeFilters.push({ label: 'Supplier', value: filterSupplier, type: 'supplier' });
+  if (filterProductType !== 'All') activeFilters.push({ label: 'Product Type', value: filterProductType, type: 'productType' });
   if (filterStatus !== 'All') activeFilters.push({ label: 'Status', value: filterStatus, type: 'status' });
   if (filterWarehouse !== 'All') activeFilters.push({ label: 'Warehouse', value: filterWarehouse, type: 'warehouse' });
   if (filterStock !== 'All') activeFilters.push({ label: 'Stock', value: filterStock, type: 'stock' });
@@ -1144,6 +1413,8 @@ export default function AdminProductsTab({
 
   const handleFilterRemove = (filter) => {
     if (filter.type === 'category') setFilterCategory('All');
+    if (filter.type === 'supplier') setFilterSupplier('All');
+    if (filter.type === 'productType') setFilterProductType('All');
     if (filter.type === 'status') setFilterStatus('All');
     if (filter.type === 'warehouse') setFilterWarehouse('All');
     if (filter.type === 'stock') setFilterStock('All');
@@ -1167,6 +1438,37 @@ export default function AdminProductsTab({
           {categoriesToShow.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
         </select>
       )}
+      {suppliersToShow.length > 0 && (
+        <select
+          value={filterSupplier}
+          onChange={(e) => setFilterSupplier(e.target.value)}
+          style={{
+            height: '24px', padding: '0 1rem 0 0.4rem', borderRadius: '12px',
+            border: '1px solid var(--border)', backgroundColor: filterSupplier === 'All' ? 'white' : 'var(--primary-light)',
+            color: filterSupplier === 'All' ? 'var(--text-main)' : 'var(--primary)',
+            fontSize: '0.7rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+          }}
+        >
+          <option value="All">Supplier: All</option>
+          {suppliersToShow.map((sup) => <option key={sup} value={sup}>{sup}</option>)}
+        </select>
+      )}
+      <select
+        value={filterProductType}
+        onChange={(e) => setFilterProductType(e.target.value)}
+        style={{
+          height: '24px', padding: '0 1rem 0 0.4rem', borderRadius: '12px',
+          border: '1px solid var(--border)', backgroundColor: filterProductType === 'All' ? 'white' : 'var(--primary-light)',
+          color: filterProductType === 'All' ? 'var(--text-main)' : 'var(--primary)',
+          fontSize: '0.7rem', fontWeight: 500, outline: 'none', cursor: 'pointer', appearance: 'none',
+        }}
+      >
+        <option value="All">Type: All</option>
+        <option value="Peptides">Peptides (Finished)</option>
+        <option value="API Peptides">API Peptides</option>
+        <option value="API Supplements">API Supplements</option>
+        <option value="Other">Other</option>
+      </select>
       <select
         value={filterStatus}
         onChange={(e) => setFilterStatus(e.target.value)}
@@ -1242,9 +1544,11 @@ export default function AdminProductsTab({
     </>
   );
 
-  const totalItems = filteredProducts.length;
+  const groupedProductsArray = filteredGroups.sort((a, b) => a.name.localeCompare(b.name));
+
+  const totalItems = groupedProductsArray.length;
   const totalPages = Math.ceil(totalItems / rowsPerPage);
-  const paginatedProducts = filteredProducts.slice(
+  const paginatedProducts = groupedProductsArray.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
@@ -1256,6 +1560,13 @@ export default function AdminProductsTab({
         subtitle="Manage product details, pricing, inventory categories, and Zoho Catalog integrations."
         icon={Package}
       />
+      
+      <ProductContextSwitcher 
+        searchTerm={searchTerm} 
+        currentTab="products" 
+        onClear={() => setSearchTerm('')} 
+      />
+      
       {isAdmin && !readOnly && (
         <div style={{ marginBottom: '1.5rem' }}>
           <AdminSupplyNotifierWidget />
@@ -1278,7 +1589,7 @@ export default function AdminProductsTab({
           }}
         >
           <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-main)' }}>
-            Products ({filteredProducts.length})
+            Products ({filteredGroups.reduce((acc, g) => acc + g.variants.length, 0)} items in {filteredGroups.length} families)
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button

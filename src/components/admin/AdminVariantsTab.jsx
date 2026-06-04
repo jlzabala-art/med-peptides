@@ -14,7 +14,8 @@ import DataTable from '../ui/DataTable';
 import { db } from '../../firebase';
 import { RefreshCw, EyeOff, Eye, Package, DollarSign, Hash, AlertTriangle, Check, Save, Sparkles } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import ProductContextSwitcher from './ProductContextSwitcher';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -43,6 +44,7 @@ export default function AdminVariantsTab() {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
   const deepLinkSearch = params.get('search');
 
@@ -306,6 +308,25 @@ export default function AdminVariantsTab() {
             <Sparkles size={13} style={{ marginRight: '4px' }} />
             <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>Atlas</span>
           </button>
+          
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              // Navigate to pricing tab
+              navigate(`/admin/prices?sku=${encodeURIComponent(g.product.sku || '')}&productId=${encodeURIComponent(g.product.id || '')}`);
+            }}
+            style={{
+              background: 'rgba(16, 185, 129, 0.1)', border: 'none', cursor: 'pointer', 
+              padding: '0.2rem 0.4rem', borderRadius: '4px', color: 'var(--color-success)', 
+              display: 'inline-flex', alignItems: 'center', transition: 'background 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(16, 185, 129, 0.2)'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(16, 185, 129, 0.1)'}
+            title="Manage Pricing"
+          >
+            <DollarSign size={13} style={{ marginRight: '4px' }} />
+            <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>Pricing</span>
+          </button>
           {(g.product.dosage || g.product.strength) && (
             <span
               style={{
@@ -393,6 +414,15 @@ export default function AdminVariantsTab() {
           <RefreshCw size={15} /> Refresh
         </button>
       </div>
+
+      <ProductContextSwitcher 
+        searchTerm={searchTerm} 
+        currentTab="stock" 
+        onClear={() => {
+          setSearchTerm('');
+          navigate('/admin/stock', { replace: true });
+        }} 
+      />
 
       <div
         style={{

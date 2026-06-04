@@ -21,6 +21,8 @@ const SearchTemplate = lazy(() => import('../templates/SearchTemplate'));
 const CompareTemplate = lazy(() => import('../templates/CompareTemplate'));
 const CompoundComparator = lazy(() => import('../templates/CompoundComparator'));
 const PrivacyPolicy = lazy(() => import('../templates/PrivacyPolicy'));
+const LegalConditions = lazy(() => import('../templates/LegalConditions'));
+const TermsOfUse = lazy(() => import('../templates/TermsOfUse'));
 const WhatArePeptides = lazy(() => import('../templates/WhatArePeptides'));
 const WhatAreProtocolsPage = lazy(() => import('../templates/WhatAreProtocolsPage'));
 const ReconstitutionGuide = lazy(() => import('../templates/ReconstitutionGuide'));

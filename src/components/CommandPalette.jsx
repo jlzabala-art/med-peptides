@@ -6,9 +6,13 @@ import { collection, query, where, getDocs, limit, orderBy } from 'firebase/fire
 
 const ADMIN_ROUTES = [
   { id: 'route-1', label: 'Admin Dashboard', path: '/admin', icon: LayoutDashboard, type: 'Route' },
-  { id: 'route-2', label: 'Active Users', path: '/admin?t=users', icon: User, type: 'Route' },
-  { id: 'route-3', label: 'Manage Products', path: '/admin?t=products', icon: Box, type: 'Route' },
-  { id: 'route-4', label: 'Orders & Billing', path: '/admin?t=orders', icon: Package, type: 'Route' },
+  { id: 'route-2', label: 'Active Users', path: '/admin/users', icon: User, type: 'Route' },
+  { id: 'route-3', label: 'Products Catalog', path: '/admin/products', icon: Box, type: 'Route' },
+  { id: 'route-4', label: 'Orders & Billing', path: '/admin/orders', icon: Package, type: 'Route' },
+  { id: 'route-5', label: 'Prices & Offers', path: '/admin/prices', icon: Box, type: 'Route' },
+  { id: 'route-6', label: 'Protocols', path: '/admin/protocols', icon: Box, type: 'Route' },
+  { id: 'route-7', label: 'Analytics', path: '/admin/analytics', icon: LayoutDashboard, type: 'Route' },
+  { id: 'route-8', label: 'System Settings', path: '/admin/settings', icon: LayoutDashboard, type: 'Route' }
 ];
 
 const fuzzyMatch = (q, text) => text.toLowerCase().includes(q.toLowerCase());
@@ -58,17 +62,17 @@ export default function CommandPalette({ isOpen, onClose }) {
       const foundUsers = uSnap.docs
         .map(d => ({ id: d.id, ...d.data() }))
         .filter(u => fuzzyMatch(lowerQ, u.fullName || u.email || ''))
-        .map(u => ({ id: u.id, label: u.fullName || u.email, path: `/admin?t=users&uid=${u.id}`, type: 'User', icon: User }));
+        .map(u => ({ id: u.id, label: u.fullName || u.email, path: `/admin/users?uid=${u.id}`, type: 'User', icon: User }));
         
       const foundProducts = pSnap.docs
         .map(d => ({ id: d.id, ...d.data() }))
         .filter(p => fuzzyMatch(lowerQ, p.name || ''))
-        .map(p => ({ id: p.id, label: p.name, path: `/admin?t=products&pid=${p.id}`, type: 'Product', icon: Box }));
+        .map(p => ({ id: p.id, label: p.name, path: `/admin/products?search=${encodeURIComponent(p.name)}`, type: 'Product', icon: Box }));
         
       const foundOrders = oSnap.docs
         .map(d => ({ id: d.id, ...d.data() }))
         .filter(o => fuzzyMatch(lowerQ, o.id) || fuzzyMatch(lowerQ, o.userEmail || ''))
-        .map(o => ({ id: o.id, label: `Order #${o.id.slice(0,8)} - ${o.userEmail}`, path: `/admin?t=orders&oid=${o.id}`, type: 'Order', icon: Package }));
+        .map(o => ({ id: o.id, label: `Order #${o.id.slice(0,8)} - ${o.userEmail}`, path: `/admin/orders?oid=${o.id}`, type: 'Order', icon: Package }));
         
       setResults([...routeResults, ...foundUsers, ...foundProducts, ...foundOrders]);
     } catch (err) {

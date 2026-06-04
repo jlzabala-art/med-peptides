@@ -110,11 +110,12 @@ const NAV_GROUPS = [
     label: 'Catalog & Inventory',
     items: [
       { id: 'products',        label: 'Products',        icon: Box },
+      { id: 'protocols',       label: 'Protocols',       icon: ClipboardList },
       { id: 'stock',           label: 'Stock',           icon: FlaskConical },
+      { id: 'prices',          label: 'Pricing Matrix',  icon: Tag },
       { id: 'competitors',     label: 'Competitor Analysis', icon: Activity },
       { id: 'enrichment',      label: 'Catalog Enrichment', icon: Database },
       { id: 'lab-tests',       label: 'Lab Tests',       icon: ScrollText },
-      { id: 'protocols',       label: 'Protocols',       icon: ClipboardList },
     ],
   },
   {
@@ -220,7 +221,6 @@ const NAV_GROUPS = [
     label: 'Configuration',
     items: [
       { id: 'settings',        label: 'General Settings',  icon: Settings },
-      { id: 'prices',          label: 'Prices',            icon: Tag },
       { id: 'costs',           label: 'Costs',             icon: DollarSign },
       { id: 'relationships',   label: 'Relationships',     icon: Network },
       { id: 'home-layout',     label: 'Home Layout',       icon: LayoutTemplate },
