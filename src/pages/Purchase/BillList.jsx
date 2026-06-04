@@ -1,132 +1,381 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, updateDoc, doc, serverTimestamp, arrayUnion } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Receipt, Plus, Loader2 } from 'lucide-react';
-import { Card } from '../../components/ui';
-import DataTable from '../../components/ui/DataTable';
+import { Receipt, Plus, X, Building2, Calendar, DollarSign, FileText, CheckCircle, AlertCircle } from 'lucide-react';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
+import ERPListDetailLayout from '../../components/shared/ERPListDetailLayout';
+import ERPStatusBadge from '../../components/shared/ERPStatusBadge';
+import ERPActivityTimeline from '../../components/shared/ERPActivityTimeline';
 import BillForm from '../../components/purchase/BillForm';
+import ZohoPaperPreview from '../../components/admin/ZohoPaperPreview';
 
+
+// ── Bill states ordered for the status bar ──────────────────────────────────
+const BILL_STATES = ['DRAFT', 'PENDING', 'APPROVED', 'SCHEDULED', 'PAID', 'OVERDUE', 'VOID'];
+const TERMINAL_STATES = ['PAID', 'VOID'];
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function fmt(date) {
+  if (!date) return 'N/A';
+  const d = date?.toDate ? date.toDate() : new Date(date);
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function fmtCurrency(amount, currency = 'USD') {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount || 0);
+}
+
+// ── List Item ─────────────────────────────────────────────────────────────────
+function BillListItem({ bill, isSelected }) {
+  const isOverdue = bill.status !== 'PAID' && bill.dueDate && new Date(bill.dueDate?.toDate?.() || bill.dueDate) < new Date();
+  return (
+    <div style={{ padding: '0.875rem 1.25rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.35rem' }}>
+        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: isSelected ? '#1d4ed8' : '#1e293b' }}>
+          {bill.billNumber || bill.id?.slice(0, 8)}
+        </span>
+        <ERPStatusBadge status={isOverdue && bill.status !== 'PAID' ? 'OVERDUE' : (bill.status || 'DRAFT')} size="sm" />
+      </div>
+      <div style={{ fontSize: '0.82rem', color: '#475569', fontWeight: 500 }}>{bill.supplierName || '—'}</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.3rem' }}>
+        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          Due: {fmt(bill.dueDate)}
+        </span>
+        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: isOverdue && bill.status !== 'PAID' ? '#dc2626' : '#1e293b' }}>
+          {fmtCurrency(bill.totalAmount || bill.amount)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ── Detail Panel ──────────────────────────────────────────────────────────────
+function BillDetail({ bill, onClose, onStatusChange }) {
+  const [detailTab, setDetailTab] = useState('overview');
+  const isTerminal = TERMINAL_STATES.includes((bill.status || '').toUpperCase());
+
+  const handleStatus = async (newStatus) => {
+    if (isTerminal) return;
+    await updateDoc(doc(db, 'purchaseBills', bill.id), {
+      status: newStatus,
+      updatedAt: serverTimestamp(),
+      statusHistory: arrayUnion({
+        status: newStatus,
+        changedAt: new Date().toISOString(),
+        changedBy: 'Admin',
+      }),
+    });
+    onStatusChange?.();
+  };
+
+  const handleMarkPaid = () => handleStatus('PAID');
+
+  const subtotal = (bill.items || []).reduce((sum, i) => sum + (parseFloat(i.amount) || parseFloat(i.quantity) * parseFloat(i.unitPrice) || 0), 0);
+  const tax = bill.tax || 0;
+  const total = bill.totalAmount || bill.amount || subtotal + tax;
+
+  const sectionStyle = { marginBottom: '1.5rem' };
+  const sectionTitle = { fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.05em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.6rem' };
+  const divider = { height: '1px', backgroundColor: '#e2e8f0', margin: '1.25rem 0' };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* Header */}
+      <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #e2e8f0', backgroundColor: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexShrink: 0 }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>{bill.billNumber || bill.id?.slice(0, 8)}</h2>
+            <ERPStatusBadge status={bill.status || 'DRAFT'} />
+          </div>
+          <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.25rem', display: 'flex', gap: '1rem' }}>
+            <span>Issued: {fmt(bill.createdAt || bill.issueDate)}</span>
+            {bill.dueDate && <span>Due: {fmt(bill.dueDate)}</span>}
+          </div>
+        </div>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: '0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <X size={18} />
+        </button>
+      </div>
+
+      {/* Tabs Menu */}
+      <div style={{ display: 'flex', gap: '1.5rem', borderBottom: '1px solid #e2e8f0', padding: '0 1.5rem', backgroundColor: 'white', flexShrink: 0 }}>
+        {[
+          { id: 'overview', label: 'Overview' },
+          { id: 'items', label: 'Line Items' },
+          { id: 'activity', label: 'Activity' }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setDetailTab(tab.id)}
+            style={{
+              padding: '0.9rem 0.25rem',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+              fontWeight: detailTab === tab.id ? 700 : 500,
+              color: detailTab === tab.id ? '#2563eb' : '#64748b',
+              borderBottom: detailTab === tab.id ? '2.5px solid #2563eb' : '2.5px solid transparent',
+              transition: 'all 0.2s ease',
+              textTransform: 'uppercase',
+              letterSpacing: '0.03em'
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Body */}
+      <div className="erp-scroll" style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
+
+        {/* TAB 1: OVERVIEW */}
+        {detailTab === 'overview' && (
+          <div>
+            {/* Status Flow */}
+            <div style={{ marginBottom: '1.5rem', backgroundColor: 'white', padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <div style={sectionTitle}>Status Flow</div>
+              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                {BILL_STATES.map(s => {
+                  const isCurrent = (bill.status || 'DRAFT').toUpperCase() === s;
+                  return (
+                    <button
+                      key={s}
+                      onClick={() => handleStatus(s)}
+                      disabled={isTerminal && !isCurrent}
+                      style={{
+                        padding: '0.3rem 0.75rem', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 600,
+                        cursor: isTerminal && !isCurrent ? 'not-allowed' : 'pointer',
+                        border: isCurrent ? '2px solid #2563eb' : '1px solid #e2e8f0',
+                        backgroundColor: isCurrent ? '#eff6ff' : '#f8fafc',
+                        color: isCurrent ? '#2563eb' : '#64748b',
+                        display: 'flex', alignItems: 'center', gap: '0.25rem',
+                        opacity: isTerminal && !isCurrent ? 0.5 : 1,
+                      }}
+                    >
+                      {isCurrent && <CheckCircle size={11} />}
+                      {s.replace(/_/g, ' ')}
+                    </button>
+                  );
+                })}
+              </div>
+              {isTerminal && (
+                <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.5rem', fontStyle: 'italic', margin: '0.5rem 0 0 0' }}>
+                  This bill is marked as {bill.status?.toLowerCase()} and is locked.
+                </p>
+              )}
+            </div>
+
+            {/* Vendor Card */}
+            <div style={{ marginBottom: '1.5rem', backgroundColor: 'white', padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <div style={sectionTitle}>Vendor Details</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '0.5rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, marginBottom: '0.2rem', textTransform: 'uppercase' }}>Vendor Name</label>
+                  <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#1e293b' }}>{bill.supplierName || '—'}</span>
+                </div>
+                {bill.supplierEmail && (
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, marginBottom: '0.2rem', textTransform: 'uppercase' }}>Email Address</label>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#1e293b' }}>{bill.supplierEmail}</span>
+                  </div>
+                )}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, marginBottom: '0.2rem', textTransform: 'uppercase' }}>Due Date</label>
+                  <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#1e293b' }}>{bill.dueDate ? fmt(bill.dueDate) : '—'}</span>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, marginBottom: '0.2rem', textTransform: 'uppercase' }}>Total Amount</label>
+                  <span style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>{fmtCurrency(total)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: LINE ITEMS */}
+        {detailTab === 'items' && (
+          <div style={{ margin: '-1.5rem', backgroundColor: '#f8fafc' }}>
+            <ZohoPaperPreview
+              docType="BILL"
+              documentData={{
+                documentNumber: bill.billNumber || bill.id?.slice(0, 8),
+                date: fmt(bill.createdAt || bill.issueDate),
+                dueDate: fmt(bill.dueDate),
+                supplierName: bill.supplierName,
+                supplierEmail: bill.supplierEmail,
+                items: bill.items || [],
+                subTotal: subtotal,
+                taxTotal: tax,
+                grandTotal: total,
+                notes: bill.notes || ''
+              }}
+            />
+          </div>
+        )}
+
+        {/* TAB 3: ACTIVITY TIMELINE */}
+        {detailTab === 'activity' && (
+          <div style={{ backgroundColor: 'white', padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+            <div style={sectionTitle}>Activity logs</div>
+            <div style={{ marginTop: '1rem' }}>
+              <ERPActivityTimeline events={bill.statusHistory || []} currentStatus={bill.status} />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #e2e8f0', backgroundColor: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', flexShrink: 0 }}>
+        <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+          {fmtCurrency(total)}
+        </div>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          {!isTerminal && (
+            <button
+              onClick={handleMarkPaid}
+              style={{ padding: '0.5rem 1rem', backgroundColor: '#16a34a', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <CheckCircle size={14} /> Mark as Paid
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Page ─────────────────────────────────────────────────────────────────
 export default function BillList() {
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [selectedBill, setSelectedBill] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [refreshToken, setRefreshToken] = useState(0);
 
   useEffect(() => {
+    let isSeeding = false;
     const q = query(collection(db, 'purchaseBills'), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, (snap) => {
-      setBills(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    const unsub = onSnapshot(q, async (snap) => {
+      const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      if (data.length === 0 && !isSeeding) {
+        isSeeding = true;
+        try {
+          const sample1 = {
+            billNumber: "BILL-2026-001",
+            supplierName: "Global Peptide Synthesis Ltd.",
+            supplierEmail: "sales@globalpeptides.com",
+            status: "APPROVED",
+            items: [
+              { itemName: "BPC-157 Acetate (API)", quantity: 100, unit: "g", expectedCost: 11.50, unitPrice: 11.50, total: 1150.00 }
+            ],
+            totalAmount: 1150.00,
+            createdAt: new Date(),
+            statusHistory: [
+              { status: 'DRAFT', changedAt: new Date(Date.now() - 86400000).toISOString(), changedBy: 'Admin' },
+              { status: 'APPROVED', changedAt: new Date().toISOString(), changedBy: 'Admin' }
+            ]
+          };
+
+          const sample2 = {
+            billNumber: "BILL-2026-002",
+            supplierName: "Apex Biochemicals Corp",
+            supplierEmail: "info@apexbiochem.com",
+            status: "PENDING",
+            items: [
+              { itemName: "TB-500 Acetate (API)", quantity: 50, unit: "g", expectedCost: 18.00, unitPrice: 18.00, total: 900.00 }
+            ],
+            totalAmount: 900.00,
+            createdAt: new Date(),
+            statusHistory: [
+              { status: 'DRAFT', changedAt: new Date().toISOString(), changedBy: 'Admin' }
+            ]
+          };
+
+          await addDoc(collection(db, 'purchaseBills'), sample1);
+          await addDoc(collection(db, 'purchaseBills'), sample2);
+        } catch (err) {
+          console.error("Error seeding sample Bills:", err);
+        } finally {
+          isSeeding = false;
+        }
+      }
+
+      setBills(data);
       setLoading(false);
     });
     return () => unsub();
   }, []);
 
-  const handleCreate = () => {
-    setSelectedBill(null);
-    setShowForm(true);
-  };
-
-  const handleEdit = (bill) => {
-    setSelectedBill(bill);
-    setShowForm(true);
-  };
-
-  const columns = [
-    {
-      key: 'billNumber',
-      header: 'Bill#',
-      sortKey: 'billNumber',
-      render: (r) => <span style={{ fontWeight: 600 }}>{r.billNumber || r.id.slice(0, 8)}</span>
-    },
-    {
-      key: 'supplierName',
-      header: 'Supplier',
-      sortKey: 'supplierName',
-    },
-    {
-      key: 'date',
-      header: 'Date',
-      sortKey: 'createdAt',
-      render: (r) => r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString() : 'N/A'
-    },
-    {
-      key: 'amount',
-      header: 'Amount',
-      sortKey: 'totalAmount',
-      render: (r) => `$${(r.totalAmount || 0).toFixed(2)}`
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      sortKey: 'status',
-      render: (r) => (
-        <span style={{ 
-          padding: '0.25rem 0.5rem', 
-          borderRadius: '12px', 
-          fontSize: '0.75rem', 
-          fontWeight: 700, 
-          backgroundColor: r.status === 'paid' ? 'rgba(34,197,94,0.1)' : 'rgba(234,88,12,0.1)', 
-          color: r.status === 'paid' ? '#15803d' : '#c2410c' 
-        }}>
-          {(r.status || 'unpaid').toUpperCase()}
-        </span>
-      )
-    },
-    {
-      key: 'actions',
-      header: 'Action',
-      align: 'right',
-      render: (r) => (
-        <button 
-          onClick={() => handleEdit(r)}
-          style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px', background: 'white', cursor: 'pointer' }}
-        >
-          View / Edit
-        </button>
-      )
-    }
-  ];
-
-  const filtered = bills.filter(r => 
-    r.supplierName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filtered = bills.filter(r =>
+    r.supplierName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     r.billNumber?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '3rem' }}>
+    <div style={{ maxWidth: '1280px', margin: '0 auto', paddingBottom: '3rem' }}>
       <AdminPageHeader
         title="Supplier Bills"
-        subtitle="Manage bills from suppliers, reconcile with POs, and track payments."
+        subtitle="Manage incoming vendor bills, reconcile with purchase orders, and track payments."
         icon={Receipt}
         actions={
-          <button onClick={handleCreate} className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <button
+            onClick={() => { setSelectedBill(null); setShowForm(true); }}
+            className="btn btn-primary"
+            style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}
+          >
             <Plus size={16} /> New Bill
           </button>
         }
       />
 
-      <Card style={{ overflow: 'visible', padding: 0 }}>
-        {loading ? (
-          <div style={{ padding: '3rem', textAlign: 'center' }}><Loader2 className="spin" /></div>
-        ) : (
-          <DataTable
-            data={filtered}
-            columns={columns}
-            searchQuery={searchTerm}
-            onSearchChange={setSearchTerm}
-            searchPlaceholder="Search by supplier or bill number..."
-            emptyTitle="No Bills found"
-            emptyDescription="Create a new Bill to track supplier payables."
+      <ERPListDetailLayout
+        items={filtered}
+        loading={loading}
+        getItemId={(b) => b.id}
+        searchQuery={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Search by supplier or bill number..."
+        headerLeft={
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>All Bills</div>
+            <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>{filtered.length} records</div>
+          </div>
+        }
+        headerActions={
+          <button
+            onClick={() => { setSelectedBill(null); setShowForm(true); }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', padding: '0.4rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, backgroundColor: '#1e293b', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+          >
+            <Plus size={14} /> New
+          </button>
+        }
+        renderListItem={(bill, isSelected) => (
+          <BillListItem bill={bill} isSelected={isSelected} />
+        )}
+        renderDetail={(bill, onClose) => (
+          <BillDetail
+            key={bill.id + refreshToken}
+            bill={bill}
+            onClose={onClose}
+            onStatusChange={() => setRefreshToken(t => t + 1)}
           />
         )}
-      </Card>
+        emptyState={
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🧾</div>
+            <div style={{ fontWeight: 600, color: '#64748b' }}>No bill selected</div>
+            <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.25rem' }}>Select a bill from the list to view details.</div>
+          </div>
+        }
+      />
 
       {showForm && (
-        <BillForm 
-          bill={selectedBill} 
-          onClose={() => setShowForm(false)} 
+        <BillForm
+          bill={selectedBill}
+          onClose={() => setShowForm(false)}
         />
       )}
     </div>

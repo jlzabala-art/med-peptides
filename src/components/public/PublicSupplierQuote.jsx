@@ -23,7 +23,7 @@ export default function PublicSupplierQuote() {
   useEffect(() => {
     const fetchRFQ = async () => {
       try {
-        const docRef = doc(db, 'agency_rfqs', id);
+        const docRef = doc(db, 'purchase_rfqs', id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
@@ -59,6 +59,14 @@ export default function PublicSupplierQuote() {
     setItems(updated);
   };
 
+  const handleDiscountChange = (index, discount) => {
+    const updated = [...items];
+    updated[index].itemDiscount = discount;
+    setItems(updated);
+  };
+
+  const [globalDiscount, setGlobalDiscount] = useState(0);
+
   const handleSubmit = async () => {
     setLoading(true);
     try {
@@ -76,8 +84,9 @@ export default function PublicSupplierQuote() {
         };
       });
 
-      await updateDoc(doc(db, 'agency_rfqs', id), {
+      await updateDoc(doc(db, 'purchase_rfqs', id), {
         items: finalItems,
+        globalDiscount: parseFloat(globalDiscount) || 0,
         status: 'PRICING_SUBMITTED' // Alert AM
       });
       setSubmitted(true);
@@ -131,7 +140,7 @@ export default function PublicSupplierQuote() {
     }
     setLoading(true);
     try {
-      await updateDoc(doc(db, 'agency_rfqs', id), {
+      await updateDoc(doc(db, 'purchase_rfqs', id), {
         status: 'SHIPPED',
         shippingData
       });
@@ -186,7 +195,7 @@ export default function PublicSupplierQuote() {
                   {items.map((item, idx) => (
                     <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0', background: 'white' }}>
                       <td style={{ padding: '1rem' }}>
-                        <strong style={{ color: '#334155' }}>{item.peptide_name}</strong>
+                        <strong style={{ color: '#334155' }}>{item.itemName || item.peptide_name}</strong>
                       </td>
                       <td style={{ textAlign: 'right', padding: '1rem' }}>
                         <button style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', border: '1px solid #3b82f6', borderRadius: '4px', background: '#eff6ff', color: '#1d4ed8', cursor: 'pointer' }}>
@@ -236,16 +245,21 @@ export default function PublicSupplierQuote() {
                   <th style={{ textAlign: 'left', padding: '1rem', background: '#f8fafc' }}>{t('supplierQuote.productDesc', "Product Description")}</th>
                   <th style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc' }}>{t('supplierQuote.reqQty', "Required Qty")}</th>
                   <th style={{ textAlign: 'right', padding: '1rem', background: '#f8fafc' }}>{t('supplierQuote.unitCost', "Your Unit Cost (USD)")}</th>
+                  <th style={{ textAlign: 'right', padding: '1rem', background: '#f8fafc' }}>{t('supplierQuote.itemDiscount', "Item Discount (USD)")}</th>
                 </tr>
               </thead>
               <tbody>
-                {items.map((item, idx) => (
+                {items.map((item, idx) => {
+                  const cost = parseFloat(item.supplierUnitCost) || 0;
+                  const discount = parseFloat(item.itemDiscount) || 0;
+                  const netCost = cost - discount;
+                  return (
                   <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0', background: 'white' }}>
                     <td style={{ padding: '1rem' }}>
-                      <strong style={{ color: '#334155' }}>{item.peptide_name}</strong>
+                      <strong style={{ color: '#334155' }}>{item.itemName || item.peptide_name}</strong>
                       {item.dosage && <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.2rem' }}>{item.dosage}</div>}
                     </td>
-                    <td style={{ textAlign: 'center', padding: '1rem', fontWeight: 600 }}>{item.quantity}</td>
+                    <td style={{ textAlign: 'center', padding: '1rem', fontWeight: 600 }}>{item.quantity} {item.unit || ''}</td>
                     <td style={{ textAlign: 'right', padding: '1rem' }}>
                       <div style={{ position: 'relative', display: 'inline-block' }}>
                         <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>$</span>
@@ -258,13 +272,39 @@ export default function PublicSupplierQuote() {
                         />
                       </div>
                     </td>
+                    <td style={{ textAlign: 'right', padding: '1rem' }}>
+                      <div style={{ position: 'relative', display: 'inline-block' }}>
+                        <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>-$</span>
+                        <input 
+                          type="number" min="0" step="0.01"
+                          value={item.itemDiscount || ''}
+                          onChange={(e) => handleDiscountChange(idx, e.target.value)}
+                          placeholder="0.00"
+                          style={{ width: '100px', padding: '0.5rem 0.5rem 0.5rem 1.8rem', textAlign: 'right', border: '2px dashed #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', color: '#0f172a' }}
+                        />
+                      </div>
+                    </td>
                   </tr>
-                ))}
+                )})}
               </tbody>
             </table>
           </div>
 
-          <div style={{ padding: '1.5rem 2rem', background: 'white', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0' }}>
+          <div style={{ padding: '1.5rem 2rem', background: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e2e8f0' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>{t('supplierQuote.globalDiscount', "Total Order Discount (USD)")}</label>
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#16a34a', fontWeight: 700 }}>-$</span>
+                <input 
+                  type="number" min="0" step="0.01"
+                  value={globalDiscount || ''}
+                  onChange={(e) => setGlobalDiscount(e.target.value)}
+                  placeholder="0.00"
+                  style={{ width: '120px', padding: '0.5rem 0.5rem 0.5rem 1.8rem', textAlign: 'right', border: '2px solid #22c55e', borderRadius: '6px', fontSize: '1rem', fontWeight: 600, color: '#15803d', backgroundColor: '#f0fdf4' }}
+                />
+              </div>
+            </div>
+            
             <button 
               onClick={handleSubmit}
               className="gcp-btn gcp-btn--primary" 

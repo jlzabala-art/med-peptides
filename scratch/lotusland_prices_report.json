@@ -1,0 +1,4880 @@
+[
+  {
+    "id": "3AgTWKcdHKRTjSbA4TW1",
+    "name": "SS-31",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 780,
+    "firestoreVariants": [],
+    "sourcedCost": 780,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "SS-31"
+  },
+  {
+    "id": "3UhWwnvsTIPBX83IwRdk",
+    "name": "Humamin",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 4600,
+    "firestoreVariants": [],
+    "sourcedCost": 4600,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Humamin"
+  },
+  {
+    "id": "3aYrY0SFxwykgHRx0XuN",
+    "name": "Semax",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 640,
+    "firestoreVariants": [],
+    "sourcedCost": 640,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Semax"
+  },
+  {
+    "id": "5-AMINO_1_MQ-2mg-vial",
+    "name": "5-AMINO 1 MQ",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-5AMI1MQ-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 55.2,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "5-AMINO 1 MQ",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 69,
+        "kit": 69,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 55.2,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 59.8,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 46,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "5-AMINO_1_MQ-50mg-tablet",
+    "name": "5-AMINO 1 MQ",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-5AMI1MQ-50MG/TABLET",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 55.2,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "5-AMINO 1 MQ",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 69,
+        "kit": 69,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 55.2,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 59.8,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 46,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "5-amino-1-mq",
+    "name": "5-AMINO 1 MQ",
+    "category": "Metabolic & Weight",
+    "sku": "MP-MW-5AMI1MQ-50MG/TABLET",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 55.2,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "5-AMINO 1 MQ",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 69,
+        "kit": 69,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 55.2,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 59.8,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 46,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "6ozHxbRwaX01qGuAc8Hm",
+    "name": "Alprostadil",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 4930,
+    "firestoreVariants": [],
+    "sourcedCost": 4930,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Alprostadil"
+  },
+  {
+    "id": "9e8sJneDfqhDf6Q70HRq",
+    "name": "MGF",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 3240,
+    "firestoreVariants": [],
+    "sourcedCost": 3240,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "MGF"
+  },
+  {
+    "id": "AOD-9604-2mg-vial",
+    "name": "AOD-9604",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-AOD960-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 12,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "AOD-9604",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 15,
+        "kit": 90,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 12,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 13,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 10,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "AOD-9604-5mg-vial",
+    "name": "AOD-9604",
+    "category": "VIAL",
+    "sku": "MP-WEI-AOD960-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 12,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "AOD-9604",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 15,
+        "kit": 90,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 12,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 13,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 10,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "ARA-290-16mg-vial",
+    "name": "ARA-290",
+    "category": "Recovery & Repair",
+    "sku": "MP-HR-ARA290-16MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 72,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "ARA-290",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 72,
+        "kit": 360,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 78,
+        "kit": 390,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 90,
+        "kit": 450,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 60,
+        "kit": 300,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "BPC-157-10mg-vial",
+    "name": "BPC-157",
+    "category": "VIAL",
+    "sku": "MP-HR-BPC157-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 48,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "BPC-157",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 48,
+        "kit": 300,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 52,
+        "kit": 325,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 60,
+        "kit": 375,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 40,
+        "kit": 250,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "BPC-157-2mg-vial",
+    "name": "BPC-157",
+    "category": "VIAL",
+    "sku": "MP-HR-BPC157-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 48,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "BPC-157",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 48,
+        "kit": 300,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 52,
+        "kit": 325,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 60,
+        "kit": 375,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 40,
+        "kit": 250,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "BPC-157-5mg-vial",
+    "name": "BPC-157",
+    "category": "VIAL",
+    "sku": "MP-HR-BPC157-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 48,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "BPC-157",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 48,
+        "kit": 300,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 52,
+        "kit": 325,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 60,
+        "kit": 375,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 40,
+        "kit": 250,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "BPC-157_TB-500-5-5mg-vial",
+    "name": "BPC-157 + TB-500",
+    "category": "VIAL",
+    "sku": "MP-HR-BPC1TB50-5MG-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 108,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "BPC-157 + TB-500",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 108,
+        "kit": 576,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 117,
+        "kit": 624,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 135,
+        "kit": 720,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 90,
+        "kit": 480,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "Bacteriostatic_Water-30ml-vial",
+    "name": "Bacteriostatic Water",
+    "category": "Research Supplies",
+    "sku": "MP-RES-BACTWATE-30ML/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 8.8,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Bacteriostatic Water",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 11,
+        "kit": 11,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 8.8,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 9.53,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 7.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "CCrgs46QaTLNwZxEL0OS",
+    "name": "CJC-1295 Acetate",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 4300,
+    "firestoreVariants": [],
+    "sourcedCost": 4300,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "CJC-1295 Acetate"
+  },
+  {
+    "id": "CJC-1295_with_DAC-2mg-vial",
+    "name": "CJC-1295 with DAC",
+    "category": "Hormonal Optimization",
+    "sku": "MP-MUS-CJC1WITH-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "CJC-1295 with DAC",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "CJC-1295_without_DAC_(Modified_GRF_1-29)-2mg-vial",
+    "name": "CJC-1295 without DAC (Modified GRF 1-29)",
+    "category": "Hormonal Optimization",
+    "sku": "MP-MUS-CJC1WITH-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 20,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "CJC-1295 without DAC (Modified GRF 1-29)",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 25,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 21.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 16.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "CJC-1295_without_DAC_Ipamorelin-10-10mg-vial",
+    "name": "CJC-1295 without DAC + Ipamorelin",
+    "category": "Hormonal Optimization",
+    "sku": "MP-MUS-CJC1WITH-10MG-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 156,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "CJC-1295 without DAC + Ipamorelin",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 156,
+        "kit": 780,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 169,
+        "kit": 845,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 195,
+        "kit": 975,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 130,
+        "kit": 650,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "CJC-1295_without_DAC_Ipamorelin-5-5mg-vial",
+    "name": "CJC-1295 without DAC + Ipamorelin",
+    "category": "Hormonal Optimization",
+    "sku": "MP-MUS-CJC1WITH-5MG-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 156,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "CJC-1295 without DAC + Ipamorelin",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 156,
+        "kit": 780,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 169,
+        "kit": 845,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 195,
+        "kit": 975,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 130,
+        "kit": 650,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "Cagrilintide-5mg-vial",
+    "name": "Cagrilintide",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-CAGRIL-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Cagrilintide",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Cardiogen-10mg-vial",
+    "name": "Cardiogen",
+    "category": "Other",
+    "sku": "MP-OTH-CARDIO-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 36,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Cardiogen",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 36,
+        "kit": 192,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 39,
+        "kit": 208,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 45,
+        "kit": 240,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 30,
+        "kit": 160,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "Cartalax-10mg-vial",
+    "name": "Cartalax",
+    "category": "Other",
+    "sku": "MP-OTH-CARTAL-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Cartalax",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 24,
+        "kit": 120,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "kit": 130,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 20,
+        "kit": 100,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "D6eWfaIWTNam7ORHiasH",
+    "name": "AOD 9604 Acetate",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 2856,
+    "firestoreVariants": [],
+    "sourcedCost": 2856,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "AOD 9604 Acetate"
+  },
+  {
+    "id": "DSIP-2mg-vial",
+    "name": "DSIP",
+    "category": "Cognitive & Mood",
+    "sku": "MP-COG-DSIP-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 84,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "DSIP",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 84,
+        "kit": 456,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 91,
+        "kit": 494,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 105,
+        "kit": 570,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 70,
+        "kit": 380,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "DyKHA7BDDMkfOhBsmGvN",
+    "name": "Kisspeptin",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 1300,
+    "firestoreVariants": [],
+    "sourcedCost": 1300,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Kisspeptin"
+  },
+  {
+    "id": "Epithalon-10mg-vial",
+    "name": "Epithalon",
+    "category": "Longevity & Anti-Aging",
+    "sku": "MP-ANT-EPITHA-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 84,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Epithalon",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 84,
+        "kit": 456,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 91,
+        "kit": 494,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 105,
+        "kit": 570,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 70,
+        "kit": 380,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "FST-344_(Follistatin)-1mg-vial",
+    "name": "FST-344 (Follistatin)",
+    "category": "Hormonal Optimization",
+    "sku": "MP-MUS-FST3FOLL-1MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 72,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "FST-344 (Follistatin)",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 90,
+        "kit": 480,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 72,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 78,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 60,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "GHK-Cu_(Copper_Peptide)-2mg-vial",
+    "name": "GHK-Cu (Copper Peptide)",
+    "category": "Longevity & Anti-Aging",
+    "sku": "MP-ANT-GHKCCOPP-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 48,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "GHK-Cu (Copper Peptide)",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 48,
+        "kit": 240,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 52,
+        "kit": 260,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 60,
+        "kit": 300,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 40,
+        "kit": 200,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "GHK-Cu_(Copper_Peptide)-50mg-vial",
+    "name": "GHK-Cu (Copper Peptide)",
+    "category": "Longevity & Anti-Aging",
+    "sku": "MP-ANT-GHKCCOPP-50MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 48,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "GHK-Cu (Copper Peptide)",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 48,
+        "kit": 240,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 52,
+        "kit": 260,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 60,
+        "kit": 300,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 40,
+        "kit": 200,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "GHK-Cu_(Copper_Peptide)-5mg-vial",
+    "name": "GHK-Cu (Copper Peptide)",
+    "category": "Longevity & Anti-Aging",
+    "sku": "MP-ANT-GHKCCOPP-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 48,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "GHK-Cu (Copper Peptide)",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 48,
+        "kit": 240,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 52,
+        "kit": 260,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 60,
+        "kit": 300,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 40,
+        "kit": 200,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "GHRP-2-5mg-vial",
+    "name": "GHRP-2",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HOR-GHRP2-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 16,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "GHRP-2",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 20,
+        "kit": 100,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 16,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 17.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 13.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "GLOW_(BPC-157-TB-500-GHK-Cu)-10-10-75mg-vial",
+    "name": "GLOW (BPC-157/TB-500/GHK-Cu)",
+    "category": "Recovery & Repair",
+    "sku": "MP-HR-GLOWBPC1-10/10/75MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 144,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "GLOW (BPC-157/TB-500/GHK-Cu)",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 144,
+        "kit": 900,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 156,
+        "kit": 975,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 180,
+        "kit": 1125,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 120,
+        "kit": 750,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "GW-501516-10mg-vial",
+    "name": "GW-501516",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-GW5015-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "GW-501516",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "HCG-10000iu-vial",
+    "name": "HCG",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HOR-HCG-10000IU/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 14.4,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "HCG",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 18,
+        "kit": 130,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 14.4,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 15.6,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 12,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "HCG-5000iu-vial",
+    "name": "HCG",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HOR-HCG-5000IU/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 14.4,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "HCG",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 18,
+        "kit": 130,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 14.4,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 15.6,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 12,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "HGH-10iu-vial",
+    "name": "HGH",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HOR-HGH-10IU/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 32,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "HGH",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 40,
+        "kit": 250,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 32,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 34.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 26.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "HMG-75iu-vial",
+    "name": "HMG",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HOR-HMG-75IU/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "HMG",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 180,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Hexarelin-2mg-vial",
+    "name": "Hexarelin",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HOR-HEXARE-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 20,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Hexarelin",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 25,
+        "kit": 130,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 21.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 16.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Hexarelin-5mg-vial",
+    "name": "Hexarelin",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HOR-HEXARE-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 20,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Hexarelin",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 25,
+        "kit": 130,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 21.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 16.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "IAf8oqb2dRBKHKpkpnnj",
+    "name": "Nonapeptide",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 1350,
+    "firestoreVariants": [],
+    "sourcedCost": 1350,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Nonapeptide"
+  },
+  {
+    "id": "IGF-1_LR3-0.1mg-vial",
+    "name": "IGF-1 LR3",
+    "category": "Hormonal Optimization",
+    "sku": "MP-MUS-IGF1LR3-0-1MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "IGF-1 LR3",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 180,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Ipamorelin-10mg-vial",
+    "name": "Ipamorelin",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HOR-IPAMOR-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 16,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Ipamorelin",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 20,
+        "kit": 100,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 16,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 17.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 13.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Ipamorelin-2mg-vial",
+    "name": "Ipamorelin",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HOR-IPAMOR-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 16,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Ipamorelin",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 20,
+        "kit": 100,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 16,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 17.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 13.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Ipamorelin-5mg-vial",
+    "name": "Ipamorelin",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HOR-IPAMOR-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 16,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Ipamorelin",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 20,
+        "kit": 100,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 16,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 17.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 13.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "JmTlyaHx6lYbHG5HIU0d",
+    "name": "Mots C",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 1187.75,
+    "firestoreVariants": [],
+    "sourcedCost": 1187.75,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Mots C"
+  },
+  {
+    "id": "KLOW_(BPC-157-TB-500-GHK-Cu-KPV)-10-10-75-10mg-vial",
+    "name": "KLOW (BPC-157/TB-500/GHK-Cu/KPV)",
+    "category": "Recovery & Repair",
+    "sku": "MP-HR-KLOWBPC1-10/10/75/10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 144,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "GLOW (BPC-157/TB-500/GHK-Cu)",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 144,
+        "kit": 900,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 156,
+        "kit": 975,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 180,
+        "kit": 1125,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 120,
+        "kit": 750,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "KPV-5mg-vial",
+    "name": "KPV",
+    "category": "Recovery & Repair",
+    "sku": "MP-HR-KPV-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 60,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "KPV",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 60,
+        "kit": 324,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 65,
+        "kit": 351,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 75,
+        "kit": 405,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 50,
+        "kit": 270,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "Kisspeptin-10-5mg-vial",
+    "name": "Kisspeptin-10",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HOR-KISSPE-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Kisspeptin-10",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 180,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "LzqHuCzkoChXQYlPpAgM",
+    "name": "Selank",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 640,
+    "firestoreVariants": [],
+    "sourcedCost": 640,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Selank"
+  },
+  {
+    "id": "MK-677_(Ibutamoren)-10mg-vial",
+    "name": "MK-677 (Ibutamoren)",
+    "category": "Hormonal Optimization",
+    "sku": "MP-MUS-MK67IBUT-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "MK-677 (Ibutamoren)",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 180,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "MOTS-C-10mg-vial",
+    "name": "MOTS-C",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-MOTSC-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "MOTS-C",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "MT2_(Melanotan_II)-10mg-vial",
+    "name": "MT2 (Melanotan II)",
+    "category": "Other",
+    "sku": "MP-OTH-MT2MELAI-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 36,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "MT2 (Melanotan II)",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 36,
+        "kit": 216,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 39,
+        "kit": 234,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 45,
+        "kit": 270,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 30,
+        "kit": 180,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "NAD+-1000mg-vial",
+    "name": "NAD+",
+    "category": "Longevity & Anti-Aging",
+    "sku": "MP-ANT-NAD-1000MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 60,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "NAD+",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 60,
+        "kit": 336,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 65,
+        "kit": 364,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 75,
+        "kit": 420,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 50,
+        "kit": 280,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "NAD+-500mg-vial",
+    "name": "NAD+",
+    "category": "Longevity & Anti-Aging",
+    "sku": "MP-ANT-NAD-500MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 60,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "NAD+",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 60,
+        "kit": 336,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 65,
+        "kit": 364,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 75,
+        "kit": 420,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 50,
+        "kit": 280,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "NMN-50mg-tablet",
+    "name": "NMN",
+    "category": "Longevity & Anti-Aging",
+    "sku": "MP-ANT-NMN-50MG/TABLET",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 0,
+    "sourcedVariants": [],
+    "source": null,
+    "matchedName": "NMN"
+  },
+  {
+    "id": "NxumJ7d2zYvRxszMaFdp",
+    "name": "Argireline Acetate",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 1150,
+    "firestoreVariants": [],
+    "sourcedCost": 1150,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Argireline Acetate"
+  },
+  {
+    "id": "Oxytocin_Acetate-2mg-vial",
+    "name": "Oxytocin Acetate",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HOR-OXYTACET-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 20,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Oxytocin Acetate",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 25,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 21.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 16.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "PE-22_28-10mg-vial",
+    "name": "PE-22 28",
+    "category": "Cognitive & Mood",
+    "sku": "MP-COG-PE2228-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 32,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "PE-22 28",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 40,
+        "kit": 200,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 32,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 34.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 26.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "PE-22_28-2mg-vial",
+    "name": "PE-22 28",
+    "category": "Cognitive & Mood",
+    "sku": "MP-COG-PE2228-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 32,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "PE-22 28",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 40,
+        "kit": 200,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 32,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 34.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 26.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "PE-22_28-5mg-vial",
+    "name": "PE-22 28",
+    "category": "Cognitive & Mood",
+    "sku": "MP-COG-PE2228-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 32,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "PE-22 28",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 40,
+        "kit": 200,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 32,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 34.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 26.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "PEG_MGF-2mg-vial",
+    "name": "PEG MGF",
+    "category": "Hormonal Optimization",
+    "sku": "MP-MUS-PEGMGF-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "PEG MGF",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "PNC-27-5mg-vial",
+    "name": "PNC-27",
+    "category": "Other",
+    "sku": "MP-OTH-PNC27-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 60,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "PNC-27",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 60,
+        "kit": 336,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 65,
+        "kit": 364,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 75,
+        "kit": 420,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 50,
+        "kit": 280,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "PT-141_(Bremelanotide)-10mg-vial",
+    "name": "PT-141 (Bremelanotide)",
+    "category": "Other",
+    "sku": "MP-OTH-PT14BREM-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 30,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "PT-141 (Bremelanotide)",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 30,
+        "kit": 180,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 32.5,
+        "kit": 195,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 37.5,
+        "kit": 225,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 25,
+        "kit": 150,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "Pinealon-10mg-vial",
+    "name": "Pinealon",
+    "category": "Cognitive & Mood",
+    "sku": "MP-COG-PINEAL-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 20,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Pinealon",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 25,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 21.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 16.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Precision_Insulin_Syringes-Box_of_100",
+    "name": "Precision Insulin Syringes",
+    "category": "Research Supplies",
+    "sku": "MP-RES-PRECINSU-BOXOF100",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 17.6,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Precision Insulin Syringes",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 22,
+        "kit": 22,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 17.6,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 19.07,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 14.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Prostamax-10mg-vial",
+    "name": "Prostamax",
+    "category": "Other",
+    "sku": "MP-OTH-PROSTA-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 84,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Prostamax",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 84,
+        "kit": 456,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 91,
+        "kit": 494,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 105,
+        "kit": 570,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 70,
+        "kit": 380,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "R0U9eNtdh45fQFhoMBiP",
+    "name": "IGF-1 LR3",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 27000,
+    "firestoreVariants": [],
+    "sourcedCost": 27000,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "IGF-1 LR3"
+  },
+  {
+    "id": "Retatrutide-10mg-vial",
+    "name": "Retatrutide",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-RETATR-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 64,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Retatrutide",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 80,
+        "kit": 450,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 64,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 69.34,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 53.34,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Retatrutide-15mg-vial",
+    "name": "Retatrutide",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-RETATR-15MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 64,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Retatrutide",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 80,
+        "kit": 450,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 64,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 69.34,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 53.34,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Retatrutide-20mg-vial",
+    "name": "Retatrutide",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-RETATR-20MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 64,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Retatrutide",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 80,
+        "kit": 450,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 64,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 69.34,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 53.34,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "RlLN0cPGLYW8GAttgjlS",
+    "name": "KPV",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 853.76,
+    "firestoreVariants": [],
+    "sourcedCost": 853.76,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "KPV"
+  },
+  {
+    "id": "SLU_PP-332-50mg-vial",
+    "name": "SLU PP-332",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-SLUPP33-50MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 56,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "SLU PP-332",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 70,
+        "kit": 380,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 56,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 60.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 46.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "SS-31-10mg-vial",
+    "name": "SS-31",
+    "category": "Longevity & Anti-Aging",
+    "sku": "MP-ANT-SS31-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 96,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "SS-31",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 96,
+        "kit": 504,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 104,
+        "kit": 546,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 120,
+        "kit": 630,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 80,
+        "kit": 420,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "SS-31-5mg-vial",
+    "name": "SS-31",
+    "category": "Other",
+    "sku": "MP-ENE-SS31-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 96,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "SS-31",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 96,
+        "kit": 504,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 104,
+        "kit": 546,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 120,
+        "kit": 630,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 80,
+        "kit": 420,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "Selank-30mg-vial",
+    "name": "Selank",
+    "category": "Cognitive & Mood",
+    "sku": "MP-COG-SELANK-30MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Selank",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Selank-5mg-vial",
+    "name": "Selank",
+    "category": "Cognitive & Mood",
+    "sku": "MP-COG-SELANK-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Selank",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Semaglutide-10mg-vial",
+    "name": "Semaglutide",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-SEMAGL-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Semaglutide",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Semaglutide-2mg-vial",
+    "name": "Semaglutide",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-SEMAGL-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Semaglutide",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Semaglutide-5mg-vial",
+    "name": "Semaglutide",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-SEMAGL-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Semaglutide",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Semax-30mg-vial",
+    "name": "Semax",
+    "category": "Cognitive & Mood",
+    "sku": "MP-COG-SEMAX-30MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 28,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Semax",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 35,
+        "kit": 180,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 28,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 30.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 23.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Semax-5mg-vial",
+    "name": "Semax",
+    "category": "Cognitive & Mood",
+    "sku": "MP-COG-SEMAX-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 28,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Semax",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 35,
+        "kit": 180,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 28,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 30.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 23.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Sermorelin-2mg-vial",
+    "name": "Sermorelin",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HOR-SERMOR-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 14.4,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Sermorelin",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 18,
+        "kit": 130,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 14.4,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 15.6,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 12,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "Snap-8-10mg-vial",
+    "name": "Snap-8",
+    "category": "Other",
+    "sku": "MP-OTH-SNAP8-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 84,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Snap-8",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 84,
+        "kit": 456,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 91,
+        "kit": 494,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 105,
+        "kit": 570,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 70,
+        "kit": 380,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "SsPBwunPmQ8iJmKZqNun",
+    "name": "Thymosin Beta-4",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 2441.6,
+    "firestoreVariants": [],
+    "sourcedCost": 2441.6,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Thymosin Beta-4"
+  },
+  {
+    "id": "TB-500-5mg-vial",
+    "name": "TB-500",
+    "category": "Recovery & Repair",
+    "sku": "MP-REC-TB500-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 144,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "GLOW (BPC-157/TB-500/GHK-Cu)",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 144,
+        "kit": 900,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 156,
+        "kit": 975,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 180,
+        "kit": 1125,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 120,
+        "kit": 750,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "TB-500_(Thymosin_β4)-2mg-vial",
+    "name": "TB-500 (Thymosin β4)",
+    "category": "Recovery & Repair",
+    "sku": "MP-HR-TB50THYM-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 144,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "GLOW (BPC-157/TB-500/GHK-Cu)",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 144,
+        "kit": 900,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 156,
+        "kit": 975,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 180,
+        "kit": 1125,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 120,
+        "kit": 750,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "TJl6vttXAqD4fOJnotOF",
+    "name": "BPC-157",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 780,
+    "firestoreVariants": [],
+    "sourcedCost": 780,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "BPC-157"
+  },
+  {
+    "id": "Tesamorelin-2mg-vial",
+    "name": "Tesamorelin",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HOR-TESAMO-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 30,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Tesamorelin",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 30,
+        "kit": 216,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 32.5,
+        "kit": 234,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 37.5,
+        "kit": 270,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 25,
+        "kit": 180,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "Testagen-10mg-vial",
+    "name": "Testagen",
+    "category": "Other",
+    "sku": "MP-OTH-TESTAG-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 84,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Testagen",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 84,
+        "kit": 456,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 91,
+        "kit": 494,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 105,
+        "kit": 570,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 70,
+        "kit": 380,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "Thymagen-10mg-vial",
+    "name": "Thymagen",
+    "category": "Other",
+    "sku": "MP-OTH-THYMAG-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 36,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Thymagen",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 36,
+        "kit": 180,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 39,
+        "kit": 195,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 45,
+        "kit": 225,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "Thymosin_Alpha1-6mg-vial",
+    "name": "Thymosin Alpha-1",
+    "category": "Immune Support",
+    "sku": "MP-IMM-THYMALPH-6MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 62.4,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Thymosin Alpha-1",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 62.4,
+        "kit": null,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 67.6,
+        "kit": null,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 52,
+        "kit": null,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 78,
+        "currency": "USD",
+        "kit": 780
+      }
+    }
+  },
+  {
+    "id": "Thymosin_Alpha_1-5mg-vial",
+    "name": "Thymosin Alpha 1",
+    "category": "Other",
+    "sku": "MP-OTH-THYMALPH-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 62.4,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Thymosin Alpha-1",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 62.4,
+        "kit": null,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 67.6,
+        "kit": null,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 52,
+        "kit": null,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 78,
+        "currency": "USD",
+        "kit": 780
+      }
+    }
+  },
+  {
+    "id": "Thymulin-10mg-vial",
+    "name": "Thymulin",
+    "category": "Other",
+    "sku": "MP-OTH-THYMUL-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 108,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Thymulin",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 108,
+        "kit": 816,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 117,
+        "kit": 884,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 135,
+        "kit": 1020,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 90,
+        "kit": 680,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "Tirzepatide-10mg-vial",
+    "name": "Tirzepatide",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-TIRZEP-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 0,
+    "sourcedVariants": [],
+    "source": null,
+    "matchedName": "Tirzepatide"
+  },
+  {
+    "id": "Tirzepatide-15mg-vial",
+    "name": "Tirzepatide",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-TIRZEP-15MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 0,
+    "sourcedVariants": [],
+    "source": null,
+    "matchedName": "Tirzepatide"
+  },
+  {
+    "id": "Tirzepatide-30mg-vial",
+    "name": "Tirzepatide",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-TIRZEP-30MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 0,
+    "sourcedVariants": [],
+    "source": null,
+    "matchedName": "Tirzepatide"
+  },
+  {
+    "id": "Tirzepatide-5mg-vial",
+    "name": "Tirzepatide",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-TIRZEP-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 0,
+    "sourcedVariants": [],
+    "source": null,
+    "matchedName": "Tirzepatide"
+  },
+  {
+    "id": "Tirzepatide-60mg-vial",
+    "name": "Tirzepatide",
+    "category": "Metabolic & Weight",
+    "sku": "MP-WEI-TIRZEP-60MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 0,
+    "sourcedVariants": [],
+    "source": null,
+    "matchedName": "Tirzepatide"
+  },
+  {
+    "id": "Ucjqm3tZBGd4PNgg9GZD",
+    "name": "Dihexa Acetate",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 352.5,
+    "firestoreVariants": [],
+    "sourcedCost": 352.5,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Dihexa Acetate"
+  },
+  {
+    "id": "WNRMERAvgrNDOzGsxWRU",
+    "name": "GHK-Cu",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 96.21,
+    "firestoreVariants": [],
+    "sourcedCost": 96.21,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "GHK-Cu"
+  },
+  {
+    "id": "WkgnGZV4cIqwd2Ntocdi",
+    "name": "Ipamorelin",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 1420,
+    "firestoreVariants": [],
+    "sourcedCost": 1420,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Ipamorelin"
+  },
+  {
+    "id": "aod-9604",
+    "name": "AOD-9604",
+    "category": "Metabolic & Weight",
+    "sku": "MP-MW-AOD960-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 12,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "AOD-9604",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 15,
+        "kit": 90,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 12,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 13,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 10,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "aogmP5xZJ0UiVZXeTApm",
+    "name": "TB500",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 1280.91,
+    "firestoreVariants": [],
+    "sourcedCost": 1280.91,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "TB500"
+  },
+  {
+    "id": "ara-290",
+    "name": "ARA-290",
+    "category": "Recovery & Repair",
+    "sku": "MP-RR-ARA290-16MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 72,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "ARA-290",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 72,
+        "kit": 360,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 78,
+        "kit": 390,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 90,
+        "kit": 450,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 60,
+        "kit": 300,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "bAbXRojHyXA3LcHetv0W",
+    "name": "Melanotan",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 1218,
+    "firestoreVariants": [],
+    "sourcedCost": 1218,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Melanotan"
+  },
+  {
+    "id": "bacteriostatic-water",
+    "name": "Bacteriostatic Water",
+    "category": "Research Supplies",
+    "sku": "MP-RS-BACTWATE-30ML/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 8.8,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Bacteriostatic Water",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 11,
+        "kit": 11,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 8.8,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 9.53,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 7.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "bpc-157",
+    "name": "BPC-157",
+    "category": "Recovery & Repair",
+    "sku": "MP-RR-BPC157-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 48,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "BPC-157",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 48,
+        "kit": 300,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 52,
+        "kit": 325,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 60,
+        "kit": 375,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 40,
+        "kit": 250,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "cagrilintide",
+    "name": "Cagrilintide",
+    "category": "Metabolic & Weight",
+    "sku": "MP-MW-CAGRIL-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Cagrilintide",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "cardiogen",
+    "name": "Cardiogen",
+    "category": "Other",
+    "sku": "MP-OR-CARDIO-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 36,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Cardiogen",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 36,
+        "kit": 192,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 39,
+        "kit": 208,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 45,
+        "kit": 240,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 30,
+        "kit": 160,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "cartalax",
+    "name": "Cartalax",
+    "category": "Other",
+    "sku": "MP-OR-CARTAL-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Cartalax",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 24,
+        "kit": 120,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "kit": 130,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 20,
+        "kit": 100,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "cea788V1W2OVX69DHHWf",
+    "name": "DSIP",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 1160,
+    "firestoreVariants": [],
+    "sourcedCost": 1160,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "DSIP"
+  },
+  {
+    "id": "cjc-1295-with-dac",
+    "name": "CJC-1295 with DAC",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HO-CJC1WITH-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "CJC-1295 with DAC",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "cjc-1295-without-dac-modified-grf-1-29",
+    "name": "CJC-1295 without DAC (Modified GRF 1-29)",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HO-CJC1WITH-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 20,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "CJC-1295 without DAC (Modified GRF 1-29)",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 25,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 21.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 16.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "dsip",
+    "name": "DSIP",
+    "category": "Sleep & Circadian",
+    "sku": "MP-SC-DSIP-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 84,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "DSIP",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 84,
+        "kit": 456,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 91,
+        "kit": 494,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 105,
+        "kit": 570,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 70,
+        "kit": 380,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "ep4vJdKozvcikOHEc7HH",
+    "name": "Oxytocin",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 460,
+    "firestoreVariants": [],
+    "sourcedCost": 460,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Oxytocin"
+  },
+  {
+    "id": "epithalon",
+    "name": "Epithalon",
+    "category": "Longevity & Anti-Aging",
+    "sku": "MP-LA-EPITHA-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 84,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Epithalon",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 84,
+        "kit": 456,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 91,
+        "kit": 494,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 105,
+        "kit": 570,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 70,
+        "kit": 380,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "fst-344-follistatin",
+    "name": "FST-344 (Follistatin)",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HO-FST3FOLL-1MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 72,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "FST-344 (Follistatin)",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 90,
+        "kit": 480,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 72,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 78,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 60,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "gPuHIuZYFiVg3FtPALeF",
+    "name": "Tesamorelin",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 2818.8,
+    "firestoreVariants": [],
+    "sourcedCost": 2818.8,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Tesamorelin"
+  },
+  {
+    "id": "ghk-cu-copper-peptide",
+    "name": "GHK-Cu (Copper Peptide)",
+    "category": "Longevity & Anti-Aging",
+    "sku": "MP-LA-GHKCCOPP-50MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 48,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "GHK-Cu (Copper Peptide)",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 48,
+        "kit": 240,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 52,
+        "kit": 260,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 60,
+        "kit": 300,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 40,
+        "kit": 200,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "ghrp-2",
+    "name": "GHRP-2",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HO-GHRP2-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 16,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "GHRP-2",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 20,
+        "kit": 100,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 16,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 17.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 13.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "glow-bpc-157-tb-500-ghk-cu",
+    "name": "GLOW (BPC-157/TB-500/GHK-Cu)",
+    "category": "Recovery & Repair",
+    "sku": "MP-RR-GLOWBPC1-10/10/75MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 144,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "GLOW (BPC-157/TB-500/GHK-Cu)",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 144,
+        "kit": 900,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 156,
+        "kit": 975,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 180,
+        "kit": 1125,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 120,
+        "kit": 750,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "gw-501516",
+    "name": "GW-501516",
+    "category": "Metabolic & Weight",
+    "sku": "MP-MW-GW5015-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "GW-501516",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "hcg",
+    "name": "HCG",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HO-HCG-5000IU/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 14.4,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "HCG",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 18,
+        "kit": 130,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 14.4,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 15.6,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 12,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "hexarelin",
+    "name": "Hexarelin",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HO-HEXARE-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 20,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Hexarelin",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 25,
+        "kit": 130,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 21.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 16.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "hgh",
+    "name": "HGH",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HO-HGH-10IU/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 32,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "HGH",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 40,
+        "kit": 250,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 32,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 34.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 26.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "hmg",
+    "name": "HMG",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HO-HMG-75IU/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "HMG",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 180,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "iBYR7txfY6dS5GHiRHbJ",
+    "name": "Palmitoyl Tripeptide -5",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 1350,
+    "firestoreVariants": [],
+    "sourcedCost": 1350,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Palmitoyl Tripeptide -5"
+  },
+  {
+    "id": "igf-1-lr3",
+    "name": "IGF-1 LR3",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HO-IGF1LR3-0-1MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "IGF-1 LR3",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 180,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "ipamorelin",
+    "name": "Ipamorelin",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HO-IPAMOR-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 16,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Ipamorelin",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 20,
+        "kit": 100,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 16,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 17.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 13.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "iyrq9q0EGKHdBtGq96r4",
+    "name": "Epitahalon",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 598.04,
+    "firestoreVariants": [],
+    "sourcedCost": 598.04,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Epitahalon"
+  },
+  {
+    "id": "izLmTturSG2FQ4DpqNGg",
+    "name": "GHRP-2",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 1450,
+    "firestoreVariants": [],
+    "sourcedCost": 1450,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "GHRP-2"
+  },
+  {
+    "id": "jdfu2JY3GkW9AIMZZkYw",
+    "name": "Bremelanotide (PT 141)",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 978.18,
+    "firestoreVariants": [],
+    "sourcedCost": 978.18,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Bremelanotide (PT 141)"
+  },
+  {
+    "id": "kisspeptin-10",
+    "name": "Kisspeptin-10",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HO-KISSPE-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Kisspeptin-10",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 180,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "klow-bpc-157-tb-500-ghk-cu-kpv",
+    "name": "KLOW (BPC-157/TB-500/GHK-Cu/KPV)",
+    "category": "Recovery & Repair",
+    "sku": "MP-RR-KLOWBPC1-10/10/75/10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 144,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "GLOW (BPC-157/TB-500/GHK-Cu)",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 144,
+        "kit": 900,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 156,
+        "kit": 975,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 180,
+        "kit": 1125,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 120,
+        "kit": 750,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "kpv",
+    "name": "KPV",
+    "category": "Recovery & Repair",
+    "sku": "MP-RR-KPV-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 60,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "KPV",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 60,
+        "kit": 324,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 65,
+        "kit": 351,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 75,
+        "kit": 405,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 50,
+        "kit": 270,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "mk-677-ibutamoren",
+    "name": "MK-677 (Ibutamoren)",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HO-MK67IBUT-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "MK-677 (Ibutamoren)",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 180,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "mots-c",
+    "name": "MOTS-C",
+    "category": "Metabolic & Weight",
+    "sku": "MP-MW-MOTSC-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "MOTS-C",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "mt2-melanotan-ii",
+    "name": "MT2 (Melanotan II)",
+    "category": "Other",
+    "sku": "MP-OR-MT2MELAI-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 36,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "MT2 (Melanotan II)",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 36,
+        "kit": 216,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 39,
+        "kit": 234,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 45,
+        "kit": 270,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 30,
+        "kit": 180,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "nad",
+    "name": "NAD+",
+    "category": "Longevity & Anti-Aging",
+    "sku": "MP-LA-NAD-1000MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 60,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "NAD+",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 60,
+        "kit": 336,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 65,
+        "kit": 364,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 75,
+        "kit": 420,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 50,
+        "kit": 280,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "oDniHVTWA3jgssukDaKp",
+    "name": "SLUPP-332",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 160,
+    "firestoreVariants": [],
+    "sourcedCost": 160,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "SLUPP-332"
+  },
+  {
+    "id": "oxytocin-acetate",
+    "name": "Oxytocin Acetate",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HO-OXYTACET-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 20,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Oxytocin Acetate",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 25,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 21.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 16.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "pe-22-28",
+    "name": "PE-22 28",
+    "category": "Cognitive & Mood",
+    "sku": "MP-CM-PE2228-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 32,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "PE-22 28",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 40,
+        "kit": 200,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 32,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 34.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 26.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "peg-mgf",
+    "name": "PEG MGF",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HO-PEGMGF-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "PEG MGF",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "pinealon",
+    "name": "Pinealon",
+    "category": "Cognitive & Mood",
+    "sku": "MP-CM-PINEAL-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 20,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Pinealon",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 25,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 21.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 16.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "pnc-27",
+    "name": "PNC-27",
+    "category": "Other",
+    "sku": "MP-OR-PNC27-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 60,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "PNC-27",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 60,
+        "kit": 336,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 65,
+        "kit": 364,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 75,
+        "kit": 420,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 50,
+        "kit": 280,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "precision-insulin-syringes",
+    "name": "Precision Insulin Syringes",
+    "category": "Research Supplies",
+    "sku": "MP-RS-PRECINSU-BOXOF100",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 17.6,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Precision Insulin Syringes",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 22,
+        "kit": 22,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 17.6,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 19.07,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 14.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "prostamax",
+    "name": "Prostamax",
+    "category": "Other",
+    "sku": "MP-OR-PROSTA-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 84,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Prostamax",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 84,
+        "kit": 456,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 91,
+        "kit": 494,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 105,
+        "kit": 570,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 70,
+        "kit": 380,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "pt-141-bremelanotide",
+    "name": "PT-141 (Bremelanotide)",
+    "category": "Other",
+    "sku": "MP-OR-PT14BREM-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 30,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "PT-141 (Bremelanotide)",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 30,
+        "kit": 180,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 32.5,
+        "kit": 195,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 37.5,
+        "kit": 225,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 25,
+        "kit": 150,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "rawRvmgXIWwIGSItekuK",
+    "name": "Tirzepatide",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 450,
+    "firestoreVariants": [],
+    "sourcedCost": 450,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Tirzepatide"
+  },
+  {
+    "id": "retatrutide",
+    "name": "Retatrutide",
+    "category": "Metabolic & Weight",
+    "sku": "MP-MW-RETATR-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 64,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Retatrutide",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 80,
+        "kit": 450,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 64,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 69.34,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 53.34,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "selank",
+    "name": "Selank",
+    "category": "Cognitive & Mood",
+    "sku": "MP-CM-SELANK-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Selank",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "semaglutide",
+    "name": "Semaglutide",
+    "category": "Metabolic & Weight",
+    "sku": "MP-MW-SEMAGL-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 24,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Semaglutide",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 24,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 26,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 20,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "semax",
+    "name": "Semax",
+    "category": "Cognitive & Mood",
+    "sku": "MP-CM-SEMAX-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 28,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Semax",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 35,
+        "kit": 180,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 28,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 30.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 23.33,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "sermorelin",
+    "name": "Sermorelin",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HO-SERMOR-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 14.4,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Sermorelin",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 18,
+        "kit": 130,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 14.4,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 15.6,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 12,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "slu-pp-332",
+    "name": "SLU PP-332",
+    "category": "Metabolic & Weight",
+    "sku": "MP-MW-SLUPP33-50MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 56,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "SLU PP-332",
+    "v2Pricing": {
+      "retail": {
+        "perUnit": 70,
+        "kit": 380,
+        "currency": "USD"
+      },
+      "wholesale": {
+        "perUnit": 56,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "clinic": {
+        "perUnit": 60.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      },
+      "master": {
+        "perUnit": 46.67,
+        "currency": "USD",
+        "billingUnit": "vial"
+      }
+    }
+  },
+  {
+    "id": "snap-8",
+    "name": "Snap-8",
+    "category": "Other",
+    "sku": "MP-OR-SNAP8-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 84,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Snap-8",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 84,
+        "kit": 456,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 91,
+        "kit": 494,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 105,
+        "kit": 570,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 70,
+        "kit": 380,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "ss-31",
+    "name": "SS-31",
+    "category": "Longevity & Anti-Aging",
+    "sku": "MP-LA-SS31-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 96,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "SS-31",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 96,
+        "kit": 504,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 104,
+        "kit": 546,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 120,
+        "kit": 630,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 80,
+        "kit": 420,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "t8NbeX8WS1Zgd3FSORtu",
+    "name": "Thymosin Alpha",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 2842.6,
+    "firestoreVariants": [],
+    "sourcedCost": 2842.6,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Thymosin Alpha"
+  },
+  {
+    "id": "tb-500-thymosin-4",
+    "name": "TB-500 (Thymosin β4)",
+    "category": "Recovery & Repair",
+    "sku": "MP-RR-TB50THYM-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 144,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "GLOW (BPC-157/TB-500/GHK-Cu)",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 144,
+        "kit": 900,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 156,
+        "kit": 975,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 180,
+        "kit": 1125,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 120,
+        "kit": 750,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "tesamorelin",
+    "name": "Tesamorelin",
+    "category": "Hormonal Optimization",
+    "sku": "MP-HO-TESAMO-2MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 30,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Tesamorelin",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 30,
+        "kit": 216,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 32.5,
+        "kit": 234,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 37.5,
+        "kit": 270,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 25,
+        "kit": 180,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "testagen",
+    "name": "Testagen",
+    "category": "Other",
+    "sku": "MP-OR-TESTAG-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 84,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Testagen",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 84,
+        "kit": 456,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 91,
+        "kit": 494,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 105,
+        "kit": 570,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 70,
+        "kit": 380,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "thymagen",
+    "name": "Thymagen",
+    "category": "Other",
+    "sku": "MP-OR-THYMAG-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 36,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Thymagen",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 36,
+        "kit": 180,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 39,
+        "kit": 195,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 45,
+        "kit": 225,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 30,
+        "kit": 150,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "thymosin-alpha-1",
+    "name": "Thymosin Alpha 1",
+    "category": "Immune Support",
+    "sku": "MP-IS-THYMALPH-5MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 62.4,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Thymosin Alpha-1",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 62.4,
+        "kit": null,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 67.6,
+        "kit": null,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 52,
+        "kit": null,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 78,
+        "currency": "USD",
+        "kit": 780
+      }
+    }
+  },
+  {
+    "id": "thymulin",
+    "name": "Thymulin",
+    "category": "Other",
+    "sku": "MP-OR-THYMUL-10MG/VIAL",
+    "firestoreCost": 0,
+    "firestoreVariants": [],
+    "sourcedCost": 108,
+    "sourcedVariants": [],
+    "source": "Local v2 Catalog",
+    "matchedName": "Thymulin",
+    "v2Pricing": {
+      "wholesale": {
+        "perUnit": 108,
+        "kit": 816,
+        "currency": "USD"
+      },
+      "clinic": {
+        "perUnit": 117,
+        "kit": 884,
+        "currency": "USD"
+      },
+      "retail": {
+        "perUnit": 135,
+        "kit": 1020,
+        "currency": "USD"
+      },
+      "master": {
+        "perUnit": 90,
+        "kit": 680,
+        "currency": "USD"
+      }
+    }
+  },
+  {
+    "id": "vLEpQ0dHbg5iHiAtqiPe",
+    "name": "HCG",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 23200,
+    "firestoreVariants": [],
+    "sourcedCost": 23200,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "HCG"
+  },
+  {
+    "id": "wn60qqgbzFgqe3sfLnCL",
+    "name": "Acetylhexapeptide",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 1150,
+    "firestoreVariants": [],
+    "sourcedCost": 1150,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Acetylhexapeptide"
+  },
+  {
+    "id": "xCRYw0UYoSnBak4CT5Y6",
+    "name": "Sermorelin",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 2750,
+    "firestoreVariants": [],
+    "sourcedCost": 2750,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Sermorelin"
+  },
+  {
+    "id": "xEePzkNVS4SZJZ5sfUDL",
+    "name": "Retatrutide",
+    "category": "API Peptide",
+    "sku": "",
+    "firestoreCost": 1160,
+    "firestoreVariants": [],
+    "sourcedCost": 1160,
+    "sourcedVariants": [],
+    "source": "Firestore (Base)",
+    "matchedName": "Retatrutide"
+  }
+]

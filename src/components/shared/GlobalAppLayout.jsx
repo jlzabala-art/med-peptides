@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Outlet } from 'react-router-dom';
-import { Home, Search, Heart, GraduationCap, Shield, BookOpen, Activity, Stethoscope, Users, ShoppingBag, LogOut } from 'lucide-react';
+import { Home, Search, Heart, GraduationCap, Shield, BookOpen, Activity, Stethoscope, Users, ShoppingBag, LogOut, Sparkles } from 'lucide-react';
 import AppSidebar from './AppSidebar/index';
 import AppHeader from './AppHeader/index';
 import RefillReminderBanner from './RefillReminderBanner';
@@ -62,12 +62,12 @@ export default function GlobalAppLayout({
   const { user, activeRole, logout } = useAuth();
   const [isMobile, setIsMobile] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Show ClinicalAssistant as a 3rd column for patients on desktop
   const isPatientOrPublic = user && activeRole !== 'admin' && activeRole !== 'professional' && activeRole !== 'wholesaler';
-  const showRightSidebar = !isMobile && isPatientOrPublic;
+  const showAIButton = isPatientOrPublic;
 
   // Determine default sidebar props if none provided
   const computedSidebarProps = sidebarProps || {
@@ -150,16 +150,48 @@ export default function GlobalAppLayout({
             {children || <Outlet />}
           </main>
 
-          {/* Right Sidebar Column (ClinicalAI) */}
-          {showRightSidebar && (
-            <aside style={{
-              width: '400px',
-              padding: '2rem 2.5rem 2rem 0',
-              display: 'flex',
-              flexDirection: 'column',
-            }}>
-              <ClinicalAssistant embedded={true} isOpen={true} setIsOpen={() => {}} />
-            </aside>
+          {/* AI Floating Action Button */}
+          {showAIButton && !isAssistantOpen && (
+            <button
+              onClick={() => setIsAssistantOpen(true)}
+              style={{
+                position: 'fixed',
+                bottom: '2rem',
+                right: '2.5rem',
+                width: '56px',
+                height: '56px',
+                borderRadius: '28px',
+                backgroundColor: '#2563eb',
+                color: 'white',
+                border: 'none',
+                boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 9000,
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.backgroundColor = '#1d4ed8';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.backgroundColor = '#2563eb';
+              }}
+            >
+              <Sparkles size={24} />
+            </button>
+          )}
+
+          {/* Assistant Drawer Overlay */}
+          {showAIButton && (
+            <ClinicalAssistant 
+              embedded={false} 
+              isOpen={isAssistantOpen} 
+              setIsOpen={setIsAssistantOpen} 
+            />
           )}
 
         </div>

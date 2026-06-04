@@ -17,7 +17,7 @@ const AdminSemanticTab = React.lazy(() => import('../components/admin/AdminSeman
 const AdminPricesTab = React.lazy(() => import('../components/admin/AdminPricesTab'));
 const AdminVariantsTab = React.lazy(() => import('../components/admin/AdminVariantsTab'));
 const AdminProtocolsTab = React.lazy(() => import('../components/admin/AdminProtocolsTab'));
-const AdminBlueprintsTab = React.lazy(() => import('../components/admin/AdminBlueprintsTab'));
+const AdminBlueprintsTab = React.lazy(() => import('../components/admin/AdminWorkflowsTab'));
 
 // New B2B Modules
 const DoctorPatientsTab = React.lazy(() => import('../components/doctor/DoctorPatientsTab'));

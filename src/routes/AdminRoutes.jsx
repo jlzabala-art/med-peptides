@@ -70,8 +70,8 @@ const ImportCatalogsTab = React.lazy(() => import('../components/admin/imports/I
 const ImportRFQTab = React.lazy(() => import('../components/admin/imports/ImportRFQTab'));
 const ShippingTrackerTab = React.lazy(() => import('../components/supplier/ShippingTrackerTab'));
 const AdminMarketingTab = React.lazy(() => import('../components/admin/AdminMarketingTab'));
-const QuotationsModule = React.lazy(() => import('../components/admin/QuotationsModule'));
-const SalesOrdersModule = React.lazy(() => import('../components/admin/SalesOrdersModule'));
+const QuotationsModule = React.lazy(() => import('../pages/Sales/QuotationList'));
+const SalesOrdersModule = React.lazy(() => import('../pages/Sales/SalesOrderList'));
 const InvoicesModule = React.lazy(() => import('../components/admin/InvoicesModule'));
 // ── Premium loading skeleton for lazy-loaded admin tabs ────────────────────────
 const AdminTabSkeleton = () => (

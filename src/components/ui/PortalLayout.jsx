@@ -92,7 +92,7 @@ export default function PortalLayout({
   const { currency, updateCurrency, density, updateDensity } = usePreferences();
 
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const [isAiOpen, setAiOpen] = useState(true);
+  const [isAiOpen, setAiOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   // Holds live data injected by admin tab components via 'admin-context-update' events
   const [enrichedContext, setEnrichedContext] = useState(null);
@@ -213,8 +213,8 @@ export default function PortalLayout({
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
-        display: 'grid',
-        gridTemplateColumns: isMobile ? '1fr auto' : 'minmax(auto, 1fr) minmax(200px, 500px) minmax(auto, 1fr)',
+        display: 'flex',
+        justifyContent: 'space-between',
         alignItems: 'center',
         gap: '1rem',
         padding: '0 1.5rem',
@@ -223,7 +223,7 @@ export default function PortalLayout({
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)'
       }}>
         {/* Left Side */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexShrink: 0, overflow: 'visible' }}>
           {isMobile && (
             <button 
               onClick={() => setSidebarOpen(!isSidebarOpen)}
@@ -233,7 +233,7 @@ export default function PortalLayout({
               <Menu size={20} color="var(--color-text-primary)" />
             </button>
           )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, overflowX: 'auto', scrollbarWidth: 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
             <img 
               src="/atlas-health-logo.png" 
               alt="Atlas Health" 
@@ -257,7 +257,7 @@ export default function PortalLayout({
 
         {/* Center - Global Search (Optional) */}
         {!isMobile && (
-          <div style={{ width: '100%' }}>
+          <div style={{ flex: 1, maxWidth: '500px', margin: '0 1rem', flexShrink: 1 }}>
             <div style={{ position: 'relative', width: '100%' }}>
               <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-secondary)' }} />
               <input 
@@ -284,7 +284,7 @@ export default function PortalLayout({
         )}
 
         {/* Right Side */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem', minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem', flexShrink: 0 }}>
           
           {/* Preferences Toggles */}
           {!isMobile && (

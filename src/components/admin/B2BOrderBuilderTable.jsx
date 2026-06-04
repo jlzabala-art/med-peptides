@@ -21,7 +21,7 @@ function AutocompleteCell({ item, onSelect }) {
   const handleChange = (e) => {
     const val = e.target.value;
     setQ(val);
-    if (val.length >= 2) {
+    if (val.length >= 3) {
       setIsOpen(true);
       handleInput(val);
     } else {
@@ -43,8 +43,8 @@ function AutocompleteCell({ item, onSelect }) {
         <input 
           value={q} 
           onChange={handleChange} 
-          onFocus={() => q.length >= 2 && setIsOpen(true)}
-          placeholder="Buscar producto o API..."
+          onFocus={() => q.length >= 3 && setIsOpen(true)}
+          placeholder="Buscar producto o API (min. 3 letras)..."
           style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: '0.8rem', padding: '0.2rem 0.5rem', color: 'var(--color-text-primary)' }}
         />
       </div>

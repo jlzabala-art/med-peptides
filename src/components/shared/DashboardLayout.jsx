@@ -16,8 +16,7 @@ export default function DashboardLayout({
 }) {
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobileAIOpen, setIsMobileAIOpen] = useState(false);
-  const [isDesktopAIOpen, setIsDesktopAIOpen] = useState(true);
+  const [isAIOpen, setIsAIOpen] = useState(false);
   const [overrideContextMode, setOverrideContextMode] = useState(null);
   const { userProfile } = useAuth();
   
@@ -29,8 +28,8 @@ export default function DashboardLayout({
     }
   }, [userProfile]);
 
-  // Show ClinicalAssistant as a 3rd column for doctors, patients and admins on desktop
-  const showRightSidebar = !isMobile && ['doctor', 'patient', 'admin'].includes(roleContext) && isDesktopAIOpen;
+  // Determine if AI is available
+  const showAIButton = ['doctor', 'patient', 'admin'].includes(roleContext);
 
   // The sidebar has built-in mobile handling, but we can track mobile state here if needed
   useEffect(() => {
@@ -45,9 +44,9 @@ export default function DashboardLayout({
       // Temporarily override the AI context when opening from a product
       setOverrideContextMode('clinical');
       if (isMobile) {
-        setIsMobileAIOpen(true);
+        setIsAIOpen(true);
       } else {
-        setIsDesktopAIOpen(true);
+        setIsAIOpen(true);
       }
     };
     window.addEventListener('OPEN_ATLAS_CLINICAL_MODE', handleContextEvent);
@@ -79,9 +78,9 @@ export default function DashboardLayout({
         <AppHeader 
           {...headerProps} 
           onToggleSidebar={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          onToggleDesktopAI={() => setIsDesktopAIOpen(!isDesktopAIOpen)}
-          isDesktopAIOpen={isDesktopAIOpen}
-          showDesktopAIToggle={!isMobile && ['doctor', 'patient', 'admin'].includes(roleContext)}
+          onToggleDesktopAI={() => setIsAIOpen(!isAIOpen)}
+          isDesktopAIOpen={isAIOpen}
+          showDesktopAIToggle={false} // Disable header toggle since we have FAB
         />
 
         {/* Content & Optional Right Sidebar Container */}
@@ -107,27 +106,13 @@ export default function DashboardLayout({
             {children}
           </main>
 
-          {/* Right Sidebar Column (ClinicalAI) */}
-          {showRightSidebar && (
-            <aside style={{
-              flex: '0 0 30%',
-              minWidth: '320px',
-              maxWidth: '400px',
-              padding: '2rem 2.5rem 2rem 0',
-              display: 'flex',
-              flexDirection: 'column',
-            }}>
-              <ClinicalAssistant embedded={true} isOpen={true} setIsOpen={() => setIsDesktopAIOpen(false)} pageContext={pageContext} contextMode={overrideContextMode || (roleContext === 'admin' ? 'admin' : roleContext === 'doctor' ? 'doctor' : 'patient')} />
-            </aside>
-          )}
-
         </div>
       </div>
 
-      {/* Mobile FAB for Clinical Assistant */}
-      {isMobile && ['doctor', 'patient', 'admin'].includes(roleContext) && !isMobileAIOpen && (
+      {/* FAB for Clinical Assistant */}
+      {showAIButton && !isAIOpen && (
         <button 
-          onClick={() => setIsMobileAIOpen(true)}
+          onClick={() => setIsAIOpen(true)}
           style={{
             position: 'fixed',
             bottom: '24px',
@@ -151,11 +136,11 @@ export default function DashboardLayout({
         </button>
       )}
       
-      {isMobile && ['doctor', 'patient', 'admin'].includes(roleContext) && (
+      {showAIButton && (
         <ClinicalAssistant 
           embedded={false} 
-          isOpen={isMobileAIOpen} 
-          setIsOpen={setIsMobileAIOpen} 
+          isOpen={isAIOpen} 
+          setIsOpen={setIsAIOpen} 
           pageContext={pageContext} 
           contextMode={overrideContextMode || (roleContext === 'admin' ? 'admin' : roleContext === 'doctor' ? 'doctor' : 'patient')}
         />

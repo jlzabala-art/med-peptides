@@ -38,8 +38,8 @@ function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, 
           className="sb-group-header"
           onClick={() => !isEditing && toggleGroup(group.id)}
           aria-expanded={isOpen}
-          data-tooltip={undefined}
-          title={undefined}
+          data-tooltip={!expanded ? group.label : undefined}
+          title={!expanded ? group.label : undefined}
           style={{ flex: 1, pointerEvents: isEditing ? 'none' : 'auto' }}
         >
           <span className="sb-group-emoji" aria-hidden="true">
@@ -250,7 +250,7 @@ export default function AppSidebar({
   const [expanded, setExpanded] = useState(() => {
     if (isMobile) return false;
     const saved = localStorage.getItem(`${storageKey}-expanded`);
-    return saved !== null ? JSON.parse(saved) : true;
+    return saved !== null ? JSON.parse(saved) : false;
   });
   const [closingFlyout, setClosingFlyout] = useState(false);
 

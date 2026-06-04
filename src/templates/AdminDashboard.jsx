@@ -111,26 +111,6 @@ function useUnreadMessagesCount() {
 // ── Intent-based navigation groups ────────────────────────────────────────────
 const NAV_GROUPS = [
   {
-    id: 'catalog-pim',
-    label: 'Items & Catalog',
-    icon: Box,
-    items: [
-      { id: 'products',        label: 'All Items',       icon: Box },
-      { id: 'products?category=Peptides', label: 'Finished Peptides', icon: Package },
-      { id: 'products?category=APIs',     label: 'APIs & Raw Mats',   icon: FlaskConical },
-      { id: 'products?category=Supplements', label: 'Supplements',    icon: Pill },
-      { id: 'stock',           label: 'Stock & Variants',icon: Activity },
-      { id: 'prices',          label: 'Pricing Matrix',  icon: Tag },
-      { id: 'costs',           label: 'Costs',           icon: DollarSign },
-      { id: 'pricing-visibility', label: 'Pricing Visibility',  icon: EyeOff },
-      { id: 'protocols',       label: 'Protocols',       icon: ClipboardList },
-      { id: 'competitors',     label: 'Competitor Analysis', icon: Activity },
-      { id: 'enrichment',      label: 'Catalog Enrichment', icon: Database },
-      { id: 'lab-tests',       label: 'Lab Tests & COAs',icon: ScrollText },
-      { id: 'catalog-builder', label: 'Catalog Builder', icon: Wrench },
-    ],
-  },
-  {
     id: 'sales-operations',
     label: 'Sales (O2C)',
     icon: TrendingUp,
@@ -156,6 +136,26 @@ const NAV_GROUPS = [
       { id: 'purchase-orders',   label: 'Purchase Orders',       icon: ShoppingCart },
       { id: 'purchase-bills',    label: 'Supplier Bills',        icon: Receipt },
       { id: 'payments-made',     label: 'Payments Made',         icon: DollarSign },
+    ],
+  },
+  {
+    id: 'catalog-pim',
+    label: 'Items & Catalog',
+    icon: Box,
+    items: [
+      { id: 'products',        label: 'All Items',       icon: Box },
+      { id: 'products?category=Peptides', label: 'Finished Peptides', icon: Package },
+      { id: 'products?category=APIs',     label: 'APIs & Raw Mats',   icon: FlaskConical },
+      { id: 'products?category=Supplements', label: 'Supplements',    icon: Pill },
+      { id: 'stock',           label: 'Stock & Variants',icon: Activity },
+      { id: 'prices',          label: 'Pricing Matrix',  icon: Tag },
+      { id: 'costs',           label: 'Costs',           icon: DollarSign },
+      { id: 'pricing-visibility', label: 'Pricing Visibility',  icon: EyeOff },
+      { id: 'protocols',       label: 'Protocols',       icon: ClipboardList },
+      { id: 'competitors',     label: 'Competitor Analysis', icon: Activity },
+      { id: 'enrichment',      label: 'Catalog Enrichment', icon: Database },
+      { id: 'lab-tests',       label: 'Lab Tests & COAs',icon: ScrollText },
+      { id: 'catalog-builder', label: 'Catalog Builder', icon: Wrench },
     ],
   },
   {

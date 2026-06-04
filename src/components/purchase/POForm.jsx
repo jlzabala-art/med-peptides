@@ -3,6 +3,8 @@ import { addDoc, updateDoc, doc, collection, serverTimestamp } from 'firebase/fi
 import { db } from '../../firebase';
 import { X, Send, Plus, Trash2, CheckCircle, Save } from 'lucide-react';
 import { Card } from '../ui';
+import ProductAutocomplete from '../shared/ProductAutocomplete';
+
 
 export default function POForm({ po, onClose }) {
   const [supplierName, setSupplierName] = useState(po?.supplierName || '');
@@ -144,13 +146,19 @@ export default function POForm({ po, onClose }) {
                 {items.map((item, idx) => (
                   <tr key={idx} style={{ borderTop: '1px solid #e2e8f0' }}>
                     <td style={{ padding: '0.75rem' }}>
-                      <input 
-                        type="text" 
-                        value={item.itemName} 
-                        onChange={(e) => updateItem(idx, 'itemName', e.target.value)}
-                        placeholder="e.g. Tirzepatide 10mg"
-                        className="gcp-input"
-                        style={{ width: '100%' }}
+                      <ProductAutocomplete
+                        value={item.itemName}
+                        onChange={(val) => updateItem(idx, 'itemName', val)}
+                        onSelect={(prod) => {
+                          if (prod) {
+                            const newItems = [...items];
+                            newItems[idx].itemName = prod.dosage ? `${prod.name} (${prod.dosage})` : prod.name;
+                            if (prod.unit) newItems[idx].unit = prod.unit;
+                            if (prod.costPrice) newItems[idx].unitPrice = prod.costPrice;
+                            setItems(newItems);
+                          }
+                        }}
+                        placeholder="Search product (min. 3 chars)..."
                       />
                     </td>
                     <td style={{ padding: '0.75rem' }}>

@@ -26,9 +26,10 @@ export default function SidebarGadget(props) {
 
     const usedItemIds = new Set();
 
-    const hydratedGroups = savedGroups.map(savedGroup => {
-      const origGroup = originalGroups.find(g => g.id === savedGroup.id) || 
-                        (savedGroup.id === 'favorites' ? { id: 'favorites', label: 'Favorites', emoji: '⭐' } : savedGroup);
+    const hydratedGroups = savedGroups
+      .filter(savedGroup => savedGroup.id !== 'favorites' && savedGroup.id !== 'admin_favorites')
+      .map(savedGroup => {
+      const origGroup = originalGroups.find(g => g.id === savedGroup.id) || savedGroup;
       
       const hydratedItems = (savedGroup.items || [])
         .map(savedItem => {
@@ -104,21 +105,7 @@ export default function SidebarGadget(props) {
   }, [user, props.groups]);
 
   const injectFavoritesGroup = (initialGroups) => {
-    const hasFavs = initialGroups.some(g => g.id === 'favorites');
-    if (!hasFavs) {
-      let productsItem = null;
-      initialGroups.forEach(g => {
-        const found = (g.items || []).find(i => i.id === 'products');
-        if (found) productsItem = { ...found };
-      });
-      const favItems = productsItem ? [productsItem] : [];
-      setSidebarGroups([
-        { id: 'favorites', label: 'Favorites', emoji: '⭐', items: favItems },
-        ...initialGroups
-      ]);
-    } else {
-      setSidebarGroups(initialGroups);
-    }
+    setSidebarGroups(initialGroups);
   };
 
   const savePreferences = async (groupsToSave = sidebarGroups, exitEditMode = true) => {
@@ -195,10 +182,7 @@ export default function SidebarGadget(props) {
   };
 
   const resetToDefault = async () => {
-    const defaultGroups = [
-      { id: 'favorites', label: 'Favorites', emoji: '⭐', items: [] },
-      ...props.groups
-    ];
+    const defaultGroups = [...props.groups];
     setSidebarGroups(defaultGroups);
     await savePreferences(defaultGroups);
     setIsEditing(false);
@@ -230,14 +214,7 @@ export default function SidebarGadget(props) {
         {...props} 
         groups={displayGroups}
         pinnedItems={props.pinnedItems || []}
-        isEditing={isEditing}
-        onToggleFavorite={handleToggleFavorite}
-        footer={{
-          label: isOrderModalOpen ? "Save Menu" : "Customize Menu",
-          icon: isOrderModalOpen ? Save : Settings,
-          onClick: () => setIsOrderModalOpen(true),
-          onReset: resetToDefault
-        }}
+        isEditing={false}
       />
     </>
   );
