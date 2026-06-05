@@ -65,7 +65,7 @@ export default function AppHeader({
 
   return (
     <header className="app-header glass-header">
-      {/* Left: Hamburger (Mobile) + Breadcrumbs / Context Title */}
+      {/* Left: Hamburger (Mobile) + Breadcrumbs / Context Title + Portal Switcher */}
       <div className="app-header-left">
         {onToggleSidebar && (
           <button className="app-header-hamburger" onClick={onToggleSidebar} aria-label="Toggle Sidebar">
@@ -82,6 +82,8 @@ export default function AppHeader({
             </div>
           )}
         </div>
+        {/* Portal switcher sits in left — it's a context indicator, not a utility action */}
+        <AdminPortalSwitcher />
       </div>
 
       {/* Center: Dynamic Utility Content OR Global Search */}
@@ -104,8 +106,16 @@ export default function AppHeader({
           </div>
         )}
       </div>
+      {/* Mobile: compact search icon shown when bar is hidden */}
+      <button
+        className="app-header-search-mobile-btn"
+        aria-label="Search"
+        onClick={() => setIsSearchOpen(true)}
+      >
+        <Search size={20} strokeWidth={1.8} />
+      </button>
 
-      {/* Right: Actions & Profile */}
+      {/* Right: Actions & Profile — NO AdminPortalSwitcher here (moved to left) */}
       <div className="app-header-right">
         {onOpenCart && (
           <button className="app-header-action" aria-label="Cart" onClick={onOpenCart}>
@@ -124,11 +134,8 @@ export default function AppHeader({
             style={{ color: isDesktopAIOpen ? 'var(--color-accent)' : 'inherit', display: 'flex', alignItems: 'center', gap: '6px' }}
           >
             <Sparkles size={20} strokeWidth={2} className={isDesktopAIOpen ? 'pulse-icon' : ''} />
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, display: 'none' }} className="ai-label">Atlas AI</span>
           </button>
         )}
-        
-        <AdminPortalSwitcher />
         
         <button 
           className="app-header-action" 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, updateDoc, doc, addDoc, serverTimestamp, arrayUnion } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, updateDoc, doc, addDoc, serverTimestamp, arrayUnion, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { ShoppingCart, Plus, X, Building2, FileText, CheckCircle, Package } from 'lucide-react';
+import { ShoppingCart, Plus, X, Building2, FileText, CheckCircle, Package, ExternalLink } from 'lucide-react';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import ERPListDetailLayout from '../../components/shared/ERPListDetailLayout';
 import ERPStatusBadge from '../../components/shared/ERPStatusBadge';
@@ -80,8 +80,16 @@ function PODetail({ po, onClose, onStatusChange, onEdit }) {
             <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>{po.poNumber || po.id?.slice(0, 8)}</h2>
             <ERPStatusBadge status={po.status || 'DRAFT'} />
           </div>
-          <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.25rem' }}>
-            Created: {fmt(po.createdAt)}
+          <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.25rem', display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <span>Created: {fmt(po.createdAt)}</span>
+            {po.zohoId && (
+              <>
+                <span style={{ color: '#cbd5e1' }}>|</span>
+                <a href={`https://books.zoho.eu/app#/purchaseorders/${po.zohoId}`} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  View in Zoho Books <ExternalLink size={11} />
+                </a>
+              </>
+            )}
           </div>
         </div>
         <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: '0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -246,6 +254,33 @@ export default function POList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [refreshToken, setRefreshToken] = useState(0);
 
+  const handleBulkAction = async (ids, newStatus) => {
+    try {
+      await Promise.all(ids.map(id =>
+        updateDoc(doc(db, 'purchaseOrders', id), {
+          status: newStatus,
+          statusHistory: arrayUnion({ status: newStatus, changedAt: new Date().toISOString(), changedBy: 'Admin (Bulk)' })
+        })
+      ));
+      setRefreshToken(t => t + 1);
+    } catch (err) { console.error(err); alert('Error processing bulk action.'); }
+  };
+
+  const handleBulkDelete = async (ids) => {
+    if (!window.confirm(`Delete ${ids.length} purchase orders? This cannot be undone.`)) return;
+    try {
+      await Promise.all(ids.map(id => deleteDoc(doc(db, 'purchaseOrders', id))));
+      setRefreshToken(t => t + 1);
+    } catch (err) { console.error(err); alert('Error deleting purchase orders.'); }
+  };
+
+  const bulkActions = [
+    { label: 'Mark as Issued', onClick: (ids) => handleBulkAction(ids, 'SENT_TO_SUPPLIER') },
+    { label: 'Mark as Received', onClick: (ids) => handleBulkAction(ids, 'RECEIVED') },
+    { label: 'Mark as Cancelled', onClick: (ids) => handleBulkAction(ids, 'CANCELLED') },
+    { label: 'Delete', variant: 'danger', onClick: handleBulkDelete },
+  ];
+
   useEffect(() => {
     let isSeeding = false;
     const q = query(collection(db, 'purchaseOrders'), orderBy('createdAt', 'desc'));
@@ -336,14 +371,7 @@ export default function POList() {
             <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>{filtered.length} records</div>
           </div>
         }
-        headerActions={
-          <button
-            onClick={() => { setSelectedPo(null); setShowForm(true); }}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', padding: '0.4rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, backgroundColor: '#1e293b', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-          >
-            <Plus size={14} /> New
-          </button>
-        }
+        bulkActions={bulkActions}
         renderListItem={(po, isSelected) => <POListItem po={po} isSelected={isSelected} />}
         renderDetail={(po, onClose) => (
           <PODetail
@@ -354,13 +382,6 @@ export default function POList() {
             onEdit={(p) => { setSelectedPo(p); setShowForm(true); }}
           />
         )}
-        emptyState={
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🛒</div>
-            <div style={{ fontWeight: 600, color: '#64748b' }}>No PO selected</div>
-            <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.25rem' }}>Select a purchase order to view details.</div>
-          </div>
-        }
       />
 
       {showForm && (

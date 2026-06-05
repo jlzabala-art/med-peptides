@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, updateDoc, doc, addDoc, serverTimestamp, getDocs, where, increment, arrayUnion } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, updateDoc, doc, addDoc, serverTimestamp, getDocs, where, increment, arrayUnion, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { ShoppingCart, Plus, X, CheckCircle, Package, FileText, Send, Save } from 'lucide-react';
+import { ShoppingCart, Plus, X, CheckCircle, Package, FileText, Send, Save, ExternalLink } from 'lucide-react';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import ERPListDetailLayout from '../../components/shared/ERPListDetailLayout';
 import ERPStatusBadge from '../../components/shared/ERPStatusBadge';
@@ -188,8 +188,16 @@ function SODetail({ so, onClose, onStatusChange, onEdit }) {
             <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700 }}>{so.documentNumber || so.id?.slice(0, 8)}</h2>
             <ERPStatusBadge status={so.status || 'CONFIRMED'} />
           </div>
-          <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.25rem' }}>
-            Fecha de pedido: {fmt(so.createdAt)}
+          <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.25rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <span>Fecha de pedido: {fmt(so.createdAt)}</span>
+            {so.zohoId && (
+              <>
+                <span>•</span>
+                <a href={`https://books.zoho.eu/app#/salesorders/${so.zohoId}`} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  Ver en Zoho Books <ExternalLink size={12} />
+                </a>
+              </>
+            )}
           </div>
         </div>
         <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: '0.25rem' }}>
@@ -506,6 +514,44 @@ export default function SalesOrderList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [refreshToken, setRefreshToken] = useState(0);
 
+  const handleBulkAction = async (ids, newStatus) => {
+    try {
+      const batch = [];
+      for (const id of ids) {
+        batch.push(updateDoc(doc(db, 'b2b_sales_orders', id), {
+          status: newStatus,
+          statusHistory: arrayUnion({ status: newStatus, changedAt: new Date().toISOString(), changedBy: 'Admin (Bulk)' })
+        }));
+      }
+      await Promise.all(batch);
+      setRefreshToken(t => t + 1);
+    } catch (err) {
+      console.error(err);
+      alert("Error processing bulk action.");
+    }
+  };
+
+  const handleBulkDelete = async (ids) => {
+    if (!window.confirm(`Are you sure you want to delete ${ids.length} sales orders?`)) return;
+    try {
+      const batch = [];
+      for (const id of ids) {
+        batch.push(deleteDoc(doc(db, 'b2b_sales_orders', id)));
+      }
+      await Promise.all(batch);
+      setRefreshToken(t => t + 1);
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting documents.");
+    }
+  };
+
+  const bulkActions = [
+    { label: 'Mark as Confirmed', onClick: (ids) => handleBulkAction(ids, 'CONFIRMED') },
+    { label: 'Mark as Shipped', onClick: (ids) => handleBulkAction(ids, 'SHIPPED') },
+    { label: 'Delete', variant: 'danger', onClick: (ids) => handleBulkDelete(ids) },
+  ];
+
   useEffect(() => {
     let isSeeding = false;
     const q = query(collection(db, 'b2b_sales_orders'), orderBy('createdAt', 'desc'));
@@ -611,14 +657,7 @@ export default function SalesOrderList() {
             <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>{filtered.length} records</div>
           </div>
         }
-        headerActions={
-          <button
-            onClick={() => { setSelectedOrder(null); setShowForm(true); }}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', padding: '0.4rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, backgroundColor: '#1e293b', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-          >
-            <Plus size={14} /> New
-          </button>
-        }
+        bulkActions={bulkActions}
         renderListItem={(so, isSelected) => <SOListItem so={so} isSelected={isSelected} />}
         renderDetail={(so, onClose) => (
           <SODetail
@@ -629,13 +668,6 @@ export default function SalesOrderList() {
             onEdit={(o) => { setSelectedOrder(o); setShowForm(true); }}
           />
         )}
-        emptyState={
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🛒</div>
-            <div style={{ fontWeight: 600, color: '#64748b' }}>No sales order selected</div>
-            <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.25rem' }}>Select a sales order from the list to view details.</div>
-          </div>
-        }
       />
 
       {showForm && (

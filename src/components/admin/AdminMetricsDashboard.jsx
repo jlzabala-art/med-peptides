@@ -49,6 +49,11 @@ import AdminFinanceWidget from './gadgets/AdminFinanceWidget';
 import AdminProductSyncWidget from './gadgets/AdminProductSyncWidget';
 import { Card, MetricCard, Button } from '../ui';
 
+import RecentRegistrationsTable from './metrics/RecentRegistrationsTable';
+import DoctorCohortTable from './metrics/DoctorCohortTable';
+import WholesalerCohortTable from './metrics/WholesalerCohortTable';
+import PageVisitsTable from './metrics/PageVisitsTable';
+
 const DEFAULT_CONFIG = {
   visibleKPIs: [
     'totalUsers',
@@ -60,6 +65,7 @@ const DEFAULT_CONFIG = {
     'averageOrderValue',
     'lowStockAlerts',
     'systemHealth',
+    'completedOrders',
   ],
   kpiOrder: [
     'totalUsers',
@@ -556,16 +562,16 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
   };
 
   const handleNavigate = (tab) => {
-    navigate(`/admin?t=${tab}`);
+    navigate(`/admin/${tab === 'dashboard' ? '' : tab}`);
   };
 
   const navigateToUserTab = (role) => {
     if (role === 'wholesaler') {
-      navigate('/admin?t=wholesalers');
+      navigate('/admin/wholesellers');
     } else if (role === 'doctor') {
-      navigate('/admin?t=doctors');
+      navigate('/admin/doctors');
     } else {
-      navigate('/admin?t=patients');
+      navigate('/admin/patients');
     }
   };
 
@@ -878,11 +884,169 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
 
   return (
     <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
-      {/* ── Command Center Header ─────────────────────────────────────────── */}
-      <div style={{
+      <style>{`
+        /* ─── AdminMetricsDashboard — Design System ───────────────── */
+
+        /* ── Shared card shell ────────────────────────────────────── */
+        .amd-card {
+          background: #ffffff;
+          border-radius: 12px;
+          border: 1px solid var(--color-border, #e2e8f0);
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+          padding: 1.5rem;
+          transition: box-shadow 0.2s, border-color 0.2s;
+        }
+        .amd-card.clickable { cursor: pointer; }
+        .amd-card.clickable:hover {
+          box-shadow: 0 4px 16px rgba(26,115,232,0.12);
+          border-color: var(--color-primary, #1a73e8);
+        }
+        /* card header row */
+        .amd-card-header {
+          display: flex; justify-content: space-between;
+          align-items: center; margin-bottom: 0.875rem;
+        }
+        .amd-card-title {
+          margin: 0;
+          font-size: 0.9rem; font-weight: 600;
+          color: var(--color-text-primary, #202124);
+        }
+        /* stat label (uppercase small) */
+        .amd-stat-label {
+          font-size: 0.68rem; font-weight: 700;
+          color: #64748b; text-transform: uppercase;
+          letter-spacing: 0.07em;
+        }
+        /* stat value */
+        .amd-stat-value {
+          font-size: 1.6rem; font-weight: 800;
+          line-height: 1.1; letter-spacing: -0.02em;
+          margin-top: 0.15rem;
+        }
+
+        /* Typography Scale */
+        .amd-label    { font-size: 0.7rem;  font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+        .amd-caption  { font-size: 0.75rem; font-weight: 400; }
+        .amd-body     { font-size: 0.85rem; font-weight: 400; }
+        .amd-subtitle { font-size: 0.85rem; font-weight: 600; }
+        .amd-title    { font-size: 1rem;    font-weight: 600; }
+        .amd-heading  { font-size: 1.1rem;  font-weight: 600; }
+        .amd-value    { font-size: 1.8rem;  font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; }
+
+        /* Layouts */
+        .amd-command-header {
+          padding: 1.75rem 2rem;
+        }
+        .amd-kpi-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 1rem;
+          margin-bottom: 2rem;
+        }
+        .amd-active-users-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+        .amd-bottom-grid {
+          display: grid;
+          gap: 2rem;
+          margin-bottom: 2rem;
+        }
+        .amd-widget-grid {
+          display: grid;
+          gap: 1.5rem;
+        }
+        .amd-table-section {
+          background: white;
+          border-radius: 8px;
+          padding: 1.5rem;
+          border: 1px solid var(--color-border, #dadce0);
+          box-shadow: 0 1px 2px rgba(60,67,70,0.1);
+          margin-bottom: 1.5rem;
+        }
+        .amd-table-section table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 0.85rem;
+          text-align: left;
+        }
+        .amd-table-section thead tr {
+          border-bottom: 2px solid var(--color-border, #dadce0);
+          background-color: #f8f9fa;
+        }
+        .amd-table-section th {
+          padding: 0.65rem 0.875rem;
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: #5f6368;
+          white-space: nowrap;
+        }
+        .amd-table-section td {
+          padding: 0.65rem 0.875rem;
+          border-bottom: 1px solid #f1f3f4;
+          color: #202124;
+          vertical-align: middle;
+        }
+        .amd-table-section tr:hover td { background-color: #f8f9fa; }
+        .amd-expand-btn {
+          background: none; border: none; cursor: pointer;
+          padding: 0.25rem 0.5rem; border-radius: 4px;
+          font-size: 0.75rem; color: #5f6368; display: flex; align-items: center; gap: 0.25rem;
+        }
+        .amd-expand-btn:hover { background: #f1f3f4; }
+        .amd-expanded-row td {
+          background: #f8f9fa;
+          font-size: 0.8rem;
+          color: #5f6368;
+          padding: 0.5rem 0.875rem 0.75rem 2.5rem;
+          border-bottom: 1px solid #e2e8f0;
+        }
+        .amd-badge {
+          display: inline-block;
+          padding: 0.15rem 0.55rem;
+          border-radius: 12px;
+          font-size: 0.72rem;
+          font-weight: 700;
+        }
+
+        /* KPI card compact on mobile */
+        @media (max-width: 768px) {
+          .amd-command-header { padding: 1rem; }
+          .amd-kpi-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+          .amd-active-users-grid { grid-template-columns: 1fr; }
+          .amd-bottom-grid { grid-template-columns: 1fr !important; }
+          .amd-widget-grid { grid-template-columns: 1fr !important; }
+          /* Compact KPI card on mobile */
+          .admin-metric-card {
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 0.75rem !important;
+            padding: 0.875rem 1rem !important;
+            min-height: unset !important;
+          }
+          .admin-metric-card .amd-card-icon {
+            flex-shrink: 0;
+          }
+          .admin-metric-card .amd-card-body {
+            flex: 1; min-width: 0;
+          }
+          .admin-metric-card .amd-value {
+            font-size: 1.3rem !important;
+          }
+          .amd-table-section { padding: 1rem 0.75rem; }
+          .amd-table-section th, .amd-table-section td { padding: 0.5rem 0.625rem; }
+        }
+
+        @media (max-width: 480px) {
+          .amd-kpi-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+      {/* ── Command Center Header ───────────────────────────────────── */}
+      <div className="amd-command-header" style={{
         backgroundColor: 'var(--color-bg-surface, #ffffff)',
         borderRadius: '16px',
-        padding: '1.75rem 2rem',
         marginBottom: '1.5rem',
         position: 'relative',
         border: '1px solid var(--color-border, #e2e8f0)',
@@ -969,7 +1133,7 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
           ].map(({ label, value, color }) => (
             <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
               <span style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{label}</span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 800, color, fontFamily: '"Inter", monospace' }}>{value ?? '—'}</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 800, color }}>{value ?? '—'}</span>
             </div>
           ))}
         </div>
@@ -984,30 +1148,36 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
 
       {/* Active Users & Telemetry Panel */}
       {showPanel('activeUsers') && (
-        <div style={{ marginBottom: '2rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-          
+        <div className="amd-active-users-grid">
+
           {/* Active Users Widget */}
-          <div style={{ backgroundColor: 'var(--color-bg-surface, #ffffff)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--color-border, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--color-text-primary, #1e293b)' }}>Usuarios Activos ({activeUsers.length})</h3>
+          <div
+            className="amd-card clickable"
+            onClick={() => handleNavigate('analytics')}
+          >
+            <div className="amd-card-header">
+              <h3 className="amd-card-title">Active Users ({activeUsers.length})</h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }} />
-                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary, #64748b)' }}>En tiempo real</span>
+                <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#10b981', animation: 'livePulse 2s infinite' }} />
+                <span className="amd-caption" style={{ color: '#64748b' }}>Live · Real time</span>
+                <ArrowUpRight size={14} style={{ color: 'var(--color-primary, #1a73e8)' }} />
               </div>
             </div>
             {activeUsers.length === 0 ? (
-              <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary, #64748b)', textAlign: 'center', padding: '1rem' }}>No hay usuarios activos en este momento.</p>
+              <p className="amd-body" style={{ color: '#64748b', textAlign: 'center', padding: '1rem 0', margin: 0 }}>
+                No users are currently active.
+              </p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '200px', overflowY: 'auto' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto' }}>
                 {activeUsers.map(u => (
-                  <div key={u.userId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem', backgroundColor: 'var(--color-bg-app, #f8fafc)', borderRadius: '6px' }}>
+                  <div key={u.userId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.4rem 0.6rem', backgroundColor: '#f8f9fa', borderRadius: '6px' }}>
                     <div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--color-text-primary, #1e293b)' }}>{u.email}</div>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary, #64748b)' }}>Rol: {u.role}</div>
+                      <div className="amd-subtitle" style={{ color: '#202124' }}>{u.email}</div>
+                      <div className="amd-caption" style={{ color: '#64748b' }}>Role: {u.role}</div>
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--color-primary, #0071bd)', backgroundColor: 'rgba(0,113,189,0.1)', padding: '2px 6px', borderRadius: '4px' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--color-primary, #1a73e8)', backgroundColor: 'rgba(26,115,232,0.08)', padding: '2px 7px', borderRadius: '4px' }}>
                       {u.currentPath}
-                    </div>
+                    </span>
                   </div>
                 ))}
               </div>
@@ -1015,23 +1185,31 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
           </div>
 
           {/* AI Consumption Widget */}
-          <div style={{ backgroundColor: 'var(--color-bg-surface, #ffffff)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--color-border, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 600, color: 'var(--color-text-primary, #1e293b)' }}>Consumo Atlas AI</h3>
+          <div
+            className="amd-card clickable"
+            onClick={() => handleNavigate('analytics')}
+          >
+            <div className="amd-card-header">
+              <h3 className="amd-card-title">Atlas AI Consumption</h3>
+              <ArrowUpRight size={16} style={{ color: 'var(--color-primary, #1a73e8)', flexShrink: 0 }} />
+            </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-              <span style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--color-primary, #0071bd)', lineHeight: 1 }}>
+              <span className="amd-stat-value" style={{ color: 'var(--color-primary, #1a73e8)' }}>
                 ${aiConsumption.toFixed(3)}
               </span>
-              <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary, #64748b)' }}>USD este mes</span>
+              <span className="amd-caption" style={{ color: '#64748b' }}>USD this month</span>
             </div>
-            
-            <div style={{ marginTop: '1.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--color-text-secondary, #64748b)', marginBottom: '0.25rem' }}>
-                <span>Gemini 1.5 Pro</span>
-                <span>${aiConsumption.toFixed(3)} / $10.00 límite</span>
+            <div style={{ marginTop: '1.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                <span className="amd-caption" style={{ color: '#64748b' }}>Gemini 1.5 Pro</span>
+                <span className="amd-caption" style={{ color: '#64748b' }}>${aiConsumption.toFixed(3)} / $10.00 limit</span>
               </div>
-              <div style={{ width: '100%', height: '8px', backgroundColor: 'var(--color-bg-app, #f8fafc)', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ width: `${Math.min((aiConsumption / 10) * 100, 100)}%`, height: '100%', backgroundColor: aiConsumption > 8 ? '#ef4444' : 'var(--color-primary, #0071bd)' }} />
+              <div style={{ width: '100%', height: '6px', backgroundColor: '#f1f3f4', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ width: `${Math.min((aiConsumption / 10) * 100, 100)}%`, height: '100%', backgroundColor: aiConsumption > 8 ? '#ef4444' : 'var(--color-primary, #1a73e8)', borderRadius: '4px', transition: 'width 0.5s ease' }} />
               </div>
+              <p className="amd-caption" style={{ margin: '0.6rem 0 0', color: '#64748b' }}>
+                Click to view full AI usage breakdown and session analytics →
+              </p>
             </div>
           </div>
         </div>
@@ -1338,14 +1516,7 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
         <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
         <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{activeKPIs.length} metrics</span>
       </div>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '1rem',
-          marginBottom: '2rem',
-        }}
-      >
+      <div className="amd-kpi-grid">
         {activeKPIs.map((key) => {
           const meta = KPI_METADATA[key];
           let displayVal = metrics[key];
@@ -1392,155 +1563,19 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
 
       {/* Two Column Layout: Recent Registrations & System Status */}
       <div
+        className="amd-bottom-grid"
         style={{
-          display: 'grid',
           gridTemplateColumns: showPanel('systemStatus') ? '1.6fr 1fr' : '1fr',
-          gap: '2rem',
-          marginBottom: '4rem',
         }}
       >
-        {/* Recent Registrations Table (GCP Style) */}
+        {/* Recent Registrations Table */}
         {showPanel('recentRegistrations') && (
-          <div
-            style={{
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              padding: '1.5rem',
-              border: '1px solid #dadce0',
-              boxShadow: '0 1px 2px 0 rgba(60,67,70,0.1)',
-              overflow: 'hidden',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '1.25rem',
-              }}
-            >
-              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#202124' }}>
-                Recent User Registrations
-              </h3>
-              <span style={{ fontSize: '0.72rem', color: '#5f6368' }}>Last 5 signups scoped</span>
-            </div>
-
-            <div style={{ overflowX: 'auto' }}>
-              <table
-                style={{
-                  width: '100%',
-                  borderCollapse: 'collapse',
-                  fontSize: '0.8rem',
-                  textAlign: 'left',
-                }}
-              >
-                <thead>
-                  <tr style={{ borderBottom: '2px solid #dadce0', backgroundColor: '#f8f9fa' }}>
-                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>
-                      User Name
-                    </th>
-                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>
-                      Email
-                    </th>
-                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>
-                      Role
-                    </th>
-                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>
-                      Status
-                    </th>
-                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>
-                      Zone
-                    </th>
-                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>
-                      Created At
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentUsers.map((user) => (
-                    <tr
-                      key={user.id}
-                      style={{
-                        borderBottom: '1px solid #dadce0',
-                        transition: 'background-color 0.15s',
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8f9fa')}
-                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                    >
-                      <td style={{ padding: '0.75rem 1rem' }}>
-                        <button
-                          onClick={() => navigateToUserTab(user.role)}
-                          disabled={!!wholesalerId} // disable navigation links for wholesalers to prevent sandbox escape
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            padding: 0,
-                            color: wholesalerId ? '#202124' : '#1a73e8',
-                            fontWeight: 700,
-                            cursor: wholesalerId ? 'default' : 'pointer',
-                            textDecoration: 'none',
-                            fontSize: 'inherit',
-                            textAlign: 'left',
-                          }}
-                          onMouseEnter={(e) => {
-                            if (!wholesalerId) e.currentTarget.style.textDecoration = 'underline';
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!wholesalerId) e.currentTarget.style.textDecoration = 'none';
-                          }}
-                        >
-                          {user.name || 'Unknown User'}
-                        </button>
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#5f6368' }}>{user.email}</td>
-                      <td
-                        style={{
-                          padding: '0.75rem 1rem',
-                          textTransform: 'capitalize',
-                          color: '#3c4043',
-                          fontWeight: 500,
-                        }}
-                      >
-                        {user.role || 'guest'}
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem' }}>
-                        <span
-                          style={{
-                            display: 'inline-block',
-                            padding: '0.15rem 0.5rem',
-                            borderRadius: '4px',
-                            fontSize: '0.68rem',
-                            fontWeight: 700,
-                            textTransform: 'uppercase',
-                            backgroundColor: user.status === 'pending' ? '#fef7e0' : '#e6f4ea',
-                            color: user.status === 'pending' ? '#b06000' : '#137333',
-                          }}
-                        >
-                          {user.status || 'active'}
-                        </span>
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#5f6368' }}>
-                        {user.shippingCountry || user.detectedCountry || user.region || 'N/A'}
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#5f6368' }}>
-                        {formatDate(user.createdAt)}
-                      </td>
-                    </tr>
-                  ))}
-                  {recentUsers.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={6}
-                        style={{ textAlign: 'center', padding: '2rem', color: '#9aa0a6' }}
-                      >
-                        No recent registration activity found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <RecentRegistrationsTable
+            recentUsers={recentUsers}
+            wholesalerId={wholesalerId}
+            navigateToUserTab={navigateToUserTab}
+            formatDate={formatDate}
+          />
         )}
 
         {/* System Status & Health Panel (GCP Style) */}
@@ -1663,7 +1698,7 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
                     Query Latency
                   </span>
                   <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#202124' }}>
-                    ~42ms
+                    {metrics.systemHealth}
                   </span>
                 </div>
 
@@ -1678,7 +1713,6 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
                       fontSize: '0.8rem',
                       fontWeight: 700,
                       color: '#202124',
-                      fontFamily: 'monospace',
                     }}
                   >
                     regenpept-prod
@@ -1762,7 +1796,7 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
                     animation: 'fadeIn 0.3s ease-out',
                   }}
                 >
-                  <CheckCircle2 size={12} /> Cache flushed successfully! (24.8 MB)
+                  <CheckCircle2 size={12} /> Cache flushed successfully!
                 </div>
               )}
             </div>
@@ -1772,432 +1806,25 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
 
       {/* Page Visits Analytics Table */}
       {showPanel('pageVisits') && (
-        <div
-          style={{
-            backgroundColor: 'white',
-            borderRadius: '8px',
-            padding: '1.5rem',
-            border: '1px solid #dadce0',
-            boxShadow: '0 1px 2px 0 rgba(60,67,70,0.1)',
-            marginBottom: '2rem',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '1.25rem',
-            }}
-          >
-            <h3
-              style={{
-                margin: 0,
-                fontSize: '1rem',
-                fontWeight: 600,
-                color: '#202124',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-              }}
-            >
-              <Globe size={18} color="#1a73e8" />
-              Page Visits Analytics
-            </h3>
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.72rem', color: '#5f6368', fontWeight: 500 }}>
-                Timeframe:
-              </span>
-              <select
-                value={visitsPeriod}
-                onChange={(e) => setVisitsPeriod(e.target.value)}
-                style={{
-                  padding: '0.2rem 0.5rem',
-                  borderRadius: '4px',
-                  border: '1px solid #dadce0',
-                  fontSize: '0.72rem',
-                  color: '#3c4043',
-                  backgroundColor: 'var(--color-bg-surface)',
-                  cursor: 'pointer',
-                  outline: 'none',
-                }}
-              >
-                <option value="today">Today</option>
-                <option value="7d">Last 7 Days</option>
-                <option value="30d">Last 30 Days</option>
-              </select>
-            </div>
-          </div>
-
-          <div style={{ overflowX: 'auto' }}>
-            <table
-              style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                fontSize: '0.8rem',
-                textAlign: 'left',
-              }}
-            >
-              <thead>
-                <tr style={{ borderBottom: '2px solid #dadce0', backgroundColor: '#f8f9fa' }}>
-                  <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>
-                    Page Path
-                  </th>
-                  <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>
-                    Page Title
-                  </th>
-                  <th
-                    style={{
-                      padding: '0.75rem 1rem',
-                      fontWeight: 600,
-                      color: '#5f6368',
-                      textAlign: 'center',
-                    }}
-                  >
-                    Visits
-                  </th>
-                  <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>
-                    Geographical Origins (Top)
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {prioritizedViews.map((view, idx) => {
-                  const countryStrings = Object.entries(view.countries)
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([country, count]) => `${country} (${count})`)
-                    .join(', ');
-
-                  return (
-                    <tr
-                      key={idx}
-                      style={{
-                        borderBottom: '1px solid #dadce0',
-                        transition: 'background-color 0.15s',
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8f9fa')}
-                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                    >
-                      <td
-                        style={{
-                          padding: '0.75rem 1rem',
-                          fontWeight: 600,
-                          fontFamily: 'monospace',
-                          color: '#1a73e8',
-                        }}
-                      >
-                        {view.path}
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#202124' }}>{view.title}</td>
-                      <td
-                        style={{
-                          padding: '0.75rem 1rem',
-                          textAlign: 'center',
-                          fontWeight: 700,
-                          color: '#202124',
-                        }}
-                      >
-                        {view.count}
-                      </td>
-                      <td
-                        style={{ padding: '0.75rem 1rem', color: '#5f6368', fontSize: '0.75rem' }}
-                      >
-                        {countryStrings || 'N/A'}
-                      </td>
-                    </tr>
-                  );
-                })}
-                {prioritizedViews.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={4}
-                      style={{
-                        textAlign: 'center',
-                        padding: '2rem',
-                        color: '#9aa0a6',
-                        fontStyle: 'italic',
-                      }}
-                    >
-                      No page views recorded in this period.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <PageVisitsTable
+          visitsPeriod={visitsPeriod}
+          setVisitsPeriod={setVisitsPeriod}
+          prioritizedViews={prioritizedViews}
+        />
       )}
 
       {/* Physician & Clinics cohort volume table */}
       {showPanel('doctorCohort') && (
-        <div
-          style={{
-            backgroundColor: 'white',
-            borderRadius: '8px',
-            padding: '1.5rem',
-            border: '1px solid #dadce0',
-            boxShadow: '0 1px 2px 0 rgba(60,67,70,0.1)',
-            marginBottom: '2rem',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '1.25rem',
-            }}
-          >
-            <h3
-              style={{
-                margin: 0,
-                fontSize: '1rem',
-                fontWeight: 600,
-                color: '#202124',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-              }}
-            >
-              <Users size={18} color="#1a73e8" />
-              Physicians & Clinics - Patient Volume
-            </h3>
-            <span style={{ fontSize: '0.72rem', color: '#5f6368' }}>Ordered by patient count</span>
-          </div>
-
-          <div style={{ overflowX: 'auto' }}>
-            <table
-              style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                fontSize: '0.8rem',
-                textAlign: 'left',
-              }}
-            >
-              <thead>
-                <tr style={{ borderBottom: '2px solid #dadce0', backgroundColor: '#f8f9fa' }}>
-                  <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>
-                    Doctor / Clinic Name
-                  </th>
-                  <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>
-                    Institution
-                  </th>
-                  <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>
-                    Role
-                  </th>
-                  <th
-                    style={{
-                      padding: '0.75rem 1rem',
-                      fontWeight: 600,
-                      color: '#5f6368',
-                      textAlign: 'center',
-                    }}
-                  >
-                    Active Patients
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {(wholesalerId ? scopedDoctors : doctorsWithPatients).map((doc) => (
-                  <tr
-                    key={doc.id}
-                    style={{
-                      borderBottom: '1px solid #dadce0',
-                      transition: 'background-color 0.15s',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8f9fa')}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                  >
-                    <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#202124' }}>
-                      {doc.name}
-                    </td>
-                    <td style={{ padding: '0.75rem 1rem', color: '#5f6368' }}>{doc.institution}</td>
-                    <td
-                      style={{
-                        padding: '0.75rem 1rem',
-                        textTransform: 'capitalize',
-                        color: '#5f6368',
-                      }}
-                    >
-                      {doc.role}
-                    </td>
-                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
-                      <span
-                        style={{
-                          display: 'inline-block',
-                          padding: '0.15rem 0.5rem',
-                          borderRadius: '12px',
-                          fontSize: '0.75rem',
-                          fontWeight: 700,
-                          backgroundColor: doc.patientCount > 0 ? '#e6f4ea' : '#f1f3f4',
-                          color: doc.patientCount > 0 ? '#137333' : '#5f6368',
-                        }}
-                      >
-                        {doc.patientCount} patient{doc.patientCount === 1 ? '' : 's'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-                {(wholesalerId ? scopedDoctors.length : doctorsWithPatients.length) === 0 && (
-                  <tr>
-                    <td
-                      colSpan={4}
-                      style={{
-                        textAlign: 'center',
-                        padding: '2rem',
-                        color: '#9aa0a6',
-                        fontStyle: 'italic',
-                      }}
-                    >
-                      No physicians or clinics found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <DoctorCohortTable
+          wholesalerId={wholesalerId}
+          scopedDoctors={scopedDoctors}
+          doctorsWithPatients={doctorsWithPatients}
+        />
       )}
 
       {/* Wholesaler cohort volume table (Admin only) */}
       {!wholesalerId && showPanel('wholesalerCohort') && (
-        <div
-          style={{
-            backgroundColor: 'white',
-            borderRadius: '8px',
-            padding: '1.5rem',
-            border: '1px solid #dadce0',
-            boxShadow: '0 1px 2px 0 rgba(60,67,70,0.1)',
-            marginBottom: '2rem',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '1.25rem',
-            }}
-          >
-            <h3
-              style={{
-                margin: 0,
-                fontSize: '1rem',
-                fontWeight: 600,
-                color: '#202124',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-              }}
-            >
-              <Building2 size={18} color="#1a73e8" />
-              Wholesalers B2B Performance
-            </h3>
-            <span style={{ fontSize: '0.72rem', color: '#5f6368' }}>Active network volume</span>
-          </div>
-
-          <div style={{ overflowX: 'auto' }}>
-            <table
-              style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                fontSize: '0.8rem',
-                textAlign: 'left',
-              }}
-            >
-              <thead>
-                <tr style={{ borderBottom: '2px solid #dadce0', backgroundColor: '#f8f9fa' }}>
-                  <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>
-                    Wholesaler Name
-                  </th>
-                  <th
-                    style={{
-                      padding: '0.75rem 1rem',
-                      fontWeight: 600,
-                      color: '#5f6368',
-                      textAlign: 'center',
-                    }}
-                  >
-                    Clinics & Physicians
-                  </th>
-                  <th
-                    style={{
-                      padding: '0.75rem 1rem',
-                      fontWeight: 600,
-                      color: '#5f6368',
-                      textAlign: 'center',
-                    }}
-                  >
-                    Patients
-                  </th>
-                  <th
-                    style={{
-                      padding: '0.75rem 1rem',
-                      fontWeight: 600,
-                      color: '#5f6368',
-                      textAlign: 'center',
-                    }}
-                  >
-                    Total Group Size
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {wholesalersWithStats.map((ws) => (
-                  <tr
-                    key={ws.id}
-                    style={{
-                      borderBottom: '1px solid #dadce0',
-                      transition: 'background-color 0.15s',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8f9fa')}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                  >
-                    <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#202124' }}>
-                      {ws.name}
-                    </td>
-                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center', color: '#5f6368' }}>
-                      {ws.doctorCount}
-                    </td>
-                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center', color: '#5f6368' }}>
-                      {ws.patientCount}
-                    </td>
-                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
-                      <span
-                        style={{
-                          display: 'inline-block',
-                          padding: '0.15rem 0.5rem',
-                          borderRadius: '12px',
-                          fontSize: '0.75rem',
-                          fontWeight: 700,
-                          backgroundColor: '#e8f0fe',
-                          color: '#1a73e8',
-                        }}
-                      >
-                        {ws.doctorCount + ws.patientCount} members
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-                {wholesalersWithStats.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={4}
-                      style={{
-                        textAlign: 'center',
-                        padding: '2rem',
-                        color: '#9aa0a6',
-                        fontStyle: 'italic',
-                      }}
-                    >
-                      No wholesalers found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <WholesalerCohortTable wholesalersWithStats={wholesalersWithStats} />
       )}
 
       {/* System Widgets and Operational Grid */}
@@ -2205,26 +1832,18 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
         {/* System Widgets Panel */}
         {(showPanel('auditLogs') || showPanel('payoutManager')) && (
           <div>
-            <h2
-              style={{
-                fontSize: '1.1rem',
-                fontWeight: 600,
-                color: '#202124',
-                marginBottom: '1.25rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-              }}
-            >
+            <h2 className="amd-heading" style={{
+              color: '#202124', marginBottom: '1.25rem',
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+            }}>
               <Activity size={18} color="#1a73e8" />
               Operational Widgets
             </h2>
             <div
+              className="amd-widget-grid"
               style={{
-                display: 'grid',
                 gridTemplateColumns:
                   showPanel('auditLogs') && showPanel('payoutManager') ? '1fr 1fr' : '1fr',
-                gap: '1.5rem',
               }}
             >
               {showPanel('auditLogs') && (
@@ -2244,26 +1863,18 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
         {/* Operational Intelligence (Finance / Zoho Sync) */}
         {(showPanel('financeWidget') || showPanel('productSyncWidget')) && (
           <div>
-            <h2
-              style={{
-                fontSize: '1.1rem',
-                fontWeight: 600,
-                color: '#202124',
-                marginBottom: '1.25rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-              }}
-            >
+            <h2 className="amd-heading" style={{
+              color: '#202124', marginBottom: '1.25rem',
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+            }}>
               <Layers size={18} color="#1a73e8" />
-              Intelligence & Sync Hub
+              Intelligence &amp; Sync Hub
             </h2>
             <div
+              className="amd-widget-grid"
               style={{
-                display: 'grid',
                 gridTemplateColumns:
                   showPanel('financeWidget') && showPanel('productSyncWidget') ? '1fr 1fr' : '1fr',
-                gap: '1.5rem',
               }}
             >
               {showPanel('financeWidget') && <AdminFinanceWidget />}

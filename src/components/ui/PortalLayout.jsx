@@ -203,99 +203,206 @@ export default function PortalLayout({
     }
   `;
 
+  const headerCSS = `
+    .portal-header {
+      height: 60px;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      padding: 0 1.5rem;
+      position: relative;
+      z-index: 50;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      box-sizing: border-box;
+      width: 100%;
+      overflow: hidden;
+    }
+    .portal-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      overflow: hidden;
+      min-width: 0;
+      flex-shrink: 1;
+    }
+    .portal-header-logo {
+      height: 40px;
+      width: auto;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    .portal-header-sep {
+      color: #e2e8f0;
+      font-size: 1.4rem;
+      font-weight: 300;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .portal-header-title {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--color-text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-shrink: 1;
+      min-width: 0;
+    }
+    .portal-header-switcher {
+      flex-shrink: 0;
+    }
+    /* CENTER: search bar (desktop) */
+    .portal-header-center {
+      min-width: 0;
+      padding: 0 0.75rem;
+      overflow: hidden;
+    }
+    .portal-header-search-bar {
+      display: flex;
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+    }
+    .portal-header-search-bar input {
+      width: 100%;
+      padding: 0.55rem 1rem 0.55rem 2.6rem;
+      border-radius: 24px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      background: rgba(255, 255, 255, 0.5);
+      color: var(--color-text-primary);
+      font-size: 0.88rem;
+      outline: none;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+    .portal-header-search-icon-inside {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--color-text-secondary);
+      display: flex;
+    }
+    /* Mobile search ICON button — hidden on desktop */
+    .portal-header-search-btn {
+      display: none;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 50%;
+      padding: 0.45rem;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-secondary);
+      flex-shrink: 0;
+    }
+    /* RIGHT: never shrinks */
+    .portal-header-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.4rem;
+      flex-shrink: 0;
+      min-width: 0;
+      padding-left: 0.5rem;
+    }
+    /* Preferences pill — hide on narrow */
+    .portal-header-prefs { display: flex; }
+    @media (max-width: 840px) {
+      .portal-header-prefs { display: none; }
+    }
+    /* ─ Responsive ─────────────────────────── */
+    @media (max-width: 960px) {
+      /* Shrink logo */
+      .portal-header-logo { height: 32px; }
+      /* Hide portal title text — keep switcher */
+      .portal-header-title { display: none; }
+      .portal-header-sep:first-of-type { display: none; }
+    }
+    @media (max-width: 720px) {
+      /* Hide ALL text in left, show only logo + hamburger */
+      .portal-header-sep { display: none; }
+      .portal-header-switcher { display: none; }
+      .portal-header-logo { height: 28px; }
+      /* Replace search bar with icon */
+      .portal-header-search-bar { display: none; }
+      .portal-header-search-btn { display: flex; }
+      .portal-header { padding: 0 1rem; }
+    }
+  `;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden', backgroundColor: 'var(--color-bg-app)' }}>
       <style>{siriAnimation}</style>
+      <style>{headerCSS}</style>
       {/* TOPBAR */}
-      <header style={{ 
-        height: '60px', 
-        background: 'rgba(255, 255, 255, 0.75)', 
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        gap: '1rem',
-        padding: '0 1.5rem',
-        zIndex: 50,
-        color: 'var(--color-text-primary)',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)'
-      }}>
-        {/* Left Side */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexShrink: 0, overflow: 'visible' }}>
+      <header className="portal-header">
+        {/* LEFT: hamburger + logo + title + portal switcher */}
+        <div className="portal-header-left">
           {isMobile && (
-            <button 
+            <button
               onClick={() => setSidebarOpen(!isSidebarOpen)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.4rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
               title="Toggle Menu"
             >
               <Menu size={20} color="var(--color-text-primary)" />
             </button>
           )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
-            <img 
-              src="/atlas-health-logo.png" 
-              alt="Atlas Health" 
-              style={{ height: '48px', width: 'auto', objectFit: 'contain', flexShrink: 0 }} 
-              onError={(e) => { e.target.onerror = null; e.target.src = '/logo.png'; }} 
+          <img
+            src="/atlas-health-logo.png"
+            alt="Atlas Health"
+            className="portal-header-logo"
+            onError={(e) => { e.target.onerror = null; e.target.src = '/logo.png'; }}
+          />
+          {portalTitle && (
+            <>
+              <span className="portal-header-sep">|</span>
+              <span className="portal-header-title">{portalTitle}</span>
+              <span className="portal-header-sep">|</span>
+              <span className="portal-header-switcher"><AdminPortalSwitcher /></span>
+            </>
+          )}
+        </div>
+
+        {/* CENTER: search bar — hidden on mobile via CSS, collapses to nothing */}
+        <div className="portal-header-center">
+          <div className="portal-header-search-bar">
+            <span className="portal-header-search-icon-inside">
+              <Search size={16} />
+            </span>
+            <input
+              type="text"
+              placeholder="Search everything... (Cmd+K)"
+              onClick={() => setPaletteOpen(true)}
+              readOnly
             />
-            {portalTitle && (
-              <>
-                <span style={{ color: '#e2e8f0', fontSize: '1.4rem', fontWeight: 300, flexShrink: 0 }}>|</span>
-                <span style={{ fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-secondary)', letterSpacing: '-0.2px', whiteSpace: 'nowrap' }}>
-                  {portalTitle}
-                </span>
-                <span style={{ color: '#e2e8f0', fontSize: '1.4rem', fontWeight: 300, margin: '0 0.25rem', flexShrink: 0 }}>|</span>
-                <div style={{ flexShrink: 0 }}>
-                  <AdminPortalSwitcher />
-                </div>
-              </>
-            )}
           </div>
         </div>
 
-        {/* Center - Global Search (Optional) */}
-        {!isMobile && (
-          <div style={{ flex: 1, maxWidth: '500px', margin: '0 1rem', flexShrink: 1 }}>
-            <div style={{ position: 'relative', width: '100%' }}>
-              <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-secondary)' }} />
-              <input 
-                type="text" 
-                placeholder="Search everything... (Cmd+K)" 
-                onClick={() => setPaletteOpen(true)}
-                readOnly
-                style={{
-                  width: '100%',
-                  padding: '0.6rem 1rem 0.6rem 2.8rem',
-                  borderRadius: '24px',
-                  border: '1px solid rgba(0, 0, 0, 0.08)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                  color: 'var(--color-text-primary)',
-                  fontSize: '0.9rem',
-                  outline: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)'
-                }}
-              />
-            </div>
-          </div>
-        )}
+        {/* RIGHT: action buttons — never shrink */}
+        <div className="portal-header-right">
+          {/* Search icon — shown only on mobile (CSS), replaces the search bar */}
+          <button
+            className="portal-header-search-btn"
+            onClick={() => setPaletteOpen(true)}
+            title="Search"
+          >
+            <Search size={20} />
+          </button>
 
-        {/* Right Side */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem', flexShrink: 0 }}>
-          
-          {/* Preferences Toggles */}
-          {!isMobile && (
-            <div style={{ display: 'flex', alignItems: 'center', marginRight: '0.25rem', flexShrink: 0 }}>
-              <GlobalPreferencesDropdown />
-            </div>
-          )}
+          {/* Preferences pill — hidden on narrow screens via CSS */}
+          <span className="portal-header-prefs">
+            <GlobalPreferencesDropdown />
+          </span>
 
-          <button 
-            onClick={() => setAiOpen(!isAiOpen)} 
-            style={iconBtnStyle} 
+          <button
+            onClick={() => setAiOpen(!isAiOpen)}
+            style={iconBtnStyle}
             title="Ask Atlas AI"
           >
             <Sparkles size={20} color={isAiOpen ? 'var(--color-primary)' : 'var(--color-text-secondary)'} />

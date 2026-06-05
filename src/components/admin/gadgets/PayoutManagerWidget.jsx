@@ -95,56 +95,53 @@ export default function PayoutManagerWidget({
 
   return (
     <div
-      className="card"
+      className="amd-table-section"
       style={{
-        padding: '0',
-        background: 'white',
-        borderRadius: 'var(--radius-md)',
-        boxShadow: 'var(--shadow-sm)',
-        border: '1px solid #e2e8f0',
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
         overflow: 'hidden',
+        margin: 0,
+        boxSizing: 'border-box',
       }}
     >
       <div
         style={{
-          padding: '1.5rem',
-          borderBottom: '1px solid #e2e8f0',
-          background: 'var(--color-bg-app)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          marginBottom: '1.25rem',
         }}
       >
         <div>
           <h3
+            className="amd-title"
             style={{
               margin: '0 0 0.25rem 0',
-              fontSize: '1.15rem',
-              color: '#0f172a',
-              fontWeight: 800,
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
+              color: '#202124',
             }}
           >
-            <DollarSign size={18} color="var(--primary)" /> Practitioner Payouts
+            <DollarSign size={16} color="#1a73e8" /> Practitioner Payouts
           </h3>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+          <p className="amd-caption" style={{ margin: 0, color: '#5f6368' }}>
             Payout and commission management.
           </p>
         </div>
         <div
           style={{
-            padding: '0.5rem',
-            background: '#ecfdf5',
-            borderRadius: 'var(--radius-md)',
-            color: 'var(--color-success)',
+            padding: '0.4rem',
+            background: '#e6f4ea',
+            borderRadius: '4px',
+            color: '#137333',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          <FileText size={20} />
+          <FileText size={16} />
         </div>
       </div>
 
@@ -152,18 +149,16 @@ export default function PayoutManagerWidget({
         style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '1.5rem',
           display: 'flex',
           flexDirection: 'column',
-          gap: '1rem',
         }}
       >
         {loading ? (
-          <div style={{ textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
+          <div style={{ textAlign: 'center', padding: '2rem', color: '#5f6368', fontSize: '0.85rem' }}>
             Loading payouts...
           </div>
         ) : payouts.length === 0 ? (
-          <div style={{ textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
+          <div style={{ textAlign: 'center', padding: '2rem', color: '#5f6368', fontSize: '0.85rem' }}>
             No pending payouts.
           </div>
         ) : (
@@ -174,59 +169,48 @@ export default function PayoutManagerWidget({
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: '1rem',
-                border: '1px solid #e2e8f0',
-                borderRadius: 'var(--radius-md)',
-                background: 'var(--color-bg-app)',
+                padding: '0.75rem 0',
+                borderBottom: '1px solid #f1f3f4',
               }}
             >
               <div>
                 <div
                   style={{
-                    fontWeight: 800,
-                    color: 'var(--color-text-primary)',
-                    fontSize: '0.95rem',
+                    fontWeight: 600,
+                    color: '#202124',
+                    fontSize: '0.875rem',
                   }}
                 >
                   {p.doctorName}
                 </div>
                 <div
                   style={{
-                    fontSize: '0.8rem',
-                    color: 'var(--color-text-secondary)',
-                    marginTop: '0.2rem',
+                    fontSize: '0.75rem',
+                    color: '#5f6368',
+                    marginTop: '0.15rem',
                   }}
                 >
                   Period: {p.period}
                 </div>
 
                 <div
+                  className="amd-badge"
                   style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.3rem',
-                    padding: '0.2rem 0.5rem',
-                    borderRadius: 'var(--radius-md)',
-                    fontSize: '0.7rem',
-                    fontWeight: 700,
-                    marginTop: '0.5rem',
-                    background:
+                    marginTop: '0.35rem',
+                    backgroundColor:
                       p.status === 'paid'
-                        ? '#dcfce7'
+                        ? '#e6f4ea'
                         : p.status === 'processing'
-                          ? '#fef9c3'
-                          : '#fee2e2',
+                          ? '#fef7e0'
+                          : '#fce8e6',
                     color:
                       p.status === 'paid'
-                        ? '#166534'
+                        ? '#137333'
                         : p.status === 'processing'
-                          ? '#854d0e'
-                          : '#991b1b',
+                          ? '#b06000'
+                          : '#c5221f',
                   }}
                 >
-                  {p.status === 'paid' && <CheckCircle2 size={12} />}
-                  {p.status === 'processing' && <Loader2 size={12} />}
-                  {p.status === 'pending' && <AlertCircle size={12} />}
                   {p.status === 'paid'
                     ? 'Paid'
                     : p.status === 'processing'
@@ -240,25 +224,27 @@ export default function PayoutManagerWidget({
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'flex-end',
-                  gap: '0.5rem',
+                  gap: '0.4rem',
                 }}
               >
-                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a' }}>
+                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#202124' }}>
                   ${p.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </div>
                 {p.status === 'pending' && (
                   <button
                     onClick={() => handleApprove(p.id)}
                     style={{
-                      padding: '0.4rem 1rem',
-                      background: 'var(--primary)',
+                      padding: '0.35rem 0.75rem',
+                      background: '#1a73e8',
                       color: 'white',
                       border: 'none',
-                      borderRadius: 'var(--radius-sm)',
+                      borderRadius: '4px',
                       fontSize: '0.75rem',
-                      fontWeight: 700,
+                      fontWeight: 600,
                       cursor: 'pointer',
                     }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = '#1557b0')}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = '#1a73e8')}
                   >
                     Approve Payout
                   </button>

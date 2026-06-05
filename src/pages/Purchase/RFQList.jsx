@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, updateDoc, doc, addDoc, serverTimestamp, arrayUnion } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, updateDoc, doc, addDoc, serverTimestamp, arrayUnion, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { FileText, Plus, X, CheckCircle, Sparkles, Building2, Package, Calendar, Phone, Mail, Link as LinkIcon, ShoppingCart } from 'lucide-react';
+import { FileText, Plus, X, CheckCircle, Sparkles, Building2, Package, Calendar, Phone, Mail, Link as LinkIcon, ShoppingCart, ExternalLink } from 'lucide-react';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import ERPListDetailLayout from '../../components/shared/ERPListDetailLayout';
 import ERPStatusBadge from '../../components/shared/ERPStatusBadge';
@@ -151,8 +151,16 @@ function RFQDetail({ rfq, onClose, onStatusChange, onEdit }) {
             <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>{rfq.rfqNumber || rfq.id?.slice(0, 8)}</h2>
             <ERPStatusBadge status={rfq.status || 'DRAFT'} />
           </div>
-          <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.25rem' }}>
-            Created: {fmt(rfq.createdAt)}
+          <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.25rem', display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <span>Created: {fmt(rfq.createdAt)}</span>
+            {rfq.zohoId && (
+              <>
+                <span style={{ color: '#cbd5e1' }}>|</span>
+                <a href={`https://books.zoho.eu/app#/rfqs/${rfq.zohoId}`} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  View in Zoho Books <ExternalLink size={11} />
+                </a>
+              </>
+            )}
           </div>
         </div>
         <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: '0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -331,6 +339,32 @@ export default function RFQList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [refreshToken, setRefreshToken] = useState(0);
 
+  const handleBulkAction = async (ids, newStatus) => {
+    try {
+      await Promise.all(ids.map(id =>
+        updateDoc(doc(db, 'purchase_rfqs', id), {
+          status: newStatus,
+          statusHistory: arrayUnion({ status: newStatus, changedAt: new Date().toISOString(), changedBy: 'Admin (Bulk)' })
+        })
+      ));
+      setRefreshToken(t => t + 1);
+    } catch (err) { console.error(err); alert('Error processing bulk action.'); }
+  };
+
+  const handleBulkDelete = async (ids) => {
+    if (!window.confirm(`Delete ${ids.length} RFQs? This cannot be undone.`)) return;
+    try {
+      await Promise.all(ids.map(id => deleteDoc(doc(db, 'purchase_rfqs', id))));
+      setRefreshToken(t => t + 1);
+    } catch (err) { console.error(err); alert('Error deleting RFQs.'); }
+  };
+
+  const bulkActions = [
+    { label: 'Mark as Sent', onClick: (ids) => handleBulkAction(ids, 'SENT') },
+    { label: 'Mark as Cancelled', onClick: (ids) => handleBulkAction(ids, 'CANCELLED') },
+    { label: 'Delete', variant: 'danger', onClick: handleBulkDelete },
+  ];
+
   useEffect(() => {
     let isSeeding = false;
     const q = query(collection(db, 'purchase_rfqs'), orderBy('createdAt', 'desc'));
@@ -433,14 +467,7 @@ export default function RFQList() {
             <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>{filtered.length} records</div>
           </div>
         }
-        headerActions={
-          <button
-            onClick={() => { setSelectedRfq(null); setShowForm(true); }}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', padding: '0.4rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, backgroundColor: '#1e293b', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-          >
-            <Plus size={14} /> New
-          </button>
-        }
+        bulkActions={bulkActions}
         renderListItem={(rfq, isSelected) => <RFQListItem rfq={rfq} isSelected={isSelected} />}
         renderDetail={(rfq, onClose) => (
           <RFQDetail
@@ -451,13 +478,6 @@ export default function RFQList() {
             onEdit={(r) => { setSelectedRfq(r); setShowForm(true); }}
           />
         )}
-        emptyState={
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📄</div>
-            <div style={{ fontWeight: 600, color: '#64748b' }}>No RFQ selected</div>
-            <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.25rem' }}>Select an RFQ from the list to view details.</div>
-          </div>
-        }
       />
 
       {showForm && (

@@ -20,6 +20,7 @@ export default function MetricCard({
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
+        alignItems: 'flex-start',
         gap: '0.75rem',
         padding: '1.25rem 1.5rem',
         borderRadius: '16px',
@@ -50,92 +51,50 @@ export default function MetricCard({
     >
       {/* Decorative top accent line */}
       <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
+        position: 'absolute', top: 0, left: 0, right: 0,
         height: '4px',
         background: `linear-gradient(90deg, ${color}, ${color}80)`,
         opacity: 0.8
       }} />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div
-          style={{
-            width: '42px',
-            height: '42px',
-            borderRadius: '12px',
-            backgroundColor: `${color}14`, // subtle transparent background
-            color: color,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            boxShadow: `inset 0 1px 2px rgba(255,255,255,0.5)`,
-          }}
-        >
-          {Icon && <Icon size={20} strokeWidth={2.5} />}
-        </div>
-        
-        {alert && (
-          <span
-            style={{
-              fontSize: '0.62rem',
-              fontWeight: 800,
-              color: '#dc2626',
-              backgroundColor: '#fee2e2',
-              padding: '0.2rem 0.5rem',
-              borderRadius: '20px',
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-              boxShadow: '0 2px 4px rgba(220,38,38,0.1)',
-            }}
-          >
-            Alert
-          </span>
-        )}
+      <div className="amd-card-icon" style={{
+        width: '42px', height: '42px', borderRadius: '12px',
+        backgroundColor: `${color}14`, color,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0,
+        boxShadow: `inset 0 1px 2px rgba(255,255,255,0.5)`,
+      }}>
+        {Icon && <Icon size={20} strokeWidth={2.5} />}
       </div>
 
-      <div style={{ flex: 1, minWidth: 0, marginTop: '0.25rem' }}>
-        <h4
-          style={{
-            margin: 0,
-            fontSize: '0.85rem',
-            color: '#64748b',
-            fontWeight: 600,
-            letterSpacing: '0.01em',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {title}
-        </h4>
-        <div
-          style={{
-            fontSize: '1.8rem',
-            fontWeight: 800,
-            color: '#0f172a',
-            marginTop: '0.35rem',
-            letterSpacing: '-0.03em',
-            lineHeight: 1.1,
-            fontFamily: '"Inter", "Outfit", sans-serif',
-          }}
-        >
+      <div className="amd-card-body" style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+          <h4 style={{
+            margin: 0, fontSize: '0.82rem', color: '#64748b',
+            fontWeight: 600, letterSpacing: '0.01em',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {title}
+          </h4>
+          {alert && (
+            <span style={{
+              fontSize: '0.62rem', fontWeight: 800, color: '#dc2626',
+              backgroundColor: '#fee2e2', padding: '0.15rem 0.4rem',
+              borderRadius: '20px', letterSpacing: '0.04em', textTransform: 'uppercase',
+              flexShrink: 0,
+            }}>
+              Alert
+            </span>
+          )}
+        </div>
+        <div className="amd-value" style={{ color: '#0f172a', marginTop: '0.2rem' }}>
           {value}
         </div>
         {subtitle && (
-          <p
-            style={{
-              margin: '0.5rem 0 0',
-              fontSize: '0.75rem',
-              color: '#94a3b8',
-              fontWeight: 500,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
+          <p style={{
+            margin: '0.3rem 0 0', fontSize: '0.72rem', color: '#94a3b8',
+            fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
             {subtitle}
           </p>
         )}

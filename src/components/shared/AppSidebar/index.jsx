@@ -7,7 +7,7 @@ import './AppSidebar.css';
 
 
 // ─── Sortable Group Wrapper ────────────────────────────────────────────────
-function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, handleItemClick, isEditing, isMobile, onToggleFavorite, isFavoritesGroup, favoritesSet }) {
+function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, handleItemClick, isEditing, isMobile, onToggleFavorite, isFavoritesGroup, favoritesSet, isFlyoutOpen, onFlyoutEnter, onFlyoutLeave }) {
   const {
     attributes,
     listeners,
@@ -29,7 +29,13 @@ function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, 
   const items = group.items || [];
 
   return (
-    <div ref={setNodeRef} style={style} className="sb-group">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="sb-group"
+      onMouseEnter={!expanded ? () => onFlyoutEnter(group.id) : undefined}
+      onMouseLeave={!expanded ? onFlyoutLeave : undefined}
+    >
       <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
         {isEditing && (
           <div style={{ padding: '4px 4px 4px 12px', width: '28px' }} />
@@ -39,7 +45,6 @@ function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, 
           onClick={() => !isEditing && toggleGroup(group.id)}
           aria-expanded={isOpen}
           data-tooltip={!expanded ? group.label : undefined}
-          title={!expanded ? group.label : undefined}
           style={{ flex: 1, pointerEvents: isEditing ? 'none' : 'auto' }}
         >
           <span className="sb-group-emoji" aria-hidden="true">
@@ -69,6 +74,9 @@ function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, 
       <div
         className="sb-group-items"
         style={{ maxHeight: isOpen ? '999px' : '0px', overflow: isEditing ? 'visible' : 'hidden' }}
+        data-flyout-open={!expanded && isFlyoutOpen ? 'true' : undefined}
+        onMouseEnter={!expanded ? () => onFlyoutEnter(group.id) : undefined}
+        onMouseLeave={!expanded ? onFlyoutLeave : undefined}
       >
         {!expanded && (
           <div className="sb-flyout-header">
@@ -141,7 +149,6 @@ function SortableSidebarItem({ item, isActive, handleItemClick, expanded, isEdit
         className={`sb-item${isActive ? ' active' : ''}${item.pulse ? ' pulse' : ''}`}
         onClick={() => !isEditing && handleItemClick(item.id)}
         data-tooltip={!expanded ? item.label : undefined}
-        title={!expanded ? item.label : undefined}
         aria-current={isActive ? 'page' : undefined}
         style={{
           flex: 1,
@@ -247,12 +254,33 @@ export default function AppSidebar({
   isEditing = false,
   onToggleFavorite
 }) {
+  // On mobile: always force expanded (full drawer with labels + accordion)
   const [expanded, setExpanded] = useState(() => {
-    if (isMobile) return false;
+    if (isMobile) return true;
     const saved = localStorage.getItem(`${storageKey}-expanded`);
     return saved !== null ? JSON.parse(saved) : false;
   });
+
+  // Keep mobile always expanded if isMobile changes (e.g. resize)
+  useEffect(() => {
+    if (isMobile) setExpanded(true);
+  }, [isMobile]);
   const [closingFlyout, setClosingFlyout] = useState(false);
+  // JS-controlled flyout — tracks which group is hovered in collapsed mode
+  const [hoveredGroupId, setHoveredGroupId] = useState(null);
+  const closeTimerRef = useRef(null);
+
+  const openFlyout = useCallback((groupId) => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    setHoveredGroupId(groupId);
+  }, []);
+
+  const closeFlyout = useCallback(() => {
+    closeTimerRef.current = setTimeout(() => setHoveredGroupId(null), 150);
+  }, []);
+
+  // Clean up timer on unmount
+  useEffect(() => () => { if (closeTimerRef.current) clearTimeout(closeTimerRef.current); }, []);
 
   const [openGroups, setOpenGroups] = useState(() => {
     return new Set(['favorites']);
@@ -345,7 +373,13 @@ export default function AppSidebar({
       )}
 
       <aside 
-        className={`app-sidebar ${!expanded ? 'collapsed' : ''} ${closingFlyout ? 'force-close-flyout' : ''} ${isOpen && isMobile ? 'mobile-open' : ''} ${isEditing ? 'editing-mode' : ''}`}
+        className={`app-sidebar ${
+          !expanded && !isMobile ? 'collapsed' : ''
+        } ${closingFlyout ? 'force-close-flyout' : ''} ${
+          isOpen && isMobile ? 'mobile-open' : ''
+        } ${isEditing ? 'editing-mode' : ''} ${
+          isMobile ? 'mobile-mode' : ''
+        }`}
         style={{
           '--sb-bg': accentColor ? `${accentColor}05` : undefined,
           '--sb-active-color': accentColor,
@@ -354,6 +388,7 @@ export default function AppSidebar({
         aria-label="Main navigation"
       >
         <div className="sb-header">
+          {/* Desktop: collapse/expand toggle */}
           {!isMobile && (
             <button
               className="sb-hamburger"
@@ -368,16 +403,35 @@ export default function AppSidebar({
               }
             </button>
           )}
-          <div className="sb-brand" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: expanded ? '24px 0' : '16px 0', width: '100%', transition: 'margin 0.2s' }}>
-            {header.title && (
-              <AtlasHealthLogo 
-                size={expanded ? 48 : 32} 
-                style={{ 
-                  transition: 'width 0.2s, height 0.2s' 
-                }} 
-              />
-            )}
-          </div>
+
+          {/* Mobile: logo + name row + close button */}
+          {isMobile && (
+            <div className="sb-mobile-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <AtlasHealthLogo size={28} />
+                <span className="sb-mobile-title">Atlas Health</span>
+              </div>
+              <button
+                className="sb-mobile-close"
+                onClick={onClose}
+                aria-label="Close menu"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
+          {/* Desktop: centered logo */}
+          {!isMobile && (
+            <div className="sb-brand" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: expanded ? '24px 0' : '16px 0', width: '100%', transition: 'margin 0.2s' }}>
+              {header.title && (
+                <AtlasHealthLogo 
+                  size={expanded ? 48 : 32} 
+                  style={{ transition: 'width 0.2s, height 0.2s' }} 
+                />
+              )}
+            </div>
+          )}
         </div>
 
         {/* ── Phase 1: Search bar (visible only when expanded & not editing) ── */}
@@ -421,7 +475,6 @@ export default function AppSidebar({
                     className={`sb-item${isActive ? ' active' : ''}${item.pulse ? ' pulse' : ''}`}
                     onClick={() => handleItemClick(item.id)}
                     data-tooltip={!expanded ? item.label : undefined}
-                    title={!expanded ? item.label : undefined}
                     aria-current={isActive ? 'page' : undefined}
                   >
                     <span className="sb-item-icon">
@@ -465,6 +518,9 @@ export default function AppSidebar({
                   onToggleFavorite={onToggleFavorite}
                   isFavoritesGroup={group.id === 'favorites'}
                   favoritesSet={favoritesSet}
+                  isFlyoutOpen={!expanded && hoveredGroupId === group.id}
+                  onFlyoutEnter={openFlyout}
+                  onFlyoutLeave={closeFlyout}
                 />
                 {gi < filteredGroups.length - 1 && <div className="sb-divider" />}
               </React.Fragment>

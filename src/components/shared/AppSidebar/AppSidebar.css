@@ -72,6 +72,43 @@
   padding: 0;
 }
 
+/* ── Mobile drawer header ────────────────────────────────────────────────────── */
+.sb-mobile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 4px;
+}
+
+.sb-mobile-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--sb-text);
+  letter-spacing: -0.01em;
+}
+
+/* Hidden by default — shown only in @media mobile block */
+.sb-mobile-close {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--sb-hover-bg);
+  border-radius: 8px;
+  color: var(--sb-icon);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+}
+.sb-mobile-close:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--sb-text);
+}
+
+
 .sb-hamburger {
   display: flex;
   align-items: center;
@@ -190,7 +227,7 @@
   background: none;
   width: 100%;
   text-align: left;
-  color: var(--sb-muted);
+  color: #64748b; /* Slate-500 for better legibility */
   font-size: 10.5px;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -514,15 +551,47 @@
     height: 100vh;
     z-index: 200;
     transform: translateX(-100%);
-    transition: transform var(--sb-duration) var(--sb-easing),
-                width var(--sb-duration) var(--sb-easing);
-    width: var(--sb-w-full) !important;
-    min-width: var(--sb-w-full) !important;
-    box-shadow: 4px 0 32px rgba(0, 0, 0, 0.15);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.28s ease;
+    /* Full drawer width — comfortable for touch */
+    width: 85vw !important;
+    min-width: 280px !important;
+    max-width: 340px !important;
+    box-shadow: none;
+    border-right: 1px solid var(--sb-group-divider);
+    background: #ffffff !important; /* Force solid white background on mobile drawer */
   }
-  .app-sidebar.mobile-open { transform: translateX(0); }
+
+  .app-sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 8px 0 40px rgba(0, 0, 0, 0.18);
+  }
+
+  /* Force expanded styles on mobile — never show collapsed/icon mode */
+  .app-sidebar.mobile-mode .sb-group-label,
+  .app-sidebar.mobile-mode .sb-item-label {
+    opacity: 1 !important;
+    max-width: none !important;
+  }
+
+  .app-sidebar.mobile-mode .sb-group-items {
+    /* Never use flyout positioning on mobile */
+    position: static !important;
+    display: block !important;
+    width: auto !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* Close button visible only on mobile */
+  .sb-mobile-close {
+    display: flex !important;
+  }
+
   .sb-overlay { display: block; }
 }
+
 
 /* ── External mobile hamburger trigger ───────────────────────────────────────── */
 .sb-mobile-trigger {
@@ -633,27 +702,26 @@
   opacity: 1;
   background: var(--sb-hover-bg);
 }
-/* ── Flyout Menu for Collapsed Sidebar ───────────────────────────────────── */
+/* ── Flyout Menu for Collapsed Sidebar ───────────────────────────────────────── */
 .app-sidebar.collapsed .sb-group-items {
   display: none !important;
 }
 
-.app-sidebar.collapsed .sb-group:hover .sb-group-items {
+/* JS-controlled: show when data-flyout-open is set */
+.app-sidebar.collapsed .sb-group-items[data-flyout-open="true"] {
   display: block !important;
   position: absolute;
-  left: var(--sb-w-mini, 56px); /* Touch sidebar exactly */
-  /* top is inherited from static position */
+  left: var(--sb-w-mini, 56px);
   width: 240px;
   background: #ffffff;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   border: 1px solid var(--sb-group-divider);
-  border-left: none; /* Combine visually */
+  border-left: none;
   border-radius: 0 var(--sb-item-radius) var(--sb-item-radius) 0;
   padding: 8px;
   z-index: 100000;
   max-height: calc(100vh - 100px) !important;
   overflow-y: auto !important;
-  /* Make sure labels are visible in the flyout */
 }
 .app-sidebar.collapsed .sb-group-items .sb-item {
   justify-content: flex-start;
@@ -668,19 +736,14 @@
   max-width: none !important;
 }
 
-/* Force hide when clicking */
-.app-sidebar.collapsed.force-close-flyout .sb-group-items {
-  display: none !important;
+.app-sidebar.collapsed .sb-group-items[data-flyout-open="true"] .sb-item-label {
+  opacity: 1 !important;
+  max-width: none !important;
 }
 
-/* Bridge the hover gap and create a diagonal safe zone */
-.app-sidebar.collapsed .sb-group-items::before {
-  content: '';
-  position: absolute;
-  left: -40px;
-  top: -150px;
-  bottom: -150px;
-  width: 40px;
+/* Force hide flyout when clicking elsewhere */
+.app-sidebar.collapsed.force-close-flyout .sb-group-items {
+  display: none !important;
 }
 
 /* Flyout header */
@@ -693,19 +756,4 @@
   padding: 4px 8px 10px;
   margin-bottom: 4px;
   border-bottom: 1px solid var(--sb-group-divider);
-}
-
-.app-sidebar.collapsed .sb-group:hover .sb-group-items .sb-item-label {
-  opacity: 1 !important;
-  max-width: none !important;
-}
-
-/* Bridge the hover gap to prevent flyout from closing */
-.app-sidebar.collapsed .sb-group-items::before {
-  content: '';
-  position: absolute;
-  left: -24px;
-  top: 0;
-  width: 24px;
-  height: 100%;
 }

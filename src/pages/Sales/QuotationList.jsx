@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, updateDoc, doc, addDoc, serverTimestamp, arrayUnion } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, updateDoc, doc, addDoc, serverTimestamp, arrayUnion, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { FileText, Plus, X, CheckCircle, Sparkles, Building2, Calendar, User, Mail, PlusCircle, Save } from 'lucide-react';
+import { FileText, Plus, X, CheckCircle, Sparkles, Building2, Calendar, User, Mail, PlusCircle, Save, ExternalLink } from 'lucide-react';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import ERPListDetailLayout from '../../components/shared/ERPListDetailLayout';
 import ERPStatusBadge from '../../components/shared/ERPStatusBadge';
@@ -135,8 +135,16 @@ function QuotationDetail({ quote, onClose, onStatusChange, onEdit }) {
             <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700 }}>{quote.documentNumber || quote.id?.slice(0, 8)}</h2>
             <ERPStatusBadge status={quote.status || 'DRAFT'} />
           </div>
-          <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.25rem' }}>
-            Fecha de emisión: {fmt(quote.createdAt)}
+          <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.25rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <span>Fecha de emisión: {fmt(quote.createdAt)}</span>
+            {quote.zohoId && (
+              <>
+                <span>•</span>
+                <a href={`https://books.zoho.eu/app#/quotes/${quote.zohoId}`} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  Ver en Zoho Books <ExternalLink size={12} />
+                </a>
+              </>
+            )}
           </div>
         </div>
         <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: '0.25rem' }}>
@@ -433,6 +441,45 @@ export default function QuotationList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [refreshToken, setRefreshToken] = useState(0);
 
+  const handleBulkAction = async (ids, newStatus) => {
+    try {
+      const batch = [];
+      for (const id of ids) {
+        batch.push(updateDoc(doc(db, 'b2b_quotations', id), {
+          status: newStatus,
+          statusHistory: arrayUnion({ status: newStatus, changedAt: new Date().toISOString(), changedBy: 'Admin (Bulk)' })
+        }));
+      }
+      await Promise.all(batch);
+      setRefreshToken(t => t + 1);
+    } catch (err) {
+      console.error(err);
+      alert("Error processing bulk action.");
+    }
+  };
+
+  const handleBulkDelete = async (ids) => {
+    if (!window.confirm(`Are you sure you want to delete ${ids.length} quotations?`)) return;
+    try {
+      const batch = [];
+      for (const id of ids) {
+        batch.push(deleteDoc(doc(db, 'b2b_quotations', id)));
+      }
+      await Promise.all(batch);
+      setRefreshToken(t => t + 1);
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting documents.");
+    }
+  };
+
+  const bulkActions = [
+    { label: 'Mark as Sent', onClick: (ids) => handleBulkAction(ids, 'SENT') },
+    { label: 'Mark as Accepted', onClick: (ids) => handleBulkAction(ids, 'ACCEPTED') },
+    { label: 'Mark as Declined', onClick: (ids) => handleBulkAction(ids, 'DECLINED') },
+    { label: 'Delete', variant: 'danger', onClick: (ids) => handleBulkDelete(ids) },
+  ];
+
   useEffect(() => {
     let isSeeding = false;
     const q = query(collection(db, 'b2b_quotations'), orderBy('createdAt', 'desc'));
@@ -539,14 +586,7 @@ export default function QuotationList() {
             <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>{filtered.length} records</div>
           </div>
         }
-        headerActions={
-          <button
-            onClick={() => { setSelectedQuote(null); setShowForm(true); }}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', padding: '0.4rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, backgroundColor: '#1e293b', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-          >
-            <Plus size={14} /> New
-          </button>
-        }
+        bulkActions={bulkActions}
         renderListItem={(quote, isSelected) => <QuotationListItem quote={quote} isSelected={isSelected} />}
         renderDetail={(quote, onClose) => (
           <QuotationDetail
@@ -557,13 +597,6 @@ export default function QuotationList() {
             onEdit={(q) => { setSelectedQuote(q); setShowForm(true); }}
           />
         )}
-        emptyState={
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📄</div>
-            <div style={{ fontWeight: 600, color: '#64748b' }}>No quotation selected</div>
-            <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.25rem' }}>Select a quotation from the list to view details.</div>
-          </div>
-        }
       />
 
       {showForm && (

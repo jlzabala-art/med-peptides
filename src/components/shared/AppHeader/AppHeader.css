@@ -1,12 +1,16 @@
 /* AppHeader.css */
 
+/* ── Main bar: CSS Grid guarantees no overlap between sections ── */
 .app-header {
   height: 64px;
   background-color: #ffffff;
   border-bottom: 1px solid #e2e8f0;
-  display: flex;
+
+  /* Grid: left=auto, center=flexible, mobile-search-icon=auto, right=auto */
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
-  justify-content: space-between;
+  gap: 0;
   padding: 0 1.5rem;
   position: sticky;
   top: 0;
@@ -14,11 +18,14 @@
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
 }
 
+/* ── Left section ─────────────────────────────────────────────── */
 .app-header-left {
   display: flex;
   align-items: center;
   gap: 1rem;
-  flex-shrink: 0;
+  /* never shrinks, never grows */
+  min-width: 0;
+  overflow: hidden;
 }
 
 .app-header-hamburger {
@@ -32,6 +39,7 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .app-header-hamburger:hover {
@@ -42,6 +50,7 @@
 .app-header-title-group {
   display: flex;
   align-items: center;
+  overflow: hidden;
 }
 
 .app-header-title {
@@ -52,6 +61,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  white-space: nowrap;
 }
 
 .app-header-subtitle {
@@ -60,24 +70,35 @@
   color: #64748b;
   border-left: 1px solid #e2e8f0;
   padding-left: 0.5rem;
+  white-space: nowrap;
 }
 
+/* ── Center section: search ───────────────────────────────────── */
+/* Grid gives this exactly the space between left and right.
+   minmax(0, 1fr) means it can shrink to 0 — never overflows. */
 .app-header-center {
-  flex: 1;
-  max-width: 600px;
-  margin: 0 2rem;
   position: relative;
+  padding: 0 0.75rem;    /* horizontal breathing room from left/right columns */
+  min-width: 0;
+  max-width: 480px;      /* cap so it doesn't grow huge on wide screens */
+  width: 100%;
+}
+
+.app-header-search-container {
+  position: relative;
+  width: 100%;
 }
 
 .app-header-search {
   width: 100%;
-  padding: 0.6rem 1rem 0.6rem 2.5rem;
+  padding: 0.6rem 4rem 0.6rem 2.5rem; /* right padding for kbd hint */
   border-radius: 8px;
   border: 1px solid #e2e8f0;
   background-color: #f8fafc;
   font-size: 0.9rem;
   color: #1e293b;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .app-header-search:focus {
@@ -118,11 +139,12 @@
   box-shadow: 0 1px 1px rgba(0,0,0,0.05);
 }
 
+/* ── Right section: action buttons ───────────────────────────── */
 .app-header-right {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  flex-shrink: 0;
+  gap: 0.5rem;     /* tighter than before so icons don't eat too much space */
+  min-width: 0;
 }
 
 .app-header-action {
@@ -130,13 +152,14 @@
   border: none;
   cursor: pointer;
   color: #64748b;
-  padding: 0.5rem;
+  padding: 0.4rem;
   border-radius: 8px;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  flex-shrink: 0;
 }
 
 .app-header-action:hover {
@@ -177,6 +200,7 @@
   cursor: pointer;
   transition: background-color 0.2s ease;
   border: 1px solid transparent;
+  flex-shrink: 0;
 }
 
 .app-header-profile:hover {
@@ -195,6 +219,7 @@
   justify-content: center;
   font-weight: 700;
   font-size: 0.9rem;
+  flex-shrink: 0;
 }
 
 .app-header-user-info {
@@ -207,6 +232,25 @@
   font-weight: 700;
   color: #0f172a;
   line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Mobile search icon button — hidden on desktop, shown when bar disappears */
+.app-header-search-mobile-btn {
+  display: none;            /* hidden by default */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  padding: 0.4rem;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.app-header-search-mobile-btn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
 }
 
 .app-header-user-role {
@@ -215,19 +259,49 @@
   color: #64748b;
   line-height: 1.2;
   text-transform: capitalize;
+  white-space: nowrap;
 }
 
-/* Mobile adjustments */
-@media (max-width: 768px) {
-  .app-header-center {
-    display: none; /* Hide search on mobile for now, or replace with icon */
+/* ── Responsive ─────────────────────────────────────────────── */
+
+/* Hide Cmd+K hint on smaller screens */
+@media (max-width: 1000px) {
+  .app-header-shortcut {
+    display: none;
   }
-  
+  .app-header-search {
+    padding-right: 1rem;
+  }
+  /* Reduce right gap slightly */
+  .app-header-right {
+    gap: 0.25rem;
+  }
+}
+
+/* Hide subtitle to save space */
+@media (max-width: 860px) {
+  .app-header-subtitle {
+    display: none;
+  }
+}
+
+/* Hide user name/role */
+@media (max-width: 768px) {
   .app-header-user-info {
     display: none;
   }
-  
   .app-header {
     padding: 0 1rem;
+  }
+}
+
+/* Fully hide search bar — replace with icon button */
+@media (max-width: 640px) {
+  .app-header-center {
+    display: none;
+  }
+  /* Show the compact icon instead */
+  .app-header-search-mobile-btn {
+    display: flex;
   }
 }
