@@ -4,7 +4,7 @@ import { messagingService } from '../../../services/messagingService';
 import RichMessageCard from './RichMessageCard';
 import './MessagingApp.css';
 
-export default function ChatWindow({ conversation, currentUserId, currentUserRole }) {
+export default function ChatWindow({ conversation, currentUserId, currentUserRole, onBack }) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [file, setFile] = useState(null);
@@ -97,6 +97,11 @@ export default function ChatWindow({ conversation, currentUserId, currentUserRol
     <div className="messaging-main">
       {/* Header */}
       <div className="chat-header">
+        {onBack && (
+          <button className="chat-header-back-btn" onClick={onBack} aria-label="Back to conversations">
+            ←
+          </button>
+        )}
         <div className="chat-header-title">{getConvoTitle(conversation)}</div>
         {conversation.type === 'direct' && <div className="chat-header-status">● Online</div>}
       </div>

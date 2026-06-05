@@ -265,7 +265,7 @@ export default function CommandPalette({ isOpen, onClose, navGroups = [], pinned
             return (
               <div key={group} style={{ marginBottom: '0.5rem' }}>
                 <div style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' }}>
-                  {group === 'Recent' ? 'Recientes' : group === 'Action' ? 'Acciones rápidas' : group}
+                  {group === 'Recent' ? 'Recent' : group === 'Action' ? 'Quick Actions' : group}
                 </div>
                 {grouped[group].map(item => {
                   const Icon = group === 'Action' ? getActionIcon(item.id) : (item.icon || Box);
@@ -296,9 +296,9 @@ export default function CommandPalette({ isOpen, onClose, navGroups = [], pinned
         </div>
         {/* Footer hints */}
         <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid rgba(255,255,255,0.1)', fontSize: '0.75rem', color: '#cbd5e1', display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-          <span><ArrowUp size={12} /> ↑ / <ArrowDown size={12} /> ↓: Navegar</span>
-          <span><ArrowRight size={12} /> ↵: Seleccionar</span>
-          <span>Esc: Cerrar</span>
+        <span><ArrowUp size={12} /> ↑ / <ArrowDown size={12} /> ↓: Navigate</span>
+          <span><ArrowRight size={12} /> ↵: Select</span>
+          <span>Esc: Close</span>
         </div>
       </div>
     </div>

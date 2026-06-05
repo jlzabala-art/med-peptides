@@ -46,7 +46,9 @@ export default function RegeneraCalendar() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('create'); // 'create' | 'edit'
   const [shareModalOpen, setShareModalOpen] = useState(false);
-  const [viewTimezone, setViewTimezone] = useState('local');
+  // Detect browser/system timezone automatically
+  const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const [viewTimezone, setViewTimezone] = useState(browserTimezone);
   const defaultEventForm = { 
     title: '', start: '', end: '', type: 'prescription', patientId: '',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, description: '',
@@ -240,25 +242,25 @@ export default function RegeneraCalendar() {
   const renderToolbar = () => (
     <div className="calendar-toolbar" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
       {!isPatient && <button className="btn btn-primary" onClick={openCreateModal}>New Event</button>}
-      <button className="btn btn-secondary" onClick={exportCSV}>Export CSV</button>
-      <button className="btn btn-secondary" onClick={exportICal}>Export iCal</button>
-      {!isPatient && <button className="btn btn-secondary" onClick={() => setShareModalOpen(true)}>Share with Patient</button>}
-      {!isPatient && <button className="btn btn-secondary" onClick={fetchGoogleAuth}>Connect Google</button>}
+      <button className="btn btn-secondary hide-mobile" onClick={exportCSV}>Export CSV</button>
+      <button className="btn btn-secondary hide-mobile" onClick={exportICal}>Export iCal</button>
+      {!isPatient && <button className="btn btn-secondary hide-mobile" onClick={() => setShareModalOpen(true)}>Share with Patient</button>}
+      {!isPatient && <button className="btn btn-secondary hide-mobile" onClick={fetchGoogleAuth}>Connect Google</button>}
       {googleAuthUrl && !isPatient && (
-        <a href={googleAuthUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{textDecoration: 'none'}}>
+        <a href={googleAuthUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary hide-mobile" style={{textDecoration: 'none'}}>
           Authorize Google
         </a>
       )}
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
         <label style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>Timezone:</label>
         <select 
           className="cal-input" 
-          style={{ padding: '0.35rem 0.5rem', fontSize: '0.85rem', minWidth: '150px' }}
+          style={{ padding: '0.35rem 0.5rem', fontSize: '0.85rem', minWidth: '140px' }}
           value={viewTimezone}
           onChange={(e) => setViewTimezone(e.target.value)}
         >
-          <option value="local">Local (Default)</option>
-          {timezoneList.map(tz => <option key={tz} value={tz}>{tz}</option>)}
+          <option value={browserTimezone}>{browserTimezone} (Auto)</option>
+          {timezoneList.filter(tz => tz !== browserTimezone).map(tz => <option key={tz} value={tz}>{tz}</option>)}
         </select>
       </div>
     </div>
@@ -279,7 +281,8 @@ export default function RegeneraCalendar() {
         dayMaxEvents={true}
         events={events}
         eventContent={renderEventContent}
-        height="700px"
+        height="auto"
+        contentHeight={typeof window !== 'undefined' && window.innerWidth < 480 ? 400 : 650}
       />
 
       {/* Modal for create / edit */}

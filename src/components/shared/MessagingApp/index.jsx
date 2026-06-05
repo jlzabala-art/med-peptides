@@ -11,7 +11,6 @@ export default function MessagingApp({ currentUser }) {
   useEffect(() => {
     if (!currentUser || !currentUser.uid) return;
 
-    // Track presence
     messagingService.updateUserPresence(currentUser.uid, true);
 
     const handleUnload = () => {
@@ -19,14 +18,11 @@ export default function MessagingApp({ currentUser }) {
     };
     window.addEventListener('beforeunload', handleUnload);
 
-    // Subscribe to conversations
     const unsubscribe = messagingService.subscribeToConversations(currentUser.uid, (convos) => {
       setConversations(convos);
-      // If we don't have an active conversation, but we have convos, select the first one
       if (!activeConversation && convos.length > 0) {
         setActiveConversation(convos[0]);
       } else if (activeConversation) {
-        // Update active conversation reference if data changed
         const updated = convos.find(c => c.id === activeConversation.id);
         if (updated) setActiveConversation(updated);
       }
@@ -41,19 +37,47 @@ export default function MessagingApp({ currentUser }) {
 
   if (!currentUser) return null;
 
+  const handleSelectConversation = (convo) => {
+    setActiveConversation(convo);
+  };
+
   return (
     <div className="messaging-app-container">
-      <ConversationsList 
-        conversations={conversations} 
-        activeConversation={activeConversation}
-        onSelect={setActiveConversation}
-        currentUserId={currentUser.uid}
-      />
-      <ChatWindow 
-        conversation={activeConversation}
-        currentUserId={currentUser.uid}
-        currentUserRole={currentUser.role}
-      />
+      {/* Mobile-only tab bar (hidden on desktop via CSS) */}
+      <div className="messaging-mobile-tabs">
+        <div
+          className={`messaging-mobile-tab ${!activeConversation ? 'active' : ''}`}
+          onClick={() => setActiveConversation(null)}
+        >
+          Conversations
+          {conversations.length > 0 && (
+            <span className="messaging-mobile-tab-badge">{conversations.length}</span>
+          )}
+        </div>
+        <div className={`messaging-mobile-tab ${activeConversation ? 'active' : ''}`}>
+          {activeConversation ? (activeConversation.title || 'Chat') : 'Chat'}
+        </div>
+      </div>
+
+      {/* Panels row: desktop = side by side, mobile = one at a time */}
+      <div className="messaging-panels-row">
+        <div className={`messaging-panel messaging-sidebar-panel ${activeConversation ? 'mobile-hidden' : 'mobile-visible'}`}>
+          <ConversationsList
+            conversations={conversations}
+            activeConversation={activeConversation}
+            onSelect={handleSelectConversation}
+            currentUserId={currentUser.uid}
+          />
+        </div>
+        <div className={`messaging-panel messaging-chat-panel ${!activeConversation ? 'mobile-hidden' : 'mobile-visible'}`}>
+          <ChatWindow
+            conversation={activeConversation}
+            currentUserId={currentUser.uid}
+            currentUserRole={currentUser.role}
+            onBack={() => setActiveConversation(null)}
+          />
+        </div>
+      </div>
     </div>
   );
 }
