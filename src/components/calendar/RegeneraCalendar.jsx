@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './CalendarCloud.css';
 
 import FullCalendar from '@fullcalendar/react';
@@ -50,6 +50,19 @@ export default function RegeneraCalendar() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // FullCalendar ref — used to force updateSize() after mount (fixes Safari 0-height grid)
+  const calendarRef = useRef(null);
+  useEffect(() => {
+    // Give the browser a frame to finish layout, then tell FC to recalculate
+    const t1 = setTimeout(() => {
+      calendarRef.current?.getApi().updateSize();
+    }, 50);
+    const t2 = setTimeout(() => {
+      calendarRef.current?.getApi().updateSize();
+    }, 300);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [mobile, loading]);
 
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -284,20 +297,22 @@ export default function RegeneraCalendar() {
     </div>
   );
 
-  // Default view: month grid for both (user can switch)
   const calendarView = 'dayGridMonth';
-  const headerToolbar = mobile
-    ? { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' }
-    : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' };
+  const headerToolbar = {
+    left: 'prev,next today',
+    center: 'title',
+    right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+  };
 
   return (
-    <div className="regenera-calendar-wrapper" role="region" aria-label="Event Calendar" style={{ minHeight: mobile ? '600px' : '750px', height: mobile ? '600px' : '750px', display: 'flex', flexDirection: 'column' }}>
+    <div className="regenera-calendar-wrapper" role="region" aria-label="Event Calendar">
       {renderToolbar()}
-      <div style={{ flex: 1, minHeight: 0 }}>
+      <div style={{ width: '100%' }}>
         <FullCalendar
+          ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
           initialView={calendarView}
-          key={`${calendarView}-${viewTimezone}`}
+          key={`fc-${viewTimezone}`}
           timeZone={viewTimezone}
           headerToolbar={headerToolbar}
           editable={!isPatient}
@@ -307,7 +322,7 @@ export default function RegeneraCalendar() {
           dayMaxEvents={mobile ? 2 : true}
           events={events}
           eventContent={renderEventContent}
-          height={mobile ? 600 : 700}
+          contentHeight="auto"
           noEventsContent="No events scheduled"
         />
       </div>
