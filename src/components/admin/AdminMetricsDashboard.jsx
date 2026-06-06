@@ -931,7 +931,7 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
         .amd-subtitle { font-size: 0.85rem; font-weight: 600; }
         .amd-title    { font-size: 1rem;    font-weight: 600; }
         .amd-heading  { font-size: 1.1rem;  font-weight: 600; }
-        .amd-value    { font-size: 1.8rem;  font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; }
+        .amd-value    { font-size: 1.6rem;  font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; color: var(--color-text-primary, #1e293b); font-family: var(--font-heading, inherit); }
 
         /* Layouts */
         .amd-command-header {
@@ -1032,9 +1032,6 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
           .admin-metric-card .amd-card-body {
             flex: 1; min-width: 0;
           }
-          .admin-metric-card .amd-value {
-            font-size: 1.3rem !important;
-          }
           .amd-table-section { padding: 1rem 0.75rem; }
           .amd-table-section th, .amd-table-section td { padding: 0.5rem 0.625rem; }
         }
@@ -1123,17 +1120,17 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
         </div>
 
         {/* KPI Summary Ribbon */}
-        <div style={{ position: 'relative', display: 'flex', gap: '2rem', marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255,255,255,0.08)', flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', display: 'flex', gap: '2.5rem', marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255,255,255,0.08)', flexWrap: 'wrap' }}>
           {[
-            { label: 'Total Users', value: metrics.totalUsers, color: '#38bdf8' },
-            { label: 'Active Physicians', value: metrics.activePhysicians, color: '#34d399' },
-            { label: 'Active Orders', value: metrics.activeOrders, color: '#a78bfa' },
-            { label: 'Pending Attention', value: metrics.pendingApprovals + metrics.lowStockAlerts, color: metrics.pendingApprovals + metrics.lowStockAlerts > 0 ? '#fb923c' : '#34d399' },
-            { label: 'DB Latency', value: metrics.systemHealth, color: '#64748b' },
-          ].map(({ label, value, color }) => (
-            <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-              <span style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{label}</span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 800, color }}>{value ?? '—'}</span>
+            { label: 'Total Users', value: metrics.totalUsers },
+            { label: 'Active Physicians', value: metrics.activePhysicians },
+            { label: 'Active Orders', value: metrics.activeOrders },
+            { label: 'Pending Attention', value: metrics.pendingApprovals + metrics.lowStockAlerts },
+            { label: 'DB Latency', value: metrics.systemHealth },
+          ].map(({ label, value }) => (
+            <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <span className="amd-stat-label">{label}</span>
+              <span className="amd-value">{value ?? '—'}</span>
             </div>
           ))}
         </div>

@@ -312,9 +312,8 @@
 .sb-item:hover {
   background: var(--sb-hover-bg);
   color: var(--sb-text);
-  transform: translateX(1px);
 }
-.sb-item:active { transform: translateX(0) scale(0.98); }
+.sb-item:active { transform: scale(0.98); }
 
 /* Active pill */
 .sb-item.active {

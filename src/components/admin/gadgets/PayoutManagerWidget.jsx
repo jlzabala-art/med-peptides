@@ -227,7 +227,7 @@ export default function PayoutManagerWidget({
                   gap: '0.4rem',
                 }}
               >
-                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#202124' }}>
+                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#202124', lineHeight: 1.1, letterSpacing: '-0.02em', fontFamily: 'var(--font-heading, inherit)' }}>
                   ${p.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </div>
                 {p.status === 'pending' && (

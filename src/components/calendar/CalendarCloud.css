@@ -184,7 +184,7 @@
 }
 
 /* Mobile Responsiveness */
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .regenera-calendar-wrapper {
     padding: 0.75rem;
     border-radius: 8px;

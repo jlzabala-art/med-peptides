@@ -26,7 +26,7 @@ const mobileStyles = `
   .mw-chat { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .mw-back-btn { display: none; }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1023px) {
     .mw-tabs {
       display: flex;
       border-bottom: 2px solid #e2e8f0;
