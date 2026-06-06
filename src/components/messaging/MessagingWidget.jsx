@@ -287,7 +287,7 @@ export default function MessagingWidget({ role, ownerId }) {
             </span>
           )}
         </div>            </div>
-                  </div>
+
                 );
               })
             )}

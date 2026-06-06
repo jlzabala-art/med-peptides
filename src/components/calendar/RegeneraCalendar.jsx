@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import './CalendarCloud.css';
+
 import FullCalendar from '@fullcalendar/react';
+
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -282,7 +285,7 @@ export default function RegeneraCalendar() {
         events={events}
         eventContent={renderEventContent}
 
-        height={typeof window !== 'undefined' && window.innerWidth < 1024 ? 550 : 750}
+        height={typeof window !== 'undefined' && window.innerWidth < 1024 ? 'auto' : 750}
       />
 
       {/* Modal for create / edit */}
