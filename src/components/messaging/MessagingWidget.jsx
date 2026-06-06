@@ -27,34 +27,9 @@ const mobileStyles = `
   .mw-back-btn { display: none; }
 
   @media (max-width: 1023px) {
-    .mw-tabs {
-      display: flex;
-      border-bottom: 2px solid #e2e8f0;
-      background: var(--color-bg-surface);
-      border-radius: 12px 12px 0 0;
-      flex-shrink: 0;
-    }
-    .mw-tab {
-      flex: 1; padding: 0.75rem 1rem; text-align: center;
-      font-size: 0.9rem; font-weight: 500; color: #64748b;
-      cursor: pointer; border-bottom: 3px solid transparent;
-      transition: all 0.2s;
-      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
-    }
-    .mw-tab.active {
-      color: var(--color-primary, #2563eb);
-      border-bottom-color: var(--color-primary, #2563eb);
-      font-weight: 600;
-    }
-    .mw-tab-badge {
-      background: var(--color-primary, #2563eb); color: #fff;
-      border-radius: 10px; padding: 0 6px; font-size: 0.7rem;
-      min-width: 18px; height: 18px;
-      display: inline-flex; align-items: center; justify-content: center;
-    }
     .mw-panels {
       flex-direction: column; gap: 0;
-      border-radius: 0 0 12px 12px; overflow: hidden;
+      border-radius: 12px; overflow: hidden;
     }
     .mw-sidebar { width: 100%; border-radius: 0; border-top: none; }
     .mw-panel-hidden { display: none !important; }
@@ -79,6 +54,19 @@ export default function MessagingWidget({ role, ownerId }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showNewChat, setShowNewChat] = useState(false);
   const [newChatName, setNewChatName] = useState('');
+  
+  // Admin User Search state
+  const [allUsers, setAllUsers] = useState([]);
+  
+  useEffect(() => {
+    if (showNewChat && (isAdmin || effectiveRole === 'admin') && allUsers.length === 0) {
+      import('firebase/firestore').then(({ collection, getDocs, query }) => {
+        getDocs(query(collection(db, 'users'))).then(snap => {
+          setAllUsers(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        });
+      });
+    }
+  }, [showNewChat, isAdmin, effectiveRole, allUsers.length]);
 
   useEffect(() => {
     if (!user) return;
@@ -106,9 +94,38 @@ export default function MessagingWidget({ role, ownerId }) {
     if (!newChatName.trim()) return;
     try {
       const docRef = await addDoc(collection(db, 'conversations'), {
-        type: 'direct',
+        type: 'group',
         groupName: newChatName.trim(),
         participants: [effectiveId],
+        createdAt: serverTimestamp(),
+        lastMessage: 'Conversation started',
+        lastMessageAt: serverTimestamp(),
+        status: 'open',
+        unreadCount: {}
+      });
+      setActiveConvId(docRef.id);
+      setShowNewChat(false);
+      setNewChatName('');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleStartDirectChat = async (targetUser) => {
+    try {
+      // Create new direct conversation
+      const myName = user?.displayName || user?.email || 'Admin';
+      const docRef = await addDoc(collection(db, 'conversations'), {
+        type: 'direct',
+        groupName: '', // Handled dynamically
+        participants: [effectiveId, targetUser.id],
+        participantNames: {
+          [effectiveId]: myName,
+          [targetUser.id]: targetUser.name || targetUser.email || 'User'
+        },
+        participantRoles: {
+          [targetUser.id]: targetUser.role || 'user'
+        },
         createdAt: serverTimestamp(),
         lastMessage: 'Conversation started',
         lastMessageAt: serverTimestamp(),
@@ -133,18 +150,7 @@ export default function MessagingWidget({ role, ownerId }) {
     <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
       <style>{mobileStyles}</style>
 
-      {/* Mobile tab bar */}
-      <div className="mw-tabs">
-        <div className={`mw-tab ${!activeConvId ? 'active' : ''}`} onClick={handleBack}>
-          Conversations
-          {conversations.length > 0 && (
-            <span className="mw-tab-badge">{conversations.length}</span>
-          )}
-        </div>
-        <div className={`mw-tab ${activeConvId ? 'active' : ''}`}>
-          {activeConvId ? activeConvName : 'Chat'}
-        </div>
-      </div>
+
 
       {/* Panels */}
       <div className="mw-panels">
@@ -164,7 +170,37 @@ export default function MessagingWidget({ role, ownerId }) {
               </button>
             </div>
 
-            {showNewChat && (
+            {showNewChat && (isAdmin || effectiveRole === 'admin') ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <input
+                  type="text"
+                  placeholder="Search user by name or email..."
+                  value={newChatName}
+                  onChange={e => setNewChatName(e.target.value)}
+                  style={{ width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.8rem' }}
+                  autoFocus
+                />
+                {newChatName.trim().length > 0 && (
+                  <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: '6px', background: 'var(--color-bg-surface)' }}>
+                    {allUsers.filter(u => 
+                      u.id !== effectiveId && (
+                        (u.name || '').toLowerCase().includes(newChatName.toLowerCase()) || 
+                        (u.email || '').toLowerCase().includes(newChatName.toLowerCase())
+                      )
+                    ).map(u => (
+                      <div 
+                        key={u.id}
+                        onClick={() => handleStartDirectChat(u)}
+                        style={{ padding: '0.5rem', borderBottom: '1px solid var(--color-border)', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', flexDirection: 'column' }}
+                      >
+                        <div style={{ fontWeight: 600 }}>{u.name || 'Unknown'} <span style={{ color: 'var(--color-text-tertiary)', fontSize: '0.7rem', textTransform: 'uppercase', marginLeft: '0.3rem' }}>({u.role || 'user'})</span></div>
+                        <div style={{ color: 'var(--color-text-tertiary)' }}>{u.email}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : showNewChat && (
               <form onSubmit={handleCreateGroup} style={{ display: 'flex', gap: '0.5rem' }}>
                 <input
                   type="text"
@@ -220,7 +256,13 @@ export default function MessagingWidget({ role, ownerId }) {
                           <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Users size={12} /> {c.groupName || 'Group'}</span>
                         ) : c.type === 'order_support' ? (
                           `Order #${c.referenceId?.slice(0, 6)}`
-                        ) : c.type === 'product_inquiry' ? 'SKU Inquiry' : 'Direct Chat'}
+                        ) : c.type === 'product_inquiry' ? (
+                          'SKU Inquiry'
+                        ) : (
+                          c.participantNames 
+                            ? Object.entries(c.participantNames).find(([id]) => id !== effectiveId)?.[1] || 'Direct Chat'
+                            : 'Direct Chat'
+                        )}
                       </div>
                       {c.lastMessageAt && (
                         <div style={{ fontSize: '0.65rem', color: 'var(--color-text-tertiary)' }}>
@@ -228,9 +270,23 @@ export default function MessagingWidget({ role, ownerId }) {
                         </div>
                       )}
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: isUnread ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: isUnread ? 600 : 400 }}>
-                      {c.lastMessage || 'No messages yet'}
-                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ fontSize: '0.75rem', color: isUnread ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: isUnread ? 600 : 400 }}>
+            {c.lastMessage || 'No messages yet'}
+          </div>
+          {isUnread && (
+            <span style={{
+              background: '#f59e0b',
+              color: 'white',
+              borderRadius: '999px',
+              padding: '0 0.4rem',
+              fontSize: '0.6rem',
+              marginLeft: '0.5rem'
+            }}>
+              {c.unreadCount?.[effectiveId]}
+            </span>
+          )}
+        </div>            </div>
                   </div>
                 );
               })

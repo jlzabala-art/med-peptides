@@ -7,10 +7,60 @@ import {
   addDoc,
   serverTimestamp,
   updateDoc,
-  doc
+  doc,
+  increment
 } from 'firebase/firestore';
-import { db } from '../../firebase';
-import { Send, Package, FileText, CheckCircle2, UploadCloud } from 'lucide-react';
+import { db, storage, uploadBytes, getDownloadURL, ref } from '../../firebase';
+import { Send, Package, FileText, CheckCircle2, UploadCloud, Check } from 'lucide-react';
+
+  // Handle file selection and upload
+  const handleFileSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const storagePath = `attachments/${conversationId}/${file.name}`;
+    const fileRef = ref(storage, storagePath);
+    try {
+      await uploadBytes(fileRef, file);
+      const downloadURL = await getDownloadURL(fileRef);
+      setPendingAttachments(prev => [...prev, { type: 'file', name: file.name, url: downloadURL }]);
+    } catch (err) {
+      console.error('File upload error:', err);
+    }
+  };
+
+  // Update typing status
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (user) {
+        const typingRef = doc(db, 'conversations', conversationId);
+        updateDoc(typingRef, { [`typing.${user.uid}`]: false }).catch(()=>{});
+      }
+    }, 3000);
+    return () => clearTimeout(timeout);
+  }, [inputText, conversationId, user]);
+
+  const handleInputChange = (e) => {
+    setInputText(e.target.value);
+    if (user) {
+      const typingRef = doc(db, 'conversations', conversationId);
+      updateDoc(typingRef, { [`typing.${user.uid}`]: true }).catch(()=>{});
+    }
+  };
+
+  // Quick replies (admin only)
+  const quickReplies = [
+    'Thanks for reaching out, we will get back soon.',
+    'Please provide your order number.',
+    'Your request has been escalated to the specialist.',
+    'Let me check that for you.',
+    'Could you share more details?'
+  ];
+
+  const sendQuickReply = async (text) => {
+    setInputText(text);
+    // Immediately send
+    await handleSend({ preventDefault: () => {} });
+  };
 import { useAuth } from '../../context/AuthContext';
 import ContextAttachment from './ContextAttachment';
 
@@ -21,6 +71,7 @@ export default function ConversationThread({ conversationId, conversationType, r
   const [loading, setLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [pendingAttachments, setPendingAttachments] = useState([]);
+  const [typingUsers, setTypingUsers] = useState([]);
   const endRef = useRef(null);
 
   useEffect(() => {
@@ -46,6 +97,19 @@ export default function ConversationThread({ conversationId, conversationType, r
       }
     });
 
+    return () => unsub();
+  }, [conversationId, user]);
+
+  // Listen for typing status of other users
+  useEffect(() => {
+    if (!conversationId) return;
+    const convRef = doc(db, 'conversations', conversationId);
+    const unsub = onSnapshot(convRef, (snap) => {
+      const data = snap.data();
+      const typing = (data && data.typing) || {};
+      const others = Object.entries(typing).filter(([uid, val]) => uid !== user?.uid && val);
+      setTypingUsers(others.map(([uid]) => uid));
+    });
     return () => unsub();
   }, [conversationId, user]);
 
@@ -78,9 +142,7 @@ export default function ConversationThread({ conversationId, conversationType, r
       // Update conversation lastMessage
       await updateDoc(doc(db, 'conversations', conversationId), {
         lastMessage: content,
-        lastMessageAt: serverTimestamp(),
-        // For vertical communication, if admin sends, increase clinic's unread, else increase admin's unread
-        // (Simplified for now, real implementation would increment the other participant's counter)
+        lastMessageAt: serverTimestamp()
       });
     } catch (err) {
       console.error("Error sending message:", err);
@@ -103,13 +165,8 @@ export default function ConversationThread({ conversationId, conversationType, r
     e.preventDefault();
     setIsDragging(false);
     
-    // Check if it's text/html (like dragging a product card)
-    const htmlData = e.dataTransfer.getData('text/html');
     const textData = e.dataTransfer.getData('text/plain');
-    
-    // Very naive extraction of product info from dragged text
     if (textData) {
-      // Simulate creating a product context from drag
       if (textData.toLowerCase().includes('sku')) {
         setPendingAttachments(prev => [...prev, {
           type: 'product_card',
@@ -146,7 +203,6 @@ export default function ConversationThread({ conversationId, conversationType, r
         </div>
       )}
       
-      {/* Header Context */}
       <div style={{ padding: '1rem', background: 'var(--color-bg-surface)', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800 }}>
@@ -161,14 +217,13 @@ export default function ConversationThread({ conversationId, conversationType, r
         )}
       </div>
 
-      {/* Messages */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {messages.length === 0 ? (
           <div style={{ textAlign: 'center', color: 'var(--color-text-tertiary)', fontSize: '0.8rem', marginTop: '2rem' }}>
             No messages in this conversation.<br/>Type below to start.
           </div>
         ) : (
-          messages.map(msg => {
+          messages.map((msg, idx) => {
             const isMe = msg.senderId === user?.uid;
             return (
               <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start' }}>
@@ -194,11 +249,21 @@ export default function ConversationThread({ conversationId, conversationType, r
                     {msg.attachments.map((att, i) => <ContextAttachment key={i} attachment={att} />)}
                   </div>
                 )}
+                {isMe && idx === messages.length - 1 && (
+                    <div style={{ fontSize: '0.6rem', display: 'flex', alignItems: 'center', marginTop: '2px', color: 'var(--color-text-tertiary)' }}>
+                        Sent <Check size={10} style={{ marginLeft: '2px' }} />
+                    </div>
+                )}
               </div>
             );
           })
         )}
         <div ref={endRef} />
+        {typingUsers.length > 0 && (
+          <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>
+            Someone is typing...
+          </div>
+        )}
       </div>
 
       {/* Input */}
@@ -217,12 +282,38 @@ export default function ConversationThread({ conversationId, conversationType, r
           </div>
         )}
 
+        {/* Quick replies (admin only) */}
+        {isAdmin && quickReplies.map((qr, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => sendQuickReply(qr)}
+            style={{
+              background: 'var(--color-bg-app)',
+              border: '1px solid var(--color-border)',
+              borderRadius: '6px',
+              padding: '0.3rem 0.6rem',
+              fontSize: '0.75rem',
+              cursor: 'pointer',
+              marginBottom: '0.4rem'
+            }}
+          >
+            {qr}
+          </button>
+        ))}
+
         <form onSubmit={handleSend} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          {/* SKU attachment button */}
           <button type="button" onClick={() => {
             const sku = prompt("Enter SKU to attach context:");
             if (sku) setPendingAttachments(prev => [...prev, { type: 'product_card', name: 'Attached product', sku }]);
           }} title="Adjuntar documento / SKU" style={{ background: 'transparent', border: 'none', color: 'var(--color-text-tertiary)', cursor: 'pointer', padding: '0.3rem' }}>
             <FileText size={18} />
+          </button>
+          {/* File attachment button */}
+          <input type="file" id="fileUpload" style={{ display: 'none' }} onChange={handleFileSelect} />
+          <button type="button" onClick={() => document.getElementById('fileUpload').click()} title="Adjuntar archivo" style={{ background: 'transparent', border: 'none', color: 'var(--color-text-tertiary)', cursor: 'pointer', padding: '0.3rem' }}>
+            <UploadCloud size={18} />
           </button>
           <input 
             type="text" 

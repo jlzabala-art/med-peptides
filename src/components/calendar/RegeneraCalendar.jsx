@@ -281,8 +281,8 @@ export default function RegeneraCalendar() {
         dayMaxEvents={true}
         events={events}
         eventContent={renderEventContent}
-        height="auto"
-        contentHeight={typeof window !== 'undefined' && window.innerWidth < 480 ? 400 : 650}
+
+        height={typeof window !== 'undefined' && window.innerWidth < 1024 ? 550 : 750}
       />
 
       {/* Modal for create / edit */}
