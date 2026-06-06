@@ -1,4 +1,4 @@
-/* CalendarCloud.css - Simplified Clean Aesthetic */
+/* CalendarCloud.css - Mobile-first clean aesthetic */
 
 :root {
   --cal-color-primary: var(--color-primary, #2563eb);
@@ -8,7 +8,7 @@
   --cal-bg-header: transparent;
 }
 
-/* FullCalendar Overrides for a cleaner, modern look */
+/* Wrapper */
 .regenera-calendar-wrapper {
   background: var(--color-bg-surface, #ffffff);
   border-radius: 12px;
@@ -21,6 +21,13 @@
 .regenera-calendar-wrapper .fc {
   font-family: inherit;
   color: var(--cal-color-text);
+  width: 100%;
+  height: 100%;
+}
+
+/* Force minimum height to prevent grid collapse bug on mobile */
+.regenera-calendar-wrapper .fc-view-harness {
+  min-height: 600px !important;
 }
 
 /* Remove heavy borders from the grid */
@@ -141,8 +148,8 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   font-size: 0.9rem;
-  background: transparent;
-  color: var(--color-text-main);
+  background: var(--color-bg-surface, #ffffff);
+  color: var(--color-text-main, #1f2937);
 }
 .cal-input:focus {
   outline: none;
@@ -160,7 +167,35 @@
   border-bottom-right-radius: 12px;
 }
 
-/* FullCalendar Button Styling to match btn-secondary */
+/* ─── Custom Toolbar Layout ─── */
+.calendar-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.cal-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.cal-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Small button variant */
+.btn-sm {
+  padding: 0.3rem 0.7rem !important;
+  font-size: 0.8rem !important;
+}
+
 .regenera-calendar-wrapper .fc .fc-button-primary {
   background-color: var(--color-bg-surface, #ffffff);
   border: 1px solid var(--border, #e5e7eb);
@@ -183,52 +218,47 @@
   opacity: 0.6;
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 1023px) {
+/* ─── Mobile Responsiveness ─── */
+@media (max-width: 767px) {
   .regenera-calendar-wrapper {
     padding: 0.75rem;
     border-radius: 8px;
   }
 
-  /* Compact the custom toolbar */
+  /* Toolbar: only show left side, full width */
   .calendar-toolbar {
-    flex-direction: column;
-    align-items: stretch !important;
-    gap: 0.5rem !important;
-  }
-  .calendar-toolbar > div {
-    margin-left: 0 !important;
-    justify-content: space-between !important;
+    flex-direction: row;
     flex-wrap: wrap;
     gap: 0.4rem;
-  }
-  /* Hide less critical buttons on mobile */
-  .calendar-toolbar .btn-secondary.hide-mobile {
-    display: none;
+    margin-bottom: 0.75rem;
   }
 
-  /* FullCalendar toolbar: stack vertically */
+  /* Hide desktop-only items */
+  .hide-mobile {
+    display: none !important;
+  }
+
+  /* FullCalendar header smaller */
   .regenera-calendar-wrapper .fc-toolbar {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.4rem;
   }
   .regenera-calendar-wrapper .fc-toolbar-chunk {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 0.25rem;
+    gap: 0.2rem;
   }
-
-  /* Make toolbar buttons smaller */
   .regenera-calendar-wrapper .fc .fc-button-primary {
     padding: 0.25rem 0.5rem;
     font-size: 0.78rem;
   }
   .regenera-calendar-wrapper .fc-toolbar-title {
     font-size: 1rem !important;
+    text-align: center;
   }
 
-  /* Day number and header cells smaller */
+  /* Day grid cells */
   .regenera-calendar-wrapper .fc-col-header-cell {
     padding: 6px 0;
     font-size: 0.72rem;
@@ -237,42 +267,49 @@
     font-size: 0.72rem;
     padding: 4px;
   }
-
-  /* Events smaller */
   .regenera-calendar-wrapper .fc-event {
     font-size: 0.65rem;
     padding: 1px 3px;
     margin: 1px 2px;
   }
 
-  /* Reduce height so it fits without horizontal scroll */
-  .regenera-calendar-wrapper .fc {
+  /* ─── List view (agenda) styles for mobile ─── */
+  .regenera-calendar-wrapper .fc-list-day-cushion {
+    padding: 0.5rem 0.75rem;
     font-size: 0.8rem;
+    background: rgba(37, 99, 235, 0.05);
+  }
+  .regenera-calendar-wrapper .fc-list-event td {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+  }
+  .regenera-calendar-wrapper .fc-list-event-time {
+    font-size: 0.75rem;
+    color: var(--cal-color-text-muted);
+    white-space: nowrap;
+  }
+  .regenera-calendar-wrapper .fc-list-event-title {
+    font-weight: 500;
+  }
+  .regenera-calendar-wrapper .fc-list-empty {
+    padding: 2rem;
+    text-align: center;
+    color: var(--cal-color-text-muted);
+    font-size: 0.9rem;
   }
 }
 
 @media (max-width: 480px) {
-  /* On very small phones, reduce the calendar wrapper padding even more */
   .regenera-calendar-wrapper {
     padding: 0.5rem;
   }
-
-  /* Hide week/day view buttons to save space, keep month + today/prev/next */
+  /* Hide week/day view buttons – only keep prev/next/today */
   .regenera-calendar-wrapper .fc-timeGridWeek-button,
   .regenera-calendar-wrapper .fc-timeGridDay-button {
     display: none !important;
   }
-
-  /* Make the month grid cells smaller on phones */
-  .regenera-calendar-wrapper .fc-daygrid-day-number {
-    font-size: 0.65rem;
-    padding: 2px;
-  }
-  .regenera-calendar-wrapper .fc-col-header-cell {
-    font-size: 0.65rem;
-    padding: 4px 0;
-  }
 }
+
 
 .regenera-calendar-wrapper .fc .fc-button-active,
 .regenera-calendar-wrapper .fc .fc-button-primary:active {

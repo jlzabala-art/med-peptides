@@ -87,6 +87,16 @@ export default defineConfig({
       }
     })
   ],
+  optimizeDeps: {
+    include: [
+      '@fullcalendar/react',
+      '@fullcalendar/core',
+      '@fullcalendar/daygrid',
+      '@fullcalendar/timegrid',
+      '@fullcalendar/interaction',
+      '@fullcalendar/list',
+    ],
+  },
   build: {
     chunkSizeWarningLimit: 1000,
     emptyOutDir: true,

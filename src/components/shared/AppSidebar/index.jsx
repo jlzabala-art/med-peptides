@@ -44,7 +44,6 @@ function SortableSidebarGroup({ group, isOpen, expanded, toggleGroup, activeId, 
           className="sb-group-header"
           onClick={() => !isEditing && toggleGroup(group.id)}
           aria-expanded={isOpen}
-          data-tooltip={!expanded ? group.label : undefined}
           style={{ flex: 1, pointerEvents: isEditing ? 'none' : 'auto' }}
         >
           <span className="sb-group-emoji" aria-hidden="true">
@@ -148,7 +147,6 @@ function SortableSidebarItem({ item, isActive, handleItemClick, expanded, isEdit
       <button
         className={`sb-item${isActive ? ' active' : ''}${item.pulse ? ' pulse' : ''}`}
         onClick={() => !isEditing && handleItemClick(item.id)}
-        data-tooltip={!expanded ? item.label : undefined}
         aria-current={isActive ? 'page' : undefined}
         style={{
           flex: 1,

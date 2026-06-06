@@ -2,17 +2,18 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './CalendarCloud.css';
 
 import FullCalendar from '@fullcalendar/react';
-
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useCalendarEvents } from '../../hooks/useCalendarEvents';
 import { httpsCallable } from 'firebase/functions';
-import { functions } from '../../firebase'; // assume exported firebase functions instance
+import { functions } from '../../firebase';
 import ProtocolDayBadge from './ProtocolDayBadge';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
-// custom CSS for glassmorphism etc.
+
+// Detect mobile viewport
+const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 768;
 
 // Helper to generate iCal content
 const generateICal = (events) => {
@@ -38,21 +39,25 @@ const generateICal = (events) => {
 };
 
 export default function RegeneraCalendar() {
-  // Calendar data hook
   const { events, loading, createEvent, updateEvent, deleteEvent } = useCalendarEvents();
-
-  // UI state
   const { userProfile } = useAuth();
   const isPatient = userProfile?.role === 'patient';
-  
-  const [selectedEvent, setSelectedEvent] = useState(null); // for popover edit
+
+  // Mobile detection with resize listener
+  const [mobile, setMobile] = useState(isMobile());
+  useEffect(() => {
+    const handleResize = () => setMobile(isMobile());
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState('create'); // 'create' | 'edit'
+  const [modalMode, setModalMode] = useState('create');
   const [shareModalOpen, setShareModalOpen] = useState(false);
-  // Detect browser/system timezone automatically
   const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const [viewTimezone, setViewTimezone] = useState(browserTimezone);
-  const defaultEventForm = { 
+  const defaultEventForm = {
     title: '', start: '', end: '', type: 'prescription', patientId: '',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, description: '',
     dosage: '', injectionSite: '', prn: false, refillReminder: false, symptoms: ''
@@ -243,50 +248,69 @@ export default function RegeneraCalendar() {
 
   // Toolbar with extra buttons
   const renderToolbar = () => (
-    <div className="calendar-toolbar" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-      {!isPatient && <button className="btn btn-primary" onClick={openCreateModal}>New Event</button>}
-      <button className="btn btn-secondary hide-mobile" onClick={exportCSV}>Export CSV</button>
-      <button className="btn btn-secondary hide-mobile" onClick={exportICal}>Export iCal</button>
-      {!isPatient && <button className="btn btn-secondary hide-mobile" onClick={() => setShareModalOpen(true)}>Share with Patient</button>}
-      {!isPatient && <button className="btn btn-secondary hide-mobile" onClick={fetchGoogleAuth}>Connect Google</button>}
-      {googleAuthUrl && !isPatient && (
-        <a href={googleAuthUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary hide-mobile" style={{textDecoration: 'none'}}>
-          Authorize Google
-        </a>
-      )}
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-        <label style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>Timezone:</label>
-        <select 
-          className="cal-input" 
-          style={{ padding: '0.35rem 0.5rem', fontSize: '0.85rem', minWidth: '140px' }}
+    <div className="calendar-toolbar">
+      <div className="cal-toolbar-left">
+        {!isPatient && (
+          <button className="btn btn-primary btn-sm" onClick={openCreateModal}>+ Event</button>
+        )}
+        <button className="btn btn-secondary btn-sm hide-mobile" onClick={exportCSV}>CSV</button>
+        <button className="btn btn-secondary btn-sm hide-mobile" onClick={exportICal}>iCal</button>
+        {!isPatient && (
+          <button className="btn btn-secondary btn-sm hide-mobile" onClick={() => setShareModalOpen(true)}>Share</button>
+        )}
+        {!isPatient && (
+          <button className="btn btn-secondary btn-sm hide-mobile" onClick={fetchGoogleAuth}>Google</button>
+        )}
+        {googleAuthUrl && !isPatient && (
+          <a href={googleAuthUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm hide-mobile" style={{ textDecoration: 'none' }}>
+            Authorize
+          </a>
+        )}
+      </div>
+      <div className="cal-toolbar-right">
+        <label style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>TZ:</label>
+        <select
+          className="cal-input"
+          style={{ padding: '0.3rem 0.4rem', fontSize: '0.8rem', minWidth: '130px' }}
           value={viewTimezone}
           onChange={(e) => setViewTimezone(e.target.value)}
         >
           <option value={browserTimezone}>{browserTimezone} (Auto)</option>
-          {timezoneList.filter(tz => tz !== browserTimezone).map(tz => <option key={tz} value={tz}>{tz}</option>)}
+          {timezoneList.filter(tz => tz !== browserTimezone).map(tz => (
+            <option key={tz} value={tz}>{tz}</option>
+          ))}
         </select>
       </div>
     </div>
   );
 
-  return (
-    <div className="regenera-calendar-wrapper" role="region" aria-label="Event Calendar">
-      {renderToolbar()}
-      <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        timeZone={viewTimezone}
-        headerToolbar={{ left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' }}
-        editable={!isPatient}
-        selectable={!isPatient}
-        dateClick={handleDateClick}
-        selectMirror={true}
-        dayMaxEvents={true}
-        events={events}
-        eventContent={renderEventContent}
+  // Default view: month grid for both (user can switch)
+  const calendarView = 'dayGridMonth';
+  const headerToolbar = mobile
+    ? { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' }
+    : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' };
 
-        height={typeof window !== 'undefined' && window.innerWidth < 1024 ? 'auto' : 750}
-      />
+  return (
+    <div className="regenera-calendar-wrapper" role="region" aria-label="Event Calendar" style={{ minHeight: mobile ? '600px' : '750px', height: mobile ? '600px' : '750px', display: 'flex', flexDirection: 'column' }}>
+      {renderToolbar()}
+      <div style={{ flex: 1, minHeight: 0 }}>
+        <FullCalendar
+          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+          initialView={calendarView}
+          key={`${calendarView}-${viewTimezone}`}
+          timeZone={viewTimezone}
+          headerToolbar={headerToolbar}
+          editable={!isPatient}
+          selectable={!isPatient}
+          dateClick={handleDateClick}
+          selectMirror={true}
+          dayMaxEvents={mobile ? 2 : true}
+          events={events}
+          eventContent={renderEventContent}
+          height={mobile ? 600 : 700}
+          noEventsContent="No events scheduled"
+        />
+      </div>
 
       {/* Modal for create / edit */}
       {modalOpen && (

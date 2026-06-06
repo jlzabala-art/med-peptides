@@ -271,23 +271,23 @@ export default function MessagingWidget({ role, ownerId }) {
                       )}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: '0.75rem', color: isUnread ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: isUnread ? 600 : 400 }}>
-            {c.lastMessage || 'No messages yet'}
-          </div>
-          {isUnread && (
-            <span style={{
-              background: '#f59e0b',
-              color: 'white',
-              borderRadius: '999px',
-              padding: '0 0.4rem',
-              fontSize: '0.6rem',
-              marginLeft: '0.5rem'
-            }}>
-              {c.unreadCount?.[effectiveId]}
-            </span>
-          )}
-        </div>            </div>
-
+                      <div style={{ fontSize: '0.75rem', color: isUnread ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: isUnread ? 600 : 400 }}>
+                        {c.lastMessage || 'No messages yet'}
+                      </div>
+                      {isUnread && (
+                        <span style={{
+                          background: '#f59e0b',
+                          color: 'white',
+                          borderRadius: '999px',
+                          padding: '0 0.4rem',
+                          fontSize: '0.6rem',
+                          marginLeft: '0.5rem'
+                        }}>
+                          {c.unreadCount?.[effectiveId]}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 );
               })
             )}

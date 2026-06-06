@@ -6,18 +6,34 @@ import { useTranslation } from 'react-i18next';
 export default function GlobalPreferencesDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const buttonRef = useRef(null);
+  const [dropPos, setDropPos] = useState({ top: 0, right: 0 });
   const { currency, updateCurrency, density, updateDensity } = usePreferences();
   const { i18n } = useTranslation();
 
+  // Close on outside click
   useEffect(() => {
     function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target) &&
+          buttonRef.current && !buttonRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Recalculate position on open so the panel uses fixed coords
+  const handleToggle = () => {
+    if (!isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropPos({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
+    setIsOpen(prev => !prev);
+  };
 
   const toggleLanguage = (lang) => {
     i18n.changeLanguage(lang);
@@ -27,9 +43,14 @@ export default function GlobalPreferencesDropdown() {
   const currentLang = i18n.language === 'es' ? 'ES' : 'EN';
 
   return (
-    <div ref={dropdownRef} style={{ position: 'relative', display: 'inline-block' }}>
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      {/* Trigger button */}
+      <button
+        ref={buttonRef}
+        onClick={handleToggle}
+        aria-label="Global Preferences"
+        aria-haspopup="true"
+        aria-expanded={isOpen}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -50,27 +71,32 @@ export default function GlobalPreferencesDropdown() {
       >
         <Globe size={14} />
         <span>{currentLang}</span>
-        <div style={{ width: '1px', height: '12px', background: 'rgba(0,0,0,0.1)' }}></div>
+        <div style={{ width: '1px', height: '12px', background: 'rgba(0,0,0,0.1)' }} />
         <span>{currency}</span>
         <Settings2 size={14} style={{ marginLeft: '2px' }} />
       </button>
 
+      {/* Fixed-position dropdown — breaks out of any stacking context */}
       {isOpen && (
-        <div style={{
-          position: 'absolute',
-          top: '100%',
-          right: 0,
-          marginTop: '0.5rem',
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(16px)',
-          borderRadius: '12px',
-          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          width: '240px',
-          zIndex: 1000,
-          overflow: 'hidden',
-          animation: 'fadeIn 0.2s ease-out'
-        }}>
+        <div
+          ref={dropdownRef}
+          style={{
+            position: 'fixed',
+            top: dropPos.top,
+            right: dropPos.right,
+            background: 'rgba(255, 255, 255, 0.98)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            borderRadius: '12px',
+            boxShadow: '0 10px 40px -5px rgba(0,0,0,0.15), 0 4px 12px -2px rgba(0,0,0,0.08)',
+            border: '1px solid rgba(0,0,0,0.06)',
+            width: '240px',
+            zIndex: 99999,
+            overflow: 'hidden',
+            animation: 'gpd-fadeIn 0.18s ease-out',
+          }}
+        >
+          {/* Header */}
           <div style={{ padding: '0.75rem 1rem', background: '#f8fafc', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
             <span style={{ fontWeight: 700, fontSize: '0.75rem', color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               Preferences
@@ -78,100 +104,91 @@ export default function GlobalPreferencesDropdown() {
           </div>
 
           <div style={{ padding: '0.5rem' }}>
-            {/* Language Section */}
+            {/* Language */}
             <div style={{ marginBottom: '1rem' }}>
               <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', fontWeight: 600, padding: '0 0.5rem 0.5rem', textTransform: 'uppercase' }}>Language</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.25rem' }}>
-                <button
-                  onClick={() => toggleLanguage('en')}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '0.5rem', border: 'none', borderRadius: '6px',
-                    background: currentLang === 'EN' ? 'rgba(0, 113, 189, 0.1)' : 'transparent',
-                    color: currentLang === 'EN' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                    cursor: 'pointer', fontWeight: currentLang === 'EN' ? 600 : 400
-                  }}
-                >
-                  English {currentLang === 'EN' && <Check size={14} />}
-                </button>
-                <button
-                  onClick={() => toggleLanguage('es')}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '0.5rem', border: 'none', borderRadius: '6px',
-                    background: currentLang === 'ES' ? 'rgba(0, 113, 189, 0.1)' : 'transparent',
-                    color: currentLang === 'ES' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                    cursor: 'pointer', fontWeight: currentLang === 'ES' ? 600 : 400
-                  }}
-                >
-                  Español {currentLang === 'ES' && <Check size={14} />}
-                </button>
+                {[{ id: 'en', label: 'English' }, { id: 'es', label: 'Español' }].map(({ id, label }) => {
+                  const active = currentLang === id.toUpperCase();
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => toggleLanguage(id)}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '0.5rem', border: 'none', borderRadius: '6px',
+                        background: active ? 'rgba(0, 113, 189, 0.1)' : 'transparent',
+                        color: active ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                        cursor: 'pointer', fontWeight: active ? 600 : 400, fontSize: '0.82rem',
+                      }}
+                    >
+                      {label} {active && <Check size={14} />}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Currency Section */}
+            {/* Currency */}
             <div style={{ marginBottom: '1rem' }}>
               <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', fontWeight: 600, padding: '0 0.5rem 0.5rem', textTransform: 'uppercase' }}>Currency</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.25rem' }}>
-                {['USD', 'AED', 'DUAL'].map(curr => (
-                  <button
-                    key={curr}
-                    onClick={() => updateCurrency(curr)}
-                    style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      padding: '0.5rem 0', border: 'none', borderRadius: '6px',
-                      background: currency === curr ? 'rgba(0, 113, 189, 0.1)' : 'transparent',
-                      color: currency === curr ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                      cursor: 'pointer', fontWeight: currency === curr ? 600 : 400,
-                      fontSize: '0.75rem'
-                    }}
-                  >
-                    {curr}
-                  </button>
-                ))}
+                {['USD', 'AED', 'DUAL'].map(curr => {
+                  const active = currency === curr;
+                  return (
+                    <button
+                      key={curr}
+                      onClick={() => updateCurrency(curr)}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        padding: '0.5rem 0', border: 'none', borderRadius: '6px',
+                        background: active ? 'rgba(0, 113, 189, 0.1)' : 'transparent',
+                        color: active ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                        cursor: 'pointer', fontWeight: active ? 600 : 400, fontSize: '0.75rem',
+                      }}
+                    >
+                      {curr}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Density Section */}
+            {/* Density */}
             <div>
               <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', fontWeight: 600, padding: '0 0.5rem 0.5rem', textTransform: 'uppercase' }}>Layout Density</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.25rem' }}>
-                <button
-                  onClick={() => updateDensity('comfortable')}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem',
-                    padding: '0.5rem', border: 'none', borderRadius: '6px',
-                    background: density === 'comfortable' ? 'rgba(0, 113, 189, 0.1)' : 'transparent',
-                    color: density === 'comfortable' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                    cursor: 'pointer', fontWeight: density === 'comfortable' ? 600 : 400,
-                    fontSize: '0.75rem'
-                  }}
-                >
-                  <Maximize2 size={14} /> Comfortable
-                </button>
-                <button
-                  onClick={() => updateDensity('compact')}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem',
-                    padding: '0.5rem', border: 'none', borderRadius: '6px',
-                    background: density === 'compact' ? 'rgba(0, 113, 189, 0.1)' : 'transparent',
-                    color: density === 'compact' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                    cursor: 'pointer', fontWeight: density === 'compact' ? 600 : 400,
-                    fontSize: '0.75rem'
-                  }}
-                >
-                  <List size={14} /> Compact
-                </button>
+                {[
+                  { id: 'comfortable', label: 'Comfortable', Icon: Maximize2 },
+                  { id: 'compact',     label: 'Compact',     Icon: List },
+                ].map(({ id, label, Icon }) => {
+                  const active = density === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => updateDensity(id)}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem',
+                        padding: '0.5rem', border: 'none', borderRadius: '6px',
+                        background: active ? 'rgba(0, 113, 189, 0.1)' : 'transparent',
+                        color: active ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                        cursor: 'pointer', fontWeight: active ? 600 : 400, fontSize: '0.75rem',
+                      }}
+                    >
+                      <Icon size={14} /> {label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
-
           </div>
         </div>
       )}
+
       <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-5px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes gpd-fadeIn {
+          from { opacity: 0; transform: translateY(-6px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </div>

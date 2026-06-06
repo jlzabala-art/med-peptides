@@ -72,8 +72,7 @@ import { getFirestore } from 'firebase/firestore';
 let dbInstance;
 try {
   dbInstance = initializeFirestore(app, {
-    localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()}),
-    experimentalForceLongPolling: true
+    localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
   });
 } catch (e) {
   dbInstance = getFirestore(app);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, HelpCircle, User, ChevronDown, ShoppingCart, Menu, Sparkles, Globe, Moon, Sun } from 'lucide-react';
+import { Search, Bell, User, ChevronDown, ShoppingCart, Menu, Sparkles, Globe, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { useHeaderContext } from '../../../context/HeaderContext';
 import { useTheme } from '../../../context/ThemeContext';
@@ -21,7 +21,7 @@ export default function AppHeader({
   const { headerContent } = useHeaderContext();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const [isAIOpen, setIsAIOpen] = useState(false);
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   
   const { theme, toggleTheme } = useTheme();
@@ -148,14 +148,7 @@ export default function AppHeader({
 
         <GlobalPreferencesDropdown />
 
-        <button 
-          className="app-header-action" 
-          aria-label="Help & Support"
-          onClick={() => setIsAIOpen(true)}
-        >
-          <HelpCircle size={20} strokeWidth={1.8} />
-          {isAIOpen && <AdminAIAssistant onClose={() => setIsAIOpen(false)} />}
-        </button>
+
         
         <button 
           className="app-header-action" 
