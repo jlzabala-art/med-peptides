@@ -4,7 +4,7 @@ import { db } from '../../firebase';
 import { FileText, Plus, X, CheckCircle, Sparkles, Building2, Package, Calendar, Phone, Mail, Link as LinkIcon, ShoppingCart, ExternalLink } from 'lucide-react';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import ERPListDetailLayout from '../../components/shared/ERPListDetailLayout';
-import ERPStatusBadge from '../../components/shared/ERPStatusBadge';
+import { StatusChip } from '../../components/ui';
 import ERPActivityTimeline from '../../components/shared/ERPActivityTimeline';
 import RFQForm from '../../components/purchase/RFQForm';
 import PriceListImportModal from '../../components/purchase/PriceListImportModal';
@@ -34,7 +34,7 @@ function RFQListItem({ rfq, isSelected }) {
         <span style={{ fontWeight: 700, fontSize: '0.9rem', color: isSelected ? '#1d4ed8' : '#1e293b' }}>
           {rfq.rfqNumber || rfq.id?.slice(0, 8)}
         </span>
-        <ERPStatusBadge status={rfq.status || 'DRAFT'} size="sm" />
+        <StatusChip status={rfq.status || 'DRAFT'} size="sm" />
       </div>
       <div style={{ fontSize: '0.82rem', color: '#475569', fontWeight: 500 }}>{rfq.supplierName || '—'}</div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.3rem' }}>
@@ -149,7 +149,7 @@ function RFQDetail({ rfq, onClose, onStatusChange, onEdit }) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
             <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>{rfq.rfqNumber || rfq.id?.slice(0, 8)}</h2>
-            <ERPStatusBadge status={rfq.status || 'DRAFT'} />
+            <StatusChip status={rfq.status || 'DRAFT'} />
           </div>
           <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.25rem', display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
             <span>Created: {fmt(rfq.createdAt)}</span>

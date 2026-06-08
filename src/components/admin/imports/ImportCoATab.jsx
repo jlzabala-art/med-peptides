@@ -1,4 +1,5 @@
 import React from 'react';
+import { Checkbox } from '../../../components/ui';
 import BaseImportTab from './BaseImportTab';
 import { getStatusColor } from './utils';
 import { Download } from 'lucide-react';
@@ -30,7 +31,7 @@ export default function ImportCoATab() {
           <thead>
             <tr>
               <th style={{ width: '40px', textAlign: 'center' }}>
-                <input type="checkbox" checked={selectedRows.size === parsedData.length} onChange={(e) => toggleAll(e.target.checked)} />
+                <Checkbox checked={selectedRows.size === parsedData.length} onChange={(e) => toggleAll(e.target.checked)} />
               </th>
               <th>AI Confidence</th>
               <th>Status</th>
@@ -56,7 +57,7 @@ export default function ImportCoATab() {
               return (
                 <tr key={idx} style={{ backgroundColor: score < 50 && isChecked ? '#fef2f2' : (isQuarantined ? '#fef2f2' : 'transparent'), opacity: isChecked ? 1 : 0.5 }}>
                   <td style={{ textAlign: 'center' }}>
-                    <input type="checkbox" checked={isChecked} onChange={() => toggleRow(idx)} />
+                    <Checkbox checked={isChecked} onChange={() => toggleRow(idx)} />
                   </td>
                   <td style={{ fontWeight: 700, color: confColor }}>
                     {score}%

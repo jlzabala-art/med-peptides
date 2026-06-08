@@ -1,3 +1,4 @@
+import { TextField, Checkbox, Select } from '../../components/ui';
 import React, { useState, useEffect } from 'react';
 import { catalogRepository } from '../../repositories/catalogRepository';
 import { Users, Mail, Phone, Calendar, ArrowUpRight, Search, Download, Loader2, RefreshCcw, FileText, Link, Edit2, Plus, Check, X, Trash2, ChevronDown, ChevronRight, AlertTriangle } from 'lucide-react';
@@ -261,7 +262,6 @@ function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUp
             </a>
           </div>
         </div>
-
         {/* Deficit Alert */}
         {hasDeficit && (
           <div style={{
@@ -275,20 +275,16 @@ function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUp
             </span>
           </div>
         )}
-
         {/* Quick stock adjuster */}
         <div style={{
           display: 'flex', gap: '0.75rem', alignItems: 'center',
           borderTop: '1px solid #f1f5f9', paddingTop: '0.6rem', marginTop: '0.25rem'
         }}>
           <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569' }}>Quick Adjust Stock:</span>
-          <input 
+          <TextField
             type="number"
-            className="admin-premium-input"
             value={stockInput}
-            onChange={(e) => setStockInput(parseInt(e.target.value) || 0)}
-            style={{ width: '75px', padding: '4px 8px', fontSize: '0.75rem' }}
-          />
+            onChange={(e) => setStockInput(parseInt(e.target.value) || 0)} />
           <button 
             onClick={handleSaveStock}
             disabled={isUpdatingStock}
@@ -327,7 +323,6 @@ function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUp
           </p>
         </div>
       </div>
-
       {/* Fuzzy suggestions if any */}
       {suggestions.length > 0 && (
         <div style={{
@@ -357,7 +352,6 @@ function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUp
           </div>
         </div>
       )}
-
       {/* Sleek inline register form */}
       <form onSubmit={handleRegisterProduct} style={{
         backgroundColor: '#ffffff', padding: '1rem', borderRadius: '8px',
@@ -371,30 +365,24 @@ function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUp
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
           <div>
             <label style={getLabelStyle()}>SKU Code (Required)</label>
-            <input 
-              type="text" 
+            <TextField
+              type="text"
               value={sku}
               onFocus={() => setFocusField('sku')}
               onBlur={() => setFocusField(null)}
               onChange={e => setSku(e.target.value.toUpperCase())}
               placeholder="e.g. BPC157"
-              className="admin-premium-input"
-              style={{ width: '100%' }}
-              required
-            />
+              required />
           </div>
           <div>
             <label style={getLabelStyle()}>Dosage / Strength</label>
-            <input 
-              type="text" 
+            <TextField
+              type="text"
               value={dosage}
               onFocus={() => setFocusField('dosage')}
               onBlur={() => setFocusField(null)}
               onChange={e => setDosage(e.target.value)}
-              placeholder="e.g. 5mg"
-              className="admin-premium-input"
-              style={{ width: '100%' }}
-            />
+              placeholder="e.g. 5mg" />
           </div>
           <div>
             <label style={getLabelStyle()}>Category</label>
@@ -417,16 +405,13 @@ function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUp
           {category === 'Other' && (
             <div>
               <label style={getLabelStyle()}>Custom Category</label>
-              <input 
-                type="text" 
+              <TextField
+                type="text"
                 value={customCategory}
                 onFocus={() => setFocusField('customCategory')}
                 onBlur={() => setFocusField(null)}
                 onChange={e => setCustomCategory(e.target.value)}
-                placeholder="Category Name"
-                className="admin-premium-input"
-                style={{ width: '100%' }}
-              />
+                placeholder="Category Name" />
             </div>
           )}
         </div>
@@ -434,41 +419,32 @@ function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUp
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '0.75rem' }}>
           <div>
             <label style={getLabelStyle()}>Initial Stock Level</label>
-            <input 
-              type="number" 
+            <TextField
+              type="number"
               value={stock}
               onFocus={() => setFocusField('stock')}
               onBlur={() => setFocusField(null)}
-              onChange={e => setStock(parseInt(e.target.value) || 0)}
-              className="admin-premium-input"
-              style={{ width: '100%' }}
-            />
+              onChange={e => setStock(parseInt(e.target.value) || 0)} />
           </div>
           <div>
             <label style={getLabelStyle()}>Guest Price ($/vial)</label>
-            <input 
-              type="number" 
+            <TextField
+              type="number"
               step="0.01"
               value={guestPrice}
               onFocus={() => setFocusField('guestPrice')}
               onBlur={() => setFocusField(null)}
-              onChange={e => setGuestPrice(parseFloat(e.target.value) || 0)}
-              className="admin-premium-input"
-              style={{ width: '100%' }}
-            />
+              onChange={e => setGuestPrice(parseFloat(e.target.value) || 0)} />
           </div>
           <div>
             <label style={getLabelStyle()}>Pro Price ($/vial)</label>
-            <input 
-              type="number" 
+            <TextField
+              type="number"
               step="0.01"
               value={proPrice}
               onFocus={() => setFocusField('proPrice')}
               onBlur={() => setFocusField(null)}
-              onChange={e => setProPrice(parseFloat(e.target.value) || 0)}
-              className="admin-premium-input"
-              style={{ width: '100%' }}
-            />
+              onChange={e => setProPrice(parseFloat(e.target.value) || 0)} />
           </div>
           <div>
             <label style={getLabelStyle()}>Warehouse Location</label>
@@ -613,21 +589,11 @@ function RFQItemsList({ rfqId, items: initialItems, onSaveItems, supplierName, c
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <input
+          <TextField
             type="text"
             placeholder="Filter items..."
             value={filterText}
-            onChange={(e) => setFilterText(e.target.value)}
-            style={{
-              padding: '6px 12px',
-              fontSize: '0.8rem',
-              borderRadius: '16px',
-              border: '1px solid var(--border, #cbd5e1)',
-              outline: 'none',
-              width: '180px',
-              backgroundColor: '#ffffff'
-            }}
-          />
+            onChange={(e) => setFilterText(e.target.value)} />
           
           <button
             onClick={handleCopyMagicLink}
@@ -728,7 +694,6 @@ function RFQItemsList({ rfqId, items: initialItems, onSaveItems, supplierName, c
           )}
         </div>
       </div>
-
       {/* Batch operations toolbar */}
       {selectedItems.length > 0 && !isEditing && (
         <div style={{
@@ -742,13 +707,11 @@ function RFQItemsList({ rfqId, items: initialItems, onSaveItems, supplierName, c
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <input 
+              <TextField
                 type="number"
                 placeholder="Margin %"
                 value={bulkMargin}
-                onChange={e => setBulkMargin(e.target.value)}
-                style={{ width: '80px', padding: '4px 6px', fontSize: '0.75rem', border: '1px solid #cbd5e1', borderRadius: '4px' }}
-              />
+                onChange={e => setBulkMargin(e.target.value)} />
               <button 
                 onClick={() => {
                   const m = parseFloat(bulkMargin);
@@ -774,14 +737,12 @@ function RFQItemsList({ rfqId, items: initialItems, onSaveItems, supplierName, c
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: '0.5rem' }}>
               <span style={{ fontSize: '0.75rem', color: '#1e40af' }}>$</span>
-              <input 
+              <TextField
                 type="number"
                 step="0.01"
                 placeholder="Cost"
                 value={bulkCost}
-                onChange={e => setBulkCost(e.target.value)}
-                style={{ width: '80px', padding: '4px 6px', fontSize: '0.75rem', border: '1px solid #cbd5e1', borderRadius: '4px' }}
-              />
+                onChange={e => setBulkCost(e.target.value)} />
               <button 
                 onClick={() => {
                   const c = parseFloat(bulkCost);
@@ -918,7 +879,6 @@ function RFQItemsList({ rfqId, items: initialItems, onSaveItems, supplierName, c
           </div>
         </div>
       )}
-
       <div style={{ 
         maxHeight: '400px', 
         overflowY: 'auto', 
@@ -932,12 +892,7 @@ function RFQItemsList({ rfqId, items: initialItems, onSaveItems, supplierName, c
             <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 1 }}>
               {!isEditing && (
                 <th style={{ padding: '10px 14px', width: '40px', textAlign: 'center' }}>
-                  <input 
-                    type="checkbox" 
-                    checked={isAllSelected}
-                    onChange={handleSelectAll}
-                    style={{ cursor: 'pointer' }}
-                  />
+                  <Checkbox type="checkbox" checked={isAllSelected} onChange={handleSelectAll} />
                 </th>
               )}
               <th style={{ padding: '10px 14px', fontWeight: 600, color: '#475569' }}>Item Description</th>
@@ -978,62 +933,48 @@ function RFQItemsList({ rfqId, items: initialItems, onSaveItems, supplierName, c
                     >
                       {!isEditing && (
                         <td style={{ textAlign: 'center', padding: '10px 14px' }}>
-                          <input 
+                          <Checkbox
                             type="checkbox"
                             checked={isSelected}
-                            onChange={() => handleToggleSelectItem(item)}
-                            style={{ cursor: 'pointer' }}
-                          />
+                            onChange={() => handleToggleSelectItem(item)} />
                         </td>
                       )}
                       <td style={{ padding: '10px 14px' }}>
                         {isEditing ? (
                           <div style={{ display: 'flex', gap: '0.4rem', flexDirection: 'column' }}>
-                            <input 
-                              type="text" 
-                              className="admin-premium-input"
-                              value={item.peptide_name || ''} 
-                              onChange={(e) => handleItemChange(originalIndex, 'peptide_name', e.target.value)}
-                              style={{ padding: '4px 8px', fontSize: '0.85rem', width: '100%', fontWeight: '600' }}
-                            />
-                            <input 
-                              type="text" 
-                              className="admin-premium-input"
+                            <TextField
+                              type="text"
+                              value={item.peptide_name || ''}
+                              onChange={(e) => handleItemChange(originalIndex, 'peptide_name', e.target.value)} />
+                            <TextField
+                              type="text"
                               placeholder="Dosage (optional)"
-                              value={item.dosage || ''} 
-                              onChange={(e) => handleItemChange(originalIndex, 'dosage', e.target.value)}
-                              style={{ padding: '4px 8px', fontSize: '0.75rem', width: '100%', color: '#64748b' }}
-                            />
+                              value={item.dosage || ''}
+                              onChange={(e) => handleItemChange(originalIndex, 'dosage', e.target.value)} />
                             
                             {/* Supplier Cost & Margin Inputs */}
                             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '4px', alignItems: 'center' }}>
                               <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Cost: $</span>
-                              <input 
-                                type="number" 
-                                className="admin-premium-input"
+                              <TextField
+                                type="number"
                                 step="0.01"
-                                value={item.supplierUnitCost || 0} 
+                                value={item.supplierUnitCost || 0}
                                 onChange={(e) => {
                                   const cost = parseFloat(e.target.value) || 0;
                                   const margin = item.marginPercent || 20;
                                   const clientPrice = cost * (1 + margin / 100);
                                   setItems(prev => prev.map((x, i) => i === originalIndex ? { ...x, supplierUnitCost: cost, clientUnitPrice: parseFloat(clientPrice.toFixed(2)) } : x));
-                                }}
-                                style={{ width: '60px', padding: '4px 6px', fontSize: '0.75rem' }}
-                              />
+                                }} />
                               <span style={{ fontSize: '0.7rem', color: '#64748b', marginLeft: '4px' }}>Margin:</span>
-                              <input 
-                                type="number" 
-                                className="admin-premium-input"
-                                value={item.marginPercent || 20} 
+                              <TextField
+                                type="number"
+                                value={item.marginPercent || 20}
                                 onChange={(e) => {
                                   const margin = parseFloat(e.target.value) || 0;
                                   const cost = item.supplierUnitCost || 0;
                                   const clientPrice = cost * (1 + margin / 100);
                                   setItems(prev => prev.map((x, i) => i === originalIndex ? { ...x, marginPercent: margin, clientUnitPrice: parseFloat(clientPrice.toFixed(2)) } : x));
-                                }}
-                                style={{ width: '50px', padding: '4px 6px', fontSize: '0.75rem' }}
-                              />
+                                }} />
                               <span style={{ fontSize: '0.7rem', color: '#64748b' }}>%</span>
                             </div>
                           </div>
@@ -1064,41 +1005,32 @@ function RFQItemsList({ rfqId, items: initialItems, onSaveItems, supplierName, c
                       </td>
                       <td style={{ textAlign: 'right', padding: '10px 14px' }}>
                         {isEditing ? (
-                          <input 
-                            type="number" 
-                            className="admin-premium-input"
-                            value={item.quantity} 
-                            onChange={(e) => handleItemChange(originalIndex, 'quantity', parseFloat(e.target.value) || 0)}
-                            style={{ padding: '4px 6px', fontSize: '0.85rem', width: '70px', textAlign: 'right' }}
-                          />
+                          <TextField
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) => handleItemChange(originalIndex, 'quantity', parseFloat(e.target.value) || 0)} />
                         ) : (
                           <span style={{ color: '#334155', fontWeight: 600 }}>{item.quantity}</span>
                         )}
                       </td>
                       <td style={{ textAlign: 'center', padding: '10px 14px' }}>
                         {isEditing ? (
-                          <input 
-                            type="text" 
-                            className="admin-premium-input"
-                            value={item.units || ''} 
+                          <TextField
+                            type="text"
+                            value={item.units || ''}
                             placeholder="Units"
-                            onChange={(e) => handleItemChange(originalIndex, 'units', e.target.value)}
-                            style={{ padding: '4px 6px', fontSize: '0.85rem', width: '70px', textAlign: 'center' }}
-                          />
+                            onChange={(e) => handleItemChange(originalIndex, 'units', e.target.value)} />
                         ) : (
                           <span style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 500 }}>{item.units || 'vials'}</span>
                         )}
                       </td>
                       <td style={{ textAlign: 'right', padding: '10px 14px', color: price > 0 ? '#0f766e' : '#64748b' }}>
                         {isEditing ? (
-                          <input 
-                            type="number" 
-                            className="admin-premium-input"
+                          <TextField
+                            type="number"
                             step="0.01"
-                            value={item.clientUnitPrice || 0} 
-                            onChange={(e) => handleItemChange(originalIndex, 'clientUnitPrice', parseFloat(e.target.value) || 0)}
-                            style={{ padding: '4px 6px', fontSize: '0.85rem', width: '80px', textAlign: 'right' }}
-                          />
+                            value={item.clientUnitPrice || 0}
+                            onChange={(e) => handleItemChange(originalIndex, 'clientUnitPrice', parseFloat(e.target.value) || 0)} />
                         ) : (
                           price > 0 ? `$${price.toFixed(2)}` : <span style={{ fontSize: '0.75rem', fontStyle: 'italic' }}>Awaiting pricing</span>
                         )}
@@ -1124,7 +1056,6 @@ function RFQItemsList({ rfqId, items: initialItems, onSaveItems, supplierName, c
                         </td>
                       )}
                     </tr>
-                    
                     {/* Collapsible Details Row */}
                     {isExpanded && !isEditing && (
                       <tr>

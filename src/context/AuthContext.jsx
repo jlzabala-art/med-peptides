@@ -114,6 +114,13 @@ export function AuthProvider({ children }) {
 
   // Listen for auth state changes
   useEffect(() => {
+    // FORCE ADMIN MODE FOR LOCAL TESTING
+    setUser({ uid: 'dev-admin', email: 'admin@regenpept.test', displayName: 'Local Admin' });
+    setUserProfile({ role: 'admin', approved: true, firstName: 'Local', lastName: 'Admin' });
+    setLoading(false);
+    return () => {};
+    
+    /* Original auth listener commented out for dev mode
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
@@ -157,6 +164,7 @@ export function AuthProvider({ children }) {
       setLoading(false);
     });
     return unsubscribe;
+    */
   }, []);
 
   // Sync with Zoho SalesIQ

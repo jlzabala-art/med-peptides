@@ -12,60 +12,11 @@ import {
 } from 'firebase/firestore';
 import { db, storage, uploadBytes, getDownloadURL, ref } from '../../firebase';
 import { Send, Package, FileText, CheckCircle2, UploadCloud, Check } from 'lucide-react';
-
-  // Handle file selection and upload
-  const handleFileSelect = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const storagePath = `attachments/${conversationId}/${file.name}`;
-    const fileRef = ref(storage, storagePath);
-    try {
-      await uploadBytes(fileRef, file);
-      const downloadURL = await getDownloadURL(fileRef);
-      setPendingAttachments(prev => [...prev, { type: 'file', name: file.name, url: downloadURL }]);
-    } catch (err) {
-      console.error('File upload error:', err);
-    }
-  };
-
-  // Update typing status
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (user) {
-        const typingRef = doc(db, 'conversations', conversationId);
-        updateDoc(typingRef, { [`typing.${user.uid}`]: false }).catch(()=>{});
-      }
-    }, 3000);
-    return () => clearTimeout(timeout);
-  }, [inputText, conversationId, user]);
-
-  const handleInputChange = (e) => {
-    setInputText(e.target.value);
-    if (user) {
-      const typingRef = doc(db, 'conversations', conversationId);
-      updateDoc(typingRef, { [`typing.${user.uid}`]: true }).catch(()=>{});
-    }
-  };
-
-  // Quick replies (admin only)
-  const quickReplies = [
-    'Thanks for reaching out, we will get back soon.',
-    'Please provide your order number.',
-    'Your request has been escalated to the specialist.',
-    'Let me check that for you.',
-    'Could you share more details?'
-  ];
-
-  const sendQuickReply = async (text) => {
-    setInputText(text);
-    // Immediately send
-    await handleSend({ preventDefault: () => {} });
-  };
 import { useAuth } from '../../context/AuthContext';
 import ContextAttachment from './ContextAttachment';
 
 export default function ConversationThread({ conversationId, conversationType, referenceId, onResolved }) {
-  const { user, isAdmin, isPhysician, userRole } = useAuth();
+  const { user, isAdmin, userRole } = useAuth();
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
@@ -84,11 +35,10 @@ export default function ConversationThread({ conversationId, conversationType, r
       orderBy('timestamp', 'asc')
     );
     const unsub = onSnapshot(q, (snap) => {
-      const msgs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       setMessages(msgs);
       setLoading(false);
       
-      // Mark as read for current user
       if (user && msgs.length > 0) {
         const convRef = doc(db, 'conversations', conversationId);
         updateDoc(convRef, {
@@ -96,11 +46,9 @@ export default function ConversationThread({ conversationId, conversationType, r
         }).catch(err => console.error("Error marking read:", err));
       }
     });
-
     return () => unsub();
   }, [conversationId, user]);
 
-  // Listen for typing status of other users
   useEffect(() => {
     if (!conversationId) return;
     const convRef = doc(db, 'conversations', conversationId);
@@ -119,11 +67,47 @@ export default function ConversationThread({ conversationId, conversationType, r
     }
   }, [messages]);
 
-  const handleSend = async (e) => {
-    e.preventDefault();
-    if (!inputText.trim() || !user || !conversationId) return;
+  // Update typing status
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (user && conversationId) {
+        const typingRef = doc(db, 'conversations', conversationId);
+        updateDoc(typingRef, { [`typing.${user.uid}`]: false }).catch(()=>{});
+      }
+    }, 3000);
+    return () => clearTimeout(timeout);
+  }, [inputText, conversationId, user]);
 
-    const content = inputText.trim();
+  const handleInputChange = (e) => {
+    setInputText(e.target.value);
+    if (user && conversationId) {
+      const typingRef = doc(db, 'conversations', conversationId);
+      updateDoc(typingRef, { [`typing.${user.uid}`]: true }).catch(()=>{});
+    }
+  };
+
+  const handleFileSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const storagePath = `attachments/${conversationId}/${file.name}`;
+    const fileRef = ref(storage, storagePath);
+    try {
+      await uploadBytes(fileRef, file);
+      const downloadURL = await getDownloadURL(fileRef);
+      setPendingAttachments(prev => [...prev, { type: 'file', name: file.name, url: downloadURL }]);
+    } catch (err) {
+      console.error('File upload error:', err);
+    }
+  };
+
+  const handleSend = async (e, directText = null) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const textToSend = directText !== null ? directText : inputText;
+    
+    if (!textToSend.trim() && pendingAttachments.length === 0) return;
+    if (!user || !conversationId) return;
+
+    const content = textToSend.trim();
     const attachmentsToSent = [...pendingAttachments];
     
     setInputText('');
@@ -139,14 +123,25 @@ export default function ConversationThread({ conversationId, conversationType, r
         timestamp: serverTimestamp(),
       });
 
-      // Update conversation lastMessage
       await updateDoc(doc(db, 'conversations', conversationId), {
-        lastMessage: content,
+        lastMessage: content || 'Attachment',
         lastMessageAt: serverTimestamp()
       });
     } catch (err) {
       console.error("Error sending message:", err);
     }
+  };
+
+  const quickReplies = [
+    'Thanks for reaching out, we will get back soon.',
+    'Please provide your order number.',
+    'Your request has been escalated to the specialist.',
+    'Let me check that for you.',
+    'Could you share more details?'
+  ];
+
+  const sendQuickReply = async (text) => {
+    await handleSend(null, text);
   };
 
   if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading messages...</div>;
@@ -283,45 +278,50 @@ export default function ConversationThread({ conversationId, conversationType, r
         )}
 
         {/* Quick replies (admin only) */}
-        {isAdmin && quickReplies.map((qr, i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={() => sendQuickReply(qr)}
-            style={{
-              background: 'var(--color-bg-app)',
-              border: '1px solid var(--color-border)',
-              borderRadius: '6px',
-              padding: '0.3rem 0.6rem',
-              fontSize: '0.75rem',
-              cursor: 'pointer',
-              marginBottom: '0.4rem'
-            }}
-          >
-            {qr}
-          </button>
-        ))}
+        {isAdmin && (
+          <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.2rem' }}>
+            {quickReplies.map((qr, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => sendQuickReply(qr)}
+                style={{
+                  background: 'var(--color-bg-app)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '6px',
+                  padding: '0.3rem 0.6rem',
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {qr}
+              </button>
+            ))}
+          </div>
+        )}
 
         <form onSubmit={handleSend} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          {/* SKU attachment button */}
           <button type="button" onClick={() => {
             const sku = prompt("Enter SKU to attach context:");
             if (sku) setPendingAttachments(prev => [...prev, { type: 'product_card', name: 'Attached product', sku }]);
           }} title="Adjuntar documento / SKU" style={{ background: 'transparent', border: 'none', color: 'var(--color-text-tertiary)', cursor: 'pointer', padding: '0.3rem' }}>
             <FileText size={18} />
           </button>
-          {/* File attachment button */}
+          
           <input type="file" id="fileUpload" style={{ display: 'none' }} onChange={handleFileSelect} />
           <button type="button" onClick={() => document.getElementById('fileUpload').click()} title="Adjuntar archivo" style={{ background: 'transparent', border: 'none', color: 'var(--color-text-tertiary)', cursor: 'pointer', padding: '0.3rem' }}>
             <UploadCloud size={18} />
           </button>
+          
           <input 
             type="text" 
             placeholder={pendingAttachments.length > 0 ? "Add a message to your attachments..." : "Type a message..."}
             value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
+            onChange={handleInputChange}
             style={{ flex: 1, padding: '0.6rem 1rem', borderRadius: '20px', border: '1px solid var(--color-border)', background: 'var(--color-bg-app)', fontSize: '0.85rem' }}
           />
+          
           <button type="submit" disabled={!inputText.trim() && pendingAttachments.length === 0} style={{ background: 'var(--color-primary)', border: 'none', color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (inputText.trim() || pendingAttachments.length > 0) ? 'pointer' : 'not-allowed', opacity: (inputText.trim() || pendingAttachments.length > 0) ? 1 : 0.5 }}>
             <Send size={16} style={{ marginLeft: '-2px' }}/>
           </button>

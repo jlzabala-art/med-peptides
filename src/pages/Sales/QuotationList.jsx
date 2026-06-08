@@ -4,7 +4,7 @@ import { db } from '../../firebase';
 import { FileText, Plus, X, CheckCircle, Sparkles, Building2, Calendar, User, Mail, PlusCircle, Save, ExternalLink } from 'lucide-react';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import ERPListDetailLayout from '../../components/shared/ERPListDetailLayout';
-import ERPStatusBadge from '../../components/shared/ERPStatusBadge';
+import { StatusChip , Checkbox } from '../../components/ui';
 import ERPActivityTimeline from '../../components/shared/ERPActivityTimeline';
 import B2BOrderBuilderTable from '../../components/admin/B2BOrderBuilderTable';
 import ZohoPaperPreview from '../../components/admin/ZohoPaperPreview';
@@ -32,7 +32,7 @@ function QuotationListItem({ quote, isSelected }) {
         <span style={{ fontWeight: 700, fontSize: '0.9rem', color: isSelected ? '#1d4ed8' : '#1e293b' }}>
           {quote.documentNumber || quote.id?.slice(0, 8)}
         </span>
-        <ERPStatusBadge status={quote.status || 'DRAFT'} size="sm" />
+        <StatusChip status={quote.status || 'DRAFT'} size="sm" />
       </div>
       <div style={{ fontSize: '0.82rem', color: '#475569', fontWeight: 500 }}>
         {quote.customerName || '—'}
@@ -133,7 +133,7 @@ function QuotationDetail({ quote, onClose, onStatusChange, onEdit }) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
             <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700 }}>{quote.documentNumber || quote.id?.slice(0, 8)}</h2>
-            <ERPStatusBadge status={quote.status || 'DRAFT'} />
+            <StatusChip status={quote.status || 'DRAFT'} />
           </div>
           <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.25rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <span>Fecha de emisión: {fmt(quote.createdAt)}</span>
@@ -374,11 +374,17 @@ function QuotationFormModal({ quote, onClose, onSave }) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>Nombre del Cliente *</label>
-              <input value={customerName} onChange={e => setCustomerName(e.target.value)} className="gcp-input" style={{ width: '100%' }} placeholder="Ej. Dr. Martínez" />
+              <TextField
+                value={customerName}
+                onChange={e => setCustomerName(e.target.value)}
+                placeholder="Ej. Dr. Martínez" />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>Email del Cliente</label>
-              <input value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} className="gcp-input" style={{ width: '100%' }} placeholder="email@ejemplo.com" />
+              <TextField
+                value={customerEmail}
+                onChange={e => setCustomerEmail(e.target.value)}
+                placeholder="email@ejemplo.com" />
             </div>
           </div>
 
@@ -404,7 +410,7 @@ function QuotationFormModal({ quote, onClose, onSave }) {
 
           <div>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.82rem', color: '#1e293b' }}>
-              <input type="checkbox" checked={isDropship} onChange={e => setIsDropship(e.target.checked)} style={{ width: '15px', height: '15px' }} />
+              <Checkbox checked={isDropship} onChange={e => setIsDropship(e.target.checked)} />
               Pedido Dropshipping (Envío directo de Proveedor a Cliente)
             </label>
           </div>

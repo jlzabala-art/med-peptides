@@ -14,11 +14,11 @@ export default function AppFilterBar({
   secondaryActions
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+    <div className="gcp-filter-bar-container" style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
       
       {/* Search Row */}
       {onSearchChange && (
-        <div style={{ display: 'flex', flex: 1, minWidth: '300px', position: 'relative' }}>
+        <div className="gcp-filter-bar-search" style={{ display: 'flex', flex: 1, minWidth: '200px', position: 'relative' }}>
           <Search size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-secondary)' }} />
           <input
             type="text"

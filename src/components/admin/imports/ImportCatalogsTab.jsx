@@ -1,4 +1,5 @@
 import React from 'react';
+import { Checkbox } from '../../../components/ui';
 import BaseImportTab from './BaseImportTab';
 import { getStatusColor } from './utils';
 
@@ -13,7 +14,7 @@ export default function ImportCatalogsTab() {
       <thead>
         <tr>
           <th style={{ width: '40px', textAlign: 'center' }}>
-            <input type="checkbox" checked={selectedRows.size === parsedData.length} onChange={(e) => toggleAll(e.target.checked)} />
+            <Checkbox checked={selectedRows.size === parsedData.length} onChange={(e) => toggleAll(e.target.checked)} />
           </th>
           <th>Status</th>
           <th>Original Extracted Name</th>
@@ -31,7 +32,7 @@ export default function ImportCatalogsTab() {
           return (
             <tr key={idx} style={{ opacity: selectedRows.has(idx) ? 1 : 0.5 }}>
               <td style={{ textAlign: 'center' }}>
-                <input type="checkbox" checked={selectedRows.has(idx)} onChange={() => toggleRow(idx)} />
+                <Checkbox checked={selectedRows.has(idx)} onChange={() => toggleRow(idx)} />
               </td>
               <td>
                 <span style={{ 

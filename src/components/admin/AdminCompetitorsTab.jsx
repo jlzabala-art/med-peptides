@@ -272,11 +272,11 @@ export default function AdminCompetitorsTab() {
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', background: 'rgba(255,255,255,0.01)', padding: '1.25rem', borderRadius: '12px', border: '1px dashed var(--border)', position: 'relative' }}>
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Store Name</label>
-              <input type="text" value={newCompName} onChange={e => setNewCompName(e.target.value)} placeholder="e.g. Acme Peptides" style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-default)', outline: 'none' }} />
+              <TextField type="text" value={newCompName} onChange={e => setNewCompName(e.target.value)} placeholder="e.g. Acme Peptides" />
             </div>
             <div style={{ flex: 2 }}>
               <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Target URL</label>
-              <input type="text" value={newCompUrl} onChange={e => setNewCompUrl(e.target.value)} placeholder="https://..." style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-default)', outline: 'none' }} />
+              <TextField type="text" value={newCompUrl} onChange={e => setNewCompUrl(e.target.value)} placeholder="https://..." />
             </div>
             <button onClick={addCompetitor} className="btn btn-secondary" style={{ padding: '0.75rem 1.5rem', display: 'flex', gap: '0.5rem', borderRadius: '8px', fontWeight: 700, alignItems: 'center' }}>
               <Plus size={16} /> Add Store

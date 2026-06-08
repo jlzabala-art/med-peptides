@@ -2074,20 +2074,33 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
                     <div className="co-name-grid">
                       <div className="co-field">
                         <label className="co-label">First Name *</label>
-                        <input required className={`co-input${formData.firstName ? ' valid' : ''}`} value={formData.firstName}
-                          onChange={e => set({ firstName: e.target.value })} placeholder="Alexander" autoComplete="given-name" />
+                        <TextField
+                          required
+                          value={formData.firstName}
+                          onChange={e => set({ firstName: e.target.value })}
+                          placeholder="Alexander"
+                          autoComplete="given-name" />
                       </div>
                       <div className="co-field">
                         <label className="co-label">Surname *</label>
-                        <input required className={`co-input${formData.lastName ? ' valid' : ''}`} value={formData.lastName}
-                          onChange={e => set({ lastName: e.target.value })} placeholder="Sterling" autoComplete="family-name" />
+                        <TextField
+                          required
+                          value={formData.lastName}
+                          onChange={e => set({ lastName: e.target.value })}
+                          placeholder="Sterling"
+                          autoComplete="family-name" />
                       </div>
                     </div>
 
                     <div className="co-field">
                       <label className="co-label">Email *</label>
-                      <input required type="email" className={`co-input${formData.email ? ' valid' : ''}`} value={formData.email}
-                        onChange={e => { set({ email: e.target.value }); setInlineError(null); }} placeholder="your@email.com" autoComplete="email" />
+                      <TextField
+                        required
+                        type="email"
+                        value={formData.email}
+                        onChange={e => { set({ email: e.target.value }); setInlineError(null); }}
+                        placeholder="your@email.com"
+                        autoComplete="email" />
                       {/* P1 Fix 2.2 — hint to switch to login if user already exists */}
                       <div style={{ marginTop: '0.45rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                         <span style={{ fontSize: '0.72rem', color: 'var(--color-text-tertiary)' }}>Already have an account?</span>
@@ -2101,15 +2114,24 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
 
                     <div className="co-field">
                       <label className="co-label">Phone (WhatsApp Preferred) *</label>
-                      <input required type="tel" className={`co-input${formData.phone ? ' valid' : ''}`} value={formData.phone}
-                        onChange={e => set({ phone: e.target.value })} placeholder="+00 123 456 789" autoComplete="tel" />
+                      <TextField
+                        required
+                        type="tel"
+                        value={formData.phone}
+                        onChange={e => set({ phone: e.target.value })}
+                        placeholder="+00 123 456 789"
+                        autoComplete="tel" />
                     </div>
 
                     {formData.isProfessional && (
                       <div className="co-field">
                         <label className="co-label">Organization / Clinic *</label>
-                        <input required className={`co-input${formData.clinic ? ' valid' : ''}`} value={formData.clinic}
-                          onChange={e => set({ clinic: e.target.value })} placeholder="Medical Center / Research Lab" autoComplete="organization" />
+                        <TextField
+                          required
+                          value={formData.clinic}
+                          onChange={e => set({ clinic: e.target.value })}
+                          placeholder="Medical Center / Research Lab"
+                          autoComplete="organization" />
                       </div>
                     )}
 
@@ -2122,8 +2144,13 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
                           <div className="co-field">
                             <label className="co-label">Create Password *</label>
                             <div style={{ position: 'relative' }}>
-                              <input required type={showPassword ? "text" : "password"} className={`co-input${formData.password ? ' valid' : ''}`} value={formData.password}
-                                onChange={e => set({ password: e.target.value })} placeholder="••••••••" autoComplete="new-password" />
+                              <TextField
+                                required
+                                type={showPassword ? "text" : "password"}
+                                value={formData.password}
+                                onChange={e => set({ password: e.target.value })}
+                                placeholder="••••••••"
+                                autoComplete="new-password" />
                               <button type="button" onClick={() => setShowPassword(!showPassword)} style={{
                                 position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
                                 background: 'none', border: 'none', color: 'var(--color-text-tertiary)', cursor: 'pointer', padding: '4px'
@@ -2146,8 +2173,13 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
                           </div>
                           <div className="co-field">
                             <label className="co-label">Confirm Password *</label>
-                            <input required type="password" className={`co-input${formData.confirmPassword ? ' valid' : ''}`} value={formData.confirmPassword}
-                              onChange={e => set({ confirmPassword: e.target.value })} placeholder="••••••••" autoComplete="new-password" />
+                            <TextField
+                              required
+                              type="password"
+                              value={formData.confirmPassword}
+                              onChange={e => set({ confirmPassword: e.target.value })}
+                              placeholder="••••••••"
+                              autoComplete="new-password" />
                           </div>
                         </div>
                         {formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword && (
@@ -2160,14 +2192,22 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '0.5rem 0' }}>
                     <div className="co-field">
                       <label className="co-label">Email Address</label>
-                      <input required type="email" className="co-input" value={formData.email}
-                        onChange={e => set({ email: e.target.value })} placeholder="researcher@email.com" />
+                      <TextField
+                        required
+                        type="email"
+                        value={formData.email}
+                        onChange={e => set({ email: e.target.value })}
+                        placeholder="researcher@email.com" />
                     </div>
                     <div className="co-field">
                       <label className="co-label">Password</label>
                       <div style={{ position: 'relative' }}>
-                        <input required type={showPassword ? "text" : "password"} className="co-input" value={formData.password}
-                          onChange={e => set({ password: e.target.value })} placeholder="••••••••" />
+                        <TextField
+                          required
+                          type={showPassword ? "text" : "password"}
+                          value={formData.password}
+                          onChange={e => set({ password: e.target.value })}
+                          placeholder="••••••••" />
                         <button type="button" onClick={() => setShowPassword(!showPassword)} style={{
                           position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
                           background: 'none', border: 'none', color: 'var(--color-text-tertiary)', cursor: 'pointer', padding: '4px'
@@ -2968,7 +3008,6 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
 
         </div>{/* end co-grid */}
       </div>{/* end co-inner */}
-
       {/* ── Mobile: Bottom-sheet summary ──────────────────────────────── */}
       {!isDone && (
         <div className="co-mobile-sheet">
@@ -2995,7 +3034,6 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
           </AnimatePresence>
         </div>
       )}
-
       {/* ── Mobile: Floating Action Bar (glassmorphism) ───────────────── */}
       <div className="co-fab">
         {!isDone ? (
@@ -3029,7 +3067,6 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
           </div>
         )}
       </div>
-
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { collection, query, orderBy, getDocs, addDoc, serverTimestamp, doc, upda
 import { httpsCallable } from 'firebase/functions';
 import { db, functions } from '../../firebase';
 import { Briefcase, Plus, Search, Loader2, CheckCircle, FileText, User, Building } from 'lucide-react';
-import { Card } from '../ui';
+import { Card, TextField, Select } from '../ui';
 
 export default function AdminAgencyDealsTab() {
   const [deals, setDeals] = useState([]);
@@ -207,22 +207,20 @@ export default function AdminAgencyDealsTab() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.25rem' }}>Supplier (Vendor)</label>
-                  <input 
+                  <TextField 
                     type="text" required
                     placeholder="e.g. LotusLand"
                     value={formData.supplierName}
                     onChange={e => setFormData({...formData, supplierName: e.target.value})}
-                    style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px' }}
                   />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.25rem' }}>End Customer</label>
-                  <input 
+                  <TextField 
                     type="text" required
                     placeholder="e.g. Magenta"
                     value={formData.customerName}
                     onChange={e => setFormData({...formData, customerName: e.target.value})}
-                    style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px' }}
                   />
                 </div>
               </div>
@@ -240,35 +238,33 @@ export default function AdminAgencyDealsTab() {
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.25rem' }}>Total Cargo Volume ($)</label>
-                <input 
+                <TextField 
                   type="number" required min="0" step="0.01"
                   value={formData.totalVolume}
                   onChange={e => setFormData({...formData, totalVolume: e.target.value})}
-                  style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px' }}
                 />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.25rem' }}>Commission Type</label>
-                  <select 
+                  <Select 
                     value={formData.commissionType}
                     onChange={e => setFormData({...formData, commissionType: e.target.value})}
-                    style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px' }}
-                  >
-                    <option value="percentage">Percentage (%)</option>
-                    <option value="fixed">Fixed Amount ($)</option>
-                  </select>
+                    options={[
+                      { label: 'Percentage (%)', value: 'percentage' },
+                      { label: 'Flat Fee ($)', value: 'flat' }
+                    ]}
+                  />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.25rem' }}>
                     {formData.commissionType === 'percentage' ? 'Commission Rate (%)' : 'Commission Amount ($)'}
                   </label>
-                  <input 
+                  <TextField 
                     type="number" required min="0" step="0.01"
                     value={formData.commissionValue}
                     onChange={e => setFormData({...formData, commissionValue: e.target.value})}
-                    style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px' }}
                   />
                 </div>
                 <div style={{ gridColumn: 'span 2', textAlign: 'right', fontWeight: 700, color: 'var(--color-success)', marginTop: '0.5rem' }}>

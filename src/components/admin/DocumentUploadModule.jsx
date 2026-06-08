@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Checkbox } from '../../components/ui';
 import { db, storage, functions } from '../../firebase';
 import { collection, query, orderBy, getDocs, addDoc, serverTimestamp, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
@@ -588,7 +589,7 @@ export default function DocumentUploadModule() {
                   {/* Master Row (Folder/Group) */}
                   <div style={{ display: 'grid', gridTemplateColumns: '40px 3fr 2fr 1.5fr 40px', padding: '1rem 1.5rem', alignItems: 'center', backgroundColor: someSelected && !allSelected ? 'rgba(0,113,189,0.02)' : allSelected ? 'rgba(0,113,189,0.05)' : 'white' }}>
                     <div>
-                      <input type="checkbox" checked={allSelected} ref={input => { if (input) input.indeterminate = someSelected && !allSelected; }} onChange={() => toggleGroupSelection(allIds)} style={{ cursor: 'pointer', width: '18px', height: '18px' }} />
+                      <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={() => toggleGroupSelection(allIds)} />
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                       <button onClick={() => toggleGroupExpand(baseName)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.2rem', color: 'var(--text-muted)' }}>
@@ -622,7 +623,7 @@ export default function DocumentUploadModule() {
                     return (
                       <div key={variant.id} style={{ display: 'grid', gridTemplateColumns: '40px 3fr 2fr 1.5fr 40px', padding: '1rem 1.5rem 1rem 3rem', alignItems: 'center', backgroundColor: '#f8fafc', borderTop: '1px dashed var(--border)' }}>
                         <div>
-                          <input type="checkbox" checked={selectedDocs.has(variant.id)} onChange={() => toggleSelection(variant.id)} style={{ cursor: 'pointer' }} />
+                          <Checkbox checked={selectedDocs.has(variant.id)} onChange={() => toggleSelection(variant.id)} />
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <div style={{ display: 'flex', flexDirection: 'column' }}>

@@ -16,6 +16,7 @@ export { default as Tabs } from './Tabs';
 export { default as TextField } from './TextField';
 export { default as Select } from './Select';
 export { default as Toggle } from './Toggle';
+export { default as Checkbox } from './Checkbox';
 export { default as StatusChip } from './StatusChip';
 
 /* Legacy GCP-style components (preserved for backward compatibility) */

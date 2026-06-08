@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Checkbox } from '../../../components/ui';
 import BaseImportTab from './BaseImportTab';
 import { db } from '../../../firebase';
 import { collection, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
@@ -88,7 +89,7 @@ export default function ImportPriceListsTab() {
     return (
       <tr style={{ opacity: isChecked ? 1 : 0.5, backgroundColor: score < 50 && isChecked ? '#fef2f2' : 'transparent', borderBottom: '1px solid var(--border)' }}>
         <td style={{ textAlign: 'center', padding: '0.75rem' }}>
-          <input type="checkbox" checked={isChecked} onChange={() => toggleRow(idx)} />
+          <Checkbox checked={isChecked} onChange={() => toggleRow(idx)} />
         </td>
         <td style={{ fontWeight: 700, color: confColor }}>
           {score}%
@@ -145,7 +146,7 @@ export default function ImportPriceListsTab() {
       <thead>
         <tr style={{ borderBottom: '2px solid var(--border)', textAlign: 'left' }}>
           <th style={{ width: '40px', textAlign: 'center', padding: '0.75rem' }}>
-            <input type="checkbox" checked={selectedRows.size === parsedData.length} onChange={(e) => toggleAll(e.target.checked)} />
+            <Checkbox checked={selectedRows.size === parsedData.length} onChange={(e) => toggleAll(e.target.checked)} />
           </th>
           <th>AI Confidence</th>
           <th>Status</th>

@@ -1,10 +1,11 @@
+import { TextField, Checkbox, Select } from '../../components/ui';
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, addDoc, serverTimestamp, arrayUnion, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { ShoppingCart, Plus, X, Building2, FileText, CheckCircle, Package, ExternalLink } from 'lucide-react';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import ERPListDetailLayout from '../../components/shared/ERPListDetailLayout';
-import ERPStatusBadge from '../../components/shared/ERPStatusBadge';
+import { StatusChip } from '../../components/ui';
 import ERPActivityTimeline from '../../components/shared/ERPActivityTimeline';
 import POForm from '../../components/purchase/POForm';
 import ZohoPaperPreview from '../../components/admin/ZohoPaperPreview';
@@ -33,7 +34,7 @@ function POListItem({ po, isSelected }) {
         <span style={{ fontWeight: 700, fontSize: '0.9rem', color: isSelected ? '#1d4ed8' : '#1e293b' }}>
           {po.poNumber || po.id?.slice(0, 8)}
         </span>
-        <ERPStatusBadge status={po.status || 'DRAFT'} size="sm" />
+        <StatusChip status={po.status || 'DRAFT'} size="sm" />
       </div>
       <div style={{ fontSize: '0.82rem', color: '#475569', fontWeight: 500 }}>{po.supplierName || '—'}</div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.3rem' }}>
@@ -78,7 +79,7 @@ function PODetail({ po, onClose, onStatusChange, onEdit }) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
             <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>{po.poNumber || po.id?.slice(0, 8)}</h2>
-            <ERPStatusBadge status={po.status || 'DRAFT'} />
+            <StatusChip status={po.status || 'DRAFT'} />
           </div>
           <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.25rem', display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
             <span>Created: {fmt(po.createdAt)}</span>

@@ -50,6 +50,7 @@ import {
   DEFAULT_GUEST_SECTIONS,
   DEFAULT_PRO_SECTIONS,
 } from '../../hooks/useHomeLayout';
+import { Tabs } from '../ui';
 
 const ROLE_METADATA = {
   admin: {
@@ -462,32 +463,19 @@ function LayoutPreviewModal({ layout, onClose }) {
           </button>
         </div>
 
-        {/* Audience tabs */}
-        <div
-          style={{
-            padding: '0.75rem 1.5rem',
-            borderBottom: '1px solid var(--border)',
-            display: 'flex',
-            gap: '0.4rem',
-            background: 'rgba(0,0,0,0.01)',
-            overflowX: 'auto',
-          }}
-        >
-          {ALL_ROLES.map((role) => {
-            const MetaIcon = ROLE_METADATA[role].icon;
-            return (
-              <button
-                key={role}
-                style={{ ...tabBtnStyle(activeTab === role), flexShrink: 0 }}
-                onClick={() => setActiveTab(role)}
-              >
-                <MetaIcon size={13} style={{ marginRight: '0.35rem', verticalAlign: 'middle' }} />
-                {ROLE_METADATA[role].label}
-              </button>
-            );
-          })}
+        {/* Audience tabs replaced with Tabs component */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, padding: '0 1.5rem' }}>
+          <Tabs
+            activeTab={activeTab}
+            onChange={setActiveTab}
+            tabs={ALL_ROLES.map(role => ({
+              id: role,
+              label: ROLE_METADATA[role].label,
+              icon: ROLE_METADATA[role].icon,
+              content: null // Content is rendered outside to avoid remounting issues if needed, or we can just wrap it
+            }))}
+          />
         </div>
-
         {/* Section list */}
         <div style={{ overflowY: 'auto', padding: '1rem 1.5rem', flex: 1 }}>
           <div

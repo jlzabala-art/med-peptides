@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import DataTable from '../ui/DataTable';
+import { Tabs, StatusChip } from '../ui';
 import AppFilterBar from '../ui/AppFilterBar';
 import AppEntityCell from '../ui/AppEntityCell';
 import { Users, Building2, UserCircle, Briefcase, Mail, Phone, Plus, X } from 'lucide-react';
@@ -88,9 +89,7 @@ export default function AdminAccountManagersTab() {
       header: 'Status',
       key: 'status',
       render: (row) => (
-        <span className={`status-badge status-${row.disabled ? 'inactive' : 'active'}`}>
-          {row.disabled ? 'Suspended' : 'Active'}
-        </span>
+        <StatusChip status={row.disabled ? 'inactive' : 'active'} label={row.disabled ? 'Suspended' : 'Active'} />
       ),
     },
   ];
@@ -172,10 +171,6 @@ export default function AdminAccountManagersTab() {
 function ManagerDetailPanel({ manager, wholesellers, onUpdate }) {
   const [activeTab, setActiveTab] = useState('profile');
 
-  const tabs = [
-    { id: 'profile', label: 'Operational Profile', icon: Briefcase },
-    { id: 'contact', label: 'Contact & Routing', icon: Phone },
-  ];
 
   const orgOptions = Object.entries(wholesellers).map(([id, name]) => ({ id, name }));
 
@@ -185,148 +180,66 @@ function ManagerDetailPanel({ manager, wholesellers, onUpdate }) {
         backgroundColor: 'var(--color-bg-surface)',
         border: '1px solid var(--border)',
         borderRadius: 'var(--radius-md)',
-        padding: '0',
+        padding: '1.5rem',
         display: 'flex',
+        flexDirection: 'column',
         minHeight: '300px',
-        overflow: 'hidden',
       }}
     >
-      <div style={{ width: '200px', borderRight: '1px solid var(--border)', padding: '1rem 0' }}>
-        {tabs.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setActiveTab(t.id)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              width: '100%',
-              padding: '0.75rem 1.5rem',
-              backgroundColor: activeTab === t.id ? 'var(--color-bg-elevated)' : 'transparent',
-              borderLeft: activeTab === t.id ? '3px solid var(--primary)' : '3px solid transparent',
-              color: activeTab === t.id ? 'var(--primary)' : 'var(--text-secondary)',
-              border: 'none',
-              borderRight: 'none',
-              borderTop: 'none',
-              borderBottom: 'none',
-              cursor: 'pointer',
-              textAlign: 'left',
-              fontSize: '0.9rem',
-              fontWeight: 500,
-            }}
-          >
-            <t.icon size={16} /> {t.label}
-          </button>
-        ))}
-      </div>
-
-      <div style={{ flex: 1, padding: '2rem' }}>
-        {activeTab === 'profile' && (
-          <div style={{ maxWidth: '600px' }}>
-            <h4
-              style={{ marginBottom: '1.5rem', color: 'var(--text-primary)', fontSize: '1.1rem' }}
-            >
-              Operational Assignments
-            </h4>
-            <div style={{ display: 'grid', gap: '1.5rem' }}>
-              <div>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: '0.85rem',
-                    color: 'var(--text-muted)',
-                    marginBottom: '0.4rem',
-                  }}
+      <Tabs
+        activeTab={activeTab}
+        onChange={setActiveTab}
+        tabs={[
+          {
+            id: 'profile',
+            label: 'Operational Profile',
+            icon: Briefcase,
+            content: (
+              <div style={{ maxWidth: '600px' }}>
+                <h4
+                  style={{ marginBottom: '1.5rem', color: 'var(--text-primary)', fontSize: '1.1rem' }}
                 >
-                  Parent Wholeseller Organization
-                </label>
-                <select
-                  defaultValue={manager.wholesellerId || ''}
-                  onChange={(e) => onUpdate(manager.id, { wholesellerId: e.target.value })}
-                  style={{
-                    width: '100%',
-                    maxWidth: '400px',
-                    padding: '0.6rem',
-                    border: '1px solid var(--border)',
-                    borderRadius: '4px',
-                    background: 'var(--color-bg-elevated)',
-                    color: 'var(--text-primary)',
-                  }}
-                >
-                  <option value="">-- Unassigned --</option>
-                  {orgOptions.map((org) => (
-                    <option key={org.id} value={org.id}>
-                      {org.name}
-                    </option>
-                  ))}
-                </select>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-                  This limits the Account Manager's operational visibility to only clinics, doctors,
-                  and orders belonging to this Wholeseller.
-                </p>
+                  Operational Assignments
+                </h4>
+                <div style={{ display: 'grid', gap: '1.5rem' }}>
+                  <div>
+                    <Toggle label="Account Active" checked={!manager.disabled} onChange={(checked) => onUpdate(manager.id, { disabled: !checked })} />
+                  </div>
+                </div>
               </div>
-              <div style={{ marginTop: '1rem' }}>
-                <label
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    cursor: 'pointer',
-                  }}
+            )
+          },
+          {
+            id: 'contact',
+            label: 'Contact & Routing',
+            icon: Phone,
+            content: (
+              <div style={{ maxWidth: '600px' }}>
+                <h4
+                  style={{ marginBottom: '1.5rem', color: 'var(--text-primary)', fontSize: '1.1rem' }}
                 >
-                  <input
-                    type="checkbox"
-                    checked={!manager.disabled}
-                    onChange={(e) => onUpdate(manager.id, { disabled: !e.target.checked })}
-                    style={{ width: '18px', height: '18px' }}
-                  />
-                  <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>
-                    Account Active
-                  </span>
-                </label>
+                  Contact Info
+                </h4>
+                <div style={{ display: 'grid', gap: '1.5rem' }}>
+                  <div>
+                    <label
+                      style={{
+                        display: 'block',
+                        fontSize: '0.85rem',
+                        color: 'var(--text-muted)',
+                        marginBottom: '0.4rem',
+                      }}
+                    >
+                      Phone Number
+                    </label>
+                    <TextField defaultValue={manager.phone || ''} onBlur={(e) => onUpdate(manager.id, { phone: e.target.value })} />
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'contact' && (
-          <div style={{ maxWidth: '600px' }}>
-            <h4
-              style={{ marginBottom: '1.5rem', color: 'var(--text-primary)', fontSize: '1.1rem' }}
-            >
-              Contact Info
-            </h4>
-            <div style={{ display: 'grid', gap: '1.5rem' }}>
-              <div>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: '0.85rem',
-                    color: 'var(--text-muted)',
-                    marginBottom: '0.4rem',
-                  }}
-                >
-                  Phone Number
-                </label>
-                <input
-                  type="text"
-                  defaultValue={manager.phone || ''}
-                  onBlur={(e) => onUpdate(manager.id, { phone: e.target.value })}
-                  style={{
-                    width: '100%',
-                    maxWidth: '400px',
-                    padding: '0.6rem',
-                    border: '1px solid var(--border)',
-                    borderRadius: '4px',
-                    background: 'transparent',
-                    color: 'var(--text-primary)',
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+            )
+          }
+        ]}
+      />
     </div>
   );
 }

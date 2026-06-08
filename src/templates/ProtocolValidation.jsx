@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars, react-hooks/set-state-in-effect */
 import React, { useState, useEffect, useMemo } from 'react';
+import { Checkbox } from '../components/ui';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   ShieldCheck, AlertTriangle, AlertCircle, CheckCircle2,
@@ -189,7 +190,7 @@ export default function ProtocolValidation({ products }) {
         {/* Positive Friction: Mandatory Check for Blocked status */}
         {status === 'blocked' && (
           <label className="bypass-checkbox">
-            <input type="checkbox" checked={bypassWarning} onChange={(e) => setBypassWarning(e.target.checked)} />
+            <Checkbox checked={bypassWarning} onChange={(e) => setBypassWarning(e.target.checked)} />
             <span>I acknowledge the clinical conflicts and wish to proceed under research discretion.</span>
           </label>
         )}

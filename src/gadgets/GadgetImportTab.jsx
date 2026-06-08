@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Checkbox } from '../components/ui';
 import { UploadCloud, FileText, Loader2, CheckCircle } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
@@ -340,7 +341,7 @@ export default function GadgetImportTab({ title, description, context, apiUrl, a
               <thead>
                 <tr>
                   <th style={{ ...gadgetStyles.th, width: '40px', textAlign: 'center' }}>
-                    <input type="checkbox" checked={selectedRows.size === parsedData.length} onChange={(e) => toggleAll(e.target.checked)} />
+                    <Checkbox checked={selectedRows.size === parsedData.length} onChange={(e) => toggleAll(e.target.checked)} />
                   </th>
                   <th style={gadgetStyles.th}>Confidence</th>
                   <th style={gadgetStyles.th}>Item Data</th>
@@ -356,7 +357,7 @@ export default function GadgetImportTab({ title, description, context, apiUrl, a
                   return (
                     <tr key={idx} style={{ opacity: selectedRows.has(idx) ? 1 : 0.5, backgroundColor: score < 50 && selectedRows.has(idx) ? '#fef2f2' : 'transparent' }}>
                       <td style={{ ...gadgetStyles.td, textAlign: 'center' }}>
-                        <input type="checkbox" checked={selectedRows.has(idx)} onChange={() => toggleRow(idx)} />
+                        <Checkbox checked={selectedRows.has(idx)} onChange={() => toggleRow(idx)} />
                       </td>
                       <td style={{ ...gadgetStyles.td, fontWeight: 'bold', color: confColor }}>{score}%</td>
                       <td style={gadgetStyles.td}>

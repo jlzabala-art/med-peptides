@@ -4,7 +4,7 @@ import { db } from '../../firebase';
 import { ShoppingCart, Plus, X, CheckCircle, Package, FileText, Send, Save, ExternalLink } from 'lucide-react';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import ERPListDetailLayout from '../../components/shared/ERPListDetailLayout';
-import ERPStatusBadge from '../../components/shared/ERPStatusBadge';
+import { StatusChip , Checkbox } from '../../components/ui';
 import ERPActivityTimeline from '../../components/shared/ERPActivityTimeline';
 import B2BOrderBuilderTable from '../../components/admin/B2BOrderBuilderTable';
 import ZohoPaperPreview from '../../components/admin/ZohoPaperPreview';
@@ -32,7 +32,7 @@ function SOListItem({ so, isSelected }) {
         <span style={{ fontWeight: 700, fontSize: '0.9rem', color: isSelected ? '#1d4ed8' : '#1e293b' }}>
           {so.documentNumber || so.id?.slice(0, 8)}
         </span>
-        <ERPStatusBadge status={so.status || 'CONFIRMED'} size="sm" />
+        <StatusChip status={so.status || 'CONFIRMED'} size="sm" />
       </div>
       <div style={{ fontSize: '0.82rem', color: '#475569', fontWeight: 500 }}>
         {so.customerName || '—'}
@@ -186,7 +186,7 @@ function SODetail({ so, onClose, onStatusChange, onEdit }) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
             <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700 }}>{so.documentNumber || so.id?.slice(0, 8)}</h2>
-            <ERPStatusBadge status={so.status || 'CONFIRMED'} />
+            <StatusChip status={so.status || 'CONFIRMED'} />
           </div>
           <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.25rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <span>Fecha de pedido: {fmt(so.createdAt)}</span>
@@ -477,7 +477,7 @@ function SalesOrderFormModal({ order, onClose, onSave }) {
 
           <div>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.82rem', color: '#1e293b' }}>
-              <input type="checkbox" checked={isDropship} onChange={e => setIsDropship(e.target.checked)} style={{ width: '15px', height: '15px' }} />
+              <Checkbox checked={isDropship} onChange={e => setIsDropship(e.target.checked)} />
               Pedido Dropshipping (Envío directo de Proveedor a Cliente)
             </label>
           </div>

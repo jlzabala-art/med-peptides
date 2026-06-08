@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mediluxe Health Solutions · Professional Health Testing Pricing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #1FA98F;
+            --green2: #30B8A1;
+            --turq: #3FB8C7;
+            --gold: #B98E4C;
+            --ink: #13201d;
+            --muted: #5d6b66;
+            --soft: #7d8a85;
+            --line: #e6ece9;
+            --bg: #f4f7f6;
+            --card: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .page {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 48px 44px 64px;
+        }
+
+        /* Header */
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .brand .name {
+            font-weight: 800;
+            letter-spacing: .18em;
+            font-size: 15px;
+            text-transform: uppercase;
+        }
+
+        .eyebrow {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 8px;
+            margin-top: 20px;
+        }
+
+        h1 {
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: -.01em;
+            margin-bottom: 12px;
+        }
+
+        h1 .hl {
+            background: linear-gradient(120deg, var(--green), var(--turq));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .lead {
+            font-size: 14px;
+            color: var(--muted);
+            max-width: 760px;
+            margin-bottom: 40px;
+        }
+
+        /* Pricing Cards */
+        .grid3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .plan {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .plan.reco {
+            border: 1.5px solid var(--green);
+            box-shadow: 0 0 0 4px rgba(31, 169, 143, .08);
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            align-self: flex-start;
+        }
+
+        .badge.reco {
+            background: rgba(31, 169, 143, .12);
+            color: var(--green);
+        }
+
+        .plan h3 {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .price {
+            font-size: 28px;
+            font-weight: 800;
+            margin: 4px 0 12px;
+            color: var(--green);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .price.custom {
+            font-size: 18px;
+            margin: 12px 0 20px;
+        }
+
+        .price small {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .who {
+            font-size: 12px;
+            color: var(--muted);
+            border-top: 1px dashed var(--line);
+            padding-top: 14px;
+            margin-top: 4px;
+            line-height: 1.45;
+        }
+
+        ul.feats {
+            list-style: none;
+            margin: 16px 0 12px;
+            flex: 1;
+        }
+
+        ul.feats li {
+            font-size: 12px;
+            color: #33433e;
+            padding-left: 20px;
+            position: relative;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        ul.feats li:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green2);
+        }
+
+        /* Table */
+        .tabla-container {
+            margin-top: 40px;
+        }
+
+        .tabla {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .tabla th {
+            background: #eef3f1;
+            text-align: left;
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 14px 16px;
+        }
+
+        .tabla td {
+            padding: 14px 16px;
+            border-top: 1px solid var(--line);
+            font-size: 12.5px;
+            vertical-align: top;
+            color: var(--ink);
+            font-weight: 500;
+        }
+
+        .tabla td.test-name {
+            font-weight: 800;
+        }
+
+        .tabla td.precio {
+            font-weight: 800;
+            white-space: nowrap;
+            color: var(--green);
+        }
+
+        .category-badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            background: rgba(125, 138, 133, .14);
+            color: var(--muted);
+            padding: 3px 8px;
+            border-radius: 12px;
+            white-space: nowrap;
+        }
+
+        .note {
+            font-size: 11px;
+            color: var(--soft);
+            margin-top: 6px;
+            font-style: italic;
+        }
+
+        /* Footer */
+        .foot {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--line);
+        }
+
+        .foot h4 {
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: var(--muted);
+        }
+
+        .foot ul {
+            list-style: none;
+        }
+
+        .foot ul li {
+            position: relative;
+            padding-left: 14px;
+            margin-bottom: 8px;
+            font-size: 11px;
+            color: var(--soft);
+            line-height: 1.5;
+        }
+
+        .foot ul li::before {
+            content: '-';
+            position: absolute;
+            left: 0;
+            color: var(--soft);
+        }
+
+        /* Input Styles */
+        input.price-input {
+            width: 80px;
+            padding: 4px 8px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--ink);
+            text-align: right;
+            transition: all 0.2s;
+            background: #fff;
+        }
+
+        input.price-input:focus {
+            outline: none;
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px rgba(31, 169, 143, 0.15);
+        }
+        
+        .price input.price-input {
+            font-size: 20px;
+            width: 100px;
+            color: var(--green);
+        }
+
+        .btn-export {
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            margin: 40px auto 0;
+            background: linear-gradient(120deg, var(--green), var(--turq));
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: opacity 0.2s;
+            text-align: center;
+        }
+
+        .btn-export:hover {
+            opacity: 0.9;
+        }
+
+        /* Responsive */
+        @media (max-width: 800px) {
+            .grid3 {
+                grid-template-columns: 1fr;
+            }
+            .page {
+                padding: 32px 24px;
+            }
+            .tabla-container {
+                overflow-x: auto;
+            }
+        }
+        
+        @media print {
+            body { background: #fff; }
+            .page { padding: 24px; max-width: 100%; }
+            .plan, .tabla { break-inside: avoid; }
+            h1 .hl { -webkit-text-fill-color: var(--green); }
+            .btn-export { display: none; }
+            input.price-input { border: none; padding: 0; width: auto; background: transparent; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page">
+    
+    <div class="brand">
+        <!-- Generico hospital/medical icon as placeholder since logo not provided -->
+        <svg class="logo" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="4" width="20" height="16" rx="2" stroke="#1FA98F" stroke-width="2"/>
+            <path d="M12 8V16M8 12H16" stroke="#1FA98F" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="name">Mediluxe Health Solutions</div>
+    </div>
+
+    <div class="eyebrow">Professional Health Testing Portfolio</div>
+    <h1>Professional <span class="hl">Health Testing</span> Pricing</h1>
+    <div class="lead">Please fill out the corresponding prices in the fields below. When finished, click the Export button at the bottom of the page.</div>
+
+    <form id="pricingForm">
+        <div class="grid3">
+            <!-- Card 1 -->
+            <div class="plan">
+                <h3>Essential Testing</h3>
+                <div class="price"><small>From AED</small> <input type="number" class="price-input" name="Plan_Essential_Testing" placeholder="0.00"></div>
+                <div class="who"><strong>Who it is for:</strong> Clinics starting with individual precision health tests.</div>
+                <ul class="feats">
+                    <li>Single-test access</li>
+                    <li>Suitable for first patient evaluation</li>
+                    <li>Basic physician support</li>
+                    <li>Test-specific report</li>
+                    <li>Optional follow-up consultation</li>
+                </ul>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="plan reco">
+                <div class="badge reco">Recommended</div>
+                <h3>Precision Medicine Panel</h3>
+                <div class="price"><small>From AED</small> <input type="number" class="price-input" name="Plan_Precision_Medicine" placeholder="0.00"></div>
+                <div class="who"><strong>Who it is for:</strong> Physicians who want a more complete patient health overview.</div>
+                <ul class="feats">
+                    <li>Combination of genetic and biomarker testing</li>
+                    <li>Better clinical context</li>
+                    <li>Suitable for longevity, prevention and regenerative medicine</li>
+                    <li>Physician-oriented interpretation</li>
+                    <li>Optional personalized protocol support</li>
+                </ul>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="plan">
+                <h3>Full Ecosystem Program</h3>
+                <div class="price custom">Custom quotation</div>
+                <div class="who"><strong>Who it is for:</strong> Clinics looking for an integrated testing and personalized treatment workflow.</div>
+                <ul class="feats">
+                    <li>Multi-omics health testing</li>
+                    <li>Genetics, pharmacogenetics, biomarkers and AI-supported interpretation</li>
+                    <li>UltraPerson protocol support</li>
+                    <li>Optional European compounding pharmacy fulfillment</li>
+                    <li>Designed for recurring patient programs</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="tabla-container">
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th>Test / Product</th>
+                        <th>Category</th>
+                        <th>Clinical Purpose</th>
+                        <th>Clinic Price</th>
+                        <th>Patient Rec. Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="test-name">Eterna / ProGen</td>
+                        <td><span class="category-badge">Genetic Health Platform</span></td>
+                        <td>
+                            Integrated medical station combining genetic information, advanced analytics and wearable data.
+                            <div class="note">Designed as a central platform for personalized health monitoring.</div>
+                        </td>
+                        <td class="precio">AED <input type="number" class="price-input" name="Eterna_Clinic" placeholder="0.00"></td>
+                        <td class="precio">AED <input type="number" class="price-input" name="Eterna_Patient" placeholder="0.00"></td>
+                    </tr>
+                    <tr>
+                        <td class="test-name">ProGen 2.0</td>
+                        <td><span class="category-badge">Genomic Risk Analysis</span></td>
+                        <td>
+                            Foundational genetic analysis covering hereditary predispositions and biological traits.
+                            <div class="note">Part of the Eterna platform.</div>
+                        </td>
+                        <td class="precio">AED <input type="number" class="price-input" name="ProGen2_Clinic" placeholder="0.00"></td>
+                        <td class="precio">AED <input type="number" class="price-input" name="ProGen2_Patient" placeholder="0.00"></td>
+                    </tr>
+                    <tr>
+                        <td class="test-name">tellmeGen</td>
+                        <td><span class="category-badge">Pharmacogenetics</span></td>
+                        <td>
+                            Analysis of disease predisposition, carrier status and medication metabolism.
+                            <div class="note">Includes pharmacogenetic optimization for physician decision support.</div>
+                        </td>
+                        <td class="precio">AED <input type="number" class="price-input" name="tellmeGen_Clinic" placeholder="0.00"></td>
+                        <td class="precio">AED <input type="number" class="price-input" name="tellmeGen_Patient" placeholder="0.00"></td>
+                    </tr>
+                    <tr>
+                        <td class="test-name">Bloodo Cortisol</td>
+                        <td><span class="category-badge">Functional Biomarker</span></td>
+                        <td>
+                            Morning and evening cortisol assessment for HPA axis and circadian rhythm evaluation.
+                            <div class="note">Useful for stress, fatigue and sleep-related clinical programs.</div>
+                        </td>
+                        <td class="precio">AED <input type="number" class="price-input" name="BloodoCortisol_Clinic" placeholder="0.00"></td>
+                        <td class="precio">AED <input type="number" class="price-input" name="BloodoCortisol_Patient" placeholder="0.00"></td>
+                    </tr>
+                    <tr>
+                        <td class="test-name">Bloodo NAD</td>
+                        <td><span class="category-badge">Functional Biomarker</span></td>
+                        <td>
+                            Assessment of NAD+ and NADH levels related to cellular energy and longevity.
+                            <div class="note">Relevant for bioenergetics and longevity protocols.</div>
+                        </td>
+                        <td class="precio">AED <input type="number" class="price-input" name="BloodoNAD_Clinic" placeholder="0.00"></td>
+                        <td class="precio">AED <input type="number" class="price-input" name="BloodoNAD_Patient" placeholder="0.00"></td>
+                    </tr>
+                    <tr>
+                        <td class="test-name">Bloodo Testosterone+</td>
+                        <td><span class="category-badge">Functional Biomarker</span></td>
+                        <td>
+                            Advanced androgen and hormonal status assessment.
+                            <div class="note">Relevant for vitality, fatigue, performance and hormonal optimization.</div>
+                        </td>
+                        <td class="precio">AED <input type="number" class="price-input" name="BloodoTesto_Clinic" placeholder="0.00"></td>
+                        <td class="precio">AED <input type="number" class="price-input" name="BloodoTesto_Patient" placeholder="0.00"></td>
+                    </tr>
+                    <tr>
+                        <td class="test-name">24Genetics Julia</td>
+                        <td><span class="category-badge">AI Nutritional Assistant</span></td>
+                        <td>
+                            AI-supported nutritional guidance based on nutrigenetic information.
+                            <div class="note">Helps improve patient adherence through daily guidance.</div>
+                        </td>
+                        <td class="precio">AED <input type="number" class="price-input" name="Julia_Clinic" placeholder="0.00"></td>
+                        <td class="precio">AED <input type="number" class="price-input" name="Julia_Patient" placeholder="0.00"></td>
+                    </tr>
+                    <tr>
+                        <td class="test-name">24Genetics Jun</td>
+                        <td><span class="category-badge">AI Dermatogenetic</span></td>
+                        <td>
+                            AI-supported skin and hair recommendations based on genetic predispositions.
+                            <div class="note">Suitable for aesthetic, dermatology and hair health clinics.</div>
+                        </td>
+                        <td class="precio">AED <input type="number" class="price-input" name="Jun_Clinic" placeholder="0.00"></td>
+                        <td class="precio">AED <input type="number" class="price-input" name="Jun_Patient" placeholder="0.00"></td>
+                    </tr>
+                    <tr>
+                        <td class="test-name">UltraPerson</td>
+                        <td><span class="category-badge">AI Protocol Engine</span></td>
+                        <td>
+                            AI-supported generation of personalized supplementation protocols.
+                            <div class="note">Physician-in-the-loop model with final clinical approval.</div>
+                        </td>
+                        <td class="precio">AED <input type="number" class="price-input" name="UltraPerson_Clinic" placeholder="0.00"></td>
+                        <td class="precio">AED <input type="number" class="price-input" name="UltraPerson_Patient" placeholder="0.00"></td>
+                    </tr>
+                    <tr>
+                        <td class="test-name">Custom Compounding Support</td>
+                        <td><span class="category-badge">Pharmaceutical Fulfillment</span></td>
+                        <td>
+                            Optional fulfillment of personalized formulations through European compounding pharmacy network.
+                            <div class="note">Available when applicable and subject to regulatory and clinical requirements.</div>
+                        </td>
+                        <td class="precio">Custom</td>
+                        <td class="precio">Custom</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="foot">
+            <h4>Commercial Conditions</h4>
+            <ul>
+                <li>Prices are indicative and subject to confirmation.</li>
+                <li>Final pricing may vary depending on volume, clinic agreement and selected testing combination.</li>
+                <li>Testing services are intended to support healthcare professionals and should be interpreted within the appropriate clinical context.</li>
+                <li>Custom compounding fulfillment is optional and subject to availability, prescription requirements and applicable regulations.</li>
+            </ul>
+        </div>
+
+        <button type="button" class="btn-export" onclick="exportData()">Export Pricing Data</button>
+    </form>
+</div>
+
+<script>
+function exportData() {
+    const inputs = document.querySelectorAll('.price-input');
+    let csvContent = "data:text/csv;charset=utf-8,Item Name,Price (AED)\n";
+    let hasData = false;
+    
+    inputs.forEach(input => {
+        if(input.value.trim() !== '') {
+            hasData = true;
+            csvContent += `${input.name.replace(/_/g, ' ')},${input.value}\n`;
+        }
+    });
+    
+    if(!hasData) {
+        alert("Please fill out at least one price before exporting.");
+        return;
+    }
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "mediluxe_pricing_data.csv");
+    document.body.appendChild(link); // Required for Firefox
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+
+</body>
+</html>

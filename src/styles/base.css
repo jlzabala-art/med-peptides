@@ -418,12 +418,66 @@ button:focus-visible, a:focus-visible {
 
 /* Global table scroll behavior for mobile without wrappers */
 @media (max-width: 768px) {
-  table, .gcp-table {
+  table.gcp-table, .gcp-table {
     display: block !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    white-space: nowrap !important;
     width: 100% !important;
+  }
+  
+  table.gcp-table thead, .gcp-table thead {
+    display: none !important;
+  }
+
+  table.gcp-table tbody, .gcp-table tbody {
+    display: block !important;
+  }
+
+  table.gcp-table tr, .gcp-table tr {
+    display: flex !important;
+    flex-direction: column !important;
+    margin-bottom: 1rem !important;
+    border: 1px solid rgba(0,0,0,0.08) !important;
+    border-radius: 12px !important;
+    background: #fff;
+    padding: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  }
+
+  table.gcp-table td, .gcp-table td {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    text-align: left !important;
+    border-bottom: 1px solid rgba(0,0,0,0.04) !important;
+    padding: 0.75rem 0.5rem !important;
+    width: 100% !important;
+    box-sizing: border-box;
+    white-space: normal !important;
+    word-break: break-word;
+  }
+
+  table.gcp-table td:last-child, .gcp-table td:last-child {
+    border-bottom: none !important;
+    flex-direction: row !important;
+    justify-content: flex-end !important;
+  }
+
+  /* Exclude FullCalendar */
+  .regenera-calendar-wrapper table, .fc table {
+    display: table !important;
+    white-space: normal !important;
+    width: 100% !important;
+  }
+}
+
+/* Mobile Filter Bar & Form Responsiveness */
+@media (max-width: 768px) {
+  .gcp-filter-bar-container {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .gcp-filter-bar-search {
+    width: 100% !important;
+    min-width: 100% !important;
   }
 }
 

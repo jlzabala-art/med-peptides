@@ -1,6 +1,6 @@
 import React from 'react';
 import { Clock, User } from 'lucide-react';
-import ERPStatusBadge from './ERPStatusBadge';
+import { StatusChip } from '../ui';
 
 /**
  * ERPActivityTimeline
@@ -52,7 +52,7 @@ export default function ERPActivityTimeline({ events = [], currentStatus }) {
             {/* Content */}
             <div style={{ flex: 1, paddingBottom: '0.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <ERPStatusBadge status={event.status} size="sm" />
+                <StatusChip status={event.status} size="sm" />
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                   <Clock size={10} />
                   {date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}

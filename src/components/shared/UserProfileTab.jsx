@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { Checkbox } from '../../components/ui';
 import { useAuth } from '../../context/AuthContext';
 import { Mail, User as UserIcon, Phone, Lock, Save, AlertCircle, CheckCircle2, Camera, Globe, MapPin, Briefcase, BellRing } from 'lucide-react';
 import { getAuth, updatePassword, updateProfile } from 'firebase/auth';
@@ -330,15 +331,15 @@ export default function UserProfileTab() {
             </label>
             <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input type="checkbox" name="notif_email" checked={formData.notif_email} onChange={handleCheckboxChange} />
+                <Checkbox name="notif_email" checked={formData.notif_email} onChange={handleCheckboxChange} />
                 <span>Email Alerts</span>
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input type="checkbox" name="notif_sms" checked={formData.notif_sms} onChange={handleCheckboxChange} />
+                <Checkbox name="notif_sms" checked={formData.notif_sms} onChange={handleCheckboxChange} />
                 <span>SMS Notifications</span>
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input type="checkbox" name="notif_inApp" checked={formData.notif_inApp} onChange={handleCheckboxChange} />
+                <Checkbox name="notif_inApp" checked={formData.notif_inApp} onChange={handleCheckboxChange} />
                 <span>In-App Messages</span>
               </label>
             </div>

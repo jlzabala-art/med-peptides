@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mediluxe Health Solutions · Pricing Data Entry</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #1FA98F;
+            --turq: #3FB8C7;
+            --gold: #B98E4C;
+            --ink: #13201d;
+            --muted: #5d6b66;
+            --line: #e6ece9;
+            --bg: #f4f7f6;
+            --card: #ffffff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            padding: 48px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card);
+            border-radius: 16px;
+            border: 1px solid var(--line);
+            padding: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .brand .name {
+            font-weight: 800;
+            letter-spacing: .18em;
+            font-size: 15px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        h1 .hl {
+            background: linear-gradient(120deg, var(--green), var(--turq));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .lead {
+            text-align: center;
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 40px;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+        }
+
+        .form-section h3 {
+            font-size: 18px;
+            color: var(--green);
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--line);
+            padding-bottom: 8px;
+        }
+
+        .form-group {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 20px;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .form-group.header {
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 2px solid var(--line);
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .item-desc {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 400;
+            margin-top: 4px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ink);
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px rgba(31, 169, 143, 0.1);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper::before {
+            content: "AED";
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .input-wrapper input {
+            padding-left: 45px;
+        }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            background: linear-gradient(120deg, var(--green), var(--turq));
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: opacity 0.2s;
+            margin-top: 40px;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+        }
+
+        .success-msg {
+            display: none;
+            background: rgba(31, 169, 143, 0.1);
+            color: var(--green);
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            margin-top: 20px;
+            border: 1px solid var(--green);
+        }
+
+        @media (max-width: 600px) {
+            .form-group {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .form-group.header {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="brand">
+        <svg class="logo" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="4" width="20" height="16" rx="2" stroke="#1FA98F" stroke-width="2"/>
+            <path d="M12 8V16M8 12H16" stroke="#1FA98F" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="name">Mediluxe Health Solutions</div>
+    </div>
+    
+    <h1>Pricing <span class="hl">Data Entry</span></h1>
+    <div class="lead">Please fill out the corresponding prices for the Professional Health Testing Portfolio. Once completed, click the button at the bottom to export the data and send it back to us.</div>
+
+    <form id="pricingForm">
+        
+        <!-- Plans -->
+        <div class="form-section">
+            <h3>Pricing Plans</h3>
+            <div class="form-group header">
+                <div>Plan Name</div>
+                <div>Starting Price</div>
+                <div></div>
+            </div>
+            
+            <div class="form-group">
+                <div class="item-name">Essential Testing
+                    <div class="item-desc">Clinics starting with individual precision health tests.</div>
+                </div>
+                <div class="input-wrapper">
+                    <input type="text" name="Essential Testing" placeholder="0.00">
+                </div>
+                <div></div>
+            </div>
+            
+            <div class="form-group">
+                <div class="item-name">Precision Medicine Panel
+                    <div class="item-desc">Physicians who want a more complete patient health overview.</div>
+                </div>
+                <div class="input-wrapper">
+                    <input type="text" name="Precision Medicine Panel" placeholder="0.00">
+                </div>
+                <div></div>
+            </div>
+        </div>
+
+        <!-- Individual Tests -->
+        <div class="form-section">
+            <h3>Individual Tests & Platforms</h3>
+            <div class="form-group header">
+                <div>Test / Product Name</div>
+                <div>Clinic Price</div>
+                <div>Patient Rec. Price</div>
+            </div>
+
+            <div class="form-group">
+                <div class="item-name">Eterna / ProGen
+                    <div class="item-desc">Genetic Health Platform</div>
+                </div>
+                <div class="input-wrapper"><input type="text" name="Eterna_Clinic" placeholder="0.00"></div>
+                <div class="input-wrapper"><input type="text" name="Eterna_Patient" placeholder="0.00"></div>
+            </div>
+
+            <div class="form-group">
+                <div class="item-name">ProGen 2.0
+                    <div class="item-desc">Genomic Risk Analysis</div>
+                </div>
+                <div class="input-wrapper"><input type="text" name="ProGen2_Clinic" placeholder="0.00"></div>
+                <div class="input-wrapper"><input type="text" name="ProGen2_Patient" placeholder="0.00"></div>
+            </div>
+
+            <div class="form-group">
+                <div class="item-name">tellmeGen
+                    <div class="item-desc">Pharmacogenetics</div>
+                </div>
+                <div class="input-wrapper"><input type="text" name="tellmeGen_Clinic" placeholder="0.00"></div>
+                <div class="input-wrapper"><input type="text" name="tellmeGen_Patient" placeholder="0.00"></div>
+            </div>
+
+            <div class="form-group">
+                <div class="item-name">Bloodo Cortisol
+                    <div class="item-desc">Functional Biomarker</div>
+                </div>
+                <div class="input-wrapper"><input type="text" name="BloodoCortisol_Clinic" placeholder="0.00"></div>
+                <div class="input-wrapper"><input type="text" name="BloodoCortisol_Patient" placeholder="0.00"></div>
+            </div>
+
+            <div class="form-group">
+                <div class="item-name">Bloodo NAD
+                    <div class="item-desc">Functional Biomarker</div>
+                </div>
+                <div class="input-wrapper"><input type="text" name="BloodoNAD_Clinic" placeholder="0.00"></div>
+                <div class="input-wrapper"><input type="text" name="BloodoNAD_Patient" placeholder="0.00"></div>
+            </div>
+
+            <div class="form-group">
+                <div class="item-name">Bloodo Testosterone+
+                    <div class="item-desc">Functional Biomarker</div>
+                </div>
+                <div class="input-wrapper"><input type="text" name="BloodoTesto_Clinic" placeholder="0.00"></div>
+                <div class="input-wrapper"><input type="text" name="BloodoTesto_Patient" placeholder="0.00"></div>
+            </div>
+
+            <div class="form-group">
+                <div class="item-name">24Genetics Julia
+                    <div class="item-desc">AI Nutritional Assistant</div>
+                </div>
+                <div class="input-wrapper"><input type="text" name="Julia_Clinic" placeholder="0.00"></div>
+                <div class="input-wrapper"><input type="text" name="Julia_Patient" placeholder="0.00"></div>
+            </div>
+
+            <div class="form-group">
+                <div class="item-name">24Genetics Jun
+                    <div class="item-desc">AI Dermatogenetic</div>
+                </div>
+                <div class="input-wrapper"><input type="text" name="Jun_Clinic" placeholder="0.00"></div>
+                <div class="input-wrapper"><input type="text" name="Jun_Patient" placeholder="0.00"></div>
+            </div>
+
+            <div class="form-group">
+                <div class="item-name">UltraPerson
+                    <div class="item-desc">AI Protocol Engine</div>
+                </div>
+                <div class="input-wrapper"><input type="text" name="UltraPerson_Clinic" placeholder="0.00"></div>
+                <div class="input-wrapper"><input type="text" name="UltraPerson_Patient" placeholder="0.00"></div>
+            </div>
+
+        </div>
+
+        <button type="button" class="btn-submit" onclick="exportData()">Export Data</button>
+        <div id="successMsg" class="success-msg">Data exported successfully! Please attach the downloaded file to your email.</div>
+    </form>
+</div>
+
+<script>
+function exportData() {
+    const form = document.getElementById('pricingForm');
+    const formData = new FormData(form);
+    
+    // Create CSV content
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Item Name,Type,Price\n";
+    
+    for (let [key, value] of formData.entries()) {
+        if(value.trim() !== '') {
+            csvContent += `${key.replace(/_/g, ' ')},Price,${value}\n`;
+        }
+    }
+    
+    // Download the file
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "mediluxe_pricing_data.csv");
+    document.body.appendChild(link); // Required for FF
+    link.click();
+    
+    document.getElementById('successMsg').style.display = 'block';
+}
+</script>
+
+</body>
+</html>

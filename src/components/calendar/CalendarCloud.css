@@ -1,195 +1,53 @@
 /* CalendarCloud.css - Mobile-first clean aesthetic */
 
 :root {
-  --cal-color-primary: var(--color-primary, #2563eb);
-  --cal-color-border: var(--border, #e5e7eb);
-  --cal-color-text: var(--color-text-main, #1f2937);
-  --cal-color-text-muted: var(--color-text-secondary, #6b7280);
-  --cal-bg-header: transparent;
+  --cal-color-primary: #1FA98F;
+  --cal-color-primary-hover: #188d77;
+  --cal-color-border: #e6ece9;
+  --cal-color-text: #13201d;
+  --cal-color-text-muted: #5d6b66;
+  --cal-color-text-soft: #7d8a85;
+  --cal-bg-header: #f4f7f6;
+  --cal-bg-surface: #ffffff;
 }
 
 /* Wrapper */
 .regenera-calendar-wrapper {
-  background: var(--color-bg-surface, #ffffff);
+  background: var(--cal-bg-surface);
   border-radius: 12px;
   padding: 1.5rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--cal-color-border);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  /* overflow-x:hidden was killing FullCalendar's internal height calc — removed */
   overflow: visible;
+  position: relative;
 }
 
 .regenera-calendar-wrapper .fc {
   font-family: inherit;
   color: var(--cal-color-text);
   width: 100%;
-  /* Do NOT set height:100% — it collapses when parent is auto */
+  --fc-border-color: var(--cal-color-border);
+  --fc-page-bg-color: var(--cal-bg-surface);
 }
 
-/* Force the scrollgrid to NOT use liquid-absolute positioning */
-.regenera-calendar-wrapper .fc-scroller-liquid-absolute {
-  position: relative !important;
-  height: auto !important;
-  overflow: visible !important;
+.regenera-calendar-wrapper .fc a {
+  color: var(--cal-color-text) !important;
+  text-decoration: none;
 }
 
-/* Force each day cell frame to have minimum height so grid is always visible */
+.regenera-calendar-wrapper .fc-theme-standard td, 
+.regenera-calendar-wrapper .fc-theme-standard th {
+  border: 1px solid var(--fc-border-color) !important;
+}
+
 .regenera-calendar-wrapper .fc-daygrid-day-frame {
   min-height: 80px;
 }
-
-/* Also target the td directly for maximum specificity */
 .regenera-calendar-wrapper .fc-daygrid-day {
   min-height: 80px !important;
 }
 
-/* Ensure the daygrid body table rows have height */
-.regenera-calendar-wrapper .fc-daygrid-body tr {
-  height: auto !important;
-}
-
-/* Prevent FullCalendar scrollgrid from collapsing */
-.regenera-calendar-wrapper .fc-view-harness {
-  min-height: 400px !important;
-  height: auto !important;
-}
-
-.regenera-calendar-wrapper .fc-scrollgrid {
-  border: none !important;
-}
-
-/* Remove heavy borders from the grid */
-.regenera-calendar-wrapper .fc-theme-standard td, 
-.regenera-calendar-wrapper .fc-theme-standard th {
-  border-color: var(--cal-color-border);
-}
-
-/* Clean header */
-.regenera-calendar-wrapper .fc-col-header-cell {
-  background-color: var(--cal-bg-header);
-  padding: 12px 0;
-  font-weight: 500;
-  font-size: 0.85rem;
-  color: var(--cal-color-text-muted);
-  text-transform: uppercase;
-  border-left: none;
-  border-right: none;
-}
-
-.regenera-calendar-wrapper .fc-daygrid-day-number {
-  font-size: 0.85rem;
-  color: var(--cal-color-text-muted);
-  padding: 8px;
-  font-weight: 500;
-}
-
-/* Today highlight */
-.regenera-calendar-wrapper .fc-day-today {
-  background-color: rgba(37, 99, 235, 0.03) !important;
-}
-
-.regenera-calendar-wrapper .fc-day-today .fc-daygrid-day-number {
-  color: var(--cal-color-primary);
-  font-weight: 700;
-}
-
-/* Events */
-.regenera-calendar-wrapper .fc-event {
-  border-radius: 6px;
-  padding: 3px 6px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: none;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  margin: 1px 4px;
-}
-
-.custom-fc-event-content {
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Simple Dialog (Modal) */
-.cal-dialog-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem;
-}
-
-.cal-dialog {
-  background: white;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 440px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--border);
-  z-index: 10000;
-}
-
-.cal-dialog-header {
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.cal-dialog-title {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.cal-dialog-body {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.cal-form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.cal-form-label {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-}
-
-.cal-input {
-  padding: 0.6rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.9rem;
-  background: var(--color-bg-surface, #ffffff);
-  color: var(--color-text-main, #1f2937);
-}
-.cal-input:focus {
-  outline: none;
-  border-color: var(--cal-color-primary);
-}
-
-.cal-dialog-footer {
-  padding: 1.25rem 1.5rem;
-  border-top: 1px solid var(--border);
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  background: rgba(0,0,0,0.02);
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
-}
+/* FullCalendar Overrides removed for stability */
 
 /* ─── Custom Toolbar Layout ─── */
 .calendar-toolbar {
@@ -207,7 +65,6 @@
   gap: 0.5rem;
   flex-wrap: wrap;
   flex: 1 1 auto;
-  min-width: 0;
 }
 
 .cal-toolbar-right {
@@ -215,196 +72,336 @@
   align-items: center;
   gap: 0.5rem;
   flex-shrink: 0;
-  min-width: 0;
-  max-width: 160px;
 }
 
-.cal-toolbar-right select {
-  max-width: 140px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.cal-filter-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+.cal-filter-bar::-webkit-scrollbar {
+  display: none;
 }
 
-/* Small button variant */
-.btn-sm {
-  padding: 0.3rem 0.7rem !important;
-  font-size: 0.8rem !important;
-}
-
-.regenera-calendar-wrapper .fc .fc-button-primary {
-  background-color: var(--color-bg-surface, #ffffff);
-  border: 1px solid var(--border, #e5e7eb);
-  color: var(--color-text-main, #374151);
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  font-weight: 500;
-  text-transform: capitalize;
+.cal-filter-pill {
+  background: var(--cal-bg-header);
+  border: 1px solid var(--cal-color-border);
+  color: var(--cal-color-text-muted);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
   transition: all 0.2s;
-  border-radius: 6px;
-  padding: 0.35rem 0.75rem;
+}
+.cal-filter-pill.active {
+  background: rgba(31, 169, 143, 0.1);
+  color: var(--cal-color-primary);
+  border-color: var(--cal-color-primary);
 }
 
-.regenera-calendar-wrapper .fc .fc-button-primary:hover {
+/* Dialog / Modal / Bottom Sheet */
+.cal-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(19, 32, 29, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.cal-dialog {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 24px 40px -10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--cal-color-border);
+  z-index: 10000;
+}
+
+.cal-dialog-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--cal-color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cal-dialog-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--cal-color-text);
+  letter-spacing: -0.02em;
+}
+
+.cal-dialog-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.cal-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cal-form-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4b5563;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cal-input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 0.95rem;
   background-color: #f9fafb;
-  color: var(--color-text-main);
+  color: #111827;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+.cal-input:hover {
   border-color: #d1d5db;
+  background-color: #f3f4f6;
+}
+.cal-input:focus {
+  outline: none;
+  background-color: #ffffff;
+  border-color: var(--cal-color-primary);
+  box-shadow: 0 0 0 4px rgba(31, 169, 143, 0.15);
 }
 
-.regenera-calendar-wrapper .fc .fc-button-primary:disabled {
-  opacity: 0.6;
+.cal-dialog-footer {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--cal-color-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  background: var(--cal-bg-header);
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+/* Empty State */
+.empty-calendar-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  background: var(--cal-bg-header);
+  border-radius: 12px;
+  border: 1px dashed #c2ccc8;
+  margin: 20px 0;
+}
+.empty-calendar-state .empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+.empty-calendar-state h4 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: var(--cal-color-text);
+}
+.empty-calendar-state p {
+  font-size: 0.9rem;
+  color: var(--cal-color-text-muted);
+  margin-bottom: 1.5rem;
+}
+.empty-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Modern Agenda View (.fc-list) */
+.regenera-calendar-wrapper .fc-list {
+  border: none !important;
+}
+.regenera-calendar-wrapper .fc-list-day-cushion {
+  background: transparent !important;
+  padding: 1.5rem 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--cal-color-text);
+}
+.regenera-calendar-wrapper .fc-list-day:first-child .fc-list-day-cushion {
+  padding-top: 0.5rem;
+}
+.regenera-calendar-wrapper .fc-list-event td {
+  padding: 1rem !important;
+  border: none !important;
+  background: var(--cal-bg-surface);
+  border-bottom: 1px solid var(--cal-color-border) !important;
+}
+.regenera-calendar-wrapper .fc-list-event:hover td {
+  background: var(--cal-bg-header);
+  cursor: pointer;
+}
+.regenera-calendar-wrapper .fc-list-event-time {
+  font-weight: 700;
+  color: var(--cal-color-text-muted);
+  font-size: 0.85rem;
+  width: 90px;
+}
+.regenera-calendar-wrapper .fc-list-event-graphic {
+  display: none; /* Hide the default colored dot, we render custom content */
+}
+.regenera-calendar-wrapper .fc-list-event-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* FC Buttons */
+.regenera-calendar-wrapper .fc .fc-button-primary {
+  background-color: var(--cal-bg-surface);
+  border: 1px solid var(--cal-color-border);
+  color: var(--cal-color-text-muted);
+  font-weight: 600;
+  text-transform: capitalize;
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  transition: all 0.2s;
+  box-shadow: none;
+}
+.regenera-calendar-wrapper .fc .fc-button-primary:hover {
+  background-color: var(--cal-bg-header);
+  color: var(--cal-color-text);
+}
+.regenera-calendar-wrapper .fc .fc-button-active,
+.regenera-calendar-wrapper .fc .fc-button-primary:active {
+  background-color: rgba(31, 169, 143, 0.1) !important;
+  border-color: var(--cal-color-primary) !important;
+  color: var(--cal-color-primary) !important;
+}
+
+.btn {
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+.btn-primary {
+  background-color: var(--cal-color-primary);
+  color: white;
+}
+.btn-primary:hover {
+  background-color: var(--cal-color-primary-hover);
+}
+.btn-secondary {
+  background-color: var(--cal-bg-header);
+  color: var(--cal-color-text);
+  border: 1px solid var(--cal-color-border);
+}
+.btn-secondary:hover {
+  background-color: #eef3f1;
+}
+.btn-sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
 }
 
 /* ─── Mobile Responsiveness ─── */
 @media (max-width: 767px) {
   .regenera-calendar-wrapper {
-    padding: 0.75rem;
+    padding: 0.5rem 0.25rem;
     border-radius: 8px;
   }
 
-  /* Toolbar stacks into two rows: buttons top, TZ selector below */
   .calendar-toolbar {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
   }
 
-  .cal-toolbar-left {
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-
-  .cal-toolbar-right {
-    max-width: 100%;
-    width: 100%;
-  }
-
-  .cal-toolbar-right select {
+  .cal-toolbar-left, .cal-toolbar-right {
+    justify-content: space-between;
     width: 100%;
     max-width: 100%;
-    font-size: 0.8rem;
   }
 
-  /* Hide desktop-only items */
   .hide-mobile {
     display: none !important;
   }
 
-  /* FullCalendar header: stack chunks vertically, each centered */
+  /* FullCalendar header vertical stacking */
   .regenera-calendar-wrapper .fc-toolbar {
     flex-direction: column;
-    gap: 0.35rem;
-    align-items: stretch;
+    gap: 0.75rem;
+    margin-bottom: 1rem !important;
   }
   .regenera-calendar-wrapper .fc-toolbar-chunk {
     display: flex;
     justify-content: center;
-    flex-wrap: wrap;
-    gap: 0.2rem;
+    width: 100%;
   }
-  /* Make view-switcher buttons as compact as possible */
-  .regenera-calendar-wrapper .fc .fc-button-primary {
-    padding: 0.25rem 0.45rem;
-    font-size: 0.74rem;
-    line-height: 1.2;
+  /* View switcher stretch */
+  .regenera-calendar-wrapper .fc-toolbar-chunk:last-child .fc-button-group {
+    width: 100%;
+    display: flex;
   }
+  .regenera-calendar-wrapper .fc-toolbar-chunk:last-child .fc-button {
+    flex: 1;
+  }
+  
   .regenera-calendar-wrapper .fc-toolbar-title {
-    font-size: 0.95rem !important;
-    text-align: center;
-    line-height: 1.3;
-    font-weight: 600;
+    font-size: 1.1rem !important;
   }
 
-  /* Day grid cells */
-  .regenera-calendar-wrapper .fc-col-header-cell {
-    padding: 6px 0;
-    font-size: 0.7rem;
-  }
-  .regenera-calendar-wrapper .fc-daygrid-day-number {
-    font-size: 0.72rem;
-    padding: 4px;
-  }
-  .regenera-calendar-wrapper .fc-event {
-    font-size: 0.65rem;
-    padding: 1px 3px;
-    margin: 1px 2px;
-  }
-
-  /* ─── List view (agenda) styles for mobile ─── */
-  .regenera-calendar-wrapper .fc-list-day-cushion {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8rem;
-    background: rgba(37, 99, 235, 0.05);
-  }
-  .regenera-calendar-wrapper .fc-list-event td {
-    padding: 0.6rem 0.75rem;
-    font-size: 0.85rem;
-  }
-  .regenera-calendar-wrapper .fc-list-event-time {
-    font-size: 0.75rem;
-    color: var(--cal-color-text-muted);
-    white-space: nowrap;
-  }
-  .regenera-calendar-wrapper .fc-list-event-title {
-    font-weight: 500;
-  }
-  .regenera-calendar-wrapper .fc-list-empty {
-    padding: 2rem;
-    text-align: center;
-    color: var(--cal-color-text-muted);
-    font-size: 0.9rem;
-  }
-
-  /* Modal: full-width, full safe-area height on phones */
+  /* Bottom Sheet Modal */
   .cal-dialog-overlay {
     padding: 0;
     align-items: flex-end;
   }
   .cal-dialog {
     max-width: 100%;
-    width: 100%;
-    border-radius: 16px 16px 0 0;
-    max-height: 90dvh;
-    overflow-y: auto;
+    border-radius: 20px 20px 0 0;
+    max-height: 92dvh;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .cal-dialog form {
-    max-height: unset !important;
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
   }
-  .cal-dialog-body {
-    padding: 1rem;
-  }
-  .cal-dialog-header {
-    padding: 1rem 1rem 0.75rem;
-  }
+  
   .cal-dialog-footer {
-    padding: 0.75rem 1rem;
-    /* Push above iOS home bar */
-    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
   }
-}
-
-@media (max-width: 480px) {
-  .regenera-calendar-wrapper {
-    padding: 0.5rem;
+  
+  /* Make inputs taller for touch */
+  .cal-input {
+    padding: 0.8rem;
+    font-size: 1rem;
   }
-
-  /* Squeeze all 4 view buttons to fit */
-  .regenera-calendar-wrapper .fc .fc-button-primary {
-    padding: 0.2rem 0.35rem;
-    font-size: 0.7rem;
+  
+  /* Optimize touch targets */
+  .btn, .regenera-calendar-wrapper .fc .fc-button {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
-
-  /* Sync with JS height={550} */
-  .regenera-calendar-wrapper .fc-view-harness {
-    min-height: 420px !important;
-  }
-}
-
-
-.regenera-calendar-wrapper .fc .fc-button-active,
-.regenera-calendar-wrapper .fc .fc-button-primary:active {
-  background-color: #f3f4f6 !important;
-  border-color: #d1d5db !important;
-  color: var(--cal-color-primary) !important;
-  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06) !important;
 }

@@ -90,9 +90,11 @@ export function Tabs({ tabs = [], defaultTab, activeTab: controlledTab, onChange
       </div>
 
       {/* Tab Content */}
-      <div style={{ flex: 1, paddingTop: '1.5rem', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-        {activeContent}
-      </div>
+      {activeContent !== undefined && activeContent !== null && (
+        <div style={{ flex: 1, paddingTop: '1.5rem', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          {activeContent}
+        </div>
+      )}
     </div>
   );
 }
