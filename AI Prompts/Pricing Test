@@ -1,0 +1,160 @@
+Aquí tienes un prompt completo para AntiGravity:
+
+Create a modern, responsive HTML pricing section for a healthcare / precision medicine website.
+
+The section should present the following product line:
+
+Title:
+Functional Biomarker Testing
+
+Subtitle:
+Advanced biomarker tests designed to support clinical decisions in stress, hormonal balance, cellular energy, recovery, performance, and longevity programs.
+
+Visual style:
+
+* Premium medical / longevity aesthetic
+* Clean white background with soft mint or light teal accents
+* Modern SaaS-style pricing cards
+* Rounded corners
+* Subtle shadows
+* Clear pricing hierarchy
+* Mobile responsive
+* Suitable for doctors, clinics, longevity centers and wellness clinics
+* Use professional typography similar to Inter, Plus Jakarta Sans or Manrope
+* Avoid spreadsheet-style layout
+* Make it look like a commercial pricing page
+
+Main pricing cards:
+Create three product pricing cards in a row on desktop and stacked on mobile.
+
+Card 1:
+Product name: Cortisol Test
+Price: AED 750
+Tagline: Circadian rhythm and stress response
+What it measures: Morning and evening cortisol levels (AM/PM ratio)
+Clinical applications: HPA axis assessment, stress adaptation, sleep optimization, burnout evaluation
+Key benefits:
+
+* Circadian rhythm assessment
+* Hormonal regulation insights
+* Energy and recovery monitoring
+* Simple blood spot sample collection
+* Certified clinical laboratory analysis in Europe
+* Free GCC shipping
+
+Card 2:
+Product name: Testosterone+ Test
+Price: AED 850
+Tagline: Hormonal balance and vitality
+What it measures: Testosterone and related hormones
+Clinical applications: Men’s health, vitality programs, performance optimization, hormonal balance evaluation
+Key benefits:
+
+* Energy and recovery support
+* Libido and vitality evaluation
+* Stress resilience assessment
+* Hormonal optimization
+* Simple blood spot sample collection
+* Certified clinical laboratory analysis in Europe
+* Free GCC shipping
+
+Card 3:
+Product name: NAD Level Test
+Price: AED 1,250
+Tagline: Cellular energy and longevity
+What it measures: Total NAD status (NAD+ / NADH)
+Clinical applications: Longevity programs, mitochondrial function, cellular energy assessment
+Key benefits:
+
+* Cellular energy monitoring
+* Metabolic optimization
+* Cognitive performance support
+* Longevity monitoring
+* Simple blood spot sample collection
+* Certified clinical laboratory analysis in Europe
+* Free GCC shipping
+
+Highlight:
+
+* Make NAD Level Test visually premium or “Longevity Focus”
+* Add a small badge: “Longevity Focus”
+
+Packages section:
+Below the pricing cards, create a “Recommended Clinical Packages” section with three package cards.
+
+Package 1:
+Name: Stress & Recovery
+Included tests: Cortisol + NAD
+Price: AED 2,000
+Recommended for: Fatigue, burnout, sleep optimization, recovery support
+
+Package 2:
+Name: Performance & Vitality
+Included tests: Testosterone+ + NAD
+Price: AED 2,100
+Recommended for: Performance, vitality, hormonal balance, anti-aging programs
+
+Package 3:
+Name: Complete Functional Biomarker Panel
+Included tests: Cortisol + Testosterone+ + NAD
+Price: AED 2,850
+Badge: Recommended
+Recommended for: Comprehensive assessment of stress, hormones, energy metabolism and longevity
+
+Comparison table:
+Create a clean comparison table below the packages.
+
+Columns:
+Feature | Cortisol | Testosterone+ | NAD
+
+Rows:
+Simple blood spot sample collection | Yes | Yes | Yes
+Certified clinical laboratory analysis in Europe | Yes | Yes | Yes
+Free GCC shipping | Yes | Yes | Yes
+Hormonal assessment | Yes | Yes | No
+Circadian rhythm analysis | Yes | No | No
+Cellular energy evaluation | No | No | Yes
+Longevity monitoring | No | No | Yes
+
+Volume pricing section:
+Create an accordion or clean tabbed section called “Distributor Volume Pricing”.
+
+Include three tables:
+
+Cortisol Test:
+1–19 units: AED 750
+20–99 units: AED 712.50
+100–999 units: AED 637.50
+1000+ units: AED 412.50
+
+Testosterone+ Test:
+1–19 units: AED 850
+20–99 units: AED 782
+100–999 units: AED 722.50
+1000+ units: AED 637.50
+
+NAD Level Test:
+1–19 units: AED 1,250
+20–99 units: AED 1,062.50
+100–999 units: AED 875
+1000+ units: AED 481.25
+
+Commercial note:
+Add a small professional note at the bottom:
+Prices are intended for professional partners and distributors. Final pricing may vary depending on volume, territory, logistics, and clinical program structure.
+
+UX requirements:
+
+* Use pricing cards instead of a spreadsheet.
+* Use icons or small visual markers for stress, hormones and longevity.
+* Add clear CTA buttons:
+    “Request Professional Pricing”
+    “Build Clinical Package”
+* On mobile, cards should stack vertically.
+* Comparison table should be horizontally scrollable on mobile.
+* Volume pricing should be collapsible to avoid overwhelming the page.
+* Use AED consistently.
+* Make the section feel premium and trustworthy, not like a basic table.
+
+Deliverable:
+Generate clean HTML and CSS in a single file, easy to copy into a web application.
