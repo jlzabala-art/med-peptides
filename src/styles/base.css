@@ -481,6 +481,15 @@ button:focus-visible, a:focus-visible {
   }
 }
 
+/* Admin Dashboard Grids on Mobile */
+@media (max-width: 1024px) {
+  .amd-bottom-grid,
+  .amd-widget-grid,
+  .amd-customize-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* Footer Enhancements */
 .footer-grid {
   display: grid;

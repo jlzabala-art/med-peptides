@@ -1242,7 +1242,7 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
             </span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '2rem' }}>
+          <div className="amd-customize-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '2rem' }}>
             {/* KPI list reordering & visibility */}
             <div>
               <h4
