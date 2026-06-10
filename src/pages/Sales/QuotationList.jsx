@@ -4,7 +4,7 @@ import { db } from '../../firebase';
 import { FileText, Plus, X, CheckCircle, Sparkles, Building2, Calendar, User, Mail, PlusCircle, Save, ExternalLink } from 'lucide-react';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import ERPListDetailLayout from '../../components/shared/ERPListDetailLayout';
-import { StatusChip , Checkbox } from '../../components/ui';
+import { StatusChip, Checkbox, TextField } from '../../components/ui';
 import ERPActivityTimeline from '../../components/shared/ERPActivityTimeline';
 import B2BOrderBuilderTable from '../../components/admin/B2BOrderBuilderTable';
 import ZohoPaperPreview from '../../components/admin/ZohoPaperPreview';

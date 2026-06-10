@@ -1558,11 +1558,11 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
         })}
       </div>
 
-      {/* Two Column Layout: Recent Registrations & System Status */}
+      {/* Single Column Layout: Recent Registrations */}
       <div
         className="amd-bottom-grid"
         style={{
-          gridTemplateColumns: showPanel('systemStatus') ? '1.6fr 1fr' : '1fr',
+          gridTemplateColumns: '1fr',
         }}
       >
         {/* Recent Registrations Table */}
@@ -1574,175 +1574,61 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
             formatDate={formatDate}
           />
         )}
+      </div>
 
-        {/* System Status & Health Panel (GCP Style) */}
-        {showPanel('systemStatus') && (
-          <Card style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <CardHeader
-              icon={Server}
-              title="Infrastructure Status"
-            />
-            <CardContent>
-
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem',
-                  marginBottom: '1.5rem',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    paddingBottom: '0.5rem',
-                    borderBottom: '1px solid #dadce0',
-                  }}
-                >
-                  <span style={{ fontSize: '0.8rem', color: '#5f6368', fontWeight: 500 }}>
-                    Firestore Database
-                  </span>
-                  <span
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.4rem',
-                      fontSize: '0.8rem',
-                      fontWeight: 700,
-                      color: '#0f9d58',
-                    }}
-                  >
-                    <span className="admin-pill-status-dot admin-pill-status-dot--pulse" />{' '}
-                    Connected
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    paddingBottom: '0.5rem',
-                    borderBottom: '1px solid #dadce0',
-                  }}
-                >
-                  <span style={{ fontSize: '0.8rem', color: '#5f6368', fontWeight: 500 }}>
-                    Clinical AI Engine
-                  </span>
-                  <span
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.4rem',
-                      fontSize: '0.8rem',
-                      fontWeight: 700,
-                      color: '#1a73e8',
-                    }}
-                  >
-                    <Sparkles size={13} /> gemini-2.5-pro
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    paddingBottom: '0.5rem',
-                    borderBottom: '1px solid #dadce0',
-                  }}
-                >
-                  <span style={{ fontSize: '0.8rem', color: '#5f6368', fontWeight: 500 }}>
-                    B2B Router Link
-                  </span>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#202124' }}>
-                    Active
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    paddingBottom: '0.5rem',
-                    borderBottom: '1px solid #dadce0',
-                  }}
-                >
-                  <span style={{ fontSize: '0.8rem', color: '#5f6368', fontWeight: 500 }}>
-                    Query Latency
-                  </span>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#202124' }}>
-                    {metrics.systemHealth}
-                  </span>
-                </div>
-
-                <div
-                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                >
-                  <span style={{ fontSize: '0.8rem', color: '#5f6368', fontWeight: 500 }}>
-                    Location Context
-                  </span>
-                  <span
-                    style={{
-                      fontSize: '0.8rem',
-                      fontWeight: 700,
-                      color: '#202124',
-                    }}
-                  >
-                    regenpept-prod
-                  </span>
-                </div>
+      {/* System Status & Health Panel (Full Width Horizontal) */}
+      {showPanel('systemStatus') && (
+        <Card style={{ marginBottom: '1.5rem' }}>
+          <CardHeader
+            icon={Server}
+            title="Infrastructure Status"
+          />
+          <CardContent>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gap: '1rem',
+              alignItems: 'center',
+              paddingBottom: flushSuccess ? '0.5rem' : '0',
+            }}>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: '#5f6368', display: 'block', marginBottom: '0.25rem' }}>Firestore Database</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: '#0f9d58' }}>
+                  <span className="admin-pill-status-dot admin-pill-status-dot--pulse" /> Connected
+                </span>
               </div>
-
-            <div
-              style={{
-                marginTop: 'auto',
-                padding: '1rem',
-                borderRadius: '6px',
-                backgroundColor: '#f8f9fa',
-                border: '1px solid #dadce0',
-              }}
-            >
-              <h4
-                style={{
-                  margin: '0 0 0.4rem 0',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  color: '#202124',
-                }}
-              >
-                Cache Management
-              </h4>
-              <p
-                style={{
-                  margin: '0 0 0.85rem 0',
-                  fontSize: '0.72rem',
-                  color: '#5f6368',
-                  lineHeight: '1.4',
-                }}
-              >
-                Flush application state cache to force immediate reload of catalog products and
-                layout rules.
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: '#5f6368', display: 'block', marginBottom: '0.25rem' }}>Clinical AI Engine</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: '#1a73e8' }}>
+                  <Sparkles size={13} /> gemini-2.5-pro
+                </span>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: '#5f6368', display: 'block', marginBottom: '0.25rem' }}>B2B Router Link</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#202124' }}>Active</span>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: '#5f6368', display: 'block', marginBottom: '0.25rem' }}>Query Latency</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#202124' }}>{metrics.systemHealth}</span>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: '#5f6368', display: 'block', marginBottom: '0.25rem' }}>Location Context</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#202124' }}>regenpept-prod</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', alignSelf: 'center' }}>
                 <button
                   onClick={handleFlushCache}
                   disabled={isFlushing}
                   className="admin-quick-btn"
                   style={{
-                    padding: '0.45rem 1rem',
+                    padding: '0.4rem 1rem',
                     borderRadius: '4px',
-                    width: '100%',
-                    justifyContent: 'center',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem',
                     border: '1px solid #dadce0',
                     backgroundColor: 'var(--color-bg-surface)',
-                    fontSize: '0.78rem',
+                    fontSize: '0.75rem',
                     fontWeight: 600,
                     cursor: isFlushing ? 'default' : 'pointer',
                   }}
@@ -1750,36 +1636,22 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
                     if (!isFlushing) e.currentTarget.style.backgroundColor = '#f8f9fa';
                   }}
                   onMouseLeave={(e) => {
-                    if (!isFlushing)
-                      e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)';
+                    if (!isFlushing) e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)';
                   }}
                 >
                   <RefreshCw size={12} className={isFlushing ? 'animate-spin' : ''} />
                   {isFlushing ? 'Flushing...' : 'Flush Cache'}
                 </button>
               </div>
-              {flushSuccess && (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem',
-                    color: '#0f9d58',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    marginTop: '0.5rem',
-                    justifyContent: 'center',
-                    animation: 'fadeIn 0.3s ease-out',
-                  }}
-                >
-                  <CheckCircle2 size={12} /> Cache flushed successfully!
-                </div>
-              )}
             </div>
+            {flushSuccess && (
+              <div style={{ color: '#0f9d58', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.5rem', animation: 'fadeIn 0.3s ease-out' }}>
+                <CheckCircle2 size={12} /> Cache flushed successfully
+              </div>
+            )}
           </CardContent>
         </Card>
-        )}
-      </div>
+      )}
 
       {/* Page Visits Analytics Table */}
       {showPanel('pageVisits') && (

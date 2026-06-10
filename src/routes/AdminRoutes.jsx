@@ -34,6 +34,7 @@ const AdminAnalyticsTab    = React.lazy(() => import('../components/admin/AdminA
 const AdminClinicalLogsTab = React.lazy(() => import('../components/admin/AdminClinicalLogsTab'));
 const AdminHomeLayoutTab   = React.lazy(() => import('../components/admin/AdminHomeLayoutTab'));
 const AdminPlaceholderTab  = React.lazy(() => import('../components/admin/AdminPlaceholderTab'));
+const AdminClinicsTab      = React.lazy(() => import('../components/admin/AdminClinicsTab'));
 const AdminAIAgentsTab     = React.lazy(() => import('../components/admin/AdminAIAgentsTab'));
 const AdminDeployHostingTab= React.lazy(() => import('../components/admin/AdminDeployHostingTab'));
 const AdminStorageTab      = React.lazy(() => import('../components/admin/AdminStorageTab'));
@@ -101,7 +102,7 @@ export default function AdminRoutes() {
         } />
         <Route path="wholesellers" element={<AdminTabErrorBoundary tabId="wholesellers" tabLabel="Wholesellers"><AdminWholesellersTab /></AdminTabErrorBoundary>} />
         <Route path="account-managers" element={<AdminTabErrorBoundary tabId="account-managers" tabLabel="Account Managers"><AdminAccountManagersTab /></AdminTabErrorBoundary>} />
-        <Route path="clinics" element={<AdminTabErrorBoundary tabId="clinics" tabLabel="Clinics"><AdminPlaceholderTab title="Clinics" description="Manage physical clinic locations and metadata." tags={['Network', 'Clinics']} color="var(--color-primary)" /></AdminTabErrorBoundary>} />
+        <Route path="clinics" element={<AdminTabErrorBoundary tabId="clinics" tabLabel="Clinics"><AdminClinicsTab /></AdminTabErrorBoundary>} />
         <Route path="doctors" element={<AdminTabErrorBoundary tabId="doctors" tabLabel="Doctors"><AdminUsersTab defaultRole="doctor" readOnly={false} canApprove={true} /></AdminTabErrorBoundary>} />
         <Route path="patients" element={<AdminTabErrorBoundary tabId="patients" tabLabel="Patients"><AdminUsersTab defaultRole="patient" readOnly={false} canApprove={true} /></AdminTabErrorBoundary>} />
         <Route path="rfq" element={<AdminTabErrorBoundary tabId="rfq" tabLabel="RFQ"><AdminRFQTab /></AdminTabErrorBoundary>} />
