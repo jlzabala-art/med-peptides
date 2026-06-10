@@ -47,7 +47,7 @@ import SystemAuditLogWidget from './gadgets/SystemAuditLogWidget';
 import PayoutManagerWidget from './gadgets/PayoutManagerWidget';
 import AdminFinanceWidget from './gadgets/AdminFinanceWidget';
 import AdminProductSyncWidget from './gadgets/AdminProductSyncWidget';
-import { Card, MetricCard, Button } from '../ui';
+import { Card, CardHeader, CardContent, CardTitle, CardDescription, MetricCard, Button } from '../ui';
 
 import RecentRegistrationsTable from './metrics/RecentRegistrationsTable';
 import DoctorCohortTable from './metrics/DoctorCohortTable';
@@ -441,7 +441,7 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
         const lowStockAlertsCount = allProducts.filter(
           (p) =>
             p.stockStatus === 'low' ||
-            (Number(p.stockQuantity) !== undefined && Number(p.stockQuantity) < 15)
+            (!isNaN(Number(p.stockQuantity)) && Number(p.stockQuantity) < 15)
         ).length;
 
         const completedOrdersCount = allOrders.filter(
@@ -1577,32 +1577,12 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
 
         {/* System Status & Health Panel (GCP Style) */}
         {showPanel('systemStatus') && (
-          <div
-            style={{
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              padding: '1.5rem',
-              border: '1px solid #dadce0',
-              boxShadow: '0 1px 2px 0 rgba(60,67,70,0.1)',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  marginBottom: '1.25rem',
-                }}
-              >
-                <Server size={18} color="#1a73e8" />
-                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#202124' }}>
-                  Infrastructure Status
-                </h3>
-              </div>
+          <Card style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <CardHeader
+              icon={Server}
+              title="Infrastructure Status"
+            />
+            <CardContent>
 
               <div
                 style={{
@@ -1716,7 +1696,6 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
                   </span>
                 </div>
               </div>
-            </div>
 
             <div
               style={{
@@ -1797,7 +1776,8 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
                 </div>
               )}
             </div>
-          </div>
+          </CardContent>
+        </Card>
         )}
       </div>
 

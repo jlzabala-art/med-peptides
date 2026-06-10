@@ -18,6 +18,7 @@ export default function StatusChip({ status }) {
     case 'processing':
     case 'awaiting payment':
     case 'paused':
+    case 'draft':
       return (
         <span style={{ backgroundColor: 'var(--color-warning-bg)', color: 'var(--color-warning)', padding: '0.25rem 0.6rem', borderRadius: 'var(--radius-full)', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
           <Clock size={12} /> {status}
@@ -27,6 +28,7 @@ export default function StatusChip({ status }) {
     case 'rejected':
     case 'revoked':
     case 'inactive':
+    case 'out of stock':
       return (
         <span style={{ backgroundColor: 'var(--color-danger-bg)', color: 'var(--color-danger)', padding: '0.25rem 0.6rem', borderRadius: 'var(--radius-full)', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
           <AlertCircle size={12} /> {status}

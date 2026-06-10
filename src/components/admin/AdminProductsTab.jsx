@@ -17,6 +17,7 @@ import {
   EyeOff,
   Eye,
   Trash2,
+  Edit3,
   BookOpen,
   Plus,
   ChevronDown,
@@ -30,10 +31,11 @@ import {
   Activity,
   FileText,
   LineChart,
-  Stethoscope
+  Stethoscope,
+  CheckCircle2
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import DataTable from '../ui/DataTable';
+import { DataTable, StatusChip, FilterBar } from '../ui';
 import AppActionGroup from '../ui/AppActionGroup';
 import AppStatusToggle from '../ui/AppStatusToggle';
 import AppFilterBar from '../ui/AppFilterBar';
@@ -47,7 +49,7 @@ import InlineEditField from '../ui/InlineEditField';
 import BulkOrderSelectionModal from './BulkOrders/BulkOrderSelectionModal';
 import TooltipWrapper from '../ui/TooltipWrapper';
 import AdminPageHeader from './AdminPageHeader';
-import ProductMicrosite from './products/ProductMicrosite';
+import ProductDetailsDrawer from './products/ProductDetailsDrawer';
 import CreateProductModal from './CreateProductModal';
 
 export default function AdminProductsTab({
@@ -65,6 +67,8 @@ export default function AdminProductsTab({
   const initialNew = searchParams.get('new') === 'true';
 
   const [isCreateProductModalOpen, setIsCreateProductModalOpen] = useState(initialNew);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerProduct, setDrawerProduct] = useState(null);
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -506,85 +510,76 @@ export default function AdminProductsTab({
   const columns = [
     {
       key: 'product',
-      header: 'Product / Category',
-      sortKey: 'product',
-      sortValue: (p) => p.name.toLowerCase(),
-      render: (p) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {p.zoho_item_id ? (
-            <TooltipWrapper text="Synced to Zoho Inventory">
-              <UploadCloud size={16} color="#1a73e8" />
-            </TooltipWrapper>
-          ) : (
-            <div style={{ width: 16 }}></div>
-          )}
-          <AppEntityCell
-            title={p.name}
-            subtitle={
-              <>
-                <span style={{ opacity: 0.5 }}>↳</span> {p.category} | {p.isGroup ? `${p.variants.length} Variants` : p.dosage}
-              </>
-            }
-          />
+      header: 'Product',
+      sortKey: 'name',
+      render: (row) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '4px 0' }}>
+          <div style={{
+            width: '32px', height: '32px', borderRadius: '4px', backgroundColor: 'var(--color-bg-subtle)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)'
+          }}>
+            <Package size={16} />
+          </div>
+          <div>
+            <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '2px' }}>
+              {row.name}
+            </div>
+            {row.isGroup && (
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                {row.variants.length} variant{row.variants.length !== 1 && 's'}
+              </div>
+            )}
+          </div>
         </div>
       ),
     },
     {
-      key: 'product_type',
-      header: 'Type',
-      width: '120px',
-      render: (p) => {
-        return (
-          <InlineEditField
-            type="select"
-            value={p.product_type || 'Other'}
-            options={['Peptides', 'API Peptides', 'API Supplements', 'Other']}
-            onSave={(val) => {
-              handleUpdateProduct(p.id, { product_type: val });
-            }}
-          />
-        );
-      }
+      key: 'category',
+      header: 'Category',
+      sortable: true,
+      render: (row) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>{row.category || 'N/A'}</span>
+        </div>
+      )
     },
     {
       key: 'status',
       header: 'Status',
-      width: '80px',
-      sortKey: 'status',
-      render: (p) => {
-        let isLocked = false;
-        let isLocallyActive = p.isActive !== false;
-        
-        if (!isAdmin && user) {
-          if (p.isActive === false) {
-            isLocked = true;
-            isLocallyActive = false;
-          } else {
-            const localOverrides = p.localOverrides || {};
-            if (localOverrides[user.uid] === false) {
-              isLocallyActive = false;
-            }
-          }
-        }
-        
-        const handleToggle = (willBeActive) => {
-          if (isAdmin) {
-            handleUpdateProduct(p.id, { isActive: willBeActive });
-          } else {
-            if (!user) return;
-            handleUpdateProduct(p.id, { [`localOverrides.${user.uid}`]: willBeActive });
-          }
-        };
-
-        return (
-          <AppStatusToggle
-            isActive={isLocallyActive}
-            isLocked={isLocked}
-            onToggle={handleToggle}
-          />
-        );
-      },
+      render: (row) => (
+        <StatusChip status={row.stock > 0 ? (row.isActive ? 'Active' : 'Draft') : 'Out of Stock'} />
+      )
     },
+    {
+      key: 'stock',
+      header: 'Stock',
+      sortable: true,
+      sortValue: row => row.totalStock,
+      render: (row) => {
+        const stock = row.isGroup ? row.totalStock : row.stock;
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ 
+              fontSize: '0.85rem', 
+              fontWeight: 500,
+              color: stock > 20 ? '#10b981' : (stock > 0 ? '#f59e0b' : '#ef4444')
+            }}>
+              {stock || 0}
+            </span>
+          </div>
+        );
+      }
+    },
+    {
+      key: 'guestVialPrice',
+      header: 'Retail Price',
+      sortable: true,
+      render: (row) => (
+        <span style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
+          {row.guestVialPrice ? `$${row.guestVialPrice}` : '-'}
+        </span>
+      )
+    }
   ];
 
   if (!readOnly) {
@@ -632,7 +627,6 @@ export default function AdminProductsTab({
   const handleScrapeCompetitor = async (p) => {
     toast.info(`Buscando precios para ${p.name}...`);
     try {
-      // Using fetch directly since forceScrapeCompetitors is an onRequest (HTTP) function
       const url = `https://us-central1-med-peptides-app.cloudfunctions.net/forceScrapeCompetitors?productId=${encodeURIComponent(p.id)}`;
       const res = await fetch(url, {
         method: 'POST',
@@ -644,7 +638,6 @@ export default function AdminProductsTab({
       const data = await res.json();
       
       toast.success(`Precios actualizados para ${p.name}`);
-      // Navigate to pricing tab as requested
       navigate(`/admin/prices?sku=${encodeURIComponent(p.sku || '')}&productId=${encodeURIComponent(p.id || '')}`);
     } catch (error) {
       console.error('Error scraping:', error);
@@ -665,11 +658,11 @@ export default function AdminProductsTab({
         return updateDoc(ref, { isActive: false });
       });
       await Promise.all(promises);
-      addToast(`${selectedIds.length} products have been deactivated.`, 'success');
+      toast.success(`${selectedIds.length} products have been deactivated.`);
       setSelectedProductIds([]);
       fetchProducts();
     } catch (error) {
-      addToast('Error deactivating products: ' + error.message, 'error');
+      toast.error('Error deactivating products: ' + error.message);
     }
   };
 
@@ -789,36 +782,9 @@ export default function AdminProductsTab({
     );
   };
 
-  const renderExpandedRow = (groupItem) => {
-    const targetProduct = groupItem.isGroup ? (groupItem.variants && groupItem.variants[0] ? groupItem.variants[0] : groupItem) : groupItem;
-    
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1rem', backgroundColor: 'var(--color-bg-subtle)' }}>
-        
-        {groupItem.isGroup && (
-          <div>
-            <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-main)', fontSize: '0.95rem', fontWeight: 600 }}>Available Variants</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {groupItem.variants.map(variant => (
-                <VariantRow key={variant.id} variant={variant} navigate={navigate} />
-              ))}
-            </div>
-          </div>
-        )}
-        
-        <div>
-          <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-main)', fontSize: '0.95rem', fontWeight: 600 }}>General Information & Clinical Data</h4>
-          <ProductMicrosite product={targetProduct} onUpdateProduct={fetchProducts} />
-        </div>
-      </div>
-    );
-  };
-
   const allGroupsMap = products.reduce((acc, p) => {
-    // Determine the group name
     let gName = p.zoho_item_group_name || p.item_group_name || p.group_name;
     if (!gName) {
-      // Fallback: remove dosage strings like 10mg/vial, 50mg/tablet, 5mg/vial
       gName = p.name.replace(/\s*\d+(\.\d+)?(mg|mcg|iu|g)\/?[a-zA-Z]*/i, '').trim();
     }
     
@@ -830,7 +796,7 @@ export default function AdminProductsTab({
         category: p.category,
         variants: [],
         totalStock: 0,
-        isActive: false // true if any variant is active
+        isActive: false
       };
     }
     
@@ -838,7 +804,6 @@ export default function AdminProductsTab({
     acc[gName].totalStock += (p.stock || 0);
     if (p.isActive !== false) acc[gName].isActive = true;
     
-    // Pick the most relevant zoho_item_id or sku
     if (!acc[gName].sku && p.sku) acc[gName].sku = p.sku.substring(0, 8); 
     if (!acc[gName].zoho_item_id && p.zoho_item_id) acc[gName].zoho_item_id = p.zoho_item_id;
     
@@ -872,7 +837,6 @@ export default function AdminProductsTab({
 
       let matchesDate = true;
       if (dateRange.start || dateRange.end) {
-        // Fallback to createdAt if updatedAt is null
         let updatedStr = p.updatedAt;
         if (!updatedStr && p.createdAt) {
           if (p.createdAt?.toDate) {
@@ -1094,27 +1058,92 @@ export default function AdminProductsTab({
 
   return (
     <div style={{ marginBottom: '2rem' }}>
-      <AdminPageHeader
-        title="Items & Catalog"
-        subtitle="Manage all products, APIs, supplements, and services"
-        icon={Package}
-      />
-      
-      <ProductContextSwitcher 
-        searchTerm={searchTerm} 
-        currentTab="products" 
-        onClear={() => setSearchTerm('')} 
-      />
-      
+      <div style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: 'var(--color-bg-app)', paddingBottom: '0.5rem', margin: '0 -1.5rem', padding: '0 1.5rem 0.5rem 1.5rem' }}>
+        <AdminPageHeader
+          title="Items & Catalog"
+          subtitle="Manage all products, APIs, supplements, and services"
+          icon={Package}
+        />
+        
+        <ProductContextSwitcher 
+          searchTerm={searchTerm} 
+          currentTab="products" 
+          onClear={() => setSearchTerm('')} 
+        />
+      </div>
       {isAdmin && !readOnly && (
         <div style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem',
+            marginBottom: '0.5rem'
+          }}>
+            <div style={{ backgroundColor: 'var(--surface)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ backgroundColor: 'var(--primary-light)', padding: '12px', borderRadius: '10px', color: 'var(--primary)' }}>
+                <Package size={24} />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Items</div>
+                <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>{products.length}</div>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--surface)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ backgroundColor: '#fff7ed', padding: '12px', borderRadius: '10px', color: '#ea580c' }}>
+                <Activity size={24} />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Low Stock</div>
+                <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>
+                  {products.filter(p => p.stock > 0 && p.stock <= 20).length}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--surface)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ backgroundColor: '#fef2f2', padding: '12px', borderRadius: '10px', color: '#dc2626' }}>
+                <ShoppingCart size={24} />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Out of Stock</div>
+                <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>
+                  {products.filter(p => p.stock === 0).length}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--surface)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ backgroundColor: '#f0fdf4', padding: '12px', borderRadius: '10px', color: '#16a34a' }}>
+                <CheckCircle2 size={24} />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Active Items</div>
+                <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>
+                  {products.filter(p => p.isActive !== false).length}
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <PredictiveInventoryAlerts products={products} />
           <AdminSupplyNotifierWidget />
         </div>
       )}
 
+      <div style={{ margin: '0 0 1.5rem 0' }}>
+        <FilterBar filters={activeFilters} onRemoveFilter={handleFilterRemove} onClearAll={() => {
+          setFilterCategory('All');
+          setFilterSupplier('All');
+          setFilterProductType('All');
+          setFilterStatus('All');
+          setFilterWarehouse('All');
+          setFilterStock('All');
+          setFilterZoho('All');
+          setFilterSource('All');
+        }}>
+          {renderCustomFilters()}
+        </FilterBar>
+      </div>
 
-      {/* Table Action Toolbar */}
       {!readOnly && (
         <div
           style={{
@@ -1192,7 +1221,6 @@ export default function AdminProductsTab({
         </div>
       )}
 
-      {/* Bulk Adjustment Panel */}
       {!readOnly && bulkMode && (
         <div
           style={{
@@ -1349,7 +1377,6 @@ export default function AdminProductsTab({
         </div>
       )}
 
-      {/* Catalog Select Panel */}
       {!readOnly && catalogSelectMode && (
         <div
           style={{
@@ -1433,18 +1460,43 @@ export default function AdminProductsTab({
             marginBottom: '2rem',
             textAlign: 'center',
             backgroundColor: 'white',
-            padding: '3rem',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border)',
+            padding: '5rem 2rem',
+            borderRadius: '16px',
+            border: '1px dashed #dadce0',
+            boxShadow: 'var(--shadow-sm)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-            Your catalog is empty.
+          <div style={{ backgroundColor: '#f3f4f6', borderRadius: '50%', padding: '1.5rem', marginBottom: '1.5rem' }}>
+            <Package size={48} color="#9ca3af" />
+          </div>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', margin: '0 0 0.5rem 0' }}>
+            Your catalog is currently empty
+          </h3>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', maxWidth: '400px', lineHeight: 1.5 }}>
+            Start building your clinical and pharmaceutical offerings. You can add items manually or import them from a spreadsheet.
           </p>
           {!readOnly && (
-            <button className="btn btn-primary" onClick={handleMigrate} disabled={migrating}>
-              {migrating ? 'Migrating...' : 'Run Initial Items Migration'}
-            </button>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <button 
+                className="btn btn-primary" 
+                onClick={() => setIsCreateProductModalOpen(true)}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem' }}
+              >
+                <Plus size={16} /> Add New Item
+              </button>
+              <button 
+                className="btn btn-outline" 
+                onClick={handleMigrate} 
+                disabled={migrating}
+                style={{ padding: '0.6rem 1.2rem' }}
+              >
+                {migrating ? 'Importing...' : 'Run Initial Import'}
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -1464,9 +1516,26 @@ export default function AdminProductsTab({
             data={paginatedProducts}
             columns={columns}
             keyField="id"
-            expandableRender={renderExpandedRow}
             selectedIds={selectedProductIds}
             onSelectionChange={setSelectedProductIds}
+            onRowClick={(row) => {
+              setDrawerProduct(row.isGroup && row.variants.length === 1 ? row.variants[0] : row);
+              setIsDrawerOpen(true);
+            }}
+            renderHoverActions={(row) => (
+              <>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setDrawerProduct(row.isGroup && row.variants.length === 1 ? row.variants[0] : row); setIsDrawerOpen(true); }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px', background: 'white', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', color: 'var(--text-main)', boxShadow: 'var(--shadow-sm)' }}
+                  title="Edit"
+                ><Edit3 size={14} /></button>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); handleDeactivateSelected([row.id]); }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px', background: 'white', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', color: '#ef4444', boxShadow: 'var(--shadow-sm)' }}
+                  title="Archive"
+                ><Trash2 size={14} /></button>
+              </>
+            )}
             currentPage={currentPage}
             totalPages={totalPages}
             totalItems={totalItems}
@@ -1481,9 +1550,7 @@ export default function AdminProductsTab({
             searchPlaceholder="Search items by name, category, dosage..."
             dateRange={dateRange}
             onDateRangeChange={setDateRange}
-            filters={activeFilters}
-            onFilterRemove={handleFilterRemove}
-            renderCustomFilters={renderCustomFilters}
+            renderCustomFilters={null}
             renderBatchActions={(selected) => (
               <>
                 <button
@@ -1585,7 +1652,6 @@ export default function AdminProductsTab({
         Widget: AdminProductsTab | Props: none
       </div>
     
-      {/* Modals */}
       <BulkOrderSelectionModal 
         isOpen={isBulkOrderModalOpen}
         onClose={() => {
@@ -1598,6 +1664,19 @@ export default function AdminProductsTab({
         isOpen={isCreateProductModalOpen}
         onClose={() => setIsCreateProductModalOpen(false)}
         onCreated={() => { setIsCreateProductModalOpen(false); fetchProducts(); }}
+      />
+      <ProductDetailsDrawer 
+        isOpen={isDrawerOpen} 
+        onClose={() => {
+          setIsDrawerOpen(false);
+          setDrawerProduct(null);
+        }} 
+        product={drawerProduct} 
+        onSave={(updatedProduct) => {
+          setIsDrawerOpen(false);
+          setDrawerProduct(null);
+          fetchProducts();
+        }}
       />
     </div>
   );

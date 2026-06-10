@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
-import { collection, query, where, getDocs, orderBy, addDoc } from 'firebase/firestore';
+import { collection, query, orderBy, getDocs, addDoc } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
-import { DollarSign, FileText, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { DollarSign } from 'lucide-react';
+import { Card, CardHeader, CardContent } from '../../ui/Card';
+import Button from '../../ui/Button';
+import Badge from '../../ui/Badge';
+import EmptyState from '../../ui/EmptyState';
 
 const DEMO_PAYOUTS = [
   {
@@ -31,19 +35,18 @@ const DEMO_PAYOUTS = [
   },
 ];
 
-export default function PayoutManagerWidget({
-  ownerId = 'admin',
-  ownerType = 'admin',
-  permissions = { canEdit: true, canExport: true },
-  hideCosts = false,
-}) {
-  const { activeRole } = useAuth();
+export default function PayoutManagerWidget({ ownerId = 'admin', activeRoleProp }) {
+  const { activeRole: authRole } = useAuth();
+  const activeRole = authRole || activeRoleProp;
   const [payouts, setPayouts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchPayouts() {
-      if (activeRole !== 'admin') return;
+      if (activeRole !== 'admin') {
+        setLoading(false);
+        return;
+      }
       try {
         const q = query(collection(db, 'payouts'), orderBy('period', 'desc'));
         const snap = await getDocs(q);
@@ -67,7 +70,6 @@ export default function PayoutManagerWidget({
     if (!payout) return;
 
     if (payout.amount >= 1000) {
-      // Send to CFO Approval Queue
       try {
         await addDoc(collection(db, 'financial_approvals'), {
           type: 'payout_auth',
@@ -86,7 +88,6 @@ export default function PayoutManagerWidget({
         console.error('Error queueing approval', err);
       }
     } else {
-      // Normal flow
       setPayouts((prev) => prev.map((p) => (p.id === id ? { ...p, status: 'processing' } : p)));
     }
   };
@@ -94,166 +95,80 @@ export default function PayoutManagerWidget({
   if (activeRole !== 'admin') return null;
 
   return (
-    <div
-      className="amd-table-section"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        overflow: 'hidden',
-        margin: 0,
-        boxSizing: 'border-box',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '1.25rem',
-        }}
-      >
-        <div>
-          <h3
-            className="amd-title"
-            style={{
-              margin: '0 0 0.25rem 0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              color: '#202124',
-            }}
-          >
-            <DollarSign size={16} color="#1a73e8" /> Practitioner Payouts
-          </h3>
-          <p className="amd-caption" style={{ margin: 0, color: '#5f6368' }}>
-            Payout and commission management.
-          </p>
-        </div>
-        <div
-          style={{
-            padding: '0.4rem',
-            background: '#e6f4ea',
-            borderRadius: '4px',
-            color: '#137333',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <FileText size={16} />
-        </div>
-      </div>
-
-      <div
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
+    <Card style={{ height: '100%', display: 'flex', flexDirection: 'column' }} noPadding>
+      <CardHeader 
+        icon={DollarSign}
+        title="Practitioner Payouts"
+        subtitle="Payout and commission management."
+      />
+      
+      <CardContent style={{ flex: 1, overflowY: 'auto', padding: '0 24px' }}>
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '2rem', color: '#5f6368', fontSize: '0.85rem' }}>
+          <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-secondary)' }}>
             Loading payouts...
           </div>
         ) : payouts.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '2rem', color: '#5f6368', fontSize: '0.85rem' }}>
-            No pending payouts.
-          </div>
+          <EmptyState 
+            icon={DollarSign}
+            title="No pending payouts"
+            description="There are currently no payouts waiting for approval."
+          />
         ) : (
-          payouts.map((p) => (
-            <div
-              key={p.id}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '0.75rem 0',
-                borderBottom: '1px solid #f1f3f4',
-              }}
-            >
-              <div>
-                <div
-                  style={{
-                    fontWeight: 600,
-                    color: '#202124',
-                    fontSize: '0.875rem',
-                  }}
-                >
-                  {p.doctorName}
-                </div>
-                <div
-                  style={{
-                    fontSize: '0.75rem',
-                    color: '#5f6368',
-                    marginTop: '0.15rem',
-                  }}
-                >
-                  Period: {p.period}
-                </div>
-
-                <div
-                  className="amd-badge"
-                  style={{
-                    marginTop: '0.35rem',
-                    backgroundColor:
-                      p.status === 'paid'
-                        ? '#e6f4ea'
-                        : p.status === 'processing'
-                          ? '#fef7e0'
-                          : '#fce8e6',
-                    color:
-                      p.status === 'paid'
-                        ? '#137333'
-                        : p.status === 'processing'
-                          ? '#b06000'
-                          : '#c5221f',
-                  }}
-                >
-                  {p.status === 'paid'
-                    ? 'Paid'
-                    : p.status === 'processing'
-                      ? 'Processing'
-                      : 'Pending'}
-                </div>
-              </div>
-
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px 0' }}>
+            {payouts.map((p) => (
               <div
+                key={p.id}
                 style={{
                   display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-end',
-                  gap: '0.4rem',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '16px',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: 'var(--color-bg-app)'
                 }}
               >
-                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#202124', lineHeight: 1.1, letterSpacing: '-0.02em', fontFamily: 'var(--font-heading, inherit)' }}>
-                  ${p.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div>
+                    <div style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '14px' }}>
+                      {p.doctorName}
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                      Period: {p.period}
+                    </div>
+                  </div>
+                  <div>
+                    <Badge 
+                      variant={
+                        p.status === 'paid' ? 'success' : 
+                        p.status === 'processing' ? 'warning' : 'danger'
+                      }
+                      size="sm"
+                    >
+                      {p.status === 'paid' ? 'Paid' : p.status === 'processing' ? 'Processing' : 'Pending'}
+                    </Badge>
+                  </div>
                 </div>
-                {p.status === 'pending' && (
-                  <button
-                    onClick={() => handleApprove(p.id)}
-                    style={{
-                      padding: '0.35rem 0.75rem',
-                      background: '#1a73e8',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = '#1557b0')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = '#1a73e8')}
-                  >
-                    Approve Payout
-                  </button>
-                )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                  <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                    ${p.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </div>
+                  {p.status === 'pending' && (
+                    <Button 
+                      variant="primary" 
+                      size="sm" 
+                      onClick={() => handleApprove(p.id)}
+                    >
+                      Approve Payout
+                    </Button>
+                  )}
+                </div>
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

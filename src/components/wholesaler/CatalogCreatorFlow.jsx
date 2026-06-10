@@ -53,6 +53,115 @@ const DISCOVERY_QUESTIONS = [
   { id: 'goal', question: "What should the generated content optimize for?", options: ["Maximize sales", "Maximize lead generation", "Maximize SEO performance", "Maximize scientific credibility", "Maximize distributor acquisition", "Maximize conversion rate", "Use your judgement"] }
 ];
 
+const MiniPreview = ({ catalog }) => {
+  const themeColors = {
+    royal: { primary: '#1a365d', secondary: '#2b6cb0' },
+    clinical: { primary: '#0ea5e9', secondary: '#38bdf8' },
+    minimalist: { primary: '#18181b', secondary: '#3f3f46' }
+  };
+  const theme = themeColors[catalog.theme || 'royal'] || themeColors.royal;
+  
+  return (
+    <div style={{ marginTop: '1.5rem' }}>
+      <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: '#202124' }}>Live Preview</h3>
+      <div style={{ width: '100%', height: '180px', borderRadius: '8px', border: '1px solid #dadce0', overflow: 'hidden', position: 'relative', backgroundColor: '#fff', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ height: '60px', backgroundColor: theme.primary, display: 'flex', alignItems: 'center', padding: '0 16px' }}>
+          <div style={{ width: '24px', height: '24px', borderRadius: '4px', backgroundColor: 'rgba(255,255,255,0.2)' }}></div>
+        </div>
+        <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ fontSize: '1rem', fontWeight: 700, color: '#202124', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {catalog.title || 'Untitled Catalog'}
+          </div>
+          <div style={{ width: '60%', height: '8px', backgroundColor: '#f1f3f4', borderRadius: '4px' }}></div>
+          <div style={{ width: '40%', height: '8px', backgroundColor: '#f1f3f4', borderRadius: '4px' }}></div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const calculateQualityScore = (catalog) => {
+  let score = 0;
+  let missing = [];
+  if (catalog.title && catalog.title.length > 3) score += 20; else missing.push('Catalog Title');
+  if (catalog.slug && catalog.slug.length > 3) score += 10; else missing.push('URL Slug');
+  
+  const itemsCount = (catalog.products?.length || 0) + (catalog.protocols?.length || 0);
+  if (itemsCount > 0) score += 30; else missing.push('Add Items');
+  
+  if (catalog.contactEmail || catalog.contactPhone) score += 20; else missing.push('Contact Details');
+  
+  if (catalog.theme && catalog.theme !== 'royal') score += 20; 
+  else if (catalog.theme === 'royal') score += 20; // default theme counts
+  else missing.push('Branding Selection');
+
+  if (itemsCount > 5) score += 10; // Bonus for rich catalog
+  return { score: Math.min(score, 100), missing };
+};
+
+const StickySummaryPanel = ({ catalog, isMobile, wizardStep, setWizardStep, handleSave, saving }) => {
+  const { score, missing } = calculateQualityScore(catalog);
+  
+  return (
+    <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
+      <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', color: '#202124' }}>Catalog Summary</h3>
+      
+      {/* Quality Score */}
+      <div style={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #dadce0', padding: '1rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Quality Score</span>
+          <span style={{ fontSize: '1rem', fontWeight: 700, color: score >= 90 ? '#0f9d58' : '#1a73e8' }}>{score}/100</span>
+        </div>
+        <div style={{ width: '100%', backgroundColor: '#f1f3f4', height: '6px', borderRadius: '4px', marginBottom: '12px', overflow: 'hidden' }}>
+          <div style={{ width: `${score}%`, backgroundColor: score >= 90 ? '#0f9d58' : '#1a73e8', height: '100%', borderRadius: '4px', transition: 'width 0.3s ease' }}></div>
+        </div>
+        
+        {missing.length > 0 && (
+          <div style={{ fontSize: '0.75rem', color: '#5f6368' }}>
+            <strong style={{ color: '#d93025' }}>Missing:</strong>
+            <ul style={{ margin: '4px 0 0 0', paddingLeft: '16px' }}>
+              {missing.map(item => <li key={item}>{item}</li>)}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {/* Metrics */}
+      <div style={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #dadce0', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.85rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <span style={{ color: '#5f6368' }}>Items</span>
+          <span style={{ fontWeight: 600 }}>{(catalog.products?.length || 0) + (catalog.protocols?.length || 0)}</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <span style={{ color: '#5f6368' }}>Visibility</span>
+          <span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{catalog.visibility || 'Private'}</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <span style={{ color: '#5f6368' }}>Theme</span>
+          <span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{catalog.theme || 'Royal'}</span>
+        </div>
+      </div>
+
+      <MiniPreview catalog={catalog} />
+
+      <div style={{ marginTop: 'auto', paddingTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {wizardStep === 1 && (
+          <button onClick={() => setWizardStep(2)} style={{ width: '100%', padding: '12px', backgroundColor: '#1a73e8', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}>
+            Continue to Configuration
+          </button>
+        )}
+        {wizardStep === 2 && (
+          <button onClick={() => setWizardStep(3)} style={{ width: '100%', padding: '12px', backgroundColor: '#1a73e8', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}>
+            Continue to Preview
+          </button>
+        )}
+        <button onClick={() => handleSave(false)} disabled={saving} style={{ width: '100%', padding: '12px', backgroundColor: 'transparent', color: '#5f6368', border: '1px solid #dadce0', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}>
+          Save Draft
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog = null, onBack }) {
   const { userProfile } = useAuth();
@@ -71,6 +180,7 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [rightPanelTab, setRightPanelTab] = useState('editor'); // 'editor' or 'preview'
+  const [wizardStep, setWizardStep] = useState(1); // 1: Define, 2: Configure, 3: Preview, 4: Publish
   const [expandedNoteId, setExpandedNoteId] = useState(null);
   
   // AI Chat state
@@ -626,28 +736,66 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
               )}
 
               {msg.options && i === chatHistory.length - 1 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginLeft: msg.role === 'ai' ? '32px' : '0' }}>
-                  {msg.options.map((opt, oIdx) => (
-                    <button 
-                      key={oIdx} 
-                      onClick={() => handleSendMessage(opt)}
-                      style={{
-                        padding: '6px 12px',
-                        borderRadius: '16px',
-                        border: '1px solid #1a73e8',
-                        backgroundColor: '#e8f0fe',
-                        color: '#1a73e8',
-                        fontSize: '0.8rem',
-                        fontWeight: 500,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s'
-                      }}
-                      onMouseOver={(e) => { e.target.style.backgroundColor = '#d2e3fc'; }}
-                      onMouseOut={(e) => { e.target.style.backgroundColor = '#e8f0fe'; }}
-                    >
-                      {opt}
-                    </button>
-                  ))}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginLeft: msg.role === 'ai' ? '32px' : '0' }}>
+                  {msg.options.map((opt, oIdx) => {
+                    const isTemplate = opt === "Entire catalogue" || opt === "Selected products" || opt === "Specific category" || opt === "Include future products";
+                    
+                    if (isTemplate) {
+                      let icon = '📦';
+                      let desc = 'Standard catalog template';
+                      let meta = '0 items';
+                      if (opt === "Entire catalogue") { icon = '📚'; desc = 'All products in your database'; meta = `${allProducts.length} items`; }
+                      if (opt === "Selected products") { icon = '🎯'; desc = 'Build from manually selected products'; meta = 'Custom selection'; }
+                      if (opt === "Specific category") { icon = '📑'; desc = 'Filter by a specific category'; meta = 'Targeted focus'; }
+                      if (opt === "Include future products") { icon = '🔮'; desc = 'Dynamic catalog that updates automatically'; meta = 'Always current'; }
+
+                      return (
+                        <div key={oIdx} style={{
+                          display: 'flex', flexDirection: 'column', padding: '1rem', borderRadius: '12px',
+                          border: '1px solid var(--border)', backgroundColor: 'var(--surface)', cursor: 'pointer',
+                          minWidth: '200px', flex: '1 1 200px', transition: 'all 0.2s',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                        }}
+                        onClick={() => handleSendMessage(opt)}
+                        onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                        onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                        >
+                          <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>{icon}</div>
+                          <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.25rem' }}>{opt}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', flex: 1 }}>{desc}</div>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-main)', marginBottom: '0.75rem' }}>{meta}</div>
+                          <button style={{
+                            padding: '6px 12px', borderRadius: '6px', border: 'none', backgroundColor: 'var(--color-bg-subtle)',
+                            color: 'var(--color-primary)', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', width: '100%'
+                          }}>
+                            Use Template
+                          </button>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <button 
+                        key={oIdx} 
+                        onClick={() => handleSendMessage(opt)}
+                        style={{
+                          padding: '8px 16px',
+                          borderRadius: '20px',
+                          border: '1px solid var(--color-primary)',
+                          backgroundColor: 'var(--color-bg-subtle)',
+                          color: 'var(--color-primary)',
+                          fontSize: '0.85rem',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseOver={(e) => { e.target.style.backgroundColor = 'var(--color-primary)'; e.target.style.color = '#fff'; }}
+                        onMouseOut={(e) => { e.target.style.backgroundColor = 'var(--color-bg-subtle)'; e.target.style.color = 'var(--color-primary)'; }}
+                      >
+                        {opt}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -845,153 +993,163 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
 
         {rightPanelTab === 'editor' ? (
           <div style={cartBodyStyle}>
-            <div style={formFieldStyle}>
-              <label style={labelStyle}>Catalog Title</label>
-              <input 
-                type="text" 
-                value={catalog.title}
-                onChange={(e) => setCatalog(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Generated by AI or type here..."
-                style={inputStyle}
-              />
-            </div>
-
-            <div style={formFieldStyle}>
-              <label style={labelStyle}>URL Slug</label>
-              <input 
-                type="text" 
-                value={catalog.slug}
-                onChange={(e) => setCatalog(prev => ({ ...prev, slug: e.target.value }))}
-                placeholder="e.g., longevity-catalog"
-                style={inputStyle}
-              />
-            </div>
-
-            <div style={formFieldStyle}>
-              <label style={labelStyle}>Visibility</label>
-              <select 
-                value={catalog.visibility || 'private'}
-                onChange={(e) => setCatalog(prev => ({ ...prev, visibility: e.target.value }))}
-                style={{ ...inputStyle, backgroundColor: '#fff' }}
-              >
-                <option value="private">Private (Only I can see and use it)</option>
-                <option value="public">Public (Anyone can view and reuse it)</option>
-              </select>
-            </div>
-
-            <div style={formFieldStyle}>
-              <label style={labelStyle}>Branding Color Theme</label>
-              <select 
-                value={catalog.theme || 'royal'}
-                onChange={(e) => handleThemeChange(e.target.value)}
-                style={{ ...inputStyle, backgroundColor: '#fff' }}
-              >
-                <option value="royal">Royal Longevity (Sapphire & Navy)</option>
-                <option value="emerald">Emerald Clinical (Mint & Deep Green)</option>
-                <option value="ruby">Clinical Ruby (Rose & Crimson)</option>
-                <option value="slate">Slate Professional (Charcoal Slate)</option>
-                <option value="custom">Custom Brand Colors</option>
-              </select>
-            </div>
-
-            {catalog.theme === 'custom' && (
-              <div style={{ ...formFieldStyle, flexDirection: 'row', gap: '1rem', marginTop: '0.25rem', marginBottom: '1.25rem' }}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ ...labelStyle, fontSize: '0.75rem' }}>Primary Color</label>
-                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                    <input 
-                      type="color" 
-                      value={catalog.branding?.primaryColor || '#1a73e8'}
-                      onChange={(e) => handleCustomColorChange('primaryColor', e.target.value)}
-                      style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer', width: '32px', height: '32px' }}
-                    />
-                    <input 
-                      type="text" 
-                      value={catalog.branding?.primaryColor || '#1a73e8'}
-                      onChange={(e) => handleCustomColorChange('primaryColor', e.target.value)}
-                      style={{ ...inputStyle, width: '100%', padding: '6px 8px' }}
-                    />
-                  </div>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <label style={{ ...labelStyle, fontSize: '0.75rem' }}>Secondary Color</label>
-                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                    <input 
-                      type="color" 
-                      value={catalog.branding?.secondaryColor || '#185abc'}
-                      onChange={(e) => handleCustomColorChange('secondaryColor', e.target.value)}
-                      style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer', width: '32px', height: '32px' }}
-                    />
-                    <input 
-                      type="text" 
-                      value={catalog.branding?.secondaryColor || '#185abc'}
-                      onChange={(e) => handleCustomColorChange('secondaryColor', e.target.value)}
-                      style={{ ...inputStyle, width: '100%', padding: '6px 8px' }}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div style={{...formFieldStyle, flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '0.5rem'}}>
-              <input 
-                type="checkbox" 
-                checked={catalog.pricingVisible}
-                onChange={(e) => setCatalog(prev => ({ ...prev, pricingVisible: e.target.checked }))}
-                id="pricing-visible"
-              />
-              <label htmlFor="pricing-visible" style={{...labelStyle, cursor: 'pointer', margin: 0}}>Include Prices?</label>
-            </div>
-
-            {catalog.pricingVisible && (
-              <div style={formFieldStyle}>
-                <label style={labelStyle}>Margin over cost (%)</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {wizardStep === 1 && (
+              <>
+                <div style={formFieldStyle}>
+                  <label style={labelStyle}>Catalog Title</label>
                   <input 
-                    type="number" 
-                    min="0"
-                    step="5"
-                    value={catalog.pricingMargin || 0}
-                    onChange={(e) => setCatalog(prev => ({ ...prev, pricingMargin: Number(e.target.value) }))}
-                    placeholder="e.g., 30"
-                    style={{...inputStyle, width: '100px'}}
+                    type="text" 
+                    value={catalog.title}
+                    onChange={(e) => setCatalog(prev => ({ ...prev, title: e.target.value }))}
+                    placeholder="Generated by AI or type here..."
+                    style={inputStyle}
                   />
-                  <span style={{fontSize: '0.8rem', color: '#5f6368'}}>% applied over your base cost</span>
                 </div>
-              </div>
+
+                <div style={formFieldStyle}>
+                  <label style={labelStyle}>URL Slug</label>
+                  <input 
+                    type="text" 
+                    value={catalog.slug}
+                    onChange={(e) => setCatalog(prev => ({ ...prev, slug: e.target.value }))}
+                    placeholder="e.g., longevity-catalog"
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div style={formFieldStyle}>
+                  <label style={labelStyle}>Visibility</label>
+                  <select 
+                    value={catalog.visibility || 'private'}
+                    onChange={(e) => setCatalog(prev => ({ ...prev, visibility: e.target.value }))}
+                    style={{ ...inputStyle, backgroundColor: '#fff' }}
+                  >
+                    <option value="private">Private (Only I can see and use it)</option>
+                    <option value="public">Public (Anyone can view and reuse it)</option>
+                  </select>
+                </div>
+              </>
             )}
 
-            <div style={{ marginTop: '1.5rem', marginBottom: '0.5rem', borderBottom: '1px solid #dadce0', paddingBottom: '4px' }}>
-              <h4 style={sectionHeaderStyle}>Contact Information</h4>
-              <p style={{ fontSize: '0.75rem', color: '#5f6368', margin: '4px 0 0 0' }}>
-                These details will be hidden if the catalog is made Public.
-              </p>
-            </div>
+            {wizardStep === 2 && (
+              <>
+                <div style={formFieldStyle}>
+                  <label style={labelStyle}>Branding Color Theme</label>
+                  <select 
+                    value={catalog.theme || 'royal'}
+                    onChange={(e) => handleThemeChange(e.target.value)}
+                    style={{ ...inputStyle, backgroundColor: '#fff' }}
+                  >
+                    <option value="royal">Royal Longevity (Sapphire & Navy)</option>
+                    <option value="emerald">Emerald Clinical (Mint & Deep Green)</option>
+                    <option value="ruby">Clinical Ruby (Rose & Crimson)</option>
+                    <option value="slate">Slate Professional (Charcoal Slate)</option>
+                    <option value="custom">Custom Brand Colors</option>
+                  </select>
+                </div>
 
-            <div style={formFieldStyle}>
-              <label style={labelStyle}>Contact Email</label>
-              <input 
-                type="email" 
-                value={catalog.contactEmail || ''}
-                onChange={(e) => setCatalog(prev => ({ ...prev, contactEmail: e.target.value }))}
-                placeholder="e.g., doctor@clinic.com"
-                style={inputStyle}
-              />
-            </div>
+                {catalog.theme === 'custom' && (
+                  <div style={{ ...formFieldStyle, flexDirection: 'row', gap: '1rem', marginTop: '0.25rem', marginBottom: '1.25rem' }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ ...labelStyle, fontSize: '0.75rem' }}>Primary Color</label>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        <input 
+                          type="color" 
+                          value={catalog.branding?.primaryColor || '#1a73e8'}
+                          onChange={(e) => handleCustomColorChange('primaryColor', e.target.value)}
+                          style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer', width: '32px', height: '32px' }}
+                        />
+                        <input 
+                          type="text" 
+                          value={catalog.branding?.primaryColor || '#1a73e8'}
+                          onChange={(e) => handleCustomColorChange('primaryColor', e.target.value)}
+                          style={{ ...inputStyle, width: '100%', padding: '6px 8px' }}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ ...labelStyle, fontSize: '0.75rem' }}>Secondary Color</label>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        <input 
+                          type="color" 
+                          value={catalog.branding?.secondaryColor || '#185abc'}
+                          onChange={(e) => handleCustomColorChange('secondaryColor', e.target.value)}
+                          style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer', width: '32px', height: '32px' }}
+                        />
+                        <input 
+                          type="text" 
+                          value={catalog.branding?.secondaryColor || '#185abc'}
+                          onChange={(e) => handleCustomColorChange('secondaryColor', e.target.value)}
+                          style={{ ...inputStyle, width: '100%', padding: '6px 8px' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-            <div style={formFieldStyle}>
-              <label style={labelStyle}>Contact Phone / WhatsApp</label>
-              <input 
-                type="text" 
-                value={catalog.contactPhone || ''}
-                onChange={(e) => setCatalog(prev => ({ ...prev, contactPhone: e.target.value }))}
-                placeholder="e.g., +1 555 0123"
-                style={inputStyle}
-              />
-            </div>
+                <div style={{...formFieldStyle, flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '0.5rem'}}>
+                  <input 
+                    type="checkbox" 
+                    checked={catalog.pricingVisible}
+                    onChange={(e) => setCatalog(prev => ({ ...prev, pricingVisible: e.target.checked }))}
+                    id="pricing-visible"
+                  />
+                  <label htmlFor="pricing-visible" style={{...labelStyle, cursor: 'pointer', margin: 0}}>Include Prices?</label>
+                </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
-              <h4 style={sectionHeaderStyle}>Items in Catalog ({selectedProductsInFlow.length + selectedProtocolsInFlow.length})</h4>
+                {catalog.pricingVisible && (
+                  <div style={formFieldStyle}>
+                    <label style={labelStyle}>Margin over cost (%)</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <input 
+                        type="number" 
+                        min="0"
+                        step="5"
+                        value={catalog.pricingMargin || 0}
+                        onChange={(e) => setCatalog(prev => ({ ...prev, pricingMargin: Number(e.target.value) }))}
+                        placeholder="e.g., 30"
+                        style={{...inputStyle, width: '100px'}}
+                      />
+                      <span style={{fontSize: '0.8rem', color: '#5f6368'}}>% applied over your base cost</span>
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ marginTop: '1.5rem', marginBottom: '0.5rem', borderBottom: '1px solid #dadce0', paddingBottom: '4px' }}>
+                  <h4 style={sectionHeaderStyle}>Contact Information</h4>
+                  <p style={{ fontSize: '0.75rem', color: '#5f6368', margin: '4px 0 0 0' }}>
+                    These details will be hidden if the catalog is made Public.
+                  </p>
+                </div>
+
+                <div style={formFieldStyle}>
+                  <label style={labelStyle}>Contact Email</label>
+                  <input 
+                    type="email" 
+                    value={catalog.contactEmail || ''}
+                    onChange={(e) => setCatalog(prev => ({ ...prev, contactEmail: e.target.value }))}
+                    placeholder="e.g., doctor@clinic.com"
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div style={formFieldStyle}>
+                  <label style={labelStyle}>Contact Phone / WhatsApp</label>
+                  <input 
+                    type="text" 
+                    value={catalog.contactPhone || ''}
+                    onChange={(e) => setCatalog(prev => ({ ...prev, contactPhone: e.target.value }))}
+                    placeholder="e.g., +1 555 0123"
+                    style={inputStyle}
+                  />
+                </div>
+              </>
+            )}
+
+            {wizardStep === 1 && (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
+                  <h4 style={sectionHeaderStyle}>Items in Catalog ({selectedProductsInFlow.length + selectedProtocolsInFlow.length})</h4>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <select 
                   id="addByGoalSelect"
@@ -1121,6 +1279,8 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
                   ));
                 })()}
               </div>
+            )}
+            </>
             )}
 
             <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>

@@ -34,6 +34,10 @@ export default function DataTable({
   // Expansion
   expandableRender,
   
+  // Custom Interaction
+  onRowClick,
+  renderHoverActions,
+  
   // Empty State
   emptyTitle = "No data found",
   emptyDescription = "There are no records to display.",
@@ -52,6 +56,7 @@ export default function DataTable({
   renderCustomFilters
 }) {
   const [expandedId, setExpandedId] = useState(null);
+  const [hoveredRowId, setHoveredRowId] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   const sortedData = useMemo(() => {
@@ -215,8 +220,8 @@ export default function DataTable({
           )}
         </div>
       )}
-      <div style={{ overflowX: 'auto', overflowY: 'visible', width: '100%', minHeight: '350px', maxHeight: 'calc(100vh - 200px)' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+      <div className="ui-table-container responsive-stack" style={{ overflowX: 'auto', overflowY: 'visible', width: '100%', minHeight: '350px', maxHeight: 'calc(100vh - 200px)' }}>
+        <table className="ui-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead style={{ 
             backgroundColor: 'var(--color-bg-app)', 
             borderBottom: '1px solid var(--color-border)',
@@ -237,18 +242,8 @@ export default function DataTable({
                 </th>
               )}
               
-              {(someSelected || allSelected) && renderBatchActions ? (
-                <th colSpan={columns.length + (expandableRender ? 1 : 0)} style={{ padding: '0 var(--table-padding-h)', borderBottom: '1px solid var(--color-border)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-primary)' }}>
-                      {selectedIds.length} selected
-                    </span>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                      {renderBatchActions(selectedIds)}
-                    </div>
-                  </div>
-                </th>
-              ) : (
+              {/* We no longer render batch actions in the table header. It's a floating bar now. */}
+              {!(someSelected || allSelected) || !renderBatchActions ? (
                 <React.Fragment>
                   {expandableRender && <th style={{ width: '48px', minWidth: '48px', whiteSpace: 'nowrap', padding: '0', borderBottom: '1px solid var(--color-border)', textAlign: 'center' }}></th>}
                   
@@ -268,22 +263,28 @@ export default function DataTable({
                           textAlign: col.align || 'left',
                           width: col.width || 'auto',
                           borderBottom: '1px solid var(--color-border)',
-                          whiteSpace: 'nowrap',
                           cursor: isSortable ? 'pointer' : 'default',
-                          userSelect: 'none'
+                          userSelect: 'none',
+                          whiteSpace: 'nowrap',
+                          position: (col.key === 'name' || col.header === 'Product Name' || col.label === 'Product Name') ? 'sticky' : 'static',
+                          left: (col.key === 'name' || col.header === 'Product Name' || col.label === 'Product Name') ? (onSelectionChange ? '48px' : '0') : 'auto',
+                          backgroundColor: 'var(--color-bg-subtle)',
+                          zIndex: (col.key === 'name' || col.header === 'Product Name' || col.label === 'Product Name') ? 2 : 0,
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: col.align === 'right' ? 'flex-end' : col.align === 'center' ? 'center' : 'flex-start', gap: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: col.align === 'right' ? 'flex-end' : (col.align === 'center' ? 'center' : 'flex-start'), gap: '4px' }}>
                           {col.header}
                           {isSortable && sortConfig.key === col.key && (
-                            sortConfig.direction === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />
+                            <span style={{ display: 'flex', color: 'var(--color-primary)' }}>
+                              {sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
+                            </span>
                           )}
                         </div>
                       </th>
                     );
                   })}
                 </React.Fragment>
-              )}
+              ) : null}
             </tr>
           </thead>
           <tbody>
@@ -349,27 +350,36 @@ export default function DataTable({
                       borderBottom: '1px solid var(--color-border)', 
                       backgroundColor: isSelected ? 'var(--color-bg-selected)' : (isExpanded ? 'var(--color-bg-hover)' : 'transparent'),
                       transition: 'background-color 0.2s ease',
-                      minHeight: 'var(--row-min-height)',
-                      cursor: expandableRender ? 'pointer' : 'default'
+                      height: '64px',
+                      cursor: (expandableRender || onRowClick) ? 'pointer' : 'default',
+                      position: 'relative',
                     }}
                     onClick={() => {
-                      if (expandableRender) {
+                      if (onRowClick) {
+                        onRowClick(row);
+                      } else if (expandableRender) {
                         setExpandedId(isExpanded ? null : rowKey);
                       }
                     }}
                     onMouseEnter={(e) => {
+                      setHoveredRowId(rowKey);
                       if (!isSelected && !isExpanded) e.currentTarget.style.backgroundColor = 'var(--color-bg-hover)';
                     }}
                     onMouseLeave={(e) => {
+                      setHoveredRowId(null);
                       if (!isSelected && !isExpanded) e.currentTarget.style.backgroundColor = 'transparent';
                     }}
                   >
                     {onSelectionChange && (
-                      <td style={{ padding: '0', width: '48px', minWidth: '48px', whiteSpace: 'nowrap', verticalAlign: 'middle', textAlign: 'center' }}>
+                      <td style={{ 
+                        padding: '0', width: '48px', minWidth: '48px', whiteSpace: 'nowrap', verticalAlign: 'middle', textAlign: 'center',
+                        position: 'sticky', left: 0, backgroundColor: 'inherit', zIndex: 1
+                      }}>
                         <input 
                           type="checkbox" 
                           checked={isSelected}
                           onChange={(e) => handleSelectRow(rowKey, e.target.checked)}
+                          onClick={(e) => e.stopPropagation()}
                           style={{ cursor: 'pointer' }}
                         />
                       </td>
@@ -382,21 +392,42 @@ export default function DataTable({
                         {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </td>
                     )}
-                    {columns.map((col, idx) => (
-                      <td 
-                        key={col.key || idx} 
-                        className={col.hideOnMobile ? 'hide-on-mobile' : ''}
-                        style={{ 
-                          padding: '12px 16px', 
-                          fontSize: '13px', 
-                          color: 'var(--text-main)',
-                          textAlign: col.align || 'left',
-                          verticalAlign: 'middle'
-                        }}
-                      >
-                        {col.render ? col.render(row) : row[col.key]}
-                      </td>
-                    ))}
+                    {columns.map((col, idx) => {
+                      let cellValue = col.render ? col.render(row) : row[col.key];
+                      
+                      const isProductColumn = col.key === 'name' || col.header === 'Product Name' || col.label === 'Product Name';
+                      const cellStyle = {
+                        padding: '12px 16px', 
+                        fontSize: '13px', 
+                        color: 'var(--text-main)',
+                        textAlign: col.align || 'left',
+                        verticalAlign: 'middle',
+                        position: isProductColumn ? 'sticky' : 'static',
+                        left: isProductColumn ? (onSelectionChange ? '48px' : '0') : 'auto',
+                        backgroundColor: 'inherit',
+                        zIndex: isProductColumn ? 1 : 0,
+                      };
+
+                      return (
+                        <td 
+                          key={col.key || idx} 
+                          className={col.hideOnMobile ? 'hide-on-mobile' : ''}
+                          data-label={typeof col.header === 'string' ? col.header : col.key}
+                          style={cellStyle}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div style={{ flex: 1, overflow: 'hidden' }}>
+                              {cellValue}
+                            </div>
+                            {idx === columns.length - 1 && renderHoverActions && hoveredRowId === rowKey && (
+                              <div style={{ position: 'absolute', right: '16px', display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(90deg, transparent, inherit 20%)', paddingLeft: '24px' }}>
+                                {renderHoverActions(row)}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      );
+                    })}
                   </tr>
                   {isExpanded && expandableRender && (
                     <tr style={{ backgroundColor: 'var(--color-bg-hover)' }}>
@@ -490,6 +521,49 @@ export default function DataTable({
               <ChevronRight size={20} />
             </button>
           </div>
+        </div>
+      )}
+      {/* Floating Batch Actions */}
+      {(selectedIds.length > 0) && renderBatchActions && (
+        <div style={{
+          position: 'fixed',
+          bottom: '24px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#1e293b', // Dark modern color
+          borderRadius: '12px',
+          padding: '12px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '24px',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2)',
+          zIndex: 1000,
+          color: 'white',
+          animation: 'slideUp 0.3s ease-out forwards',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ backgroundColor: '#334155', color: '#e2e8f0', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 600 }}>
+              {selectedIds.length}
+            </div>
+            <span style={{ fontSize: '0.9rem', fontWeight: 500, color: '#e2e8f0' }}>Selected</span>
+          </div>
+          <div style={{ width: '1px', height: '24px', backgroundColor: '#475569' }} />
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            {renderBatchActions(selectedIds)}
+          </div>
+          <button 
+            onClick={() => onSelectionChange?.([])} 
+            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', marginLeft: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            title="Clear Selection"
+          >
+            <X size={16} />
+          </button>
+          <style>{`
+            @keyframes slideUp {
+              from { opacity: 0; transform: translate(-50%, 20px); }
+              to { opacity: 1; transform: translate(-50%, 0); }
+            }
+          `}</style>
         </div>
       )}
     </div>

@@ -1,3 +1,5 @@
+import React from 'react';
+
 /**
  * Card — Atlas Health container component.
  *
@@ -23,7 +25,7 @@ export function Card({
   const classes = [
     'ui-card',
     variant !== 'default' && `ui-card--${variant}`,
-    `ui-card--pad-${padding}`,
+    !noPadding && `ui-card--pad-${padding}`,
     hover && 'ui-card--hover',
     isClickable && 'ui-card--clickable',
     className,
@@ -54,35 +56,49 @@ export function Card({
   );
 }
 
-export function CardHeader({ className = '', children, style, ...rest }) {
+/**
+ * Enhanced CardHeader
+ * Supports optional standard parts: icon, title, subtitle, badge, actions.
+ * If you pass standard parts, it formats them structurally.
+ * If you pass children, it renders them normally.
+ */
+export function CardHeader({ 
+  className = '', 
+  children, 
+  title, 
+  subtitle, 
+  icon: Icon, 
+  badge, 
+  actions, 
+  style, 
+  ...rest 
+}) {
+  const hasStandardProps = title || subtitle || Icon || badge || actions;
+
   return (
-    <div 
-      className={className} 
-      style={{ 
-        padding: '1rem 1.5rem', 
-        borderBottom: '1px solid var(--color-border, #dadce0)', 
-        ...style 
-      }} 
-      {...rest}
-    >
-      {children}
+    <div className={`ui-card__header ${className}`} style={style} {...rest}>
+      {hasStandardProps ? (
+        <>
+          <div className="ui-card__header-left">
+            {Icon && <Icon size={20} className="ui-card__icon" color="var(--color-text-secondary)" />}
+            <div>
+              {title && <h3 className="ui-card__title">{title}</h3>}
+              {subtitle && <p className="ui-card__subtitle">{subtitle}</p>}
+            </div>
+            {badge && <div className="ui-card__badge-wrapper">{badge}</div>}
+          </div>
+          {actions && <div className="ui-card__header-actions">{actions}</div>}
+        </>
+      ) : (
+        children
+      )}
     </div>
   );
 }
 
 export function CardTitle({ className = '', children, style, ...rest }) {
   return (
-    <h3 
-      className={className} 
-      style={{ 
-        margin: 0, 
-        fontSize: '1.1rem', 
-        fontWeight: 600, 
-        color: 'var(--color-text-primary, #202124)', 
-        ...style 
-      }} 
-      {...rest}
-    >
+    <h3 className={`ui-card__title ${className}`} style={style} {...rest}>
       {children}
     </h3>
   );
@@ -90,31 +106,23 @@ export function CardTitle({ className = '', children, style, ...rest }) {
 
 export function CardDescription({ className = '', children, style, ...rest }) {
   return (
-    <p 
-      className={className} 
-      style={{ 
-        margin: '0.25rem 0 0 0', 
-        fontSize: '0.85rem', 
-        color: 'var(--color-text-secondary, #5f6368)', 
-        ...style 
-      }} 
-      {...rest}
-    >
+    <p className={`ui-card__subtitle ${className}`} style={style} {...rest}>
       {children}
     </p>
   );
 }
 
-export function CardContent({ className = '', children, style, ...rest }) {
+export function CardContent({ className = '', children, style, noPadding, ...rest }) {
   return (
-    <div 
-      className={className} 
-      style={{ 
-        padding: '1.5rem', 
-        ...style 
-      }} 
-      {...rest}
-    >
+    <div className={`ui-card__body ${className}`} style={{ padding: noPadding ? 0 : undefined, ...style }} {...rest}>
+      {children}
+    </div>
+  );
+}
+
+export function CardFooter({ className = '', children, style, ...rest }) {
+  return (
+    <div className={`ui-card__footer ${className}`} style={style} {...rest}>
       {children}
     </div>
   );

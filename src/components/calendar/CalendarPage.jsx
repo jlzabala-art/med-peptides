@@ -1,23 +1,56 @@
 import React from 'react';
 import RegeneraCalendar from './RegeneraCalendar';
 import { Card } from '../ui';
-import './CalendarCloud.css'; // Keep for FullCalendar overrides but we will style the wrapper
+import './CalendarCloud.css'; 
 
 export default function CalendarPage() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '5rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-        <div>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-text-primary)', margin: 0 }}>My Calendar</h1>
-          <p style={{ color: 'var(--color-text-secondary)', margin: '0.2rem 0 0 0', fontSize: '0.875rem' }}>
-            Manage your prescriptions, follow-ups, and treatment protocols.
-          </p>
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-section)', paddingBottom: '5rem' }}>
+      
+      {/* Row 1: Clinical Schedule Description */}
+      <div>
+        <h1 className="atlas-h1">Clinical Schedule</h1>
+        <p className="atlas-helper-text" style={{ fontSize: '0.875rem' }}>
+          Manage prescriptions, protocols, and patient consultations.
+        </p>
       </div>
-      {/* Remove Card padding — RegeneraCalendar wrapper has its own padding */}
-      <Card style={{ padding: 0, backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
+      
+      {/* Row 2: KPI Cards */}
+      <div className="cal-dashboard-widgets" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-card)' }}>
+        
+        <div className="atlas-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--cal-color-text-secondary)' }}>
+            <span style={{ fontSize: '1.2rem' }}>📋</span>
+            <span className="atlas-label">Today's Prescriptions</span>
+          </div>
+          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--cal-color-text-primary)' }}>12</div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--cal-color-primary)', fontWeight: 600 }}>+8% vs yesterday</div>
+        </div>
+
+        <div className="atlas-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--cal-color-text-secondary)' }}>
+            <span style={{ fontSize: '1.2rem' }}>📞</span>
+            <span className="atlas-label">Pending Follow-ups</span>
+          </div>
+          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--cal-color-text-primary)' }}>4</div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--cal-color-text-muted)' }}>Action required</div>
+        </div>
+
+        <div className="atlas-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--cal-color-text-secondary)' }}>
+            <span style={{ fontSize: '1.2rem' }}>🧬</span>
+            <span className="atlas-label">Tests Due</span>
+          </div>
+          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--cal-color-text-primary)' }}>7</div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--cat-order)', fontWeight: 600 }}>3 High Priority</div>
+        </div>
+
+      </div>
+
+      {/* Row 3-6: Calendar Component */}
+      <div className="atlas-card" style={{ padding: 0, overflow: 'hidden' }}>
         <RegeneraCalendar />
-      </Card>
+      </div>
     </div>
   );
 }

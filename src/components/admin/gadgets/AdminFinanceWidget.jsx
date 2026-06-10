@@ -23,6 +23,8 @@ import {
   ArrowDownRight,
   Sparkles,
 } from 'lucide-react';
+import { Card, CardHeader, CardContent, CardFooter } from '../../ui/Card';
+import Button from '../../ui/Button';
 
 // ── CF endpoint (same region as other agents) ─────────────────────────────────
 const FINANCE_CF_URL =
@@ -175,12 +177,7 @@ function ProductMarginRow({ p, rank }) {
 }
 
 // ── Main widget ───────────────────────────────────────────────────────────────
-export default function AdminFinanceWidget({
-  ownerId = 'admin',
-  ownerType = 'admin',
-  permissions = { canEdit: true, canExport: true },
-  hideCosts = false,
-}) {
+export default function AdminFinanceWidget() {
   const [data, setData] = useState(null); // structured finance_summary
   const [rawText, setRawText] = useState(''); // AI narrative
   const [loading, setLoading] = useState(false);
@@ -188,7 +185,7 @@ export default function AdminFinanceWidget({
   const [expanded, setExpanded] = useState(false); // show AI narrative
   const [lastFetched, setLastFetched] = useState(null);
 
-  async function fetchSnapshot() {
+  const fetchSnapshot = async () => {
     if (loading) return;
     setLoading(true);
     setError(null);
@@ -212,7 +209,6 @@ export default function AdminFinanceWidget({
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
 
-      // The CF returns { reply, formattedData, ... }
       if (json.formattedData?.formatType === 'finance_summary') {
         setData(json.formattedData);
       }
@@ -228,8 +224,9 @@ export default function AdminFinanceWidget({
 
   // Auto-fetch on mount
   useEffect(() => {
+    // eslint-disable-next-line
     fetchSnapshot();
-  }, []); // eslint-disable-line
+  }, []);
 
   // Extract structured sections from formattedData
   const kpis = data?.sections?.find((s) => s.type === 'finance_kpi_row')?.kpis || [];
@@ -238,45 +235,17 @@ export default function AdminFinanceWidget({
   const weakItems = data?.sections?.find((s) => s.type === 'finance_weak_margins')?.products || [];
 
   return (
-    <div
-      style={{
-        background: 'var(--color-bg-surface)',
-        borderRadius: 'var(--radius-md)',
-        border: '1px solid #f1f5f9',
-        boxShadow: 'var(--shadow-sm)',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          padding: '1.25rem 1.5rem',
-          borderBottom: '1px solid #f1f5f9',
-          background: '#fafbfc',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <div>
-          <h3
-            style={{
-              margin: 0,
-              fontSize: '1.05rem',
-              fontWeight: 800,
-              color: '#0f172a',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
-          >
-            <BarChart2 size={17} color="var(--color-primary)" />
+    <Card style={{ height: '100%', display: 'flex', flexDirection: 'column' }} noPadding>
+      <CardHeader 
+        icon={BarChart2}
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             Finance Intelligence
             <span
               style={{
-                fontSize: '0.58rem',
+                fontSize: '10px',
                 fontWeight: 900,
-                padding: '0.15rem 0.5rem',
+                padding: '2px 8px',
                 borderRadius: 'var(--radius-sm)',
                 background: 'rgba(139,92,246,0.1)',
                 color: '#8b5cf6',
@@ -284,50 +253,29 @@ export default function AdminFinanceWidget({
                 letterSpacing: '0.04em',
               }}
             >
-              <Sparkles size={8} style={{ display: 'inline', marginRight: 2 }} />
+              <Sparkles size={10} style={{ display: 'inline', marginRight: 4 }} />
               AI
             </span>
-          </h3>
-          <p
-            style={{
-              margin: '0.2rem 0 0',
-              fontSize: '0.72rem',
-              color: 'var(--color-text-tertiary)',
-            }}
+          </div>
+        }
+        subtitle="AgentFinance · portfolio de márgenes y gross profit"
+        actions={
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={fetchSnapshot}
+            disabled={loading}
           >
-            AgentFinance · portfolio de márgenes y gross profit
-          </p>
-        </div>
-        <button
-          onClick={fetchSnapshot}
-          disabled={loading}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            padding: '0.5rem 0.85rem',
-            borderRadius: '9px',
-            border: '1px solid #e2e8f0',
-            background: 'var(--color-bg-surface)',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            color: 'var(--color-text-secondary)',
-            transition: 'all 0.15s',
-            flexShrink: 0,
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--primary)')}
-          onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--color-border)')}
-        >
-          <RefreshCw
-            size={13}
-            style={{ animation: loading ? 'finSpin 1s linear infinite' : 'none' }}
-          />
-          {loading ? 'Analizando…' : 'Actualizar'}
-        </button>
-      </div>
+            <RefreshCw
+              size={14}
+              style={{ animation: loading ? 'finSpin 1s linear infinite' : 'none' }}
+            />
+            {loading ? 'Analizando…' : 'Actualizar'}
+          </Button>
+        }
+      />
 
-      <div style={{ padding: '1.25rem 1.5rem' }}>
+      <CardContent style={{ flex: 1, overflowY: 'auto' }}>
         {/* Error */}
         {error && (
           <div
@@ -499,36 +447,36 @@ export default function AdminFinanceWidget({
         {!loading && !data && !error && (
           <div
             style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
               textAlign: 'center',
               color: 'var(--color-text-tertiary)',
-              fontSize: '0.85rem',
-              padding: '1.5rem 0',
+              padding: '40px 24px',
             }}
           >
-            Pulsa Actualizar para cargar el análisis financiero.
+            <BarChart2 size={48} color="var(--color-border)" style={{ marginBottom: 16 }} />
+            <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: 8 }}>Finance Intelligence AI</div>
+            <div style={{ fontSize: '14px', maxWidth: 300, marginBottom: 24 }}>Ejecuta el asistente para analizar márgenes, beneficios y métricas clave del portfolio en tiempo real.</div>
+            <Button variant="primary" onClick={fetchSnapshot}>
+              Ejecutar Análisis
+            </Button>
           </div>
         )}
-      </div>
+
+      </CardContent>
 
       {lastFetched && (
-        <div
-          style={{
-            padding: '0.5rem 1.5rem',
-            borderTop: '1px solid #f1f5f9',
-            fontSize: '0.65rem',
-            color: 'var(--color-border)',
-            fontWeight: 600,
-          }}
-        >
-          Última consulta: {lastFetched.toLocaleTimeString('es-ES')} · AgentFinance (Gemini 2.5
-          Flash)
-        </div>
+        <CardFooter>
+          Última consulta: {lastFetched.toLocaleTimeString('es-ES')} · AgentFinance (Gemini 2.5 Flash)
+        </CardFooter>
       )}
 
       <style>{`
         @keyframes finSpin    { to { transform: rotate(360deg); } }
         @keyframes finShimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
       `}</style>
-    </div>
+    </Card>
   );
 }

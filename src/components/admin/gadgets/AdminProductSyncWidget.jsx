@@ -39,6 +39,8 @@ import {
   Loader2,
   Box,
 } from 'lucide-react';
+import { Card, CardHeader, CardContent } from '../../ui/Card';
+import Button from '../../ui/Button';
 
 // ── Cloud Function endpoint ───────────────────────────────────────────────────
 const SKU_SYNC_URL = 'https://europe-west1-med-peptides-app.cloudfunctions.net/skuSyncAgent';
@@ -423,12 +425,7 @@ function SyncResultRow({ item }) {
 }
 
 // ── Main Widget ───────────────────────────────────────────────────────────────
-export default function AdminProductSyncWidget({
-  ownerId = 'admin',
-  ownerType = 'admin',
-  permissions = { canEdit: true, canExport: true },
-  hideCosts = false,
-}) {
+export default function AdminProductSyncWidget() {
   const [pendingProducts, setPendingProducts] = useState([]);
   const [loadingPending, setLoadingPending] = useState(true);
   const [syncLoading, setSyncLoading] = useState(false);
@@ -498,41 +495,11 @@ export default function AdminProductSyncWidget({
   const pendingCount = pendingProducts.length;
 
   return (
-    <div
-      style={{
-        background: 'var(--color-bg-surface)',
-        borderRadius: 'var(--radius-md)',
-        border: '1px solid #f1f5f9',
-        boxShadow: 'var(--shadow-sm)',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          padding: '1.25rem 1.5rem',
-          borderBottom: '1px solid #f1f5f9',
-          background: '#fafbfc',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '0.75rem',
-          flexWrap: 'wrap',
-        }}
-      >
-        <div>
-          <h3
-            style={{
-              margin: 0,
-              fontSize: '1.05rem',
-              fontWeight: 800,
-              color: '#0f172a',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
-          >
-            <Package size={17} color="var(--color-primary)" />
+    <Card style={{ height: '100%', display: 'flex', flexDirection: 'column' }} noPadding>
+      <CardHeader 
+        icon={Package}
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             Products
             {pendingCount > 0 && (
               <span
@@ -543,7 +510,7 @@ export default function AdminProductSyncWidget({
                   borderRadius: '50%',
                   background: 'var(--color-danger)',
                   color: 'var(--color-bg-surface)',
-                  fontSize: '0.65rem',
+                  fontSize: '10px',
                   fontWeight: 900,
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -552,61 +519,35 @@ export default function AdminProductSyncWidget({
                 {pendingCount}
               </span>
             )}
-          </h3>
-          <p
-            style={{
-              margin: '0.2rem 0 0',
-              fontSize: '0.72rem',
-              color: 'var(--color-text-tertiary)',
-            }}
-          >
-            {pendingCount > 0
-              ? `${pendingCount} product${pendingCount > 1 ? 's' : ''} require validation`
-              : 'All products validated ✓'}
-            {' · '}Zoho Books
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button
-            onClick={() => setActiveTab('validate')}
-            style={{
-              padding: '0.45rem 0.9rem',
-              borderRadius: 'var(--radius-sm)',
-              cursor: 'pointer',
-              border: `1.5px solid ${activeTab === 'validate' ? 'var(--color-primary)' : 'var(--color-border)'}`,
-              background:
-                activeTab === 'validate' ? 'rgba(0,54,102,0.06)' : 'var(--color-bg-surface)',
-              color:
-                activeTab === 'validate' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              fontFamily: 'inherit',
-            }}
-          >
-            Validate {pendingCount > 0 ? `(${pendingCount})` : ''}
-          </button>
-          <button
-            onClick={() => setActiveTab('sync')}
-            style={{
-              padding: '0.45rem 0.9rem',
-              borderRadius: 'var(--radius-sm)',
-              cursor: 'pointer',
-              border: `1.5px solid ${activeTab === 'sync' ? '#6366f1' : 'var(--color-border)'}`,
-              background:
-                activeTab === 'sync' ? 'rgba(99,102,241,0.06)' : 'var(--color-bg-surface)',
-              color: activeTab === 'sync' ? '#6366f1' : 'var(--color-text-secondary)',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              fontFamily: 'inherit',
-            }}
-          >
-            <Link2 size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-            Zoho Sync
-          </button>
-        </div>
-      </div>
+          </div>
+        }
+        subtitle={
+          pendingCount > 0
+            ? `${pendingCount} product${pendingCount > 1 ? 's' : ''} require validation · Zoho Books`
+            : 'All products validated ✓ · Zoho Books'
+        }
+        actions={
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <Button
+              variant={activeTab === 'validate' ? 'primary' : 'secondary'}
+              size="sm"
+              onClick={() => setActiveTab('validate')}
+            >
+              Validate {pendingCount > 0 ? `(${pendingCount})` : ''}
+            </Button>
+            <Button
+              variant={activeTab === 'sync' ? 'primary' : 'secondary'}
+              size="sm"
+              onClick={() => setActiveTab('sync')}
+            >
+              <Link2 size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+              Zoho Sync
+            </Button>
+          </div>
+        }
+      />
 
-      <div style={{ padding: '1.25rem 1.5rem' }}>
+      <CardContent style={{ flex: 1, overflowY: 'auto' }}>
         {/* ── TAB: VALIDATE ─────────────────────────────────────────────────── */}
         {activeTab === 'validate' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
@@ -873,12 +814,12 @@ export default function AdminProductSyncWidget({
             )}
           </div>
         )}
-      </div>
+      </CardContent>
 
       <style>{`
         @keyframes syncSpin    { to { transform: rotate(360deg); } }
         @keyframes syncShimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
       `}</style>
-    </div>
+    </Card>
   );
 }
