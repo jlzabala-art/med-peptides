@@ -1,0 +1,691 @@
+# GEOGRAPHY AREAS 2.0 – GLOBAL MARKET ACCESS & DEPLOYMENT CONTROL CENTER
+
+## Objective
+
+Transform this screen from a static configuration page into a strategic geographic intelligence center.
+
+The goal is not simply to define countries.
+
+The goal is to manage:
+
+- Market availability
+- Regulatory approval status
+- Product visibility
+- Pricing regions
+- Distributor territories
+- Clinic access
+- Shipping restrictions
+- Supplier sourcing regions
+- Revenue by geography
+- Zoho customer segmentation
+- International expansion planning
+
+The experience must be fully responsive and operational on both desktop and mobile.
+
+---
+
+# GENERAL UX REDESIGN
+
+Current state:
+
+Large empty screen
+No operational value
+No visual understanding of markets
+
+Replace with:
+
+--------------------------------------------------
+
+GLOBAL DEPLOYMENT CENTER
+--------------------------------------------------
+
+Markets
+
+Regulatory
+
+Pricing
+
+Distributors
+
+Shipping
+
+Analytics
+
+This becomes a real operational module.
+
+---
+
+# EXECUTIVE DASHBOARD
+
+At top of page show:
+
+-----------------------------------
+
+GLOBAL FOOTPRINT
+-----------------------------------
+
+Active Countries
+
+Pending Markets
+
+Restricted Markets
+
+Active Distributors
+
+Registered Products
+
+Projected Revenue
+
+Example:
+
+Countries
+12
+
+Active
+8
+
+Pending
+3
+
+Restricted
+1
+
+Products Registered
+87
+
+Projected Revenue
+AED 2.4M
+
+---
+
+# INTERACTIVE WORLD MAP
+
+Main screen centerpiece.
+
+Interactive map.
+
+Country colors:
+
+Green
+Operational
+
+Yellow
+Pending Registration
+
+Blue
+Commercial Opportunity
+
+Orange
+Distributor Needed
+
+Red
+Restricted
+
+Gray
+Not Configured
+
+Users immediately understand global coverage.
+
+---
+
+# COUNTRY DETAIL PANEL
+
+Click any country.
+
+Open side panel.
+
+Example:
+
+-----------------------------------
+
+UAE
+-----------------------------------
+
+Status:
+Operational
+
+Products Approved:
+42
+
+Products Pending:
+8
+
+Distributors:
+3
+
+Clinics:
+17
+
+Revenue:
+AED 840,000
+
+Average Margin:
+48%
+
+Zoho Customers:
+112
+
+Last Update:
+Today
+
+---
+
+# REGULATORY CENTER
+
+Track product registrations by country.
+
+Example:
+
+UAE
+
+Approved
+32
+
+Pending
+5
+
+Expired
+1
+
+---
+
+KSA
+
+Approved
+12
+
+Pending
+8
+
+Missing Documents
+4
+
+---
+
+Integrates with Product Regulatory module.
+
+---
+
+# PRODUCT AVAILABILITY MATRIX
+
+Critical functionality.
+
+Show matrix:
+
+Product
+
+UAE
+
+KSA
+
+Qatar
+
+Kuwait
+
+Bahrain
+
+Oman
+
+EU
+
+US
+
+Example:
+
+Tirzepatide
+
+✓
+✓
+✓
+✓
+✕
+✓
+✓
+✓
+
+Users instantly know availability.
+
+---
+
+# PRICE VISIBILITY INTEGRATION
+
+Connect directly to Pricing Visibility module.
+
+Per country:
+
+Retail Price
+
+Clinic Price
+
+Wholesaler Price
+
+Distributor Price
+
+Margin
+
+Tax
+
+Currency
+
+Example:
+
+Tirzepatide
+
+UAE
+AED 950
+
+KSA
+SAR 980
+
+Qatar
+QAR 1,050
+
+---
+
+# DISTRIBUTOR TERRITORY MANAGEMENT
+
+Assign countries.
+
+Example:
+
+Distributor
+
+Countries
+
+Revenue
+
+Status
+
+Royal Care
+
+UAE
+
+AED 500k
+
+Active
+
+---
+
+Medhat
+
+KSA
+
+SAR 700k
+
+Active
+
+---
+
+Allow:
+
+Assign
+
+Transfer
+
+Split Territory
+
+---
+
+# SHIPPING RESTRICTION CENTER
+
+Very valuable.
+
+Track:
+
+Cold Chain Required
+
+Import Restrictions
+
+Customs Restrictions
+
+Courier Restrictions
+
+Country Rules
+
+Example:
+
+UAE
+
+Normal
+
+---
+
+KSA
+
+Requires SFDA
+
+---
+
+Qatar
+
+Cold Chain Required
+
+---
+
+# CLINIC ACCESS MANAGEMENT
+
+Determine which clinics can access products.
+
+Example:
+
+UAE Clinics
+
+Products Available:
+42
+
+Products Restricted:
+5
+
+Products Pending:
+3
+
+---
+
+# ZOHO BOOKS INTEGRATION
+
+Connect geography with:
+
+Zoho Customers
+
+Zoho Invoices
+
+Zoho Sales Orders
+
+Zoho Revenue
+
+Zoho Tax Jurisdiction
+
+Zoho Currency
+
+Show:
+
+----------------------------------
+
+ZOHO MARKET DATA
+----------------------------------
+
+UAE
+
+Customers:
+120
+
+Revenue:
+AED 840k
+
+Outstanding:
+AED 50k
+
+---
+
+KSA
+
+Customers:
+80
+
+Revenue:
+SAR 610k
+
+---
+
+# AI MARKET OPPORTUNITY ENGINE
+
+Atlas AI should identify:
+
+New Markets
+
+Revenue Opportunities
+
+Registration Priorities
+
+Distributor Gaps
+
+Product Gaps
+
+Example:
+
+Recommendation:
+
+Register NAD+ in Qatar.
+
+Estimated annual demand:
+AED 180,000
+
+Confidence:
+91%
+
+---
+
+# MARKET EXPANSION PIPELINE
+
+Track:
+
+Target Market
+
+Registration Progress
+
+Assigned Owner
+
+Estimated Revenue
+
+Expected Launch Date
+
+Example:
+
+Bahrain
+
+Registration:
+60%
+
+Expected Revenue:
+AED 120k
+
+Launch:
+Q4 2026
+
+---
+
+# REVENUE BY COUNTRY
+
+Charts:
+
+Revenue
+
+Margin
+
+Orders
+
+Customers
+
+Growth
+
+By geography.
+
+---
+
+# PRODUCT HEAT MAP
+
+Visualize:
+
+Most sold products per country.
+
+Example:
+
+UAE
+Tirzepatide
+
+KSA
+NAD+
+
+Qatar
+MOTS-C
+
+---
+
+# MOBILE UX
+
+Do NOT show large tables.
+
+Use cards.
+
+Example:
+
+--------------------------------
+
+UAE
+--------------------------------
+
+Operational
+
+Products:
+42
+
+Revenue:
+AED 840k
+
+Distributors:
+3
+
+View Details
+
+---
+
+Map becomes:
+
+Country selector
+
+Search country
+
+Expandable cards
+
+Bottom-sheet details
+
+---
+
+# DESKTOP UX
+
+3-column layout.
+
+LEFT
+
+Countries
+
+Regions
+
+Search
+
+CENTER
+
+World Map
+
+Market Status
+
+RIGHT
+
+Country Details
+
+Regulatory
+
+Revenue
+
+Distributors
+
+---
+
+# FILTERS
+
+Allow filtering by:
+
+Country
+
+Region
+
+Status
+
+Distributor
+
+Product
+
+Regulatory State
+
+Revenue
+
+Zoho Customer Count
+
+---
+
+# AI QUICK ACTIONS
+
+Buttons:
+
+Find New Markets
+
+Analyze Revenue
+
+Detect Registration Gaps
+
+Suggest Distributor
+
+Review Product Coverage
+
+Generate Expansion Plan
+
+Audit Market Access
+
+Compare Countries
+
+---
+
+# REGIONAL GROUPS
+
+Preconfigured:
+
+GCC
+
+EU
+
+North America
+
+Asia
+
+Middle East
+
+Africa
+
+Latin America
+
+Users can also create custom groups.
+
+---
+
+# ALERT CENTER
+
+Display:
+
+Registrations Expiring
+
+Restricted Products
+
+Missing Distributors
+
+Revenue Decline
+
+Market Expansion Opportunities
+
+---
+
+# FINAL OBJECTIVE
+
+Transform Geography Areas into Atlas Global Expansion Command Center.
+
+Users should be able to understand:
+
+- Where products are available
+- Where products can be sold
+- Which distributors operate in each market
+- Which registrations are pending
+- Which countries generate revenue
+- Which markets need expansion
+- How pricing differs by geography
+- How Zoho customers and invoices are distributed globally
+
+from a single operational interface optimized for both desktop and mobile.

@@ -1,0 +1,380 @@
+Aquí tienes un prompt optimizado para AntiGravity, siguiendo la misma línea de los anteriores: foco en UX profesional, escalabilidad SaaS healthcare, coherencia entre desktop y mobile, y añadiendo funcionalidades que realmente aportan valor operativo.
+
+⸻
+
+Prompt para AntiGravity
+
+Physicians Management – UX & Functional Redesign (Desktop + Mobile)
+
+Redesign the Physicians Management module to feel like an enterprise-grade healthcare SaaS platform used by clinics, longevity centers, compounding pharmacies, and physician networks.
+
+The current screen only allows creating doctors and viewing a basic list. Transform it into a complete physician relationship management experience while maintaining a clean, modern, highly efficient UI.
+
+⸻
+
+1. Information Architecture
+
+Replace the current empty table with a structured physician directory.
+
+Each physician card/row should display:
+
+* Doctor name
+* Profile photo/avatar
+* Clinic name
+* Specialty
+* Country
+* City
+* Email
+* Phone
+* Status
+  * Active
+  * Pending Invitation
+  * Suspended
+  * Archived
+* Registration date
+* Last activity date
+* Number of patients
+* Number of prescriptions
+* Number of orders
+* Revenue generated
+* Assigned account manager
+
+Allow switching between:
+
+Table View
+
+For operational teams.
+
+Card View
+
+For relationship management and sales teams.
+
+Persist user preference.
+
+⸻
+
+1. Advanced Search & Filtering
+
+Replace the current single search bar with:
+
+Quick Search
+
+Search by:
+
+* Doctor
+* Clinic
+* Email
+* Phone
+* License Number
+
+Advanced Filters
+
+* Country
+* City
+* Specialty
+* Status
+* Activity level
+* Revenue range
+* Date created
+* Last login
+* Assigned manager
+
+Show active filters as removable chips.
+
+⸻
+
+1. Physician Profile Drawer
+
+Instead of a simple form, clicking a physician opens a full side panel.
+
+Tabs:
+
+Overview
+
+* Contact details
+* Clinic details
+* Status
+* Notes
+
+Activity
+
+Timeline:
+
+* Logins
+* Orders
+* Prescriptions
+* Messages
+* Catalog views
+
+Patients
+
+Summary only:
+
+* Total patients
+* Active patients
+* Recent activity
+
+Orders
+
+* Total orders
+* Revenue
+* Last order
+
+Documents
+
+* License
+* Certifications
+* Contracts
+* NDAs
+
+Internal Notes
+
+Private notes for administrators.
+
+⸻
+
+1. Create Doctor Experience
+
+Current form is too basic.
+
+Transform into a guided onboarding flow.
+
+Step 1
+
+Identity
+
+* Name
+* Email
+* Phone
+
+Step 2
+
+Professional Details
+
+* Specialty
+* License Number
+* Years of Experience
+
+Step 3
+
+Clinic Information
+
+* Clinic Name
+* Website
+* Country
+* City
+* Address
+
+Step 4
+
+Permissions
+
+* Portal access
+* Catalog access
+* Prescription permissions
+
+Step 5
+
+Review & Invite
+
+Send invitation immediately.
+
+Show success confirmation.
+
+⸻
+
+1. Empty State Redesign
+
+Current empty state feels unfinished.
+
+Replace with:
+
+Friendly Illustration
+
+“Build your physician network”
+
+Quick Actions
+
+* Add First Physician
+* Import Physicians
+* Invite Physicians
+* Download Template
+
+Provide onboarding guidance.
+
+⸻
+
+1. Bulk Actions
+
+Support:
+
+* Import CSV
+* Import Excel
+* Bulk Invite
+* Bulk Archive
+* Bulk Activate
+* Bulk Assign Manager
+* Bulk Export
+
+Show selection toolbar when rows are selected.
+
+⸻
+
+1. Communication Layer
+
+Add direct communication tools.
+
+Per physician:
+
+* Send email
+* Send notification
+* Send WhatsApp invitation
+* Schedule meeting
+
+Display communication history.
+
+⸻
+
+1. Analytics Section
+
+Add physician metrics dashboard.
+
+KPIs:
+
+* Total physicians
+* Active physicians
+* New this month
+* Invitations pending
+* Revenue generated
+* Average orders per physician
+
+Visualizations:
+
+* Growth trend
+* Country distribution
+* Specialty distribution
+* Top performing physicians
+
+⸻
+
+1. Mobile UX Optimization
+
+Current desktop layout cannot simply shrink.
+
+Create a dedicated mobile experience.
+
+Mobile List
+
+Each physician displayed as a card.
+
+Card shows:
+
+* Avatar
+* Name
+* Specialty
+* Clinic
+* Status
+
+Tap opens profile.
+
+⸻
+
+Mobile Actions
+
+Floating Action Button:
+
+* Add Physician
+
+Bottom sheet actions:
+
+* Invite
+* Call
+* Email
+* Archive
+
+⸻
+
+Mobile Filters
+
+Use slide-up filter panel.
+
+Collapsible sections:
+
+* Status
+* Country
+* Specialty
+* Activity
+
+⸻
+
+1. Responsive Side Panel
+
+Desktop:
+
+* Right-side drawer
+
+Tablet:
+
+* Wider overlay
+
+Mobile:
+
+* Full-screen profile page
+
+⸻
+
+1. Visual Improvements
+
+Improve hierarchy.
+
+Header
+
+Add:
+
+* Total physicians count
+* Active physicians count
+* Pending invitations
+
+Action Area
+
+Primary CTA:
+
+“Add Physician”
+
+Secondary CTA:
+
+“Import”
+
+Table
+
+Sticky header
+
+Sticky actions column
+
+Row hover states
+
+Quick actions on hover
+
+⸻
+
+1. Future-Proof Architecture
+
+Prepare for future modules:
+
+* Prescriptions
+* Orders
+* Messaging
+* AI Assistant
+* Patient Referrals
+* Medical Education
+* CME Programs
+
+Do not hard-code current functionality.
+
+Design reusable components and scalable data structures.
+
+⸻
+
+Goal
+
+Create a physician management module that feels comparable to Salesforce Health Cloud, HubSpot CRM, and modern healthcare SaaS platforms, while maintaining the clean visual language already used across Atlas Health and ensuring a seamless experience on desktop, tablet, and mobile.
