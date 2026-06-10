@@ -941,18 +941,35 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
           gap: 1rem;
+          margin-bottom: 1.5rem;
+        }
+        .amd-dashboard-layout {
+          display: grid;
+          grid-template-columns: 2.1fr 0.9fr;
+          gap: 1.5rem;
+          align-items: start;
           margin-bottom: 2rem;
+        }
+        .amd-main-column {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          min-width: 0;
+        }
+        .amd-sidebar-column {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          min-width: 0;
         }
         .amd-active-users-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
           gap: 1.5rem;
-          margin-bottom: 2rem;
         }
         .amd-bottom-grid {
           display: grid;
           gap: 2rem;
-          margin-bottom: 2rem;
         }
         .amd-widget-grid {
           display: grid;
@@ -964,7 +981,6 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
           padding: 1.5rem;
           border: 1px solid var(--color-border, #dadce0);
           box-shadow: 0 1px 2px rgba(60,67,70,0.1);
-          margin-bottom: 1.5rem;
         }
         .amd-table-section table {
           width: 100%;
@@ -1012,8 +1028,9 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
         }
 
         /* KPI card compact on mobile */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
           .amd-command-header { padding: 1rem; }
+          .amd-dashboard-layout { grid-template-columns: 1fr !important; }
           .amd-kpi-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
           .amd-active-users-grid { grid-template-columns: 1fr; }
           .amd-bottom-grid { grid-template-columns: 1fr !important; }
@@ -1135,82 +1152,6 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
           ))}
         </div>
       </div>
-
-      {/* supplyNotifier panel */}
-      {showPanel('supplyNotifier') && (
-        <div style={{ marginBottom: '2rem' }}>
-          <AdminSupplyNotifierWidget />
-        </div>
-      )}
-
-      {/* Active Users & Telemetry Panel */}
-      {showPanel('activeUsers') && (
-        <div className="amd-active-users-grid">
-
-          {/* Active Users Widget */}
-          <div
-            className="amd-card clickable"
-            onClick={() => handleNavigate('analytics')}
-          >
-            <div className="amd-card-header">
-              <h3 className="amd-card-title">Active Users ({activeUsers.length})</h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#10b981', animation: 'livePulse 2s infinite' }} />
-                <span className="amd-caption" style={{ color: '#64748b' }}>Live · Real time</span>
-                <ArrowUpRight size={14} style={{ color: 'var(--color-primary, #1a73e8)' }} />
-              </div>
-            </div>
-            {activeUsers.length === 0 ? (
-              <p className="amd-body" style={{ color: '#64748b', textAlign: 'center', padding: '1rem 0', margin: 0 }}>
-                No users are currently active.
-              </p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto' }}>
-                {activeUsers.map(u => (
-                  <div key={u.userId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.4rem 0.6rem', backgroundColor: '#f8f9fa', borderRadius: '6px' }}>
-                    <div>
-                      <div className="amd-subtitle" style={{ color: '#202124' }}>{u.email}</div>
-                      <div className="amd-caption" style={{ color: '#64748b' }}>Role: {u.role}</div>
-                    </div>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--color-primary, #1a73e8)', backgroundColor: 'rgba(26,115,232,0.08)', padding: '2px 7px', borderRadius: '4px' }}>
-                      {u.currentPath}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* AI Consumption Widget */}
-          <div
-            className="amd-card clickable"
-            onClick={() => handleNavigate('analytics')}
-          >
-            <div className="amd-card-header">
-              <h3 className="amd-card-title">Atlas AI Consumption</h3>
-              <ArrowUpRight size={16} style={{ color: 'var(--color-primary, #1a73e8)', flexShrink: 0 }} />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-              <span className="amd-stat-value" style={{ color: 'var(--color-primary, #1a73e8)' }}>
-                ${aiConsumption.toFixed(3)}
-              </span>
-              <span className="amd-caption" style={{ color: '#64748b' }}>USD this month</span>
-            </div>
-            <div style={{ marginTop: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
-                <span className="amd-caption" style={{ color: '#64748b' }}>Gemini 1.5 Pro</span>
-                <span className="amd-caption" style={{ color: '#64748b' }}>${aiConsumption.toFixed(3)} / $10.00 limit</span>
-              </div>
-              <div style={{ width: '100%', height: '6px', backgroundColor: '#f1f3f4', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ width: `${Math.min((aiConsumption / 10) * 100, 100)}%`, height: '100%', backgroundColor: aiConsumption > 8 ? '#ef4444' : 'var(--color-primary, #1a73e8)', borderRadius: '4px', transition: 'width 0.5s ease' }} />
-              </div>
-              <p className="amd-caption" style={{ margin: '0.6rem 0 0', color: '#64748b' }}>
-                Click to view full AI usage breakdown and session analytics →
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Customize Panel Drawer */}
       {isEditing && (
@@ -1507,230 +1448,284 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
         </div>
       )}
 
-      {/* KPI Cards Grid */}
-      <div style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Key Performance Indicators</span>
-        <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
-        <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{activeKPIs.length} metrics</span>
-      </div>
-      <div className="amd-kpi-grid">
-        {activeKPIs.map((key) => {
-          const meta = KPI_METADATA[key];
-          let displayVal = metrics[key];
+      {/* ── Two-Column Grid Layout on Desktop ────────────────────────── */}
+      <div className="amd-dashboard-layout">
+        
+        {/* Left Column (Main, 2/3 width) */}
+        <div className="amd-main-column">
+          
+          {/* KPI Cards Grid */}
+          <div>
+            <div style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Key Performance Indicators</span>
+              <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
+              <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{activeKPIs.length} metrics</span>
+            </div>
+            
+            <div className="amd-kpi-grid">
+              {activeKPIs.map((key) => {
+                const meta = KPI_METADATA[key];
+                let displayVal = metrics[key];
 
-          // Formatting based on type
-          if (key === 'revenue' || key === 'averageOrderValue') {
-            displayVal = formatCurrency(metrics[key]);
-          } else if (key === 'pendingApprovals' || key === 'lowStockAlerts') {
-            displayVal = Number(metrics[key]) || 0;
-          }
-
-          const hasAlert =
-            (key === 'pendingApprovals' && metrics.pendingApprovals > 0) ||
-            (key === 'lowStockAlerts' && metrics.lowStockAlerts > 0);
-
-          return (
-            <MetricCard
-              key={key}
-              title={meta?.title || key}
-              value={displayVal}
-              icon={meta?.icon || Activity}
-              color={meta?.color || '#1a73e8'}
-              bgColor={meta?.bgColor || '#e8f0fe'}
-              subtitle={meta?.subtitle || ''}
-              alert={hasAlert}
-              onClick={() => {
-                if (wholesalerId) return; // Disable navigation on click in wholesaler scope
-                if (key === 'totalUsers' || key === 'pendingApprovals') {
-                  handleNavigate('patients');
-                } else if (key === 'activePhysicians') {
-                  handleNavigate('doctors');
-                } else if (key === 'activeOrders') {
-                  handleNavigate('orders');
-                } else if (key === 'lowStockAlerts') {
-                  handleNavigate('products');
-                } else if (key === 'systemHealth') {
-                  handleNavigate('analytics');
+                if (key === 'revenue' || key === 'averageOrderValue') {
+                  displayVal = formatCurrency(metrics[key]);
+                } else if (key === 'pendingApprovals' || key === 'lowStockAlerts') {
+                  displayVal = Number(metrics[key]) || 0;
                 }
-              }}
+
+                const hasAlert =
+                  (key === 'pendingApprovals' && metrics.pendingApprovals > 0) ||
+                  (key === 'lowStockAlerts' && metrics.lowStockAlerts > 0);
+
+                return (
+                  <MetricCard
+                    key={key}
+                    title={meta?.title || key}
+                    value={displayVal}
+                    icon={meta?.icon || Activity}
+                    color={meta?.color || '#1a73e8'}
+                    bgColor={meta?.bgColor || '#e8f0fe'}
+                    subtitle={meta?.subtitle || ''}
+                    alert={hasAlert}
+                    onClick={() => {
+                      if (wholesalerId) return;
+                      if (key === 'totalUsers' || key === 'pendingApprovals') {
+                        handleNavigate('patients');
+                      } else if (key === 'activePhysicians') {
+                        handleNavigate('doctors');
+                      } else if (key === 'activeOrders') {
+                        handleNavigate('orders');
+                      } else if (key === 'lowStockAlerts') {
+                        handleNavigate('products');
+                      } else if (key === 'systemHealth') {
+                        handleNavigate('analytics');
+                      }
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Supply Notifier Widget */}
+          {showPanel('supplyNotifier') && (
+            <AdminSupplyNotifierWidget />
+          )}
+
+          {/* Recent Registrations Table */}
+          {showPanel('recentRegistrations') && (
+            <RecentRegistrationsTable
+              recentUsers={recentUsers}
+              wholesalerId={wholesalerId}
+              navigateToUserTab={navigateToUserTab}
+              formatDate={formatDate}
             />
-          );
-        })}
-      </div>
+          )}
 
-      {/* Single Column Layout: Recent Registrations */}
-      <div
-        className="amd-bottom-grid"
-        style={{
-          gridTemplateColumns: '1fr',
-        }}
-      >
-        {/* Recent Registrations Table */}
-        {showPanel('recentRegistrations') && (
-          <RecentRegistrationsTable
-            recentUsers={recentUsers}
-            wholesalerId={wholesalerId}
-            navigateToUserTab={navigateToUserTab}
-            formatDate={formatDate}
-          />
-        )}
-      </div>
+          {/* Physician & Clinics Cohort Volume Table */}
+          {showPanel('doctorCohort') && (
+            <DoctorCohortTable
+              wholesalerId={wholesalerId}
+              scopedDoctors={scopedDoctors}
+              doctorsWithPatients={doctorsWithPatients}
+            />
+          )}
 
-      {/* System Status & Health Panel (Full Width Horizontal) */}
-      {showPanel('systemStatus') && (
-        <Card style={{ marginBottom: '1.5rem' }}>
-          <CardHeader
-            icon={Server}
-            title="Infrastructure Status"
-          />
-          <CardContent>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-              gap: '1rem',
-              alignItems: 'center',
-              paddingBottom: flushSuccess ? '0.5rem' : '0',
-            }}>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: '#5f6368', display: 'block', marginBottom: '0.25rem' }}>Firestore Database</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: '#0f9d58' }}>
-                  <span className="admin-pill-status-dot admin-pill-status-dot--pulse" /> Connected
-                </span>
-              </div>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: '#5f6368', display: 'block', marginBottom: '0.25rem' }}>Clinical AI Engine</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: '#1a73e8' }}>
-                  <Sparkles size={13} /> gemini-2.5-pro
-                </span>
-              </div>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: '#5f6368', display: 'block', marginBottom: '0.25rem' }}>B2B Router Link</span>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#202124' }}>Active</span>
-              </div>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: '#5f6368', display: 'block', marginBottom: '0.25rem' }}>Query Latency</span>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#202124' }}>{metrics.systemHealth}</span>
-              </div>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: '#5f6368', display: 'block', marginBottom: '0.25rem' }}>Location Context</span>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#202124' }}>regenpept-prod</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', alignSelf: 'center' }}>
-                <button
-                  onClick={handleFlushCache}
-                  disabled={isFlushing}
-                  className="admin-quick-btn"
-                  style={{
-                    padding: '0.4rem 1rem',
-                    borderRadius: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    border: '1px solid #dadce0',
-                    backgroundColor: 'var(--color-bg-surface)',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    cursor: isFlushing ? 'default' : 'pointer',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isFlushing) e.currentTarget.style.backgroundColor = '#f8f9fa';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isFlushing) e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)';
-                  }}
-                >
-                  <RefreshCw size={12} className={isFlushing ? 'animate-spin' : ''} />
-                  {isFlushing ? 'Flushing...' : 'Flush Cache'}
-                </button>
+          {/* Wholesaler Cohort Volume Table (Admin only) */}
+          {!wholesalerId && showPanel('wholesalerCohort') && (
+            <WholesalerCohortTable wholesalersWithStats={wholesalersWithStats} />
+          )}
+
+          {/* Operational Intelligence (Finance / Zoho Sync) */}
+          {(showPanel('financeWidget') || showPanel('productSyncWidget')) && (
+            <div>
+              <h2 className="amd-heading" style={{
+                color: '#202124', marginBottom: '1.25rem',
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+              }}>
+                <Layers size={18} color="#1a73e8" />
+                Intelligence &amp; Sync Hub
+              </h2>
+              <div
+                className="amd-widget-grid"
+                style={{
+                  gridTemplateColumns:
+                    showPanel('financeWidget') && showPanel('productSyncWidget') ? '1fr 1fr' : '1fr',
+                }}
+              >
+                {showPanel('financeWidget') && <AdminFinanceWidget />}
+                {showPanel('productSyncWidget') && <AdminProductSyncWidget />}
               </div>
             </div>
-            {flushSuccess && (
-              <div style={{ color: '#0f9d58', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.5rem', animation: 'fadeIn 0.3s ease-out' }}>
-                <CheckCircle2 size={12} /> Cache flushed successfully
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+          )}
 
-      {/* Page Visits Analytics Table */}
-      {showPanel('pageVisits') && (
-        <PageVisitsTable
-          visitsPeriod={visitsPeriod}
-          setVisitsPeriod={setVisitsPeriod}
-          prioritizedViews={prioritizedViews}
-        />
-      )}
+        </div>
 
-      {/* Physician & Clinics cohort volume table */}
-      {showPanel('doctorCohort') && (
-        <DoctorCohortTable
-          wholesalerId={wholesalerId}
-          scopedDoctors={scopedDoctors}
-          doctorsWithPatients={doctorsWithPatients}
-        />
-      )}
-
-      {/* Wholesaler cohort volume table (Admin only) */}
-      {!wholesalerId && showPanel('wholesalerCohort') && (
-        <WholesalerCohortTable wholesalersWithStats={wholesalersWithStats} />
-      )}
-
-      {/* System Widgets and Operational Grid */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        {/* System Widgets Panel */}
-        {(showPanel('auditLogs') || showPanel('payoutManager')) && (
-          <div>
-            <h2 className="amd-heading" style={{
-              color: '#202124', marginBottom: '1.25rem',
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-            }}>
-              <Activity size={18} color="#1a73e8" />
-              Operational Widgets
-            </h2>
-            <div
-              className="amd-widget-grid"
-              style={{
-                gridTemplateColumns:
-                  showPanel('auditLogs') && showPanel('payoutManager') ? '1fr 1fr' : '1fr',
-              }}
-            >
-              {showPanel('auditLogs') && (
-                <div style={{ height: '380px' }}>
-                  <SystemAuditLogWidget />
+        {/* Right Column (Sidebar, 1/3 width) */}
+        <div className="amd-sidebar-column">
+          
+          {/* Infrastructure Status */}
+          {showPanel('systemStatus') && (
+            <Card style={{ width: '100%' }}>
+              <CardHeader
+                icon={Server}
+                title="Infrastructure Status"
+              />
+              <CardContent>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  paddingBottom: flushSuccess ? '0.5rem' : '0',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f3f4', paddingBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>Firestore Database</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: '#0f9d58' }}>
+                      <span className="admin-pill-status-dot admin-pill-status-dot--pulse" /> Connected
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f3f4', paddingBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>Clinical AI Engine</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: '#1a73e8' }}>
+                      <Sparkles size={13} /> gemini-2.5-pro
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f3f4', paddingBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>B2B Router Link</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#202124' }}>Active</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f3f4', paddingBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>Query Latency</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#202124' }}>{metrics.systemHealth}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f3f4', paddingBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>Location Context</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#202124' }}>regenpept-prod</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
+                    <button
+                      onClick={handleFlushCache}
+                      disabled={isFlushing}
+                      className="admin-quick-btn"
+                      style={{
+                        width: '100%',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '6px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        border: '1px solid #dadce0',
+                        backgroundColor: 'var(--color-bg-surface)',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        cursor: isFlushing ? 'default' : 'pointer',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isFlushing) e.currentTarget.style.backgroundColor = '#f8f9fa';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isFlushing) e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)';
+                      }}
+                    >
+                      <RefreshCw size={12} className={isFlushing ? 'animate-spin' : ''} />
+                      {isFlushing ? 'Flushing...' : 'Flush Cache'}
+                    </button>
+                  </div>
                 </div>
-              )}
+                {flushSuccess && (
+                  <div style={{ color: '#0f9d58', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.5rem', animation: 'fadeIn 0.3s ease-out' }}>
+                    <CheckCircle2 size={12} /> Cache flushed successfully
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Active Users & AI Consumption Widget */}
+          {showPanel('activeUsers') && (
+            <Card style={{ width: '100%' }}>
+              <CardContent style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {/* Active Users Section */}
+                <div>
+                  <div className="amd-card-header" style={{ marginBottom: '0.75rem' }}>
+                    <h3 className="amd-card-title">Active Users ({activeUsers.length})</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#10b981', animation: 'livePulse 2s infinite' }} />
+                      <span className="amd-caption" style={{ color: '#64748b', fontSize: '0.7rem' }}>Live</span>
+                    </div>
+                  </div>
+                  
+                  {activeUsers.length === 0 ? (
+                    <p className="amd-body" style={{ color: '#64748b', padding: '0.5rem 0', margin: 0 }}>
+                      No active sessions.
+                    </p>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '180px', overflowY: 'auto' }}>
+                      {activeUsers.slice(0, 6).map(u => (
+                        <div key={u.userId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.4rem 0.6rem', backgroundColor: '#f8f9fa', borderRadius: '6px' }}>
+                          <div style={{ minWidth: 0, flex: 1, marginRight: '0.5rem' }}>
+                            <div className="amd-subtitle" style={{ color: '#202124', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.8rem' }}>{u.email}</div>
+                            <div className="amd-caption" style={{ color: '#64748b', fontSize: '0.7rem' }}>Role: {u.role}</div>
+                          </div>
+                          <span style={{ fontSize: '0.65rem', color: 'var(--color-primary, #1a73e8)', backgroundColor: 'rgba(26,115,232,0.08)', padding: '2px 6px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
+                            {u.currentPath}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* AI Consumption Section */}
+                <div style={{ borderTop: '1px solid #f1f3f4', paddingTop: '1rem' }}>
+                  <div className="amd-card-header" style={{ marginBottom: '0.5rem' }}>
+                    <h3 className="amd-card-title">Atlas AI Consumption</h3>
+                    <Sparkles size={14} color="var(--color-primary)" />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                    <span className="amd-stat-value" style={{ color: 'var(--color-primary, #1a73e8)', fontSize: '1.4rem' }}>
+                      ${aiConsumption.toFixed(3)}
+                    </span>
+                    <span className="amd-caption" style={{ color: '#64748b', fontSize: '0.75rem' }}>USD this month</span>
+                  </div>
+                  <div style={{ marginTop: '0.75rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                      <span className="amd-caption" style={{ color: '#64748b', fontSize: '0.7rem' }}>Gemini 1.5 Pro</span>
+                      <span className="amd-caption" style={{ color: '#64748b', fontSize: '0.7rem' }}>${aiConsumption.toFixed(3)} / $10 limit</span>
+                    </div>
+                    <div style={{ width: '100%', height: '6px', backgroundColor: '#f1f3f4', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: `${Math.min((aiConsumption / 10) * 100, 100)}%`, height: '100%', backgroundColor: aiConsumption > 8 ? '#ef4444' : 'var(--color-primary, #1a73e8)', borderRadius: '4px' }} />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Payouts / Audit Logs widgets */}
+          {(showPanel('auditLogs') || showPanel('payoutManager')) && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
               {showPanel('payoutManager') && (
-                <div style={{ height: '380px' }}>
-                  <PayoutManagerWidget />
-                </div>
+                <PayoutManagerWidget />
+              )}
+              {showPanel('auditLogs') && (
+                <SystemAuditLogWidget />
               )}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Operational Intelligence (Finance / Zoho Sync) */}
-        {(showPanel('financeWidget') || showPanel('productSyncWidget')) && (
-          <div>
-            <h2 className="amd-heading" style={{
-              color: '#202124', marginBottom: '1.25rem',
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-            }}>
-              <Layers size={18} color="#1a73e8" />
-              Intelligence &amp; Sync Hub
-            </h2>
-            <div
-              className="amd-widget-grid"
-              style={{
-                gridTemplateColumns:
-                  showPanel('financeWidget') && showPanel('productSyncWidget') ? '1fr 1fr' : '1fr',
-              }}
-            >
-              {showPanel('financeWidget') && <AdminFinanceWidget />}
-              {showPanel('productSyncWidget') && <AdminProductSyncWidget />}
-            </div>
-          </div>
-        )}
+          {/* Page Visits Analytics Table */}
+          {showPanel('pageVisits') && (
+            <PageVisitsTable
+              visitsPeriod={visitsPeriod}
+              setVisitsPeriod={setVisitsPeriod}
+              prioritizedViews={prioritizedViews}
+            />
+          )}
+
+        </div>
+
       </div>
     </div>
   );

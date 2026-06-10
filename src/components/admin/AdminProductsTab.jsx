@@ -32,7 +32,13 @@ import {
   FileText,
   LineChart,
   Stethoscope,
-  CheckCircle2
+  CheckCircle2,
+  Users,
+  Shield,
+  Image as ImageIcon,
+  Sparkles,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { DataTable, StatusChip, FilterBar } from '../ui';
@@ -90,6 +96,17 @@ export default function AdminProductsTab({
       window.history.replaceState({}, '', url.toString());
     }
   }, [searchParams]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const [viewMode, setViewMode] = useState('list'); // 'list', 'card'
+  const [visibleColumns, setVisibleColumns] = useState(['image', 'product', 'category', 'type', 'stock', 'retail', 'clinic', 'supplier', 'regulatory']);
+  const [activeQuickFilter, setActiveQuickFilter] = useState('all');
+
   const [filterCategory, setFilterCategory] = useState('All');
   const [filterSupplier, setFilterSupplier] = useState('All');
   const [filterProductType, setFilterProductType] = useState('All');
@@ -507,80 +524,95 @@ export default function AdminProductsTab({
 
   const suppliersToShow = [...new Set(products.map((p) => p.supplier).filter(Boolean))];
 
-  const columns = [
+  const allColumnsList = [
+    {
+      key: 'image',
+      header: 'Image',
+      render: (row) => (
+        <div style={{ width: '36px', height: '36px', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--border)', backgroundColor: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {row.images?.length > 0 ? (
+            <img src={row.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <Package size={16} color="#94a3b8" />
+          )}
+        </div>
+      )
+    },
     {
       key: 'product',
       header: 'Product',
       sortKey: 'name',
       render: (row) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '4px 0' }}>
-          <div style={{
-            width: '32px', height: '32px', borderRadius: '4px', backgroundColor: 'var(--color-bg-subtle)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)'
-          }}>
-            <Package size={16} />
-          </div>
-          <div>
-            <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '2px' }}>
-              {row.name}
-            </div>
-            {row.isGroup && (
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                {row.variants.length} variant{row.variants.length !== 1 && 's'}
-              </div>
-            )}
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.9rem' }}>{row.name}</div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>SKU: {row.sku || 'N/A'}</div>
         </div>
-      ),
+      )
     },
     {
       key: 'category',
       header: 'Category',
-      sortable: true,
-      render: (row) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>{row.category || 'N/A'}</span>
-        </div>
-      )
+      render: (row) => <span style={{ fontSize: '0.85rem' }}>{row.category || 'N/A'}</span>
     },
     {
-      key: 'status',
-      header: 'Status',
-      render: (row) => (
-        <StatusChip status={row.stock > 0 ? (row.isActive ? 'Active' : 'Draft') : 'Out of Stock'} />
-      )
+      key: 'type',
+      header: 'Type',
+      render: (row) => <span style={{ fontSize: '0.85rem' }}>{row.product_type || 'Peptide'}</span>
     },
     {
       key: 'stock',
       header: 'Stock',
-      sortable: true,
-      sortValue: row => row.totalStock,
-      render: (row) => {
-        const stock = row.isGroup ? row.totalStock : row.stock;
-        return (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ 
-              fontSize: '0.85rem', 
-              fontWeight: 500,
-              color: stock > 20 ? '#10b981' : (stock > 0 ? '#f59e0b' : '#ef4444')
-            }}>
-              {stock || 0}
-            </span>
-          </div>
-        );
-      }
-    },
-    {
-      key: 'guestVialPrice',
-      header: 'Retail Price',
-      sortable: true,
+      sortValue: row => row.stock,
       render: (row) => (
-        <span style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
-          {row.guestVialPrice ? `$${row.guestVialPrice}` : '-'}
+        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: row.stock > 20 ? '#16a34a' : (row.stock > 0 ? '#ea580c' : '#dc2626') }}>
+          {row.stock || 0}
         </span>
       )
+    },
+    {
+      key: 'warehouse',
+      header: 'Warehouse',
+      render: (row) => <span style={{ fontSize: '0.85rem' }}>{row.warehouse || 'Poland'}</span>
+    },
+    {
+      key: 'retail',
+      header: 'Retail Price',
+      render: (row) => <span style={{ fontSize: '0.85rem' }}>{row.guestVialPrice ? `$${row.guestVialPrice}` : '-'}</span>
+    },
+    {
+      key: 'clinic',
+      header: 'Clinic Price',
+      render: (row) => <span style={{ fontSize: '0.85rem' }}>{row.proVialPrice ? `$${row.proVialPrice}` : '-'}</span>
+    },
+    {
+      key: 'supplier',
+      header: 'Supplier',
+      render: (row) => <span style={{ fontSize: '0.85rem' }}>{row.supplier || '-'}</span>
+    },
+    {
+      key: 'regulatory',
+      header: 'Regulatory',
+      render: (row) => (
+        <span style={{
+          fontSize: '0.75rem',
+          fontWeight: 600,
+          color: row.registrationStatus === 'Registered' ? '#16a34a' : (row.registrationStatus === 'Pending' ? '#d97706' : '#64748b'),
+          backgroundColor: row.registrationStatus === 'Registered' ? '#dcfce7' : (row.registrationStatus === 'Pending' ? '#fef3c7' : '#f1f5f9'),
+          padding: '2px 8px',
+          borderRadius: '12px'
+        }}>
+          {row.registrationStatus || 'Not Registered'}
+        </span>
+      )
+    },
+    {
+      key: 'updated',
+      header: 'Updated',
+      render: (row) => <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{row.updatedAt ? new Date(row.updatedAt).toLocaleDateString() : 'N/A'}</span>
     }
   ];
+
+  const columns = allColumnsList.filter(col => visibleColumns.includes(col.key));
 
   if (!readOnly) {
     columns.push({
@@ -884,10 +916,14 @@ export default function AdminProductsTab({
         }
       }
 
-      let matchesProductType = true;
-      if (filterProductType !== 'All') {
-         matchesProductType = p.product_type === filterProductType;
-      }
+      let matchesQuickFilter = true;
+      if (activeQuickFilter === 'active') matchesQuickFilter = p.isActive !== false;
+      else if (activeQuickFilter === 'lowStock') matchesQuickFilter = p.stock > 0 && p.stock <= 20;
+      else if (activeQuickFilter === 'outOfStock') matchesQuickFilter = p.stock === 0;
+      else if (activeQuickFilter === 'pendingRegulatory') matchesQuickFilter = p.registrationStatus !== 'Registered';
+      else if (activeQuickFilter === 'pendingPrice') matchesQuickFilter = !p.guestVialPrice;
+      else if (activeQuickFilter === 'noMedia') matchesQuickFilter = !p.images || p.images.length === 0;
+      else if (activeQuickFilter === 'noSupplier') matchesQuickFilter = !p.supplier;
 
       return (
         matchesCategory &&
@@ -899,7 +935,8 @@ export default function AdminProductsTab({
         matchesSearch &&
         matchesDate &&
         matchesZoho &&
-        matchesSource
+        matchesSource &&
+        matchesQuickFilter
       );
     });
   });
