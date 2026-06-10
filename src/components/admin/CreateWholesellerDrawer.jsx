@@ -54,6 +54,12 @@ export default function CreateWholesellerDrawer({ onClose, onSuccess }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const ratingVal = document.getElementById('ws-rating')?.value || '5';
+    const buyerVal = document.getElementById('ws-buyer')?.value || '';
+    const amVal = document.getElementById('ws-am')?.value || '';
+    const regVal = document.getElementById('ws-regulatory')?.value || '';
+    const logVal = document.getElementById('ws-logistics')?.value || '';
+
     const payload = {
       companyName,
       type: businessType,
@@ -61,7 +67,12 @@ export default function CreateWholesellerDrawer({ onClose, onSuccess }) {
       zohoContactId: selectedBiginContact ? selectedBiginContact.id : null,
       zohoSyncStatus: !!selectedBiginContact,
       country: selectedCountry,
-      zones: selectedZones
+      zones: selectedZones,
+      rating: parseInt(ratingVal, 10),
+      buyer: buyerVal,
+      accountManager: amVal,
+      regulatoryManager: regVal,
+      logisticsManager: logVal
     };
     onSuccess(payload);
   };
@@ -159,7 +170,7 @@ export default function CreateWholesellerDrawer({ onClose, onSuccess }) {
             
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-                Business Type
+                Supplier Type
               </label>
               <select
                 value={businessType}
@@ -167,10 +178,54 @@ export default function CreateWholesellerDrawer({ onClose, onSuccess }) {
                 className="app-input"
                 style={{ width: '100%', padding: '0.75rem' }}
               >
-                <option value="distributor">Regional Distributor</option>
-                <option value="clinic_network">Clinic Network</option>
-                <option value="pharmacy">Pharmacy Chain</option>
+                <option value="Manufacturer">Manufacturer</option>
+                <option value="Distributor">Distributor</option>
+                <option value="Compounding Pharmacy">Compounding Pharmacy</option>
+                <option value="Testing Lab">Testing Lab</option>
+                <option value="Raw Material Supplier">Raw Material Supplier</option>
+                <option value="Packaging Supplier">Packaging Supplier</option>
+                <option value="Courier">Courier</option>
               </select>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+                Initial Performance Rating
+              </label>
+              <select
+                id="ws-rating"
+                defaultValue="5"
+                className="app-input"
+                style={{ width: '100%', padding: '0.75rem' }}
+              >
+                <option value="5">★★★★★ (5 Stars)</option>
+                <option value="4">★★★★☆ (4 Stars)</option>
+                <option value="3">★★★☆☆ (3 Stars)</option>
+                <option value="2">★★☆☆☆ (2 Stars)</option>
+                <option value="1">★☆☆☆☆ (1 Star)</option>
+              </select>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--color-bg-app)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                Assigned Team Managers
+              </label>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Assigned Buyer</label>
+                <input id="ws-buyer" type="text" placeholder="e.g. Maria Delgado" className="app-input" style={{ width: '100%', padding: '0.5rem' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Assigned Account Manager</label>
+                <input id="ws-am" type="text" placeholder="e.g. Alex Smith" className="app-input" style={{ width: '100%', padding: '0.5rem' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Regulatory Manager</label>
+                <input id="ws-regulatory" type="text" placeholder="e.g. Dr. Luis Gomez" className="app-input" style={{ width: '100%', padding: '0.5rem' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Logistics Manager</label>
+                <input id="ws-logistics" type="text" placeholder="e.g. Fahad Al-Mansoori" className="app-input" style={{ width: '100%', padding: '0.5rem' }} />
+              </div>
             </div>
             
             {/* Geography Assignment */}

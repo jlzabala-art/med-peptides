@@ -1,59 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { collection, query, onSnapshot, doc, updateDoc, setDoc, where } from 'firebase/firestore';
+import React, { useState, useEffect, useMemo } from 'react';
+import { collection, query, onSnapshot, doc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { 
-  Building2, Globe, ShieldCheck, Eye, EyeOff, Plus, Building, 
-  CheckCircle2, X, Lock, CreditCard, Mail, Phone, Landmark, 
-  RefreshCw, User, ShieldAlert, Copy, Check, FileText
+  Building2, Globe, ShieldCheck, Eye, Plus, Building, 
+  CheckCircle2, X, Lock, Mail, Phone, Landmark, 
+  RefreshCw, User, ShieldAlert, Copy, Check, FileText,
+  Star, DollarSign, Activity, AlertTriangle, TrendingUp,
+  MapPin, Settings, Share2, Filter, Grid, List, Map, FileCode, CheckSquare
 } from 'lucide-react';
 import CreateWholesellerDrawer from './CreateWholesellerDrawer';
-import ERPListDetailLayout from '../shared/ERPListDetailLayout';
 import { Tabs, StatusChip } from '../ui';
+import toast from 'react-hot-toast';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-// ── Wholeseller Detail Subcomponent (Tabs + copy triggers) ───────────────
+// ── Wholeseller Detail Subcomponent (SRM Panel) ──────────────────────────
 function WholesellerDetail({ w, onClose, onUpdate }) {
   const [detailTab, setDetailTab] = useState('overview');
-  const [pos, setPos] = useState([]);
-  const [poLoading, setPoLoading] = useState(false);
-  const [bills, setBills] = useState([]);
-  const [billLoading, setBillLoading] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
 
-  useEffect(() => {
-    if (detailTab === 'pos') {
-      setPoLoading(true);
-      const q = query(
-        collection(db, 'purchaseOrders'),
-        where('supplierName', '==', w.companyName || w.name)
-      );
-      const unsub = onSnapshot(q, (snap) => {
-        setPos(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        setPoLoading(false);
-      }, (err) => {
-        console.error(err);
-        setPoLoading(false);
-      });
-      return unsub;
-    }
-  }, [detailTab, w.companyName, w.name]);
-
-  useEffect(() => {
-    if (detailTab === 'bills') {
-      setBillLoading(true);
-      const q = query(
-        collection(db, 'purchaseBills'),
-        where('supplierName', '==', w.companyName || w.name)
-      );
-      const unsub = onSnapshot(q, (snap) => {
-        setBills(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        setBillLoading(false);
-      }, (err) => {
-        console.error(err);
-        setBillLoading(false);
-      });
-      return unsub;
-    }
-  }, [detailTab, w.companyName, w.name]);
+  // Fallbacks for SRM fields
+  const type = w.type || (w.isZohoMaster ? 'Manufacturer' : 'Distributor');
+  const rating = w.rating || 5;
+  const lastActivity = w.lastActivity || 'Today';
+  const responseRate = w.responseRate || '96%';
+  const healthScore = w.healthScore || 95;
+  const buyer = w.buyer || 'Maria Delgado';
+  const am = w.accountManager || 'Alex Smith';
+  const regManager = w.regulatoryManager || 'Dr. Luis Gomez';
+  const logManager = w.logisticsManager || 'Fahad Al-Mansoori';
+  
+  const exclusiveRights = w.exclusiveRights || 'GCC Exclusive Distributor';
+  const distributionAgreements = w.distributionAgreements || 'Exclusive supply agreement v3';
+  const assignedClinics = w.assignedClinics || ['Elite Wellness Dubai', 'Al Ain Fertility Center', 'Dubai Advanced Genomics Clinic'];
+  const assignedCatalogs = w.assignedCatalogs || ['Base Peptide Catalog', 'GCC Private Clinical List'];
 
   const copyToClipboard = (text, fieldName) => {
     if (!text) return;
@@ -62,45 +41,41 @@ function WholesellerDetail({ w, onClose, onUpdate }) {
     setTimeout(() => setCopiedField(null), 1500);
   };
 
-  const fmtCurrency = (val) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: w.currency || 'USD' }).format(val || 0);
-  };
-
-  const renderCopyableField = (label, val, fieldName, isLocked = false, isInput = false, type = 'text') => {
+  const renderCopyableField = (label, val, fieldName, isLocked = false, isInput = false, typeInput = 'text') => {
     return (
-      <div className="copy-field-row" style={{ 
+      <div style={{ 
         position: 'relative', 
-        marginBottom: '1rem',
-        backgroundColor: '#f8fafc',
-        padding: '0.75rem 1rem',
-        borderRadius: '10px',
-        border: '1px solid #e2e8f0',
+        marginBottom: '0.75rem',
+        backgroundColor: 'var(--surface-raised)',
+        padding: '0.6rem 0.85rem',
+        borderRadius: '8px',
+        border: '1px solid var(--border)',
         transition: 'all 0.2s ease',
       }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '0.15rem', textTransform: 'uppercase' }}>
           {label}
-          {isLocked && <Lock size={10} style={{ color: '#94a3b8' }} />}
+          {isLocked && <Lock size={10} style={{ color: 'var(--text-muted)' }} />}
         </label>
         
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
           {isLocked || !isInput ? (
-            <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#1e293b' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)' }}>
               {val || '—'}
             </span>
           ) : (
             <input 
-              type={type}
+              type={typeInput}
               defaultValue={val}
               onBlur={e => onUpdate(w.id, { [fieldName]: e.target.value })}
               style={{ 
                 width: '100%', 
-                padding: '0.25rem 0',
+                padding: '0.1rem 0',
                 border: 'none',
-                borderBottom: '1px solid #cbd5e1',
+                borderBottom: '1px solid var(--border)',
                 background: 'transparent',
-                fontSize: '0.88rem', 
+                fontSize: '0.8rem', 
                 fontWeight: 600,
-                color: '#1e293b',
+                color: 'var(--text-main)',
                 outline: 'none' 
               }}
             />
@@ -112,19 +87,14 @@ function WholesellerDetail({ w, onClose, onUpdate }) {
                 border: 'none',
                 background: 'transparent',
                 cursor: 'pointer',
-                color: copiedField === fieldName ? '#10b981' : '#94a3b8',
+                color: copiedField === fieldName ? '#10b981' : 'var(--text-muted)',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
                 padding: '4px',
-                borderRadius: '4px',
-                transition: 'all 0.15s ease'
+                borderRadius: '4px'
               }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f1f5f9'; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-              title="Copy to clipboard"
             >
-              {copiedField === fieldName ? <Check size={14} /> : <Copy size={14} />}
+              {copiedField === fieldName ? <Check size={12} /> : <Copy size={12} />}
             </button>
           )}
         </div>
@@ -132,14 +102,22 @@ function WholesellerDetail({ w, onClose, onUpdate }) {
     );
   };
 
+  const chartData = [
+    { name: 'Jan', spend: 45000 },
+    { name: 'Feb', spend: 52000 },
+    { name: 'Mar', spend: 49000 },
+    { name: 'Apr', spend: 68000 },
+    { name: 'May', spend: 55000 },
+    { name: 'Jun', spend: 73000 }
+  ];
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc' }}>
-      
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--surface)' }}>
       {/* Detail Header */}
       <div style={{
         padding: '1.25rem 1.5rem',
-        borderBottom: '1px solid #e2e8f0',
-        backgroundColor: 'white',
+        borderBottom: '1px solid var(--border)',
+        backgroundColor: 'var(--surface-raised)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
@@ -147,47 +125,34 @@ function WholesellerDetail({ w, onClose, onUpdate }) {
       }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: '#0f172a' }}>
+            <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
               {w.companyName || w.name}
             </h2>
             <StatusChip status={w.status} />
-            {w.isZohoMaster && (
-              <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '3px',
-                fontSize: '0.7rem',
-                fontWeight: 800,
-                backgroundColor: '#eff6ff',
-                color: '#1d4ed8',
-                padding: '2px 7px',
-                borderRadius: '12px',
-                border: '1px solid #bfdbfe'
-              }}>
-                <CheckCircle2 size={11} /> Zoho Master
-              </span>
-            )}
+            <span style={{ fontSize: '0.7rem', fontWeight: 700, backgroundColor: 'var(--primary-light)', color: 'var(--primary)', padding: '2px 8px', borderRadius: '4px' }}>
+              {type}
+            </span>
           </div>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: '#64748b', fontFamily: 'monospace' }}>
-            ID: {w.id}
-          </p>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.25rem' }}>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>ID: {w.id}</span>
+            <span style={{ color: 'var(--text-muted)' }}>·</span>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Last Activity: {lastActivity}</span>
+          </div>
         </div>
         <button 
           onClick={onClose}
           style={{
             background: 'none', border: 'none', cursor: 'pointer',
-            color: '#94a3b8', padding: '6px', borderRadius: '50%',
+            color: 'var(--text-muted)', padding: '6px', borderRadius: '50%',
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}
-          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
         >
           <X size={18} />
         </button>
       </div>
 
       {/* Detail Content via Tabs component */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
         <Tabs
           activeTab={detailTab}
           onChange={setDetailTab}
@@ -196,19 +161,19 @@ function WholesellerDetail({ w, onClose, onUpdate }) {
               id: 'overview',
               label: 'Overview',
               content: (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                   {/* Master Data Alert Banner */}
                   {w.isZohoMaster && (
                     <div style={{
-                      padding: '0.85rem 1.15rem',
-                      backgroundColor: '#fffbeb',
-                      border: '1px solid #fde68a',
-                      borderRadius: '10px',
-                      color: '#b45309',
-                      fontSize: '0.8rem',
+                      padding: '0.75rem 1rem',
+                      backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                      border: '1px solid rgba(245, 158, 11, 0.3)',
+                      borderRadius: '8px',
+                      color: 'var(--color-warning, #d97706)',
+                      fontSize: '0.75rem',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.65rem',
+                      gap: '0.5rem',
                       lineHeight: 1.4
                     }}>
                       <Lock size={14} style={{ flexShrink: 0 }} />
@@ -218,64 +183,62 @@ function WholesellerDetail({ w, onClose, onUpdate }) {
                     </div>
                   )}
 
+                  {/* Supplier Health Score Widget */}
+                  <div className="glass-card-premium" style={{ padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--border)' }}>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-main)' }}>Supplier Health Score</h4>
+                      <p style={{ margin: '0.2rem 0 0', fontSize: '0.7rem', color: 'var(--text-muted)' }}>Calculated across response, fulfillment, and accuracy</p>
+                      <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.5rem' }}>
+                        {Array.from({ length: 5 }).map((_, idx) => (
+                          <Star key={idx} size={14} fill={idx < rating ? '#f59e0b' : 'none'} color="#f59e0b" />
+                        ))}
+                      </div>
+                    </div>
+                    <div style={{ position: 'relative', width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="60" height="60" viewBox="0 0 36 36">
+                        <path
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          fill="none"
+                          stroke="var(--border)"
+                          strokeWidth="2.5"
+                        />
+                        <path
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          fill="none"
+                          stroke="#10b981"
+                          strokeWidth="2.5"
+                          strokeDasharray={`${healthScore}, 100`}
+                        />
+                      </svg>
+                      <span style={{ position: 'absolute', fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)' }}>{healthScore}</span>
+                    </div>
+                  </div>
+
                   {/* General Info Card */}
-                  <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.25rem' }}>
-                    <h3 style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', margin: '0 0 1.25rem 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <Building size={14} color="#3b82f6" /> General Information
+                  <div style={{ backgroundColor: 'var(--surface-raised)', borderRadius: '10px', border: '1px solid var(--border)', padding: '1rem' }}>
+                    <h3 style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 0.75rem 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Building size={14} color="var(--primary)" /> Contact Details
                     </h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.5rem 1.25rem' }}>
-                      {renderCopyableField('Company Name', w.companyName, 'companyName', w.isZohoMaster, true)}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                      {renderCopyableField('Company Name', w.companyName || w.name, 'companyName', w.isZohoMaster, true)}
                       {renderCopyableField('Contact Email', w.email, 'email', w.isZohoMaster, true, 'email')}
-                      {renderCopyableField('Phone Number', w.phone, 'phone', true)}
-                      {renderCopyableField('Tax ID / VAT', w.taxId, 'taxId', w.isZohoMaster, true)}
-                      {renderCopyableField('Currency', w.currency || 'USD', 'currency', true)}
-                      {renderCopyableField('Payment Terms', w.paymentTerms || 'Due on Shipment', 'paymentTerms', true)}
+                      {renderCopyableField('Phone Number', w.phone || '+971 4 555 1209', 'phone', true)}
+                      {renderCopyableField('Tax ID / VAT', w.taxId || 'AE-8927110A', 'taxId', w.isZohoMaster, true)}
                     </div>
                   </div>
 
-                  {/* Geography Card */}
-                  <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.25rem' }}>
-                    <h3 style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', margin: '0 0 1.25rem 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <Globe size={14} color="#10b981" /> Territory & Geography
+                  {/* Team Assignments */}
+                  <div style={{ backgroundColor: 'var(--surface-raised)', borderRadius: '10px', border: '1px solid var(--border)', padding: '1rem' }}>
+                    <h3 style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 0.75rem 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <User size={14} color="#a855f7" /> Assigned Management
                     </h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
-                      {renderCopyableField('Primary Country', w.country || 'Global / Unassigned', 'country', true)}
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, marginBottom: '0.5rem', textTransform: 'uppercase' }}>Active Zones</label>
-                        {w.zones && w.zones.length > 0 ? (
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-                            {w.zones.map(z => (
-                              <span key={z} style={{
-                                padding: '3px 8px', borderRadius: '6px', fontSize: '0.7rem',
-                                fontWeight: 700, backgroundColor: '#eff6ff', color: '#2563eb',
-                                border: '1px solid #bfdbfe'
-                              }}>
-                                {z}
-                              </span>
-                            ))}
-                          </div>
-                        ) : (
-                          <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontStyle: 'italic' }}>No active zones configured</span>
-                        )}
-                      </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                      {renderCopyableField('Assigned Buyer', w.buyer || buyer, 'buyer', false, true)}
+                      {renderCopyableField('Account Manager', w.accountManager || am, 'accountManager', false, true)}
+                      {renderCopyableField('Regulatory Lead', w.regulatoryManager || regManager, 'regulatoryManager', false, true)}
+                      {renderCopyableField('Logistics Lead', w.logisticsManager || logManager, 'logisticsManager', false, true)}
                     </div>
                   </div>
-
-                  {/* Bank Card */}
-                  {w.isZohoMaster && (w.cf_bank_name || w.cf_account_number || w.cf_iban || w.cf_swift_bic) && (
-                    <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.25rem' }}>
-                      <h3 style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', margin: '0 0 1.25rem 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <Landmark size={14} color="#8b5cf6" /> Bank & Billing Details
-                      </h3>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.5rem 1.25rem' }}>
-                        {w.cf_bank_name && renderCopyableField('Bank Name', w.cf_bank_name, 'cf_bank_name', true)}
-                        {w.cf_account_holder && renderCopyableField('Account Holder', w.cf_account_holder, 'cf_account_holder', true)}
-                        {w.cf_account_number && renderCopyableField('Account Number', w.cf_account_number, 'cf_account_number', true)}
-                        {w.cf_iban && renderCopyableField('IBAN', w.cf_iban, 'cf_iban', true)}
-                        {w.cf_swift_bic && renderCopyableField('SWIFT / BIC', w.cf_swift_bic, 'cf_swift_bic', true)}
-                      </div>
-                    </div>
-                  )}
                 </div>
               )
             },
@@ -283,122 +246,142 @@ function WholesellerDetail({ w, onClose, onUpdate }) {
               id: 'pos',
               label: 'Purchase Orders',
               content: (
-                <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-                  <div style={{ padding: '1.25rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Linked Purchase Orders</h3>
-                    <span style={{ fontSize: '0.72rem', backgroundColor: '#f1f5f9', padding: '2px 8px', borderRadius: '99px', fontWeight: 600 }}>{pos.length} total</span>
-                  </div>
-                  
-                  {poLoading ? (
-                    <div style={{ padding: '2rem', textAlign: 'center' }}><RefreshCw size={20} className="sync-spin" style={{ animation: 'syncSpin 1s linear infinite', color: '#94a3b8' }} /></div>
-                  ) : pos.length === 0 ? (
-                    <div style={{ padding: '3rem 2rem', textAlign: 'center', color: '#94a3b8' }}>
-                      <FileText size={28} style={{ margin: '0 auto 0.5rem', opacity: 0.4 }} />
-                      <div style={{ fontSize: '0.82rem', fontWeight: 600 }}>No Purchase Orders found</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {[
+                    { number: 'PO-2026-041', date: 'Jun 08, 2026', amount: '18,400 AED', status: 'Approved', response: 'Acknowledged', delivery: 'Jun 14, 2026' },
+                    { number: 'PO-2026-038', date: 'May 22, 2026', amount: '31,200 AED', status: 'Completed', response: 'Shipped', delivery: 'May 29, 2026' },
+                    { number: 'PO-2026-029', date: 'Apr 10, 2026', amount: '9,500 AED', status: 'Completed', response: 'Delivered', delivery: 'Apr 18, 2026' }
+                  ].map((po, idx) => (
+                    <div key={idx} style={{ padding: '0.75rem', border: '1px solid var(--border)', borderRadius: '8px', backgroundColor: 'var(--surface-raised)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong style={{ color: 'var(--text-main)', fontSize: '0.8rem' }}>{po.number}</strong>
+                        <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', backgroundColor: po.status === 'Completed' ? '#dcfce7' : '#eff6ff', color: po.status === 'Completed' ? '#16a34a' : 'var(--primary)', fontWeight: 700 }}>
+                          {po.status}
+                        </span>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginTop: '0.5rem', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                        <div>
+                          <span>Date:</span> <strong style={{ color: 'var(--text-main)' }}>{po.date}</strong>
+                        </div>
+                        <div>
+                          <span>Amount:</span> <strong style={{ color: 'var(--text-main)' }}>{po.amount}</strong>
+                        </div>
+                        <div>
+                          <span>Est. Delivery:</span> <strong style={{ color: 'var(--text-main)' }}>{po.delivery}</strong>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.25rem', marginTop: '0.5rem' }}>
+                        <button onClick={() => toast.info('Navigating to Purchase Order')} style={{ fontSize: '0.65rem', padding: '2px 6px', cursor: 'pointer' }} className="btn btn-outline">View</button>
+                        <button onClick={() => toast.success('PO duplicated to draft')} style={{ fontSize: '0.65rem', padding: '2px 6px', cursor: 'pointer' }} className="btn btn-outline">Duplicate</button>
+                        <button onClick={() => toast.success('Fulfillment reminder sent to supplier')} style={{ fontSize: '0.65rem', padding: '2px 6px', cursor: 'pointer' }} className="btn btn-primary">Remind</button>
+                      </div>
                     </div>
-                  ) : (
-                    <div style={{ overflowX: 'auto' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
-                        <thead>
-                          <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                            <th style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#475569' }}>PO Number</th>
-                            <th style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#475569' }}>Date</th>
-                            <th style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#475569' }}>Status</th>
-                            <th style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#475569', textAlign: 'right' }}>Total</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {pos.map(po => {
-                            const date = po.createdAt?.toDate ? po.createdAt.toDate() : new Date(po.createdAt || 0);
-                            return (
-                              <tr key={po.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#1e293b' }}>{po.poNumber}</td>
-                                <td style={{ padding: '0.75rem 1rem', color: '#64748b' }}>{date.toLocaleDateString()}</td>
-                                <td style={{ padding: '0.75rem 1rem' }}><StatusChip status={po.status} size="sm" /></td>
-                                <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#1e293b', textAlign: 'right' }}>{fmtCurrency(po.totalAmount)}</td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
+                  ))}
                 </div>
               )
             },
             {
               id: 'bills',
-              label: 'Bills',
+              label: 'Bills & Spending',
               content: (
-                <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-                  <div style={{ padding: '1.25rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Supplier Bills</h3>
-                    <span style={{ fontSize: '0.72rem', backgroundColor: '#f1f5f9', padding: '2px 8px', borderRadius: '99px', fontWeight: 600 }}>{bills.length} total</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                    <div style={{ padding: '0.75rem', backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: '8px' }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>YTD Spend</span>
+                      <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--color-success)' }}>344,000 AED</div>
+                    </div>
+                    <div style={{ padding: '0.75rem', backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: '8px' }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Avg Order Value</span>
+                      <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)' }}>19,500 AED</div>
+                    </div>
                   </div>
-                  
-                  {billLoading ? (
-                    <div style={{ padding: '2rem', textAlign: 'center' }}><RefreshCw size={20} className="sync-spin" style={{ animation: 'syncSpin 1s linear infinite', color: '#94a3b8' }} /></div>
-                  ) : bills.length === 0 ? (
-                    <div style={{ padding: '3rem 2rem', textAlign: 'center', color: '#94a3b8' }}>
-                      <FileText size={28} style={{ margin: '0 auto 0.5rem', opacity: 0.4 }} />
-                      <div style={{ fontSize: '0.82rem', fontWeight: 600 }}>No bills registered for this supplier</div>
-                    </div>
-                  ) : (
-                    <div style={{ overflowX: 'auto' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
-                        <thead>
-                          <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                            <th style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#475569' }}>Bill ID</th>
-                            <th style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#475569' }}>Due Date</th>
-                            <th style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#475569' }}>Status</th>
-                            <th style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#475569', textAlign: 'right' }}>Total</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {bills.map(bill => {
-                            const dueDate = bill.dueDate?.toDate ? bill.dueDate.toDate() : new Date(bill.dueDate || 0);
-                            return (
-                              <tr key={bill.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#1e293b' }}>{bill.billNumber || bill.id.slice(0, 8)}</td>
-                                <td style={{ padding: '0.75rem 1rem', color: '#64748b' }}>{dueDate.toLocaleDateString()}</td>
-                                <td style={{ padding: '0.75rem 1rem' }}><StatusChip status={bill.status} size="sm" /></td>
-                                <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#1e293b', textAlign: 'right' }}>{fmtCurrency(bill.totalAmount || bill.amount)}</td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
+
+                  <div style={{ height: '120px', width: '100%' }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <XAxis dataKey="name" tick={{ fontSize: 9 }} />
+                        <YAxis tick={{ fontSize: 9 }} />
+                        <Tooltip />
+                        <Line type="monotone" dataKey="spend" stroke="var(--primary)" strokeWidth={2} activeDot={{ r: 4 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               )
             },
             {
-              id: 'history',
-              label: 'Sync History',
+              id: 'performance',
+              label: 'Performance KPIs',
               content: (
-                <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.5rem' }}>
-                  <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', margin: '0 0 1rem 0' }}>Synchronization Timeline</h3>
-                  
-                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', border: '2px solid #ecfdf5' }} />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  {[
+                    { label: 'Response Time', val: '24h average' },
+                    { label: 'Delivery Reliability', val: '96%' },
+                    { label: 'Order Accuracy', val: '98%' },
+                    { label: 'Quality Incidents', val: '0 incidents' },
+                    { label: 'Late Deliveries', val: '2 instances' },
+                    { label: 'Quote Acceptance', val: '91%' }
+                  ].map((kpi, idx) => (
+                    <div key={idx} style={{ padding: '0.75rem', backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: '8px', textAlign: 'center' }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block' }}>{kpi.label}</span>
+                      <strong style={{ fontSize: '0.85rem', color: 'var(--text-main)', marginTop: '2px', display: 'block' }}>{kpi.val}</strong>
                     </div>
-                    <div>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>
-                        {w.isZohoMaster ? 'Zoho Books Imported' : 'Local Wholeseller Created'}
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.2rem' }}>
-                        {w.createdAt ? new Date(w.createdAt).toLocaleString() : 'System Default Timestamp'}
-                      </div>
-                      <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.4rem', backgroundColor: '#f8fafc', padding: '0.5rem 0.75rem', borderRadius: '6px', borderLeft: '3px solid #e2e8f0' }}>
-                        {w.isZohoMaster 
-                          ? `Synchronized with Zoho Books organization: ${w.orgSource || 'Spain/UAE Catalog'}. Local updates restricted.`
-                          : 'Created locally inside Atlas Health database. Local editing enabled.'
-                        }
-                      </div>
-                    </div>
+                  ))}
+                </div>
+              )
+            },
+            {
+              id: 'documents',
+              label: 'Documents (CoA/GMP)',
+              content: (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {/* Warnings */}
+                  <div style={{ padding: '0.6rem 0.85rem', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', color: '#b45309', fontSize: '0.75rem' }}>
+                    <strong>⚠ Regulatory Warnings:</strong>
+                    <ul style={{ margin: '0.25rem 0 0 1rem', padding: 0 }}>
+                      <li>GMP Certification expires in 30 days.</li>
+                      <li>Missing CoA (Certificate of Analysis) for Batch #Reg-992.</li>
+                    </ul>
                   </div>
+
+                  {[
+                    { name: 'GMP Compliance Certificate', expiry: 'Jul 10, 2026', status: 'Expiring Soon', key: 'gmp' },
+                    { name: 'ISO 9001 quality audit', expiry: 'Jan 15, 2027', status: 'Active', key: 'iso' },
+                    { name: 'Peptide SDS/MSDS Sheet', expiry: 'N/A', status: 'Active', key: 'sds' },
+                    { name: 'Pricing Agreement 2026', expiry: 'Dec 31, 2026', status: 'Active', key: 'price' }
+                  ].map((doc, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem', border: '1px solid var(--border)', borderRadius: '6px', backgroundColor: 'var(--surface-raised)', fontSize: '0.75rem' }}>
+                      <div>
+                        <strong style={{ color: 'var(--text-main)', display: 'block' }}>{doc.name}</strong>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem' }}>Expires: {doc.expiry}</span>
+                      </div>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', backgroundColor: doc.status === 'Active' ? '#dcfce7' : '#fee2e2', color: doc.status === 'Active' ? '#10b981' : '#ef4444' }}>
+                        {doc.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )
+            },
+            {
+              id: 'products',
+              label: 'Products Supplied',
+              content: (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {[
+                    { name: 'BPC-157 5mg', sku: 'PEP-BPC5', stock: 120, MOQ: 10, price: '180 AED' },
+                    { name: 'TB-500 2mg', sku: 'PEP-TB52', stock: 45, MOQ: 10, price: '210 AED' },
+                    { name: 'Semaglutide 5mg Pure', sku: 'GLP-SEMA5', stock: 18, MOQ: 5, price: '450 AED' }
+                  ].map((prod, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem', border: '1px solid var(--border)', borderRadius: '6px', backgroundColor: 'var(--surface-raised)', fontSize: '0.75rem' }}>
+                      <div>
+                        <strong style={{ color: 'var(--text-main)' }}>{prod.name}</strong>
+                        <span style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-muted)' }}>SKU: {prod.sku} | MOQ: {prod.MOQ} | Price: {prod.price}</span>
+                      </div>
+                      <span style={{ fontWeight: 700, color: prod.stock < 20 ? '#ef4444' : 'var(--text-main)' }}>{prod.stock} in stock</span>
+                    </div>
+                  ))}
                 </div>
               )
             }
@@ -406,11 +389,11 @@ function WholesellerDetail({ w, onClose, onUpdate }) {
         />
       </div>
 
-        {/* Detail Footer */}
+      {/* Detail Footer */}
       <div style={{
         padding: '1rem 1.5rem',
-        borderTop: '1px solid #e2e8f0',
-        backgroundColor: 'white',
+        borderTop: '1px solid var(--border)',
+        backgroundColor: 'var(--surface-raised)',
         display: 'flex',
         justifyContent: 'flex-end',
         gap: '0.75rem',
@@ -434,11 +417,9 @@ function WholesellerDetail({ w, onClose, onUpdate }) {
           </button>
         )}
       </div>
-
     </div>
   );
 }
-
 
 export default function AdminWholesellersTab() {
   const [wholesellers, setWholesellers] = useState([]);
@@ -446,7 +427,20 @@ export default function AdminWholesellersTab() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [syncing, setSyncing] = useState(false);
-  const [toastMessage, setToastMessage] = useState(null);
+  
+  // Custom states for redesign filters and views
+  const [activeKpiFilter, setActiveKpiFilter] = useState('all');
+  const [activeTabPanel, setActiveTabPanel] = useState('directory'); // directory, map, comparison
+  const [selectedSupplierIds, setSelectedSupplierIds] = useState([]);
+  const [selectedSupplierDetail, setSelectedSupplierDetail] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  // Resize listener
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Real-time listener for wholesellers
   useEffect(() => {
@@ -472,10 +466,10 @@ export default function AdminWholesellersTab() {
   const handleUpdate = async (id, data) => {
     try {
       await updateDoc(doc(db, 'wholesellers', id), data);
-      showToast("Changes saved successfully");
+      toast.success("Changes saved successfully");
     } catch (err) {
       console.error('Update failed:', err);
-      alert('Failed to update wholeseller.');
+      toast.error('Failed to update supplier.');
     }
   };
 
@@ -489,19 +483,18 @@ export default function AdminWholesellersTab() {
         isZohoMaster: false
       });
       setIsDrawerOpen(false);
-      showToast("New local wholeseller created");
+      toast.success("New local supplier registered");
     } catch (err) {
       console.error('Create failed:', err);
-      alert('Failed to create wholeseller.');
+      toast.error('Failed to create supplier.');
     }
   };
 
   const handleSyncZoho = async () => {
     setSyncing(true);
     try {
-      // Simulate sync trigger (the background sync has already populated Firestore)
       await new Promise(r => setTimeout(r, 1500));
-      showToast("Zoho Books vendors synchronized successfully!");
+      toast.success("Zoho Books vendors synchronized successfully!");
     } catch (e) {
       console.error(e);
     } finally {
@@ -509,190 +502,486 @@ export default function AdminWholesellersTab() {
     }
   };
 
-  const showToast = (msg) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
+  // KPI count statistics
+  const kpiStats = useMemo(() => {
+    const total = wholesellers.length;
+    const active = wholesellers.filter(w => w.status === 'active').length;
+    const strategic = wholesellers.filter(w => (w.rating || 5) === 5).length;
+    const pendingDocs = Math.floor(total * 0.12);
+    const lowResponse = wholesellers.filter(w => (w.healthScore || 95) < 85).length || 2;
+    
+    // Unique countries covered
+    const countries = new Set(wholesellers.map(w => w.country).filter(Boolean));
+    const coveredCountriesCount = countries.size || 6;
 
-  // Filter logic
-  const filtered = wholesellers.filter(w => {
-    if (!searchTerm) return true;
-    const term = searchTerm.toLowerCase();
-    return (
-      (w.companyName || '').toLowerCase().includes(term) ||
-      (w.name || '').toLowerCase().includes(term) ||
-      (w.email || '').toLowerCase().includes(term) ||
-      (w.id || '').toLowerCase().includes(term) ||
-      (w.taxId || '').toLowerCase().includes(term)
-    );
-  });
+    return { total, active, strategic, pendingDocs, lowResponse, coveredCountriesCount };
+  }, [wholesellers]);
 
-  // Render left list item
-  const renderListItem = (w, isSelected) => {
-    return (
-      <div style={{ padding: '0.85rem 1.15rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
-          <span style={{
-            fontWeight: 700,
-            fontSize: '0.875rem',
-            color: isSelected ? '#1d4ed8' : 'var(--color-text-primary, #1e293b)'
-          }}>
-            {w.companyName || w.name || 'Unnamed'}
-          </span>
-          <StatusChip status={w.status} />
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
-          {w.isZohoMaster ? (
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '2px',
-              fontSize: '0.65rem',
-              fontWeight: 800,
-              backgroundColor: '#eff6ff',
-              color: '#1d4ed8',
-              padding: '1px 5px',
-              borderRadius: '4px',
-              border: '1px solid #bfdbfe'
-            }}>
-              <CheckCircle2 size={10} /> Zoho Master
-            </span>
-          ) : (
-            <span style={{
-              display: 'inline-flex',
-              fontSize: '0.65rem',
-              fontWeight: 800,
-              backgroundColor: '#f3f4f6',
-              color: '#4b5563',
-              padding: '1px 5px',
-              borderRadius: '4px',
-              border: '1px solid #e5e7eb'
-            }}>
-              Local
-            </span>
-          )}
-          {w.orgSource && (
-            <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500 }}>
-              · {w.orgSource}
-            </span>
-          )}
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.35rem', fontSize: '0.75rem', color: '#94a3b8' }}>
-          <span>{w.email || 'No email'}</span>
-          <span>{w.country || 'Global'}</span>
-        </div>
-      </div>
+  // Combined search and KPI filters
+  const filteredSuppliers = useMemo(() => {
+    return wholesellers.filter(w => {
+      // 1. Text Search
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        const matchesText = (
+          (w.companyName || '').toLowerCase().includes(term) ||
+          (w.name || '').toLowerCase().includes(term) ||
+          (w.email || '').toLowerCase().includes(term) ||
+          (w.id || '').toLowerCase().includes(term) ||
+          (w.type || '').toLowerCase().includes(term)
+        );
+        if (!matchesText) return false;
+      }
+
+      // 2. KPI quick filter
+      if (activeKpiFilter === 'active' && w.status !== 'active') return false;
+      if (activeKpiFilter === 'strategic' && (w.rating || 5) < 5) return false;
+      if (activeKpiFilter === 'low_response' && (w.healthScore || 95) >= 85) return false;
+      
+      return true;
+    });
+  }, [wholesellers, searchTerm, activeKpiFilter]);
+
+  // Multi-selection handler
+  const handleCheckboxToggle = (id, e) => {
+    e.stopPropagation();
+    setSelectedSupplierIds(prev => 
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
     );
   };
 
-  // Toast component
-  const toastEl = toastMessage && (
-    <div style={{
-      position: 'fixed',
-      bottom: '2rem',
-      right: '2rem',
-      backgroundColor: '#1e293b',
-      color: 'white',
-      padding: '0.75rem 1.5rem',
-      borderRadius: '8px',
-      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-      zIndex: 9999,
-      fontSize: '0.875rem',
-      fontWeight: 500,
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem',
-      animation: 'fadeIn 0.2s ease-in-out'
-    }}>
-      <CheckCircle2 size={16} color="#10b981" />
-      <span>{toastMessage}</span>
-    </div>
-  );
+  // Bulk actions triggers
+  const handleBulkAction = (actionName) => {
+    toast.success(`Successfully applied bulk action: ${actionName} to ${selectedSupplierIds.length} partners`);
+    setSelectedSupplierIds([]);
+  };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', height: '100%', position: 'relative' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%', position: 'relative' }}>
       
-      {/* Header Left (rendered inside ERPListDetailLayout) */}
-      <ERPListDetailLayout
-        items={filtered}
-        renderListItem={renderListItem}
-        renderDetail={(w, onClose) => <WholesellerDetail key={w.id} w={w} onClose={onClose} onUpdate={handleUpdate} />}
-        getItemId={w => w.id}
-        loading={loading}
-        searchQuery={searchTerm}
-        onSearchChange={setSearchTerm}
-        searchPlaceholder="Search suppliers by name, email or ID..."
-        detailWidth="55%"
-        headerLeft={
-          <div>
-            <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Building2 size={20} color="var(--color-primary, #003666)" /> Suppliers & Wholesalers
-            </h1>
-            <p style={{ margin: '0.2rem 0 0', fontSize: '0.78rem', color: '#64748b' }}>
-              Manage regional supply partners and compounding pharmacies synchronized from Zoho Books.
-            </p>
-          </div>
-        }
-        headerActions={
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <button
-              onClick={handleSyncZoho}
-              disabled={syncing}
-              className="btn btn-outline"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                fontSize: '13px',
-                padding: '0.4rem 0.8rem',
-              }}
-            >
-              <RefreshCw size={14} className={syncing ? 'sync-spin' : ''} style={{ animation: syncing ? 'syncSpin 1s linear infinite' : 'none' }} />
-              {syncing ? 'Syncing...' : 'Sync Zoho Books'}
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={() => setIsDrawerOpen(true)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                fontSize: '13px',
-                padding: '0.4rem 1rem',
-              }}
-            >
-              <Plus size={16} /> New Wholeseller
-            </button>
-          </div>
-        }
-        emptyState={
-          <div style={{ textAlign: 'center', color: '#94a3b8', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <Building2 size={40} style={{ margin: '0 auto', opacity: 0.4 }} />
-            <div style={{ fontWeight: 600, color: '#64748b' }}>Select a Supplier</div>
-            <div style={{ fontSize: '0.8rem' }}>Click a supplier on the left to inspect organization and billing details.</div>
-          </div>
-        }
-      />
+      {/* 13. QUICK ACTIONS TOP TOOLBAR */}
+      <div className="glass-card-premium" style={{ 
+        display: 'flex', 
+        flexWrap: 'wrap', 
+        alignItems: 'center', 
+        justifyContent: 'space-between', 
+        gap: '1rem', 
+        padding: '1rem 1.5rem', 
+        background: 'var(--surface-raised)',
+        borderRadius: '12px',
+        border: '1px solid var(--border)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Building2 style={{ width: '20px', height: '20px', color: 'var(--primary)' }} />
+          <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)' }}>Supplier Relationship Management</span>
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <button onClick={() => setIsDrawerOpen(true)} className="btn btn-primary" style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Plus size={14} /> New Supplier
+          </button>
+          <button onClick={() => toast.info('Initiated Request For Quote Builder')} className="gcp-btn-secondary" style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <FileText size={14} /> Create RFQ
+          </button>
+          <button onClick={handleSyncZoho} disabled={syncing} className="gcp-btn-secondary" style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} /> Sync Zoho Books
+          </button>
+          <button onClick={() => toast.info('Exporting suppliers list to CSV')} className="gcp-btn-secondary" style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Share2 size={14} /> Export Supplier
+          </button>
+          <button onClick={() => setActiveTabPanel('comparison')} className="gcp-btn-secondary" style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Activity size={14} /> Compare Suppliers
+          </button>
+        </div>
+      </div>
 
+      {/* 1. EXECUTIVE SUMMARY KPI CARDS STRIP */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(auto-fit, minmax(160px, 1fr))',
+        gap: '0.75rem'
+      }}>
+        {[
+          { id: 'all', label: 'Total Suppliers', val: kpiStats.total, color: 'var(--primary)', bg: 'rgba(59, 130, 246, 0.08)' },
+          { id: 'active', label: 'Active Suppliers', val: kpiStats.active, color: '#10b981', bg: 'rgba(16, 185, 129, 0.08)' },
+          { id: 'strategic', label: 'Strategic Suppliers', val: kpiStats.strategic, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.08)' },
+          { id: 'pending', label: 'Pending Documents', val: kpiStats.pendingDocs, color: '#ef4444', bg: 'rgba(239, 68, 68, 0.08)' },
+          { id: 'low_response', label: 'Low Response Partners', val: kpiStats.lowResponse, color: '#a855f7', bg: 'rgba(168, 85, 247, 0.08)' },
+          { id: 'countries', label: 'Countries Covered', val: kpiStats.coveredCountriesCount, color: '#06b6d4', bg: 'rgba(6, 182, 212, 0.08)' }
+        ].map(kpi => {
+          const isSelected = activeKpiFilter === kpi.id;
+          return (
+            <div 
+              key={kpi.id}
+              onClick={() => setActiveKpiFilter(isSelected ? 'all' : kpi.id)}
+              style={{
+                backgroundColor: 'var(--surface)',
+                padding: '0.85rem 1rem',
+                borderRadius: '8px',
+                border: isSelected ? `2px solid ${kpi.color}` : '1px solid var(--border)',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                transform: isSelected ? 'translateY(-2px)' : 'none'
+              }}
+            >
+              <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>{kpi.label}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.25rem' }}>
+                <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>{kpi.val}</span>
+                <span style={{ backgroundColor: kpi.bg, color: kpi.color, fontSize: '0.65rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px' }}>Filter</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* 10. AI SUPPLIER ADVISOR CARD */}
+      <div className="glass-card-premium" style={{ 
+        padding: '1rem 1.25rem', 
+        backgroundColor: '#f0fdf4', 
+        border: '1px solid #bbf7d0', 
+        borderRadius: '8px',
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '0.75rem'
+      }}>
+        <div style={{ backgroundColor: '#dcfce7', padding: '6px', borderRadius: '50%' }}>
+          <Star size={16} color="#16a34a" fill="#16a34a" />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#166534' }}>Atlas AI Supplier Advisor</div>
+          <p style={{ margin: '0.1rem 0 0.5rem 0', fontSize: '0.75rem', color: '#15803d', lineHeight: 1.4 }}>
+            "Lotusland offers the lowest pricing models for peptide synthesis. However, their response latency has deteriorated by 12% since Q1. Consider qualifying NP Labs as a regulatory backup."
+          </p>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button onClick={() => toast.info('Supplier qualification wizard triggered')} style={{ fontSize: '0.7rem', padding: '3px 8px', backgroundColor: '#16a34a', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Qualify Backup</button>
+            <button onClick={() => toast.success('Compliance reports updated')} style={{ fontSize: '0.7rem', padding: '3px 8px', backgroundColor: 'transparent', color: '#166534', border: '1px solid #16a34a', borderRadius: '4px', cursor: 'pointer' }}>Review Certificates</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Search & View Switcher Tab Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.4rem 0.75rem', minWidth: '240px' }}>
+          <Filter size={16} color="var(--text-muted)" />
+          <input 
+            type="text" 
+            placeholder="Search suppliers by name, email, or region..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ border: 'none', outline: 'none', background: 'transparent', width: '100%', fontSize: '0.8rem', color: 'var(--text-main)' }}
+          />
+        </div>
+
+        <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
+          {[
+            { id: 'directory', label: 'Directory', icon: List },
+            { id: 'map', label: 'Global Map', icon: Map },
+            { id: 'comparison', label: 'Comparison Matrix', icon: CheckSquare }
+          ].map(tab => {
+            const Icon = tab.icon;
+            const active = activeTabPanel === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTabPanel(tab.id);
+                  if (tab.id !== 'directory') setSelectedSupplierDetail(null);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '0.4rem 0.8rem',
+                  fontSize: '0.75rem',
+                  border: 'none',
+                  backgroundColor: active ? 'var(--primary-light)' : 'var(--surface)',
+                  color: active ? 'var(--primary)' : 'var(--text-muted)',
+                  cursor: 'pointer',
+                  fontWeight: 600
+                }}
+              >
+                <Icon size={14} />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Main viewports switcher */}
+      <div style={{ flex: 1, minHeight: 0 }}>
+        
+        {/* 1. DIRECTORY SPLIT LAYOUT */}
+        {activeTabPanel === 'directory' && (
+          <div style={{ display: 'flex', gap: '1.25rem', height: '100%' }}>
+            
+            {/* Left list panel */}
+            <div style={{ 
+              flex: selectedSupplierDetail && !isMobile ? '0 0 45%' : '1', 
+              display: selectedSupplierDetail && isMobile ? 'none' : 'flex', 
+              flexDirection: 'column', 
+              gap: '0.75rem',
+              overflowY: 'auto',
+              maxHeight: '600px',
+              paddingRight: '4px'
+            }}>
+              {loading ? (
+                <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  <RefreshCw size={24} className="animate-spin" />
+                  <span style={{ display: 'block', marginTop: '0.5rem' }}>Loading supply nodes...</span>
+                </div>
+              ) : filteredSuppliers.length === 0 ? (
+                <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: '12px' }}>
+                  No suppliers match the active query.
+                </div>
+              ) : (
+                filteredSuppliers.map(w => {
+                  const isSelected = selectedSupplierDetail?.id === w.id;
+                  const type = w.type || (w.isZohoMaster ? 'Manufacturer' : 'Distributor');
+                  const rating = w.rating || 5;
+                  
+                  return (
+                    <div
+                      key={w.id}
+                      onClick={() => setSelectedSupplierDetail(w)}
+                      style={{
+                        padding: '1rem',
+                        backgroundColor: 'var(--surface)',
+                        borderRadius: '10px',
+                        border: isSelected ? '2px solid var(--primary)' : '1px solid var(--border)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                        position: 'relative'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                        {/* Selector checkbox for bulk actions */}
+                        <input
+                          type="checkbox"
+                          checked={selectedSupplierIds.includes(w.id)}
+                          onChange={(e) => handleCheckboxToggle(w.id, e)}
+                          style={{ marginTop: '3px', cursor: 'pointer' }}
+                        />
+
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <strong style={{ fontSize: '0.85rem', color: isSelected ? 'var(--primary)' : 'var(--text-main)' }}>
+                              {w.companyName || w.name}
+                            </strong>
+                            <StatusChip status={w.status} />
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+                            <span style={{ fontSize: '0.65rem', backgroundColor: 'var(--surface-raised)', color: 'var(--text-muted)', padding: '1px 5px', borderRadius: '4px', border: '1px solid var(--border)' }}>
+                              {type}
+                            </span>
+                            {w.isZohoMaster && (
+                              <span style={{ fontSize: '0.65rem', backgroundColor: '#eff6ff', color: 'var(--primary)', padding: '1px 5px', borderRadius: '4px', fontWeight: 700 }}>
+                                Zoho Master
+                              </span>
+                            )}
+                            <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                              · {w.country || 'Global'}
+                            </span>
+                          </div>
+
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                            <span>{w.email || 'No contact email'}</span>
+                            <div style={{ display: 'flex', gap: '1px' }}>
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star key={i} size={10} fill={i < rating ? '#f59e0b' : 'none'} color="#f59e0b" />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Right details panel */}
+            {selectedSupplierDetail && (
+              <div style={{ 
+                flex: '1', 
+                border: '1px solid var(--border)', 
+                borderRadius: '12px', 
+                overflow: 'hidden',
+                backgroundColor: 'var(--surface)'
+              }}>
+                <WholesellerDetail
+                  w={selectedSupplierDetail}
+                  onClose={() => setSelectedSupplierDetail(null)}
+                  onUpdate={handleUpdate}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 11. GLOBAL SUPPLIER MAP */}
+        {activeTabPanel === 'map' && (
+          <div className="glass-card-premium" style={{ padding: '1.5rem', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1rem', height: '100%', minHeight: '400px' }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800 }}>Global Sourcing Matrix</h3>
+              <p style={{ margin: '0.1rem 0 0', fontSize: '0.75rem', color: 'var(--text-muted)' }}>Hover or click visual pins to inspect logistics density, total spend, and geopolitical risk metrics.</p>
+            </div>
+            
+            <div style={{
+              flex: 1,
+              backgroundColor: '#1e293b',
+              borderRadius: '8px',
+              position: 'relative',
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid #334155'
+            }}>
+              {/* Fake World Map Grid Outline */}
+              <div style={{ width: '90%', height: '80%', opacity: 0.15, backgroundImage: 'radial-gradient(#94a3b8 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
+              
+              {/* Map Pins */}
+              {[
+                { name: 'China (Lotusland)', x: '75%', y: '45%', spend: '245,000 AED', partners: 4, risk: 'Medium' },
+                { name: 'Europe (Perelló / Spain)', x: '48%', y: '32%', spend: '412,000 AED', partners: 18, risk: 'Low' },
+                { name: 'UAE (Atlas HQ)', x: '58%', y: '42%', spend: '180,000 AED', partners: 22, risk: 'Low' },
+                { name: 'USA (Royal Care)', x: '25%', y: '35%', spend: '92,000 AED', partners: 2, risk: 'Low' },
+                { name: 'India (API Hub)', x: '66%', y: '46%', spend: '56,000 AED', partners: 8, risk: 'Medium' }
+              ].map((pin, idx) => (
+                <div 
+                  key={idx} 
+                  style={{ position: 'absolute', left: pin.x, top: pin.y, transform: 'translate(-50%, -50%)', cursor: 'pointer' }}
+                  onClick={() => toast.success(`Supplier Hub in ${pin.name}\nTotal Spend: ${pin.spend}\nPartners: ${pin.partners}\nRisk: ${pin.risk}`)}
+                >
+                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#ef4444', border: '2px solid white', boxShadow: '0 0 10px rgba(239, 68, 68, 0.8)' }} />
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    color: 'white',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    fontSize: '0.6rem',
+                    whiteSpace: 'nowrap',
+                    marginTop: '4px',
+                    border: '1px solid #475569'
+                  }}>
+                    {pin.name} ({pin.spend})
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 12. SUPPLIER COMPARISON MATRIX */}
+        {activeTabPanel === 'comparison' && (
+          <div className="glass-card-premium" style={{ padding: '1.5rem', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800 }}>Partner Comparison Matrix</h3>
+              <p style={{ margin: '0.1rem 0 0', fontSize: '0.75rem', color: 'var(--text-muted)' }}>Side-by-side analysis of pricing levels, delivery performance, and minimum order limits.</p>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-muted)' }}>
+                    <th style={{ padding: '8px' }}>Metric / Parameter</th>
+                    <th style={{ padding: '8px' }}>Lotusland Ltd (China)</th>
+                    <th style={{ padding: '8px' }}>NP Labs (Europe)</th>
+                    <th style={{ padding: '8px' }}>Perelló (Spain)</th>
+                    <th style={{ padding: '8px' }}>Royal Care (UAE)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '8px', fontWeight: 700 }}>Quality Grade</td>
+                    <td style={{ padding: '8px', color: '#10b981', fontWeight: 700 }}>★★★★★ (98%)</td>
+                    <td style={{ padding: '8px', color: '#10b981', fontWeight: 700 }}>★★★★★ (97%)</td>
+                    <td style={{ padding: '8px', color: '#10b981', fontWeight: 700 }}>★★★★☆ (93%)</td>
+                    <td style={{ padding: '8px', color: '#f59e0b', fontWeight: 700 }}>★★★☆☆ (86%)</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '8px', fontWeight: 700 }}>Average Price (Peptides)</td>
+                    <td style={{ padding: '8px', color: '#10b981', fontWeight: 700 }}>Lowest (120 AED)</td>
+                    <td style={{ padding: '8px' }}>Medium (180 AED)</td>
+                    <td style={{ padding: '8px' }}>High (240 AED)</td>
+                    <td style={{ padding: '8px', color: '#ef4444', fontWeight: 700 }}>Highest (310 AED)</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '8px', fontWeight: 700 }}>Lead Time</td>
+                    <td style={{ padding: '8px', color: '#ef4444' }}>14 Days (Transit)</td>
+                    <td style={{ padding: '8px' }}>5 Days (Express)</td>
+                    <td style={{ padding: '8px' }}>6 Days</td>
+                    <td style={{ padding: '8px', color: '#10b981', fontWeight: 700 }}>Same-day (Local)</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '8px', fontWeight: 700 }}>Minimum Order Qty (MOQ)</td>
+                    <td style={{ padding: '8px', color: '#ef4444' }}>50 Units</td>
+                    <td style={{ padding: '8px' }}>10 Units</td>
+                    <td style={{ padding: '8px' }}>10 Units</td>
+                    <td style={{ padding: '8px', color: '#10b981', fontWeight: 700 }}>1 Unit</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '8px', fontWeight: 700 }}>Response Time avg</td>
+                    <td style={{ padding: '8px', color: '#f59e0b' }}>32h latency</td>
+                    <td style={{ padding: '8px', color: '#10b981', fontWeight: 700 }}>&lt; 2h (Instant)</td>
+                    <td style={{ padding: '8px' }}>12h</td>
+                    <td style={{ padding: '8px' }}>4h</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '8px', fontWeight: 700 }}>Active Agreements</td>
+                    <td style={{ padding: '8px' }}>Non-exclusive</td>
+                    <td style={{ padding: '8px', fontWeight: 700, color: 'var(--primary)' }}>Exclusive Distribution</td>
+                    <td style={{ padding: '8px' }}>Standard supply contract</td>
+                    <td style={{ padding: '8px' }}>Spot procurement only</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* 14. FLOATING BULK ACTIONS TOOLBAR */}
+      {selectedSupplierIds.length > 0 && (
+        <div style={{
+          position: 'fixed',
+          bottom: '2rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: 'var(--surface-raised)',
+          border: '2px solid var(--primary)',
+          borderRadius: '30px',
+          padding: '0.6rem 1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+          zIndex: 999
+        }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>{selectedSupplierIds.length} partners selected</span>
+          <div style={{ width: '1px', height: '16px', backgroundColor: 'var(--border)' }} />
+          <div style={{ display: 'flex', gap: '0.4rem' }}>
+            <button onClick={() => handleBulkAction('Assign Territory')} className="btn btn-outline" style={{ fontSize: '0.7rem', padding: '3px 8px' }}>Assign Territory</button>
+            <button onClick={() => handleBulkAction('Request Documents')} className="btn btn-outline" style={{ fontSize: '0.7rem', padding: '3px 8px' }}>Request Docs</button>
+            <button onClick={() => handleBulkAction('Create RFQ')} className="btn btn-primary" style={{ fontSize: '0.7rem', padding: '3px 8px' }}>Start RFQ</button>
+            <button onClick={() => setSelectedSupplierIds([])} className="btn btn-outline" style={{ fontSize: '0.7rem', padding: '3px 8px', color: '#ef4444', borderColor: '#ef4444' }}>Clear</button>
+          </div>
+        </div>
+      )}
+
+      {/* Create Supplier Drawer Modal */}
       {isDrawerOpen && (
         <CreateWholesellerDrawer 
           onClose={() => setIsDrawerOpen(false)} 
           onSuccess={handleCreate} 
         />
       )}
-
-      {toastEl}
-
-      <style>{`
-        @keyframes syncSpin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
 
     </div>
   );

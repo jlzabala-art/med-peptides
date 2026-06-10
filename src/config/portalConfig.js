@@ -1,29 +1,38 @@
 import { 
   FiHome, FiUsers, FiBox, FiActivity, FiSettings, FiFileText, FiShield, 
-  FiTruck, FiDatabase, FiCpu, FiMessageSquare, FiCalendar
+  FiTruck, FiDatabase, FiCpu, FiMessageSquare, FiCalendar, FiDollarSign, 
+  FiTrendingUp, FiLayers, FiCreditCard
 } from 'react-icons/fi';
 
 /**
  * Standardized portal navigation configuration.
- * Maps a user's activeRole to their available sidebar tabs.
+ * Grouped logically into streamlined workflows.
  */
 export const PORTAL_CONFIG = {
   admin: [
-    { id: 'overview', label: 'Overview', icon: FiHome, path: '/admin', category: 'Dashboard' },
-    { id: 'analytics', label: 'Platform Analytics', icon: FiActivity, path: '/admin/analytics', category: 'Dashboard' },
-    { id: 'orders', label: 'Global Orders', icon: FiBox, path: '/admin/orders', category: 'Commerce' },
-    { id: 'bulk-orders', label: 'Bulk Orders', icon: FiBox, path: '/admin/bulk-orders', category: 'Commerce' },
-    { id: 'shipping', label: 'Shipping & Logistics', icon: FiTruck, path: '/admin/shipping', category: 'Commerce' },
-    { id: 'products', label: 'Products Catalog', icon: FiBox, path: '/admin/products', category: 'Commerce' },
-    { id: 'variants', label: 'Variants', icon: FiBox, path: '/admin/variants', category: 'Commerce' },
-    { id: 'coupons', label: 'Coupons', icon: FiActivity, path: '/admin/coupons', category: 'Commerce' },
-    { id: 'leads', label: 'CRM & Leads', icon: FiUsers, path: '/admin/leads', category: 'CRM & Users' },
-    { id: 'users', label: 'User Directory', icon: FiUsers, path: '/admin/users', category: 'CRM & Users' },
-    { id: 'access-levels', label: 'Access Levels', icon: FiShield, path: '/admin/access-levels', category: 'System & Setup' },
-    { id: 'protocols', label: 'Medical Protocols', icon: FiActivity, path: '/admin/protocols', category: 'System & Setup' },
-    { id: 'ai-agents', label: 'AI Agents', icon: FiCpu, path: '/admin/ai-agents', category: 'System & Setup' },
-    { id: 'co-branding', label: 'Co-Branding', icon: FiActivity, path: '/admin/co-branding', category: 'System & Setup' },
-    { id: 'settings', label: 'Settings', icon: FiSettings, path: '/admin/settings', category: 'System & Setup' },
+    // Dashboard & Insights
+    { id: 'overview', label: 'Overview', icon: FiHome, path: '/admin', category: 'Dashboard & Analytics' },
+    { id: 'analytics', label: 'Platform Analytics', icon: FiActivity, path: '/admin/analytics', category: 'Dashboard & Analytics' },
+    
+    // Commercial CRM
+    { id: 'leads', label: 'CRM & Leads', icon: FiUsers, path: '/admin/leads', category: 'Commercial CRM' },
+    { id: 'users', label: 'User Directory', icon: FiUsers, path: '/admin/users', category: 'Commercial CRM' },
+    
+    // Supply Chain & Sourcing
+    { id: 'wholesellers', label: 'Sourcing & SRM', icon: FiLayers, path: '/admin/wholesellers', category: 'Supply Chain' },
+    { id: 'purchase-rfqs', label: 'Purchase RFQs', icon: FiFileText, path: '/admin/purchase-rfqs', category: 'Supply Chain' },
+    { id: 'purchase-orders', label: 'Purchase Orders', icon: FiTruck, path: '/admin/purchase-orders', category: 'Supply Chain' },
+    { id: 'purchase-bills', label: 'Supplier Bills (AP)', icon: FiCreditCard, path: '/admin/purchase-bills', category: 'Supply Chain' },
+    
+    // Inventory & Sales
+    { id: 'products', label: 'Products Catalog', icon: FiBox, path: '/admin/products', category: 'Inventory & Sales' },
+    { id: 'orders', label: 'B2C Orders', icon: FiBox, path: '/admin/orders', category: 'Inventory & Sales' },
+    { id: 'quotations', label: 'Quotations', icon: FiFileText, path: '/admin/quotations', category: 'Inventory & Sales' },
+    
+    // Operations Setup
+    { id: 'protocols', label: 'Medical Protocols', icon: FiActivity, path: '/admin/protocols', category: 'Operations Setup' },
+    { id: 'ai-agents', label: 'AI Agents', icon: FiCpu, path: '/admin/ai-agents', category: 'Operations Setup' },
+    { id: 'settings', label: 'System Settings', icon: FiSettings, path: '/admin/settings', category: 'Operations Setup' },
   ],
   doctor: [
     { id: 'dashboard', label: 'Dashboard', icon: FiHome, path: '/doctor', category: 'Clinical' },

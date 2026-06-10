@@ -143,11 +143,7 @@ const NAV_GROUPS = [
     label: 'Items & Catalog',
     icon: Box,
     items: [
-      { id: 'products',        label: 'All Items',       icon: Box },
-      { id: 'products?category=Peptides', label: 'Finished Peptides', icon: Package },
-      { id: 'products?category=APIs',     label: 'APIs & Raw Mats',   icon: FlaskConical },
-      { id: 'products?category=Supplements', label: 'Supplements',    icon: Pill },
-      { id: 'stock',           label: 'Stock & Variants',icon: Activity },
+      { id: 'products',        label: 'Items',           icon: Box },
       { id: 'prices',          label: 'Pricing Matrix',  icon: Tag },
       { id: 'costs',           label: 'Costs',           icon: DollarSign },
       { id: 'pricing-visibility', label: 'Pricing Visibility',  icon: EyeOff },

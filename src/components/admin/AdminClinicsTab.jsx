@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Building2, Users, FileText, Sparkles, CheckCircle2,
-  MapPin, Phone, Mail, Navigation, Plus, Lock, Globe, Building, Target
+  MapPin, Phone, Mail, Navigation, Plus, Lock, Globe, Building, Target, X
 } from 'lucide-react';
 import ERPListDetailLayout from '../shared/ERPListDetailLayout';
 import { Tabs, StatusChip } from '../ui';

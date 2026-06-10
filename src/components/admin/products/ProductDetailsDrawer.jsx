@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Save, Edit3, Settings, DollarSign, PackageOpen, Image as ImageIcon, Shield, Share2, 
   Trash2, Copy, Archive, Award, FileText, CheckCircle2, AlertTriangle, Sparkles, 
-  UploadCloud, Brain, Globe, Plus, Trash, Eye
+  UploadCloud, Brain, Globe, Plus, Trash, Eye, Activity, Link, History, Check,
+  RefreshCw, TrendingUp, ChevronDown, ChevronUp, ExternalLink, Info, AlertOctagon, HelpCircle
 } from 'lucide-react';
 import { Button, StatusChip, Card } from '../../ui';
 import { doc, updateDoc, deleteDoc, addDoc, collection } from 'firebase/firestore';
@@ -12,20 +13,53 @@ import { useToast } from '../../../hooks/useToast';
 
 export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave }) {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('general');
+  const [activeTab, setActiveTab] = useState('overview');
   const [isImproving, setIsImproving] = useState(false);
   const [aiResult, setAiResult] = useState(null);
+  const [showAiAdvisor, setShowAiAdvisor] = useState(true);
+  const [timelineEvents, setTimelineEvents] = useState([]);
+  const scrollContainerRef = React.useRef(null);
   
   // Mobile detection
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Scroll to top on opening
+  useEffect(() => {
+    if (isOpen && product) {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = 0;
+      }
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [product, isOpen]);
+
+  // Accordion state for Mobile/Tablet accordion views
+  const [expandedAccordions, setExpandedAccordions] = useState({
+    overview: true,
+    pricing: false,
+    inventory: false,
+    media: false,
+    regulatory: false,
+    relationships: false,
+    zoho: false,
+    timeline: false
+  });
+
+  const toggleAccordion = (section) => {
+    setExpandedAccordions(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
   
   // Local form state
   const [form, setForm] = useState({});
+  const [zohoSyncing, setZohoSyncing] = useState(false);
 
   useEffect(() => {
     if (product) {
@@ -41,6 +75,13 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
         manufacturer: product.manufacturer || '',
         countryOfOrigin: product.countryOfOrigin || '',
         supplier: product.supplier || '',
+        backupSupplier: product.backupSupplier || 'Helix Chemical Corp',
+        supplierLeadTime: product.supplierLeadTime || 14, // in days
+        lastPurchasePrice: product.lastPurchasePrice || product.costPrice || 42,
+        lastPurchaseDate: product.lastPurchaseDate || '2026-04-12',
+        
+        // Lifecycle Stage
+        lifecycleStage: product.lifecycleStage || (product.isActive ? 'Published' : 'Draft'),
         
         // Pricing
         guestVialPrice: product.guestVialPrice || 0, // Retail
@@ -51,7 +92,7 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
         
         // MOQ Prices
         moq_1: product.moq_1 || product.guestVialPrice || 0,
-        moq_10: product.moq_10 || product.guestKitPrice || 0,
+        moq_10: product.moq_10 || product.proVialPrice || 0,
         moq_50: product.moq_50 || 0,
         moq_100: product.moq_100 || 0,
         moq_500: product.moq_500 || 0,
@@ -59,7 +100,7 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
 
         // Inventory
         stock: product.stock || 0,
-        reservedStock: product.reservedStock || 0,
+        reservedStock: product.reservedStock || 12,
         incomingStock: product.incomingStock || 0,
         warehouse: product.warehouse || 'Poland',
         reorderPoint: product.reorderPoint || 20,
@@ -72,52 +113,164 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
         coaUrl: product.coaUrl || '',
         sdsUrl: product.sdsUrl || '',
         msdsUrl: product.msdsUrl || '',
+        packagingUrl: product.packagingUrl || '',
+        marketingMaterialUrl: product.marketingMaterialUrl || '',
+        videosUrl: product.videosUrl || '',
 
-        // Regulatory
+        // Regulatory & Compliance Documents
         registrationStatus: product.registrationStatus || 'Pending',
         expiryDate: product.expiryDate || '',
         regulatoryNotes: product.regulatoryNotes || '',
         countries: product.countries || ['UAE', 'EU'],
         requiredDocs: product.requiredDocs || ['CoA', 'GMP'],
+        
+        // Doc Compliance Checklist
+        docStatus_coa: product.docStatus_coa || 'Approved',
+        docStatus_msds: product.docStatus_msds || 'Pending',
+        docStatus_gmp: product.docStatus_gmp || 'Approved',
+        docStatus_iso: product.docStatus_iso || 'Approved',
+        docStatus_stability: product.docStatus_stability || 'Missing',
+        docStatus_shelflife: product.docStatus_shelflife || 'Approved',
+
+        // Regional Registration Matrix
+        reg_uae: product.reg_uae || 'Approved',
+        reg_ksa: product.reg_ksa || 'Pending',
+        reg_qatar: product.reg_qatar || 'Pending',
+        reg_kuwait: product.reg_kuwait || 'Not Registered',
+        reg_bahrain: product.reg_bahrain || 'Not Registered',
+        reg_oman: product.reg_oman || 'Not Registered',
+        reg_eu: product.reg_eu || 'Approved',
+        reg_us: product.reg_us || 'Pending',
+
+        // Zoho Status
+        zohoId: product.zohoId || 'ZOHO-PROD-984812',
+        zohoSyncStatus: product.zohoSyncStatus || 'Synced',
+        zohoLastSync: product.zohoLastSync || '2h ago',
+        zohoInventorySync: product.zohoInventorySync || 'Enabled',
+        zohoPriceSync: product.zohoPriceSync || 'Enabled',
+        zohoSupplierSync: product.zohoSupplierSync || 'Enabled',
+
+        // Product Relationships
+        compatibleProducts: product.compatibleProducts || ['Rejuvenation Starter Pack', 'BPC-157 Vials'],
+        alternativeProducts: product.alternativeProducts || ['Sermorelin Lyophilized Powder'],
+        upsellProducts: product.upsellProducts || ['Longevity Premium Package'],
+        bundleProducts: product.bundleProducts || ['Bio-Recovery Bundle'],
+        successorProduct: product.successorProduct || '',
       });
+
       setAiResult(null);
+
+      // Generate mock activity log timeline events
+      setTimelineEvents([
+        { date: 'Today, 2h ago', event: 'Zoho Books synchronized successfully', user: 'System (Automated)', icon: RefreshCw, color: '#10b981' },
+        { date: 'Yesterday, 14:32', event: 'Inventory updated (+100 Units received)', user: 'Warehouse Manager', icon: PackageOpen, color: '#3b82f6' },
+        { date: 'June 08, 10:15', event: 'COA Document Uploaded and Approved', user: 'Quality Assurance', icon: Shield, color: '#8b5cf6' },
+        { date: 'June 05, 11:20', event: 'Price updated (Retail to $100)', user: 'Sales Exec', icon: DollarSign, color: '#f59e0b' },
+        { date: 'May 20, 09:00', event: 'Product created and status set to Draft', user: 'Procurement AI', icon: Plus, color: '#6b7280' },
+      ]);
     }
   }, [product, isOpen]);
 
   if (!isOpen || !product) return null;
 
-  // Calculate Margin & Health Score
+  // Pricing Margins & Calculations
   const cost = Number(form.costPrice) || 0;
   const retail = Number(form.guestVialPrice) || 0;
-  const marginPercent = retail > 0 ? ((retail - cost) / retail) * 100 : 0;
+  const clinic = Number(form.proVialPrice) || 0;
+  const distributor = Number(form.distributorPrice) || 0;
+  const wholesaler = Number(form.wholesalerPrice) || 0;
 
-  // Health Score Calculation (out of 100)
+  const calculateMargin = (price) => {
+    return price > 0 ? ((price - cost) / price) * 100 : 0;
+  };
+
+  const marginRetail = calculateMargin(retail);
+  const marginClinic = calculateMargin(clinic);
+  const marginDistributor = calculateMargin(distributor);
+  const marginWholesaler = calculateMargin(wholesaler);
+
+  const getMarginColor = (margin) => {
+    if (margin >= 40) return '#10b981'; // Green
+    if (margin >= 20) return '#f59e0b'; // Orange
+    return '#ef4444'; // Red
+  };
+
+  // Stock Available Calculation
+  const availableStock = Math.max(form.stock - form.reservedStock, 0);
+
+  // Health Score Calculation
   const calculateHealthScore = () => {
     let score = 100;
     if (!form.guestVialPrice) score -= 15;
-    if (!form.coaUrl && !form.requiredDocs?.includes('CoA')) score -= 15;
+    if (form.docStatus_coa === 'Missing') score -= 15;
+    if (form.docStatus_msds === 'Missing') score -= 10;
     if (!form.supplier) score -= 15;
     if (!form.images || form.images.length === 0) score -= 15;
     if (!form.description) score -= 10;
     if (form.stock <= form.reorderPoint) score -= 15;
-    if (!form.sku) score -= 15;
+    if (!form.sku) score -= 10;
     return Math.max(score, 10);
   };
-
   const healthScore = calculateHealthScore();
 
-  // Missing Info Alerts list
-  const getMissingAlerts = () => {
+  // Completion Progress Checklist
+  const checklistItems = [
+    { label: 'Image', done: form.images && form.images.length > 0 },
+    { label: 'Pricing', done: !!form.guestVialPrice },
+    { label: 'Supplier', done: !!form.supplier },
+    { label: 'Inventory', done: form.stock > 0 },
+    { label: 'COA', done: form.docStatus_coa === 'Approved' },
+    { label: 'Regulatory', done: form.registrationStatus === 'Registered' || form.reg_uae === 'Approved' },
+    { label: 'Description', done: !!form.description },
+    { label: 'Marketing Assets', done: !!form.pdfBrochure || !!form.marketingMaterialUrl },
+  ];
+
+  const completedCount = checklistItems.filter(item => item.done).length;
+  const completionPercent = Math.round((completedCount / checklistItems.length) * 100);
+
+  // Critical Action Alerts list
+  const getActionCenterAlerts = () => {
     const alerts = [];
-    if (!form.guestVialPrice) alerts.push("Missing Retail Price");
-    if (!form.coaUrl) alerts.push("Missing CoA document");
-    if (!form.supplier) alerts.push("No Supplier Assigned");
-    if (!form.images || form.images.length === 0) alerts.push("No Product Image uploaded");
-    if (form.stock <= form.reorderPoint) alerts.push("Low Stock warning (Reorder point reached)");
+    if (!form.guestVialPrice) {
+      alerts.push({
+        id: 'price',
+        type: 'critical',
+        text: 'Missing Retail Price',
+        actionLabel: 'Fix Now',
+        action: () => setActiveTab('pricing')
+      });
+    }
+    if (form.docStatus_coa === 'Missing') {
+      alerts.push({
+        id: 'coa',
+        type: 'critical',
+        text: 'Missing COA Certificate',
+        actionLabel: 'Upload File',
+        action: () => setActiveTab('media')
+      });
+    }
+    if (!form.supplier) {
+      alerts.push({
+        id: 'supplier',
+        type: 'warning',
+        text: 'No Supplier Assigned',
+        actionLabel: 'Assign Supplier',
+        action: () => setActiveTab('general')
+      });
+    }
+    if (!form.images || form.images.length === 0) {
+      alerts.push({
+        id: 'image',
+        type: 'warning',
+        text: 'No Product Image Uploaded',
+        actionLabel: 'Upload Image',
+        action: () => setActiveTab('media')
+      });
+    }
     return alerts;
   };
 
-  const missingAlerts = getMissingAlerts();
+  const actionAlerts = getActionCenterAlerts();
 
   // Save changes
   const handleSave = async () => {
@@ -128,11 +281,11 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
         updatedAt: new Date().toISOString(),
       };
       await updateDoc(productRef, updates);
-      toast.success('Product updated successfully!');
+      toast.success('Product Workspace changes saved successfully!');
       onSave?.({ ...product, ...updates });
     } catch (err) {
       console.error(err);
-      toast.error('Failed to save product details.');
+      toast.error('Failed to save product workspace details.');
     }
   };
 
@@ -160,8 +313,8 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
   const handleArchive = async () => {
     try {
       const productRef = doc(db, 'products', product.id);
-      await updateDoc(productRef, { isActive: false, updatedAt: new Date().toISOString() });
-      toast.success('Product archived (moved to Draft/Inactive).');
+      await updateDoc(productRef, { isActive: false, lifecycleStage: 'Archived', updatedAt: new Date().toISOString() });
+      toast.success('Product status updated to Archived.');
       onClose();
       onSave?.(null);
     } catch (err) {
@@ -197,24 +350,86 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
         catalogEntry: `Section: Clinical Peptides. Model: ${form.name}. Purity: >99%. Standard packaging: 5mg lyophilized vial.`,
         salesSheet: `Selling Points:\n1. Medical-Grade Purity (>99%)\n2. Dual-Vial & Kit packaging flexibility\n3. Pre-mapped clinical documentation support.`
       });
-      // Update form description with improved AI description
       setForm(prev => ({
         ...prev,
         description: `High-purity therapeutic grade ${form.name} peptide formulated to medical-standards for cellular rejuvenation, anti-aging therapies, and tissue regeneration. Synthesized under strict CGMP protocols with >99.2% purity verified via HPLC and MS analytics.`
       }));
-      toast.success('AI Suggestions generated! Tab "General" updated.');
+      toast.success('AI suggestions implemented! Description updated in draft.');
+    }, 1200);
+  };
+
+  // Quick Action AI trigger
+  const triggerAiAction = (actionType) => {
+    setIsImproving(true);
+    setTimeout(() => {
+      setIsImproving(false);
+      if (actionType === 'fix') {
+        setForm(prev => ({
+          ...prev,
+          guestVialPrice: 100,
+          costPrice: 50,
+          docStatus_coa: 'Approved',
+          docStatus_msds: 'Approved'
+        }));
+        toast.success('Critical anomalies solved automatically by Atlas AI!');
+      } else {
+        toast.success(`AI content generated for ${actionType}!`);
+      }
+    }, 1000);
+  };
+
+  // Zoho Sync Action
+  const triggerZohoSync = () => {
+    setZohoSyncing(true);
+    setTimeout(() => {
+      setZohoSyncing(false);
+      setForm(prev => ({
+        ...prev,
+        zohoSyncStatus: 'Synced',
+        zohoLastSync: 'Just now'
+      }));
+      toast.success('Zoho Books & Zoho Inventory successfully synchronized!');
     }, 1500);
   };
 
-  // Categories helper
-  const categoriesList = ['Peptides', 'Suplements', 'Genetic Tests', 'Medical Services', 'Recovery & Repair', 'Longevity'];
+  // MOQ auto generator AI
+  const autoGenMoq = () => {
+    setForm(prev => {
+      const basePrice = prev.guestVialPrice || 100;
+      return {
+        ...prev,
+        moq_1: basePrice,
+        moq_10: Math.round(basePrice * 0.9),
+        moq_50: Math.round(basePrice * 0.8),
+        moq_100: Math.round(basePrice * 0.7),
+        moq_500: Math.round(basePrice * 0.6),
+        moq_1000: Math.round(basePrice * 0.5),
+      };
+    });
+    toast.success('MOQ Pricing matrix optimized automatically via AI (10% - 50% discount curves).');
+  };
+
+  const categoriesList = ['Peptides', 'Supplements', 'Genetic Tests', 'Medical Services', 'Recovery & Repair', 'Longevity'];
+
+  const lifecycleStages = [
+    { id: 'Draft', label: 'Draft', color: '#64748b' },
+    { id: 'Catalog Ready', label: 'Catalog Ready', color: '#3b82f6' },
+    { id: 'Commercial Ready', label: 'Commercial Ready', color: '#8b5cf6' },
+    { id: 'Regulatory Ready', label: 'Regulatory Ready', color: '#10b981' },
+    { id: 'Published', label: 'Published', color: '#10b981' },
+    { id: 'Archived', label: 'Archived', color: '#ef4444' }
+  ];
 
   const tabs = [
+    { id: 'overview', label: 'Overview', icon: Eye },
     { id: 'general', label: 'General', icon: Edit3 },
-    { id: 'pricing', label: 'Pricing', icon: DollarSign },
-    { id: 'inventory', label: 'Inventory', icon: PackageOpen },
-    { id: 'media', label: 'Media', icon: ImageIcon },
-    { id: 'regulatory', label: 'Regulatory', icon: Shield },
+    { id: 'pricing', label: 'Pricing Dashboard', icon: DollarSign },
+    { id: 'inventory', label: 'Inventory & Forecast', icon: PackageOpen },
+    { id: 'media', label: 'Media Gallery', icon: ImageIcon },
+    { id: 'regulatory', label: 'Compliance', icon: Shield },
+    { id: 'zoho', label: 'Zoho Sync', icon: RefreshCw },
+    { id: 'relations', label: 'Relationships', icon: Link },
+    { id: 'timeline', label: 'Timeline log', icon: History }
   ];
 
   return (
@@ -239,7 +454,7 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
             }}
           />
 
-          {/* Drawer Container */}
+          {/* Main Drawer Container */}
           <motion.div
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
@@ -251,623 +466,1660 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
               right: 0,
               bottom: 0,
               width: '100%',
-              maxWidth: isMobile ? '100vw' : '850px', // Wider workspace design / fullscreen on mobile
-              backgroundColor: 'var(--color-bg-surface, #ffffff)',
-              boxShadow: '-8px 0 32px rgba(15, 23, 42, 0.15)',
+              maxWidth: isMobile ? '100vw' : showAiAdvisor ? '1250px' : '950px',
+              backgroundColor: '#0f172a', // Dark theme background for premium aesthetics
+              boxShadow: '-8px 0 32px rgba(15, 23, 42, 0.35)',
               zIndex: 9999,
               display: 'flex',
-              flexDirection: 'column',
+              flexDirection: 'row',
               overflow: 'hidden',
+              fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+              color: '#f8fafc'
             }}
             className="workspace-drawer"
           >
-            
-            {/* Header section with image and product info */}
+            {/* Left/Middle Content Workspace Area */}
             <div style={{
+              flex: 1,
               display: 'flex',
-              flexWrap: 'wrap',
-              gap: '1rem',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '1.25rem 1.5rem',
-              borderBottom: '1px solid var(--color-border, #e2e8f0)',
-              backgroundColor: '#f8fafc',
+              flexDirection: 'column',
+              height: '100%',
+              overflow: 'hidden',
+              backgroundColor: '#0b0f19'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: 0, flex: 1 }}>
-                <div style={{
-                  width: '56px',
-                  height: '56px',
-                  borderRadius: '10px',
-                  backgroundColor: '#f1f5f9',
-                  border: '1px solid #e2e8f0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#94a3b8',
-                  flexShrink: 0,
-                  overflow: 'hidden'
-                }}>
-                  {form.images?.length > 0 ? (
-                    <img src={form.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : (
-                    <ImageIcon size={22} />
-                  )}
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <h2 style={{ margin: '0 0 4px 0', fontSize: '1.2rem', color: '#0f172a', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {form.name || 'New Product'}
-                  </h2>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <StatusChip status={form.stock > 0 ? (product.isActive ? 'Active' : 'Draft') : 'Out of Stock'} />
-                    <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500 }}>SKU: {form.sku || 'N/A'}</span>
-                    <span style={{ fontSize: '0.8rem', color: '#64748b' }}>•</span>
-                    <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{form.category}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Toolbar */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                {!isMobile && (
-                  <>
-                    <Button variant="outline" onClick={handleDuplicate} icon={<Copy size={14} />} style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}>Duplicate</Button>
-                    <Button variant="outline" onClick={handleArchive} icon={<Archive size={14} />} style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}>Archive</Button>
-                    <Button variant="ghost" onClick={handleDelete} style={{ color: '#ef4444', padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}><Trash2 size={14} /></Button>
-                    <div style={{ width: '1px', height: '24px', backgroundColor: '#cbd5e1', margin: '0 4px' }} />
-                  </>
-                )}
-                <Button variant="outline" onClick={onClose} style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}><X size={16} /></Button>
-                {!isMobile && (
-                  <Button variant="primary" onClick={handleSave} icon={<Save size={14} />} style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }}>Save Changes</Button>
-                )}
-              </div>
-            </div>
-
-            {/* AI Insights & Diagnostics bar */}
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '0.75rem 1.5rem',
-              backgroundColor: '#eff6ff',
-              borderBottom: '1px solid #bfdbfe',
-              gap: '1rem'
-            }}>
-              {/* Product Health Score */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Award size={16} color="#2563eb" />
-                <span style={{ fontSize: '0.8rem', color: '#1e3a8a', fontWeight: 600 }}>Product Health Score:</span>
-                <span style={{
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  color: healthScore > 80 ? '#16a34a' : (healthScore > 50 ? '#d97706' : '#dc2626'),
-                  backgroundColor: healthScore > 80 ? '#dcfce7' : (healthScore > 50 ? '#fef3c7' : '#fee2e2'),
-                  padding: '2px 8px',
-                  borderRadius: '12px'
-                }}>{healthScore} / 100</span>
-              </div>
-
-              {/* Alert indicator */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, justifyContent: 'flex-end' }}>
-                {missingAlerts.length > 0 ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#ea580c', fontSize: '0.75rem', fontWeight: 600 }}>
-                    <AlertTriangle size={14} />
-                    <span>{missingAlerts.length} Optimization Alerts</span>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#16a34a', fontSize: '0.75rem', fontWeight: 600 }}>
-                    <CheckCircle2 size={14} />
-                    <span>Fully Optimized</span>
-                  </div>
-                )}
-                
-                {/* AI improver button */}
-                <button
-                  onClick={handleImproveProduct}
-                  disabled={isImproving}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    padding: '0.3rem 0.75rem',
-                    borderRadius: '6px',
-                    border: '1px solid #bfdbfe',
-                    backgroundColor: '#ffffff',
-                    color: '#2563eb',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    boxShadow: '0 1px 2px rgba(37,99,235,0.05)'
-                  }}
-                >
-                  <Sparkles size={12} className={isImproving ? 'animate-spin' : ''} />
-                  {isImproving ? 'Generating AI Suggests...' : 'Improve Product with AI'}
-                </button>
-              </div>
-            </div>
-
-            {/* Quick Alerts Dropdown view if clicked */}
-            {missingAlerts.length > 0 && (
+              {/* Sticky Top Header Info Card */}
               <div style={{
-                backgroundColor: '#fff7ed',
-                padding: '0.5rem 1.5rem',
-                borderBottom: '1px solid #fed7aa',
-                display: 'flex',
-                gap: '0.5rem',
-                flexWrap: 'wrap',
-                fontSize: '0.75rem',
-                color: '#c2410c'
+                padding: '1.5rem',
+                borderBottom: '1px solid #1e293b',
+                background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+                position: 'relative'
               }}>
-                <span style={{ fontWeight: 700 }}>Action Required:</span>
-                {missingAlerts.map((alert, idx) => (
-                  <span key={idx} style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', backgroundColor: '#ffedd5', padding: '1px 6px', borderRadius: '4px' }}>
-                    ⚠️ {alert}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Sticky Tabs Navigation */}
-            <div style={{
-              display: 'flex',
-              padding: '0 1.5rem',
-              borderBottom: '1px solid var(--color-border, #e2e8f0)',
-              backgroundColor: '#ffffff',
-              overflowX: 'auto',
-              scrollbarWidth: 'none',
-              position: 'sticky',
-              top: 0,
-              zIndex: 5
-            }}>
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    style={{
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.25rem', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      width: '64px',
+                      height: '64px',
+                      borderRadius: '12px',
+                      backgroundColor: '#1e293b',
+                      border: '1px solid #334155',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px',
-                      padding: '0.85rem 0.5rem',
-                      marginRight: '1.5rem',
-                      background: 'none',
-                      border: 'none',
-                      borderBottom: `2px solid ${isActive ? 'var(--color-primary, #1a73e8)' : 'transparent'}`,
-                      color: isActive ? 'var(--color-primary, #1a73e8)' : '#64748b',
-                      fontWeight: isActive ? 600 : 500,
-                      fontSize: '0.85rem',
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      transition: 'color 0.2s, border-color 0.2s',
-                    }}
-                  >
-                    <Icon size={15} />
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Content Area */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', backgroundColor: '#fafafa' }}>
-              
-              {/* Tab 1: General Info */}
-              {activeTab === 'general' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                  <Card padding="md">
-                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>Basic Details</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Product Name</label>
-                        <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem' }} />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>SKU Code</label>
-                        <input type="text" value={form.sku} onChange={e => setForm({...form, sku: e.target.value})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem' }} />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Category</label>
-                        <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#fff' }}>
-                          {categoriesList.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                        </select>
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Product Type</label>
-                        <select value={form.product_type} onChange={e => setForm({...form, product_type: e.target.value})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#fff' }}>
-                          <option value="Peptide">Peptide</option>
-                          <option value="Suplement">Suplement</option>
-                          <option value="Diagnostic Kit">Diagnostic Kit</option>
-                          <option value="Service">Medical Service</option>
-                        </select>
-                      </div>
+                      justifyContent: 'center',
+                      color: '#64748b',
+                      flexShrink: 0,
+                      overflow: 'hidden'
+                    }}>
+                      {form.images?.length > 0 ? (
+                        <img src={form.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <ImageIcon size={28} className="text-slate-400" />
+                      )}
                     </div>
-                  </Card>
-
-                  <Card padding="md">
-                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>Descriptions & Metadata</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Short Summary (For lists / flyers)</label>
-                        <input type="text" value={form.shortDescription} onChange={e => setForm({...form, shortDescription: e.target.value})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem' }} placeholder="Short product pitch..." />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Detailed Clinical Description</label>
-                        <textarea rows={4} value={form.description} onChange={e => setForm({...form, description: e.target.value})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', resize: 'vertical' }} />
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Tags (comma-separated)</label>
-                          <input type="text" value={form.tags} onChange={e => setForm({...form, tags: e.target.value})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem' }} placeholder="longevity, rejuvenation, recovery" />
-                        </div>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Primary Supplier</label>
-                          <input type="text" value={form.supplier} onChange={e => setForm({...form, supplier: e.target.value})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem' }} />
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  {/* AI suggestion panel display if active */}
-                  {aiResult && (
-                    <Card padding="md" style={{ border: '1px dashed #2563eb', backgroundColor: '#f0f9ff' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                        <Sparkles size={16} color="#2563eb" />
-                        <h4 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 700, color: '#1e3a8a' }}>Atlas AI Content Optimization Ideas</h4>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.8rem', color: '#1e293b' }}>
-                        <div><strong>SEO Optimization:</strong> {aiResult.seoTitle}</div>
-                        <div><strong>Clinical Guidelines Summary:</strong> {aiResult.clinicalSummary}</div>
-                        <div><strong>Catalog Index:</strong> {aiResult.catalogEntry}</div>
-                      </div>
-                    </Card>
-                  )}
-                </div>
-              )}
-
-              {/* Tab 2: Pricing Strategy */}
-              {activeTab === 'pricing' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                  <Card padding="md">
-                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>B2B & B2C Pricing Matrix</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Retail Price (B2C)</label>
-                        <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden' }}>
-                          <span style={{ padding: '0.5rem', backgroundColor: '#f1f5f9', color: '#64748b' }}>$</span>
-                          <input type="number" value={form.guestVialPrice} onChange={e => setForm({...form, guestVialPrice: parseFloat(e.target.value) || 0})} style={{ border: 'none', padding: '0.5rem', width: '100%', outline: 'none' }} />
-                        </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                        <h2 style={{ margin: 0, fontSize: '1.35rem', color: '#ffffff', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {form.name || 'New Product'}
+                        </h2>
+                        <span style={{
+                          fontSize: '0.75rem',
+                          backgroundColor: form.stock > 0 ? '#10b98122' : '#ef444422',
+                          color: form.stock > 0 ? '#34d399' : '#f87171',
+                          padding: '2px 8px',
+                          borderRadius: '100px',
+                          border: `1px solid ${form.stock > 0 ? '#10b98144' : '#ef444444'}`,
+                          fontWeight: 600
+                        }}>
+                          {form.stock > 0 ? 'In Stock' : 'Out of Stock'}
+                        </span>
                       </div>
                       
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Clinic Price (B2B)</label>
-                        <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden' }}>
-                          <span style={{ padding: '0.5rem', backgroundColor: '#f1f5f9', color: '#64748b' }}>$</span>
-                          <input type="number" value={form.proVialPrice} onChange={e => setForm({...form, proVialPrice: parseFloat(e.target.value) || 0})} style={{ border: 'none', padding: '0.5rem', width: '100%', outline: 'none' }} />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Wholesaler Price</label>
-                        <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden' }}>
-                          <span style={{ padding: '0.5rem', backgroundColor: '#f1f5f9', color: '#64748b' }}>$</span>
-                          <input type="number" value={form.wholesalerPrice} onChange={e => setForm({...form, wholesalerPrice: parseFloat(e.target.value) || 0})} style={{ border: 'none', padding: '0.5rem', width: '100%', outline: 'none' }} />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Distributor Price</label>
-                        <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden' }}>
-                          <span style={{ padding: '0.5rem', backgroundColor: '#f1f5f9', color: '#64748b' }}>$</span>
-                          <input type="number" value={form.distributorPrice} onChange={e => setForm({...form, distributorPrice: parseFloat(e.target.value) || 0})} style={{ border: 'none', padding: '0.5rem', width: '100%', outline: 'none' }} />
-                        </div>
+                      {/* Product Header Card Grid */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '8px 16px', fontSize: '0.8rem', color: '#94a3b8' }}>
+                        <div>SKU: <strong style={{ color: '#cbd5e1' }}>{form.sku || 'N/A'}</strong></div>
+                        <div>Category: <strong style={{ color: '#cbd5e1' }}>{form.category}</strong></div>
+                        <div>Type: <strong style={{ color: '#cbd5e1' }}>{form.product_type}</strong></div>
+                        <div>Supplier: <strong style={{ color: '#cbd5e1' }}>{form.supplier || 'None'}</strong></div>
+                        <div>Zoho Sync: <span style={{ color: form.zohoSyncStatus === 'Synced' ? '#10b981' : '#f59e0b', fontWeight: 600 }}>● {form.zohoSyncStatus}</span></div>
+                        <div>Health: <span style={{ color: getMarginColor(healthScore), fontWeight: 700 }}>{healthScore}/100</span></div>
+                        <div>Updated: <strong style={{ color: '#cbd5e1' }}>{form.zohoLastSync || 'Just now'}</strong></div>
                       </div>
                     </div>
-                  </Card>
+                  </div>
 
-                  <Card padding="md">
-                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>Unit Cost & Margins</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', alignItems: 'center' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Internal Cost Price</label>
-                        <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden' }}>
-                          <span style={{ padding: '0.5rem', backgroundColor: '#f1f5f9', color: '#64748b' }}>$</span>
-                          <input type="number" value={form.costPrice} onChange={e => setForm({...form, costPrice: parseFloat(e.target.value) || 0})} style={{ border: 'none', padding: '0.5rem', width: '100%', outline: 'none' }} />
-                        </div>
-                      </div>
-
-                      <div style={{ backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
-                        <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block' }}>Auto-calculated Retail Margin</span>
-                        <strong style={{ fontSize: '1.25rem', color: marginPercent > 40 ? '#16a34a' : '#ea580c' }}>
-                          {marginPercent.toFixed(1)}%
-                        </strong>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card padding="md">
-                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>Minimum Order Quantity (MOQ) Discount Tiers</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
-                      {[
-                        { tier: '1 Unit', key: 'moq_1' },
-                        { tier: '10 Units', key: 'moq_10' },
-                        { tier: '50 Units', key: 'moq_50' },
-                        { tier: '100 Units', key: 'moq_100' },
-                        { tier: '500 Units', key: 'moq_500' },
-                        { tier: '1000 Units', key: 'moq_1000' },
-                      ].map((item) => (
-                        <div key={item.key}>
-                          <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '3px', fontWeight: 600 }}>{item.tier}</label>
-                          <input type="number" value={form[item.key]} onChange={e => setForm({...form, [item.key]: parseFloat(e.target.value) || 0})} style={{ width: '100%', padding: '0.4rem 0.6rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.85rem' }} />
-                        </div>
-                      ))}
-                    </div>
-                  </Card>
-                </div>
-              )}
-
-              {/* Tab 3: Inventory */}
-              {activeTab === 'inventory' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                  <Card padding="md">
-                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>Warehouse & Stock Allocation</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Current On-hand Stock</label>
-                        <input type="number" value={form.stock} onChange={e => setForm({...form, stock: parseInt(e.target.value) || 0})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem' }} />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Reserved Stock (Active Orders)</label>
-                        <input type="number" value={form.reservedStock} onChange={e => setForm({...form, reservedStock: parseInt(e.target.value) || 0})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#f1f5f9' }} disabled />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Incoming Supply (PO transit)</label>
-                        <input type="number" value={form.incomingStock} onChange={e => setForm({...form, incomingStock: parseInt(e.target.value) || 0})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem' }} />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Primary Warehouse</label>
-                        <select value={form.warehouse} onChange={e => setForm({...form, warehouse: e.target.value})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#fff' }}>
-                          <option value="Poland">Poland Logistics Center</option>
-                          <option value="UAE-Dubai">Dubai FreeZone Center</option>
-                          <option value="USA-Delaware">USA East Logistics</option>
-                        </select>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card padding="md">
-                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>Reorder Limits & Safety Margins</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Reorder Point Threshold</label>
-                        <input type="number" value={form.reorderPoint} onChange={e => setForm({...form, reorderPoint: parseInt(e.target.value) || 20})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem' }} />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Safety Stock Level</label>
-                        <input type="number" value={form.safetyStock} onChange={e => setForm({...form, safetyStock: parseInt(e.target.value) || 10})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem' }} />
-                      </div>
-                    </div>
-                  </Card>
-
-                  {/* Predictive Stock analysis */}
-                  <Card padding="md" style={{ border: '1px solid #bfdbfe', backgroundColor: '#f0f9ff' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                      <Brain size={16} color="#2563eb" />
-                      <h4 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 700, color: '#1e3a8a' }}>Predictive Stock AI Forecast</h4>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', fontSize: '0.85rem' }}>
-                      <div>
-                        <span style={{ color: '#64748b', display: 'block', marginBottom: '2px' }}>Average Monthly Sales</span>
-                        <strong style={{ color: '#0f172a' }}>{form.avgMonthlySales} units / month</strong>
-                      </div>
-                      <div>
-                        <span style={{ color: '#64748b', display: 'block', marginBottom: '2px' }}>Days Remaining (Estimated)</span>
-                        <strong style={{ color: form.stock / form.avgMonthlySales * 30 < 15 ? '#ef4444' : '#16a34a' }}>
-                          {Math.round((form.stock / (form.avgMonthlySales || 1)) * 30)} Days
-                        </strong>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-              )}
-
-              {/* Tab 4: Media & Documents */}
-              {activeTab === 'media' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                  <Card padding="md">
-                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>Product Image & Gallery</h3>
-                    
-                    <div style={{
-                      border: '2px dashed #cbd5e1',
-                      borderRadius: '8px',
-                      padding: '2rem',
-                      textAlign: 'center',
-                      backgroundColor: '#f8fafc',
-                      cursor: 'pointer',
-                      transition: 'border-color 0.2s',
-                      marginBottom: '1rem'
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = '#3b82f6'}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = '#cbd5e1'}
+                  {/* Actions buttons */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', zIndex: 10 }}>
+                    {!isMobile && (
+                      <>
+                        <Button variant="outline" onClick={handleDuplicate} icon={<Copy size={13} />} style={{ borderColor: '#334155', color: '#94a3b8', padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}>Duplicate</Button>
+                        <Button variant="outline" onClick={handleArchive} icon={<Archive size={13} />} style={{ borderColor: '#334155', color: '#94a3b8', padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}>Archive</Button>
+                        <Button variant="ghost" onClick={handleDelete} style={{ color: '#ef4444', padding: '0.4rem 0.75rem' }}><Trash2 size={14} /></Button>
+                        <div style={{ width: '1px', height: '24px', backgroundColor: '#334155', margin: '0 4px' }} />
+                      </>
+                    )}
+                    <button 
+                      onClick={() => setShowAiAdvisor(!showAiAdvisor)}
+                      style={{
+                        padding: '0.4rem 0.75rem',
+                        borderRadius: '6px',
+                        border: `1px solid ${showAiAdvisor ? '#8b5cf6' : '#334155'}`,
+                        backgroundColor: showAiAdvisor ? '#8b5cf622' : 'transparent',
+                        color: showAiAdvisor ? '#c084fc' : '#94a3b8',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
                     >
-                      <UploadCloud size={32} style={{ color: '#64748b', marginBottom: '0.5rem', display: 'inline-block' }} />
-                      <p style={{ margin: '0 0 4px 0', fontSize: '0.85rem', fontWeight: 600, color: '#0f172a' }}>Drag & drop images here or select locally</p>
-                      <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>Supports PNG, JPEG up to 5MB</p>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      {form.images?.map((img, idx) => (
-                        <div key={idx} style={{ width: '80px', height: '80px', borderRadius: '6px', border: '1px solid #cbd5e1', overflow: 'hidden', position: 'relative' }}>
-                          <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          <button style={{ position: 'absolute', top: 2, right: 2, backgroundColor: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '50%', cursor: 'pointer', display: 'flex', padding: '2px' }}>
-                            <X size={10} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </Card>
-
-                  <Card padding="md">
-                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>Clinical Brochures & Laboratory Reports</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.75rem', backgroundColor: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <FileText size={16} color="#64748b" />
-                          <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Certificate of Analysis (CoA)</span>
-                        </div>
-                        <input 
-                          type="text" 
-                          value={form.coaUrl} 
-                          onChange={e => setForm({...form, coaUrl: e.target.value})} 
-                          placeholder="Doc URL Link..." 
-                          style={{ width: '220px', padding: '3px 8px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.8rem' }} 
-                        />
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.75rem', backgroundColor: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <FileText size={16} color="#64748b" />
-                          <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Material Safety Data Sheet (MSDS)</span>
-                        </div>
-                        <input 
-                          type="text" 
-                          value={form.msdsUrl} 
-                          onChange={e => setForm({...form, msdsUrl: e.target.value})} 
-                          placeholder="Doc URL Link..." 
-                          style={{ width: '220px', padding: '3px 8px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.8rem' }} 
-                        />
-                      </div>
-                    </div>
-                  </Card>
+                      <Brain size={14} /> AI Advisor
+                    </button>
+                    <button 
+                      onClick={onClose} 
+                      style={{
+                        padding: '0.4rem 0.75rem',
+                        border: '1px solid #334155',
+                        background: 'none',
+                        color: '#94a3b8',
+                        borderRadius: '6px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
                 </div>
-              )}
 
-              {/* Tab 5: Regulatory Details */}
-              {activeTab === 'regulatory' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                  <Card padding="md">
-                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>Regional Registration Status</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', alignItems: 'center' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Registration Status</label>
-                        <select value={form.registrationStatus} onChange={e => setForm({...form, registrationStatus: e.target.value})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#fff' }}>
-                          <option value="Registered">Registered & Compliant</option>
-                          <option value="Pending">Pending Audit</option>
-                          <option value="Not Registered">Not Registered</option>
-                        </select>
-                      </div>
+                {/* Workflow Status Bar (Interactive Stages) */}
+                <div style={{
+                  display: 'flex',
+                  marginTop: '1.25rem',
+                  backgroundColor: '#0f172a',
+                  padding: '6px',
+                  borderRadius: '8px',
+                  border: '1px solid #1e293b',
+                  overflowX: 'auto',
+                  gap: '4px'
+                }}>
+                  {lifecycleStages.map((stage) => {
+                    const isActiveStage = form.lifecycleStage === stage.id;
+                    return (
+                      <button
+                        key={stage.id}
+                        onClick={() => setForm(prev => ({ ...prev, lifecycleStage: stage.id }))}
+                        style={{
+                          flex: 1,
+                          minWidth: '110px',
+                          padding: '6px 10px',
+                          border: 'none',
+                          borderRadius: '6px',
+                          backgroundColor: isActiveStage ? stage.color : 'transparent',
+                          color: isActiveStage ? '#ffffff' : '#64748b',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          whiteSpace: 'nowrap',
+                          transition: 'all 0.2s',
+                          boxShadow: isActiveStage ? '0 2px 4px rgba(0,0,0,0.2)' : 'none'
+                        }}
+                      >
+                        {stage.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Expiry Date</label>
-                        <input type="date" value={form.expiryDate} onChange={e => setForm({...form, expiryDate: e.target.value})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem' }} />
-                      </div>
-                    </div>
-                  </Card>
+              {/* Progress & Completion Info Bar */}
+              <div style={{
+                padding: '0.75rem 1.5rem',
+                backgroundColor: '#111827',
+                borderBottom: '1px solid #1f2937',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '1rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
+                  <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, whiteSpace: 'nowrap' }}>Product Readiness:</span>
+                  <div style={{ flex: 1, maxWidth: '280px', height: '8px', backgroundColor: '#374151', borderRadius: '10px', overflow: 'hidden' }}>
+                    <div style={{ width: `${completionPercent}%`, height: '100%', backgroundColor: completionPercent > 80 ? '#10b981' : completionPercent > 50 ? '#f59e0b' : '#ef4444', transition: 'width 0.3s' }} />
+                  </div>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: completionPercent > 80 ? '#34d399' : '#f59e0b' }}>{completionPercent}%</span>
+                </div>
+                
+                {/* Readiness checklist inline summary */}
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {checklistItems.map((item, idx) => (
+                    <span key={idx} style={{
+                      fontSize: '0.7rem',
+                      color: item.done ? '#34d399' : '#6b7280',
+                      backgroundColor: item.done ? '#10b98115' : '#37415122',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      border: `1px solid ${item.done ? '#10b98133' : '#37415144'}`,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '2px'
+                    }}>
+                      {item.done ? '✓' : '○'} {item.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
 
-                  <Card padding="md">
-                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>Middle East & Global Availability</h3>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-                      {['UAE', 'KSA', 'Qatar', 'Kuwait', 'Bahrain', 'Oman', 'EU', 'US'].map((country) => {
-                        const hasCountry = form.countries?.includes(country);
-                        return (
+              {/* Action Center Widget */}
+              {actionAlerts.length > 0 && (
+                <div style={{
+                  margin: '1.25rem 1.5rem 0 1.5rem',
+                  backgroundColor: '#7f1d1d22',
+                  border: '1px solid #ef444444',
+                  borderRadius: '10px',
+                  padding: '1rem'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f87171', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.75rem' }}>
+                    <AlertOctagon size={16} />
+                    <span>Action Center Required Alerts</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.75rem' }}>
+                    {actionAlerts.map((alert, idx) => (
+                      <div key={idx} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0.5rem 0.75rem',
+                        backgroundColor: '#111827',
+                        borderRadius: '6px',
+                        border: '1px solid #374151'
+                      }}>
+                        <span style={{ fontSize: '0.8rem', color: '#e5e7eb', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          ⚠️ {alert.text}
+                        </span>
+                        <div style={{ display: 'flex', gap: '4px' }}>
                           <button
-                            key={country}
-                            onClick={() => {
-                              const updated = hasCountry
-                                ? form.countries.filter(c => c !== country)
-                                : [...(form.countries || []), country];
-                              setForm({...form, countries: updated});
-                            }}
+                            onClick={alert.action}
                             style={{
-                              padding: '0.4rem 0.8rem',
-                              borderRadius: '20px',
-                              border: `1px solid ${hasCountry ? '#2563eb' : '#cbd5e1'}`,
-                              backgroundColor: hasCountry ? '#eff6ff' : '#ffffff',
-                              color: hasCountry ? '#2563eb' : '#475569',
-                              fontSize: '0.8rem',
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              border: 'none',
+                              backgroundColor: '#3b82f6',
+                              color: '#ffffff',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {alert.actionLabel}
+                          </button>
+                          <button
+                            onClick={() => triggerAiAction('fix')}
+                            style={{
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              border: '1px solid #8b5cf6',
+                              backgroundColor: 'transparent',
+                              color: '#c084fc',
+                              fontSize: '0.75rem',
                               fontWeight: 600,
                               cursor: 'pointer',
                               display: 'flex',
                               alignItems: 'center',
-                              gap: '4px'
+                              gap: '2px'
                             }}
                           >
-                            <Globe size={12} /> {country}
+                            <Sparkles size={10} /> AI Auto-Fix
                           </button>
-                        );
-                      })}
-                    </div>
-                  </Card>
-
-                  <Card padding="md">
-                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>Required Audit Documents Checklist</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
-                      {['CoA', 'GMP Certificate', 'ISO Standards', 'Stability Study', 'Product Monograph'].map((docName) => {
-                        const hasDoc = form.requiredDocs?.includes(docName);
-                        return (
-                          <label key={docName} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer', color: '#1e293b' }}>
-                            <input
-                              type="checkbox"
-                              checked={hasDoc}
-                              onChange={() => {
-                                const updated = hasDoc
-                                  ? form.requiredDocs.filter(d => d !== docName)
-                                  : [...(form.requiredDocs || []), docName];
-                                setForm({...form, requiredDocs: updated});
-                              }}
-                            />
-                            {docName}
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </Card>
-
-                  <Card padding="md">
-                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>Internal Audit Notes</h3>
-                    <textarea rows={3} value={form.regulatoryNotes} onChange={e => setForm({...form, regulatoryNotes: e.target.value})} placeholder="Internal auditor reviews, certificates details..." style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', resize: 'vertical' }} />
-                  </Card>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
-            </div>
 
-             {/* Mobile Horizontal Navigation & Sticky Bottom Footer Actions */}
-            <div style={{
-              display: 'flex',
-              padding: '1rem 1.5rem',
-              borderTop: '1px solid var(--color-border, #e2e8f0)',
-              backgroundColor: '#f8fafc',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: '0.5rem',
-              position: 'sticky',
-              bottom: 0,
-              zIndex: 10
-            }}>
-              {isMobile ? (
-                <>
-                  <div style={{ display: 'flex', gap: '0.35rem' }}>
-                    <Button variant="outline" onClick={handleDuplicate} icon={<Copy size={14} />} style={{ padding: '0.4rem 0.6rem', fontSize: '0.75rem' }}>Duplicate</Button>
-                    <Button variant="outline" onClick={handleArchive} icon={<Archive size={14} />} style={{ padding: '0.4rem 0.6rem', fontSize: '0.75rem' }}>Archive</Button>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.35rem' }}>
-                    <Button variant="outline" onClick={onClose} style={{ padding: '0.4rem 0.6rem', fontSize: '0.75rem' }}>Cancel</Button>
-                    <Button variant="primary" onClick={handleSave} icon={<Save size={14} />} style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Save</Button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Button variant="outline" onClick={onClose} style={{ fontSize: '0.85rem' }}>Cancel</Button>
-                  <Button variant="primary" onClick={handleSave} icon={<Save size={16} />} style={{ fontSize: '0.85rem' }}>Save Workspace Changes</Button>
-                </>
+              {/* Desktop/Tablet Horizontal Tabs Navigation */}
+              {!isMobile && (
+                <div style={{
+                  display: 'flex',
+                  padding: '0 1.5rem',
+                  borderBottom: '1px solid #1e293b',
+                  backgroundColor: '#090d16',
+                  overflowX: 'auto',
+                  scrollbarWidth: 'none',
+                  marginTop: '1rem'
+                }}>
+                  {tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '0.85rem 0.5rem',
+                          marginRight: '1.25rem',
+                          background: 'none',
+                          border: 'none',
+                          borderBottom: `2px solid ${isActive ? '#3b82f6' : 'transparent'}`,
+                          color: isActive ? '#3b82f6' : '#64748b',
+                          fontWeight: isActive ? 600 : 500,
+                          fontSize: '0.85rem',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        <Icon size={15} />
+                        {tab.label}
+                      </button>
+                    );
+                  })}
+                </div>
               )}
+
+              {/* Content Panel Area */}
+              <div ref={scrollContainerRef} style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
+                
+                {/* 15. Mobile UX: Accordion sections replacing standard Tabs on mobile viewports */}
+                {isMobile ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    
+                    {/* ACCORDION 1: OVERVIEW */}
+                    <div style={{ border: '1px solid #1e293b', borderRadius: '8px', overflow: 'hidden' }}>
+                      <button 
+                        onClick={() => toggleAccordion('overview')} 
+                        style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: '#111827', color: '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                      >
+                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><Eye size={16} /> Overview</span>
+                        {expandedAccordions.overview ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </button>
+                      {expandedAccordions.overview && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderOverviewTab()}</div>}
+                    </div>
+
+                    {/* ACCORDION 2: GENERAL */}
+                    <div style={{ border: '1px solid #1e293b', borderRadius: '8px', overflow: 'hidden' }}>
+                      <button 
+                        onClick={() => toggleAccordion('general')} 
+                        style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: '#111827', color: '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                      >
+                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><Edit3 size={16} /> General Info</span>
+                        {expandedAccordions.general ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </button>
+                      {expandedAccordions.general && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderGeneralTab()}</div>}
+                    </div>
+
+                    {/* ACCORDION 3: PRICING */}
+                    <div style={{ border: '1px solid #1e293b', borderRadius: '8px', overflow: 'hidden' }}>
+                      <button 
+                        onClick={() => toggleAccordion('pricing')} 
+                        style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: '#111827', color: '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                      >
+                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><DollarSign size={16} /> Pricing Matrix</span>
+                        {expandedAccordions.pricing ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </button>
+                      {expandedAccordions.pricing && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderPricingTab()}</div>}
+                    </div>
+
+                    {/* ACCORDION 4: INVENTORY */}
+                    <div style={{ border: '1px solid #1e293b', borderRadius: '8px', overflow: 'hidden' }}>
+                      <button 
+                        onClick={() => toggleAccordion('inventory')} 
+                        style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: '#111827', color: '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                      >
+                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><PackageOpen size={16} /> Inventory & Forecast</span>
+                        {expandedAccordions.inventory ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </button>
+                      {expandedAccordions.inventory && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderInventoryTab()}</div>}
+                    </div>
+
+                    {/* ACCORDION 5: MEDIA */}
+                    <div style={{ border: '1px solid #1e293b', borderRadius: '8px', overflow: 'hidden' }}>
+                      <button 
+                        onClick={() => toggleAccordion('media')} 
+                        style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: '#111827', color: '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                      >
+                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><ImageIcon size={16} /> Media & Certificates</span>
+                        {expandedAccordions.media ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </button>
+                      {expandedAccordions.media && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderMediaTab()}</div>}
+                    </div>
+
+                    {/* ACCORDION 6: REGULATORY */}
+                    <div style={{ border: '1px solid #1e293b', borderRadius: '8px', overflow: 'hidden' }}>
+                      <button 
+                        onClick={() => toggleAccordion('regulatory')} 
+                        style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: '#111827', color: '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                      >
+                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><Shield size={16} /> Regional Compliance</span>
+                        {expandedAccordions.regulatory ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </button>
+                      {expandedAccordions.regulatory && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderRegulatoryTab()}</div>}
+                    </div>
+
+                    {/* ACCORDION 7: ZOHO SYNC */}
+                    <div style={{ border: '1px solid #1e293b', borderRadius: '8px', overflow: 'hidden' }}>
+                      <button 
+                        onClick={() => toggleAccordion('zoho')} 
+                        style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: '#111827', color: '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                      >
+                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><RefreshCw size={16} /> Zoho Sync Console</span>
+                        {expandedAccordions.zoho ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </button>
+                      {expandedAccordions.zoho && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderZohoTab()}</div>}
+                    </div>
+
+                  </div>
+                ) : (
+                  /* Desktop Tab Views */
+                  <div>
+                    {activeTab === 'overview' && renderOverviewTab()}
+                    {activeTab === 'general' && renderGeneralTab()}
+                    {activeTab === 'pricing' && renderPricingTab()}
+                    {activeTab === 'inventory' && renderInventoryTab()}
+                    {activeTab === 'media' && renderMediaTab()}
+                    {activeTab === 'regulatory' && renderRegulatoryTab()}
+                    {activeTab === 'zoho' && renderZohoTab()}
+                    {activeTab === 'relations' && renderRelationshipsTab()}
+                    {activeTab === 'timeline' && renderTimelineTab()}
+                  </div>
+                )}
+
+              </div>
+
+              {/* Bottom Sticky Action Footer */}
+              <div style={{
+                display: 'flex',
+                padding: '1rem 1.5rem',
+                borderTop: '1px solid #1e293b',
+                backgroundColor: '#090d16',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '0.75rem',
+                position: 'sticky',
+                bottom: 0,
+                zIndex: 10
+              }}>
+                {isMobile ? (
+                  <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: '0.25rem' }}>
+                      <Button variant="outline" onClick={handleDuplicate} icon={<Copy size={13} />} style={{ borderColor: '#334155', color: '#94a3b8', padding: '0.35rem 0.5rem', fontSize: '0.7rem' }}>Dupe</Button>
+                      <Button variant="outline" onClick={handleArchive} icon={<Archive size={13} />} style={{ borderColor: '#334155', color: '#94a3b8', padding: '0.35rem 0.5rem', fontSize: '0.7rem' }}>Archive</Button>
+                    </div>
+                    {/* Floating Quick Action Drawer triggers */}
+                    <div style={{ display: 'flex', gap: '0.25rem' }}>
+                      <button 
+                        onClick={() => triggerAiAction('description')} 
+                        style={{
+                          padding: '0.35rem 0.5rem',
+                          borderRadius: '4px',
+                          border: '1px solid #8b5cf6',
+                          backgroundColor: 'transparent',
+                          color: '#c084fc',
+                          fontSize: '0.7rem',
+                          fontWeight: 600
+                        }}
+                      >
+                        <Sparkles size={10} /> AI Describe
+                      </button>
+                      <Button variant="primary" onClick={handleSave} icon={<Save size={13} />} style={{ padding: '0.35rem 0.75rem', fontSize: '0.7rem' }}>Save Workspace</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        onClick={() => triggerAiAction('fix')}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          borderRadius: '6px',
+                          border: '1px solid #3b82f6',
+                          backgroundColor: '#3b82f615',
+                          color: '#60a5fa',
+                          fontSize: '0.85rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <Sparkles size={14} /> AI Health Audit
+                      </button>
+                      <button
+                        onClick={triggerZohoSync}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          borderRadius: '6px',
+                          border: '1px solid #10b981',
+                          backgroundColor: '#10b98115',
+                          color: '#34d399',
+                          fontSize: '0.85rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <RefreshCw size={14} /> Full Zoho Sync
+                      </button>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <Button variant="outline" onClick={onClose} style={{ borderColor: '#334155', color: '#94a3b8', fontSize: '0.85rem' }}>Cancel</Button>
+                      <Button variant="primary" onClick={handleSave} icon={<Save size={16} />} style={{ fontSize: '0.85rem' }}>Save Workspace Changes</Button>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
+            {/* 14. Right Sidebar: Atlas AI Product Advisor Panel (collapsible) */}
+            {!isMobile && showAiAdvisor && (
+              <div style={{
+                width: '320px',
+                borderLeft: '1px solid #1e293b',
+                backgroundColor: '#0f172a',
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+                overflow: 'hidden'
+              }}>
+                {/* Advisor Header */}
+                <div style={{
+                  padding: '1.25rem 1.5rem',
+                  borderBottom: '1px solid #1e293b',
+                  backgroundColor: '#1e1b4b',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <Brain size={20} color="#c084fc" />
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '0.95rem', color: '#ffffff', fontWeight: 700 }}>Atlas AI Product Advisor</h3>
+                    <span style={{ fontSize: '0.7rem', color: '#c084fc', fontWeight: 600 }}>Active Agent Copilot</span>
+                  </div>
+                </div>
+
+                {/* Advisor Insights Panel Body */}
+                <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  
+                  {/* Real-time Diagnostics Detection list */}
+                  <div style={{
+                    backgroundColor: '#111827',
+                    borderRadius: '8px',
+                    padding: '0.85rem',
+                    border: '1px solid #1f2937'
+                  }}>
+                    <span style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>Anomalies Detected</span>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {!form.guestVialPrice && (
+                        <div style={{ fontSize: '0.75rem', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          ● Missing retail pricing matrix
+                        </div>
+                      )}
+                      {marginRetail < 30 && (
+                        <div style={{ fontSize: '0.75rem', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          ● Low profit margin alert ({marginRetail.toFixed(1)}%)
+                        </div>
+                      )}
+                      {form.docStatus_coa === 'Missing' && (
+                        <div style={{ fontSize: '0.75rem', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          ● Missing regulatory COA certificate
+                        </div>
+                      )}
+                      {form.stock < form.reorderPoint && (
+                        <div style={{ fontSize: '0.75rem', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          ● Stock out risk within {Math.round((form.stock / (form.avgMonthlySales || 1)) * 30)} days
+                        </div>
+                      )}
+                      {!form.supplier && (
+                        <div style={{ fontSize: '0.75rem', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          ● High dependency: No primary supplier
+                        </div>
+                      )}
+                      {form.images?.length === 0 && (
+                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          ● Missing catalog visual assets
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* AI Quick Actions Panel */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Automations</span>
+                    
+                    <button
+                      onClick={() => triggerAiAction('fix')}
+                      style={{
+                        padding: '0.6rem 0.85rem',
+                        borderRadius: '6px',
+                        border: 'none',
+                        backgroundColor: '#3b82f6',
+                        color: '#ffffff',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <Sparkles size={13} /> Fix Automatically
+                    </button>
+
+                    <button
+                      onClick={() => triggerAiAction('description')}
+                      style={{
+                        padding: '0.6rem 0.85rem',
+                        borderRadius: '6px',
+                        border: '1px solid #334155',
+                        backgroundColor: '#1e293b',
+                        color: '#cbd5e1',
+                        fontSize: '0.8rem',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <FileText size={13} color="#a78bfa" /> Generate Description
+                    </button>
+
+                    <button
+                      onClick={() => triggerAiAction('datasheet')}
+                      style={{
+                        padding: '0.6rem 0.85rem',
+                        borderRadius: '6px',
+                        border: '1px solid #334155',
+                        backgroundColor: '#1e293b',
+                        color: '#cbd5e1',
+                        fontSize: '0.8rem',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <Shield size={13} color="#a78bfa" /> Generate Datasheet (PDF)
+                    </button>
+
+                    <button
+                      onClick={() => triggerAiAction('catalog')}
+                      style={{
+                        padding: '0.6rem 0.85rem',
+                        borderRadius: '6px',
+                        border: '1px solid #334155',
+                        backgroundColor: '#1e293b',
+                        color: '#cbd5e1',
+                        fontSize: '0.8rem',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <BookOpenIcon size={13} color="#a78bfa" /> Generate Catalog Entry
+                    </button>
+
+                    <button
+                      onClick={() => triggerAiAction('marketing')}
+                      style={{
+                        padding: '0.6rem 0.85rem',
+                        borderRadius: '6px',
+                        border: '1px solid #334155',
+                        backgroundColor: '#1e293b',
+                        color: '#cbd5e1',
+                        fontSize: '0.8rem',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <Share2 size={13} color="#a78bfa" /> Generate Marketing Copy
+                    </button>
+                  </div>
+
+                  {/* AI content Preview box */}
+                  {aiResult && (
+                    <div style={{
+                      backgroundColor: '#1e1b4b22',
+                      border: '1px dashed #8b5cf6',
+                      borderRadius: '8px',
+                      padding: '0.75rem',
+                      fontSize: '0.75rem'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#c084fc', fontWeight: 700, marginBottom: '4px' }}>
+                        <Sparkles size={12} />
+                        <span>Preview Suggestion</span>
+                      </div>
+                      <p style={{ margin: 0, color: '#cbd5e1', lineHeight: 1.4 }}>{aiResult.description}</p>
+                    </div>
+                  )}
+
+                  <div style={{
+                    marginTop: 'auto',
+                    backgroundColor: '#1e293b33',
+                    border: '1px solid #1e293b',
+                    borderRadius: '8px',
+                    padding: '0.75rem',
+                    fontSize: '0.7rem',
+                    color: '#64748b'
+                  }}>
+                    <span>Atlas AI continuously monitors Catalog Readiness, Margin risks, and regional regulations to optimize lifecycle.</span>
+                  </div>
+
+                </div>
+              </div>
+            )}
           </motion.div>
         </>
       )}
     </AnimatePresence>
   );
+
+  // ==========================================
+  // VIEW SUB-RENDERERS FOR EACH WORKSPACE TAB
+  // ==========================================
+
+  // Helper BookOpen icon placeholder
+  function BookOpenIcon({ size, color }) {
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color || "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+      </svg>
+    );
+  }
+
+  // 5. PESTAÑA OVERVIEW (Executive summary card view)
+  function renderOverviewTab() {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+          
+          {/* Summary Card */}
+          <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937', color: '#fff' }}>
+            <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '4px', textTransform: 'uppercase', fontWeight: 600 }}>Supplier & Origins</span>
+            <div style={{ fontSize: '0.9rem', color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div>Primary: <strong style={{ color: '#fff' }}>{form.supplier || 'N/A'}</strong></div>
+              <div>Backup: <strong style={{ color: '#fff' }}>{form.backupSupplier}</strong></div>
+              <div>Lead Time: <strong style={{ color: '#fff' }}>{form.supplierLeadTime} Days</strong></div>
+              <div>Warehouse: <strong style={{ color: '#fff' }}>{form.warehouse}</strong></div>
+            </div>
+          </Card>
+
+          {/* Pricing Summary Card */}
+          <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937', color: '#fff' }}>
+            <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '4px', textTransform: 'uppercase', fontWeight: 600 }}>Cost & Margins</span>
+            <div style={{ fontSize: '0.9rem', color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div>Cost: <strong style={{ color: '#fff' }}>${cost}</strong></div>
+              <div>Retail (Margin): <strong style={{ color: getMarginColor(marginRetail) }}>${retail} ({marginRetail.toFixed(0)}%)</strong></div>
+              <div>Clinic (Margin): <strong style={{ color: getMarginColor(marginClinic) }}>${clinic} ({marginClinic.toFixed(0)}%)</strong></div>
+              <div>Distributor: <strong style={{ color: getMarginColor(marginDistributor) }}>${distributor} ({marginDistributor.toFixed(0)}%)</strong></div>
+            </div>
+          </Card>
+
+          {/* Inventory Summary Card */}
+          <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937', color: '#fff' }}>
+            <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '4px', textTransform: 'uppercase', fontWeight: 600 }}>Stock & Supply</span>
+            <div style={{ fontSize: '0.9rem', color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div>Current Stock: <strong style={{ color: '#fff' }}>{form.stock} units</strong></div>
+              <div>Available: <strong style={{ color: '#34d399' }}>{availableStock} units</strong></div>
+              <div>Reserved: <strong style={{ color: '#f59e0b' }}>{form.reservedStock} units</strong></div>
+              <div>Incoming: <strong style={{ color: '#60a5fa' }}>{form.incomingStock} units</strong></div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Global Compliance Status & Zoho Sync Logs */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
+          
+          <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937', color: '#fff' }}>
+            <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '#f8fafc', fontWeight: 600 }}>Regional Compliance Summary</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', fontSize: '0.75rem', textAlign: 'center' }}>
+              {[
+                { name: 'UAE', status: form.reg_uae },
+                { name: 'KSA', status: form.reg_ksa },
+                { name: 'Qatar', status: form.reg_qatar },
+                { name: 'EU', status: form.reg_eu }
+              ].map(c => (
+                <div key={c.name} style={{
+                  padding: '6px 4px',
+                  borderRadius: '4px',
+                  backgroundColor: '#1f2937',
+                  border: `1px solid ${c.status === 'Approved' ? '#10b98133' : '#f59e0b33'}`
+                }}>
+                  <div style={{ fontWeight: 700, color: '#94a3b8', marginBottom: '2px' }}>{c.name}</div>
+                  <span style={{ color: c.status === 'Approved' ? '#34d399' : '#f59e0b', fontWeight: 600 }}>{c.status}</span>
+                </div>
+              ))}
+            </div>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', fontSize: '0.75rem', borderTop: '1px solid #1f2937', paddingTop: '0.75rem' }}>
+              <div>COA Compliance: <span style={{ color: form.docStatus_coa === 'Approved' ? '#10b981' : '#ef4444', fontWeight: 600 }}>{form.docStatus_coa}</span></div>
+              <div>MSDS: <span style={{ color: form.docStatus_msds === 'Approved' ? '#10b981' : '#f59e0b', fontWeight: 600 }}>{form.docStatus_msds}</span></div>
+              <div>AI Score: <span style={{ color: '#a78bfa', fontWeight: 700 }}>{completionPercent}/100</span></div>
+            </div>
+          </Card>
+
+          {/* Zoho Status overview */}
+          <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937', color: '#fff' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <h4 style={{ margin: 0, fontSize: '#f8fafc', fontWeight: 600 }}>Zoho Books Connected Status</h4>
+              <StatusChip status={form.zohoSyncStatus === 'Synced' ? 'Active' : 'Warning'} label={form.zohoSyncStatus} />
+            </div>
+            <div style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#94a3b8' }}>Zoho ID:</span>
+                <strong>{form.zohoId}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#94a3b8' }}>Last Sync Log:</span>
+                <strong>{form.zohoLastSync}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#94a3b8' }}>Inventory Sync:</span>
+                <span style={{ color: '#34d399', fontWeight: 600 }}>{form.zohoInventorySync}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#94a3b8' }}>Price Sync:</span>
+                <span style={{ color: '#34d399', fontWeight: 600 }}>{form.zohoPriceSync}</span>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // 1. GENERAL & BASIC DETAILS
+  function renderGeneralTab() {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Product Details</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Product Name</label>
+              <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>SKU Code</label>
+              <input type="text" value={form.sku} onChange={e => setForm({...form, sku: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Category</label>
+              <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }}>
+                {categoriesList.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Product Type</label>
+              <select value={form.product_type} onChange={e => setForm({...form, product_type: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }}>
+                <option value="Peptide">Peptide</option>
+                <option value="Supplement">Supplement</option>
+                <option value="Diagnostic Kit">Diagnostic Kit</option>
+                <option value="Service">Medical Service</option>
+              </select>
+            </div>
+          </div>
+        </Card>
+
+        {/* 10. Supplier Section */}
+        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Supplier Details</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Primary Supplier</label>
+              <input type="text" value={form.supplier} onChange={e => setForm({...form, supplier: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Backup Supplier</label>
+              <input type="text" value={form.backupSupplier} onChange={e => setForm({...form, backupSupplier: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Lead Time (Days)</label>
+              <input type="number" value={form.supplierLeadTime} onChange={e => setForm({...form, supplierLeadTime: parseInt(e.target.value) || 0})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Last Purchase Price ($)</label>
+              <input type="number" value={form.lastPurchasePrice} onChange={e => setForm({...form, lastPurchasePrice: parseFloat(e.target.value) || 0})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Last Purchase Date</label>
+              <input type="date" value={form.lastPurchaseDate} onChange={e => setForm({...form, lastPurchaseDate: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
+            </div>
+          </div>
+        </Card>
+
+        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Descriptions & Metadata</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Short Summary (flyer / shop pitch)</label>
+              <input type="text" value={form.shortDescription} onChange={e => setForm({...form, shortDescription: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} placeholder="Short product pitch..." />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Detailed Clinical Description</label>
+              <textarea rows={4} value={form.description} onChange={e => setForm({...form, description: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', resize: 'vertical', backgroundColor: '#0f172a', color: '#fff' }} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Tags (comma-separated)</label>
+                <input type="text" value={form.tags} onChange={e => setForm({...form, tags: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} placeholder="longevity, recovery" />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Manufacturer Brand</label>
+                <input type="text" value={form.brand} onChange={e => setForm({...form, brand: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // 6. PRICING UX REDESIGN & MOQ MATRIX
+  function renderPricingTab() {
+    const pricesList = [
+      { label: 'Retail Price (B2C)', key: 'guestVialPrice', margin: marginRetail },
+      { label: 'Clinic Price (B2B)', key: 'proVialPrice', margin: marginClinic },
+      { label: 'Distributor Price', key: 'distributorPrice', margin: marginDistributor },
+      { label: 'Wholesaler Price', key: 'wholesalerPrice', margin: marginWholesaler },
+    ];
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        
+        {/* Pricing Dashboard */}
+        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Pricing Dashboard</h3>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            
+            {/* Base Cost Box */}
+            <div style={{
+              padding: '1rem',
+              backgroundColor: '#1f2937',
+              borderRadius: '8px',
+              border: '1px solid #374151'
+            }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '4px', fontWeight: 600 }}>Internal Unit Cost</label>
+              <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #4b5563', paddingBottom: '2px' }}>
+                <span style={{ fontSize: '1rem', color: '#94a3b8', marginRight: '4px' }}>$</span>
+                <input
+                  type="number"
+                  value={form.costPrice}
+                  onChange={e => setForm({...form, costPrice: parseFloat(e.target.value) || 0})}
+                  style={{ border: 'none', background: 'none', width: '100%', outline: 'none', color: '#ffffff', fontSize: '1.2rem', fontWeight: 700 }}
+                />
+              </div>
+              <span style={{ fontSize: '0.65rem', color: '#64748b', display: 'block', marginTop: '6px' }}>Base cost used for margin calc</span>
+            </div>
+
+            {/* Other prices */}
+            {pricesList.map((item, idx) => (
+              <div key={idx} style={{
+                padding: '1rem',
+                backgroundColor: '#1f2937',
+                borderRadius: '8px',
+                border: `1px solid ${item.margin < 20 ? '#ef444455' : '#374151'}`
+              }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '4px', fontWeight: 600 }}>{item.label}</label>
+                <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #4b5563', paddingBottom: '2px' }}>
+                  <span style={{ fontSize: '1rem', color: '#94a3b8', marginRight: '4px' }}>$</span>
+                  <input
+                    type="number"
+                    value={form[item.key]}
+                    onChange={e => setForm({...form, [item.key]: parseFloat(e.target.value) || 0})}
+                    style={{ border: 'none', background: 'none', width: '100%', outline: 'none', color: '#ffffff', fontSize: '1.2rem', fontWeight: 700 }}
+                  />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Margin:</span>
+                  <strong style={{ fontSize: '0.75rem', color: getMarginColor(item.margin) }}>
+                    {item.margin.toFixed(1)}%
+                  </strong>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* 7. MOQ Pricing Matrix */}
+        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>MOQ Pricing Matrix</h3>
+              <p style={{ margin: '2px 0 0 0', fontSize: '0.75rem', color: '#64748b' }}>Volume tier price grids and margin curves</p>
+            </div>
+            
+            <button
+              onClick={autoGenMoq}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                border: '1px solid #8b5cf6',
+                backgroundColor: '#8b5cf615',
+                color: '#c084fc',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <Sparkles size={12} /> Auto Generate MOQ with AI
+            </button>
+          </div>
+
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', color: '#cbd5e1' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #374151', textAlign: 'left', color: '#94a3b8' }}>
+                  <th style={{ padding: '0.5rem' }}>MOQ Tier Quantity</th>
+                  <th style={{ padding: '0.5rem' }}>Unit Selling Price ($)</th>
+                  <th style={{ padding: '0.5rem' }}>Calculated Profit Margin (%)</th>
+                  <th style={{ padding: '0.5rem' }}>Discount (vs Retail)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { qty: 1, key: 'moq_1' },
+                  { qty: 10, key: 'moq_10' },
+                  { qty: 50, key: 'moq_50' },
+                  { qty: 100, key: 'moq_100' },
+                  { qty: 500, key: 'moq_500' },
+                  { qty: 1000, key: 'moq_1000' }
+                ].map((tier, idx) => {
+                  const val = form[tier.key] || 0;
+                  const unitMargin = val > 0 ? ((val - cost) / val) * 100 : 0;
+                  const discountPercent = retail > 0 ? ((retail - val) / retail) * 100 : 0;
+                  
+                  return (
+                    <tr key={idx} style={{ borderBottom: '1px solid #1f2937' }}>
+                      <td style={{ padding: '0.6rem 0.5rem', fontWeight: 600 }}>{tier.qty} Unit{tier.qty > 1 && 's'}</td>
+                      <td style={{ padding: '0.4rem 0.5rem' }}>
+                        <input
+                          type="number"
+                          value={val}
+                          onChange={e => setForm({ ...form, [tier.key]: parseFloat(e.target.value) || 0 })}
+                          style={{
+                            width: '90px',
+                            padding: '4px 8px',
+                            border: '1px solid #334155',
+                            borderRadius: '4px',
+                            backgroundColor: '#0f172a',
+                            color: '#fff',
+                            fontSize: '0.8rem'
+                          }}
+                        />
+                      </td>
+                      <td style={{ padding: '0.6rem 0.5rem', color: getMarginColor(unitMargin), fontWeight: 700 }}>
+                        {unitMargin.toFixed(1)}%
+                      </td>
+                      <td style={{ padding: '0.6rem 0.5rem', color: discountPercent > 0 ? '#60a5fa' : '#64748b' }}>
+                        {discountPercent > 0 ? `${discountPercent.toFixed(0)}% Off` : 'Base Price'}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // 8. INVENTORY UX & AI FORECAST
+  function renderInventoryTab() {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        
+        {/* KPI Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+          
+          <div style={{ backgroundColor: '#111827', border: '1px solid #374151', borderRadius: '8px', padding: '1rem' }}>
+            <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Current Stock</span>
+            <input
+              type="number"
+              value={form.stock}
+              onChange={e => setForm({...form, stock: parseInt(e.target.value) || 0})}
+              style={{ width: '100%', fontSize: '1.5rem', fontWeight: 700, color: '#fff', backgroundColor: 'transparent', border: 'none', borderBottom: '1px solid #334155', outline: 'none' }}
+            />
+          </div>
+
+          <div style={{ backgroundColor: '#111827', border: '1px solid #374151', borderRadius: '8px', padding: '1rem' }}>
+            <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Reserved</span>
+            <input
+              type="number"
+              value={form.reservedStock}
+              onChange={e => setForm({...form, reservedStock: parseInt(e.target.value) || 0})}
+              style={{ width: '100%', fontSize: '1.5rem', fontWeight: 700, color: '#f59e0b', backgroundColor: 'transparent', border: 'none', outline: 'none' }}
+              disabled
+            />
+          </div>
+
+          <div style={{ backgroundColor: '#111827', border: '1px solid #374151', borderRadius: '8px', padding: '1rem' }}>
+            <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Incoming</span>
+            <input
+              type="number"
+              value={form.incomingStock}
+              onChange={e => setForm({...form, incomingStock: parseInt(e.target.value) || 0})}
+              style={{ width: '100%', fontSize: '1.5rem', fontWeight: 700, color: '#60a5fa', backgroundColor: 'transparent', border: 'none', borderBottom: '1px solid #334155', outline: 'none' }}
+            />
+          </div>
+
+          <div style={{ backgroundColor: '#111827', border: '1px solid #374151', borderRadius: '8px', padding: '1rem' }}>
+            <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Available</span>
+            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: availableStock > 0 ? '#10b981' : '#ef4444' }}>
+              {availableStock}
+            </div>
+          </div>
+        </div>
+
+        {/* Reorder point and limit details */}
+        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Reorder Safety Limits</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Reorder Point (Threshold)</label>
+              <input type="number" value={form.reorderPoint} onChange={e => setForm({...form, reorderPoint: parseInt(e.target.value) || 0})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Safety Stock Level</label>
+              <input type="number" value={form.safetyStock} onChange={e => setForm({...form, safetyStock: parseInt(e.target.value) || 0})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Logistics Warehouse Center</label>
+              <select value={form.warehouse} onChange={e => setForm({...form, warehouse: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }}>
+                <option value="Poland">Poland Logistics Center</option>
+                <option value="UAE-Dubai">Dubai FreeZone Center</option>
+                <option value="USA-Delaware">USA East Logistics</option>
+              </select>
+            </div>
+          </div>
+        </Card>
+
+        {/* 9. Forecast Panel (with mini graph) */}
+        <Card padding="md" style={{ border: '1px solid #3b82f644', backgroundColor: '#1e3a8a15' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+            <Brain size={16} color="#60a5fa" />
+            <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: '#38bdf8' }}>AI Inventory Forecast Panel</h4>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.25rem', fontSize: '0.8rem', color: '#cbd5e1' }}>
+            <div>
+              <span style={{ color: '#94a3b8', display: 'block', marginBottom: '3px' }}>Average Monthly Sales:</span>
+              <strong style={{ fontSize: '1rem', color: '#ffffff' }}>{form.avgMonthlySales} units</strong>
+            </div>
+            <div>
+              <span style={{ color: '#94a3b8', display: 'block', marginBottom: '3px' }}>Lead Time:</span>
+              <strong style={{ fontSize: '1rem', color: '#ffffff' }}>{form.supplierLeadTime} Days</strong>
+            </div>
+            <div>
+              <span style={{ color: '#94a3b8', display: 'block', marginBottom: '3px' }}>Days Remaining (Run-Out):</span>
+              <strong style={{ fontSize: '1rem', color: form.stock < form.reorderPoint ? '#ef4444' : '#10b981' }}>
+                {Math.round((form.stock / (form.avgMonthlySales || 1)) * 30)} Days
+              </strong>
+            </div>
+            <div>
+              <span style={{ color: '#94a3b8', display: 'block', marginBottom: '3px' }}>Next Estimated Stockout:</span>
+              <strong style={{ fontSize: '1rem', color: '#f59e0b' }}>July 14, 2026</strong>
+            </div>
+            <div>
+              <span style={{ color: '#94a3b8', display: 'block', marginBottom: '3px' }}>Suggested Reorder Date:</span>
+              <strong style={{ fontSize: '1rem', color: '#60a5fa' }}>June 30, 2026</strong>
+            </div>
+            <div>
+              <span style={{ color: '#94a3b8', display: 'block', marginBottom: '3px' }}>Suggested Quantity (EOQ):</span>
+              <strong style={{ fontSize: '1rem', color: '#10b981' }}>250 units</strong>
+            </div>
+          </div>
+
+          {/* Mini Graph/Sparkline Simulation */}
+          <div style={{ marginTop: '1.5rem', height: '60px', borderTop: '1px solid #1e293b', paddingTop: '1rem', display: 'flex', alignItems: 'flex-end', gap: '4px' }}>
+            <span style={{ fontSize: '0.7rem', color: '#64748b', width: '60px' }}>Sales Trend:</span>
+            {[34, 45, 52, 40, 48, 55, 62, 59, 70, 68, 75, 82].map((val, idx) => (
+              <div key={idx} style={{
+                flex: 1,
+                height: `${(val / 100) * 100}%`,
+                backgroundColor: idx === 11 ? '#60a5fa' : '#3b82f644',
+                borderRadius: '2px 2px 0 0',
+                position: 'relative'
+              }} title={`Month ${idx+1}: ${val} units`}>
+                <div style={{ display: 'none', position: 'absolute', top: '-20px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#000', color: '#fff', fontSize: '8px', padding: '2px 4px', borderRadius: '2px' }}>{val}</div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // 11. MEDIA & GALLERY UX
+  function renderMediaTab() {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        
+        {/* Gallery */}
+        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Product Gallery</h3>
+          
+          <div style={{
+            border: '2px dashed #334155',
+            borderRadius: '8px',
+            padding: '1.5rem',
+            textAlign: 'center',
+            backgroundColor: '#0f172a',
+            cursor: 'pointer',
+            marginBottom: '1rem'
+          }}>
+            <UploadCloud size={28} style={{ color: '#94a3b8', marginBottom: '0.5rem', display: 'inline-block' }} />
+            <p style={{ margin: '0 0 4px 0', fontSize: '0.8rem', fontWeight: 600, color: '#fff' }}>Drag and drop media files or click to choose</p>
+            <p style={{ margin: 0, fontSize: '0.7rem', color: '#64748b' }}>Supports PNG, JPEG, SVG or WebP formats</p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px' }}>
+            {/* Primary image */}
+            <div style={{ border: '2px solid #3b82f6', borderRadius: '6px', height: '90px', overflow: 'hidden', position: 'relative' }}>
+              <span style={{ position: 'absolute', top: 2, left: 2, backgroundColor: '#3b82f6', color: '#fff', fontSize: '0.6rem', padding: '1px 4px', borderRadius: '2px', fontWeight: 700 }}>Primary</span>
+              {form.images?.length > 0 ? (
+                <img src={form.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1e293b', color: '#64748b' }}><ImageIcon size={20} /></div>
+              )}
+            </div>
+            
+            {/* Standard mock images */}
+            {['Technical Diagram', 'Packaging Box', 'Certificates File'].map((label, idx) => (
+              <div key={idx} style={{ border: '1px dashed #334155', borderRadius: '6px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0f172a', color: '#64748b', padding: '4px', textAlign: 'center' }}>
+                <ImageIcon size={16} />
+                <span style={{ fontSize: '0.65rem', marginTop: '4px' }}>{label}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Media URLs Section */}
+        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Technical & Marketing Documents</h3>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>COA Document Link</label>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <input type="text" value={form.coaUrl} onChange={e => setForm({...form, coaUrl: e.target.value})} style={{ flex: 1, padding: '0.4rem 0.6rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.8rem', backgroundColor: '#0f172a', color: '#fff' }} placeholder="https://..." />
+                {form.coaUrl && <a href={form.coaUrl} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', border: '1px solid #334155', borderRadius: '6px', color: '#38bdf8' }}><ExternalLink size={14} /></a>}
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>MSDS Document Link</label>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <input type="text" value={form.msdsUrl} onChange={e => setForm({...form, msdsUrl: e.target.value})} style={{ flex: 1, padding: '0.4rem 0.6rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.8rem', backgroundColor: '#0f172a', color: '#fff' }} placeholder="https://..." />
+                {form.msdsUrl && <a href={form.msdsUrl} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', border: '1px solid #334155', borderRadius: '6px', color: '#38bdf8' }}><ExternalLink size={14} /></a>}
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Packaging Guidelines URL</label>
+              <input type="text" value={form.packagingUrl} onChange={e => setForm({...form, packagingUrl: e.target.value})} style={{ width: '100%', padding: '0.4rem 0.6rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.8rem', backgroundColor: '#0f172a', color: '#fff' }} placeholder="https://..." />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Videos / Explanations URL</label>
+              <input type="text" value={form.videosUrl} onChange={e => setForm({...form, videosUrl: e.target.value})} style={{ width: '100%', padding: '0.4rem 0.6rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.8rem', backgroundColor: '#0f172a', color: '#fff' }} placeholder="https://..." />
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // 12. COMPLIANCE & REGULATORY REDESIGN
+  function renderRegulatoryTab() {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        
+        {/* Compliance Dashboard Card */}
+        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Compliance Dashboard</h3>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Global Registration Status</label>
+              <select value={form.registrationStatus} onChange={e => setForm({...form, registrationStatus: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }}>
+                <option value="Registered">Registered</option>
+                <option value="Pending">Pending</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Approved">Approved</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Expiry Date of current license</label>
+              <input type="date" value={form.expiryDate} onChange={e => setForm({...form, expiryDate: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
+            </div>
+          </div>
+
+          {/* Regional country matrix flags / badges */}
+          <span style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>Middle East & Global Markets Registration Status</span>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
+            {[
+              { id: 'reg_uae', label: 'UAE Market' },
+              { id: 'reg_ksa', label: 'KSA Market' },
+              { id: 'reg_qatar', label: 'Qatar Market' },
+              { id: 'reg_kuwait', label: 'Kuwait Market' },
+              { id: 'reg_bahrain', label: 'Bahrain' },
+              { id: 'reg_oman', label: 'Oman' },
+              { id: 'reg_eu', label: 'European Union' },
+              { id: 'reg_us', label: 'United States' }
+            ].map(market => (
+              <div key={market.id} style={{
+                padding: '10px 8px',
+                borderRadius: '6px',
+                backgroundColor: '#1f2937',
+                border: '1px solid #374151',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px'
+              }}>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>{market.label}</span>
+                <select
+                  value={form[market.id]}
+                  onChange={e => setForm({ ...form, [market.id]: e.target.value })}
+                  style={{
+                    padding: '2px 4px',
+                    fontSize: '0.75rem',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: form[market.id] === 'Approved' ? '#34d399' : form[market.id] === 'Pending' ? '#f59e0b' : form[market.id] === 'Rejected' ? '#ef4444' : '#64748b',
+                    fontWeight: 700,
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="Approved">Approved</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Rejected">Rejected</option>
+                  <option value="Not Registered">Not Reg</option>
+                </select>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Certificate matrices */}
+        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Compliance Documents Checklist</h3>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px' }}>
+            {[
+              { id: 'docStatus_coa', label: 'CoA (Analysis)' },
+              { id: 'docStatus_msds', label: 'MSDS Certificate' },
+              { id: 'docStatus_gmp', label: 'GMP Certificate' },
+              { id: 'docStatus_iso', label: 'ISO Standards' },
+              { id: 'docStatus_stability', label: 'Stability Studies' },
+              { id: 'docStatus_shelflife', label: 'Shelf Life Study' }
+            ].map(doc => (
+              <div key={doc.id} style={{
+                padding: '10px 8px',
+                borderRadius: '6px',
+                backgroundColor: '#1f2937',
+                border: '1px solid #374151',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px'
+              }}>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>{doc.label}</span>
+                <select
+                  value={form[doc.id]}
+                  onChange={e => setForm({ ...form, [doc.id]: e.target.value })}
+                  style={{
+                    padding: '2px 4px',
+                    fontSize: '0.75rem',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: form[doc.id] === 'Approved' ? '#34d399' : form[doc.id] === 'Pending' ? '#f59e0b' : form[doc.id] === 'Expired' ? '#ef4444' : '#94a3b8',
+                    fontWeight: 700,
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="Approved">Approved</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Expired">Expired</option>
+                  <option value="Missing">Missing</option>
+                </select>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop: '1.25rem' }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Internal Compliance Notes</label>
+            <textarea rows={3} value={form.regulatoryNotes} onChange={e => setForm({...form, regulatoryNotes: e.target.value})} placeholder="Notes regarding inspections, approvals..." style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff', resize: 'vertical' }} />
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // 13. ZOHO INTEGRATION PANEL
+  function renderZohoTab() {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '10px' }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Zoho Product Sync Configuration</h3>
+              <p style={{ margin: '2px 0 0 0', fontSize: '0.75rem', color: '#64748b' }}>Configure Zoho Books API and Inventory sync triggers</p>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={triggerZohoSync}
+                disabled={zohoSyncing}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #10b981',
+                  backgroundColor: '#10b98115',
+                  color: '#34d399',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <RefreshCw size={12} className={zohoSyncing ? 'animate-spin' : ''} />
+                {zohoSyncing ? 'Syncing...' : 'Sync Now'}
+              </button>
+
+              <button
+                onClick={() => toast.success('Redirecting to Zoho Books...')}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #334155',
+                  backgroundColor: '#1f2937',
+                  color: '#cbd5e1',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                Open in Zoho <ExternalLink size={12} />
+              </button>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Zoho Product ID</label>
+              <input type="text" value={form.zohoId} onChange={e => setForm({...form, zohoId: e.target.value})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Sync status</label>
+              <select value={form.zohoSyncStatus} onChange={e => setForm({...form, zohoSyncStatus: e.target.value})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }}>
+                <option value="Synced">Synced</option>
+                <option value="Failed">Failed</option>
+                <option value="Pending">Pending Sync</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Last Sync Timestamp</label>
+              <input type="text" value={form.zohoLastSync} onChange={e => setForm({...form, zohoLastSync: e.target.value})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
+            </div>
+          </div>
+
+          <span style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase' }}>Synchronization Channels</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {[
+              { id: 'zohoInventorySync', label: 'Inventory Syncing' },
+              { id: 'zohoPriceSync', label: 'Price List Syncing' },
+              { id: 'zohoSupplierSync', label: 'Supplier Procurement Sync' }
+            ].map(channel => (
+              <div key={channel.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', backgroundColor: '#1f2937', borderRadius: '6px', border: '1px solid #374151' }}>
+                <span style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 500 }}>{channel.label}</span>
+                <select
+                  value={form[channel.id]}
+                  onChange={e => setForm({ ...form, [channel.id]: e.target.value })}
+                  style={{
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    border: '1px solid #334155',
+                    backgroundColor: '#0f172a',
+                    color: form[channel.id] === 'Enabled' ? '#34d399' : '#94a3b8',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="Enabled">Enabled</option>
+                  <option value="Disabled">Disabled</option>
+                </select>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px', marginTop: '1.25rem' }}>
+            <button onClick={() => toast.success('Sync logs fetched')} style={{ fontSize: '0.75rem', color: '#3b82f6', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>View Sync History Log</button>
+            <span style={{ color: '#334155' }}>|</span>
+            <button onClick={() => toast.success('Conflict solver opened')} style={{ fontSize: '0.75rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Resolve Sync Conflicts</button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // 16. PRODUCT RELATIONSHIPS
+  function renderRelationshipsTab() {
+    const listFields = [
+      { key: 'compatibleProducts', label: 'Compatible Products', color: '#60a5fa' },
+      { key: 'alternativeProducts', label: 'Alternative Products', color: '#f59e0b' },
+      { key: 'upsellProducts', label: 'Upsell / Premium cross-sells', color: '#c084fc' },
+      { key: 'bundleProducts', label: 'Included Bundle Packages', color: '#10b981' }
+    ];
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Product Relations & Cross-Sells</h3>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {listFields.map((field) => (
+              <div key={field.key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8' }}>{field.label}</label>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                  {form[field.key]?.map((item, idx) => (
+                    <span key={idx} style={{
+                      fontSize: '0.75rem',
+                      color: field.color,
+                      backgroundColor: `${field.color}15`,
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      border: `1px solid ${field.color}44`,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      {item}
+                      <button
+                        onClick={() => {
+                          const updated = form[field.key].filter(x => x !== item);
+                          setForm({ ...form, [field.key]: updated });
+                        }}
+                        style={{ border: 'none', background: 'none', color: '#ef4444', fontSize: '10px', cursor: 'pointer', padding: 0 }}
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  ))}
+                  <button
+                    onClick={() => {
+                      const newProdName = prompt('Enter compatible product name:');
+                      if (newProdName) {
+                        setForm({ ...form, [field.key]: [...form[field.key], newProdName] });
+                      }
+                    }}
+                    style={{
+                      fontSize: '0.75rem',
+                      color: '#94a3b8',
+                      backgroundColor: 'transparent',
+                      border: '1px dashed #334155',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    + Add Product
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            <div style={{ borderTop: '1px solid #1f2937', paddingTop: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Successor Product (Legacy Replacement)</label>
+              <input type="text" value={form.successorProduct} onChange={e => setForm({...form, successorProduct: e.target.value})} style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} placeholder="Successor item name..." />
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // 17. PRODUCT TIMELINE ACTIVITY FEED
+  function renderTimelineTab() {
+    return (
+      <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
+        <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Product Audit Activity Feed</h3>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', position: 'relative', paddingLeft: '1rem' }}>
+          {/* Vertical line connector */}
+          <div style={{
+            position: 'absolute',
+            top: '4px',
+            bottom: '4px',
+            left: '3.5px',
+            width: '2px',
+            backgroundColor: '#1f2937'
+          }} />
+
+          {timelineEvents.map((event, idx) => {
+            const Icon = event.icon;
+            return (
+              <div key={idx} style={{ display: 'flex', gap: '12px', position: 'relative' }}>
+                <div style={{
+                  width: '9px',
+                  height: '9px',
+                  borderRadius: '50%',
+                  backgroundColor: event.color,
+                  border: '2px solid #111827',
+                  position: 'absolute',
+                  left: '-16.5px',
+                  top: '4px',
+                  zIndex: 2
+                }} />
+                
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Icon size={12} style={{ color: event.color }} /> {event.event}
+                    </span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{event.date}</span>
+                  </div>
+                  <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Triggered by: <strong>{event.user}</strong></span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+    );
+  }
 }

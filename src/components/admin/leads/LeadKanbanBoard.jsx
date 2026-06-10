@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { calculateAILeadScore } from './LeadUtils';
-import { Mail, Phone, Calendar, ArrowUpRight, DollarSign, Target, Package, Clock, ShieldAlert } from 'lucide-react';
+import { calculateDetailedAIScore } from './LeadUtils';
+import { Mail, Phone, Calendar, ArrowUpRight, DollarSign, Target, Package, Clock, ShieldAlert, User, MapPin } from 'lucide-react';
 
 const STAGES = [
   { id: 'new', label: 'New', color: '#3b82f6', bg: '#eff6ff' },
   { id: 'qualified', label: 'Qualified', color: '#8b5cf6', bg: '#f5f3ff' },
-  { id: 'pricing', label: 'Pricing', color: '#f59e0b', bg: '#fffbeb' },
+  { id: 'pricing', label: 'RFQ Requested', color: '#f59e0b', bg: '#fffbeb' },
   { id: 'quoted', label: 'Quotation Sent', color: '#10b981', bg: '#f0fdf4' },
   { id: 'negotiation', label: 'Negotiation', color: '#0ea5e9', bg: '#e0f2fe' },
+  { id: 'awaiting', label: 'Awaiting Decision', color: '#ea580c', bg: '#fff7ed' },
   { id: 'won', label: 'Won', color: '#16a34a', bg: '#dcfce3' },
-  { id: 'lost', label: 'Lost', color: '#ef4444', bg: '#fef2f2' },
-  { id: 'hold', label: 'Hold', color: '#64748b', bg: '#f8fafc' },
+  { id: 'lost', label: 'Lost', color: '#ef4444', bg: '#fef2f2' }
 ];
 
 export default function LeadKanbanBoard({ leads, onLeadClick, onStatusChange }) {
@@ -19,7 +19,6 @@ export default function LeadKanbanBoard({ leads, onLeadClick, onStatusChange }) 
   const handleDragStart = (e, leadId) => {
     setDraggedLeadId(leadId);
     e.dataTransfer.effectAllowed = 'move';
-    // Firefox requires some data to be set
     e.dataTransfer.setData('text/plain', leadId);
   };
 
@@ -36,9 +35,17 @@ export default function LeadKanbanBoard({ leads, onLeadClick, onStatusChange }) 
     }
   };
 
-  // Map leads to stages
+  // Map leads to columns, handle status aliases for robustness
   const columns = STAGES.map(stage => {
-    const stageLeads = leads.filter(l => (l.status || 'new').toLowerCase() === stage.id);
+    const stageLeads = leads.filter(l => {
+      let st = (l.status || 'new').toLowerCase();
+      if (st === 'hold') st = 'awaiting';
+      if (st === 'completed') st = 'won';
+      if (st === 'rfq_requested') st = 'pricing';
+      if (st === 'quotation_sent') st = 'quoted';
+      if (st === 'awaiting_decision') st = 'awaiting';
+      return st === stage.id;
+    });
     return { ...stage, leads: stageLeads };
   });
 
@@ -47,7 +54,7 @@ export default function LeadKanbanBoard({ leads, onLeadClick, onStatusChange }) 
       display: 'flex', 
       gap: '1rem', 
       overflowX: 'auto', 
-      paddingBottom: '1rem',
+      paddingBottom: '1.5rem',
       minHeight: '600px',
       alignItems: 'flex-start'
     }}>
@@ -55,14 +62,15 @@ export default function LeadKanbanBoard({ leads, onLeadClick, onStatusChange }) 
         <div 
           key={col.id} 
           style={{ 
-            minWidth: '300px',
-            maxWidth: '300px',
-            backgroundColor: 'var(--color-bg-subtle, #f8fafc)',
+            minWidth: '280px',
+            maxWidth: '280px',
+            backgroundColor: 'var(--surface-raised, #f8fafc)',
             borderRadius: '12px',
             display: 'flex',
             flexDirection: 'column',
-            maxHeight: '100%',
+            maxHeight: '750px',
             border: '1px solid var(--border, #e2e8f0)',
+            flexShrink: 0
           }}
           onDragOver={handleDragOver}
           onDrop={(e) => handleDrop(e, col.id)}
@@ -70,21 +78,20 @@ export default function LeadKanbanBoard({ leads, onLeadClick, onStatusChange }) 
           {/* Column Header */}
           <div style={{ 
             padding: '1rem', 
-            borderBottom: '2px solid transparent', 
-            borderColor: col.color,
+            borderBottom: `3px solid ${col.color}`,
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--surface, #ffffff)',
             borderRadius: '12px 12px 0 0'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: col.color }} />
-              <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-main, #1e293b)' }}>{col.label}</span>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: col.color }} />
+              <span style={{ fontWeight: 800, fontSize: '0.8rem', color: 'var(--text-main, #1e293b)' }}>{col.label}</span>
             </div>
             <span style={{ 
-              fontSize: '0.75rem', fontWeight: 600, color: col.color, 
-              backgroundColor: col.bg, padding: '2px 8px', borderRadius: '12px' 
+              fontSize: '0.7rem', fontWeight: 700, color: col.color, 
+              backgroundColor: col.bg, padding: '2px 8px', borderRadius: '10px' 
             }}>
               {col.leads.length}
             </span>
@@ -97,15 +104,33 @@ export default function LeadKanbanBoard({ leads, onLeadClick, onStatusChange }) 
             flexDirection: 'column', 
             gap: '0.75rem',
             overflowY: 'auto',
-            minHeight: '150px' // allow drop even if empty
+            minHeight: '200px'
           }}>
             {col.leads.map(lead => {
-              const score = calculateAILeadScore(lead);
+              const aiDetails = calculateDetailedAIScore(lead);
               const isRFQ = lead.type === 'rfq';
               const itemsCount = lead.originalData?.items?.length || 0;
-              // Mock value based on item count for display
-              const value = isRFQ ? itemsCount * 500 : 0;
+              
+              // Calculate opportunity value
+              const value = isRFQ 
+                ? (lead.originalData?.items || []).reduce((sum, item) => sum + ((item.clientUnitPrice || 250) * (item.quantity || 1)), 0)
+                : 500;
+              
               const daysOpen = Math.max(0, Math.floor((new Date() - new Date(lead.createdAt)) / (1000 * 60 * 60 * 24)));
+              const owner = lead.assignedOwner || 'Jose';
+              const country = lead.country || (isRFQ ? 'Spain' : 'UAE');
+              const leadType = lead.leadType || (isRFQ ? 'Compounding Pharmacy' : 'Clinic');
+
+              // Lead Health check
+              let healthColor = '#10b981'; // Healthy
+              let healthLabel = 'Healthy';
+              if (daysOpen > 15 && col.id !== 'won' && col.id !== 'lost') {
+                healthColor = '#dc2626'; // Critical
+                healthLabel = 'Critical';
+              } else if (daysOpen > 7 && col.id !== 'won' && col.id !== 'lost') {
+                healthColor = '#f59e0b'; // Attention
+                healthLabel = 'Attention';
+              }
 
               return (
                 <div
@@ -114,68 +139,129 @@ export default function LeadKanbanBoard({ leads, onLeadClick, onStatusChange }) 
                   onDragStart={(e) => handleDragStart(e, lead.id)}
                   onClick={() => onLeadClick(lead)}
                   style={{
-                    backgroundColor: '#ffffff',
-                    borderRadius: '8px',
+                    backgroundColor: 'var(--surface, #ffffff)',
+                    borderRadius: '10px',
                     padding: '1rem',
                     border: '1px solid var(--border, #e2e8f0)',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
                     cursor: 'pointer',
-                    opacity: draggedLeadId === lead.id ? 0.5 : 1,
-                    transition: 'all 0.2s ease'
+                    opacity: draggedLeadId === lead.id ? 0.4 : 1,
+                    transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                    position: 'relative'
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)'; }}
+                  onMouseEnter={e => { 
+                    e.currentTarget.style.transform = 'translateY(-2px)'; 
+                    e.currentTarget.style.boxShadow = '0 6px 12px rgba(0,0,0,0.06)';
+                    e.currentTarget.style.borderColor = 'var(--primary, #3b82f6)';
+                  }}
+                  onMouseLeave={e => { 
+                    e.currentTarget.style.transform = 'translateY(0)'; 
+                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)';
+                    e.currentTarget.style.borderColor = 'var(--border, #e2e8f0)';
+                  }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                    <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1e293b', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  {/* Lead Health Marker Bar */}
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    bottom: 0,
+                    width: '3.5px',
+                    backgroundColor: healthColor,
+                    borderRadius: '10px 0 0 10px'
+                  }} title={`Health Score: ${healthLabel}`} />
+
+                  {/* Header Row */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.4rem', paddingLeft: '4px' }}>
+                    <span style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main, #1e293b)', lineHeight: 1.3 }}>
                       {lead.name}
                     </span>
                     <div style={{ 
                       display: 'flex', alignItems: 'center', gap: '2px', 
-                      color: score >= 80 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444',
-                      backgroundColor: score >= 80 ? '#f0fdf4' : score >= 50 ? '#fffbeb' : '#fef2f2',
-                      padding: '2px 6px', borderRadius: '4px', border: `1px solid ${score >= 80 ? '#bbf7d0' : score >= 50 ? '#fcd34d' : '#fca5a5'}`
+                      color: aiDetails.score >= 80 ? '#10b981' : aiDetails.score >= 50 ? '#f59e0b' : '#ef4444',
+                      backgroundColor: aiDetails.score >= 80 ? '#f0fdf4' : aiDetails.score >= 50 ? '#fffbeb' : '#fef2f2',
+                      padding: '1px 5px', borderRadius: '4px', border: `1px solid ${aiDetails.score >= 80 ? '#bbf7d0' : aiDetails.score >= 50 ? '#fcd34d' : '#fca5a5'}`,
+                      flexShrink: 0
                     }}>
-                      <Target size={10} />
-                      <span style={{ fontSize: '0.7rem', fontWeight: 800 }}>{score}</span>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 800 }}>AI {aiDetails.score}</span>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                  {/* Secondary info: Type & Country */}
+                  <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', marginBottom: '0.6rem', paddingLeft: '4px', flexWrap: 'wrap' }}>
                     <span style={{ 
-                      fontSize: '0.65rem', fontWeight: 600, padding: '2px 6px', borderRadius: '4px',
+                      fontSize: '0.6rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px',
                       backgroundColor: isRFQ ? '#f5f3ff' : '#f0fdf4', color: isRFQ ? '#6d28d9' : '#15803d'
                     }}>
-                      {isRFQ ? 'Wholesaler RFQ' : 'B2C Catalog Request'}
+                      {leadType}
+                    </span>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-muted, #64748b)', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                      <MapPin size={10} /> {country}
                     </span>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                    {isRFQ && (
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 500 }}>Products</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#334155', fontWeight: 600, fontSize: '0.8rem' }}>
-                          <Package size={12} /> {itemsCount}
-                        </div>
-                      </div>
-                    )}
-                    {value > 0 && (
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 500 }}>Est. Value</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#0f766e', fontWeight: 600, fontSize: '0.8rem' }}>
-                          <DollarSign size={12} /> {value.toLocaleString()}
-                        </div>
-                      </div>
-                    )}
+                  {/* Operational metrics */}
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: '1fr 1.2fr', 
+                    gap: '0.5rem', 
+                    marginBottom: '0.6rem', 
+                    padding: '0.5rem', 
+                    backgroundColor: 'var(--surface-raised, #f8fafc)', 
+                    borderRadius: '6px',
+                    marginLeft: '4px'
+                  }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '0.6rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>Est. Value</span>
+                      <strong style={{ color: 'var(--text-main, #0f172a)', fontSize: '0.75rem', fontWeight: 800 }}>
+                        AED {value.toLocaleString()}
+                      </strong>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '0.6rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>Last Activity</span>
+                      <span style={{ color: 'var(--text-muted, #475569)', fontSize: '0.7rem', fontWeight: 600 }}>
+                        {daysOpen === 0 ? 'Today' : `${daysOpen} days ago`}
+                      </span>
+                    </div>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f5f9', paddingTop: '0.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#64748b', fontSize: '0.7rem' }}>
-                      <Clock size={10} /> {daysOpen} days open
+                  {/* Card Footer */}
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    borderTop: '1px solid var(--border, #f1f5f9)', 
+                    paddingTop: '0.5rem',
+                    paddingLeft: '4px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div style={{ 
+                        width: '18px', 
+                        height: '18px', 
+                        borderRadius: '50%', 
+                        backgroundColor: 'var(--primary-light, #eff6ff)', 
+                        color: 'var(--primary, #2563eb)',
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        fontSize: '8px',
+                        fontWeight: 'bold'
+                      }}>
+                        {owner.charAt(0)}
+                      </div>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>{owner}</span>
                     </div>
-                    {/* Mock Next Action */}
-                    <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#3b82f6' }}>
-                      {score > 80 ? 'Send Pricing' : 'Qualify'}
+                    
+                    {/* Next Action Indicator */}
+                    <span style={{ 
+                      fontSize: '0.65rem', 
+                      fontWeight: 700, 
+                      color: healthColor,
+                      backgroundColor: healthColor + '15',
+                      padding: '2px 6px',
+                      borderRadius: '4px'
+                    }}>
+                      {aiDetails.score > 80 ? 'Send Quote' : 'Qualify'}
                     </span>
                   </div>
                 </div>

@@ -65,3 +65,33 @@ export function calculateAILeadScore(lead) {
   
   return Math.min(100, Math.max(0, score));
 }
+
+export function calculateDetailedAIScore(lead) {
+  const baseScore = calculateAILeadScore(lead);
+  let strength = 'Medium';
+  if (baseScore >= 80) strength = 'High';
+  else if (baseScore < 50) strength = 'Low';
+
+  const items = lead.originalData?.items || [];
+  const itemQty = items.reduce((sum, item) => sum + (parseInt(item.quantity, 10) || 0), 0);
+  
+  const requestedProductsScore = lead.type === 'rfq' ? Math.min(100, items.length * 8 + 40) : 55;
+  const historicalActivityScore = lead.status === 'new' ? 50 : 85;
+  const supplierMatchScore = lead.type === 'rfq' ? 92 : 60;
+  const volumeScore = lead.type === 'rfq' ? Math.min(100, itemQty * 0.1 + 35) : 48;
+  const urgencyScore = lead.temperature === 'HOT' ? 95 : lead.temperature === 'WARM' ? 75 : 50;
+  const conversionProbability = Math.round(baseScore * 0.95);
+
+  return {
+    score: baseScore,
+    strength,
+    factors: {
+      requestedProducts: requestedProductsScore,
+      historicalActivity: historicalActivityScore,
+      supplierMatch: supplierMatchScore,
+      volume: volumeScore,
+      urgency: urgencyScore,
+      conversionProbability
+    }
+  };
+}

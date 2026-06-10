@@ -1,0 +1,694 @@
+# IMPORT DATA 2.0 – AI CATALOG INGESTION & SUPPLIER ONBOARDING CENTER
+
+## Objective
+
+Transform the current upload screen from a simple file uploader into a complete AI-powered supplier catalog onboarding workflow.
+
+The user should be able to upload a supplier catalog and immediately understand:
+
+- Which products already exist
+- Which products are new
+- Which products have pricing changes
+- Which products have stock changes
+- Which products are missing documentation
+- Which products require manual review
+- Which products can be synchronized with Zoho Books
+- Which products should be added to Atlas Catalog
+
+The experience must be optimized for both desktop and mobile.
+
+---
+
+# GENERAL UX IMPROVEMENTS
+
+Current screen feels empty and static.
+
+Convert it into a guided workflow.
+
+Replace:
+
+Upload → Instructions → Start
+
+with:
+
+STEP 1
+Upload Catalog
+
+↓
+
+STEP 2
+AI Analysis
+
+↓
+
+STEP 3
+Review Results
+
+↓
+
+STEP 4
+Approve Changes
+
+↓
+
+STEP 5
+Sync with Atlas + Zoho
+
+This provides a clear mental model.
+
+---
+
+# TOP SUMMARY PANEL
+
+Above upload area add:
+
+--------------------------------------------------
+
+IMPORT CENTER
+--------------------------------------------------
+
+Total Catalogs Imported
+
+Products Processed
+
+Products Added
+
+Products Updated
+
+Products Pending Review
+
+Zoho Sync Status
+
+Last Import Date
+
+Example:
+
+Products Processed
+18,452
+
+Added
+412
+
+Updated
+2,180
+
+Pending Review
+28
+
+---
+
+# IMPORT SOURCE SELECTION
+
+Before upload.
+
+Allow selection:
+
+Supplier Catalog
+
+Price List
+
+Inventory Report
+
+COA Package
+
+Regulatory Package
+
+Protocol Template
+
+Zoho Export
+
+Manual Product Sheet
+
+This improves AI classification.
+
+---
+
+# SMART SUPPLIER DETECTION
+
+After upload:
+
+Atlas AI automatically identifies:
+
+Supplier Name
+
+Country
+
+Currency
+
+Catalog Type
+
+Language
+
+Document Quality
+
+Example:
+
+Detected Supplier
+
+Lotusland
+
+Currency
+
+USD
+
+Language
+
+English
+
+Confidence
+
+97%
+
+---
+
+# IMPORT PROFILES
+
+Current dropdown is too generic.
+
+Replace with templates:
+
+Peptide Supplier
+
+API Manufacturer
+
+Supplement Vendor
+
+Compounding Pharmacy
+
+Wholesaler
+
+Clinic Inventory
+
+Zoho Import
+
+Custom Profile
+
+Each profile automatically defines rules.
+
+---
+
+# AI RULE PRESETS
+
+Allow toggles:
+
+✓ Match Existing Products
+
+✓ Create Missing Products
+
+✓ Update Supplier Pricing
+
+✓ Update Inventory
+
+✓ Extract COAs
+
+✓ Extract GMP Documents
+
+✓ Create Supplier Records
+
+✓ Generate Product Images
+
+✓ Sync With Zoho
+
+This eliminates manual instructions.
+
+---
+
+# REAL-TIME IMPORT PREVIEW
+
+Immediately after upload show:
+
+-------------------------------------------------
+
+AI PREVIEW
+-------------------------------------------------
+
+Products Detected:
+127
+
+Matched:
+103
+
+New Products:
+21
+
+Pricing Changes:
+18
+
+Stock Changes:
+42
+
+Missing Documents:
+9
+
+Manual Reviews:
+3
+
+---
+
+Users should know what will happen BEFORE importing.
+
+---
+
+# PRODUCT MATCHING PREVIEW
+
+Display:
+
+Supplier Product
+
+↓
+
+Atlas Product
+
+↓
+
+Confidence Score
+
+Example:
+
+TB500 Acetate 5mg
+
+→
+
+TB-500 5mg
+
+Confidence
+98%
+
+Auto Approved
+
+---
+
+BPC157 Arg
+
+→
+
+BPC-157
+
+Confidence
+86%
+
+Needs Review
+
+---
+
+# PRICE CHANGE DETECTION
+
+One of the most important additions.
+
+Example:
+
+Retatrutide
+
+Previous Cost:
+$165
+
+New Cost:
+$152
+
+Difference:
+-7.8%
+
+Recommended:
+Update Supplier Price
+
+---
+
+BPC-157
+
+Previous Cost:
+$34
+
+New Cost:
+$39
+
+Difference:
++14.7%
+
+Alert:
+Margin Risk
+
+---
+
+# STOCK CHANGE DETECTION
+
+Show:
+
+Previous Stock
+
+New Stock
+
+Change
+
+Days of Coverage
+
+Example:
+
+Retatrutide
+
+0
+
+→
+
+250
+
+Status:
+Back In Stock
+
+---
+
+# MISSING PRODUCT CENTER
+
+New section.
+
+Products not found in Atlas Catalog.
+
+Options:
+
+Create Product
+
+Merge With Existing
+
+Ignore
+
+Assign Category
+
+Assign Supplier
+
+Assign Regulatory Group
+
+Assign Zoho Item Type
+
+---
+
+# BULK APPROVAL CENTER
+
+Add:
+
+Approve All
+
+Approve Pricing Only
+
+Approve Stock Only
+
+Approve New Products
+
+Reject Changes
+
+Sync To Zoho
+
+---
+
+# AI DATA ENRICHMENT
+
+After matching.
+
+Atlas AI should automatically generate:
+
+Product Name
+
+Description
+
+Category
+
+SKU
+
+Dosage
+
+CAS
+
+Tags
+
+Supplier Mapping
+
+Regulatory Status
+
+Keywords
+
+Search Metadata
+
+This reduces manual catalog work.
+
+---
+
+# DOCUMENT EXTRACTION CENTER
+
+If PDFs uploaded.
+
+Automatically extract:
+
+COA
+
+MSDS
+
+GMP
+
+ISO
+
+Stability Data
+
+Product Monographs
+
+Store directly inside product record.
+
+---
+
+# ZOHO INTEGRATION CENTER
+
+Critical.
+
+Display:
+
+-------------------------------------------------
+
+ZOHO IMPACT PREVIEW
+-------------------------------------------------
+
+New Items:
+12
+
+Items Updated:
+44
+
+Prices Updated:
+28
+
+Inventory Updated:
+67
+
+Potential Conflicts:
+3
+
+---
+
+Allow:
+
+Review Conflicts
+
+Resolve Conflicts
+
+Sync Now
+
+---
+
+# DUPLICATE DETECTION
+
+AI identifies:
+
+Duplicate Products
+
+Duplicate Suppliers
+
+Duplicate SKUs
+
+Similar Products
+
+Before creating records.
+
+---
+
+# IMPORT HISTORY
+
+New tab.
+
+Display:
+
+Import Date
+
+Supplier
+
+Products
+
+Changes
+
+Status
+
+User
+
+Zoho Sync
+
+Allow rollback.
+
+---
+
+# AUDIT TRAIL
+
+Every import must log:
+
+Imported By
+
+Date
+
+Changes Applied
+
+Previous Values
+
+New Values
+
+Zoho Sync Status
+
+---
+
+# MOBILE UX
+
+Do NOT show giant upload box.
+
+Use step-based flow.
+
+STEP 1
+Upload
+
+↓
+
+STEP 2
+Analysis
+
+↓
+
+STEP 3
+Review
+
+↓
+
+STEP 4
+Approve
+
+Each step on its own screen.
+
+Use cards instead of tables.
+
+Example:
+
+Retatrutide
+
+Matched
+
+98%
+
+Price Change
+-7%
+
+Approve
+
+Review
+
+---
+
+# DESKTOP UX
+
+Use split-screen layout.
+
+LEFT
+
+Import Controls
+
+Upload
+
+Templates
+
+Rules
+
+RIGHT
+
+Live AI Analysis
+
+Matching Results
+
+Price Changes
+
+Stock Changes
+
+Zoho Impact
+
+This allows immediate visibility.
+
+---
+
+# AI COMMANDS
+
+Add predefined buttons:
+
+Normalize Peptide Names
+
+Find Missing Products
+
+Extract COAs
+
+Generate Product Descriptions
+
+Review Supplier Pricing
+
+Validate Zoho Sync
+
+Compare Against Existing Catalog
+
+Run Full Audit
+
+---
+
+# PERFORMANCE
+
+Support:
+
+50,000+ products
+
+Large supplier catalogs
+
+Multiple currencies
+
+Multi-supplier imports
+
+Without page refreshes.
+
+Show real-time progress:
+
+Uploading
+
+Analyzing
+
+Matching
+
+Enriching
+
+Preparing Sync
+
+Completed
+
+---
+
+# FINAL OBJECTIVE
+
+Transform Import Data from a simple upload page into a complete AI Supplier Catalog Intelligence Center.
+
+The user should be able to upload a supplier catalog and within minutes:
+
+- Normalize products
+- Compare prices
+- Update stock
+- Detect risks
+- Create missing products
+- Enrich metadata
+- Extract documentation
+- Sync with Zoho Books
+- Sync with Zoho Inventory
+
+all from a single workflow with minimal manual intervention.
