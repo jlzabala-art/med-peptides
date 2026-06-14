@@ -1,8 +1,3 @@
-import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
-import Users from 'lucide-react/dist/esm/icons/users';
-import Search from 'lucide-react/dist/esm/icons/search';
-import Plus from 'lucide-react/dist/esm/icons/plus';
-import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import React, { useState, useEffect } from 'react';
 import {
   collection,
@@ -15,7 +10,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
-
+import { MessageSquare, Users, Search, Plus, ArrowLeft } from 'lucide-react';
 import ConversationThread from './ConversationThread';
 
 const mobileStyles = `
@@ -59,8 +54,10 @@ export default function MessagingWidget({ role, ownerId }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showNewChat, setShowNewChat] = useState(false);
   const [newChatName, setNewChatName] = useState('');
+
   // Admin User Search state
   const [allUsers, setAllUsers] = useState([]);
+
   useEffect(() => {
     if (showNewChat && (isAdmin || effectiveRole === 'admin') && allUsers.length === 0) {
       import('firebase/firestore').then(({ collection, getDocs, query }) => {
@@ -72,10 +69,7 @@ export default function MessagingWidget({ role, ownerId }) {
   }, [showNewChat, isAdmin, effectiveRole, allUsers.length]);
 
   useEffect(() => {
-    if (!user) {
-      const t = setTimeout(() => setLoading(false), 2000);
-      return () => clearTimeout(t);
-    }
+    if (!user) return;
     const q =
       effectiveRole === 'admin' || isAdmin
         ? query(collection(db, 'conversations'), orderBy('lastMessageAt', 'desc'))
@@ -85,17 +79,10 @@ export default function MessagingWidget({ role, ownerId }) {
             orderBy('lastMessageAt', 'desc')
           );
 
-    const unsub = onSnapshot(
-      q,
-      (snap) => {
-        setConversations(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-        setLoading(false);
-      },
-      (error) => {
-        console.error(error);
-        setLoading(false);
-      }
-    );
+    const unsub = onSnapshot(q, (snap) => {
+      setConversations(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+      setLoading(false);
+    });
     return () => unsub();
   }, [user, isAdmin, effectiveRole, effectiveId]);
 
@@ -343,7 +330,7 @@ export default function MessagingWidget({ role, ownerId }) {
                   color: 'var(--color-text-tertiary)',
                 }}
               >
-                {/* Empty instead of explicit Loading... text per user request */}
+                Loading...
               </div>
             ) : filtered.length === 0 ? (
               <div

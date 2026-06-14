@@ -1,42 +1,3 @@
-import Users from 'lucide-react/dist/esm/icons/users';
-import UserPlus from 'lucide-react/dist/esm/icons/user-plus';
-import PackageSearch from 'lucide-react/dist/esm/icons/package-search';
-import Activity from 'lucide-react/dist/esm/icons/activity';
-import ArrowUpRight from 'lucide-react/dist/esm/icons/arrow-up-right';
-import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
-import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
-import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
-import Server from 'lucide-react/dist/esm/icons/server';
-import Cpu from 'lucide-react/dist/esm/icons/cpu';
-import Database from 'lucide-react/dist/esm/icons/database';
-import Layers from 'lucide-react/dist/esm/icons/layers';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
-import ChevronUp from 'lucide-react/dist/esm/icons/chevron-up';
-import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
-import Settings from 'lucide-react/dist/esm/icons/settings';
-import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign';
-import Eye from 'lucide-react/dist/esm/icons/eye';
-import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
-import Globe from 'lucide-react/dist/esm/icons/globe';
-import Building2 from 'lucide-react/dist/esm/icons/building-2';
-import Link2 from 'lucide-react/dist/esm/icons/link-2';
-import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
-import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
-import X from 'lucide-react/dist/esm/icons/x';
-import Send from 'lucide-react/dist/esm/icons/send';
-import Sliders from 'lucide-react/dist/esm/icons/sliders';
-import Play from 'lucide-react/dist/esm/icons/play';
-import Check from 'lucide-react/dist/esm/icons/check';
-import FileText from 'lucide-react/dist/esm/icons/file-text';
-import UserCheck from 'lucide-react/dist/esm/icons/user-check';
-import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
-import Briefcase from 'lucide-react/dist/esm/icons/briefcase';
-import Layers3 from 'lucide-react/dist/esm/icons/layers-3';
-import Calendar from 'lucide-react/dist/esm/icons/calendar';
-import Home from 'lucide-react/dist/esm/icons/home';
-import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
-import MoreHorizontal from 'lucide-react/dist/esm/icons/more-horizontal';
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import {
@@ -49,96 +10,226 @@ import {
   where,
   orderBy,
   limit,
+  Timestamp,
   onSnapshot,
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-
 import {
-  ExecutiveSummaryStrip,
-  TodayPrioritiesQueue,
-  BusinessHealthRadar,
-  FinanceTasksHub,
-  CashFlowForecast,
-  CrmPipelineFunnel,
-  WholesalersLeaderboard,
-  AiCommandConsole,
-  GlobalActivityFeed,
-} from './widgets/CommandCenterWidgets';
-import HealthMatrixWidget from './widgets/HealthMatrixWidget';
-import AdminExecutiveSummaryWidget from './AdminExecutiveSummaryWidget';
-import notifier from '../../services/NotificationService';
-import styles from './AdminMetricsDashboard.module.css';
+  Users,
+  UserPlus,
+  PackageSearch,
+  Activity,
+  ArrowUpRight,
+  ShieldCheck,
+  RefreshCw,
+  CheckCircle2,
+  Server,
+  Cpu,
+  Database,
+  Layers,
+  Sparkles,
+  ArrowRight,
+  ChevronUp,
+  ChevronDown,
+  Settings,
+  DollarSign,
+  Eye,
+  EyeOff,
+  Globe,
+  Building2,
+  Link2,
+} from 'lucide-react';
 
-// Roles-based dashboard configurations preset layout
-const ROLE_PRESETS = {
-  CEO: {
-    visibleKPIs: [
-      'revenue',
-      'grossProfit',
-      'openOrders',
-      'pendingApprovals',
-      'openRFQs',
-      'aiAlerts',
-      'cashPosition',
-    ],
-    visibleWidgets: [
-      'todayPriorities',
-      'businessHealth',
-      'cashFlow',
-      'crmPipeline',
-      'wholesalersRanking',
-      'aiWorkspace',
-      'activityFeed',
-    ],
-    kpiOrder: [
-      'revenue',
-      'grossProfit',
-      'cashPosition',
-      'openOrders',
-      'pendingApprovals',
-      'openRFQs',
-      'aiAlerts',
-    ],
+import AdminSupplyNotifierWidget from './gadgets/AdminSupplyNotifierWidget';
+import SystemAuditLogWidget from './gadgets/SystemAuditLogWidget';
+import PayoutManagerWidget from './gadgets/PayoutManagerWidget';
+import AdminFinanceWidget from './gadgets/AdminFinanceWidget';
+import AdminProductSyncWidget from './gadgets/AdminProductSyncWidget';
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardTitle,
+  CardDescription,
+  MetricCard,
+  Button,
+} from '../ui';
+
+import RecentRegistrationsTable from './metrics/RecentRegistrationsTable';
+import DoctorCohortTable from './metrics/DoctorCohortTable';
+import WholesalerCohortTable from './metrics/WholesalerCohortTable';
+import PageVisitsTable from './metrics/PageVisitsTable';
+
+const DEFAULT_CONFIG = {
+  visibleKPIs: [
+    'totalUsers',
+    'pendingApprovals',
+    'activeOrders',
+    'revenue',
+    'activePhysicians',
+    'monthlyActivePatients',
+    'averageOrderValue',
+    'lowStockAlerts',
+    'systemHealth',
+    'completedOrders',
+  ],
+  kpiOrder: [
+    'totalUsers',
+    'pendingApprovals',
+    'activeOrders',
+    'revenue',
+    'activePhysicians',
+    'monthlyActivePatients',
+    'averageOrderValue',
+    'lowStockAlerts',
+    'systemHealth',
+    'completedOrders',
+    'newUsersThisWeek',
+    'activeRelationships',
+  ],
+  visiblePanels: {
+    recentRegistrations: false, // Hidden by default to reduce clutter
+    systemStatus: true,
+    supplyNotifier: true,
+    activeUsers: true,
+    payoutManager: true,
+    auditLogs: false, // Hidden by default
+    financeWidget: true,
+    productSyncWidget: true,
+    pageVisits: false, // Hidden by default
+    doctorCohort: true,
+    wholesalerCohort: true,
   },
-  Finance: {
-    visibleKPIs: ['revenue', 'grossProfit', 'cashPosition', 'pendingApprovals'],
-    visibleWidgets: [
-      'todayPriorities',
-      'financeTasks',
-      'cashFlow',
-      'businessHealth',
-      'activityFeed',
-    ],
-    kpiOrder: ['revenue', 'grossProfit', 'cashPosition', 'pendingApprovals'],
+  permissions: {
+    admin: {
+      allowedKPIs: [
+        'totalUsers',
+        'pendingApprovals',
+        'activeOrders',
+        'revenue',
+        'activePhysicians',
+        'monthlyActivePatients',
+        'averageOrderValue',
+        'lowStockAlerts',
+        'systemHealth',
+        'completedOrders',
+        'newUsersThisWeek',
+        'activeRelationships',
+      ],
+      allowedPanels: [
+        'recentRegistrations',
+        'systemStatus',
+        'supplyNotifier',
+        'activeUsers',
+        'payoutManager',
+        'auditLogs',
+        'financeWidget',
+        'productSyncWidget',
+        'pageVisits',
+        'doctorCohort',
+        'wholesalerCohort',
+      ],
+    },
+    wholesaler: {
+      allowedKPIs: [
+        'totalUsers',
+        'activeOrders',
+        'averageOrderValue',
+        'lowStockAlerts',
+        'completedOrders',
+        'newUsersThisWeek',
+      ],
+      allowedPanels: ['recentRegistrations', 'supplyNotifier', 'pageVisits', 'doctorCohort'],
+    },
   },
-  Purchasing: {
-    visibleKPIs: ['openOrders', 'openRFQs', 'pendingApprovals'],
-    visibleWidgets: ['todayPriorities', 'wholesalersRanking', 'businessHealth', 'activityFeed'],
-    kpiOrder: ['openOrders', 'openRFQs', 'pendingApprovals'],
+};
+
+const KPI_METADATA = {
+  totalUsers: {
+    title: 'Total Users',
+    icon: Users,
+    color: '#1a73e8', // Google Blue
+    bgColor: '#e8f0fe',
+    subtitle: 'Registered accounts',
   },
-  Sales: {
-    visibleKPIs: ['revenue', 'openOrders', 'openRFQs'],
-    visibleWidgets: [
-      'todayPriorities',
-      'crmPipeline',
-      'wholesalersRanking',
-      'businessHealth',
-      'activityFeed',
-    ],
-    kpiOrder: ['revenue', 'openOrders', 'openRFQs'],
+  pendingApprovals: {
+    title: 'Pending Approvals',
+    icon: UserPlus,
+    color: '#f9ab00', // Google Yellow
+    bgColor: '#fef7e0',
+    subtitle: 'Requires attention',
   },
-  Operations: {
-    visibleKPIs: ['openOrders', 'pendingApprovals', 'aiAlerts'],
-    visibleWidgets: [
-      'todayPriorities',
-      'businessHealth',
-      'wholesalersRanking',
-      'activityFeed',
-      'systemStatus',
-    ],
-    kpiOrder: ['openOrders', 'pendingApprovals', 'aiAlerts'],
+  activeOrders: {
+    title: 'Active Orders',
+    icon: PackageSearch,
+    color: '#0f9d58', // Google Green
+    bgColor: '#e6f4ea',
+    subtitle: 'Processing pipeline',
+  },
+  revenue: {
+    title: 'Total Revenue',
+    icon: DollarSign,
+    color: '#1a73e8',
+    bgColor: '#e8f0fe',
+    subtitle: 'Completed sales volume',
+  },
+  activePhysicians: {
+    title: 'Active Physicians',
+    icon: ShieldCheck,
+    color: '#0f9d58',
+    bgColor: '#e6f4ea',
+    subtitle: 'Clinics & Doctors active',
+  },
+  monthlyActivePatients: {
+    title: 'Monthly Active Patients',
+    icon: Activity,
+    color: '#1a73e8',
+    bgColor: '#e8f0fe',
+    subtitle: 'Patient engagement (30d)',
+  },
+  averageOrderValue: {
+    title: 'Avg Order Value (AOV)',
+    icon: DollarSign,
+    color: '#1a73e8',
+    bgColor: '#e8f0fe',
+    subtitle: 'Average ticket size',
+  },
+  lowStockAlerts: {
+    title: 'Low Stock Alerts',
+    icon: RefreshCw,
+    color: '#d93025', // Google Red
+    bgColor: '#fce8e6',
+    subtitle: 'Items running low',
+  },
+  systemHealth: {
+    title: 'System Health',
+    icon: Server,
+    color: '#0f9d58',
+    bgColor: '#e6f4ea',
+    subtitle: 'All systems operational',
+  },
+  completedOrders: {
+    title: 'Completed Orders',
+    icon: CheckCircle2,
+    color: '#0f9d58',
+    bgColor: '#e6f4ea',
+    subtitle: 'Successfully delivered',
+  },
+  newUsersThisWeek: {
+    title: 'New Users (7d)',
+    icon: Sparkles,
+    color: '#1a73e8',
+    bgColor: '#e8f0fe',
+    subtitle: 'Growth this week',
+  },
+  activeRelationships: {
+    title: 'Active Linkages',
+    icon: Link2,
+    color: '#1a73e8',
+    bgColor: '#e8f0fe',
+    subtitle: 'Doctor-patient pairs',
   },
 };
 
@@ -146,228 +237,848 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
   const isAdmin = userProfile?.role === 'admin' || userProfile?.roles?.includes('admin');
-  // Customizer State
-  const [currentRolePreset, setCurrentRolePreset] = useState('CEO');
-  const [visibleKPIs, setVisibleKPIs] = useState(ROLE_PRESETS.CEO.visibleKPIs);
-  const [visibleWidgets, setVisibleWidgets] = useState(ROLE_PRESETS.CEO.visibleWidgets);
-  const [isCustomizing, setIsCustomizing] = useState(false);
-  const [isExecutiveMode, setIsExecutiveMode] = useState(true);
+  const activeRole = wholesalerId ? 'wholesaler' : 'admin';
 
-  // Core Data Metrics
-  const [loading, setLoading] = useState(true);
-  const [timeFilter, setTimeFilter] = useState('7d');
-  const [dbLatency, setDbLatency] = useState('24ms');
-  const [aiConsumption, setAiConsumption] = useState(1.42);
-  const [activeUsersCount, setActiveUsersCount] = useState(4);
-  const [recentRegistrations, setRecentRegistrations] = useState([]);
-  // Metrics values (live simulation and DB mappings)
+  // Config State
+  const [config, setConfig] = useState(DEFAULT_CONFIG);
+  const [isEditing, setIsEditing] = useState(false);
+  const [savingConfig, setSavingConfig] = useState(false);
+
+  const [aiConsumption, setAiConsumption] = useState(0);
+  const [activeUsers, setActiveUsers] = useState([]);
   const [metrics, setMetrics] = useState({
-    revenue: 456000,
-    grossProfit: 136800,
-    openOrders: 127,
-    pendingApprovals: 18,
-    openRFQs: 24,
-    aiAlerts: 5,
-    cashPosition: 890400,
+    totalUsers: 0,
+    pendingApprovals: 0,
+    activeOrders: 0,
+    revenue: 0,
+    activePhysicians: 0,
+    monthlyActivePatients: 0,
+    averageOrderValue: 0,
+    lowStockAlerts: 0,
+    systemHealth: '0ms',
+    completedOrders: 0,
+    newUsersThisWeek: 0,
+    activeRelationships: 0,
   });
+  const [recentUsers, setRecentUsers] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [allRelationships, setAllRelationships] = useState([]);
+  const [pageViews, setPageViews] = useState([]);
+  const [visitsPeriod, setVisitsPeriod] = useState('7d');
+  const [timeFilter, setTimeFilter] = useState('all');
+  const [loading, setLoading] = useState(true);
 
-  // Today Priorities list
-  const [priorities, setPriorities] = useState([
-    {
-      id: 1,
-      text: '5 RFQs require immediate approval',
-      type: 'rfq',
-      priority: 'high',
-      link: '/admin/rfq',
-    },
-    {
-      id: 2,
-      text: '3 supplier bills due today',
-      type: 'bill',
-      priority: 'critical',
-      link: '/admin/bills',
-    },
-    {
-      id: 3,
-      text: '2 leads require follow-up',
-      type: 'lead',
-      priority: 'medium',
-      link: '/admin/leads',
-    },
-    {
-      id: 4,
-      text: '1 inventory alert: low stock on Peptide A1',
-      type: 'stock',
-      priority: 'high',
-      link: '/admin/products',
-    },
-    {
-      id: 5,
-      text: 'AI detected pricing anomaly in Wholesale B',
-      type: 'anomaly',
-      priority: 'low',
-      link: '/admin/analytics',
-    },
-  ]);
+  // Cache Flush simulation state
+  const [isFlushing, setIsFlushing] = useState(false);
+  const [flushSuccess, setFlushSuccess] = useState(false);
 
-  // AI Command Console simulation helper
-  const handleAiAsk = async (queryText) => {
-    const queryLower = queryText.toLowerCase();
-    if (
-      queryLower.includes('attention') ||
-      queryLower.includes('priorities') ||
-      queryLower.includes('today')
-    ) {
-      return {
-        answer:
-          'Here are the top issues that require your immediate attention today: Overdue bills (AED 34,200) and 3 pending RFQs.',
-        actions: [],
-      };
-    }
-    return {
-      answer: `AI processing finished for "${queryText}": Current cash reserves are stable.`,
-      actions: [],
-    };
-  };
-
-  // Active Tab for Widgets
-  const [aiWorkspaceTab, setAiWorkspaceTab] = useState('insights');
-
-  // Real-time Global Activity Feed (Simulation)
-  const [activityFeed, setActivityFeed] = useState([
-    { id: 1, text: 'RFQ #2304 Approved by CEO', time: '2 mins ago', type: 'rfq' },
-    { id: 2, text: 'PO #1920 Created for wholeseller BioPharma', time: '15 mins ago', type: 'po' },
-    { id: 3, text: 'Bill #9023 Paid (AED 12,500)', time: '1 hour ago', type: 'bill' },
-    { id: 4, text: 'New Lead: Clinic MedCare Dubai registered', time: '3 hours ago', type: 'lead' },
-    {
-      id: 5,
-      text: 'Supplier catalog synced with Zoho Inventory',
-      time: '5 hours ago',
-      type: 'sync',
-    },
-    { id: 6, text: 'AI Analysis Completed: Q2 Margin Optimization', time: '1 day ago', type: 'ai' },
-  ]);
-
-  // Mobile Bottom Tab State
-  const [mobileTab, setMobileTab] = useState('home');
-
+  // Load configuration from Firestore
   useEffect(() => {
-    const interval = setInterval(() => {
-      setDbLatency(`${Math.floor(Math.random() * 20) + 12}ms`);
-      const activityTypes = [
-        { text: 'AI detected new market price shift for peptide G3', type: 'ai' },
-        { text: 'RFQ #2411 received pricing from supplier B', type: 'rfq' },
-        { text: 'Supplier Bill #9244 matching completed', type: 'bill' },
-      ];
-      const randomActivity = activityTypes[Math.floor(Math.random() * activityTypes.length)];
-      setActivityFeed((prev) => [
-        { id: Date.now(), text: randomActivity.text, time: 'Just now', type: randomActivity.type },
-        ...prev.slice(0, 10),
-      ]);
-    }, 15000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Fetch metrics dynamically
-  useEffect(() => {
-    const startDbTime = performance.now();
-    async function loadData() {
+    async function loadConfig() {
       try {
-        const usersSnap = await getDocs(collection(db, 'users'));
-        const ordersSnap = await getDocs(collection(db, 'orders'));
-        const latency = Math.round(performance.now() - startDbTime);
-        setDbLatency(`${latency}ms`);
-
-        const recentRegs = usersSnap.docs
-          .map((d) => ({ id: d.id, ...d.data() }))
-          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
-          .slice(0, 5);
-        setRecentRegistrations(recentRegs);
-        setLoading(false);
+        const docRef = doc(db, 'config', 'dashboard');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          // Merge loaded config with DEFAULT_CONFIG keys to prevent missing fields
+          const data = docSnap.data();
+          setConfig({
+            visibleKPIs: data.visibleKPIs || DEFAULT_CONFIG.visibleKPIs,
+            kpiOrder: data.kpiOrder || DEFAULT_CONFIG.kpiOrder,
+            visiblePanels: { ...DEFAULT_CONFIG.visiblePanels, ...data.visiblePanels },
+            permissions: {
+              admin: { ...DEFAULT_CONFIG.permissions.admin, ...data.permissions?.admin },
+              wholesaler: {
+                ...DEFAULT_CONFIG.permissions.wholesaler,
+                ...data.permissions?.wholesaler,
+              },
+            },
+          });
+        }
       } catch (err) {
-        console.warn('Using fallback mock data for command center', err);
-        setLoading(false);
+        console.warn('Could not load custom dashboard configuration, using default:', err);
       }
     }
-    loadData();
-  }, [timeFilter]);
+    loadConfig();
+  }, []);
 
-  const handleApplyPreset = (presetName) => {
-    setCurrentRolePreset(presetName);
-    setVisibleKPIs(ROLE_PRESETS[presetName].visibleKPIs);
-    setVisibleWidgets(ROLE_PRESETS[presetName].visibleWidgets);
+  // Fetch metrics dynamically with respect to wholesalerId scope and setup polling
+  useEffect(() => {
+    let intervalId;
+    const fetchMetrics = async (isSilent = false) => {
+      if (!isSilent) setLoading(true);
+
+      try {
+        const startTime = Date.now();
+
+        // Presence and AI Cost listeners
+        const activeUsersUnsub = onSnapshot(
+          query(collection(db, 'presence'), where('isOnline', '==', true)),
+          (snap) => {
+            const online = [];
+            snap.forEach((doc) => {
+              const data = doc.data();
+              // Optional: filter out users who haven't been active in > 5 mins just in case
+              if (data.lastActiveAt) {
+                const lastActiveMs = data.lastActiveAt.toMillis();
+                if (Date.now() - lastActiveMs < 300000) {
+                  online.push(data);
+                }
+              }
+            });
+            setActiveUsers(online);
+          }
+        );
+
+        const aiLogsUnsub = onSnapshot(doc(db, 'ai_metrics', 'usage'), (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            let totalCost = 0;
+            if (data.agents) {
+              Object.values(data.agents).forEach((agentStats) => {
+                totalCost += agentStats.estimatedCost || 0;
+              });
+            }
+            setAiConsumption(totalCost);
+          } else {
+            setAiConsumption(0);
+          }
+        });
+
+        const startDbTime = performance.now();
+
+        // Create queries
+        const usersQuery = collection(db, 'users');
+        const relsQuery = query(
+          collection(db, 'doctor_patient_relationships'),
+          where('status', '==', 'active')
+        );
+        const ordersQuery = wholesalerId
+          ? query(collection(db, 'orders'), where('wholesalerId', '==', wholesalerId))
+          : collection(db, 'orders');
+        const productsQuery = collection(db, 'products');
+        const viewsQuery = query(
+          collection(db, 'page_views'),
+          orderBy('timestamp', 'desc'),
+          limit(1000)
+        );
+
+        // Execute all queries in parallel
+        const [usersSnap, relsSnap, ordersSnap, productsSnap, viewsSnapResult] = await Promise.all([
+          getDocs(usersQuery),
+          getDocs(relsQuery),
+          getDocs(ordersQuery),
+          getDocs(productsQuery),
+          getDocs(viewsQuery).catch((e) => {
+            console.warn('Could not fetch page_views collection:', e);
+            return null;
+          }),
+        ]);
+
+        const dbLatency = Math.round(performance.now() - startDbTime);
+
+        let allUsers = usersSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        let allRels = relsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        let allOrders = ordersSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        const allProducts = productsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        const allViews = viewsSnapResult
+          ? viewsSnapResult.docs.map((d) => ({ id: d.id, ...d.data() }))
+          : [];
+
+        // Apply Time Filter
+        if (timeFilter !== 'all') {
+          const now = new Date();
+          let cutoff = new Date();
+          if (timeFilter === '1d') cutoff.setDate(now.getDate() - 1);
+          else if (timeFilter === '7d') cutoff.setDate(now.getDate() - 7);
+          else if (timeFilter === '30d') cutoff.setDate(now.getDate() - 30);
+          else if (timeFilter === '90d') cutoff.setDate(now.getDate() - 90);
+
+          const isAfterCutoff = (item) => {
+            const val = item.createdAt || item.timestamp;
+            if (!val) return true; // keep items without date
+            const d = typeof val.toDate === 'function' ? val.toDate() : new Date(val);
+            if (isNaN(d.getTime())) return true;
+            return d >= cutoff;
+          };
+
+          allUsers = allUsers.filter(isAfterCutoff);
+          allOrders = allOrders.filter(isAfterCutoff);
+          allRels = allRels.filter(isAfterCutoff);
+        }
+
+        // Filter users by wholesaler scoping rules if wholesalerId is set
+        let scopedUsers = [];
+        const scopedUserIds = new Set();
+        if (wholesalerId) {
+          const wholesalerRels = allRels.filter((r) => r.doctorId === wholesalerId);
+          wholesalerRels.forEach((r) => {
+            scopedUserIds.add(r.patientId);
+          });
+          allUsers.forEach((u) => {
+            if (
+              u.wholesalerId === wholesalerId ||
+              u.id === wholesalerId ||
+              u.parentWholesalerId === wholesalerId
+            ) {
+              scopedUserIds.add(u.id);
+            }
+          });
+          scopedUsers = allUsers.filter((u) => scopedUserIds.has(u.id));
+        } else {
+          scopedUsers = allUsers;
+        }
+
+        // Calculate KPI values
+        const totalUsersCount = scopedUsers.length;
+        const pendingApprovalsCount = scopedUsers.filter((u) => u.status === 'pending').length;
+
+        const activeOrdersCount = allOrders.filter((o) =>
+          ['pending', 'processing', 'shipped'].includes(o.status)
+        ).length;
+
+        const totalRevenue = allOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+
+        const activePhysiciansCount = scopedUsers.filter(
+          (u) =>
+            (u.role === 'doctor' ||
+              u.role === 'clinic' ||
+              (u.roles && (u.roles.includes('doctor') || u.roles.includes('clinic')))) &&
+            u.status === 'active'
+        ).length;
+
+        const monthlyActivePatientsCount = scopedUsers.filter(
+          (u) =>
+            (u.role === 'patient' ||
+              u.role === 'guest' ||
+              (u.roles && (u.roles.includes('patient') || u.roles.includes('guest')))) &&
+            u.status === 'active'
+        ).length;
+
+        const averageOrderValue = allOrders.length > 0 ? totalRevenue / allOrders.length : 0;
+
+        const lowStockAlertsCount = allProducts.filter(
+          (p) =>
+            p.stockStatus === 'low' ||
+            (!isNaN(Number(p.stockQuantity)) && Number(p.stockQuantity) < 15)
+        ).length;
+
+        const completedOrdersCount = allOrders.filter(
+          (o) => o.status === 'completed' || o.status === 'delivered'
+        ).length;
+
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        const newUsersThisWeekCount = scopedUsers.filter((u) => {
+          const createdAt = u.createdAt?.toDate ? u.createdAt.toDate() : new Date(u.createdAt);
+          return createdAt >= oneWeekAgo;
+        }).length;
+
+        const activeRelationshipsCount = allRels.filter((r) => r.status === 'active').length;
+
+        setMetrics({
+          totalUsers: totalUsersCount,
+          pendingApprovals: pendingApprovalsCount,
+          activeOrders: activeOrdersCount,
+          revenue: totalRevenue,
+          activePhysicians: activePhysiciansCount,
+          monthlyActivePatients: monthlyActivePatientsCount,
+          averageOrderValue: averageOrderValue,
+          lowStockAlerts: lowStockAlertsCount,
+          systemHealth: `${dbLatency}ms`,
+          completedOrders: completedOrdersCount,
+          newUsersThisWeek: newUsersThisWeekCount,
+          activeRelationships: activeRelationshipsCount,
+        });
+
+        setUsers(allUsers);
+        setAllRelationships(allRels);
+        setPageViews(allViews);
+
+        // Recent users table
+        const recent = [...scopedUsers]
+          .sort((a, b) => {
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return dateB - dateA;
+          })
+          .slice(0, 5);
+        setRecentUsers(recent);
+
+        // ── Broadcast live metrics to AdminAI via PortalLayout event bus ──
+        // This allows ClinicalAssistant to answer questions about the current
+        // dashboard state (revenue, users, orders, etc.) in real time.
+        const recentUsersSnapshot = recent.map((u) => ({
+          name: u.fullName || u.displayName || u.email || 'Unknown',
+          role: u.role || 'patient',
+          status: u.status || 'active',
+          email: u.email || '',
+          createdAt: u.createdAt
+            ? typeof u.createdAt.toDate === 'function'
+              ? u.createdAt.toDate().toLocaleDateString()
+              : new Date(u.createdAt).toLocaleDateString()
+            : 'N/A',
+        }));
+
+        // Top 5 orders by value for financial summary
+        const topOrders = [...allOrders]
+          .sort((a, b) => (Number(b.total) || 0) - (Number(a.total) || 0))
+          .slice(0, 5)
+          .map((o) => ({
+            id: o.id?.slice(0, 8) || 'N/A',
+            status: o.status || 'unknown',
+            total: `$${Number(o.total || 0).toFixed(2)}`,
+            customer: o.customerName || o.userEmail || 'N/A',
+          }));
+
+        window.dispatchEvent(
+          new CustomEvent('admin-context-update', {
+            detail: {
+              label: 'Dashboard KPIs',
+              activeTab: 'dashboard',
+              live_metrics: {
+                totalUsers: totalUsersCount,
+                pendingApprovals: pendingApprovalsCount,
+                activeOrders: activeOrdersCount,
+                totalRevenue: `$${totalRevenue.toFixed(2)}`,
+                activePhysicians: activePhysiciansCount,
+                monthlyActivePatients: monthlyActivePatientsCount,
+                averageOrderValue: `$${averageOrderValue.toFixed(2)}`,
+                lowStockAlerts: lowStockAlertsCount,
+                completedOrders: completedOrdersCount,
+                newUsersThisWeek: newUsersThisWeekCount,
+                activeRelationships: activeRelationshipsCount,
+                systemLatency: `${dbLatency}ms`,
+              },
+              recent_registrations: recentUsersSnapshot,
+              top_orders_by_value: topOrders,
+              data_timestamp: new Date().toISOString(),
+            },
+          })
+        );
+      } catch (err) {
+        console.error('Error fetching metrics:', err);
+      } finally {
+        if (!isSilent) setLoading(false);
+      }
+    };
+
+    fetchMetrics();
+
+    // Auto-polling every 30 seconds for live updates
+    intervalId = setInterval(() => {
+      fetchMetrics(true);
+    }, 30000);
+
+    return () => clearInterval(intervalId);
+  }, [wholesalerId, timeFilter]);
+
+  const handleFlushCache = () => {
+    if (isFlushing) return;
+    setIsFlushing(true);
+    setFlushSuccess(false);
+    setTimeout(() => {
+      setIsFlushing(false);
+      setFlushSuccess(true);
+      setTimeout(() => {
+        setFlushSuccess(false);
+      }, 3000);
+    }, 1200);
   };
 
-  const toggleKPIVisibility = (kpi) => {
-    setVisibleKPIs((prev) => (prev.includes(kpi) ? prev.filter((k) => k !== kpi) : [...prev, kpi]));
+  const handleNavigate = (tab) => {
+    navigate(`/admin/${tab === 'dashboard' ? '' : tab}`);
   };
 
-  const toggleWidgetVisibility = (widget) => {
-    setVisibleWidgets((prev) =>
-      prev.includes(widget) ? prev.filter((w) => w !== widget) : [...prev, widget]
-    );
+  const navigateToUserTab = (role) => {
+    if (role === 'wholesaler') {
+      navigate('/admin/wholesellers');
+    } else if (role === 'doctor') {
+      navigate('/admin/doctors');
+    } else {
+      navigate('/admin/patients');
+    }
   };
 
-  // Mock Wholesaler Leaderboard Data
-  const wholesalers = [
-    {
-      name: 'Gulf Distribution LLC',
-      revenue: 'AED 245,000',
-      patients: 120,
-      orders: 48,
-      growth: '+14%',
-      margin: '18%',
-      score: 96,
-      status: 'Strategic',
-    },
-    {
-      name: 'PurePeptides GCC',
-      revenue: 'AED 134,000',
-      patients: 84,
-      orders: 32,
-      growth: '+22%',
-      margin: '24%',
-      score: 92,
-      status: 'Active',
-    },
-    {
-      name: 'Apex Pharmacy Direct',
-      revenue: 'AED 98,200',
-      patients: 45,
-      orders: 20,
-      growth: '-4%',
-      margin: '15%',
-      score: 78,
-      status: 'Active',
-    },
-    {
-      name: 'Oasis Biotech UAE',
-      revenue: 'AED 62,500',
-      patients: 38,
-      orders: 15,
-      growth: '+8%',
-      margin: '20%',
-      score: 85,
-      status: 'Critical Audit',
-    },
-  ];
+  const formatDate = (v) => {
+    if (!v) return 'N/A';
+    if (typeof v.toDate === 'function') return v.toDate().toLocaleDateString();
+    if (v.seconds) return new Date(v.seconds * 1000).toLocaleDateString();
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? 'N/A' : d.toLocaleDateString();
+  };
 
-  // Cash flow mock data
-  const cashFlowData = [
-    { name: 'Week 1', Incoming: 65000, Outgoing: 42000, Balance: 23000 },
-    { name: 'Week 2', Incoming: 82000, Outgoing: 38000, Balance: 44000 },
-    { name: 'Week 3', Incoming: 54000, Outgoing: 49000, Balance: 5000 },
-    { name: 'Week 4', Incoming: 95000, Outgoing: 52000, Balance: 43000 },
-  ];
+  const formatCurrency = (val) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0,
+    }).format(val);
+  };
 
-  return (
-    <div className={styles.atlasCommandCenter}>
-      {/* Dynamic Embedded CSS Styles */}
+  // Helper checking if a panel should render based on visibility and active role permissions
+  const showPanel = (panelKey) => {
+    const isVisible = config.visiblePanels[panelKey];
+    const isAllowed = config.permissions?.[activeRole]?.allowedPanels?.includes(panelKey);
+    return isVisible && isAllowed;
+  };
 
-      {/* ── COMMAND CENTER HEADER & PRESET CUSTOMIZER ────────────────── */}
-      <div className={styles.glassCard} style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+  // Layout customization controls
+  const handleToggleKPI = (key) => {
+    setConfig((prev) => {
+      const nextVisible = prev.visibleKPIs.includes(key)
+        ? prev.visibleKPIs.filter((k) => k !== key)
+        : [...prev.visibleKPIs, key];
+      return { ...prev, visibleKPIs: nextVisible };
+    });
+  };
+
+  const handleTogglePanel = (key) => {
+    setConfig((prev) => ({
+      ...prev,
+      visiblePanels: {
+        ...prev.visiblePanels,
+        [key]: !prev.visiblePanels[key],
+      },
+    }));
+  };
+
+  const handleTogglePermission = (roleKey, type, itemKey) => {
+    setConfig((prev) => {
+      const permissionsCopy = { ...prev.permissions };
+      const currentList = permissionsCopy[roleKey][type] || [];
+      const updatedList = currentList.includes(itemKey)
+        ? currentList.filter((k) => k !== itemKey)
+        : [...currentList, itemKey];
+
+      permissionsCopy[roleKey] = {
+        ...permissionsCopy[roleKey],
+        [type]: updatedList,
+      };
+
+      return { ...prev, permissions: permissionsCopy };
+    });
+  };
+
+  const moveKPI = (index, direction) => {
+    const nextOrder = [...config.kpiOrder];
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= nextOrder.length) return;
+
+    const temp = nextOrder[index];
+    nextOrder[index] = nextOrder[targetIndex];
+    nextOrder[targetIndex] = temp;
+
+    setConfig((prev) => ({
+      ...prev,
+      kpiOrder: nextOrder,
+    }));
+  };
+
+  const saveCustomLayout = async () => {
+    setSavingConfig(true);
+    try {
+      const docRef = doc(db, 'config', 'dashboard');
+      await setDoc(docRef, config);
+      setIsEditing(false);
+      setFlushSuccess(true);
+      setTimeout(() => setFlushSuccess(false), 3000);
+    } catch (err) {
+      console.error('Error saving dashboard configuration:', err);
+      alert('Failed to save dashboard configuration.');
+    } finally {
+      setSavingConfig(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div
+        style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '4rem' }}
+      >
         <div
           style={{
+            width: '40px',
+            height: '40px',
+            border: '3px solid rgba(0, 54, 102, 0.1)',
+            borderTopColor: '#1a73e8',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+          }}
+        />
+      </div>
+    );
+  }
+
+  // Get filtered page views based on time period and wholesaler scope
+  const getFilteredViews = () => {
+    const now = new Date();
+    let cutoff = new Date();
+    if (visitsPeriod === 'today') {
+      cutoff.setHours(0, 0, 0, 0);
+    } else if (visitsPeriod === '7d') {
+      cutoff.setDate(now.getDate() - 7);
+    } else if (visitsPeriod === '30d') {
+      cutoff.setDate(now.getDate() - 30);
+    }
+
+    // Determine scoped user IDs if in wholesaler mode
+    let scopedUserIds = new Set();
+    if (wholesalerId) {
+      const wholesalerRels = allRelationships.filter((r) => r.doctorId === wholesalerId);
+      wholesalerRels.forEach((r) => {
+        scopedUserIds.add(r.patientId);
+      });
+      users.forEach((u) => {
+        if (
+          u.wholesalerId === wholesalerId ||
+          u.id === wholesalerId ||
+          u.parentWholesalerId === wholesalerId
+        ) {
+          scopedUserIds.add(u.id);
+        }
+      });
+    }
+
+    return pageViews.filter((v) => {
+      const vDate = v.timestamp
+        ? new Date(v.timestamp)
+        : v.serverTime?.seconds
+          ? new Date(v.serverTime.seconds * 1000)
+          : null;
+      if (!vDate || isNaN(vDate.getTime())) return false;
+      if (vDate < cutoff) return false;
+
+      // Wholesaler scope
+      if (wholesalerId) {
+        return scopedUserIds.has(v.userId);
+      }
+      return true;
+    });
+  };
+
+  const filteredViews = getFilteredViews();
+
+  // Group page views by path
+  const groupedViewsMap = {};
+  filteredViews.forEach((v) => {
+    const path = v.pagePath || '/';
+    if (!groupedViewsMap[path]) {
+      groupedViewsMap[path] = {
+        path,
+        title: v.pageTitle || 'Page',
+        count: 0,
+        countries: {},
+      };
+    }
+    groupedViewsMap[path].count += 1;
+    const country = v.country || 'Unknown';
+    groupedViewsMap[path].countries[country] = (groupedViewsMap[path].countries[country] || 0) + 1;
+  });
+
+  const prioritizedViews = Object.values(groupedViewsMap).sort((a, b) => b.count - a.count);
+
+  // Doctors / Clinics statistics
+  const doctorsWithPatients = users
+    .filter(
+      (u) =>
+        u.role === 'doctor' ||
+        u.role === 'clinic' ||
+        (u.roles && (u.roles.includes('doctor') || u.roles.includes('clinic')))
+    )
+    .map((doc) => {
+      const docRels = allRelationships.filter(
+        (r) => r.doctorId === doc.id && r.status === 'active'
+      );
+      const patientIds = new Set();
+      docRels.forEach((r) => {
+        const peer = users.find((usr) => usr.id === r.patientId);
+        if (
+          peer &&
+          (peer.role === 'patient' ||
+            peer.role === 'guest' ||
+            (peer.roles && (peer.roles.includes('patient') || peer.roles.includes('guest'))))
+        ) {
+          patientIds.add(r.patientId);
+        }
+      });
+      return {
+        id: doc.id,
+        name: doc.fullName || doc.displayName || doc.email,
+        institution: doc.institution || 'Individual',
+        role: doc.role,
+        patientCount: patientIds.size,
+      };
+    })
+    .sort((a, b) => b.patientCount - a.patientCount);
+
+  // Scoped doctors for wholesaler view
+  const getScopedDoctors = () => {
+    if (!wholesalerId) return [];
+    const wsRels = allRelationships.filter(
+      (r) => r.doctorId === wholesalerId && r.status === 'active'
+    );
+    const doctorIds = new Set();
+    wsRels.forEach((r) => {
+      const peer = users.find((usr) => usr.id === r.patientId);
+      if (
+        peer &&
+        (peer.role === 'doctor' ||
+          peer.role === 'clinic' ||
+          (peer.roles && (peer.roles.includes('doctor') || peer.roles.includes('clinic'))))
+      ) {
+        doctorIds.add(peer.id);
+      }
+    });
+    users.forEach((u) => {
+      if (
+        (u.role === 'doctor' || u.role === 'clinic') &&
+        (u.wholesalerId === wholesalerId || u.parentWholesalerId === wholesalerId)
+      ) {
+        doctorIds.add(u.id);
+      }
+    });
+
+    return users
+      .filter((u) => doctorIds.has(u.id))
+      .map((doc) => {
+        const docRels = allRelationships.filter(
+          (r) => r.doctorId === doc.id && r.status === 'active'
+        );
+        const patientIds = new Set();
+        docRels.forEach((r) => {
+          const peer = users.find((usr) => usr.id === r.patientId);
+          if (
+            peer &&
+            (peer.role === 'patient' ||
+              peer.role === 'guest' ||
+              (peer.roles && (peer.roles.includes('patient') || peer.roles.includes('guest'))))
+          ) {
+            patientIds.add(r.patientId);
+          }
+        });
+        return {
+          id: doc.id,
+          name: doc.fullName || doc.displayName || doc.email,
+          institution: doc.institution || 'Individual',
+          role: doc.role,
+          patientCount: patientIds.size,
+        };
+      })
+      .sort((a, b) => b.patientCount - a.patientCount);
+  };
+
+  const scopedDoctors = getScopedDoctors();
+
+  // Wholesalers statistics (Admin only)
+  const wholesalersWithStats = users
+    .filter((u) => u.role === 'wholesaler' || (u.roles && u.roles.includes('wholesaler')))
+    .map((ws) => {
+      const wsRels = allRelationships.filter((r) => r.doctorId === ws.id && r.status === 'active');
+      let docCount = 0;
+      let patCount = 0;
+      wsRels.forEach((r) => {
+        const peer = users.find((usr) => usr.id === r.patientId);
+        if (peer) {
+          const isDoc =
+            peer.role === 'doctor' ||
+            peer.role === 'clinic' ||
+            (peer.roles && (peer.roles.includes('doctor') || peer.roles.includes('clinic')));
+          if (isDoc) {
+            docCount++;
+          } else {
+            patCount++;
+          }
+        }
+      });
+      return {
+        id: ws.id,
+        name: ws.fullName || ws.displayName || ws.email,
+        doctorCount: docCount,
+        patientCount: patCount,
+      };
+    })
+    .sort((a, b) => b.patientCount - a.patientCount);
+
+  // Filter and sort visible KPIs that are allowed for the current role
+  const activeKPIs = config.kpiOrder.filter((key) => {
+    const isVisible = config.visibleKPIs.includes(key);
+    const isAllowed = config.permissions?.[activeRole]?.allowedKPIs?.includes(key);
+    return isVisible && isAllowed;
+  });
+
+  return (
+    <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
+      <style>{`
+        /* ─── AdminMetricsDashboard — Design System ───────────────── */
+
+        /* ── Shared card shell ────────────────────────────────────── */
+        .amd-card {
+          background: #ffffff;
+          border-radius: 12px;
+          border: 1px solid var(--color-border, #e2e8f0);
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+          padding: 1.5rem;
+          transition: box-shadow 0.2s, border-color 0.2s;
+        }
+        .amd-card.clickable { cursor: pointer; }
+        .amd-card.clickable:hover {
+          box-shadow: 0 4px 16px rgba(26,115,232,0.12);
+          border-color: var(--color-primary, #1a73e8);
+        }
+        /* card header row */
+        .amd-card-header {
+          display: flex; justify-content: space-between;
+          align-items: center; margin-bottom: 0.875rem;
+        }
+        .amd-card-title {
+          margin: 0;
+          font-size: 0.9rem; font-weight: 600;
+          color: var(--color-text-primary, #202124);
+        }
+        /* stat label (uppercase small) */
+        .amd-stat-label {
+          font-size: 0.68rem; font-weight: 700;
+          color: #64748b; text-transform: uppercase;
+          letter-spacing: 0.07em;
+        }
+        /* stat value */
+        .amd-stat-value {
+          font-size: 1.6rem; font-weight: 800;
+          line-height: 1.1; letter-spacing: -0.02em;
+          margin-top: 0.15rem;
+        }
+
+        /* Typography Scale */
+        .amd-label    { font-size: 0.7rem;  font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+        .amd-caption  { font-size: 0.75rem; font-weight: 400; }
+        .amd-body     { font-size: 0.85rem; font-weight: 400; }
+        .amd-subtitle { font-size: 0.85rem; font-weight: 600; }
+        .amd-title    { font-size: 1rem;    font-weight: 600; }
+        .amd-heading  { font-size: 1.1rem;  font-weight: 600; }
+        .amd-value    { font-size: 1.6rem;  font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; color: var(--color-text-primary, #1e293b); font-family: var(--font-heading, inherit); }
+
+        /* Layouts */
+        .amd-command-header {
+          padding: 1.75rem 2rem;
+        }
+        .amd-kpi-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 1rem;
+          margin-bottom: 2rem;
+        }
+        .amd-active-users-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+        .amd-bottom-grid {
+          display: grid;
+          gap: 2rem;
+          margin-bottom: 2rem;
+        }
+        .amd-widget-grid {
+          display: grid;
+          gap: 1.5rem;
+        }
+        .amd-table-section {
+          background: white;
+          border-radius: 8px;
+          padding: 1.5rem;
+          border: 1px solid var(--color-border, #dadce0);
+          box-shadow: 0 1px 2px rgba(60,67,70,0.1);
+          margin-bottom: 1.5rem;
+        }
+        .amd-table-section table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 0.85rem;
+          text-align: left;
+        }
+        .amd-table-section thead tr {
+          border-bottom: 2px solid var(--color-border, #dadce0);
+          background-color: #f8f9fa;
+        }
+        .amd-table-section th {
+          padding: 0.65rem 0.875rem;
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: #5f6368;
+          white-space: nowrap;
+        }
+        .amd-table-section td {
+          padding: 0.65rem 0.875rem;
+          border-bottom: 1px solid #f1f3f4;
+          color: #202124;
+          vertical-align: middle;
+        }
+        .amd-table-section tr:hover td { background-color: #f8f9fa; }
+        .amd-expand-btn {
+          background: none; border: none; cursor: pointer;
+          padding: 0.25rem 0.5rem; border-radius: 4px;
+          font-size: 0.75rem; color: #5f6368; display: flex; align-items: center; gap: 0.25rem;
+        }
+        .amd-expand-btn:hover { background: #f1f3f4; }
+        .amd-expanded-row td {
+          background: #f8f9fa;
+          font-size: 0.8rem;
+          color: #5f6368;
+          padding: 0.5rem 0.875rem 0.75rem 2.5rem;
+          border-bottom: 1px solid #e2e8f0;
+        }
+        .amd-badge {
+          display: inline-block;
+          padding: 0.15rem 0.55rem;
+          border-radius: 12px;
+          font-size: 0.72rem;
+          font-weight: 700;
+        }
+
+        /* KPI card compact on mobile */
+        @media (max-width: 768px) {
+          .amd-command-header { padding: 1rem; }
+          .amd-kpi-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+          .amd-active-users-grid { grid-template-columns: 1fr; }
+          .amd-bottom-grid { grid-template-columns: 1fr !important; }
+          .amd-widget-grid { grid-template-columns: 1fr !important; }
+          /* Compact KPI card on mobile */
+          .admin-metric-card {
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 0.75rem !important;
+            padding: 0.875rem 1rem !important;
+            min-height: unset !important;
+          }
+          .admin-metric-card .amd-card-icon {
+            flex-shrink: 0;
+          }
+          .admin-metric-card .amd-card-body {
+            flex: 1; min-width: 0;
+          }
+          .amd-table-section { padding: 1rem 0.75rem; }
+          .amd-table-section th, .amd-table-section td { padding: 0.5rem 0.625rem; }
+        }
+
+        @media (max-width: 480px) {
+          .amd-kpi-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+      {/* ── Command Center Header ───────────────────────────────────── */}
+      <div
+        className="amd-command-header"
+        style={{
+          backgroundColor: 'var(--color-bg-surface, #ffffff)',
+          borderRadius: '16px',
+          marginBottom: '1.5rem',
+          position: 'relative',
+          border: '1px solid var(--color-border, #e2e8f0)',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+        }}
+      >
+        <div
+          style={{
+            position: 'relative',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -380,524 +1091,987 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                marginBottom: '0.25rem',
+                gap: '0.75rem',
+                marginBottom: '0.4rem',
               }}
             >
-              <span
-                style={{
-                  display: 'inline-flex',
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  backgroundColor: '#10b981',
-                  boxShadow: '0 0 8px #10b981',
-                }}
-              />
+              {/* Live pulse indicator */}
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <div
+                  style={{
+                    width: '10px',
+                    height: '10px',
+                    borderRadius: '50%',
+                    backgroundColor: '#10b981',
+                    boxShadow: '0 0 0 0 rgba(16,185,129,0.4)',
+                    animation: 'livePulse 2s infinite',
+                  }}
+                />
+                <style>{`@keyframes livePulse { 0%{box-shadow:0 0 0 0 rgba(16,185,129,0.4)} 70%{box-shadow:0 0 0 8px rgba(16,185,129,0)} 100%{box-shadow:0 0 0 0 rgba(16,185,129,0)} }`}</style>
+              </div>
               <span
                 style={{
                   fontSize: '0.7rem',
                   fontWeight: 700,
                   color: '#10b981',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
+                  letterSpacing: '0.08em',
                 }}
               >
                 Live · All Systems Operational
               </span>
             </div>
-            <h1
+            <h2
               style={{
                 margin: 0,
-                fontSize: '1.75rem',
+                fontSize: '1.6rem',
                 fontWeight: 800,
-                color: '#0f172a',
+                color: 'var(--color-text-primary, #1e293b)',
                 letterSpacing: '-0.02em',
+                lineHeight: 1.1,
               }}
             >
-              Atlas Command Center
-            </h1>
-            <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#64748b' }}>
-              Strategic oversight & operational real-time control room.
+              {wholesalerId ? 'Partner Overview' : 'Atlas Health · Command Center'}
+            </h2>
+            <p
+              style={{
+                margin: '0.35rem 0 0',
+                fontSize: '0.85rem',
+                color: 'var(--color-text-secondary, #64748b)',
+              }}
+            >
+              {wholesalerId
+                ? 'Performance metrics scoped to your B2B network.'
+                : 'Real-time platform intelligence — physicians, patients, orders & infrastructure.'}
             </p>
           </div>
 
-          {/* Controls Bar */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            {/* Preset Selector */}
-            <div
-              style={{
-                display: 'flex',
-                background: '#f1f5f9',
-                borderRadius: '8px',
-                padding: '2px',
-              }}
-            >
-              {Object.keys(ROLE_PRESETS).map((preset) => (
-                <button
-                  key={preset}
-                  onClick={() => handleApplyPreset(preset)}
-                  style={{
-                    padding: '0.4rem 0.75rem',
-                    borderRadius: '6px',
-                    border: 'none',
-                    fontSize: '0.75rem',
-                    fontWeight: currentRolePreset === preset ? 600 : 500,
-                    backgroundColor: currentRolePreset === preset ? '#ffffff' : 'transparent',
-                    color: currentRolePreset === preset ? '#0f172a' : '#64748b',
-                    boxShadow: currentRolePreset === preset ? '0 1px 3px rgba(0,0,0,0.05)' : 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  {preset}
-                </button>
-              ))}
-            </div>
-
-            {/* Customize Mode Toggle */}
-            <button
-              onClick={() => setIsCustomizing(!isCustomizing)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                padding: '0.5rem 1rem',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-                backgroundColor: isCustomizing ? '#e0f2fe' : '#ffffff',
-                color: isCustomizing ? '#0369a1' : '#475569',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-            >
-              <Sliders size={14} />
-              {isCustomizing ? 'Done Customizing' : 'Customize Layout'}
-            </button>
-          </div>
-        </div>
-
-        {/* Customization Drawer / Control Box */}
-        {isCustomizing && (
-          <div
-            style={{
-              marginTop: '1.25rem',
-              padding: '1.25rem',
-              borderRadius: '12px',
-              backgroundColor: '#f8fafc',
-              border: '1px dashed #cbd5e1',
-              animation: 'slideDown 0.2s ease-out',
-            }}
-          >
-            <h3
-              style={{
-                margin: '0 0 0.75rem 0',
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                color: '#0f172a',
-              }}
-            >
-              Configure Active Widgets & Metrics
-            </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2rem' }}>
-              {/* KPIs */}
-              <div>
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    color: '#475569',
-                    display: 'block',
-                    marginBottom: '0.5rem',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Visible KPIs (Top Strip)
-                </span>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  {[
-                    'revenue',
-                    'grossProfit',
-                    'openOrders',
-                    'pendingApprovals',
-                    'openRFQs',
-                    'aiAlerts',
-                    'cashPosition',
-                  ].map((kpi) => (
-                    <button
-                      key={kpi}
-                      onClick={() => toggleKPIVisibility(kpi)}
-                      style={{
-                        padding: '0.35rem 0.65rem',
-                        fontSize: '0.75rem',
-                        borderRadius: '6px',
-                        border: '1px solid',
-                        borderColor: visibleKPIs.includes(kpi) ? '#0284c7' : '#cbd5e1',
-                        backgroundColor: visibleKPIs.includes(kpi) ? '#f0f9ff' : '#ffffff',
-                        color: visibleKPIs.includes(kpi) ? '#0369a1' : '#475569',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {kpi.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Widgets */}
-              <div>
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    color: '#475569',
-                    display: 'block',
-                    marginBottom: '0.5rem',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Visible Workspace Widgets
-                </span>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  {[
-                    { id: 'todayPriorities', label: "Today's Priorities" },
-                    { id: 'businessHealth', label: 'Business Health Lights' },
-                    { id: 'financeTasks', label: 'Finance Workspace Tasks' },
-                    { id: 'cashFlow', label: 'Cash Flow forecasting' },
-                    { id: 'crmPipeline', label: 'CRM Sales Funnel' },
-                    { id: 'wholesalersRanking', label: 'Top Wholesalers Leaderboard' },
-                    { id: 'aiWorkspace', label: 'AI Sync & Insights Hub' },
-                    { id: 'activityFeed', label: 'Real-time Activity Feed' },
-                    { id: 'systemStatus', label: 'Infrastructure Specs' },
-                  ].map((w) => (
-                    <button
-                      key={w.id}
-                      onClick={() => toggleWidgetVisibility(w.id)}
-                      style={{
-                        padding: '0.35rem 0.65rem',
-                        fontSize: '0.75rem',
-                        borderRadius: '6px',
-                        border: '1px solid',
-                        borderColor: visibleWidgets.includes(w.id) ? '#0284c7' : '#cbd5e1',
-                        backgroundColor: visibleWidgets.includes(w.id) ? '#f0f9ff' : '#ffffff',
-                        color: visibleWidgets.includes(w.id) ? '#0369a1' : '#475569',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {w.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ── 0. AI EXECUTIVE SUMMARY WIDGET ────────────────────────────── */}
-      <AdminExecutiveSummaryWidget metrics={metrics} />
-
-      {/* ── 1. EXECUTIVE SUMMARY STRIP (TOP ROW) ────────────────────────── */}
-      <ExecutiveSummaryStrip
-        metrics={metrics}
-        visibleKPIs={visibleKPIs}
-        onCardClick={(kpiId) => {
-          if (kpiId === 'openOrders') navigate('/admin/orders');
-          else if (kpiId === 'pendingApprovals') navigate('/admin/approvals');
-          else if (kpiId === 'openRFQs') navigate('/admin/rfq');
-          else navigate('/admin/finance');
-        }}
-      />
-
-      {/* ── MAIN WORKSPACE CONTENT GRID (2 COLUMNS) ────────────────────── */}
-      <div className={styles.mainPortalGrid}>
-        {/* LEFT COLUMN: PRIMARY WORKSPACE WIDGETS */}
-        <div className={styles.widgetsCol}>
-          {/* AI COMMAND CENTER (ASK ATLAS) */}
-          <AiCommandConsole onAskQuestion={handleAiAsk} />
-
-          {/* ── 2. TODAY'S PRIORITIES QUEUE ─────────────────────────────── */}
-          {visibleWidgets.includes('todayPriorities') && (
-            <TodayPrioritiesQueue
-              priorities={priorities}
-              onAction={(item) => navigate(item.link)}
-            />
-          )}
-
-          {/* ── 3. BUSINESS HEALTH MATRIX (TRAFFIC LIGHTS) ───────────────── */}
-          {visibleWidgets.includes('businessHealth') && <HealthMatrixWidget />}
-
-          {/* ── 4. FINANCIAL TASKS WORKSPACE ───────────────────────────── */}
-          {visibleWidgets.includes('financeTasks') && (
-            <FinanceTasksHub
-              onAction={(type, detail) => {
-                notifier.info(`Redirecting to financial reconciliation for ${type}: ${detail}`);
-              }}
-            />
-          )}
-
-          {/* ── 5. CASH FLOW ANALYSIS WIDGET ────────────────────────────── */}
-          {visibleWidgets.includes('cashFlow') && (
-            <CashFlowForecast cashFlowData={cashFlowData} riskLevel="Low" />
-          )}
-
-          {/* ── 6. CRM PIPELINE FUNNEL WIDGET ────────────────────────────── */}
-          {visibleWidgets.includes('crmPipeline') && <CrmPipelineFunnel />}
-
-          {/* ── 7. TOP WHOLESALERS LEADERBOARD ────────────────────────── */}
-          {visibleWidgets.includes('wholesalersRanking') && (
-            <WholesalersLeaderboard
-              wholesalersData={wholesalers}
-              onSelect={(ws) => {
-                navigate(`/admin/wholesellers?search=${ws.name}`);
-              }}
-            />
-          )}
-
-          {/* ── 8. AI WORKSPACE (SYNC & INSIGHTS HUB) ───────────────────── */}
-          {visibleWidgets.includes('aiWorkspace') && (
-            <div className={styles.glassCard} style={{ padding: '1.25rem' }}>
-              <div
+            {/* Time range selector */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+              <label
                 style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '1rem',
-                  borderBottom: '1px solid #cbd5e1',
-                  paddingBottom: '0.5rem',
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  color: '#64748b',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
                 }}
               >
-                <h3
+                Time Range
+              </label>
+              <select
+                value={timeFilter}
+                onChange={(e) => setTimeFilter(e.target.value)}
+                style={{
+                  padding: '0.5rem 0.85rem',
+                  borderRadius: '8px',
+                  border: '1px solid var(--color-border, #e2e8f0)',
+                  fontSize: '0.82rem',
+                  backgroundColor: 'var(--color-bg-app, #f8fafc)',
+                  color: 'var(--color-text-primary, #334155)',
+                  outline: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                <option value="1d">Today</option>
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last Month</option>
+                <option value="90d">Last 3 Months</option>
+                <option value="all">All Time</option>
+              </select>
+            </div>
+
+            {isAdmin && !wholesalerId && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                <label
                   style={{
-                    margin: 0,
-                    fontSize: '0.95rem',
+                    fontSize: '0.65rem',
                     fontWeight: 700,
-                    color: '#0f172a',
+                    color: '#64748b',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                  }}
+                >
+                  Layout
+                </label>
+                <button
+                  onClick={() => setIsEditing(!isEditing)}
+                  style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.4rem',
+                    padding: '0.5rem 0.85rem',
+                    border: '1px solid',
+                    borderColor: isEditing
+                      ? 'var(--color-primary, #0071bd)'
+                      : 'var(--color-border, #e2e8f0)',
+                    backgroundColor: isEditing
+                      ? 'rgba(0,113,189,0.05)'
+                      : 'var(--color-bg-app, #f8fafc)',
+                    color: isEditing
+                      ? 'var(--color-primary, #0071bd)'
+                      : 'var(--color-text-secondary, #64748b)',
+                    borderRadius: '8px',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
                   }}
                 >
-                  <Sparkles size={16} color="#0ea5e9" /> Atlas AI Sourcing Hub
-                </h3>
-                {/* Tabs */}
-                <div style={{ display: 'flex', gap: '0.25rem' }}>
-                  {['insights', 'predictions', 'recommendations', 'agents'].map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setAiWorkspaceTab(tab)}
-                      className={`cc-tab-btn ${aiWorkspaceTab === tab ? 'active' : ''}`}
-                    >
-                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                    </button>
-                  ))}
-                </div>
+                  <Settings size={14} />
+                  {isEditing ? 'Close Editor' : 'Customize'}
+                </button>
               </div>
-
-              {/* Workspace Content */}
-              <div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    padding: '0.5rem 0.75rem',
-                    backgroundColor: '#f8fafc',
-                    borderRadius: '6px',
-                    marginBottom: '0.75rem',
-                    fontSize: '0.75rem',
-                  }}
-                >
-                  <span>
-                    Last analysis: <strong>Today 14:02</strong>
-                  </span>
-                  <span>
-                    Confidence score: <strong style={{ color: '#10b981' }}>98.4%</strong>
-                  </span>
-                  <span>
-                    Estimated impact: <strong style={{ color: '#0284c7' }}>+AED 24,000 / mo</strong>
-                  </span>
-                </div>
-
-                {aiWorkspaceTab === 'insights' && (
-                  <ul
-                    style={{
-                      margin: 0,
-                      paddingLeft: '1.2rem',
-                      fontSize: '0.82rem',
-                      color: '#334155',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.4rem',
-                    }}
-                  >
-                    <li>
-                      Revenue increased <strong>18%</strong> this month across strategic wholesaler
-                      segments.
-                    </li>
-                    <li>No overdue supplier bills in the queue. AP matches are healthy.</li>
-                    <li>
-                      <strong>3 opportunities</strong> in Dubai clinic network need strategic
-                      discount review.
-                    </li>
-                    <li>
-                      Average RFQ response time improved by <strong>22%</strong> over the last 14
-                      days.
-                    </li>
-                  </ul>
-                )}
-                {aiWorkspaceTab === 'predictions' && (
-                  <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
-                    AI predicts a potential shipping delay of 3 days from EU laboratories next week
-                    due to logistics strikes. Recommend frontloading Peptide B purchases.
-                  </p>
-                )}
-                {aiWorkspaceTab === 'recommendations' && (
-                  <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
-                    Adjust pricing on product catalog item #4401. Market price rose by 14%, current
-                    margins will reduce to 11% if not updated in Zoho Inventory.
-                  </p>
-                )}
-                {aiWorkspaceTab === 'agents' && (
-                  <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
-                    Autonomous agents: <strong>Sourcing Bot</strong> is active (last synced 4 mins
-                    ago). <strong>Discrepancy Agent</strong> matched 18/18 bills successfully.
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* RIGHT COLUMN: SIDEBAR METRICS & INFRASTRUCTURE */}
-        <div className={styles.sideCol}>
-          {/* ── 9. GLOBAL ACTIVITY FEED ────────────────────────────────── */}
-          {visibleWidgets.includes('activityFeed') && <GlobalActivityFeed logs={activityFeed} />}
+        {/* KPI Summary Ribbon */}
+        <div
+          style={{
+            position: 'relative',
+            display: 'flex',
+            gap: '2.5rem',
+            marginTop: '1.5rem',
+            paddingTop: '1.25rem',
+            borderTop: '1px solid rgba(255,255,255,0.08)',
+            flexWrap: 'wrap',
+          }}
+        >
+          {[
+            { label: 'Total Users', value: metrics.totalUsers },
+            { label: 'Active Physicians', value: metrics.activePhysicians },
+            { label: 'Active Orders', value: metrics.activeOrders },
+            {
+              label: 'Pending Attention',
+              value: metrics.pendingApprovals + metrics.lowStockAlerts,
+            },
+            { label: 'DB Latency', value: metrics.systemHealth },
+          ].map(({ label, value }) => (
+            <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <span className="amd-stat-label">{label}</span>
+              <span className="amd-value">{value ?? '—'}</span>
+            </div>
+          ))}
+        </div>
+      </div>
 
-          {/* ── 10. INFRASTRUCTURE & TECH STATUS ───────────────────────── */}
-          {visibleWidgets.includes('systemStatus') && (
-            <div className={styles.glassCard} style={{ padding: '1.25rem' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  marginBottom: '1rem',
-                }}
-              >
-                <Server size={16} color="#64748b" />
-                <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>
-                  Infrastructure Specs
-                </h3>
+      {/* supplyNotifier panel */}
+      {showPanel('supplyNotifier') && (
+        <div style={{ marginBottom: '2rem' }}>
+          <AdminSupplyNotifierWidget />
+        </div>
+      )}
+
+      {/* Active Users & Telemetry Panel */}
+      {showPanel('activeUsers') && (
+        <div className="amd-active-users-grid">
+          {/* Active Users Widget */}
+          <div className="amd-card clickable" onClick={() => handleNavigate('analytics')}>
+            <div className="amd-card-header">
+              <h3 className="amd-card-title">Active Users ({activeUsers.length})</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <div
+                  style={{
+                    width: '7px',
+                    height: '7px',
+                    borderRadius: '50%',
+                    backgroundColor: '#10b981',
+                    animation: 'livePulse 2s infinite',
+                  }}
+                />
+                <span className="amd-caption" style={{ color: '#64748b' }}>
+                  Live · Real time
+                </span>
+                <ArrowUpRight size={14} style={{ color: 'var(--color-primary, #1a73e8)' }} />
               </div>
+            </div>
+            {activeUsers.length === 0 ? (
+              <p
+                className="amd-body"
+                style={{ color: '#64748b', textAlign: 'center', padding: '1rem 0', margin: 0 }}
+              >
+                No users are currently active.
+              </p>
+            ) : (
               <div
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.75rem',
-                  fontSize: '0.8rem',
+                  gap: '0.5rem',
+                  maxHeight: '200px',
+                  overflowY: 'auto',
+                }}
+              >
+                {activeUsers.map((u) => (
+                  <div
+                    key={u.userId}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.4rem 0.6rem',
+                      backgroundColor: '#f8f9fa',
+                      borderRadius: '6px',
+                    }}
+                  >
+                    <div>
+                      <div className="amd-subtitle" style={{ color: '#202124' }}>
+                        {u.email}
+                      </div>
+                      <div className="amd-caption" style={{ color: '#64748b' }}>
+                        Role: {u.role}
+                      </div>
+                    </div>
+                    <span
+                      style={{
+                        fontSize: '0.7rem',
+                        color: 'var(--color-primary, #1a73e8)',
+                        backgroundColor: 'rgba(26,115,232,0.08)',
+                        padding: '2px 7px',
+                        borderRadius: '4px',
+                      }}
+                    >
+                      {u.currentPath}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* AI Consumption Widget */}
+          <div className="amd-card clickable" onClick={() => handleNavigate('analytics')}>
+            <div className="amd-card-header">
+              <h3 className="amd-card-title">Atlas AI Consumption</h3>
+              <ArrowUpRight
+                size={16}
+                style={{ color: 'var(--color-primary, #1a73e8)', flexShrink: 0 }}
+              />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+              <span className="amd-stat-value" style={{ color: 'var(--color-primary, #1a73e8)' }}>
+                ${aiConsumption.toFixed(3)}
+              </span>
+              <span className="amd-caption" style={{ color: '#64748b' }}>
+                USD this month
+              </span>
+            </div>
+            <div style={{ marginTop: '1.25rem' }}>
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}
+              >
+                <span className="amd-caption" style={{ color: '#64748b' }}>
+                  Gemini 1.5 Pro
+                </span>
+                <span className="amd-caption" style={{ color: '#64748b' }}>
+                  ${aiConsumption.toFixed(3)} / $10.00 limit
+                </span>
+              </div>
+              <div
+                style={{
+                  width: '100%',
+                  height: '6px',
+                  backgroundColor: '#f1f3f4',
+                  borderRadius: '4px',
+                  overflow: 'hidden',
+                }}
+              >
+                <div
+                  style={{
+                    width: `${Math.min((aiConsumption / 10) * 100, 100)}%`,
+                    height: '100%',
+                    backgroundColor:
+                      aiConsumption > 8 ? '#ef4444' : 'var(--color-primary, #1a73e8)',
+                    borderRadius: '4px',
+                    transition: 'width 0.5s ease',
+                  }}
+                />
+              </div>
+              <p className="amd-caption" style={{ margin: '0.6rem 0 0', color: '#64748b' }}>
+                Click to view full AI usage breakdown and session analytics →
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Customize Panel Drawer */}
+      {isEditing && (
+        <div
+          style={{
+            backgroundColor: 'var(--color-bg-surface)',
+            border: '1px solid #dadce0',
+            borderRadius: '8px',
+            padding: '1.5rem',
+            marginBottom: '2rem',
+            boxShadow: '0 1px 2px 0 rgba(60,67,70,0.1)',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1.5rem',
+              borderBottom: '1px solid #dadce0',
+              paddingBottom: '0.75rem',
+            }}
+          >
+            <h3 style={{ margin: 0, fontSize: '1rem', color: '#202124', fontWeight: 600 }}>
+              Customize Dashboard Overview
+            </h3>
+            <span style={{ fontSize: '0.72rem', color: '#5f6368' }}>
+              Arrange metrics and configure layout permissions.
+            </span>
+          </div>
+
+          <div
+            className="amd-customize-grid"
+            style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '2rem' }}
+          >
+            {/* KPI list reordering & visibility */}
+            <div>
+              <h4
+                style={{
+                  margin: '0 0 1rem 0',
+                  fontSize: '0.85rem',
+                  color: '#202124',
+                  fontWeight: 600,
+                }}
+              >
+                KPI Ordering & Visibility
+              </h4>
+              <div style={{ border: '1px solid #dadce0', borderRadius: '4px', overflow: 'hidden' }}>
+                {config.kpiOrder.map((key, index) => {
+                  const meta = KPI_METADATA[key];
+                  const isVisible = config.visibleKPIs.includes(key);
+                  return (
+                    <div
+                      key={key}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0.5rem 0.75rem',
+                        borderBottom:
+                          index < config.kpiOrder.length - 1 ? '1px solid #dadce0' : 'none',
+                        backgroundColor: isVisible ? 'var(--color-bg-surface)' : '#f8f9fa',
+                        opacity: isVisible ? 1 : 0.6,
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <button
+                          onClick={() => handleToggleKPI(key)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            padding: 0,
+                            cursor: 'pointer',
+                            color: isVisible ? '#1a73e8' : '#9aa0a6',
+                          }}
+                        >
+                          {isVisible ? <Eye size={16} /> : <EyeOff size={16} />}
+                        </button>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#3c4043' }}>
+                          {meta?.title || key}
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                        {/* Permissions checkboxes */}
+                        <div style={{ display: 'flex', gap: '1rem', fontSize: '0.72rem' }}>
+                          <label
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={config.permissions.admin.allowedKPIs.includes(key)}
+                              onChange={() => handleTogglePermission('admin', 'allowedKPIs', key)}
+                            />
+                            Admin
+                          </label>
+                          <label
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={config.permissions.wholesaler.allowedKPIs.includes(key)}
+                              onChange={() =>
+                                handleTogglePermission('wholesaler', 'allowedKPIs', key)
+                              }
+                            />
+                            Wholesaler
+                          </label>
+                        </div>
+
+                        {/* Reordering arrows */}
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                          <button
+                            disabled={index === 0}
+                            onClick={() => moveKPI(index, -1)}
+                            style={{
+                              padding: '2px',
+                              border: '1px solid #dadce0',
+                              borderRadius: '3px',
+                              cursor: index === 0 ? 'default' : 'pointer',
+                              backgroundColor: index === 0 ? '#f8f9fa' : 'var(--color-bg-surface)',
+                            }}
+                          >
+                            <ChevronUp size={12} color={index === 0 ? '#9aa0a6' : '#5f6368'} />
+                          </button>
+                          <button
+                            disabled={index === config.kpiOrder.length - 1}
+                            onClick={() => moveKPI(index, 1)}
+                            style={{
+                              padding: '2px',
+                              border: '1px solid #dadce0',
+                              borderRadius: '3px',
+                              cursor: index === config.kpiOrder.length - 1 ? 'default' : 'pointer',
+                              backgroundColor:
+                                index === config.kpiOrder.length - 1
+                                  ? '#f8f9fa'
+                                  : 'var(--color-bg-surface)',
+                            }}
+                          >
+                            <ChevronDown
+                              size={12}
+                              color={index === config.kpiOrder.length - 1 ? '#9aa0a6' : '#5f6368'}
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Panels visibility and permissions */}
+            <div>
+              <h4
+                style={{
+                  margin: '0 0 1rem 0',
+                  fontSize: '0.85rem',
+                  color: '#202124',
+                  fontWeight: 600,
+                }}
+              >
+                Panel Permissions & Visibility
+              </h4>
+              <div style={{ border: '1px solid #dadce0', borderRadius: '4px', overflow: 'hidden' }}>
+                {Object.keys(config.visiblePanels).map((key, index) => {
+                  const isVisible = config.visiblePanels[key];
+                  const title = key
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, (str) => str.toUpperCase());
+                  return (
+                    <div
+                      key={key}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0.5rem 0.75rem',
+                        borderBottom:
+                          index < Object.keys(config.visiblePanels).length - 1
+                            ? '1px solid #dadce0'
+                            : 'none',
+                        backgroundColor: isVisible ? 'var(--color-bg-surface)' : '#f8f9fa',
+                        opacity: isVisible ? 1 : 0.6,
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <button
+                          onClick={() => handleTogglePanel(key)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            padding: 0,
+                            cursor: 'pointer',
+                            color: isVisible ? '#1a73e8' : '#9aa0a6',
+                          }}
+                        >
+                          {isVisible ? <Eye size={16} /> : <EyeOff size={16} />}
+                        </button>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#3c4043' }}>
+                          {title}
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '1rem', fontSize: '0.72rem' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={config.permissions.admin.allowedPanels.includes(key)}
+                            onChange={() => handleTogglePermission('admin', 'allowedPanels', key)}
+                          />
+                          Admin
+                        </label>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={config.permissions.wholesaler.allowedPanels.includes(key)}
+                            onChange={() =>
+                              handleTogglePermission('wholesaler', 'allowedPanels', key)
+                            }
+                          />
+                          Wholesaler
+                        </label>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '0.75rem',
+              marginTop: '1.5rem',
+              borderTop: '1px solid #dadce0',
+              paddingTop: '1rem',
+            }}
+          >
+            <button
+              onClick={() => setIsEditing(false)}
+              style={{
+                padding: '0.5rem 1rem',
+                border: '1px solid #dadce0',
+                backgroundColor: 'var(--color-bg-surface)',
+                borderRadius: '4px',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={saveCustomLayout}
+              disabled={savingConfig}
+              style={{
+                padding: '0.5rem 1rem',
+                border: 'none',
+                backgroundColor: '#1a73e8',
+                color: 'var(--color-bg-surface)',
+                borderRadius: '4px',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              {savingConfig ? 'Saving...' : 'Save Configuration'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* KPI Cards Grid */}
+      <div
+        style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+      >
+        <span
+          style={{
+            fontSize: '0.7rem',
+            fontWeight: 700,
+            color: '#94a3b8',
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+          }}
+        >
+          Key Performance Indicators
+        </span>
+        <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
+        <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{activeKPIs.length} metrics</span>
+      </div>
+      <div className="amd-kpi-grid">
+        {activeKPIs.map((key) => {
+          const meta = KPI_METADATA[key];
+          let displayVal = metrics[key];
+
+          // Formatting based on type
+          if (key === 'revenue' || key === 'averageOrderValue') {
+            displayVal = formatCurrency(metrics[key]);
+          } else if (key === 'pendingApprovals' || key === 'lowStockAlerts') {
+            displayVal = Number(metrics[key]) || 0;
+          }
+
+          const hasAlert =
+            (key === 'pendingApprovals' && metrics.pendingApprovals > 0) ||
+            (key === 'lowStockAlerts' && metrics.lowStockAlerts > 0);
+
+          return (
+            <MetricCard
+              key={key}
+              title={meta?.title || key}
+              value={displayVal}
+              icon={meta?.icon || Activity}
+              color={meta?.color || '#1a73e8'}
+              bgColor={meta?.bgColor || '#e8f0fe'}
+              subtitle={meta?.subtitle || ''}
+              alert={hasAlert}
+              onClick={() => {
+                if (wholesalerId) return; // Disable navigation on click in wholesaler scope
+                if (key === 'totalUsers' || key === 'pendingApprovals') {
+                  handleNavigate('patients');
+                } else if (key === 'activePhysicians') {
+                  handleNavigate('doctors');
+                } else if (key === 'activeOrders') {
+                  handleNavigate('orders');
+                } else if (key === 'lowStockAlerts') {
+                  handleNavigate('products');
+                } else if (key === 'systemHealth') {
+                  handleNavigate('analytics');
+                }
+              }}
+            />
+          );
+        })}
+      </div>
+
+      {/* Two Column Layout: Recent Registrations & System Status */}
+      <div
+        className="amd-bottom-grid"
+        style={{
+          gridTemplateColumns: showPanel('systemStatus') ? '1.6fr 1fr' : '1fr',
+        }}
+      >
+        {/* Recent Registrations Table */}
+        {showPanel('recentRegistrations') && (
+          <RecentRegistrationsTable
+            recentUsers={recentUsers}
+            wholesalerId={wholesalerId}
+            navigateToUserTab={navigateToUserTab}
+            formatDate={formatDate}
+          />
+        )}
+
+        {/* System Status & Health Panel (GCP Style) */}
+        {showPanel('systemStatus') && (
+          <Card
+            style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
+          >
+            <CardHeader icon={Server} title="Infrastructure Status" />
+            <CardContent>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  marginBottom: '1.5rem',
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
                     justifyContent: 'space-between',
-                    borderBottom: '1px solid #f1f5f9',
-                    paddingBottom: '0.4rem',
+                    alignItems: 'center',
+                    paddingBottom: '0.5rem',
+                    borderBottom: '1px solid #dadce0',
                   }}
                 >
-                  <span style={{ color: '#64748b' }}>Firestore Database</span>
-                  <span style={{ color: '#10b981', fontWeight: 600 }}>Connected</span>
+                  <span style={{ fontSize: '0.8rem', color: '#5f6368', fontWeight: 500 }}>
+                    Firestore Database
+                  </span>
+                  <span
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      color: '#0f9d58',
+                    }}
+                  >
+                    <span className="admin-pill-status-dot admin-pill-status-dot--pulse" />{' '}
+                    Connected
+                  </span>
                 </div>
+
                 <div
                   style={{
                     display: 'flex',
                     justifyContent: 'space-between',
-                    borderBottom: '1px solid #f1f5f9',
-                    paddingBottom: '0.4rem',
+                    alignItems: 'center',
+                    paddingBottom: '0.5rem',
+                    borderBottom: '1px solid #dadce0',
                   }}
                 >
-                  <span style={{ color: '#64748b' }}>AI Engine Link</span>
-                  <span style={{ color: '#0284c7', fontWeight: 600 }}>gemini-2.5-pro</span>
+                  <span style={{ fontSize: '0.8rem', color: '#5f6368', fontWeight: 500 }}>
+                    Clinical AI Engine
+                  </span>
+                  <span
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      color: '#1a73e8',
+                    }}
+                  >
+                    <Sparkles size={13} /> gemini-2.5-pro
+                  </span>
                 </div>
+
                 <div
                   style={{
                     display: 'flex',
                     justifyContent: 'space-between',
-                    borderBottom: '1px solid #f1f5f9',
-                    paddingBottom: '0.4rem',
+                    alignItems: 'center',
+                    paddingBottom: '0.5rem',
+                    borderBottom: '1px solid #dadce0',
                   }}
                 >
-                  <span style={{ color: '#64748b' }}>Router Latency</span>
-                  <span style={{ color: '#0f172a', fontWeight: 600 }}>{dbLatency}</span>
+                  <span style={{ fontSize: '0.8rem', color: '#5f6368', fontWeight: 500 }}>
+                    B2B Router Link
+                  </span>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#202124' }}>
+                    Active
+                  </span>
                 </div>
+
                 <div
                   style={{
                     display: 'flex',
                     justifyContent: 'space-between',
-                    borderBottom: '1px solid #f1f5f9',
-                    paddingBottom: '0.4rem',
+                    alignItems: 'center',
+                    paddingBottom: '0.5rem',
+                    borderBottom: '1px solid #dadce0',
                   }}
                 >
-                  <span style={{ color: '#64748b' }}>Zoho Books Gateway</span>
-                  <span style={{ color: '#10b981', fontWeight: 600 }}>Synced (200 OK)</span>
+                  <span style={{ fontSize: '0.8rem', color: '#5f6368', fontWeight: 500 }}>
+                    Query Latency
+                  </span>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#202124' }}>
+                    {metrics.systemHealth}
+                  </span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#64748b' }}>Environment</span>
-                  <span style={{ color: '#0f172a', fontWeight: 600 }}>Production GCC</span>
+
+                <div
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
+                  <span style={{ fontSize: '0.8rem', color: '#5f6368', fontWeight: 500 }}>
+                    Location Context
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      color: '#202124',
+                    }}
+                  >
+                    regenpept-prod
+                  </span>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
+
+              <div
+                style={{
+                  marginTop: 'auto',
+                  padding: '1rem',
+                  borderRadius: '6px',
+                  backgroundColor: '#f8f9fa',
+                  border: '1px solid #dadce0',
+                }}
+              >
+                <h4
+                  style={{
+                    margin: '0 0 0.4rem 0',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    color: '#202124',
+                  }}
+                >
+                  Cache Management
+                </h4>
+                <p
+                  style={{
+                    margin: '0 0 0.85rem 0',
+                    fontSize: '0.72rem',
+                    color: '#5f6368',
+                    lineHeight: '1.4',
+                  }}
+                >
+                  Flush application state cache to force immediate reload of catalog products and
+                  layout rules.
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <button
+                    onClick={handleFlushCache}
+                    disabled={isFlushing}
+                    className="admin-quick-btn"
+                    style={{
+                      padding: '0.45rem 1rem',
+                      borderRadius: '4px',
+                      width: '100%',
+                      justifyContent: 'center',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      border: '1px solid #dadce0',
+                      backgroundColor: 'var(--color-bg-surface)',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      cursor: isFlushing ? 'default' : 'pointer',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isFlushing) e.currentTarget.style.backgroundColor = '#f8f9fa';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isFlushing)
+                        e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)';
+                    }}
+                  >
+                    <RefreshCw size={12} className={isFlushing ? 'animate-spin' : ''} />
+                    {isFlushing ? 'Flushing...' : 'Flush Cache'}
+                  </button>
+                </div>
+                {flushSuccess && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.3rem',
+                      color: '#0f9d58',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      marginTop: '0.5rem',
+                      justifyContent: 'center',
+                      animation: 'fadeIn 0.3s ease-out',
+                    }}
+                  >
+                    <CheckCircle2 size={12} /> Cache flushed successfully!
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
-      {/* ── 13. MOBILE UX BOTTOM NAVIGATION BAR ─────────────────────── */}
-      <div className={styles.mobileNavBar}>
-        <a
-          onClick={() => setMobileTab('home')}
-          className={`${styles.mobileNavItem} ${mobileTab === 'home' ? styles.active : ''}`}
-        >
-          <Home size={20} />
-          <span>Home</span>
-        </a>
-        <a
-          onClick={() => setMobileTab('tasks')}
-          className={`${styles.mobileNavItem} ${mobileTab === 'tasks' ? styles.active : ''}`}
-        >
-          <CheckCircle2 size={20} />
-          <span>Tasks</span>
-        </a>
-        <a
-          onClick={() => setMobileTab('finance')}
-          className={`${styles.mobileNavItem} ${mobileTab === 'finance' ? styles.active : ''}`}
-        >
-          <DollarSign size={20} />
-          <span>Finance</span>
-        </a>
-        <a
-          onClick={() => setMobileTab('crm')}
-          className={`${styles.mobileNavItem} ${mobileTab === 'crm' ? styles.active : ''}`}
-        >
-          <Users size={20} />
-          <span>CRM</span>
-        </a>
-        <a
-          onClick={() => setMobileTab('ai')}
-          className={`${styles.mobileNavItem} ${mobileTab === 'ai' ? styles.active : ''}`}
-        >
-          <Sparkles size={20} />
-          <span>AI</span>
-        </a>
-        <a
-          onClick={() => setMobileTab('more')}
-          className={`${styles.mobileNavItem} ${mobileTab === 'more' ? styles.active : ''}`}
-        >
-          <MoreHorizontal size={20} />
-          <span>More</span>
-        </a>
+      {/* Page Visits Analytics Table */}
+      {showPanel('pageVisits') && (
+        <PageVisitsTable
+          visitsPeriod={visitsPeriod}
+          setVisitsPeriod={setVisitsPeriod}
+          prioritizedViews={prioritizedViews}
+        />
+      )}
+
+      {/* Physician & Clinics cohort volume table */}
+      {showPanel('doctorCohort') && (
+        <DoctorCohortTable
+          wholesalerId={wholesalerId}
+          scopedDoctors={scopedDoctors}
+          doctorsWithPatients={doctorsWithPatients}
+        />
+      )}
+
+      {/* Wholesaler cohort volume table (Admin only) */}
+      {!wholesalerId && showPanel('wholesalerCohort') && (
+        <WholesalerCohortTable wholesalersWithStats={wholesalersWithStats} />
+      )}
+
+      {/* System Widgets and Operational Grid */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        {/* System Widgets Panel */}
+        {(showPanel('auditLogs') || showPanel('payoutManager')) && (
+          <div>
+            <h2
+              className="amd-heading"
+              style={{
+                color: '#202124',
+                marginBottom: '1.25rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <Activity size={18} color="#1a73e8" />
+              Operational Widgets
+            </h2>
+            <div
+              className="amd-widget-grid"
+              style={{
+                gridTemplateColumns:
+                  showPanel('auditLogs') && showPanel('payoutManager') ? '1fr 1fr' : '1fr',
+              }}
+            >
+              {showPanel('auditLogs') && (
+                <div style={{ height: '380px' }}>
+                  <SystemAuditLogWidget />
+                </div>
+              )}
+              {showPanel('payoutManager') && (
+                <div style={{ height: '380px' }}>
+                  <PayoutManagerWidget />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Operational Intelligence (Finance / Zoho Sync) */}
+        {(showPanel('financeWidget') || showPanel('productSyncWidget')) && (
+          <div>
+            <h2
+              className="amd-heading"
+              style={{
+                color: '#202124',
+                marginBottom: '1.25rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <Layers size={18} color="#1a73e8" />
+              Intelligence &amp; Sync Hub
+            </h2>
+            <div
+              className="amd-widget-grid"
+              style={{
+                gridTemplateColumns:
+                  showPanel('financeWidget') && showPanel('productSyncWidget') ? '1fr 1fr' : '1fr',
+              }}
+            >
+              {showPanel('financeWidget') && <AdminFinanceWidget />}
+              {showPanel('productSyncWidget') && <AdminProductSyncWidget />}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
+// Subcomponent for Metric Cards (GCP Styled)
