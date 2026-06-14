@@ -32,3 +32,9 @@ firebase-export/
 cypress/videos/
 cypress/screenshots/
 node_modules_bad/
+
+# Ignore bad node_modules backup
+.node_modules_bad/
+
+# Ignore Firebase Admin SDK keys
+med-peptides-app-*.json

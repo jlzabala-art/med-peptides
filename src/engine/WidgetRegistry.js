@@ -32,6 +32,7 @@ import BulkRestockPortalWidget from '../components/wholesaler/gadgets/BulkRestoc
 import BatchExpirationTrackerWidget from '../components/wholesaler/gadgets/BatchExpirationTrackerWidget';
 import TurnoverAnalyticsWidget from '../components/wholesaler/gadgets/TurnoverAnalyticsWidget';
 import PrescriptionIntakeWidget from '../components/wholesaler/gadgets/PrescriptionIntakeWidget';
+import DemandForecastingWidget from '../components/wholesaler/DemandForecastingWidget';
 
 import GlobalLogisticsQueueWidget from '../components/admin/gadgets/GlobalLogisticsQueueWidget';
 import B2BOrderApprovalsWidget from '../components/admin/gadgets/B2BOrderApprovalsWidget';
@@ -72,6 +73,7 @@ export const WIDGET_REGISTRY = {
   'batch_expiration': BatchExpirationTrackerWidget,
   'turnover_analytics': TurnoverAnalyticsWidget,
   'prescription_intake': PrescriptionIntakeWidget,
+  'demand_forecasting': DemandForecastingWidget,
 
   // Admin
   'global_logistics': GlobalLogisticsQueueWidget,
@@ -119,6 +121,7 @@ export const DEFAULT_PATIENT_CONFIG = {
 export const DEFAULT_WHOLESALER_CONFIG = {
   layoutType: 'grid',
   widgets: [
+    { id: 'demand_forecasting', order: 0.1, enabled: true, colSpan: 12 },
     { id: 'prescription_intake', order: 0.2, enabled: true, colSpan: 12 },
     { id: 'turnover_analytics', order: 0.3, enabled: true, colSpan: 6 },
     { id: 'batch_expiration', order: 0.5, enabled: true, colSpan: 6 },

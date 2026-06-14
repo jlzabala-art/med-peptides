@@ -1,11 +1,19 @@
 User-agent: *
 Allow: /
 
-# Block private/admin routes
+# Bloquear portales privados B2B y áreas de usuario
 Disallow: /admin
-Disallow: /dashboard
+Disallow: /doctor
+Disallow: /wholesaler
+Disallow: /clinic
+Disallow: /patient
 Disallow: /checkout
+Disallow: /dashboard
+Disallow: /account
+Disallow: /login
 Disallow: /settings
-Disallow: /auth
+Disallow: /saved
+Disallow: /orders
 
-Sitemap: https://Atlas Health-app-27a3a.web.app/sitemap.xml
+# Sitemap
+Sitemap: https://regenpept.com/sitemap.xml

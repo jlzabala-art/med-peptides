@@ -2832,7 +2832,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
                     </div>
                   </div>
 
-                    <PaymentSection formData={formData} set={set} />
+                    <PaymentSection formData={formData} set={set} isProfessional={isProfessional} />
 
                   <div className="co-cta-row" style={{ marginTop: '2rem' }}>
                     <button type="button" className="co-btn-back" onClick={goBack}>← Back</button>

@@ -62,7 +62,7 @@ import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
 import PackageOpen from "lucide-react/dist/esm/icons/package-open";
 import Package from "lucide-react/dist/esm/icons/package";
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import RefillReminderBanner from '../components/shared/RefillReminderBanner';
 import { db } from '../firebase';

@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Activity, AlertTriangle, Info, TrendingUp } from 'lucide-react';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine
+} from 'recharts';
 
 const PharmacokineticsSimulator = ({ selectedItems = [] }) => {
   const [simulation, setSimulation] = useState(null);
 
   useEffect(() => {
-    // Simulate PK logic
     if (!selectedItems || selectedItems.length === 0) {
       setSimulation(null);
       return;
@@ -15,6 +23,7 @@ const PharmacokineticsSimulator = ({ selectedItems = [] }) => {
     const hasGH = selectedItems.some(i => i.name.includes('CJC') || i.name.includes('Ipamorelin') || i.name.includes('Tesamorelin'));
     const hasMultipleGH = selectedItems.filter(i => i.name.includes('CJC') || i.name.includes('Ipamorelin') || i.name.includes('Tesamorelin')).length > 1;
     const hasHealing = selectedItems.some(i => i.name.includes('BPC') || i.name.includes('TB'));
+    const hasSemaglutide = selectedItems.some(i => i.name.includes('Semaglutide') || i.name.includes('Tirzepatide'));
 
     let warnings = [];
     let insights = [];
@@ -25,19 +34,50 @@ const PharmacokineticsSimulator = ({ selectedItems = [] }) => {
     if (hasGH && hasHealing) {
       insights.push("Sinergia óptima detectada: La elevación de IGF-1 inducida por el secretagogo amplificará la angiogénesis del BPC/TB.");
     }
+    if (hasSemaglutide) {
+      warnings.push("Vida media prolongada detectada. (T1/2 > 160h). Monitorear de cerca efectos gastrointestinales durante la fase de acumulación.");
+    }
 
-    // Mock chart data (blood plasma levels over 24h)
-    const points = Array.from({ length: 24 }).map((_, i) => {
-      let val = 0;
-      if (hasGH) val += Math.sin((i / 24) * Math.PI) * 100;
-      if (hasHealing) val += Math.cos((i / 24) * Math.PI) * 50 + 50;
-      return Math.max(0, val);
-    });
+    // Generate Chart Data
+    const data = [];
+    const totalHours = hasSemaglutide ? 168 : 24; // 1 week vs 24 hours
+    const interval = hasSemaglutide ? 12 : 1;
 
-    setSimulation({ warnings, insights, points });
+    for (let i = 0; i <= totalHours; i += interval) {
+      let concentration = 0;
+      let threshold = 50;
+
+      if (hasSemaglutide) {
+        // Simple accumulation model for long half-life
+        concentration += (100 * (1 - Math.exp(-0.01 * i)));
+      } else {
+        if (hasGH) concentration += (Math.sin((i / 24) * Math.PI) * 100);
+        if (hasHealing) concentration += (Math.cos((i / 24) * Math.PI) * 50 + 50);
+      }
+
+      data.push({
+        time: hasSemaglutide ? `Día ${Math.floor(i/24)}` : `${i}h`,
+        concentration: Math.max(0, Math.round(concentration)),
+        threshold: threshold
+      });
+    }
+
+    setSimulation({ warnings, insights, data, hasSemaglutide });
   }, [selectedItems]);
 
   if (!simulation) return null;
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div style={{ background: '#fff', border: '1px solid #e2e8f0', padding: '10px', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+          <p style={{ margin: '0 0 5px', fontWeight: 600, fontSize: '0.85rem' }}>{label}</p>
+          <p style={{ margin: 0, color: '#3b82f6', fontSize: '0.85rem' }}>Concentración: {payload[0].value} ng/mL</p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div style={{
@@ -53,31 +93,32 @@ const PharmacokineticsSimulator = ({ selectedItems = [] }) => {
           <Activity size={20} />
         </div>
         <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>
-          AI PK Simulator (Pharmacokinetics)
+          AI Pharmacokinetics Simulator
         </h3>
       </div>
 
       <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>
-        Análisis predictivo de vida media y saturación de receptores basado en los compuestos del carrito actual.
+        Proyección de concentración en plasma sanguíneo basada en la combinación de compuestos seleccionada.
       </p>
 
-      {/* Simulated Chart */}
-      <div style={{ height: '120px', display: 'flex', alignItems: 'flex-end', gap: '4px', borderBottom: '2px solid #e2e8f0', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
-        {simulation.points.map((val, i) => (
-          <div key={i} style={{
-            flex: 1,
-            background: 'linear-gradient(to top, #3b82f6, #93c5fd)',
-            height: `${val}%`,
-            borderRadius: '4px 4px 0 0',
-            minHeight: '2px',
-            opacity: 0.8
-          }} title={`Hora ${i}: Nivel ${Math.round(val)}`} />
-        ))}
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--color-text-tertiary)', marginBottom: '1.5rem', marginTop: '-1rem' }}>
-        <span>0h (Inyección)</span>
-        <span>12h</span>
-        <span>24h</span>
+      {/* Recharts Area Chart */}
+      <div style={{ width: '100%', height: 250, marginBottom: '2rem' }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={simulation.data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <defs>
+              <linearGradient id="colorConcentration" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+            <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
+            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+            <Tooltip content={<CustomTooltip />} />
+            <ReferenceLine y={50} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'top', value: 'Umbral Terapéutico', fill: '#ef4444', fontSize: 10 }} />
+            <Area type="monotone" dataKey="concentration" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorConcentration)" />
+          </AreaChart>
+        </ResponsiveContainer>
       </div>
 
       {/* Alerts & Insights */}

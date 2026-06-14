@@ -23,6 +23,16 @@ const INTERACTION_DB = {
     peptides: ['pt-141', 'melanotan ii'],
     risk: 'moderate',
     message: 'PT-141 actúa a nivel central (receptores melanocortina). Aunque no afecta la serotonina directamente, pacientes en SSRIs pueden experimentar variaciones en la respuesta al arousal.'
+  },
+  'levotiroxina': {
+    peptides: ['semaglutide', 'tirzepatide'],
+    risk: 'moderate',
+    message: 'El retraso en el vaciado gástrico inducido por agonistas GLP-1 puede alterar significativamente la absorción de la Levotiroxina oral. Se recomienda monitorizar TSH.'
+  },
+  'insulina': {
+    peptides: ['semaglutide', 'tirzepatide'],
+    risk: 'high',
+    message: 'ALERTA: El uso concomitante de insulina con agonistas GLP-1/GIP aumenta drásticamente el riesgo de hipoglucemia severa. Se requiere ajuste a la baja de la dosis de insulina.'
   }
 };
 

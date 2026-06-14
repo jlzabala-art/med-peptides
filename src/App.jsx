@@ -13,6 +13,7 @@ import Footer from './layout/Footer';
 import BottomTabBar from './layout/BottomTabBar';
 import RegionBar from './sections/RegionBar';
 import BackToTop from './layout/BackToTop';
+import SEO from './components/SEO';
 import ExitProfessionalMode from './components/auth/ExitProfessionalMode';
 import ClinicalAssistant from './components/shared/ClinicalAssistant';
 import { trackPageView } from './hooks/useAnalytics';
@@ -500,6 +501,7 @@ function App() {
 
   return (
       <div className="app">
+        <SEO />
         <Toaster position="bottom-right" />
         <AppRouter {...routerProps} />
         <ClinicalAssistant 

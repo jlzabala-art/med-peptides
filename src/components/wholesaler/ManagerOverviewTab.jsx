@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
+import ManagerChurnWidget from './ManagerChurnWidget';
 
 
 
@@ -77,7 +78,9 @@ export default function ManagerOverviewTab() {
         <StatCard title="Performance Score" value="98%" icon={TrendingUp} color="#8b5cf6" />
       </div>
 
-      <div style={{ backgroundColor: 'var(--color-bg-surface)', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+      <ManagerChurnWidget managerId={currentUser?.uid} />
+
+      <div style={{ backgroundColor: 'var(--color-bg-surface)', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', marginTop: '2rem' }}>
         <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '1rem' }}>Recent Activity</h2>
         {loading ? (
           <div style={{ color: 'var(--color-text-secondary)' }}>Loading activity...</div>

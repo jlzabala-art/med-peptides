@@ -4,6 +4,7 @@ import Check from "lucide-react/dist/esm/icons/check";
 import Eye from "lucide-react/dist/esm/icons/eye";
 import EyeOff from "lucide-react/dist/esm/icons/eye-off";
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 
 
 
@@ -106,6 +107,7 @@ export default function DashboardCustomizer({ currentConfig, defaultConfig, onCl
       ...currentConfig,
       widgets: widgets
     });
+    toast.success('Configuración del panel guardada');
   };
 
   const handleRestore = () => {

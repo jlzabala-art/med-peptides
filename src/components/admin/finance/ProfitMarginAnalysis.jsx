@@ -3,9 +3,16 @@ import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
 import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
 import Activity from "lucide-react/dist/esm/icons/activity";
 import React, { useMemo } from 'react';
-
-
-
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell
+} from 'recharts';
 
 import { PROTOCOL_BLUEPRINTS } from '../../../data/protocolBlueprints';
 import { useStaticData } from '../../../hooks/useStaticData';
@@ -55,6 +62,7 @@ export default function ProfitMarginAnalysis() {
       return {
         id: key,
         name: protocol.title || key,
+        shortName: (protocol.title || key).substring(0, 15) + '...',
         totalCost,
         bundlePrice,
         grossProfit,
@@ -62,6 +70,27 @@ export default function ProfitMarginAnalysis() {
       };
     }).sort((a, b) => b.grossProfit - a.grossProfit);
   }, []);
+
+  const chartData = protocolMargins.slice(0, 5);
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div style={{ background: 'white', padding: '1rem', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}>
+          <p style={{ margin: '0 0 0.5rem 0', fontWeight: 800, color: '#0f172a' }}>{payload[0].payload.name}</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '2rem', marginBottom: '0.25rem' }}>
+            <span style={{ color: '#64748b', fontSize: '0.85rem' }}>Profit:</span>
+            <strong style={{ color: '#10b981' }}>{formatCurrency(payload[0].value)}</strong>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '2rem' }}>
+            <span style={{ color: '#64748b', fontSize: '0.85rem' }}>Margin:</span>
+            <strong style={{ color: '#0f172a' }}>{payload[0].payload.marginPercent}%</strong>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="glass-card-premium" style={{ borderTop: '4px solid var(--success)', position: 'relative', overflow: 'hidden' }}>
@@ -78,6 +107,24 @@ export default function ProfitMarginAnalysis() {
           </div>
         </div>
 
+        {/* Top 5 Chart */}
+        <div style={{ height: '250px', marginBottom: '2.5rem', background: '#f8fafc', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+          <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Top 5 Most Profitable Protocols</h4>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }} barSize={40}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+              <XAxis dataKey="shortName" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} dy={10} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={(value) => `$${value}`} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(16, 185, 129, 0.05)' }} />
+              <Bar dataKey="grossProfit" radius={[6, 6, 0, 0]}>
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.marginPercent >= 50 ? '#10b981' : '#f59e0b'} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
           {protocolMargins.slice(0, 6).map(protocol => {
             const isHealthy = protocol.marginPercent >= 50;
@@ -89,29 +136,34 @@ export default function ProfitMarginAnalysis() {
                 border: `1px solid ${isHealthy ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.3)'}`,
                 display: 'flex', 
                 flexDirection: 'column', 
-                gap: '1rem' 
-              }}>
+                gap: '1rem',
+                transition: 'transform 0.2s',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <h4 style={{ fontWeight: '800', color: 'var(--text-primary)', fontSize: '0.95rem', margin: 0, paddingRight: '1rem' }}>
+                  <h4 style={{ fontWeight: '800', color: 'var(--text-primary)', fontSize: '0.95rem', margin: 0, paddingRight: '1rem', lineHeight: 1.3 }}>
                     {protocol.name}
                   </h4>
                   <div style={{ 
-                    padding: '0.25rem 0.5rem', 
+                    padding: '0.35rem 0.6rem', 
                     background: isHealthy ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
                     color: isHealthy ? 'var(--success)' : 'var(--warning)',
-                    borderRadius: '6px',
+                    borderRadius: '8px',
                     fontWeight: 800,
                     fontSize: '0.75rem',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.25rem'
+                    gap: '0.35rem'
                   }}>
-                    {isHealthy ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                    {protocol.marginPercent}% Margin
+                    {isHealthy ? <TrendingUp size={14} strokeWidth={3} /> : <TrendingDown size={14} strokeWidth={3} />}
+                    {protocol.marginPercent}%
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '0.75rem', borderBottom: '1px dashed var(--border)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '1rem', borderBottom: '1px dashed var(--border)' }}>
                   <div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Bundle Price</div>
                     <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '1.1rem' }}>{formatCurrency(protocol.bundlePrice)}</div>
@@ -122,9 +174,11 @@ export default function ProfitMarginAnalysis() {
                   </div>
                 </div>
 
-                <div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, marginBottom: '0.25rem' }}>Gross Profit per Kit</div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: isHealthy ? 'var(--success)' : 'var(--warning)', display: 'flex', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, marginBottom: '0.25rem' }}>
+                    Gross Profit per Kit
+                  </div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 800, color: isHealthy ? 'var(--success)' : 'var(--warning)', display: 'flex', alignItems: 'center' }}>
                     <DollarSign size={20} strokeWidth={3} />
                     {protocol.grossProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>

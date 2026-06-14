@@ -19,6 +19,9 @@ export default defineConfig({
     port: 3000,
     open: true
   },
+  optimizeDeps: {
+    exclude: ['node_modules_bad']
+  },
   build: {
     outDir: 'dist',
     sourcemap: false,

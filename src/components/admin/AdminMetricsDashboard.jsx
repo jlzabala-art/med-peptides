@@ -105,6 +105,7 @@ import {
   AiCommandConsole,
   GlobalActivityFeed
 } from './widgets/CommandCenterWidgets';
+import AdminExecutiveSummaryWidget from './AdminExecutiveSummaryWidget';
 import notifier from '../../services/NotificationService';
 import styles from './AdminMetricsDashboard.module.css';
 
@@ -419,6 +420,9 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
           </div>
         )}
       </div>
+
+      {/* ── 0. AI EXECUTIVE SUMMARY WIDGET ────────────────────────────── */}
+      <AdminExecutiveSummaryWidget metrics={metrics} />
 
       {/* ── 1. EXECUTIVE SUMMARY STRIP (TOP ROW) ────────────────────────── */}
       <ExecutiveSummaryStrip

@@ -77,6 +77,7 @@ import ClientsTab from '../components/wholesaler/ClientsTab';
 import CatalogList from '../components/wholesaler/CatalogList';
 import CatalogCreatorFlow from '../components/wholesaler/CatalogCreatorFlow';
 import EmailCampaignBuilder from '../components/wholesaler/EmailCampaignBuilder';
+import DemandForecastingWidget from '../components/wholesaler/DemandForecastingWidget';
 import { Card, MetricCard } from '../components/ui';
 // ── Flat tab list (for reference) ────────────────────────────────────────────────────────────
 const TABS = [
@@ -817,6 +818,9 @@ export function WholesalerOverviewTab({ uid, onNavigate }) {
           </button>
         </div>
       )}
+
+      {/* AI Demand Forecasting */}
+      <DemandForecastingWidget />
 
       {/* KPI row */}
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>

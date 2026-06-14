@@ -31,6 +31,7 @@ import { db } from '../../firebase';
 import { RX_STATUS_META } from '../../config/prescriptionConfig';
 import DoctorPrescriptionBuilder from './DoctorPrescriptionBuilder';
 import ClinicalCopilotWidget from './ClinicalCopilotWidget';
+import PatientAdherenceWidget from './PatientAdherenceWidget';
 import { Card, MetricCard } from '../ui';
 import Spinner from '../ui/Spinner';
 import { useTranslation } from 'react-i18next';
@@ -176,6 +177,8 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
         </div>
 
         <ClinicalCopilotWidget onDraftGenerated={(draft) => { setShowBuilder(true); window.dispatchEvent(new CustomEvent('nav:ai-draft', { detail: draft })); }} />
+
+        <PatientAdherenceWidget doctorId={doctorId} />
 
         <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
           <Card style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
