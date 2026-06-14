@@ -141,23 +141,29 @@ export default function SupplierInsightsView({ products }) {
             prices: [],
             moqs: [],
             leadTimes: [],
-            // Mocking some intel data since it's not strictly in variant yet
-            healthScore: Math.floor(Math.random() * 30 + 70), 
-            qualityScore: Math.floor(Math.random() * 20 + 80),
-            reliability: Math.floor(Math.random() * 15 + 85),
-            status: 'active',
+            coas: [],
+            gmps: [],
             alerts: [],
-            recommendation: `Monitor ${sName} performance continuously.`
+            missingDataFlags: []
           });
         }
         const s = supplierMap.get(sName);
         s.productsSupplied++;
         
         // Extract pricing from nested wholesale or direct price
-        const price = v.prices?.Wholesale?.price || v.prices?.Clinic?.price || v.price;
+        const price = v.prices?.Wholesale?.price || v.prices?.Clinic?.price || v.cost || v.price;
         if (price) s.prices.push(Number(price));
+        else s.missingDataFlags.push(`Missing price for ${v.sku || p.name}`);
+
         if (v.moq) s.moqs.push(Number(v.moq));
         if (v.leadTime) s.leadTimes.push(Number(v.leadTime));
+        else s.missingDataFlags.push(`Missing lead time for ${v.sku || p.name}`);
+
+        s.coas.push(!!v.coa);
+        if (!v.coa) s.alerts.push(`Missing COA for ${v.sku || p.name}`);
+
+        s.gmps.push(!!v.gmp);
+        if (!v.gmp) s.missingDataFlags.push(`Missing GMP for ${v.sku || p.name}`);
       });
     });
 
@@ -165,17 +171,68 @@ export default function SupplierInsightsView({ products }) {
        const avgPrice = s.prices.length ? s.prices.reduce((a,b)=>a+b,0)/s.prices.length : 0;
        const avgLeadTime = s.leadTimes.length ? Math.round(s.leadTimes.reduce((a,b)=>a+b,0)/s.leadTimes.length) : 14;
        const minMoq = s.moqs.length ? Math.min(...s.moqs) : '100';
-       
-       if (s.healthScore < 75) s.status = 'at-risk';
-       if (s.healthScore < 65) s.status = 'critical';
 
+       // Dynamic Scoring Algorithm
+       let score = 100;
+       let quality = 100;
+       let reliability = 100;
+
+       // COA penalty: -15 pts
+       const missingCOAs = s.coas.filter(has => !has).length;
+       if (missingCOAs > 0) {
+          score -= (missingCOAs * 15);
+          quality -= (missingCOAs * 20);
+       }
+       
+       // GMP penalty: -10 pts
+       const missingGMPs = s.gmps.filter(has => !has).length;
+       if (missingGMPs > 0) {
+          score -= (missingGMPs * 10);
+          quality -= (missingGMPs * 10);
+       }
+
+       // Missing Data Penalty: -5 pts
+       const missingData = s.missingDataFlags.length;
+       if (missingData > 0) {
+          score -= (missingData * 5);
+          reliability -= (missingData * 10);
+       }
+       
+       score = Math.max(0, score);
+       quality = Math.max(0, quality);
+       reliability = Math.max(0, reliability);
+
+       let status = 'active';
+       if (score < 75) status = 'at-risk';
+       if (score < 50) status = 'critical';
+
+       let recommendation = `Monitor ${s.name} performance continuously.`;
+       if (score < 50) {
+         recommendation = `Critical Risk: Halt purchase orders. Missing critical compliance documents (COA/GMP) for ${missingCOAs + missingGMPs} variants.`;
+       } else if (score < 75 && missingCOAs > 0) {
+         recommendation = `Action Required: Request missing COAs for ${missingCOAs} variants immediately.`;
+       } else if (score < 90 && missingData > 0) {
+         recommendation = `Data Cleanup: Missing lead times or prices for ${missingData} variants.`;
+       } else if (score >= 90) {
+         recommendation = `Top performing supplier with full compliance. Ideal for consolidating volume.`;
+       }
+       
        return {
          ...s,
+         healthScore: score,
+         qualityScore: quality,
+         reliability: reliability,
+         status,
+         recommendation,
+         trendData: [score - 5, score - 2, score, score, score, score].map(v => Math.max(0, Math.min(100, v))),
          avgLeadTime,
          priceDisplay: avgPrice > 0 ? `$${avgPrice.toFixed(2)} avg` : 'Varies',
          moqDisplay: minMoq !== '100' ? `${minMoq} units` : 'Varies',
+         recentPOs: Math.floor(Math.random() * 10) + 1, // Mock POs
+         totalSpent: `$${(Math.random() * 100 + 10).toFixed(1)}k`, // Mock Spend
+         compliance: missingGMPs === 0 && missingCOAs === 0 ? 'Fully Compliant' : (missingCOAs > 0 ? 'Missing COA' : 'Missing GMP')
        };
-    }).sort((a,b) => b.healthScore - a.healthScore);
+    }).sort((a,b) => a.healthScore - b.healthScore); // Sort lowest score first
   }, [products]);
 
   const suppliers = suppliersData.length > 0 ? suppliersData : MOCK_SUPPLIERS;

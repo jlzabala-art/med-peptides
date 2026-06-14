@@ -400,6 +400,17 @@ export default function InventoryIntelligenceView({ products = [] }) {
         .status-badge.warning { background: #fffbeb; color: #f59e0b; }
         .status-badge.success { background: #dcfce7; color: #22c55e; }
 
+        .desktop-table { display: table; }
+        .mobile-card-container { display: none; }
+        .mobile-card {
+          background: #fff;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 1rem;
+          margin-bottom: 1rem;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
         @media (max-width: 1024px) {
           .alert-card {
             flex: 0 0 calc(50% - 0.5rem);
@@ -416,6 +427,8 @@ export default function InventoryIntelligenceView({ products = [] }) {
           .alert-card {
             flex: 0 0 85%;
           }
+          .desktop-table { display: none; }
+          .mobile-card-container { display: block; }
         }
 
         @media (max-width: 480px) {
@@ -563,7 +576,7 @@ export default function InventoryIntelligenceView({ products = [] }) {
           Reorder Recommendations
         </h2>
         <div className="table-container">
-          <table className="modern-table">
+          <table className="modern-table desktop-table">
             <thead>
               <tr>
                 <th>Product</th>
@@ -607,6 +620,32 @@ export default function InventoryIntelligenceView({ products = [] }) {
               )}
             </tbody>
           </table>
+          <div className="mobile-card-container">
+            {reorderRecommendations.map(item => (
+              <div key={item.id} className="mobile-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <h4 style={{ margin: 0, fontWeight: 600, color: '#0f172a' }}>{item.name}</h4>
+                  <span className={`status-badge ${item.stock === 0 ? 'critical' : 'warning'}`}>{item.stock} / {item.reorderPoint}</span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.85rem', color: '#475569', marginBottom: '1rem' }}>
+                  <div><strong>Supplier:</strong> {item.supplier}</div>
+                  <div><strong>MOQ:</strong> {item.moq}</div>
+                  <div><strong>Lead Time:</strong> {item.leadTime}</div>
+                  <div><strong style={{ color: '#0f172a' }}>Reorder:</strong> {Math.max(item.moq, item.reorderPoint * 2 - item.stock)}</div>
+                </div>
+                <div className="action-group" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button className="action-btn primary" style={{ flex: 1, justifyContent: 'center' }}><Send size={14}/> PO</button>
+                  <button className="action-btn outline" style={{ flex: 1, justifyContent: 'center' }}>RFQ</button>
+                </div>
+              </div>
+            ))}
+            {reorderRecommendations.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
+                <PackageOpen size={32} style={{ opacity: 0.2, margin: '0 auto 0.5rem auto', display: 'block' }} />
+                No products currently require reordering.
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -667,7 +706,7 @@ export default function InventoryIntelligenceView({ products = [] }) {
       <div className="glass-card">
         <h2 className="section-title"><PackageMinus size={24} color="#64748b" /> Dead Stock Analysis</h2>
         <div className="table-container">
-          <table className="modern-table">
+          <table className="modern-table desktop-table">
             <thead>
               <tr>
                 <th>Product</th>
@@ -713,6 +752,35 @@ export default function InventoryIntelligenceView({ products = [] }) {
               )}
             </tbody>
           </table>
+          <div className="mobile-card-container">
+            {deadStockItems.map(item => (
+              <div key={item.id} className="mobile-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <h4 style={{ margin: 0, fontWeight: 600, color: '#0f172a' }}>{item.name}</h4>
+                  <span style={{ color: '#ef4444', fontWeight: 600 }}>{item.noSalesDays} days W/O</span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.85rem', color: '#475569', marginBottom: '1rem' }}>
+                  <div><strong>Tied Capital:</strong> ${(item.stock * item.price).toLocaleString()}</div>
+                  <div><strong>Current Stock:</strong> {item.stock}</div>
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', background: '#f3e8ff', color: '#7e22ce', padding: '0.25rem 0.5rem', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 500 }}>
+                      <Sparkles size={12} /> {item.stock > 200 ? 'Bundle & Discount 20%' : 'Promote via Email'}
+                    </span>
+                  </div>
+                </div>
+                <div className="action-group" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button className="action-btn outline" style={{ flex: 1, justifyContent: 'center' }}><Tag size={14} /> Discount</button>
+                  <button className="action-btn danger" style={{ flex: 1, justifyContent: 'center' }}><ArchiveX size={14} /> Remove</button>
+                </div>
+              </div>
+            ))}
+            {deadStockItems.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
+                <Activity size={32} style={{ opacity: 0.2, margin: '0 auto 0.5rem auto', display: 'block' }} />
+                Excellent! You have no dead stock right now.
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

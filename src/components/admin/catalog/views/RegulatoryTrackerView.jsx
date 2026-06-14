@@ -96,7 +96,26 @@ export default function RegulatoryTrackerView({ products = [] }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', fontFamily: 'Inter, sans-serif' }}>
+    <div className="regulatory-tracker" style={{ display: 'flex', flexDirection: 'column', gap: '24px', fontFamily: 'Inter, sans-serif' }}>
+      <style>
+      {`
+        .desktop-table { display: table; }
+        .mobile-card-container { display: none; }
+        .mobile-card {
+          background: #fff;
+          border-bottom: 1px solid #e5e7eb;
+          padding: 16px;
+        }
+        .mobile-card:last-child {
+          border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+          .desktop-table { display: none; }
+          .mobile-card-container { display: block; }
+        }
+      `}
+      </style>
       {/* Header Section */}
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: '16px' }}>
         <div>
@@ -191,7 +210,7 @@ export default function RegulatoryTrackerView({ products = [] }) {
             </div>
             
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ minWidth: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+              <table className="desktop-table" style={{ minWidth: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
                 <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb', color: '#6b7280', textTransform: 'uppercase', fontSize: '0.75rem' }}>
                   <tr>
                     <th style={{ padding: '12px 16px', fontWeight: 500 }}>Product / Supplier</th>
@@ -220,6 +239,34 @@ export default function RegulatoryTrackerView({ products = [] }) {
                   ))}
                 </tbody>
               </table>
+
+              <div className="mobile-card-container">
+                {actualData.map((product) => (
+                  <div key={product.id} className="mobile-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                      <div>
+                        <div style={{ fontWeight: 600, color: '#111827', fontSize: '1rem' }}>{product.name}</div>
+                        <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>{product.supplier}</div>
+                      </div>
+                      <div>{renderRiskBadge(product.risk)}</div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.85rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #e5e7eb', paddingBottom: '4px' }}>
+                        <span style={{ color: '#6b7280' }}>Registration:</span> <span>{renderStatusIcon(product.registration)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #e5e7eb', paddingBottom: '4px' }}>
+                        <span style={{ color: '#6b7280' }}>COA:</span> <span>{renderStatusIcon(product.coa)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #e5e7eb', paddingBottom: '4px' }}>
+                        <span style={{ color: '#6b7280' }}>GMP:</span> <span>{renderStatusIcon(product.gmp)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #e5e7eb', paddingBottom: '4px' }}>
+                        <span style={{ color: '#6b7280' }}>Stability:</span> <span>{renderStatusIcon(product.stability)}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div style={{ padding: '12px', borderTop: '1px solid #e5e7eb', backgroundColor: '#f9fafb', textAlign: 'center' }}>
