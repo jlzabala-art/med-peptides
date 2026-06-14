@@ -1,79 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import { generateExecutiveSummary } from '../../services/adminAiService';
-import Bot from 'lucide-react/dist/esm/icons/bot';
+import React from 'react';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import styles from './AdminExecutiveSummaryWidget.module.css';
+import { useNavigate } from 'react-router-dom';
 
-export default function AdminExecutiveSummaryWidget({ metrics }) {
-    const [summary, setSummary] = useState('');
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+export default function AdminExecutiveSummaryWidget() {
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        let isMounted = true;
-
-        const fetchSummary = async () => {
-            try {
-                setIsLoading(true);
-                setError(null);
-                const result = await generateExecutiveSummary(metrics);
-                if (isMounted) {
-                    setSummary(result);
-                }
-            } catch (err) {
-                if (isMounted) {
-                    setError('Unable to load AI insights at this time.');
-                }
-            } finally {
-                if (isMounted) {
-                    setIsLoading(false);
-                }
-            }
-        };
-
-        // Only fetch if we have some metrics
-        if (metrics && Object.keys(metrics).length > 0) {
-            fetchSummary();
-        } else {
-            setIsLoading(false);
-            setSummary('Waiting for metrics to generate insights...');
-        }
-
-        return () => {
-            isMounted = false;
-        };
-    }, [metrics]);
-
-    return (
-        <div className={styles.widgetContainer}>
-            <div className={styles.header}>
-                <div className={styles.titleWrapper}>
-                    <div className={styles.iconWrapper}>
-                        <Bot size={20} className={styles.botIcon} />
-                        {isLoading && <Sparkles size={12} className={styles.sparkleIcon} />}
-                    </div>
-                    <h3 className={styles.title}>Atlas AI Executive Summary</h3>
-                </div>
-                <div className={styles.badge}>Live Analysis</div>
-            </div>
-
-            <div className={styles.content}>
-                {isLoading ? (
-                    <div className={styles.skeletonContainer}>
-                        <div className={styles.skeletonLine} style={{ width: '100%' }}></div>
-                        <div className={styles.skeletonLine} style={{ width: '90%' }}></div>
-                        <div className={styles.skeletonLine} style={{ width: '95%' }}></div>
-                        <div className={styles.skeletonLine} style={{ width: '60%' }}></div>
-                    </div>
-                ) : error ? (
-                    <div className={styles.error}>{error}</div>
-                ) : (
-                    <div className={styles.markdownWrapper}>
-                        <ReactMarkdown>{summary}</ReactMarkdown>
-                    </div>
-                )}
-            </div>
+  // In a real scenario, this data would come from the AI backend based on metrics.
+  // We are implementing the static structure of the Executive AI Brief per rules.
+  return (
+    <div className={styles.widgetContainer}>
+      <div className={styles.header}>
+        <div className={styles.titleWrapper}>
+          <div className={styles.iconWrapper}>
+            <Sparkles size={18} />
+          </div>
+          <h3 className={styles.title}>Executive AI Brief</h3>
         </div>
-    );
+      </div>
+
+      <div className={styles.content}>
+        <ul className={styles.bullets}>
+          <li>
+            Revenue <strong>+18%</strong> vs last month
+          </li>
+          <li>
+            <strong>3 RFQs</strong> require immediate approval
+          </li>
+          <li>
+            <strong>2 delayed shipments</strong> from EU suppliers
+          </li>
+          <li>
+            Inventory risk: <strong>Thymulin</strong>
+          </li>
+        </ul>
+
+        <div>
+          <span className={styles.impact}>Impact: +AED 24,000 projected</span>
+        </div>
+
+        <div className={styles.actions}>
+          <button className={styles.actionBtn} onClick={() => navigate('/admin/rfq')}>
+            Review RFQs
+          </button>
+          <button className={styles.actionBtn} onClick={() => navigate('/admin/products')}>
+            View Inventory
+          </button>
+          <button className={styles.actionBtn}>Ask Atlas</button>
+        </div>
+      </div>
+    </div>
+  );
 }
