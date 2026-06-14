@@ -46,7 +46,7 @@ export default function CatalogTableView({
     }));
   }, [products, variants, matrixViewType]);
 
-  const [visibleColumns, setVisibleColumns] = useState([]);
+  const [visibleColumns, setVisibleColumns] = useState(null);
   const [activeSavedView, setActiveSavedView] = useState('Default View');
 
   const renderSavedViews = () => (
@@ -303,19 +303,24 @@ export default function CatalogTableView({
   useEffect(() => {
     let isMounted = true;
     if (user?.uid) {
-      getDoc(doc(db, `users/${user.uid}/views/catalogProducts_items`)).then((snapshot) => {
-        if (!isMounted) return;
-        if (snapshot.exists()) {
-          const data = snapshot.data();
-          if (data.visibleColumns) {
-            setVisibleColumns(data.visibleColumns);
+      getDoc(doc(db, `users/${user.uid}/views/catalogProducts_items`))
+        .then((snapshot) => {
+          if (!isMounted) return;
+          if (snapshot.exists()) {
+            const data = snapshot.data();
+            if (data.visibleColumns) {
+              setVisibleColumns(data.visibleColumns);
+            } else {
+              setVisibleColumns(columns.map((c) => c.key));
+            }
           } else {
             setVisibleColumns(columns.map((c) => c.key));
           }
-        } else {
-          setVisibleColumns(columns.map((c) => c.key));
-        }
-      });
+        })
+        .catch((err) => {
+          console.error('Error fetching visibleColumns', err);
+          if (isMounted) setVisibleColumns(columns.map((c) => c.key));
+        });
     } else {
       Promise.resolve().then(() => {
         if (isMounted) setVisibleColumns(columns.map((c) => c.key));
@@ -327,7 +332,8 @@ export default function CatalogTableView({
   }, [user, columns]);
 
   const handleColumnToggle = async (key, isVisible) => {
-    const newCols = isVisible ? [...visibleColumns, key] : visibleColumns.filter((c) => c !== key);
+    const currentCols = visibleColumns || columns.map((c) => c.key);
+    const newCols = isVisible ? [...currentCols, key] : currentCols.filter((c) => c !== key);
     setVisibleColumns(newCols);
     if (user?.uid) {
       await setDoc(
