@@ -1395,6 +1395,14 @@ export function GlobalActivityFeed({ logs = [] }) {
     { id: 1, text: 'RFQ #2304 Approved by CEO', time: '2 mins ago', type: 'rfq' },
     { id: 2, text: 'PO #1920 Created for wholeseller BioPharma', time: '15 mins ago', type: 'po' },
     { id: 3, text: 'Bill #9023 Paid (AED 12,500)', time: '1 hour ago', type: 'bill' },
+    { id: 4, text: 'New Lead: Clinic MedCare Dubai registered', time: '3 hours ago', type: 'lead' },
+    {
+      id: 5,
+      text: 'Supplier catalog synced with Zoho Inventory',
+      time: '5 hours ago',
+      type: 'sync',
+    },
+    { id: 6, text: 'AI Analysis Completed: Q2 Margin Optimization', time: '1 day ago', type: 'ai' },
   ];
   const items = logs.length > 0 ? logs : defaultLogs;
 
@@ -1413,18 +1421,37 @@ export function GlobalActivityFeed({ logs = [] }) {
         </h3>
         <span className="cc-health-dot cc-dot-green" />
       </div>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.85rem',
-          maxHeight: '380px',
-          overflowY: 'auto',
-        }}
-      >
+
+      <style>{`
+        .cc-activity-feed {
+          display: flex;
+          flex-direction: column;
+          gap: 0.85rem;
+          max-height: 380px;
+          overflow-y: auto;
+        }
+        /* Mobile: limit to 5 items */
+        .cc-activity-feed .cc-activity-item:nth-child(n+6) {
+          display: none !important;
+        }
+        /* Desktop: 2 columns, show all */
+        @media (min-width: 1024px) {
+          .cc-activity-feed {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+          }
+          .cc-activity-feed .cc-activity-item:nth-child(n+6) {
+            display: flex !important;
+          }
+        }
+      `}</style>
+
+      <div className="cc-activity-feed">
         {items.map((item) => (
           <div
             key={item.id}
+            className="cc-activity-item"
             style={{
               display: 'flex',
               flexDirection: 'column',
