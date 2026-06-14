@@ -1,0 +1,147 @@
+.widgetContainer {
+    background: linear-gradient(145deg, rgba(16, 24, 39, 0.95), rgba(10, 15, 26, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    color: #e5e7eb;
+}
+
+.widgetContainer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.titleWrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.iconWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(59, 130, 246, 0.15);
+    border-radius: 10px;
+    color: #60a5fa;
+}
+
+.botIcon {
+    z-index: 2;
+}
+
+.sparkleIcon {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    color: #fbbf24;
+    animation: pulseSparkle 1.5s infinite;
+}
+
+@keyframes pulseSparkle {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(0.8); opacity: 0.5; }
+}
+
+.title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: linear-gradient(90deg, #f9fafb, #d1d5db);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.25rem 0.6rem;
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border-radius: 20px;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.content {
+    min-height: 80px;
+}
+
+.skeletonContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.skeletonLine {
+    height: 12px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+    background-size: 200% 100%;
+    border-radius: 4px;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.error {
+    color: #ef4444;
+    font-size: 0.9rem;
+}
+
+.markdownWrapper {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #d1d5db;
+}
+
+.markdownWrapper h3 {
+    font-size: 1.05rem;
+    color: #f3f4f6;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.markdownWrapper p {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+}
+
+.markdownWrapper ul {
+    margin-top: 0;
+    padding-left: 1.25rem;
+    margin-bottom: 0;
+}
+
+.markdownWrapper li {
+    margin-bottom: 0.4rem;
+}
+
+.markdownWrapper strong {
+    color: #f9fafb;
+    font-weight: 600;
+}
