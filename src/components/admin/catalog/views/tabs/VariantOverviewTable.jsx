@@ -62,9 +62,41 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
       <tbody>
         {variants.map((v, i) => {
           const health = calculateVariantHealthScore(v);
+
+          // Fallback SKU Generator Algorithm
+          const generateFallbackSku = () => {
+            const prodName = parentProduct?.name || parentProduct?.displayName || 'UNK';
+            const safeName = prodName
+              .replace(/[^a-zA-Z0-9]/g, '')
+              .substring(0, 5)
+              .toUpperCase();
+            const format = (v.format || '').substring(0, 3).toUpperCase();
+            const size = (v.size || v.dosage || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            const parts = ['SKU', safeName, format, size].filter(Boolean);
+            return parts.join('-');
+          };
+
+          const displaySku = v.sku || generateFallbackSku();
+
           return (
             <tr key={v.id || i} style={trStyle}>
-              <td style={tdStyleMain}>{v.sku || '-'}</td>
+              <td style={tdStyleMain}>
+                {displaySku}
+                {!v.sku && (
+                  <span
+                    style={{
+                      fontSize: '0.65rem',
+                      color: '#f59e0b',
+                      marginLeft: '6px',
+                      border: '1px solid #fcd34d',
+                      padding: '2px 4px',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    AUTO
+                  </span>
+                )}
+              </td>
               <td style={tdStyle}>{v.supplier || 'Unassigned'}</td>
               <td style={tdStyle}>
                 {[v.format || '', v.dosage || '', v.size || ''].filter(Boolean).join(' ') || '-'}

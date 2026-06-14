@@ -11,6 +11,7 @@ import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import Tag from 'lucide-react/dist/esm/icons/tag';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useMemo, useEffect } from 'react';
+import { db } from '../../../firebase';
 import { useCatalogData } from './useCatalogData';
 import CatalogKPIHeader from './CatalogKPIHeader';
 import CatalogProductsWorkspace from './views/CatalogProductsWorkspace';
@@ -104,6 +105,8 @@ export default function CatalogIntelligenceHub() {
   // Filter variants for the specific views (Inventory, Regulatory, Suppliers, Missing Data)
   // Note: CatalogProductsWorkspace still accepts products and does its own filtering if needed,
   // but we can pass variants to it as well, or we can filter the products array as before.
+  const deferredSearchQuery = React.useDeferredValue(searchQuery);
+
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       // 1. Basic Filters (Search & Categories)
@@ -111,8 +114,8 @@ export default function CatalogIntelligenceHub() {
         const cat = p.category || 'Uncategorized';
         if (!activeCategories.includes(cat)) return false;
       }
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
+      if (deferredSearchQuery) {
+        const q = deferredSearchQuery.toLowerCase();
         const matchesSearch =
           p.name?.toLowerCase().includes(q) ||
           p.sku?.toLowerCase().includes(q) ||
@@ -143,14 +146,21 @@ export default function CatalogIntelligenceHub() {
 
       return true;
     });
-  }, [products, activeCategories, searchQuery, activeWorkspace, advancedFilters, activeKpis]);
+  }, [
+    products,
+    activeCategories,
+    deferredSearchQuery,
+    activeWorkspace,
+    advancedFilters,
+    activeKpis,
+  ]);
 
   // Filter variants for intelligence views
   const filteredVariants = useMemo(() => {
     return variants.filter((v) => {
       // Basic Search
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
+      if (deferredSearchQuery) {
+        const q = deferredSearchQuery.toLowerCase();
         if (!v.name.toLowerCase().includes(q) && !v.supplier.toLowerCase().includes(q))
           return false;
       }
@@ -183,7 +193,7 @@ export default function CatalogIntelligenceHub() {
 
       return true;
     });
-  }, [variants, searchQuery, activeWorkspace, advancedFilters]);
+  }, [variants, deferredSearchQuery, activeWorkspace, advancedFilters]);
 
   // --- External Filters Visibility ---
   const activeFiltersVisuals = useMemo(() => {
@@ -437,6 +447,52 @@ export default function CatalogIntelligenceHub() {
     } else if (action === 'ai_variant' || action === 'ai') {
       setAiProduct(product);
       setIsAiModalOpen(true);
+    } else if (action === 'quick_edit') {
+      const field = variant; // field name passed as variant arg
+      const val = arguments[3]; // value passed as 4th arg
+      const updateData = {};
+      if (field === 'cost') {
+        updateData.cost = val;
+        updateData.unitCost = val;
+      } else if (field === 'msrp') {
+        updateData.msrp = val;
+        updateData.price = val;
+      } else {
+        updateData[field] = val;
+      }
+
+      import('firebase/firestore').then(({ doc, updateDoc }) => {
+        let variantId = product.id;
+        let productId = product.parentProduct?.id || product.originalProduct?.id;
+
+        // If the product object IS the variant itself (flat mode row)
+        if (product.isVariantRow) {
+          variantId = product.id;
+        }
+
+        if (productId && variantId && !variantId.includes('-root')) {
+          const vRef = doc(db, 'products', productId, 'variants', variantId);
+          updateDoc(vRef, updateData)
+            .then(() => {
+              toast.success(`Updated ${field} successfully!`);
+            })
+            .catch((err) => {
+              console.error('Quick edit error:', err);
+              toast.error('Failed to update.');
+            });
+        } else {
+          // If it's a main product pretending to be a variant
+          const pRef = doc(db, 'products', product.id);
+          updateDoc(pRef, updateData)
+            .then(() => {
+              toast.success(`Updated ${field} successfully!`);
+            })
+            .catch((err) => {
+              console.error('Quick edit error:', err);
+              toast.error('Failed to update.');
+            });
+        }
+      });
     }
   };
 

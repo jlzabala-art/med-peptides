@@ -3,11 +3,13 @@ import {
   collection,
   query,
   getDocs,
+  getDoc,
   orderBy,
   doc,
   updateDoc,
   deleteDoc,
   addDoc,
+  collectionGroup,
 } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { useToast } from '../../../hooks/useToast';
@@ -20,25 +22,28 @@ export function useCatalogData() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const q = query(collection(db, 'products'), orderBy('name'));
-      const snapshot = await getDocs(q);
 
-      const rawProducts = await Promise.all(
-        snapshot.docs.map(async (docSnap) => {
-          const productData = { id: docSnap.id, ...docSnap.data() };
+      const [productsSnap, variantsSnap] = await Promise.all([
+        getDocs(query(collection(db, 'products'), orderBy('name'))),
+        getDocs(collectionGroup(db, 'variants')),
+      ]);
 
-          try {
-            const variantsQ = query(collection(db, 'products', docSnap.id, 'variants'));
-            const vSnap = await getDocs(variantsQ);
-            productData.variants = vSnap.docs.map((v) => ({ id: v.id, ...v.data() }));
-          } catch (vErr) {
-            console.warn(`Could not fetch variants for ${docSnap.id}`, vErr);
-            productData.variants = [];
+      const variantsByProduct = {};
+      variantsSnap.docs.forEach((vSnap) => {
+        const productId = vSnap.ref.parent.parent?.id;
+        if (productId) {
+          if (!variantsByProduct[productId]) {
+            variantsByProduct[productId] = [];
           }
+          variantsByProduct[productId].push({ id: vSnap.id, ...vSnap.data() });
+        }
+      });
 
-          return productData;
-        })
-      );
+      const rawProducts = productsSnap.docs.map((docSnap) => {
+        const productData = { id: docSnap.id, ...docSnap.data() };
+        productData.variants = variantsByProduct[docSnap.id] || [];
+        return productData;
+      });
 
       // Group products by case-insensitive name to merge duplicates
       const groupedMap = new Map();
@@ -57,7 +62,7 @@ export function useCatalogData() {
           if (existing.variants.length === 0) {
             existing.variants.push({
               id: `${existing.id}-root`,
-              format: existing.format || existing.category || '',
+              format: existing.format || '',
               size: existing.size || '',
               dosage: existing.dosage || '',
               supplier: existing.supplier || existing.vendor || 'Unassigned',
@@ -76,7 +81,7 @@ export function useCatalogData() {
             // add duplicate's root as variant
             existing.variants.push({
               id: p.id,
-              format: p.format || p.category || '',
+              format: p.format || '',
               size: p.size || '',
               dosage: p.dosage || '',
               supplier: p.supplier || p.vendor || 'Unassigned',

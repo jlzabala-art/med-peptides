@@ -227,7 +227,7 @@ export default function PortalLayout({
       align-items: center;
       padding: 0 1.5rem;
       position: relative;
-      z-index: 50;
+      z-index: 101;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
       box-sizing: border-box;
       width: 100%;

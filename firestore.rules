@@ -62,6 +62,9 @@ service cloud.firestore {
     match /subcategories/{id}          { allow read: if true; allow write: if isAdmin(); }
     match /settings/{id}               { allow read: if true; allow write: if isAdmin(); }
     match /config/{id}                 { allow read: if true; allow write: if isAdmin(); }
+    match /global_rates/{id}           { allow read: if true; allow write: if isAdmin(); }
+    match /rates/{id}                  { allow read: if true; allow write: if isAdmin(); }
+    match /wholesellers/{id}           { allow read: if true; allow write: if isAdmin(); }
     match /product_variants/{id}       { allow read: if true; allow write: if isAdmin(); }
     match /blueprints/{id}             { allow read: if true; allow write: if isAdmin(); }
     match /monitoring_profiles/{id}    { allow read: if true; allow write: if isAdmin(); }
@@ -79,6 +82,7 @@ service cloud.firestore {
     match /clinical_logs/{id}          { allow read, write: if isAdmin(); }
     match /ai_response_cache/{id}      { allow read, write: if isAdmin(); }
     match /page_views/{id}             { allow create: if true; allow read, update, delete: if isAdmin(); }
+    match /user_sessions/{id}          { allow read, write: if isAuthenticated() && (request.auth.uid == id || isAdmin()); }
 
     // PROTOCOLS — fully public read (get + list + query)
     match /protocols/{protocolId} {
@@ -145,7 +149,7 @@ service cloud.firestore {
       allow delete: if isAdmin();
 
       // Subcollections: users can read/write their own; admins have full access
-      match /{allSubcollections=**} {
+      match /{document=**} {
         allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
         allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
       }
@@ -476,8 +480,7 @@ service cloud.firestore {
     // ── user_sessions — Tracking connection time ──
     match /user_sessions/{uid} {
       allow read: if isAuthenticated() && (request.auth.uid == uid || isAdmin());
-      allow create, update: if isAuthenticated() && request.auth.uid == uid;
-      allow delete: if isAdmin();
+      allow write: if isAuthenticated() && (request.auth.uid == uid || isAdmin());
     }
 
     // ── audit_logs — Tamper-proof medical read/write tracking ──

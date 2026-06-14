@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../../firebase';
@@ -127,12 +127,14 @@ export function useCatalogFilters(items = []) {
   };
 
   // Filtering Logic
+  const deferredSearchQuery = React.useDeferredValue(searchQuery);
+
   const filteredData = useMemo(() => {
     let result = [...items];
 
     // Search
-    if (searchQuery) {
-      const lowerQ = searchQuery.toLowerCase();
+    if (deferredSearchQuery) {
+      const lowerQ = deferredSearchQuery.toLowerCase();
       result = result.filter(
         (item) =>
           (item.name || '').toLowerCase().includes(lowerQ) ||

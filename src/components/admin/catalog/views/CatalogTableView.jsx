@@ -39,7 +39,7 @@ export default function CatalogTableView({
       ...v,
       // Provide compatibility fields for the table renderer
       parentProduct: v.originalProduct,
-      name: `${v.parentProductName || v.displayName || 'Unknown'} - ${v.format || ''} ${v.size || ''}`.trim(),
+      name: `${v.productName || v.displayName || 'Unknown'} - ${v.format || ''} ${v.size || ''}`.trim(),
       category: v.originalProduct?.category,
       images: v.images || v.originalProduct?.images,
       isVariantRow: true,
@@ -149,7 +149,7 @@ export default function CatalogTableView({
                 display: 'inline-block',
               }}
             >
-              {count} {count === 1 ? 'Variant' : 'Variants'}
+              {count}
             </div>
           );
         },
@@ -166,16 +166,13 @@ export default function CatalogTableView({
           );
           const count = uniqueSuppliers.size;
 
-          let coverageText = 'No Source';
           let color = '#94a3b8';
           let bg = 'rgba(148, 163, 184, 0.1)';
 
           if (count === 1) {
-            coverageText = 'Single Source Risk';
             color = '#f59e0b';
             bg = 'rgba(245, 158, 11, 0.1)';
           } else if (count >= 2) {
-            coverageText = `${count} Suppliers`;
             color = '#10b981';
             bg = 'rgba(16, 185, 129, 0.1)';
           }
@@ -192,7 +189,7 @@ export default function CatalogTableView({
                 display: 'inline-block',
               }}
             >
-              {count === 0 ? '0 Suppliers' : coverageText}
+              {count}
             </div>
           );
         },
@@ -247,6 +244,107 @@ export default function CatalogTableView({
         },
       },
     ];
+
+    if (matrixViewType === 'flat') {
+      contextColumns = [
+        {
+          key: 'stock',
+          header: 'Stock',
+          render: (row) => (
+            <input
+              type="number"
+              defaultValue={row.stock || 0}
+              onBlur={(e) => {
+                const val = Number(e.target.value);
+                if (val !== row.stock && onAction) {
+                  onAction('quick_edit', row, 'stock', val);
+                }
+              }}
+              style={{
+                width: '70px',
+                padding: '4px 8px',
+                border: '1px solid transparent',
+                borderRadius: '4px',
+                fontSize: '0.85rem',
+                backgroundColor: 'rgba(0,0,0,0.02)',
+                outline: 'none',
+                transition: 'all 0.2s',
+              }}
+              onFocus={(e) => {
+                e.target.style.border = '1px solid #3b82f6';
+                e.target.style.backgroundColor = '#fff';
+              }}
+              onClick={(e) => e.stopPropagation()}
+            />
+          ),
+        },
+        {
+          key: 'cost',
+          header: 'Cost ($)',
+          render: (row) => (
+            <input
+              type="number"
+              step="0.01"
+              defaultValue={row.cost || row.unitCost || 0}
+              onBlur={(e) => {
+                const val = Number(e.target.value);
+                if (val !== (row.cost || row.unitCost) && onAction) {
+                  onAction('quick_edit', row, 'cost', val);
+                }
+              }}
+              style={{
+                width: '80px',
+                padding: '4px 8px',
+                border: '1px solid transparent',
+                borderRadius: '4px',
+                fontSize: '0.85rem',
+                backgroundColor: 'rgba(0,0,0,0.02)',
+                outline: 'none',
+                transition: 'all 0.2s',
+              }}
+              onFocus={(e) => {
+                e.target.style.border = '1px solid #3b82f6';
+                e.target.style.backgroundColor = '#fff';
+              }}
+              onClick={(e) => e.stopPropagation()}
+            />
+          ),
+        },
+        {
+          key: 'msrp',
+          header: 'MSRP ($)',
+          render: (row) => (
+            <input
+              type="number"
+              step="0.01"
+              defaultValue={row.msrp || row.price || 0}
+              onBlur={(e) => {
+                const val = Number(e.target.value);
+                if (val !== (row.msrp || row.price) && onAction) {
+                  onAction('quick_edit', row, 'msrp', val);
+                }
+              }}
+              style={{
+                width: '80px',
+                padding: '4px 8px',
+                border: '1px solid transparent',
+                borderRadius: '4px',
+                fontSize: '0.85rem',
+                backgroundColor: 'rgba(0,0,0,0.02)',
+                outline: 'none',
+                transition: 'all 0.2s',
+              }}
+              onFocus={(e) => {
+                e.target.style.border = '1px solid #3b82f6';
+                e.target.style.backgroundColor = '#fff';
+              }}
+              onClick={(e) => e.stopPropagation()}
+            />
+          ),
+        },
+        ...contextColumns.filter((c) => c.key === 'supplierCount' || c.key === 'statusSummary'),
+      ];
+    }
 
     const actionColumn = {
       key: 'actions',

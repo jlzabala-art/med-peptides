@@ -181,16 +181,6 @@ function useUnreadMessagesCount() {
 // ── Intent-based navigation groups ────────────────────────────────────────────
 const NAV_GROUPS = [
   {
-    id: 'core-workspace',
-    label: 'Workspace',
-    icon: LayoutDashboard,
-    items: [
-      { id: 'dashboard', label: 'Dashboard', icon: Activity },
-      { id: 'messages', label: 'Messages', icon: MessageSquare },
-      { id: 'calendar', label: 'Calendar', icon: Calendar },
-    ],
-  },
-  {
     id: 'sales-operations',
     label: 'Sales (O2C)',
     icon: TrendingUp,
@@ -397,9 +387,7 @@ export default function AdminDashboard() {
     }
     return NAV_GROUPS.map((group) => ({
       ...group,
-      items: group.items.filter(
-        (item) => group.id === 'core-workspace' || userProfile.allowedAdminTabs.includes(item.id)
-      ),
+      items: group.items.filter((item) => userProfile.allowedAdminTabs.includes(item.id)),
     })).filter((group) => group.items.length > 0);
   }, [userProfile, isAdmin]);
 
