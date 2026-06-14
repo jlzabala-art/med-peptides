@@ -65,11 +65,26 @@ export default function DataTable({
   onDateRangeChange,
   filters = [],
   onFilterRemove,
-  renderCustomFilters
+  renderCustomFilters,
+
+  // Table Settings
+  enableColumnSelection = false,
+  enableExport = false,
+  onExport,
+  visibleColumns, // array of keys
+  onColumnToggle, // (columnKey, isVisible) => void
+  tableId
 }) {
   const [expandedId, setExpandedId] = useState(null);
   const [hoveredRowId, setHoveredRowId] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [showColMenu, setShowColMenu] = useState(false);
+
+  // Use visibleColumns prop if provided, otherwise assume all visible
+  const activeColumns = useMemo(() => {
+    if (!visibleColumns) return columns;
+    return columns.filter(c => visibleColumns.includes(c.key || c.header));
+  }, [columns, visibleColumns]);
 
   const sortedData = useMemo(() => {
     const safeData = data || [];
@@ -129,7 +144,7 @@ export default function DataTable({
       flexDirection: 'column'
     }}>
       {/* TOOLBAR */}
-      {(onSearchChange || onDateRangeChange || renderCustomFilters || (filters && filters.length > 0)) && (
+      {(onSearchChange || onDateRangeChange || renderCustomFilters || (filters && filters.length > 0) || enableColumnSelection || enableExport) && (
         <div style={{
           display: 'flex',
           flexDirection: 'column',
@@ -196,6 +211,74 @@ export default function DataTable({
                 {renderCustomFilters()}
               </div>
             )}
+
+            <div style={{ flex: 1 }} />
+
+            {(enableColumnSelection || enableExport) && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'relative' }}>
+                {enableExport && (
+                  <button 
+                    onClick={onExport}
+                    style={{ 
+                      padding: '0.35rem 0.75rem', 
+                      backgroundColor: 'var(--color-bg-subtle)', 
+                      border: '1px solid var(--color-border)', 
+                      borderRadius: 'var(--radius-sm)', 
+                      fontSize: '0.75rem', 
+                      fontWeight: 600, 
+                      cursor: 'pointer' 
+                    }}
+                  >
+                    Export CSV
+                  </button>
+                )}
+                {enableColumnSelection && (
+                  <div style={{ position: 'relative' }}>
+                    <button 
+                      onClick={() => setShowColMenu(!showColMenu)}
+                      style={{ 
+                        padding: '0.35rem 0.75rem', 
+                        backgroundColor: 'var(--color-bg-subtle)', 
+                        border: '1px solid var(--color-border)', 
+                        borderRadius: 'var(--radius-sm)', 
+                        fontSize: '0.75rem', 
+                        fontWeight: 600, 
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem'
+                      }}
+                    >
+                      Columns <ChevronDown size={14}/>
+                    </button>
+                    {showColMenu && (
+                      <div style={{ 
+                        position: 'absolute', top: '100%', right: 0, marginTop: '4px',
+                        backgroundColor: 'var(--color-bg-app)', border: '1px solid var(--color-border)',
+                        borderRadius: 'var(--radius-md)', padding: '0.5rem', minWidth: '150px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', zIndex: 50,
+                        display: 'flex', flexDirection: 'column', gap: '0.25rem'
+                      }}>
+                        {columns.map((c, i) => {
+                          const colKey = c.key || c.header;
+                          const isVisible = visibleColumns ? visibleColumns.includes(colKey) : true;
+                          return (
+                            <label key={`col-sel-${i}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', cursor: 'pointer' }}>
+                              <input 
+                                type="checkbox" 
+                                checked={isVisible} 
+                                onChange={(e) => onColumnToggle && onColumnToggle(colKey, e.target.checked)} 
+                              />
+                              {c.header || colKey}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Filter Chips */}
@@ -229,7 +312,7 @@ export default function DataTable({
           )}
         </div>
       )}
-      <div className="ui-table-container responsive-stack" style={{ overflowX: 'auto', overflowY: 'visible', width: '100%', minHeight: '350px', maxHeight: 'calc(100vh - 200px)' }}>
+      <div className="ui-table-container responsive-stack" style={{ overflowX: 'auto', overflowY: 'auto', width: '100%', minHeight: '350px', maxHeight: 'calc(100vh - 200px)' }}>
         <table className="ui-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead style={{ 
             backgroundColor: 'var(--color-bg-app)', 
@@ -254,7 +337,7 @@ export default function DataTable({
               {!(someSelected || allSelected) || !renderBatchActions ? (
                 <React.Fragment>
                   {expandableRender && <th style={{ width: '48px', minWidth: '48px', whiteSpace: 'nowrap', padding: '0', borderBottom: '1px solid var(--color-border)', textAlign: 'center' }}></th>}
-                  {columns.map((col, idx) => {
+                  {activeColumns.map((col, idx) => {
                     const isSortable = col.key && col.sortable !== false;
                     return (
                       <th 
@@ -393,12 +476,12 @@ export default function DataTable({
                     {expandableRender && (
                       <td 
                         style={{ padding: '0', width: '48px', minWidth: '48px', whiteSpace: 'nowrap', cursor: 'pointer', color: 'var(--text-muted)', verticalAlign: 'middle', textAlign: 'center' }}
-                        onClick={() => setExpandedId(isExpanded ? null : rowKey)}
+                        onClick={(e) => { e.stopPropagation(); setExpandedId(isExpanded ? null : rowKey); }}
                       >
                         {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </td>
                     )}
-                    {columns.map((col, idx) => {
+                    {activeColumns.map((col, idx) => {
                       let cellValue = col.render ? col.render(row) : row[col.key];
                       const isProductColumn = col.key === 'name' || col.header === 'Product Name' || col.label === 'Product Name';
                       const cellStyle = {
@@ -424,7 +507,7 @@ export default function DataTable({
                             <div style={{ flex: 1, overflow: 'hidden' }}>
                               {cellValue}
                             </div>
-                            {idx === columns.length - 1 && renderHoverActions && hoveredRowId === rowKey && (
+                            {idx === activeColumns.length - 1 && renderHoverActions && hoveredRowId === rowKey && (
                               <div style={{ position: 'absolute', right: '16px', display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(90deg, transparent, inherit 20%)', paddingLeft: '24px' }}>
                                 {renderHoverActions(row)}
                               </div>
@@ -477,7 +560,7 @@ export default function DataTable({
                   outline: 'none'
                 }}
               >
-                {[10, 20, 50, 100].map(val => (
+                {[20, 50, 100, 250].map(val => (
                   <option key={`rpp-${val}`} value={val}>{val}</option>
                 ))}
               </select>

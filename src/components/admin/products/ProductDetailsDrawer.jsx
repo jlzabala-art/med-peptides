@@ -4,6 +4,8 @@ import Edit3 from "lucide-react/dist/esm/icons/edit-3";
 import Settings from "lucide-react/dist/esm/icons/settings";
 import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
 import PackageOpen from "lucide-react/dist/esm/icons/package-open";
+import Box from "lucide-react/dist/esm/icons/box";
+import Building from "lucide-react/dist/esm/icons/building";
 import ImageIcon from "lucide-react/dist/esm/icons/image";
 import Shield from "lucide-react/dist/esm/icons/shield";
 import Share2 from "lucide-react/dist/esm/icons/share-2";
@@ -105,13 +107,12 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
   // Accordion state for Mobile/Tablet accordion views
   const [expandedAccordions, setExpandedAccordions] = useState({
     overview: true,
-    pricing: false,
+    variants: false,
+    suppliers: false,
     inventory: false,
-    media: false,
     regulatory: false,
-    relationships: false,
-    zoho: false,
-    timeline: false
+    pricing: false,
+    history: false
   });
 
   const toggleAccordion = (section) => {
@@ -481,14 +482,12 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Eye },
-    { id: 'general', label: 'General', icon: Edit3 },
-    { id: 'pricing', label: 'Pricing Dashboard', icon: DollarSign },
-    { id: 'inventory', label: 'Inventory & Forecast', icon: PackageOpen },
-    { id: 'media', label: 'Media Gallery', icon: ImageIcon },
-    { id: 'regulatory', label: 'Compliance', icon: Shield },
-    { id: 'zoho', label: 'Zoho Sync', icon: RefreshCw },
-    { id: 'relations', label: 'Relationships', icon: Link },
-    { id: 'timeline', label: 'Timeline log', icon: History }
+    { id: 'variants', label: 'Variants', icon: PackageOpen },
+    { id: 'suppliers', label: 'Suppliers', icon: Building },
+    { id: 'inventory', label: 'Inventory', icon: Box },
+    { id: 'regulatory', label: 'Regulatory', icon: Shield },
+    { id: 'pricing', label: 'Pricing', icon: DollarSign },
+    { id: 'history', label: 'History', icon: History }
   ];
 
   return (
@@ -855,28 +854,28 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
                       {expandedAccordions.overview && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderOverviewTab()}</div>}
                     </div>
 
-                    {/* ACCORDION 2: GENERAL */}
+                    {/* ACCORDION 2: VARIANTS */}
                     <div style={{ border: '1px solid #1e293b', borderRadius: '8px', overflow: 'hidden' }}>
                       <button 
-                        onClick={() => toggleAccordion('general')} 
+                        onClick={() => toggleAccordion('variants')} 
                         style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: '#111827', color: '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                       >
-                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><Edit3 size={16} /> General Info</span>
-                        {expandedAccordions.general ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><PackageOpen size={16} /> Variants</span>
+                        {expandedAccordions.variants ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </button>
-                      {expandedAccordions.general && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderGeneralTab()}</div>}
+                      {expandedAccordions.variants && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderVariantsTab()}</div>}
                     </div>
 
-                    {/* ACCORDION 3: PRICING */}
+                    {/* ACCORDION 3: SUPPLIERS */}
                     <div style={{ border: '1px solid #1e293b', borderRadius: '8px', overflow: 'hidden' }}>
                       <button 
-                        onClick={() => toggleAccordion('pricing')} 
+                        onClick={() => toggleAccordion('suppliers')} 
                         style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: '#111827', color: '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                       >
-                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><DollarSign size={16} /> Pricing Matrix</span>
-                        {expandedAccordions.pricing ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><Building size={16} /> Suppliers</span>
+                        {expandedAccordions.suppliers ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </button>
-                      {expandedAccordions.pricing && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderPricingTab()}</div>}
+                      {expandedAccordions.suppliers && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderSuppliersTab()}</div>}
                     </div>
 
                     {/* ACCORDION 4: INVENTORY */}
@@ -885,46 +884,46 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
                         onClick={() => toggleAccordion('inventory')} 
                         style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: '#111827', color: '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                       >
-                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><PackageOpen size={16} /> Inventory & Forecast</span>
+                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><Box size={16} /> Inventory</span>
                         {expandedAccordions.inventory ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </button>
                       {expandedAccordions.inventory && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderInventoryTab()}</div>}
                     </div>
 
-                    {/* ACCORDION 5: MEDIA */}
-                    <div style={{ border: '1px solid #1e293b', borderRadius: '8px', overflow: 'hidden' }}>
-                      <button 
-                        onClick={() => toggleAccordion('media')} 
-                        style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: '#111827', color: '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}
-                      >
-                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><ImageIcon size={16} /> Media & Certificates</span>
-                        {expandedAccordions.media ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                      </button>
-                      {expandedAccordions.media && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderMediaTab()}</div>}
-                    </div>
-
-                    {/* ACCORDION 6: REGULATORY */}
+                    {/* ACCORDION 5: REGULATORY */}
                     <div style={{ border: '1px solid #1e293b', borderRadius: '8px', overflow: 'hidden' }}>
                       <button 
                         onClick={() => toggleAccordion('regulatory')} 
                         style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: '#111827', color: '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                       >
-                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><Shield size={16} /> Regional Compliance</span>
+                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><Shield size={16} /> Regulatory</span>
                         {expandedAccordions.regulatory ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </button>
                       {expandedAccordions.regulatory && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderRegulatoryTab()}</div>}
                     </div>
 
-                    {/* ACCORDION 7: ZOHO SYNC */}
+                    {/* ACCORDION 6: PRICING */}
                     <div style={{ border: '1px solid #1e293b', borderRadius: '8px', overflow: 'hidden' }}>
                       <button 
-                        onClick={() => toggleAccordion('zoho')} 
+                        onClick={() => toggleAccordion('pricing')} 
                         style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: '#111827', color: '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                       >
-                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><RefreshCw size={16} /> Zoho Sync Console</span>
-                        {expandedAccordions.zoho ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><DollarSign size={16} /> Pricing</span>
+                        {expandedAccordions.pricing ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </button>
-                      {expandedAccordions.zoho && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderZohoTab()}</div>}
+                      {expandedAccordions.pricing && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderPricingTab()}</div>}
+                    </div>
+
+                    {/* ACCORDION 7: HISTORY */}
+                    <div style={{ border: '1px solid #1e293b', borderRadius: '8px', overflow: 'hidden' }}>
+                      <button 
+                        onClick={() => toggleAccordion('history')} 
+                        style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: '#111827', color: '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                      >
+                        <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><History size={16} /> History</span>
+                        {expandedAccordions.history ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </button>
+                      {expandedAccordions.history && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}>{renderTimelineTab()}</div>}
                     </div>
 
                   </div>
@@ -932,14 +931,12 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
                   /* Desktop Tab Views */
                   <div>
                     {activeTab === 'overview' && renderOverviewTab()}
-                    {activeTab === 'general' && renderGeneralTab()}
-                    {activeTab === 'pricing' && renderPricingTab()}
+                    {activeTab === 'variants' && renderVariantsTab()}
+                    {activeTab === 'suppliers' && renderSuppliersTab()}
                     {activeTab === 'inventory' && renderInventoryTab()}
-                    {activeTab === 'media' && renderMediaTab()}
                     {activeTab === 'regulatory' && renderRegulatoryTab()}
-                    {activeTab === 'zoho' && renderZohoTab()}
-                    {activeTab === 'relations' && renderRelationshipsTab()}
-                    {activeTab === 'timeline' && renderTimelineTab()}
+                    {activeTab === 'pricing' && renderPricingTab()}
+                    {activeTab === 'history' && renderTimelineTab()}
                   </div>
                 )}
 
@@ -1259,19 +1256,49 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
     );
   }
 
-  // 5. PESTAÑA OVERVIEW (Executive summary card view)
+  // 5. PESTAÑA OVERVIEW (Executive summary card view + General Info)
   function renderOverviewTab() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        {/* General Info integrated into Overview */}
+        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Product General Info</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Product Name</label>
+              <input type="text" value={form.name || ''} onChange={e => setForm({...form, name: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Category</label>
+              <select value={form.category || ''} onChange={e => setForm({...form, category: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }}>
+                {categoriesList.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Product Type</label>
+              <select value={form.product_type || ''} onChange={e => setForm({...form, product_type: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }}>
+                <option value="Peptide">Peptide</option>
+                <option value="Supplement">Supplement</option>
+                <option value="Diagnostic Kit">Diagnostic Kit</option>
+                <option value="Service">Medical Service</option>
+              </select>
+            </div>
+          </div>
+          <div style={{ marginTop: '1rem' }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Description</label>
+            <textarea rows={3} value={form.description || ''} onChange={e => setForm({...form, description: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', resize: 'vertical', backgroundColor: '#0f172a', color: '#fff' }} />
+          </div>
+        </Card>
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
           {/* Summary Card */}
           <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937', color: '#fff' }}>
             <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '4px', textTransform: 'uppercase', fontWeight: 600 }}>Supplier & Origins</span>
             <div style={{ fontSize: '0.9rem', color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <div>Primary: <strong style={{ color: '#fff' }}>{form.supplier || 'N/A'}</strong></div>
-              <div>Backup: <strong style={{ color: '#fff' }}>{form.backupSupplier}</strong></div>
-              <div>Lead Time: <strong style={{ color: '#fff' }}>{form.supplierLeadTime} Days</strong></div>
-              <div>Warehouse: <strong style={{ color: '#fff' }}>{form.warehouse}</strong></div>
+              <div>Backup: <strong style={{ color: '#fff' }}>{form.backupSupplier || 'N/A'}</strong></div>
+              <div>Lead Time: <strong style={{ color: '#fff' }}>{form.supplierLeadTime || 0} Days</strong></div>
+              <div>Warehouse: <strong style={{ color: '#fff' }}>{form.warehouse || 'N/A'}</strong></div>
             </div>
           </Card>
 
@@ -1331,24 +1358,24 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
           <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937', color: '#fff' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
               <h4 style={{ margin: 0, fontSize: '#f8fafc', fontWeight: 600 }}>Zoho Books Connected Status</h4>
-              <StatusChip status={form.zohoSyncStatus === 'Synced' ? 'Active' : 'Warning'} label={form.zohoSyncStatus} />
+              <StatusChip status={form.zohoSyncStatus === 'Synced' ? 'Active' : 'Warning'} label={form.zohoSyncStatus || 'Not Synced'} />
             </div>
             <div style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: '#94a3b8' }}>Zoho ID:</span>
-                <strong>{form.zohoId}</strong>
+                <strong>{form.zohoId || 'N/A'}</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: '#94a3b8' }}>Last Sync Log:</span>
-                <strong>{form.zohoLastSync}</strong>
+                <strong>{form.zohoLastSync || 'Never'}</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: '#94a3b8' }}>Inventory Sync:</span>
-                <span style={{ color: '#34d399', fontWeight: 600 }}>{form.zohoInventorySync}</span>
+                <span style={{ color: '#34d399', fontWeight: 600 }}>{form.zohoInventorySync || 'N/A'}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: '#94a3b8' }}>Price Sync:</span>
-                <span style={{ color: '#34d399', fontWeight: 600 }}>{form.zohoPriceSync}</span>
+                <span style={{ color: '#34d399', fontWeight: 600 }}>{form.zohoPriceSync || 'N/A'}</span>
               </div>
             </div>
           </Card>
@@ -1357,93 +1384,68 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
     );
   }
 
-  // 1. GENERAL & BASIC DETAILS
-  function renderGeneralTab() {
+  // 2. VARIANTS TAB (Replaces General Tab)
+  function renderVariantsTab() {
+    const variants = product?.variants || [];
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
-          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Product Details</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Product Name</label>
-              <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>SKU Code</label>
-              <input type="text" value={form.sku} onChange={e => setForm({...form, sku: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Category</label>
-              <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }}>
-                {categoriesList.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Product Type</label>
-              <select value={form.product_type} onChange={e => setForm({...form, product_type: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }}>
-                <option value="Peptide">Peptide</option>
-                <option value="Supplement">Supplement</option>
-                <option value="Diagnostic Kit">Diagnostic Kit</option>
-                <option value="Service">Medical Service</option>
-              </select>
-            </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Product Variants</h3>
+            <button style={{
+              padding: '0.4rem 0.75rem',
+              borderRadius: '6px',
+              backgroundColor: '#3b82f6',
+              color: '#fff',
+              border: 'none',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              + Add Variant
+            </button>
           </div>
-        </Card>
-
-        {/* 10. Supplier Section */}
-        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
-          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Supplier Details</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Primary Supplier</label>
-              <input type="text" value={form.supplier} onChange={e => setForm({...form, supplier: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
+          
+          {variants.length === 0 ? (
+            <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b', fontSize: '0.9rem', backgroundColor: '#0f172a', borderRadius: '8px' }}>
+              No variants defined for this product yet.
             </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Backup Supplier</label>
-              <input type="text" value={form.backupSupplier} onChange={e => setForm({...form, backupSupplier: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {variants.map((v, i) => (
+                <div key={v.id || i} style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  padding: '1rem', 
+                  backgroundColor: '#0f172a', 
+                  border: '1px solid #1e293b',
+                  borderRadius: '8px'
+                }}>
+                  <div>
+                    <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.9rem', marginBottom: '4px' }}>
+                      {v.name || v.sku || `Variant ${i+1}`}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'flex', gap: '12px' }}>
+                      <span>SKU: {v.sku || 'N/A'}</span>
+                      <span>Supplier: {v.supplier || 'N/A'}</span>
+                      <span>Stock: {v.stock || 0}</span>
+                    </div>
+                  </div>
+                  <button style={{ padding: '0.4rem 0.6rem', border: '1px solid #334155', borderRadius: '4px', backgroundColor: 'transparent', color: '#cbd5e1', cursor: 'pointer', fontSize: '0.75rem' }}>
+                    Edit
+                  </button>
+                </div>
+              ))}
             </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Lead Time (Days)</label>
-              <input type="number" value={form.supplierLeadTime} onChange={e => setForm({...form, supplierLeadTime: parseInt(e.target.value) || 0})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Last Purchase Price ($)</label>
-              <input type="number" value={form.lastPurchasePrice} onChange={e => setForm({...form, lastPurchasePrice: parseFloat(e.target.value) || 0})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Last Purchase Date</label>
-              <input type="date" value={form.lastPurchaseDate} onChange={e => setForm({...form, lastPurchaseDate: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
-            </div>
-          </div>
-        </Card>
-
-        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
-          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Descriptions & Metadata</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Short Summary (flyer / shop pitch)</label>
-              <input type="text" value={form.shortDescription} onChange={e => setForm({...form, shortDescription: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} placeholder="Short product pitch..." />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Detailed Clinical Description</label>
-              <textarea rows={4} value={form.description} onChange={e => setForm({...form, description: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', resize: 'vertical', backgroundColor: '#0f172a', color: '#fff' }} />
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Tags (comma-separated)</label>
-                <input type="text" value={form.tags} onChange={e => setForm({...form, tags: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} placeholder="longevity, recovery" />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Manufacturer Brand</label>
-                <input type="text" value={form.brand} onChange={e => setForm({...form, brand: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
-              </div>
-            </div>
-          </div>
+          )}
         </Card>
       </div>
     );
   }
-
   // 6. PRICING UX REDESIGN & MOQ MATRIX
   function renderPricingTab() {
     const pricesList = [
@@ -1717,77 +1719,66 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
     );
   }
 
-  // 11. MEDIA & GALLERY UX
-  function renderMediaTab() {
+  // 3. SUPPLIERS TAB (Replaces Media Tab)
+  function renderSuppliersTab() {
+    const variants = product?.variants || [];
+    // Extract unique suppliers from variants
+    const uniqueSuppliersMap = {};
+    variants.forEach(v => {
+      if (v.supplier && !uniqueSuppliersMap[v.supplier]) {
+        uniqueSuppliersMap[v.supplier] = {
+          name: v.supplier,
+          leadTime: v.supplierLeadTime || form.supplierLeadTime || 'N/A',
+          moq: v.moq || form.moq || 'N/A',
+          variantsCount: 1
+        };
+      } else if (v.supplier) {
+        uniqueSuppliersMap[v.supplier].variantsCount += 1;
+      }
+    });
+    const suppliers = Object.values(uniqueSuppliersMap);
+
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        {/* Gallery */}
         <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
-          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Product Gallery</h3>
-          <div style={{
-            border: '2px dashed #334155',
-            borderRadius: '8px',
-            padding: '1.5rem',
-            textAlign: 'center',
-            backgroundColor: '#0f172a',
-            cursor: 'pointer',
-            marginBottom: '1rem'
-          }}>
-            <UploadCloud size={28} style={{ color: '#94a3b8', marginBottom: '0.5rem', display: 'inline-block' }} />
-            <p style={{ margin: '0 0 4px 0', fontSize: '0.8rem', fontWeight: 600, color: '#fff' }}>Drag and drop media files or click to choose</p>
-            <p style={{ margin: 0, fontSize: '0.7rem', color: '#64748b' }}>Supports PNG, JPEG, SVG or WebP formats</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Product Suppliers (Derived from Variants)</h3>
           </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px' }}>
-            {/* Primary image */}
-            <div style={{ border: '2px solid #3b82f6', borderRadius: '6px', height: '90px', overflow: 'hidden', position: 'relative' }}>
-              <span style={{ position: 'absolute', top: 2, left: 2, backgroundColor: '#3b82f6', color: '#fff', fontSize: '0.6rem', padding: '1px 4px', borderRadius: '2px', fontWeight: 700 }}>Primary</span>
-              {form.images?.length > 0 ? (
-                <img src={form.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1e293b', color: '#64748b' }}><ImageIcon size={20} /></div>
-              )}
+          
+          {suppliers.length === 0 ? (
+            <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b', fontSize: '0.9rem', backgroundColor: '#0f172a', borderRadius: '8px' }}>
+              No suppliers found in the variants.
             </div>
-            {/* Standard mock images */}
-            {['Technical Diagram', 'Packaging Box', 'Certificates File'].map((label, idx) => (
-              <div key={idx} style={{ border: '1px dashed #334155', borderRadius: '6px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0f172a', color: '#64748b', padding: '4px', textAlign: 'center' }}>
-                <ImageIcon size={16} />
-                <span style={{ fontSize: '0.65rem', marginTop: '4px' }}>{label}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Media URLs Section */}
-        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
-          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Technical & Marketing Documents</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>COA Document Link</label>
-              <div style={{ display: 'flex', gap: '4px' }}>
-                <input type="text" value={form.coaUrl} onChange={e => setForm({...form, coaUrl: e.target.value})} style={{ flex: 1, padding: '0.4rem 0.6rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.8rem', backgroundColor: '#0f172a', color: '#fff' }} placeholder="https://..." />
-                {form.coaUrl && <a href={form.coaUrl} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', border: '1px solid #334155', borderRadius: '6px', color: '#38bdf8' }}><ExternalLink size={14} /></a>}
-              </div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem', color: '#e2e8f0' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #1e293b', color: '#94a3b8' }}>
+                    <th style={{ padding: '0.75rem 0.5rem', fontWeight: 600 }}>Supplier Name</th>
+                    <th style={{ padding: '0.75rem 0.5rem', fontWeight: 600 }}>Variants Supplied</th>
+                    <th style={{ padding: '0.75rem 0.5rem', fontWeight: 600 }}>Avg Lead Time</th>
+                    <th style={{ padding: '0.75rem 0.5rem', fontWeight: 600 }}>Avg MOQ</th>
+                    <th style={{ padding: '0.75rem 0.5rem', fontWeight: 600, textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {suppliers.map((s, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid #1e293b' }}>
+                      <td style={{ padding: '0.75rem 0.5rem', fontWeight: 600 }}>{s.name}</td>
+                      <td style={{ padding: '0.75rem 0.5rem' }}>{s.variantsCount} variant(s)</td>
+                      <td style={{ padding: '0.75rem 0.5rem' }}>{s.leadTime} days</td>
+                      <td style={{ padding: '0.75rem 0.5rem' }}>{s.moq}</td>
+                      <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right' }}>
+                        <button style={{ padding: '0.3rem 0.6rem', border: '1px solid #334155', borderRadius: '4px', backgroundColor: 'transparent', color: '#cbd5e1', cursor: 'pointer', fontSize: '0.75rem' }}>
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>MSDS Document Link</label>
-              <div style={{ display: 'flex', gap: '4px' }}>
-                <input type="text" value={form.msdsUrl} onChange={e => setForm({...form, msdsUrl: e.target.value})} style={{ flex: 1, padding: '0.4rem 0.6rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.8rem', backgroundColor: '#0f172a', color: '#fff' }} placeholder="https://..." />
-                {form.msdsUrl && <a href={form.msdsUrl} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', border: '1px solid #334155', borderRadius: '6px', color: '#38bdf8' }}><ExternalLink size={14} /></a>}
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Packaging Guidelines URL</label>
-              <input type="text" value={form.packagingUrl} onChange={e => setForm({...form, packagingUrl: e.target.value})} style={{ width: '100%', padding: '0.4rem 0.6rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.8rem', backgroundColor: '#0f172a', color: '#fff' }} placeholder="https://..." />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Videos / Explanations URL</label>
-              <input type="text" value={form.videosUrl} onChange={e => setForm({...form, videosUrl: e.target.value})} style={{ width: '100%', padding: '0.4rem 0.6rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.8rem', backgroundColor: '#0f172a', color: '#fff' }} placeholder="https://..." />
-            </div>
-          </div>
+          )}
         </Card>
       </div>
     );

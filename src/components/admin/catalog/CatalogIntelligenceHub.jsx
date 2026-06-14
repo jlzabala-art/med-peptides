@@ -12,6 +12,7 @@ import CatalogProductsWorkspace from './views/CatalogProductsWorkspace';
 import InventoryIntelligenceView from './views/InventoryIntelligenceView';
 import SupplierInsightsView from './views/SupplierInsightsView';
 import RegulatoryTrackerView from './views/RegulatoryTrackerView';
+import MissingDataCenterView from './views/MissingDataCenterView';
 import ProductDetailsDrawer from "../products/ProductDetailsDrawer";
 import SmartProductIntakeWizard from "./SmartProductIntakeWizard";
 import AdvancedFiltersDrawer from './AdvancedFiltersDrawer';
@@ -282,7 +283,10 @@ export default function CatalogIntelligenceHub() {
 
   const handleFilterSelect = (kpiId) => {
     if (kpiId === 'active') setSearchQuery(''); 
-    else if (kpiId === 'missing_data') setSearchQuery('');
+    else if (kpiId === 'missing_data') {
+      setSearchQuery('');
+      setActiveWorkspace('missing_data');
+    }
   };
 
   return (
@@ -367,6 +371,7 @@ export default function CatalogIntelligenceHub() {
         {activeWorkspace === 'inventory' && <InventoryIntelligenceView products={filteredProducts} />}
         {activeWorkspace === 'suppliers' && <SupplierInsightsView products={filteredProducts} />}
         {activeWorkspace === 'regulatory' && <RegulatoryTrackerView products={filteredProducts} />}
+        {activeWorkspace === 'missing_data' && <MissingDataCenterView products={filteredProducts} onAction={handleAction} />}
       </div>
 
       {/* Modals & Drawers */}

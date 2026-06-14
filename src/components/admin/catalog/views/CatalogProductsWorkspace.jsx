@@ -33,7 +33,7 @@ const CatalogProductsWorkspace = ({
   };
 
   return (
-    <div className="catalog-products-workspace" style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+    <div className="catalog-products-workspace" style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
       {/* Toolbar */}
       <div className="workspace-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0' }}>
         <div className="toolbar-left">
@@ -92,8 +92,7 @@ const CatalogProductsWorkspace = ({
               <div style={{
                 position: 'absolute', top: '100%', right: 0, marginTop: '8px',
                 backgroundColor: '#ffffff', borderRadius: '8px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)',
-                border: '1px solid #e2e8f0', minWidth: '180px', zIndex: 10,
-                overflow: 'hidden'
+                border: '1px solid #e2e8f0', minWidth: '180px', zIndex: 9999
               }}>
                 <button onClick={() => handleBulkAction('import')} style={dropdownItemStyle} onMouseEnter={handleHover} onMouseLeave={handleLeave}>
                   <Upload size={16} color="#64748b" /> Import Products

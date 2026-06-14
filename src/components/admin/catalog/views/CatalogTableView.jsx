@@ -8,6 +8,10 @@ import Box from "lucide-react/dist/esm/icons/box";
 import React, { useState } from 'react';
 import { DataTable } from '../../../ui';
 import { calculateProductHealthScore } from '../useProductHealthScore';
+import { useAuth } from '../../../../context/AuthContext';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '../../../../firebase';
+import { useEffect } from 'react';
 
 
 
@@ -29,6 +33,110 @@ export default function CatalogTableView({
   selectedIds,
   onSelectionChange
 }) {
+  const { user } = useAuth();
+  const [visibleColumns, setVisibleColumns] = useState(['image', 'product', 'category', 'coverage', 'health', 'actions']);
+
+  useEffect(() => {
+    if (user?.uid) {
+      getDoc(doc(db, `users/${user.uid}/views/catalogProducts`)).then(snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.data();
+          if (data.visibleColumns) setVisibleColumns(data.visibleColumns);
+        }
+      });
+    }
+  }, [user]);
+
+  const handleColumnToggle = async (key, isVisible) => {
+    const newCols = isVisible 
+      ? [...visibleColumns, key] 
+      : visibleColumns.filter(c => c !== key);
+    setVisibleColumns(newCols);
+    if (user?.uid) {
+      await setDoc(doc(db, `users/${user.uid}/views/catalogProducts`), { visibleColumns: newCols }, { merge: true });
+    }
+  };
+
+  const handleExport = () => {
+    const exportCols = columns.filter(c => c.header && c.key !== 'actions' && c.key !== 'image');
+    const headers = exportCols.map(c => c.header);
+    
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + headers.join(",") + "\n"
+      + products.map(row => {
+          return exportCols.map(c => {
+             if (c.key === 'product') return `"${(row.name || '').replace(/"/g, '""')}"`;
+             if (c.key === 'health') return `"${calculateProductHealthScore(row).score}"`;
+             if (c.key === 'coverage') {
+               const variants = row.variants || [];
+               const uniqueSuppliers = new Set(variants.map(v => v.supplier).filter(Boolean));
+               return `"${uniqueSuppliers.size}"`;
+             }
+             return `"${(row[c.key] || '').toString().replace(/"/g, '""')}"`;
+          }).join(",");
+        }).join("\n");
+        
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "catalog_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const renderVariantRow = (row) => {
+    if (!row.variants || row.variants.length === 0) {
+      return (
+        <div style={{ padding: '16px', color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '8px' }}>
+          No variants defined for this product.
+        </div>
+      );
+    }
+    
+    return (
+      <div style={{ padding: '16px 24px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+        <h4 style={{ margin: '0 0 12px 0', fontSize: '0.85rem', color: 'var(--text-main)' }}>Variants ({row.variants.length})</h4>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+          <thead>
+            <tr style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--color-border)', textAlign: 'left' }}>
+              <th style={{ padding: '8px' }}>SKU</th>
+              <th style={{ padding: '8px' }}>Format</th>
+              <th style={{ padding: '8px' }}>Size</th>
+              <th style={{ padding: '8px' }}>Supplier</th>
+              <th style={{ padding: '8px' }}>Cost</th>
+              <th style={{ padding: '8px' }}>MSRP</th>
+              <th style={{ padding: '8px' }}>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {row.variants.map((v, i) => (
+              <tr key={i} style={{ borderBottom: '1px solid var(--color-border)', backgroundColor: 'transparent' }}>
+                <td style={{ padding: '8px', fontWeight: 500, color: 'var(--text-main)' }}>{v.sku || '-'}</td>
+                <td style={{ padding: '8px' }}>{v.format || '-'}</td>
+                <td style={{ padding: '8px' }}>{v.size || '-'}</td>
+                <td style={{ padding: '8px', color: v.supplier ? 'inherit' : 'var(--text-muted)' }}>{v.supplier || 'Unassigned'}</td>
+                <td style={{ padding: '8px' }}>{v.cost ? `$${v.cost}` : '-'}</td>
+                <td style={{ padding: '8px' }}>{v.msrp ? `$${v.msrp}` : '-'}</td>
+                <td style={{ padding: '8px' }}>
+                  <span style={{ 
+                    padding: '2px 6px', 
+                    borderRadius: '12px', 
+                    fontSize: '0.7rem', 
+                    backgroundColor: v.status === 'Active' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(148, 163, 184, 0.1)',
+                    color: v.status === 'Active' ? '#10b981' : '#64748b'
+                  }}>
+                    {v.status || 'Draft'}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
   const columns = [
     {
       key: 'image',
@@ -95,9 +203,11 @@ export default function CatalogTableView({
               padding: '2px 8px', 
               borderRadius: '12px' 
             }}>
-              {coverageText}
+              {count === 0 ? '0 Suppliers' : coverageText}
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{count} Supplier{count !== 1 ? 's' : ''}</div>
+            {count > 0 && (
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{count} Supplier{count !== 1 ? 's' : ''}</div>
+            )}
           </div>
         );
       }
@@ -139,6 +249,7 @@ export default function CatalogTableView({
           </button>
           <AppActionGroup actions={[
             { type: 'edit', onClick: () => onAction('edit', row) },
+            { type: 'archive', onClick: () => onAction('archive', row) },
             { type: 'delete', onClick: () => onAction('delete', row) }
           ]} />
         </div>
@@ -154,6 +265,7 @@ export default function CatalogTableView({
         keyField="id"
         selectedIds={selectedIds}
         onSelectionChange={onSelectionChange}
+        expandableRender={renderVariantRow}
         onRowClick={onRowClick}
         currentPage={currentPage}
         totalPages={Math.ceil(products.length / rowsPerPage) || 1}
@@ -164,6 +276,12 @@ export default function CatalogTableView({
         isLoading={loading}
         hideSearch={true} // Search is handled by Hub
         hidePagination={false}
+        enableColumnSelection={true}
+        enableExport={true}
+        onExport={handleExport}
+        visibleColumns={visibleColumns}
+        onColumnToggle={handleColumnToggle}
+        tableId="catalogProducts"
       />
     </div>
   );

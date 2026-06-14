@@ -127,7 +127,58 @@ export default function SupplierInsightsView({ products }) {
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const suppliers = MOCK_SUPPLIERS;
+  const suppliersData = React.useMemo(() => {
+    const supplierMap = new Map();
+    (products || []).forEach(p => {
+      (p.variants || []).forEach(v => {
+        const sName = v.supplier || v.vendor;
+        if (!sName) return;
+        if (!supplierMap.has(sName)) {
+          supplierMap.set(sName, {
+            id: sName,
+            name: sName,
+            productsSupplied: 0,
+            prices: [],
+            moqs: [],
+            leadTimes: [],
+            // Mocking some intel data since it's not strictly in variant yet
+            healthScore: Math.floor(Math.random() * 30 + 70), 
+            qualityScore: Math.floor(Math.random() * 20 + 80),
+            reliability: Math.floor(Math.random() * 15 + 85),
+            status: 'active',
+            alerts: [],
+            recommendation: `Monitor ${sName} performance continuously.`
+          });
+        }
+        const s = supplierMap.get(sName);
+        s.productsSupplied++;
+        
+        // Extract pricing from nested wholesale or direct price
+        const price = v.prices?.Wholesale?.price || v.prices?.Clinic?.price || v.price;
+        if (price) s.prices.push(Number(price));
+        if (v.moq) s.moqs.push(Number(v.moq));
+        if (v.leadTime) s.leadTimes.push(Number(v.leadTime));
+      });
+    });
+
+    return Array.from(supplierMap.values()).map(s => {
+       const avgPrice = s.prices.length ? s.prices.reduce((a,b)=>a+b,0)/s.prices.length : 0;
+       const avgLeadTime = s.leadTimes.length ? Math.round(s.leadTimes.reduce((a,b)=>a+b,0)/s.leadTimes.length) : 14;
+       const minMoq = s.moqs.length ? Math.min(...s.moqs) : '100';
+       
+       if (s.healthScore < 75) s.status = 'at-risk';
+       if (s.healthScore < 65) s.status = 'critical';
+
+       return {
+         ...s,
+         avgLeadTime,
+         priceDisplay: avgPrice > 0 ? `$${avgPrice.toFixed(2)} avg` : 'Varies',
+         moqDisplay: minMoq !== '100' ? `${minMoq} units` : 'Varies',
+       };
+    }).sort((a,b) => b.healthScore - a.healthScore);
+  }, [products]);
+
+  const suppliers = suppliersData.length > 0 ? suppliersData : MOCK_SUPPLIERS;
 
   const getHealthColor = (score) => {
     if (score >= 90) return '#10b981';
@@ -342,25 +393,28 @@ export default function SupplierInsightsView({ products }) {
             <thead>
               <tr>
                 <th>Supplier</th>
-                <th>Status</th>
-                <th>Products</th>
-                <th>Avg Lead Time</th>
                 <th>MOQ</th>
-                <th>Reliability</th>
+                <th>Lead Time</th>
+                <th>Price (Avg)</th>
                 <th>Quality Score</th>
+                <th>Reliability</th>
                 <th>Health Score</th>
               </tr>
             </thead>
             <tbody>
               {suppliers.map(s => (
                 <tr key={s.id} onClick={() => setSelectedSupplier(s)}>
-                  <td style={{ fontWeight: 600 }}>{s.name}</td>
-                  <td><span className={getStatusBadge(s.status)}>{s.status.replace('-', ' ')}</span></td>
-                  <td>{s.productsSupplied}</td>
+                  <td style={{ fontWeight: 600 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span className={getStatusBadge(s.status)} style={{ width: 8, height: 8, padding: 0, borderRadius: '50%' }}></span>
+                      {s.name}
+                    </div>
+                  </td>
+                  <td>{s.moqDisplay || s.moq}</td>
                   <td>{s.avgLeadTime} days</td>
-                  <td>{s.moq}</td>
-                  <td>{s.reliability}%</td>
+                  <td>{s.priceDisplay || 'Varies'}</td>
                   <td>{s.qualityScore}/100</td>
+                  <td>{s.reliability}%</td>
                   <td>
                     <div className="si-score-ring" style={{ border: `3px solid ${getHealthColor(s.healthScore)}`, color: getHealthColor(s.healthScore), width: '40px', height: '40px', fontSize: '0.875rem' }}>
                       {s.healthScore}
@@ -496,7 +550,7 @@ export default function SupplierInsightsView({ products }) {
                 <h4 style={{ borderBottom: '1px solid var(--border, #e5e7eb)', paddingBottom: '0.5rem', marginBottom: '1rem', marginTop: '2rem' }}>Products from {selectedSupplier.name}</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {(() => {
-                    const supplierProducts = (products || []).filter(p => p.supplier === selectedSupplier.name || p.vendor === selectedSupplier.name);
+                    const supplierProducts = (products || []).filter(p => p.variants?.some(v => (v.supplier || v.vendor) === selectedSupplier.name));
                     if (supplierProducts.length === 0) {
                       return <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem', padding: '1rem', background: 'var(--bg-hover, #f9fafb)', borderRadius: '8px', textAlign: 'center' }}>No products found for this supplier.</div>;
                     }
