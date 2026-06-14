@@ -17,6 +17,8 @@ import React, { useState } from 'react';
 import CatalogTableView from './CatalogTableView';
 import CatalogCardsView from './CatalogCardsView';
 import CatalogOverviewDashboard from './CatalogOverviewDashboard';
+import CatalogCommandBar from './CatalogCommandBar';
+import { useCatalogFilters } from '../useCatalogFilters';
 
 const CatalogProductsWorkspace = ({
   products = [],
@@ -28,7 +30,9 @@ const CatalogProductsWorkspace = ({
 }) => {
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [matrixViewType, setMatrixViewType] = useState('grouped'); // 'grouped' | 'flat'
-  const [contextualTab, setContextualTab] = useState('overview'); // 'overview' | 'items' | 'commercial' | 'analytics'
+
+  const itemsToFilter = matrixViewType === 'flat' ? variants : products;
+  const filterState = useCatalogFilters(itemsToFilter);
 
   const handleBulkAction = (action) => {
     setShowBulkActions(false);
@@ -244,47 +248,6 @@ const CatalogProductsWorkspace = ({
         </div>
       </div>
 
-      {/* Contextual Tabs */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '2px',
-          padding: '0 24px',
-          backgroundColor: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
-        }}
-      >
-        {[
-          { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-          { id: 'items', label: 'Items', icon: Box },
-          { id: 'commercial', label: 'Commercial', icon: DollarSign },
-          { id: 'analytics', label: 'Analytics', icon: BarChart2 },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setContextualTab(tab.id)}
-            style={{
-              padding: '12px 16px',
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '0.9rem',
-              fontWeight: 500,
-              color: contextualTab === tab.id ? '#2563eb' : '#64748b',
-              borderBottom:
-                contextualTab === tab.id ? '2px solid #2563eb' : '2px solid transparent',
-              transition: 'all 0.2s',
-            }}
-          >
-            <tab.icon size={16} />
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
       {/* Main Content Area */}
       <div className="workspace-content" style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
         {loading ? (
@@ -374,26 +337,119 @@ const CatalogProductsWorkspace = ({
               </div>
             </div>
           </div>
-        ) : contextualTab === 'overview' ? (
-          <CatalogOverviewDashboard products={products} variants={variants} onAction={onAction} />
-        ) : contextualTab === 'analytics' ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#64748b' }}>
-            <BarChart2 size={48} color="#cbd5e1" style={{ marginBottom: '1rem' }} />
-            <h3>Product Analytics</h3>
-            <p>Advanced metrics and reporting placeholder (coming soon)</p>
-          </div>
         ) : (
-          <div className="products-view" style={{ height: '100%' }}>
-            {activeDisplayMode === 'table' ? (
-              <CatalogTableView
-                products={products}
-                variants={variants}
-                onAction={onAction}
-                matrixViewType={matrixViewType}
-                contextualTab={contextualTab}
-              />
-            ) : (
-              <CatalogCardsView products={products} onAction={onAction} />
+          <div
+            className="products-view"
+            style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+          >
+            <CatalogCommandBar filterState={filterState} />
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              {activeDisplayMode === 'table' ? (
+                <CatalogTableView
+                  products={matrixViewType === 'grouped' ? filterState.paginatedData : []}
+                  variants={matrixViewType === 'flat' ? filterState.paginatedData : variants}
+                  onAction={onAction}
+                  matrixViewType={matrixViewType}
+                  filterState={filterState}
+                />
+              ) : (
+                <CatalogCardsView
+                  items={filterState.loadedData}
+                  onAction={onAction}
+                  matrixViewType={matrixViewType}
+                  filterState={filterState}
+                />
+              )}
+            </div>
+
+            {/* Simple Pagination Bar (Only show if table mode, cards has load more) */}
+            {activeDisplayMode === 'table' && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 24px',
+                  backgroundColor: '#fff',
+                  borderTop: '1px solid #e2e8f0',
+                }}
+              >
+                <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                  Showing{' '}
+                  {Math.min(
+                    (filterState.currentPage - 1) * filterState.rowsPerPage + 1,
+                    filterState.totalItems
+                  )}{' '}
+                  to{' '}
+                  {Math.min(
+                    filterState.currentPage * filterState.rowsPerPage,
+                    filterState.totalItems
+                  )}{' '}
+                  of {filterState.totalItems} entries
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <select
+                    value={filterState.rowsPerPage}
+                    onChange={(e) => filterState.setRowsPerPage(Number(e.target.value))}
+                    style={{
+                      padding: '6px 10px',
+                      borderRadius: '4px',
+                      border: '1px solid #e2e8f0',
+                      color: '#475569',
+                      fontSize: '0.85rem',
+                      outline: 'none',
+                    }}
+                  >
+                    <option value={10}>10 rows</option>
+                    <option value={20}>20 rows</option>
+                    <option value={50}>50 rows</option>
+                    <option value={100}>100 rows</option>
+                  </select>
+                  <button
+                    disabled={filterState.currentPage === 1}
+                    onClick={() => filterState.setCurrentPage((p) => p - 1)}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      border: '1px solid #e2e8f0',
+                      backgroundColor: filterState.currentPage === 1 ? '#f8fafc' : '#fff',
+                      color: filterState.currentPage === 1 ? '#94a3b8' : '#475569',
+                      cursor: filterState.currentPage === 1 ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    disabled={
+                      filterState.currentPage === filterState.totalPages ||
+                      filterState.totalPages === 0
+                    }
+                    onClick={() => filterState.setCurrentPage((p) => p + 1)}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      border: '1px solid #e2e8f0',
+                      backgroundColor:
+                        filterState.currentPage === filterState.totalPages ||
+                        filterState.totalPages === 0
+                          ? '#f8fafc'
+                          : '#fff',
+                      color:
+                        filterState.currentPage === filterState.totalPages ||
+                        filterState.totalPages === 0
+                          ? '#94a3b8'
+                          : '#475569',
+                      cursor:
+                        filterState.currentPage === filterState.totalPages ||
+                        filterState.totalPages === 0
+                          ? 'not-allowed'
+                          : 'pointer',
+                    }}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         )}

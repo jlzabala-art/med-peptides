@@ -1,66 +1,66 @@
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import Settings from "lucide-react/dist/esm/icons/settings";
-import Users from "lucide-react/dist/esm/icons/users";
-import Database from "lucide-react/dist/esm/icons/database";
-import Layers from "lucide-react/dist/esm/icons/layers";
-import PackageSearch from "lucide-react/dist/esm/icons/package-search";
-import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
-import Bot from "lucide-react/dist/esm/icons/bot";
-import Link2 from "lucide-react/dist/esm/icons/link-2";
-import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import Wrench from "lucide-react/dist/esm/icons/wrench";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-import Receipt from "lucide-react/dist/esm/icons/receipt";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Box from "lucide-react/dist/esm/icons/box";
-import Tag from "lucide-react/dist/esm/icons/tag";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Eye from "lucide-react/dist/esm/icons/eye";
-import EyeOff from "lucide-react/dist/esm/icons/eye-off";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import Cpu from "lucide-react/dist/esm/icons/cpu";
-import LogOut from "lucide-react/dist/esm/icons/log-out";
-import Menu from "lucide-react/dist/esm/icons/menu";
-import X from "lucide-react/dist/esm/icons/x";
-import Building2 from "lucide-react/dist/esm/icons/building-2";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import Truck from "lucide-react/dist/esm/icons/truck";
-import Search from "lucide-react/dist/esm/icons/search";
-import Building from "lucide-react/dist/esm/icons/building";
-import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
-import HeartPulse from "lucide-react/dist/esm/icons/heart-pulse";
-import UserPlus from "lucide-react/dist/esm/icons/user-plus";
-import Lock from "lucide-react/dist/esm/icons/lock";
-import Briefcase from "lucide-react/dist/esm/icons/briefcase";
-import LayoutTemplate from "lucide-react/dist/esm/icons/layout-template";
-import Network from "lucide-react/dist/esm/icons/network";
-import ScrollText from "lucide-react/dist/esm/icons/scroll-text";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
-import Settings2 from "lucide-react/dist/esm/icons/settings-2";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import PieChart from "lucide-react/dist/esm/icons/pie-chart";
-import CreditCard from "lucide-react/dist/esm/icons/credit-card";
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
-import Pill from "lucide-react/dist/esm/icons/pill";
-import FilePlus from "lucide-react/dist/esm/icons/file-plus";
-import ArrowLeftRight from "lucide-react/dist/esm/icons/arrow-left-right";
-import UserCog from "lucide-react/dist/esm/icons/user-cog";
-import BarChart4 from "lucide-react/dist/esm/icons/bar-chart-4";
-import Workflow from "lucide-react/dist/esm/icons/workflow";
-import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
-import PackageOpen from "lucide-react/dist/esm/icons/package-open";
-import Package from "lucide-react/dist/esm/icons/package";
+import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
+import Settings from 'lucide-react/dist/esm/icons/settings';
+import Users from 'lucide-react/dist/esm/icons/users';
+import Database from 'lucide-react/dist/esm/icons/database';
+import Layers from 'lucide-react/dist/esm/icons/layers';
+import PackageSearch from 'lucide-react/dist/esm/icons/package-search';
+import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
+import Bot from 'lucide-react/dist/esm/icons/bot';
+import Link2 from 'lucide-react/dist/esm/icons/link-2';
+import BarChart3 from 'lucide-react/dist/esm/icons/bar-chart-3';
+import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
+import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
+import ClipboardList from 'lucide-react/dist/esm/icons/clipboard-list';
+import Zap from 'lucide-react/dist/esm/icons/zap';
+import Globe from 'lucide-react/dist/esm/icons/globe';
+import Wrench from 'lucide-react/dist/esm/icons/wrench';
+import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
+import Receipt from 'lucide-react/dist/esm/icons/receipt';
+import FlaskConical from 'lucide-react/dist/esm/icons/flask-conical';
+import Box from 'lucide-react/dist/esm/icons/box';
+import Tag from 'lucide-react/dist/esm/icons/tag';
+import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign';
+import FileText from 'lucide-react/dist/esm/icons/file-text';
+import Eye from 'lucide-react/dist/esm/icons/eye';
+import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
+import Mail from 'lucide-react/dist/esm/icons/mail';
+import Activity from 'lucide-react/dist/esm/icons/activity';
+import BookOpen from 'lucide-react/dist/esm/icons/book-open';
+import Cpu from 'lucide-react/dist/esm/icons/cpu';
+import LogOut from 'lucide-react/dist/esm/icons/log-out';
+import Menu from 'lucide-react/dist/esm/icons/menu';
+import X from 'lucide-react/dist/esm/icons/x';
+import Building2 from 'lucide-react/dist/esm/icons/building-2';
+import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
+import Truck from 'lucide-react/dist/esm/icons/truck';
+import Search from 'lucide-react/dist/esm/icons/search';
+import Building from 'lucide-react/dist/esm/icons/building';
+import Stethoscope from 'lucide-react/dist/esm/icons/stethoscope';
+import HeartPulse from 'lucide-react/dist/esm/icons/heart-pulse';
+import UserPlus from 'lucide-react/dist/esm/icons/user-plus';
+import Lock from 'lucide-react/dist/esm/icons/lock';
+import Briefcase from 'lucide-react/dist/esm/icons/briefcase';
+import LayoutTemplate from 'lucide-react/dist/esm/icons/layout-template';
+import Network from 'lucide-react/dist/esm/icons/network';
+import ScrollText from 'lucide-react/dist/esm/icons/scroll-text';
+import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
+import Calendar from 'lucide-react/dist/esm/icons/calendar';
+import UploadCloud from 'lucide-react/dist/esm/icons/upload-cloud';
+import Settings2 from 'lucide-react/dist/esm/icons/settings-2';
+import CheckCircle from 'lucide-react/dist/esm/icons/check-circle';
+import PieChart from 'lucide-react/dist/esm/icons/pie-chart';
+import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
+import ShieldAlert from 'lucide-react/dist/esm/icons/shield-alert';
+import Pill from 'lucide-react/dist/esm/icons/pill';
+import FilePlus from 'lucide-react/dist/esm/icons/file-plus';
+import ArrowLeftRight from 'lucide-react/dist/esm/icons/arrow-left-right';
+import UserCog from 'lucide-react/dist/esm/icons/user-cog';
+import BarChart4 from 'lucide-react/dist/esm/icons/bar-chart-4';
+import Workflow from 'lucide-react/dist/esm/icons/workflow';
+import GraduationCap from 'lucide-react/dist/esm/icons/graduation-cap';
+import PackageOpen from 'lucide-react/dist/esm/icons/package-open';
+import Package from 'lucide-react/dist/esm/icons/package';
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
@@ -70,72 +70,9 @@ import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import PortalLayout from '../components/ui/PortalLayout';
 import PageTransition from '../components/PageTransition';
 import Omnibar from '../components/admin/Omnibar';
-
 
 import GlobalNotificationCenter from '../components/shared/widgets/GlobalNotificationCenter';
 import MarketIntelligenceHub from '../components/admin/market/MarketIntelligenceHub';
@@ -198,13 +135,15 @@ import AdminPaymentsMadeTab from '../components/admin/AdminPaymentsMadeTab';
 import AdminPaymentsReceivedTab from '../components/admin/AdminPaymentsReceivedTab';
 
 // icon alias (lucide doesn't export MailPlus2 — must be before NAV_GROUPS)
-function MailPlus2(props) { return <UserPlus {...props} />; }
+function MailPlus2(props) {
+  return <UserPlus {...props} />;
+}
 
 // ── Always-visible pinned items (not inside accordion groups) ─────────────────
 const PINNED_ITEMS = [
   { id: 'dashboard', label: 'Dashboard KPIs', icon: LayoutDashboard },
-  { id: 'messages',  label: 'Messages',        icon: MessageSquare },
-  { id: 'calendar',  label: 'Calendar',        icon: Calendar },
+  { id: 'messages', label: 'Messages', icon: MessageSquare },
+  { id: 'calendar', label: 'Calendar', icon: Calendar },
 ];
 
 // ── Hooks ──────────────────────────────────────────────────────────────────────
@@ -216,12 +155,16 @@ function useUnreadMessagesCount() {
     if (!user) return;
     const effectiveRole = userRole;
     const effectiveId = user.uid;
-    const q = (effectiveRole === 'admin' || isAdmin)
-      ? query(collection(db, 'conversations'))
-      : query(collection(db, 'conversations'), where('participants', 'array-contains', effectiveId));
+    const q =
+      effectiveRole === 'admin' || isAdmin
+        ? query(collection(db, 'conversations'))
+        : query(
+            collection(db, 'conversations'),
+            where('participants', 'array-contains', effectiveId)
+          );
     const unsub = onSnapshot(q, (snap) => {
       let count = 0;
-      snap.forEach(doc => {
+      snap.forEach((doc) => {
         const data = doc.data();
         if (data.unreadCount?.[effectiveId] > 0) {
           count++;
@@ -242,9 +185,9 @@ const NAV_GROUPS = [
     label: 'Workspace',
     icon: LayoutDashboard,
     items: [
-      { id: 'dashboard',        label: 'Dashboard',           icon: Activity },
-      { id: 'messages',         label: 'Messages',            icon: MessageSquare },
-      { id: 'calendar',         label: 'Calendar',            icon: Calendar },
+      { id: 'dashboard', label: 'Dashboard', icon: Activity },
+      { id: 'messages', label: 'Messages', icon: MessageSquare },
+      { id: 'calendar', label: 'Calendar', icon: Calendar },
     ],
   },
   {
@@ -252,15 +195,15 @@ const NAV_GROUPS = [
     label: 'Sales (O2C)',
     icon: TrendingUp,
     items: [
-      { id: 'quotations',       label: 'Quotations',          icon: FileText },
-      { id: 'sales-orders',     label: 'Sales Orders',        icon: Box },
-      { id: 'invoices',         label: 'Invoices',            icon: DollarSign },
-      { id: 'payments-received',label: 'Payments Received',   icon: DollarSign },
-      { id: 'orders',           label: 'B2C Orders',          icon: PackageSearch },
-      { id: 'bulk-orders',      label: 'Bulk Orders',         icon: Box },
-      { id: 'agency-deals',     label: 'Agency Deals',        icon: Briefcase },
-      { id: 'logistics',        label: 'Logistics Tracker',   icon: Truck },
-      { id: 'shipping',         label: 'Shipping Network',    icon: Globe },
+      { id: 'quotations', label: 'Quotations', icon: FileText },
+      { id: 'sales-orders', label: 'Sales Orders', icon: Box },
+      { id: 'invoices', label: 'Invoices', icon: DollarSign },
+      { id: 'payments-received', label: 'Payments Received', icon: DollarSign },
+      { id: 'orders', label: 'B2C Orders', icon: PackageSearch },
+      { id: 'bulk-orders', label: 'Bulk Orders', icon: Box },
+      { id: 'agency-deals', label: 'Agency Deals', icon: Briefcase },
+      { id: 'logistics', label: 'Logistics Tracker', icon: Truck },
+      { id: 'shipping', label: 'Shipping Network', icon: Globe },
     ],
   },
   {
@@ -268,11 +211,11 @@ const NAV_GROUPS = [
     label: 'Purchases (P2P)',
     icon: ShoppingCart,
     items: [
-      { id: 'wholesellers',      label: 'Suppliers/Wholesalers', icon: Building2 },
-      { id: 'purchase-rfqs',     label: 'Requests for Quotation',icon: FileText },
-      { id: 'purchase-orders',   label: 'Purchase Orders',       icon: ShoppingCart },
-      { id: 'purchase-bills',    label: 'Supplier Bills',        icon: Receipt },
-      { id: 'payments-made',     label: 'Payments Made',         icon: DollarSign },
+      { id: 'wholesellers', label: 'Suppliers/Wholesalers', icon: Building2 },
+      { id: 'purchase-rfqs', label: 'Requests for Quotation', icon: FileText },
+      { id: 'purchase-orders', label: 'Purchase Orders', icon: ShoppingCart },
+      { id: 'purchase-bills', label: 'Supplier Bills', icon: Receipt },
+      { id: 'payments-made', label: 'Payments Made', icon: DollarSign },
     ],
   },
   {
@@ -280,14 +223,12 @@ const NAV_GROUPS = [
     label: 'Items & Catalog',
     icon: Box,
     items: [
-      { id: 'products',        label: 'Items',           icon: Box },
-      { id: 'prices',          label: 'Pricing Matrix',  icon: Tag },
-      { id: 'costs',           label: 'Costs',           icon: DollarSign },
-      { id: 'pricing-visibility', label: 'Pricing Visibility',  icon: EyeOff },
-      { id: 'protocols',       label: 'Protocols',       icon: ClipboardList },
-      { id: 'competitors',     label: 'Competitor Analysis', icon: Activity },
-      { id: 'enrichment',      label: 'Catalog Enrichment', icon: Database },
-      { id: 'lab-tests',       label: 'Lab Tests & COAs',icon: ScrollText },
+      { id: 'products', label: 'Items', icon: Box },
+      { id: 'pricing-visibility', label: 'Pricing Visibility', icon: EyeOff },
+      { id: 'protocols', label: 'Protocols', icon: ClipboardList },
+      { id: 'competitors', label: 'Competitor Analysis', icon: Activity },
+      { id: 'enrichment', label: 'Catalog Enrichment', icon: Database },
+      { id: 'lab-tests', label: 'Lab Tests & COAs', icon: ScrollText },
       { id: 'catalog-builder', label: 'Catalog Builder', icon: Wrench },
     ],
   },
@@ -296,15 +237,15 @@ const NAV_GROUPS = [
     label: 'CRM & Users',
     icon: Users,
     items: [
-      { id: 'leads',            label: 'Leads',               icon: Users },
-      { id: 'clinics',          label: 'Clinics',             icon: Building },
-      { id: 'doctors',          label: 'Doctors',             icon: Stethoscope },
-      { id: 'patients',         label: 'Patients',            icon: HeartPulse },
-      { id: 'account-managers', label: 'Account Managers',    icon: ShieldCheck },
-      { id: 'command-center',   label: 'Command Center',      icon: Activity },
-      { id: 'territory-rules',  label: 'Territory Rules',     icon: ShieldCheck },
-      { id: 'access-levels',    label: 'Access Levels',       icon: Lock },
-      { id: 'invitations',      label: 'Invitations',         icon: UserPlus },
+      { id: 'leads', label: 'Leads', icon: Users },
+      { id: 'clinics', label: 'Clinics', icon: Building },
+      { id: 'doctors', label: 'Doctors', icon: Stethoscope },
+      { id: 'patients', label: 'Patients', icon: HeartPulse },
+      { id: 'account-managers', label: 'Account Managers', icon: ShieldCheck },
+      { id: 'command-center', label: 'Command Center', icon: Activity },
+      { id: 'territory-rules', label: 'Territory Rules', icon: ShieldCheck },
+      { id: 'access-levels', label: 'Access Levels', icon: Lock },
+      { id: 'invitations', label: 'Invitations', icon: UserPlus },
     ],
   },
   {
@@ -312,12 +253,12 @@ const NAV_GROUPS = [
     label: 'Finance & Accounting',
     icon: DollarSign,
     items: [
-      { id: 'finance-budget',     label: 'Budgets & Variances',    icon: PieChart },
-      { id: 'approvals',          label: 'Approvals',              icon: ShieldCheck },
-      { id: 'finance-payables',   label: 'Payables & Payouts',     icon: CreditCard },
-      { id: 'finance-approvals',  label: 'Control & Approvals',    icon: ShieldAlert },
-      { id: 'finance-economics',  label: 'Unit Economics',         icon: TrendingUp },
-      { id: 'finance-reporting',  label: 'Reporting & Data Room',  icon: FileText }
+      { id: 'finance-budget', label: 'Budgets & Variances', icon: PieChart },
+      { id: 'approvals', label: 'Approvals', icon: ShieldCheck },
+      { id: 'finance-payables', label: 'Payables & Payouts', icon: CreditCard },
+      { id: 'finance-approvals', label: 'Control & Approvals', icon: ShieldAlert },
+      { id: 'finance-economics', label: 'Unit Economics', icon: TrendingUp },
+      { id: 'finance-reporting', label: 'Reporting & Data Room', icon: FileText },
     ],
   },
   {
@@ -325,17 +266,17 @@ const NAV_GROUPS = [
     label: 'Marketing & External',
     icon: Globe,
     items: [
-      { id: 'email-campaigns',  label: 'Email Campaigns',     icon: Mail },
-      { id: 'marketing',        label: 'Content / Social',    icon: Globe },
-      { id: 'newsletter',       label: 'Newsletter Signups',  icon: Mail },
-      { id: 'email-templates',  label: 'Email Templates',     icon: FileText },
-      { id: 'drip-marketing',   label: 'Drip Sequences',      icon: Zap },
-      { id: 'catalogs',         label: 'Shared Catalogs',     icon: BookOpen },
-      { id: 'coupons',          label: 'Coupons & Discounts', icon: Tag },
-      { id: 'referrals',        label: 'Referral Tracking',   icon: Users },
-      { id: 'co-branding',      label: 'Co-Branding',         icon: Eye },
-      { id: 'sku-sync',         label: 'Zoho Books',          icon: Link2 },
-      { id: 'crm-intelligence', label: 'Zoho Bigin',          icon: Briefcase },
+      { id: 'email-campaigns', label: 'Email Campaigns', icon: Mail },
+      { id: 'marketing', label: 'Content / Social', icon: Globe },
+      { id: 'newsletter', label: 'Newsletter Signups', icon: Mail },
+      { id: 'email-templates', label: 'Email Templates', icon: FileText },
+      { id: 'drip-marketing', label: 'Drip Sequences', icon: Zap },
+      { id: 'catalogs', label: 'Shared Catalogs', icon: BookOpen },
+      { id: 'coupons', label: 'Coupons & Discounts', icon: Tag },
+      { id: 'referrals', label: 'Referral Tracking', icon: Users },
+      { id: 'co-branding', label: 'Co-Branding', icon: Eye },
+      { id: 'sku-sync', label: 'Zoho Books', icon: Link2 },
+      { id: 'crm-intelligence', label: 'Zoho Bigin', icon: Briefcase },
     ],
   },
   {
@@ -345,20 +286,20 @@ const NAV_GROUPS = [
     badge: 'LIVE',
     badgeColor: 'var(--color-success)',
     items: [
-      { id: 'ai-agents',         label: 'AI Agents Hub',       icon: Network },
-      { id: 'prescription-agent',label: 'Prescription Agent',  icon: Zap },
-      { id: 'clinical-ai',       label: 'Atlas AI',            icon: Bot },
-      { id: 'workflows',         label: 'Automation Workflows',icon: Settings2 },
-      { id: 'semantic',          label: 'AI Semantics',        icon: Cpu },
-      { id: 'analytics',         label: 'Analytics',           icon: BarChart3 },
-      { id: 'ai-logs',           label: 'AI Logs',             icon: ScrollText },
-      { id: 'audit-logs',        label: 'Audit Logs',          icon: ShieldCheck },
-      { id: 'relationships',     label: 'Relationships',       icon: Network },
-      { id: 'views',             label: 'Views',               icon: Layers },
-      { id: 'home-layout',       label: 'Home Layout',         icon: LayoutTemplate },
-      { id: 'gadget-repository', label: 'Gadget Repository',   icon: Layers },
-      { id: 'settings',          label: 'General Settings',    icon: Settings },
-      { id: 'deploy',            label: 'Deploy & Hosting',    icon: Globe },
+      { id: 'ai-agents', label: 'AI Agents Hub', icon: Network },
+      { id: 'prescription-agent', label: 'Prescription Agent', icon: Zap },
+      { id: 'clinical-ai', label: 'Atlas AI', icon: Bot },
+      { id: 'workflows', label: 'Automation Workflows', icon: Settings2 },
+      { id: 'semantic', label: 'AI Semantics', icon: Cpu },
+      { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+      { id: 'ai-logs', label: 'AI Logs', icon: ScrollText },
+      { id: 'audit-logs', label: 'Audit Logs', icon: ShieldCheck },
+      { id: 'relationships', label: 'Relationships', icon: Network },
+      { id: 'views', label: 'Views', icon: Layers },
+      { id: 'home-layout', label: 'Home Layout', icon: LayoutTemplate },
+      { id: 'gadget-repository', label: 'Gadget Repository', icon: Layers },
+      { id: 'settings', label: 'General Settings', icon: Settings },
+      { id: 'deploy', label: 'Deploy & Hosting', icon: Globe },
     ],
   },
   {
@@ -366,15 +307,15 @@ const NAV_GROUPS = [
     label: 'Import Data',
     icon: UploadCloud,
     items: [
-      { id: 'import-catalogs',   label: 'Import Catalogs',     icon: BookOpen },
-      { id: 'import-prices',     label: 'Import Price Lists',  icon: Tag },
-      { id: 'import-coa',        label: 'Import Certificates', icon: CheckCircle },
-      { id: 'import-rfq',        label: 'Import RFQs',         icon: FileText },
-      { id: 'import-prescriptions', label: 'Import Prescriptions',icon: ClipboardList },
-      { id: 'import-bloodworks', label: 'Import Bloodworks',   icon: Activity },
-      { id: 'import-history',    label: 'Import History',      icon: Database },
-    ]
-  }
+      { id: 'import-catalogs', label: 'Import Catalogs', icon: BookOpen },
+      { id: 'import-prices', label: 'Import Price Lists', icon: Tag },
+      { id: 'import-coa', label: 'Import Certificates', icon: CheckCircle },
+      { id: 'import-rfq', label: 'Import RFQs', icon: FileText },
+      { id: 'import-prescriptions', label: 'Import Prescriptions', icon: ClipboardList },
+      { id: 'import-bloodworks', label: 'Import Bloodworks', icon: Activity },
+      { id: 'import-history', label: 'Import History', icon: Database },
+    ],
+  },
 ];
 
 // Tab→group lookup
@@ -384,11 +325,26 @@ for (const g of NAV_GROUPS) for (const item of g.items) TAB_TO_GROUP[item.id] = 
 // ── Loading spinner ────────────────────────────────────────────────────────────
 function AdminLoadingFallback() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center',
-      alignItems: 'center', minHeight: '400px', gap: '1rem' }}>
-      <div style={{ width: 40, height: 40, borderRadius: '50%',
-        border: '3px solid rgba(0,54,102,0.1)', borderTopColor: 'var(--primary)',
-        animation: 'adminSpin 1s linear infinite' }} />
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '400px',
+        gap: '1rem',
+      }}
+    >
+      <div
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: '50%',
+          border: '3px solid rgba(0,54,102,0.1)',
+          borderTopColor: 'var(--primary)',
+          animation: 'adminSpin 1s linear infinite',
+        }}
+      />
       <span style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)', fontWeight: 600 }}>
         Loading module...
       </span>
@@ -399,83 +355,193 @@ function AdminLoadingFallback() {
 
 // ── Tab renderer ───────────────────────────────────────────────────────────────
 function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
-  const tabLabel = NAV_GROUPS.flatMap(g => g.items).find(i => i.id === tab)?.label || tab;
+  const tabLabel = NAV_GROUPS.flatMap((g) => g.items).find((i) => i.id === tab)?.label || tab;
   return (
     <AdminTabErrorBoundary tabId={tab} tabLabel={tabLabel}>
-    <React.Suspense fallback={<AdminLoadingFallback />}>
-      {tab === 'dashboard' && (
-        <AdminMetricsDashboard />
-      )}
-      {tab === 'messages' && <AtlasMessagesHub />}
-      {tab === 'quotations' && <B2BQuotationsHub />}
-      {tab === 'invoices' && <InvoiceIntelligenceHub />}
-      {tab === 'workflows' && <AdminWorkflowsTab />}
-      {tab === 'logistics' && <AdminLogisticsTab />}
-      {tab === 'import-catalogs' && <ImportCatalogsTab />}
-      {tab === 'import-prices' && <ImportPriceListsTab />}
-      {tab === 'import-coa' && <ImportCoATab />}
-      {tab === 'import-rfq' && <ImportRFQTab />}
-      {tab === 'import-history' && <AdminImportHistoryTab />}
-      {tab === 'import-prescriptions' && <AdminPlaceholderTab title="Import Prescriptions" description="Upload patient prescriptions and doctor notes." tags={['Medical', 'Imports']} color="var(--color-primary)" />}
-      {tab === 'import-bloodworks' && <AdminPlaceholderTab title="Import Bloodworks" description="Upload lab results and blood panels." tags={['Labs', 'Imports']} color="var(--color-primary)" />}
-      {tab === 'wholesellers'  && <AdminWholesellersTab />}
-      {tab === 'account-managers' && <AdminAccountManagersTab />}
-      {tab === 'clinics'       && <AdminPlaceholderTab title="Clinics" description="Manage physical clinic locations and metadata." tags={['Network', 'Clinics']} color="var(--color-primary)" />}
-      {tab === 'doctors'       && <AdminPhysiciansTab />}
-      {tab === 'patients'      && <AdminUsersTab defaultRole="patient" readOnly={false} canApprove={true} />}
-      {tab === 'users'         && <AdminUsersTab readOnly={false} canApprove={true} />}
-      {tab === 'products'      && <CatalogIntelligenceHub />}
-      {tab === 'competitors'   && <MarketIntelligenceHub />}
-      {tab === 'costs'         && <AdminCostsTab readOnly={false} />}
-      {tab === 'prices'        && <AdminPricesTab />}
-      {tab === 'relationships' && <AdminRelationshipsTab readOnly={false} />}
-      {tab === 'semantic'      && <AdminSemanticTab readOnly={false} />}
-      {tab === 'settings'      && <AdminSettingsTab readOnly={false} />}
-      {tab === 'invitations'   && <AdminInvitationsTab readOnly={false} />}
-      {tab === 'views'         && <AdminViewsConfigTab />}
-      {tab === 'orders'        && <OrdersTab readOnly={false} />}
-      {tab === 'bulk-orders'   && <AdminBulkOrdersTab />}
-      {tab === 'access-levels' && <AdminAccessLevelsTab />}
-      {tab === 'purchase-rfqs' && <AdminRFQTab />}
-      {tab === 'purchase-orders' && <AdminPOTab />}
-      {tab === 'purchase-bills' && <AdminBillsTab />}
-      {tab === 'payments-made' && <AdminPaymentsMadeTab />}
-      {tab === 'payments-received' && <AdminPaymentsReceivedTab />}
-      {tab === 'clinical-ai'   && <ClinicalAIWidget />}
-      {tab === 'prescription-agent' && <AdminPlaceholderTab title="Prescription Agent" description="Manage logic for AI prescription recommendations." tags={['AI', 'Medical']} color="var(--color-primary)" />}
-      {tab === 'analytics'     && <AdminAnalyticsTab /> }
-      {tab === 'ai-logs'       && <AdminClinicalLogsTab /> }
-      {tab === 'audit-logs'    && <AdminAuditLogsTab /> }
-      {tab === 'command-center'     && <AtlasCommandCenter />}
-      {tab === 'territory-rules'    && <AdminPlaceholderTab title="Territory Rules" description="Configure exclusivity rules and protected categories." tags={['Rules', 'Protection']} color="var(--color-primary)" />}
-      {tab === 'branding'           && <AdminPlaceholderTab title="Wholeseller Branding" description="Configure white-label subdomains and assets." tags={['Brand', 'White-label']} color="var(--color-primary)" />}
-      {tab === 'pricing-visibility' && <AdminPlaceholderTab title="Pricing Visibility" description="Configure regional pricing walls and product visibility." tags={['Pricing', 'Access']} color="var(--color-primary)" />}
-      {tab === 'leads'              && <AdminPlaceholderTab title="Lead Management" description="Global B2B/B2C lead routing and ownership rules." tags={['Sales', 'Leads']} color="var(--color-primary)" />}
-      {tab === 'home-layout'   && <AdminHomeLayoutTab />}
-      {tab === 'protocols'     && <AdminProtocolsTab />}
-      {tab === 'programs'      && <AdminProgramsTab />}
-      {tab === 'stock'         && <AdminVariantsTab />}
-      {tab === 'lab-tests'     && <AdminPlaceholderTab title="Lab Tests & COAs" description="Manage quality control, third-party tests, and Certificates of Analysis for your stock batches." tags={['Quality', 'Testing']} color="var(--color-primary)" />}
-      {tab === 'catalogs'         && <CatalogList ownerId="admin" ownerType="admin" onOpenBuilder={() => { setCatalogToEdit(null); setActiveTab('catalog-builder'); }} onSelectCatalogToEdit={(cat) => { setCatalogToEdit(cat); setActiveTab('catalog-builder'); }} />}
-      {tab === 'catalog-builder'  && <CatalogCreatorFlow ownerId="admin" ownerType="admin" editingCatalog={catalogToEdit} onBack={() => { setCatalogToEdit(null); setActiveTab('catalogs'); }} />}
-      {tab === 'email-campaigns'  && <EmailCampaignBuilder ownerId="admin" ownerType="admin" onBack={() => setActiveTab('catalogs')} />}
-      {tab === 'newsletter'       && <AdminPlaceholderTab title="Newsletter Signups" description="View and export B2C newsletter subscribers." tags={['Marketing', 'B2C']} color="var(--color-primary)" />}
-      {tab === 'email-templates'   && <AdminEmailTemplatesTab />}
-      {tab === 'gadget-repository' && <AdminGadgetRepositoryTab />}
-      {tab === 'sku-sync'           && <AdminSkuMappingTab />}
-      {tab === 'crm-intelligence'   && (
-        <div style={{ padding: '0.5rem 0' }}>
-          <AdminZohoCRMWidget fullHeight={false} />
-        </div>
-      )}
-      {tab.startsWith('finance-') && <AdminFinanceTab activeSubTab={tab.replace('finance-', '')} />}
-      {tab === 'deploy' && (
-        <AdminPlaceholderTab title="Deploy & Hosting"
-          description="Monitor application deployments, environment variables, hosting status, and trigger builds."
-          features={['GitHub CI/CD triggers', 'Environment variable manager', 'Real-time build log streaming', 'Domain SSL configurations']}
-          tags={['Infrastructure', 'Hosting', 'Cloud']} color="var(--color-primary)" priority="soon" />
-      )}
-    </React.Suspense>
+      <React.Suspense fallback={<AdminLoadingFallback />}>
+        {tab === 'dashboard' && <AdminMetricsDashboard />}
+        {tab === 'messages' && <AtlasMessagesHub />}
+        {tab === 'quotations' && <B2BQuotationsHub />}
+        {tab === 'invoices' && <InvoiceIntelligenceHub />}
+        {tab === 'workflows' && <AdminWorkflowsTab />}
+        {tab === 'logistics' && <AdminLogisticsTab />}
+        {tab === 'import-catalogs' && <ImportCatalogsTab />}
+        {tab === 'import-prices' && <ImportPriceListsTab />}
+        {tab === 'import-coa' && <ImportCoATab />}
+        {tab === 'import-rfq' && <ImportRFQTab />}
+        {tab === 'import-history' && <AdminImportHistoryTab />}
+        {tab === 'import-prescriptions' && (
+          <AdminPlaceholderTab
+            title="Import Prescriptions"
+            description="Upload patient prescriptions and doctor notes."
+            tags={['Medical', 'Imports']}
+            color="var(--color-primary)"
+          />
+        )}
+        {tab === 'import-bloodworks' && (
+          <AdminPlaceholderTab
+            title="Import Bloodworks"
+            description="Upload lab results and blood panels."
+            tags={['Labs', 'Imports']}
+            color="var(--color-primary)"
+          />
+        )}
+        {tab === 'wholesellers' && <AdminWholesellersTab />}
+        {tab === 'account-managers' && <AdminAccountManagersTab />}
+        {tab === 'clinics' && (
+          <AdminPlaceholderTab
+            title="Clinics"
+            description="Manage physical clinic locations and metadata."
+            tags={['Network', 'Clinics']}
+            color="var(--color-primary)"
+          />
+        )}
+        {tab === 'doctors' && <AdminPhysiciansTab />}
+        {tab === 'patients' && (
+          <AdminUsersTab defaultRole="patient" readOnly={false} canApprove={true} />
+        )}
+        {tab === 'users' && <AdminUsersTab readOnly={false} canApprove={true} />}
+        {tab === 'products' && <CatalogIntelligenceHub />}
+        {tab === 'competitors' && <MarketIntelligenceHub />}
+        {tab === 'costs' && <AdminCostsTab readOnly={false} />}
+        {tab === 'prices' && <AdminPricesTab />}
+        {tab === 'relationships' && <AdminRelationshipsTab readOnly={false} />}
+        {tab === 'semantic' && <AdminSemanticTab readOnly={false} />}
+        {tab === 'settings' && <AdminSettingsTab readOnly={false} />}
+        {tab === 'invitations' && <AdminInvitationsTab readOnly={false} />}
+        {tab === 'views' && <AdminViewsConfigTab />}
+        {tab === 'orders' && <OrdersTab readOnly={false} />}
+        {tab === 'bulk-orders' && <AdminBulkOrdersTab />}
+        {tab === 'access-levels' && <AdminAccessLevelsTab />}
+        {tab === 'purchase-rfqs' && <AdminRFQTab />}
+        {tab === 'purchase-orders' && <AdminPOTab />}
+        {tab === 'purchase-bills' && <AdminBillsTab />}
+        {tab === 'payments-made' && <AdminPaymentsMadeTab />}
+        {tab === 'payments-received' && <AdminPaymentsReceivedTab />}
+        {tab === 'clinical-ai' && <ClinicalAIWidget />}
+        {tab === 'prescription-agent' && (
+          <AdminPlaceholderTab
+            title="Prescription Agent"
+            description="Manage logic for AI prescription recommendations."
+            tags={['AI', 'Medical']}
+            color="var(--color-primary)"
+          />
+        )}
+        {tab === 'analytics' && <AdminAnalyticsTab />}
+        {tab === 'ai-logs' && <AdminClinicalLogsTab />}
+        {tab === 'audit-logs' && <AdminAuditLogsTab />}
+        {tab === 'command-center' && <AtlasCommandCenter />}
+        {tab === 'territory-rules' && (
+          <AdminPlaceholderTab
+            title="Territory Rules"
+            description="Configure exclusivity rules and protected categories."
+            tags={['Rules', 'Protection']}
+            color="var(--color-primary)"
+          />
+        )}
+        {tab === 'branding' && (
+          <AdminPlaceholderTab
+            title="Wholeseller Branding"
+            description="Configure white-label subdomains and assets."
+            tags={['Brand', 'White-label']}
+            color="var(--color-primary)"
+          />
+        )}
+        {tab === 'pricing-visibility' && (
+          <AdminPlaceholderTab
+            title="Pricing Visibility"
+            description="Configure regional pricing walls and product visibility."
+            tags={['Pricing', 'Access']}
+            color="var(--color-primary)"
+          />
+        )}
+        {tab === 'leads' && (
+          <AdminPlaceholderTab
+            title="Lead Management"
+            description="Global B2B/B2C lead routing and ownership rules."
+            tags={['Sales', 'Leads']}
+            color="var(--color-primary)"
+          />
+        )}
+        {tab === 'home-layout' && <AdminHomeLayoutTab />}
+        {tab === 'protocols' && <AdminProtocolsTab />}
+        {tab === 'programs' && <AdminProgramsTab />}
+        {tab === 'stock' && <AdminVariantsTab />}
+        {tab === 'lab-tests' && (
+          <AdminPlaceholderTab
+            title="Lab Tests & COAs"
+            description="Manage quality control, third-party tests, and Certificates of Analysis for your stock batches."
+            tags={['Quality', 'Testing']}
+            color="var(--color-primary)"
+          />
+        )}
+        {tab === 'catalogs' && (
+          <CatalogList
+            ownerId="admin"
+            ownerType="admin"
+            onOpenBuilder={() => {
+              setCatalogToEdit(null);
+              setActiveTab('catalog-builder');
+            }}
+            onSelectCatalogToEdit={(cat) => {
+              setCatalogToEdit(cat);
+              setActiveTab('catalog-builder');
+            }}
+          />
+        )}
+        {tab === 'catalog-builder' && (
+          <CatalogCreatorFlow
+            ownerId="admin"
+            ownerType="admin"
+            editingCatalog={catalogToEdit}
+            onBack={() => {
+              setCatalogToEdit(null);
+              setActiveTab('catalogs');
+            }}
+          />
+        )}
+        {tab === 'email-campaigns' && (
+          <EmailCampaignBuilder
+            ownerId="admin"
+            ownerType="admin"
+            onBack={() => setActiveTab('catalogs')}
+          />
+        )}
+        {tab === 'newsletter' && (
+          <AdminPlaceholderTab
+            title="Newsletter Signups"
+            description="View and export B2C newsletter subscribers."
+            tags={['Marketing', 'B2C']}
+            color="var(--color-primary)"
+          />
+        )}
+        {tab === 'email-templates' && <AdminEmailTemplatesTab />}
+        {tab === 'gadget-repository' && <AdminGadgetRepositoryTab />}
+        {tab === 'sku-sync' && <AdminSkuMappingTab />}
+        {tab === 'crm-intelligence' && (
+          <div style={{ padding: '0.5rem 0' }}>
+            <AdminZohoCRMWidget fullHeight={false} />
+          </div>
+        )}
+        {tab.startsWith('finance-') && (
+          <AdminFinanceTab activeSubTab={tab.replace('finance-', '')} />
+        )}
+        {tab === 'deploy' && (
+          <AdminPlaceholderTab
+            title="Deploy & Hosting"
+            description="Monitor application deployments, environment variables, hosting status, and trigger builds."
+            features={[
+              'GitHub CI/CD triggers',
+              'Environment variable manager',
+              'Real-time build log streaming',
+              'Domain SSL configurations',
+            ]}
+            tags={['Infrastructure', 'Hosting', 'Cloud']}
+            color="var(--color-primary)"
+            priority="soon"
+          />
+        )}
+      </React.Suspense>
     </AdminTabErrorBoundary>
   );
 }
@@ -502,12 +568,12 @@ export default function AdminDashboard() {
   }, []);
 
   const dynamicPinnedItems = React.useMemo(() => {
-    return PINNED_ITEMS.map(item => {
+    return PINNED_ITEMS.map((item) => {
       if (item.id === 'messages') {
-        return { 
-          ...item, 
+        return {
+          ...item,
           badge: unreadMessages > 0 ? unreadMessages : null,
-          badgeColor: '#25D366' // WhatsApp green
+          badgeColor: '#25D366', // WhatsApp green
         };
       }
       return item;
@@ -521,10 +587,12 @@ export default function AdminDashboard() {
     if (!userProfile?.allowedAdminTabs || userProfile.allowedAdminTabs.length === 0) {
       return NAV_GROUPS;
     }
-    return NAV_GROUPS.map(group => ({
+    return NAV_GROUPS.map((group) => ({
       ...group,
-      items: group.items.filter(item => userProfile.allowedAdminTabs.includes(item.id))
-    })).filter(group => group.items.length > 0);
+      items: group.items.filter(
+        (item) => group.id === 'core-workspace' || userProfile.allowedAdminTabs.includes(item.id)
+      ),
+    })).filter((group) => group.items.length > 0);
   }, [userProfile, isAdmin]);
 
   // Derive active tab from the URL path instead of query params.
@@ -535,7 +603,11 @@ export default function AdminDashboard() {
   React.useEffect(() => {
     if (isAdmin || userProfile?.role === 'admin') return; // Admins bypass restrictions
     if (userProfile?.allowedAdminTabs && userProfile.allowedAdminTabs.length > 0) {
-      if (!userProfile.allowedAdminTabs.includes(activeTab) && activeTab !== 'dashboard' && activeTab !== 'my-profile') {
+      if (
+        !userProfile.allowedAdminTabs.includes(activeTab) &&
+        activeTab !== 'dashboard' &&
+        activeTab !== 'my-profile'
+      ) {
         // Not allowed to access this tab
         navigate(`/admin/${userProfile.allowedAdminTabs[0]}`);
       } else if (activeTab === 'dashboard' && !userProfile.allowedAdminTabs.includes('dashboard')) {
@@ -545,22 +617,29 @@ export default function AdminDashboard() {
     }
   }, [userProfile?.allowedAdminTabs, activeTab, navigate, isAdmin, userProfile?.role]);
 
-  const navToTab = useCallback((tabId) => {
-    if (tabId === 'b2c-shop') {
-      navigate('/');
-      return;
-    }
-    navigate(`/admin/${tabId === 'dashboard' ? '' : tabId}`);
-  }, [navigate]);
+  const navToTab = useCallback(
+    (tabId) => {
+      if (tabId === 'b2c-shop') {
+        navigate('/');
+        return;
+      }
+      navigate(`/admin/${tabId === 'dashboard' ? '' : tabId}`);
+    },
+    [navigate]
+  );
 
-  const handleLogout = () => { if (logout) logout(); window.location.href = '/'; };
+  const handleLogout = () => {
+    if (logout) logout();
+    window.location.href = '/';
+  };
 
-  const currentGroup = NAV_GROUPS.find(g => g.items.some(i => i.id === activeTab));
-  const currentItem  = currentGroup?.items.find(i => i.id === activeTab)
-                    ?? PINNED_ITEMS.find(i => i.id === activeTab);
+  const currentGroup = NAV_GROUPS.find((g) => g.items.some((i) => i.id === activeTab));
+  const currentItem =
+    currentGroup?.items.find((i) => i.id === activeTab) ??
+    PINNED_ITEMS.find((i) => i.id === activeTab);
 
   return (
-    <PortalLayout 
+    <PortalLayout
       sidebarNavGroups={filteredNavGroups}
       sidebarPinnedItems={dynamicPinnedItems}
       activeNavId={activeTab}
@@ -570,13 +649,21 @@ export default function AdminDashboard() {
       pageContext={{
         activeTab: activeTab,
         label: currentItem?.label || 'Dashboard',
-        group: currentGroup?.label || 'Overview'
+        group: currentGroup?.label || 'Overview',
       }}
       headerActions={
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <button 
-            onClick={handleLogout} 
-            style={{ background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', marginLeft: '4px' }}
+          <button
+            onClick={handleLogout}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: '0.5rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              marginLeft: '4px',
+            }}
             title="Logout"
           >
             <LogOut size={18} color="var(--color-text-secondary)" />
@@ -592,7 +679,6 @@ export default function AdminDashboard() {
         </React.Suspense>
       </div>
       <Omnibar isOpen={isOmnibarOpen} onClose={() => setIsOmnibarOpen(false)} />
-
     </PortalLayout>
   );
 }

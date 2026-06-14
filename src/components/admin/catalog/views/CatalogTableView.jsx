@@ -7,11 +7,12 @@ import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import Box from 'lucide-react/dist/esm/icons/box';
 import React, { useState, useMemo, useEffect } from 'react';
 import { DataTable } from '../../../ui';
-import { calculateProductHealthScore } from '../useProductHealthScore';
+import { calculateVariantHealthScore } from '../useVariantHealthScore';
 import { useAuth } from '../../../../context/AuthContext';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../../../firebase';
 import AppActionGroup from '../../../ui/AppActionGroup';
+import ExpandedProductRow from './ExpandedProductRow';
 
 export default function CatalogTableView({
   products = [],
@@ -26,7 +27,6 @@ export default function CatalogTableView({
   selectedIds,
   onSelectionChange,
   matrixViewType = 'grouped',
-  contextualTab = 'items',
 }) {
   const { user } = useAuth();
 
@@ -51,7 +51,9 @@ export default function CatalogTableView({
 
   const renderSavedViews = () => (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>View:</span>
+      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+        View:
+      </span>
       <select
         value={activeSavedView}
         onChange={(e) => setActiveSavedView(e.target.value)}
@@ -64,7 +66,7 @@ export default function CatalogTableView({
           color: 'var(--color-primary)',
           backgroundColor: 'rgba(99,102,241,0.05)',
           cursor: 'pointer',
-          outline: 'none'
+          outline: 'none',
         }}
       >
         <option value="Default View">Default View</option>
@@ -108,269 +110,143 @@ export default function CatalogTableView({
       },
       {
         key: 'product',
-        header: 'Product / Variant',
+        header: 'Product / SKU',
         sortKey: 'name',
         render: (row) => (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.9rem' }}>
               {row.name || row.displayName}
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              SKU: {row.sku || 'N/A'}
-            </div>
+            {row.isVariantRow && (
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                SKU: {row.sku || 'N/A'}
+              </div>
+            )}
+            {!row.isVariantRow && row.category && (
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{row.category}</div>
+            )}
           </div>
         ),
       },
     ];
 
-    let contextColumns = [];
-
-    if (contextualTab === 'items') {
-      contextColumns = [
-        {
-          key: 'category',
-          header: 'Category',
-          render: (row) => <span style={{ fontSize: '0.85rem' }}>{row.category || '-'}</span>,
-        },
-        {
-          key: 'format',
-          header: 'Format',
-          render: (row) => <span style={{ fontSize: '0.85rem' }}>{row.format || '-'}</span>,
-        },
-        {
-          key: 'size',
-          header: 'Size',
-          render: (row) => <span style={{ fontSize: '0.85rem' }}>{row.size || '-'}</span>,
-        },
-        {
-          key: 'coverage',
-          header: 'Coverage',
-          render: (row) => {
-            const variants = row.isVariantRow ? [row] : row.variants || [];
-            const uniqueSuppliers = new Set(variants.map((v) => v.supplier).filter(Boolean));
-            const count = uniqueSuppliers.size;
-
-            let coverageText = 'No Source';
-            let color = '#94a3b8';
-            let bg = 'rgba(148, 163, 184, 0.1)';
-
-            if (count === 1) {
-              coverageText = 'Single Source';
-              color = '#f59e0b';
-              bg = 'rgba(245, 158, 11, 0.1)';
-            } else if (count === 2) {
-              coverageText = 'Dual Source';
-              color = '#3b82f6';
-              bg = 'rgba(59, 130, 246, 0.1)';
-            } else if (count >= 3) {
-              coverageText = 'Multi Source';
-              color = '#10b981';
-              bg = 'rgba(16, 185, 129, 0.1)';
-            }
-
-            return (
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '4px',
-                  alignItems: 'flex-start',
-                }}
-              >
-                <div
-                  style={{
-                    fontWeight: 600,
-                    color: color,
-                    fontSize: '0.75rem',
-                    background: bg,
-                    padding: '2px 8px',
-                    borderRadius: '12px',
-                  }}
-                >
-                  {count === 0 ? '0 Suppliers' : coverageText}
-                </div>
-              </div>
-            );
-          },
-        },
-        {
-          key: 'health',
-          header: 'Health Score',
-          render: (row) => {
-            const productRef = row.isVariantRow ? row.parentProduct : row;
-            const { score, color, flags } = calculateProductHealthScore(productRef);
-            return (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <div
-                    style={{
-                      flex: 1,
-                      height: '6px',
-                      backgroundColor: 'var(--color-bg-subtle)',
-                      borderRadius: '3px',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <div style={{ width: `${score}%`, height: '100%', backgroundColor: color }} />
-                  </div>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color }}>{score}</span>
-                </div>
-                {flags.length > 0 && (
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                    {flags[0]} {flags.length > 1 && `+${flags.length - 1}`}
-                  </span>
-                )}
-              </div>
-            );
-          },
-        },
-      ];
-    } else if (contextualTab === 'commercial') {
-      contextColumns = [
-        {
-          key: 'supplier',
-          header: 'Supplier',
-          render: (row) => (
-            <span style={{ fontSize: '0.85rem', color: row.supplier ? '#1e293b' : '#94a3b8' }}>
-              {row.supplier || 'Unassigned'}
-            </span>
-          ),
-        },
-        {
-          key: 'cost',
-          header: 'Base Cost',
-          render: (row) => (
-            <span style={{ fontSize: '0.85rem' }}>{row.cost ? `$${row.cost}` : '-'}</span>
-          ),
-        },
-        {
-          key: 'shipping',
-          header: 'Shipping/Duty',
-          render: (row) => (
-            <span style={{ fontSize: '0.85rem' }}>
-              {row.shippingCost ? `$${row.shippingCost}` : '-'}
-            </span>
-          ),
-        },
-        {
-          key: 'landed',
-          header: 'Landed Cost',
-          render: (row) => (
-            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-              {row.cost && row.shippingCost
-                ? `$${(Number(row.cost) + Number(row.shippingCost)).toFixed(2)}`
-                : '-'}
-            </span>
-          ),
-        },
-        {
-          key: 'wholesale',
-          header: 'Wholesale',
-          render: (row) => (
-            <span style={{ fontSize: '0.85rem' }}>
-              {row.wholesalePrice ? `$${row.wholesalePrice}` : '-'}
-            </span>
-          ),
-        },
-        {
-          key: 'clinic',
-          header: 'Clinic',
-          render: (row) => (
-            <span style={{ fontSize: '0.85rem' }}>
-              {row.clinicPrice ? `$${row.clinicPrice}` : '-'}
-            </span>
-          ),
-        },
-        {
-          key: 'msrp',
-          header: 'MSRP',
-          render: (row) => (
-            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-              {row.msrp ? `$${row.msrp}` : '-'}
-            </span>
-          ),
-        },
-        {
-          key: 'margin',
-          header: 'Margin',
-          render: (row) => {
-            if (!row.cost || !row.msrp) return '-';
-            const margin = ((row.msrp - row.cost) / row.msrp) * 100;
-            return (
-              <span style={{ fontSize: '0.85rem', color: margin > 50 ? '#10b981' : '#f59e0b' }}>
-                {margin.toFixed(0)}%
-              </span>
-            );
-          },
-        },
-      ];
-    } else if (contextualTab === 'inventory') {
-      contextColumns = [
-        {
-          key: 'stock',
-          header: 'Current Stock',
-          render: (row) => (
-            <span
+    let contextColumns = [
+      {
+        key: 'variantCount',
+        header: 'Variants',
+        render: (row) => {
+          if (row.isVariantRow) return <span style={{ fontSize: '0.85rem' }}>-</span>;
+          const count = row.variants?.length || 0;
+          return (
+            <div
               style={{
-                fontSize: '0.85rem',
+                fontSize: '0.75rem',
                 fontWeight: 600,
-                color: (row.stock || 0) < (row.reorderPoint || 20) ? '#ef4444' : '#1e293b',
+                color: '#64748b',
+                backgroundColor: '#f1f5f9',
+                padding: '2px 8px',
+                borderRadius: '12px',
+                display: 'inline-block',
               }}
             >
-              {row.stock || 0} units
-            </span>
-          ),
+              {count} {count === 1 ? 'Variant' : 'Variants'}
+            </div>
+          );
         },
-        {
-          key: 'reorderPoint',
-          header: 'Reorder At',
-          render: (row) => <span style={{ fontSize: '0.85rem' }}>{row.reorderPoint || 20}</span>,
+      },
+      {
+        key: 'supplierCount',
+        header: 'Suppliers',
+        render: (row) => {
+          if (row.isVariantRow)
+            return <span style={{ fontSize: '0.85rem' }}>{row.supplier || 'Unassigned'}</span>;
+
+          const uniqueSuppliers = new Set(
+            (row.variants || []).map((v) => v.supplier).filter(Boolean)
+          );
+          const count = uniqueSuppliers.size;
+
+          let coverageText = 'No Source';
+          let color = '#94a3b8';
+          let bg = 'rgba(148, 163, 184, 0.1)';
+
+          if (count === 1) {
+            coverageText = 'Single Source Risk';
+            color = '#f59e0b';
+            bg = 'rgba(245, 158, 11, 0.1)';
+          } else if (count >= 2) {
+            coverageText = `${count} Suppliers`;
+            color = '#10b981';
+            bg = 'rgba(16, 185, 129, 0.1)';
+          }
+
+          return (
+            <div
+              style={{
+                fontWeight: 600,
+                color: color,
+                fontSize: '0.75rem',
+                background: bg,
+                padding: '2px 8px',
+                borderRadius: '12px',
+                display: 'inline-block',
+              }}
+            >
+              {count === 0 ? '0 Suppliers' : coverageText}
+            </div>
+          );
         },
-        {
-          key: 'moq',
-          header: 'MOQ',
-          render: (row) => <span style={{ fontSize: '0.85rem' }}>{row.moq || '-'}</span>,
+      },
+      {
+        key: 'statusSummary',
+        header: 'Status Summary',
+        render: (row) => {
+          if (row.isVariantRow) {
+            const { score, color, status } = calculateVariantHealthScore(row);
+            return (
+              <span style={{ fontSize: '0.85rem', color, fontWeight: 600 }}>
+                {status} ({score})
+              </span>
+            );
+          }
+
+          // Aggregate status for parent product
+          let healthyCount = 0;
+          let atRiskCount = 0;
+          let missingDataCount = 0;
+
+          (row.variants || []).forEach((v) => {
+            const { score } = calculateVariantHealthScore(v);
+            if (score >= 80) healthyCount++;
+            else if (score >= 60) atRiskCount++;
+            else missingDataCount++;
+          });
+
+          return (
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              {healthyCount > 0 && (
+                <span style={{ fontSize: '0.75rem', color: '#10b981' }}>
+                  ✓ {healthyCount} Healthy
+                </span>
+              )}
+              {atRiskCount > 0 && (
+                <span style={{ fontSize: '0.75rem', color: '#f59e0b' }}>
+                  ⚠ {atRiskCount} At Risk
+                </span>
+              )}
+              {missingDataCount > 0 && (
+                <span style={{ fontSize: '0.75rem', color: '#ef4444' }}>
+                  ✕ {missingDataCount} Issues
+                </span>
+              )}
+              {healthyCount === 0 && atRiskCount === 0 && missingDataCount === 0 && (
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>No Variants</span>
+              )}
+            </div>
+          );
         },
-        {
-          key: 'leadTime',
-          header: 'Lead Time',
-          render: (row) => (
-            <span style={{ fontSize: '0.85rem' }}>
-              {row.leadTime ? `${row.leadTime} days` : '-'}
-            </span>
-          ),
-        },
-        {
-          key: 'velocity',
-          header: 'Velocity',
-          render: (row) => (
-            <span style={{ fontSize: '0.85rem' }}>{row.salesStatus || 'Medium'}</span>
-          ),
-        },
-      ];
-    } else if (contextualTab === 'regulatory') {
-      contextColumns = [
-        {
-          key: 'gmp',
-          header: 'GMP Status',
-          render: (row) => (
-            <span style={{ fontSize: '0.85rem' }}>{row.gmp ? 'Valid' : 'Missing'}</span>
-          ),
-        },
-        {
-          key: 'coa',
-          header: 'COA Status',
-          render: (row) => (
-            <span style={{ fontSize: '0.85rem' }}>{row.coa ? 'Valid' : 'Missing'}</span>
-          ),
-        },
-        {
-          key: 'permit',
-          header: 'Import Permit',
-          render: (row) => <span style={{ fontSize: '0.85rem' }}>{row.importPermit || 'N/A'}</span>,
-        },
-      ];
-    }
+      },
+    ];
 
     const actionColumn = {
       key: 'actions',
@@ -422,26 +298,24 @@ export default function CatalogTableView({
     };
 
     return [...baseColumns, ...contextColumns, actionColumn];
-  }, [contextualTab, onAction]);
+  }, [onAction]);
 
   useEffect(() => {
     let isMounted = true;
     if (user?.uid) {
-      getDoc(doc(db, `users/${user.uid}/views/catalogProducts_${contextualTab}`)).then(
-        (snapshot) => {
-          if (!isMounted) return;
-          if (snapshot.exists()) {
-            const data = snapshot.data();
-            if (data.visibleColumns) {
-              setVisibleColumns(data.visibleColumns);
-            } else {
-              setVisibleColumns(columns.map((c) => c.key));
-            }
+      getDoc(doc(db, `users/${user.uid}/views/catalogProducts_items`)).then((snapshot) => {
+        if (!isMounted) return;
+        if (snapshot.exists()) {
+          const data = snapshot.data();
+          if (data.visibleColumns) {
+            setVisibleColumns(data.visibleColumns);
           } else {
             setVisibleColumns(columns.map((c) => c.key));
           }
+        } else {
+          setVisibleColumns(columns.map((c) => c.key));
         }
-      );
+      });
     } else {
       Promise.resolve().then(() => {
         if (isMounted) setVisibleColumns(columns.map((c) => c.key));
@@ -450,14 +324,14 @@ export default function CatalogTableView({
     return () => {
       isMounted = false;
     };
-  }, [user, contextualTab, columns]);
+  }, [user, columns]);
 
   const handleColumnToggle = async (key, isVisible) => {
     const newCols = isVisible ? [...visibleColumns, key] : visibleColumns.filter((c) => c !== key);
     setVisibleColumns(newCols);
     if (user?.uid) {
       await setDoc(
-        doc(db, `users/${user.uid}/views/catalogProducts_${contextualTab}`),
+        doc(db, `users/${user.uid}/views/catalogProducts_items`),
         { visibleColumns: newCols },
         { merge: true }
       );
@@ -485,104 +359,15 @@ export default function CatalogTableView({
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `catalog_export_${contextualTab}.csv`);
+    link.setAttribute('download', `catalog_export.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   const renderVariantRow = (row) => {
-    // Hide variant rows if we are in flat view (they are already rows themselves)
     if (matrixViewType === 'flat') return null;
-
-    if (!row.variants || row.variants.length === 0) {
-      return (
-        <div
-          style={{
-            padding: '16px',
-            color: 'var(--text-muted)',
-            fontSize: '0.85rem',
-            textAlign: 'center',
-            backgroundColor: '#f8fafc',
-            borderRadius: '8px',
-          }}
-        >
-          No variants defined for this product.
-        </div>
-      );
-    }
-
-    return (
-      <div
-        style={{
-          padding: '16px 24px',
-          backgroundColor: '#f8fafc',
-          borderRadius: '8px',
-          border: '1px solid var(--color-border)',
-        }}
-      >
-        <h4 style={{ margin: '0 0 12px 0', fontSize: '0.85rem', color: 'var(--text-main)' }}>
-          Variants ({row.variants.length})
-        </h4>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
-          <thead>
-            <tr
-              style={{
-                color: 'var(--text-muted)',
-                borderBottom: '1px solid var(--color-border)',
-                textAlign: 'left',
-              }}
-            >
-              <th style={{ padding: '8px' }}>SKU</th>
-              <th style={{ padding: '8px' }}>Format</th>
-              <th style={{ padding: '8px' }}>Size</th>
-              <th style={{ padding: '8px' }}>Supplier</th>
-              <th style={{ padding: '8px' }}>Cost</th>
-              <th style={{ padding: '8px' }}>MSRP</th>
-              <th style={{ padding: '8px' }}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {row.variants.map((v, i) => (
-              <tr
-                key={i}
-                style={{
-                  borderBottom: '1px solid var(--color-border)',
-                  backgroundColor: 'transparent',
-                }}
-              >
-                <td style={{ padding: '8px', fontWeight: 500, color: 'var(--text-main)' }}>
-                  {v.sku || '-'}
-                </td>
-                <td style={{ padding: '8px' }}>{v.format || '-'}</td>
-                <td style={{ padding: '8px' }}>{v.size || '-'}</td>
-                <td style={{ padding: '8px', color: v.supplier ? 'inherit' : 'var(--text-muted)' }}>
-                  {v.supplier || 'Unassigned'}
-                </td>
-                <td style={{ padding: '8px' }}>{v.cost ? `$${v.cost}` : '-'}</td>
-                <td style={{ padding: '8px' }}>{v.msrp ? `$${v.msrp}` : '-'}</td>
-                <td style={{ padding: '8px' }}>
-                  <span
-                    style={{
-                      padding: '2px 6px',
-                      borderRadius: '12px',
-                      fontSize: '0.7rem',
-                      backgroundColor:
-                        v.status === 'Active'
-                          ? 'rgba(16, 185, 129, 0.1)'
-                          : 'rgba(148, 163, 184, 0.1)',
-                      color: v.status === 'Active' ? '#10b981' : '#64748b',
-                    }}
-                  >
-                    {v.status || 'Draft'}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
+    return <ExpandedProductRow row={row} />;
   };
 
   const handleRowClick = (row) => {
@@ -624,7 +409,7 @@ export default function CatalogTableView({
         onExport={handleExport}
         visibleColumns={visibleColumns}
         onColumnToggle={handleColumnToggle}
-        tableId={`catalogProducts_${contextualTab}_${matrixViewType}`}
+        tableId={`catalogProducts_items_${matrixViewType}`}
       />
     </div>
   );
