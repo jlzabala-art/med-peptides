@@ -35,6 +35,7 @@ import GlobalPreferencesDropdown from '../shared/AppHeader/GlobalPreferencesDrop
 import useAdminNotifications from '../../hooks/useAdminNotifications';
 import { useCopilot } from '../../context/CopilotContext';
 import CopilotWorkspacePanel from '../ai-copilot/CopilotWorkspacePanel';
+import ContextualFAB from '../common/ContextualFAB';
 
 // ── Atlas AI — Suggested Prompts per Role ──────────────────────────────────────
 const ROLE_SUGGESTED_PROMPTS = {
@@ -645,6 +646,7 @@ export default function PortalLayout({
         }}
       />
       <CopilotWorkspacePanel />
+      <ContextualFAB />
     </div>
   );
 }

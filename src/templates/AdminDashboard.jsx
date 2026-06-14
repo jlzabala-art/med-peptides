@@ -135,7 +135,7 @@ import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import PortalLayout from '../components/ui/PortalLayout';
 import PageTransition from '../components/PageTransition';
 import Omnibar from '../components/admin/Omnibar';
-import SpeedDialFAB from '../components/admin/widgets/SpeedDialFAB';
+
 
 import GlobalNotificationCenter from '../components/shared/widgets/GlobalNotificationCenter';
 import MarketIntelligenceHub from '../components/admin/market/MarketIntelligenceHub';
@@ -245,6 +245,7 @@ const NAV_GROUPS = [
       { id: 'dashboard',        label: 'Dashboard',           icon: Activity },
       { id: 'messages',         label: 'Messages',            icon: MessageSquare },
       { id: 'calendar',         label: 'Calendar',            icon: Calendar },
+      { id: 'b2c-shop',         label: 'Go to B2C Shop',      icon: Globe },
     ],
   },
   {
@@ -546,6 +547,10 @@ export default function AdminDashboard() {
   }, [userProfile?.allowedAdminTabs, activeTab, navigate, isAdmin, userProfile?.role]);
 
   const navToTab = useCallback((tabId) => {
+    if (tabId === 'b2c-shop') {
+      navigate('/');
+      return;
+    }
     navigate(`/admin/${tabId === 'dashboard' ? '' : tabId}`);
   }, [navigate]);
 
@@ -588,7 +593,7 @@ export default function AdminDashboard() {
         </React.Suspense>
       </div>
       <Omnibar isOpen={isOmnibarOpen} onClose={() => setIsOmnibarOpen(false)} />
-      <SpeedDialFAB onOpenOmnibar={() => setIsOmnibarOpen(true)} />
+
     </PortalLayout>
   );
 }

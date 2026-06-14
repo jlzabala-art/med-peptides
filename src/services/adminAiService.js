@@ -1,5 +1,4 @@
-import { httpsCallable } from 'firebase/functions';
-import { functions } from '../firebase';
+
 
 /**
  * Admin AI Service
@@ -36,5 +35,47 @@ export const generateExecutiveSummary = async (metrics) => {
     } catch (error) {
         console.error("Admin AI Backend Extraction failed:", error);
         throw new Error("Failed to generate executive summary.");
+    }
+};
+
+/**
+ * Generates dynamic thread insights based on conversation history.
+ * Used in Atlas Messages Hub.
+ */
+export const generateThreadInsights = async (threadText, entityName) => {
+    try {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                // Simulate AI analysis based on keywords in the text
+                const text = (threadText || '').toLowerCase();
+                let sentiment = 'neutral';
+                let healthScore = 85;
+                let aiSummary = `Standard conversation with ${entityName}. No immediate actions required.`;
+                
+                if (text.includes('delay') || text.includes('issue') || text.includes('customs') || text.includes('bad') || text.includes('missing')) {
+                    sentiment = 'negative';
+                    healthScore = Math.floor(Math.random() * 30) + 40; // 40-70
+                    aiSummary = `Action required: ${entityName} is reporting an issue or delay. Please review the timeline.`;
+                } else if (text.includes('great') || text.includes('thanks') || text.includes('quote') || text.includes('bulk')) {
+                    sentiment = 'positive';
+                    healthScore = Math.floor(Math.random() * 10) + 90; // 90-100
+                    aiSummary = `Positive interaction with ${entityName}. Potential for upselling or successful resolution.`;
+                }
+
+                resolve({
+                    sentiment,
+                    healthScore,
+                    aiSummary,
+                    suggestedReplies: [
+                        "Let me look into this right away.",
+                        "Could you provide more details?",
+                        "Thank you for the update."
+                    ]
+                });
+            }, 1500); // AI simulation latency
+        });
+    } catch (error) {
+        console.error("Thread insights generation failed:", error);
+        return { sentiment: 'neutral', healthScore: 50, aiSummary: 'Failed to analyze.', suggestedReplies: [] };
     }
 };

@@ -1,679 +1,460 @@
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import Pill from "lucide-react/dist/esm/icons/pill";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import Info from "lucide-react/dist/esm/icons/info";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import CalendarDays from "lucide-react/dist/esm/icons/calendar-days";
-import User from "lucide-react/dist/esm/icons/user";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Database from "lucide-react/dist/esm/icons/database";
-import Chrome from "lucide-react/dist/esm/icons/chrome";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import X from "lucide-react/dist/esm/icons/x";
 import React, { useState, useEffect } from 'react';
 import { 
-  collection, 
-  query, 
-  where, 
-  orderBy, 
-  limit, 
-  getDocs, 
-  Timestamp,
-  updateDoc,
-  doc
+  collection, query, where, orderBy, limit, getDocs, Timestamp
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
+import { 
+  Calendar as CalendarIcon, Clock, Users, Pill, CheckCircle2, ChevronLeft, ChevronRight,
+  Filter, Search, AlertTriangle, FileText, BrainCircuit, Activity, HeartPulse, RefreshCw, Plus
+} from 'lucide-react';
+import AdminPageHeader from '../components/admin/AdminPageHeader';
 
-
-
-
-
-
-
-
-
-
-
-
-
+import { toast } from 'react-hot-toast';
 
 export default function DoctorAppointments() {
-  const { user, userProfile, baseRole } = useAuth();
-  // Impersonation check
-  const isAdmin = baseRole === 'admin';
-  const storedImpersonatedId = sessionStorage.getItem('impersonatedDoctorId');
-  const activeDoctorId = isAdmin && storedImpersonatedId ? storedImpersonatedId : user?.uid;
+    const { user, baseRole } = useAuth();
+    // Impersonation
+    const isAdmin = baseRole === 'admin';
+    const storedImpersonatedId = sessionStorage.getItem('impersonatedDoctorId');
+    const activeDoctorId = isAdmin && storedImpersonatedId ? storedImpersonatedId : user?.uid;
 
-  // State
-  const [prescriptions, setPrescriptions] = useState([]);
-  const [refills, setRefills] = useState([]);
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+    const [loading, setLoading] = useState(true);
+    const [viewMode, setViewMode] = useState('Week'); // Day, Week, Month, Agenda
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [calendarExpanded, setCalendarExpanded] = useState(false); // For mobile
 
-  // Calendar sync state
-  const [calendarConnected, setCalendarConnected] = useState(() => {
-    return localStorage.getItem(`gcal_connected_${activeDoctorId}`) === 'true';
-  });
-  const [showOauthModal, setShowOauthModal] = useState(false);
-  const [oauthEmail, setOauthEmail] = useState(user?.email || '');
-  const [oauthPassword, setOauthPassword] = useState('');
-  const [oauthLoading, setOauthLoading] = useState(false);
+    // Data
+    const [events, setEvents] = useState([]);
+    const [kpis, setKpis] = useState({
+        prescriptionsToday: 0,
+        pendingFollowUps: 0,
+        testsDue: 0,
+        totalConsultations: 0
+    });
 
-  // Load appointments, prescriptions, refills, and transactions
-  useEffect(() => {
-    if (!activeDoctorId) return;
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        // 1. Fetch Prescriptions created by this doctor
-        const rxQuery = query(
-          collection(db, 'prescriptions'),
-          where('doctorId', '==', activeDoctorId),
-          orderBy('createdAt', 'desc'),
-          limit(20)
-        );
-        const rxSnap = await getDocs(rxQuery);
-        const rxList = rxSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        setPrescriptions(rxList);
+    useEffect(() => {
+        if (!activeDoctorId) return;
 
-        // 2. Fetch Refill Reminders for this doctor's patients
-        const refillQuery = query(
-          collection(db, 'refill_reminders'),
-          where('doctorId', '==', activeDoctorId),
-          limit(25)
-        );
-        const refillSnap = await getDocs(refillQuery);
-        const refillList = refillSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        setRefills(refillList);
+        const loadData = async () => {
+            setLoading(true);
+            try {
+                // Fetch mock data or real data and map to events
+                const rxQuery = query(collection(db, 'prescriptions'), where('doctorId', '==', activeDoctorId), orderBy('createdAt', 'desc'), limit(10));
+                const refillQuery = query(collection(db, 'refill_reminders'), where('doctorId', '==', activeDoctorId), limit(10));
+                
+                const [rxSnap, refillSnap] = await Promise.all([getDocs(rxQuery), getDocs(refillQuery)]);
+                
+                const loadedEvents = [];
+                let rxToday = 0;
 
-        // 3. Fetch Wholesaler and Patient Transactions
-        // In the system, transactions consist of orders linked to this doctor's prescriptions or recommendations
-        const txQuery = query(
-          collection(db, 'orders'),
-          where('supervisingPhysicianId', '==', activeDoctorId),
-          orderBy('createdAt', 'desc'),
-          limit(25)
-        );
-        const txSnap = await getDocs(txQuery);
-        const txList = txSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        setTransactions(txList);
+                // Today
+                const today = new Date();
+                today.setHours(0,0,0,0);
 
-      } catch (err) {
-        console.error("Error loading doctor appointments data:", err);
-      } finally {
-        setLoading(false);
-      }
+                rxSnap.forEach(d => {
+                    const data = d.data();
+                    const dDate = data.createdAt?.toDate ? data.createdAt.toDate() : new Date();
+                    if (dDate >= today) rxToday++;
+                    loadedEvents.push({
+                        id: d.id,
+                        title: `Prescription: ${data.patient?.name || 'Patient'}`,
+                        type: 'Prescription',
+                        date: dDate,
+                        time: dDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                        color: '#1a73e8' // Blue
+                    });
+                });
+
+                refillSnap.forEach(d => {
+                    const data = d.data();
+                    const rDate = data.remindAt?.toDate ? data.remindAt.toDate() : new Date();
+                    loadedEvents.push({
+                        id: d.id,
+                        title: `Refill: ${data.patientName || 'Patient'}`,
+                        type: 'Follow-Up',
+                        date: rDate,
+                        time: rDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                        color: '#f59e0b' // Warning Orange
+                    });
+                });
+
+                // Add some hardcoded operational schedule
+                const mockOp = [
+                    { id: 'm1', title: 'Consult: Arthur Pendragon', type: 'Consultation', date: new Date(), time: '09:00 AM', color: '#10b981' },
+                    { id: 'm2', title: 'Peptide Protocol Review: Gwen Stacy', type: 'Protocol Review', date: new Date(), time: '10:30 AM', color: '#8b5cf6' },
+                    { id: 'm3', title: 'Genetic Test Results: Bruce Banner', type: 'Genetic Test', date: new Date(), time: '14:00 PM', color: '#ec4899' },
+                ];
+
+                const allEvents = [...loadedEvents, ...mockOp].sort((a,b) => a.date - b.date);
+                setEvents(allEvents);
+
+                setKpis({
+                    prescriptionsToday: rxToday + 2, // Mocking some extra
+                    pendingFollowUps: refillSnap.size + 1,
+                    testsDue: 3,
+                    totalConsultations: 5
+                });
+
+            } catch (err) {
+                console.error("Error loading clinical schedule:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadData();
+    }, [activeDoctorId]);
+
+    const handleAction = (action) => {
+        toast.success(`${action} action triggered. Modal would open here.`);
     };
 
-    loadData();
-  }, [activeDoctorId]);
+    const fabActions = [
+        { icon: <Pill size={18} />, label: 'New Prescription', onClick: () => handleAction('New Prescription') },
+        { icon: <Clock size={18} />, label: 'New Follow-Up', onClick: () => handleAction('New Follow-Up') },
+        { icon: <Activity size={18} />, label: 'New Test', onClick: () => handleAction('New Test') },
+        { icon: <HeartPulse size={18} />, label: 'New Protocol', onClick: () => handleAction('New Protocol') },
+        { icon: <CalendarIcon size={18} />, label: 'New Appointment', onClick: () => handleAction('New Appointment') },
+    ];
 
-  // Handle Mock Google Calendar Login
-  const handleConnectCalendar = (e) => {
-    e.preventDefault();
-    if (!oauthEmail || !oauthPassword) return;
-    setOauthLoading(true);
-    setTimeout(() => {
-      setCalendarConnected(true);
-      localStorage.setItem(`gcal_connected_${activeDoctorId}`, 'true');
-      setOauthLoading(false);
-      setShowOauthModal(false);
-    }, 1500);
-  };
-
-  const handleDisconnectCalendar = () => {
-    if (!window.confirm("Disconnect Google Calendar sync?")) return;
-    setCalendarConnected(false);
-    localStorage.removeItem(`gcal_connected_${activeDoctorId}`);
-  };
-
-  // Trigger manual notification for patient refill
-  const handleTriggerRefillAlert = async (refillId, patientEmail) => {
-    try {
-      const refillRef = doc(db, 'refill_reminders', refillId);
-      await updateDoc(refillRef, {
-        [`notified.doctor`]: true,
-        [`notifiedAt.doctor`]: Timestamp.now()
-      });
-      setRefills(prev => prev.map(r => r.id === refillId ? {
-        ...r,
-        notified: { ...r.notified, doctor: true }
-      } : r));
-      alert(`Refill alert sent successfully to ${patientEmail}`);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to trigger alert. Check console.");
-    }
-  };
-
-  // Mock schedule slots for Doctor Agenda
-  const mockSchedule = [
-    { time: '09:00 AM', patient: 'Arthur Pendragon', type: 'Clinical Consultation', status: 'Scheduled' },
-    { time: '10:30 AM', patient: 'Gwen Stacy', type: 'Peptide Protocol Review', status: 'Completed' },
-    { time: '12:00 PM', patient: 'Bruce Banner', type: 'Lab Results Check', status: 'Scheduled' },
-    { time: '03:15 PM', patient: 'Peter Parker', type: 'Refill Intake', status: 'Scheduled' }
-  ];
-
-  return (
-    <div style={styles.container}>
-      {/* Title Header */}
-      <div style={styles.header}>
-        <div>
-          <h2 style={styles.title}>📅 Clinical Agenda & Appointments</h2>
-          <p style={styles.subtitle}>Manage scheduled patient visits, prescription timelines, 30-day refills, and transactions.</p>
-        </div>
-        {/* Google Calendar Sync */}
-        <div>
-          {calendarConnected ? (
-            <button style={styles.btnSyncActive} onClick={handleDisconnectCalendar}>
-              <Chrome size={14} style={{ marginRight: 6 }} />
-              Calendar Synced
-            </button>
-          ) : (
-            <button style={styles.btnSync} onClick={() => setShowOauthModal(true)}>
-              <Chrome size={14} style={{ marginRight: 6 }} />
-              Sync Google Calendar
-            </button>
-          )}
-        </div>
-      </div>
-
-      {loading ? (
-        <div style={styles.loading}>
-          <RefreshCw size={24} className="spinner" style={{ animation: 'spin 1.5s linear infinite', marginBottom: 12 }} />
-          Loading agenda details...
-        </div>
-      ) : (
-        <div style={styles.grid}>
-          {/* Left Column: Calendar Agenda & Refills */}
-          <div style={styles.col}>
-            {/* Daily Schedule Slots */}
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                <CalendarDays size={16} style={{ color: 'var(--color-success)' }} />
-                <h3 style={styles.cardTitle}>Today's Appointments</h3>
-              </div>
-              <div style={styles.list}>
-                {mockSchedule.map((slot, idx) => (
-                  <div key={idx} style={styles.slotRow}>
-                    <div style={styles.slotTime}>{slot.time}</div>
-                    <div style={{ flex: 1 }}>
-                      <div style={styles.slotPatient}>{slot.patient}</div>
-                      <div style={styles.slotType}>{slot.type}</div>
+    // Subcomponents
+    const renderKPIs = () => (
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+            <div style={styles.kpiCard} onClick={() => toast("Filtered by Prescriptions")}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{...styles.kpiIconBox, background: '#e0f2fe', color: '#0284c7'}}><Pill size={20} /></div>
+                    <div>
+                        <div style={styles.kpiValue}>{kpis.prescriptionsToday}</div>
+                        <div style={styles.kpiLabel}>Today's Prescriptions</div>
                     </div>
-                    <span style={slot.status === 'Completed' ? styles.badgeSuccess : styles.badgeInfo}>
-                      {slot.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
+                </div>
+            </div>
+            <div style={styles.kpiCard} onClick={() => toast("Filtered by Follow-Ups")}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{...styles.kpiIconBox, background: '#fef3c7', color: '#d97706'}}><Clock size={20} /></div>
+                    <div>
+                        <div style={styles.kpiValue}>{kpis.pendingFollowUps}</div>
+                        <div style={styles.kpiLabel}>Pending Follow-Ups</div>
+                    </div>
+                </div>
+            </div>
+            <div style={styles.kpiCard} onClick={() => toast("Filtered by Tests")}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{...styles.kpiIconBox, background: '#fce7f3', color: '#db2777'}}><Activity size={20} /></div>
+                    <div>
+                        <div style={styles.kpiValue}>{kpis.testsDue}</div>
+                        <div style={styles.kpiLabel}>Tests Due</div>
+                    </div>
+                </div>
+            </div>
+            <div style={styles.kpiCard} onClick={() => toast("Filtered by Consultations")}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{...styles.kpiIconBox, background: '#d1fae5', color: '#059669'}}><Users size={20} /></div>
+                    <div>
+                        <div style={styles.kpiValue}>{kpis.totalConsultations}</div>
+                        <div style={styles.kpiLabel}>Clinical Consults</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderCalendar = () => (
+        <div style={{ ...styles.card, flex: isMobile ? 'none' : '0 0 65%' }}>
+            <div style={{ ...styles.cardHeader, display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <h3 style={styles.cardTitle}>{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                        <button style={styles.iconBtn} onClick={() => setCurrentDate(new Date(currentDate.setDate(currentDate.getDate() - 7)))}><ChevronLeft size={16} /></button>
+                        <button style={styles.iconBtn} onClick={() => setCurrentDate(new Date())}>Today</button>
+                        <button style={styles.iconBtn} onClick={() => setCurrentDate(new Date(currentDate.setDate(currentDate.getDate() + 7)))}><ChevronRight size={16} /></button>
+                    </div>
+                </div>
+                {!isMobile && (
+                    <div style={{ display: 'flex', background: '#f1f5f9', padding: '4px', borderRadius: '8px' }}>
+                        {['Day', 'Week', 'Month', 'Agenda'].map(v => (
+                            <button key={v} onClick={() => setViewMode(v)} style={{ ...styles.toggleBtn, ...(viewMode === v ? styles.toggleBtnActive : {}) }}>
+                                {v}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+            
+            {/* Custom CSS Grid Calendar (Simplified Week View for illustration) */}
+            <div style={{ padding: '16px', overflowX: 'auto' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '80px repeat(5, 1fr)', gap: '8px', minWidth: '600px' }}>
+                    {/* Time Column */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', paddingTop: '40px', color: '#94a3b8', fontSize: '12px', textAlign: 'right', paddingRight: '12px' }}>
+                        <span>09:00</span>
+                        <span>10:00</span>
+                        <span>11:00</span>
+                        <span>12:00</span>
+                        <span>13:00</span>
+                        <span>14:00</span>
+                        <span>15:00</span>
+                        <span>16:00</span>
+                    </div>
+                    {/* Days */}
+                    {['Mon 12', 'Tue 13', 'Wed 14', 'Thu 15', 'Fri 16'].map((day, idx) => (
+                        <div key={day} style={{ position: 'relative', borderLeft: '1px solid #e2e8f0', paddingLeft: '8px', minHeight: '400px' }}>
+                            <div style={{ fontSize: '13px', fontWeight: 600, color: idx === 2 ? '#0ea5e9' : '#475569', marginBottom: '16px', textAlign: 'center' }}>
+                                {day}
+                            </div>
+                            
+                            {/* Plot events for Wednesday (mock current day) */}
+                            {idx === 2 && events.map((ev, eIdx) => (
+                                <div key={eIdx} style={{ background: `${ev.color}15`, borderLeft: `3px solid ${ev.color}`, padding: '8px', borderRadius: '4px', marginBottom: '8px', fontSize: '11px', cursor: 'pointer' }}>
+                                    <div style={{ fontWeight: 700, color: '#0f172a' }}>{ev.title}</div>
+                                    <div style={{ color: '#64748b' }}>{ev.time} • {ev.type}</div>
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderRightPanel = () => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', flex: isMobile ? 'none' : '0 0 calc(35% - 24px)' }}>
+            
+            {/* Atlas AI Recommendations */}
+            <div style={{ ...styles.card, border: '1px solid #cce8ff', background: '#f0f9ff' }}>
+                <div style={{ ...styles.cardHeader, background: 'transparent', borderBottom: '1px solid #bae6fd' }}>
+                    <BrainCircuit size={16} color="#0284c7" />
+                    <h3 style={{ ...styles.cardTitle, color: '#0284c7' }}>Atlas Clinical Insights</h3>
+                </div>
+                <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={styles.insightAlert}>
+                        <AlertTriangle size={14} color="#ea580c" style={{flexShrink: 0}} />
+                        <span style={{ fontSize: '13px', color: '#9a3412', lineHeight: 1.4 }}><strong>2 Prescriptions</strong> expire this week. Automated follow-up suggested.</span>
+                    </div>
+                    <div style={styles.insightAlert}>
+                        <CheckCircle2 size={14} color="#059669" style={{flexShrink: 0}} />
+                        <span style={{ fontSize: '13px', color: '#065f46', lineHeight: 1.4 }}><strong>Gwen Stacy's</strong> genetic markers indicate high compatibility for current protocol.</span>
+                    </div>
+                    <button style={styles.btnAiAction}>Automate Follow-Ups</button>
+                </div>
             </div>
 
-            {/* 30-Day Refill Alerts */}
+            {/* Today's Agenda List */}
             <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                <Clock size={16} style={{ color: 'var(--color-warning)' }} />
-                <h3 style={styles.cardTitle}>Refill Reminders (30-day Countdown)</h3>
-              </div>
-              <div style={styles.list}>
-                {refills.length === 0 ? (
-                  <div style={styles.empty}>No active patient refill alerts.</div>
-                ) : (
-                  refills.map(r => {
-                    const remindDate = r.remindAt?.toDate ? r.remindAt.toDate() : new Date(r.remindAt);
-                    const daysRemaining = Math.ceil((remindDate - new Date()) / (1000 * 60 * 60 * 24));
-                    const isDue = daysRemaining <= 0;
-                    return (
-                      <div key={r.id} style={styles.refillRow}>
-                        <div style={{ flex: 1 }}>
-                          <div style={styles.slotPatient}>{r.patientName || 'Patient'}</div>
-                          <div style={styles.slotType}>Compound: {r.peptideName || 'Peptide Therapy'}</div>
-                          <div style={styles.slotType}>Due in: <strong style={{ color: isDue ? 'var(--color-danger)' : 'var(--color-warning)' }}>{isDue ? 'Due Now' : `${daysRemaining} days`}</strong></div>
+                <div style={styles.cardHeader}>
+                    <CalendarIcon size={16} color="#475569" />
+                    <h3 style={styles.cardTitle}>Today's Agenda</h3>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    {events.slice(0,4).map((ev, i) => (
+                        <div key={i} style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: ev.color, marginTop: '6px' }} />
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>{ev.title}</div>
+                                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>{ev.time} • {ev.type}</div>
+                            </div>
                         </div>
-                        <button
-                          style={r.notified?.doctor ? styles.btnAlertSent : styles.btnAlert}
-                          onClick={() => handleTriggerRefillAlert(r.id, r.patientEmail)}
-                          disabled={r.notified?.doctor}
+                    ))}
+                </div>
+            </div>
+            
+            {/* Upcoming Appointments & Follow-ups */}
+             <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                    <Clock size={16} color="#475569" />
+                    <h3 style={styles.cardTitle}>Follow-Up Tasks</h3>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ padding: '12px 16px', fontSize: '13px', color: '#475569', display: 'flex', justifyContent: 'space-between' }}>
+                        <span>Review Lab Panel for Bruce Banner</span>
+                        <span style={{ color: '#ef4444', fontWeight: 600 }}>Due</span>
+                    </div>
+                    <div style={{ padding: '12px 16px', fontSize: '13px', color: '#475569', display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #f1f5f9' }}>
+                        <span>Patient check-in: Magenta Medical</span>
+                        <span style={{ color: '#f59e0b', fontWeight: 600 }}>Tomorrow</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+    if (loading) {
+        return (
+            <div style={{ padding: '48px', display: 'flex', justifyContent: 'center', color: '#64748b' }}>
+                <RefreshCw size={24} className="animate-spin" />
+            </div>
+        );
+    }
+
+    return (
+        <div style={styles.container}>
+            <AdminPageHeader
+                title="Clinical Operations Center"
+                subtitle="AI-powered schedule, operational metrics, and protocol timelines."
+                icon={CalendarIcon}
+                iconBg="#f0f9ff"
+                iconColor="#0ea5e9"
+                actions={
+                    !isMobile && (
+                        <>
+                            <button className="secondary-btn" onClick={() => toast.success('New Prescription')}><Pill size={16}/> Prescription</button>
+                            <button className="primary-btn" onClick={() => toast.success('New Appointment')}><Plus size={16}/> Appointment</button>
+                        </>
+                    )
+                }
+            />
+
+            {renderKPIs()}
+
+            {isMobile ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    {renderRightPanel()}
+                    <div>
+                        <button 
+                            onClick={() => setCalendarExpanded(!calendarExpanded)}
+                            style={{ width: '100%', padding: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', fontWeight: 600, color: '#0f172a' }}
                         >
-                          {r.notified?.doctor ? 'Alert Sent' : 'Trigger Alert'}
+                            {calendarExpanded ? 'Hide Calendar' : 'Show Full Calendar'}
                         </button>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          </div>
+                        {calendarExpanded && <div style={{ marginTop: '16px' }}>{renderCalendar()}</div>}
+                    </div>
+                </div>
+            ) : (
+                <div style={{ display: 'flex', gap: '24px' }}>
+                    {renderCalendar()}
+                    {renderRightPanel()}
+                </div>
+            )}
 
-          {/* Right Column: Prescriptions & Transactions */}
-          <div style={styles.col}>
-            {/* Prescription History */}
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                <Pill size={16} style={{ color: '#1a73e8' }} />
-                <h3 style={styles.cardTitle}>Prescription Log</h3>
-              </div>
-              <div style={styles.list}>
-                {prescriptions.length === 0 ? (
-                  <div style={styles.empty}>No prescriptions issued by you.</div>
-                ) : (
-                  prescriptions.map(rx => {
-                    const date = rx.createdAt?.toDate ? rx.createdAt.toDate().toLocaleDateString() : '—';
-                    return (
-                      <div key={rx.id} style={styles.rxRow}>
-                        <div style={{ flex: 1 }}>
-                          <div style={styles.rxPatient}>{rx.patient?.name || rx.patient?.email || 'Patient'}</div>
-                          <div style={styles.rxDetails}>
-                            {rx.items?.map(i => `${i.name} (x${i.quantity})`).join(', ')}
-                          </div>
-                          <div style={styles.rxDate}>Issued on: {date}</div>
-                        </div>
-                        <span style={styles.rxStatus}>{rx.status}</span>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
+            {/* Mobile / Global FAB */}
 
-            {/* Transactions Ledger */}
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                <Database size={16} style={{ color: '#7c3aed' }} />
-                <h3 style={styles.cardTitle}>Clinical Transactions Ledger</h3>
-              </div>
-              <div style={styles.list}>
-                {transactions.length === 0 ? (
-                  <div style={styles.empty}>No transactions recorded.</div>
-                ) : (
-                  transactions.map(tx => {
-                    const txDate = tx.createdAt?.toDate ? tx.createdAt.toDate().toLocaleString() : '—';
-                    return (
-                      <div key={tx.id} style={styles.txRow}>
-                        <div style={{ flex: 1 }}>
-                          <div style={styles.txInfo}>Order: <span style={styles.mono}>{tx.id.slice(0, 8)}</span></div>
-                          <div style={styles.txDate}>{txDate}</div>
-                          <div style={styles.txPrice}>
-                            Total: <strong>${tx.totals?.usd || tx.totalAmount || 0}</strong> • Status: {tx.status}
-                          </div>
-                        </div>
-                        <span style={styles.badgeTx}>{tx.cartOwnership?.source || 'standard'}</span>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-
-          </div>
         </div>
-      )}
-
-      {/* Mock Google Calendar OAuth Modal */}
-      {showOauthModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modalContainer}>
-            <div style={styles.modalHeader}>
-              <h3 style={styles.modalTitle}>Connect with Google Calendar</h3>
-              <button style={styles.closeBtn} onClick={() => setShowOauthModal(false)}>
-                <X size={18} />
-              </button>
-            </div>
-            <form onSubmit={handleConnectCalendar} style={styles.modalForm}>
-              <p style={{ margin: 0, fontSize: 13, color: '#5f6368', lineHeight: 1.5 }}>
-                Sync clinical appointments, refills, and transaction schedules directly with your Google Calendar account.
-              </p>
-              <div>
-                <label style={styles.modalLabel}>Google Email Address</label>
-                <input
-                  type="email"
-                  required
-                  value={oauthEmail}
-                  onChange={e => setOauthEmail(e.target.value)}
-                  style={styles.modalInput}
-                />
-              </div>
-              <div>
-                <label style={styles.modalLabel}>Google Password</label>
-                <input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={oauthPassword}
-                  onChange={e => setOauthPassword(e.target.value)}
-                  style={styles.modalInput}
-                />
-              </div>
-              <div style={styles.modalFooter}>
-                <button type="button" style={styles.btnGcpGray} onClick={() => setShowOauthModal(false)}>
-                  Cancel
-                </button>
-                <button type="submit" style={styles.btnGcpPrimary} disabled={oauthLoading}>
-                  {oauthLoading ? 'Authenticating...' : 'Sign in & Authorize'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+    );
 }
 
-// Styling definitions (Google Cloud Console light themes)
 const styles = {
   container: {
     padding: "24px",
-    background: "var(--color-bg-surface)",
-    fontFamily: "Inter, Roboto, sans-serif"
+    background: "#f8fafc",
+    fontFamily: "Inter, Roboto, sans-serif",
+    minHeight: '100vh',
+    margin: '-1rem' // Override parent padding if needed to expand
   },
   header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderBottom: "1px solid #dadce0",
-    paddingBottom: "16px",
-    marginBottom: "20px"
+    marginBottom: "24px"
   },
   title: {
     margin: 0,
-    fontSize: "18px",
-    fontWeight: 500,
-    color: "#202124"
+    fontSize: "20px",
+    fontWeight: 700,
+    color: "#0f172a"
   },
   subtitle: {
     margin: "4px 0 0 0",
-    fontSize: "13px",
-    color: "#5f6368"
+    fontSize: "14px",
+    color: "#64748b"
   },
-  btnSync: {
-    padding: "6px 12px",
-    borderRadius: "4px",
-    border: "1px solid #dadce0",
-    background: "var(--color-bg-surface)",
-    color: "#1a73e8",
+  kpiCard: {
+    background: "#fff",
+    border: "1px solid #e2e8f0",
+    borderRadius: "12px",
+    padding: "16px",
     cursor: "pointer",
-    fontWeight: 500,
-    fontSize: "13px",
-    display: "flex",
-    alignItems: "center"
+    boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
+    transition: "transform 0.2s",
   },
-  btnSyncActive: {
-    padding: "6px 12px",
-    borderRadius: "4px",
-    border: "1px solid #10b981",
-    background: "rgba(16,185,129,0.06)",
-    color: "var(--color-success)",
-    cursor: "pointer",
-    fontWeight: 500,
-    fontSize: "13px",
+  kpiIconBox: {
+    width: "40px",
+    height: "40px",
+    borderRadius: "10px",
     display: "flex",
-    alignItems: "center"
-  },
-  loading: {
-    padding: "48px",
-    textAlign: "center",
-    color: "#5f6368",
-    fontSize: "13px",
-    display: "flex",
-    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center"
   },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "24px"
+  kpiValue: {
+    fontSize: "20px",
+    fontWeight: 800,
+    color: "#0f172a"
   },
-  col: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "24px"
+  kpiLabel: {
+    fontSize: "12px",
+    fontWeight: 600,
+    color: "#64748b",
+    textTransform: 'uppercase'
   },
   card: {
-    background: "var(--color-bg-surface)",
-    border: "1px solid #dadce0",
-    borderRadius: "4px",
-    overflow: "hidden"
+    background: "#fff",
+    border: "1px solid #e2e8f0",
+    borderRadius: "12px",
+    overflow: "hidden",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
   },
   cardHeader: {
-    borderBottom: "1px solid #dadce0",
-    padding: "10px 14px",
-    backgroundColor: "var(--color-bg-app)",
+    borderBottom: "1px solid #f1f5f9",
+    padding: "16px",
     display: "flex",
     alignItems: "center",
     gap: "8px"
   },
   cardTitle: {
     margin: 0,
-    fontSize: "13px",
-    fontWeight: 600,
-    color: "var(--color-text-primary)"
-  },
-  list: {
-    display: "flex",
-    flexDirection: "column"
-  },
-  empty: {
-    padding: "24px",
-    textAlign: "center",
-    color: "var(--color-text-tertiary)",
-    fontSize: "13px"
-  },
-  slotRow: {
-    display: "flex",
-    alignItems: "center",
-    padding: "10px 14px",
-    borderBottom: "1px solid #f1f3f4",
-    fontSize: "13px"
-  },
-  slotTime: {
-    width: "80px",
-    fontWeight: 600,
-    color: "#5f6368"
-  },
-  slotPatient: {
-    fontWeight: 500,
-    color: "#202124"
-  },
-  slotType: {
-    fontSize: "11px",
-    color: "#5f6368",
-    marginTop: "2px"
-  },
-  badgeSuccess: {
-    fontSize: "11px",
-    fontWeight: 600,
-    padding: "2px 8px",
-    borderRadius: "12px",
-    background: "rgba(16,185,129,0.1)",
-    color: "#137333"
-  },
-  badgeInfo: {
-    fontSize: "11px",
-    fontWeight: 600,
-    padding: "2px 8px",
-    borderRadius: "12px",
-    background: "rgba(26,115,232,0.1)",
-    color: "#1a73e8"
-  },
-  refillRow: {
-    display: "flex",
-    alignItems: "center",
-    padding: "10px 14px",
-    borderBottom: "1px solid #f1f3f4",
-    fontSize: "13px"
-  },
-  btnAlert: {
-    padding: "4px 8px",
-    fontSize: "11px",
-    border: "1px solid #dadce0",
-    background: "var(--color-bg-surface)",
-    color: "var(--color-warning)",
-    borderRadius: "4px",
-    cursor: "pointer",
-    fontWeight: 500
-  },
-  btnAlertSent: {
-    padding: "4px 8px",
-    fontSize: "11px",
-    border: "1px solid #10b981",
-    background: "rgba(16,185,129,0.06)",
-    color: "var(--color-success)",
-    borderRadius: "4px",
-    fontWeight: 500
-  },
-  rxRow: {
-    display: "flex",
-    alignItems: "center",
-    padding: "10px 14px",
-    borderBottom: "1px solid #f1f3f4",
-    fontSize: "13px"
-  },
-  rxPatient: {
-    fontWeight: 500,
-    color: "#202124"
-  },
-  rxDetails: {
-    fontSize: "11px",
-    color: "#3c4043",
-    marginTop: "2px"
-  },
-  rxDate: {
-    fontSize: "11px",
-    color: "#80868b",
-    marginTop: "2px"
-  },
-  rxStatus: {
-    fontSize: "11px",
-    textTransform: "uppercase",
-    fontWeight: 700,
-    color: "#5f6368"
-  },
-  txRow: {
-    display: "flex",
-    alignItems: "center",
-    padding: "10px 14px",
-    borderBottom: "1px solid #f1f3f4",
-    fontSize: "13px"
-  },
-  txInfo: {
-    fontWeight: 500,
-    color: "#202124"
-  },
-  mono: {
-    fontFamily: "monospace",
-    color: "#5f6368"
-  },
-  txDate: {
-    fontSize: "11px",
-    color: "#80868b"
-  },
-  txPrice: {
-    fontSize: "11px",
-    color: "#3c4043",
-    marginTop: "2px"
-  },
-  badgeTx: {
-    fontSize: "11px",
-    padding: "2px 6px",
-    background: "#f1f3f4",
-    borderRadius: "4px",
-    color: "#3c4043"
-  },
-  modalOverlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: "rgba(15, 23, 42, 0.4)",
-    backdropFilter: "blur(4px)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1000,
-    padding: "16px"
-  },
-  modalContainer: {
-    background: "var(--color-bg-surface)",
-    borderRadius: "8px",
-    width: "100%",
-    maxWidth: "400px",
-    boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
-    border: "1px solid #dadce0",
-    overflow: "hidden"
-  },
-  modalHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "16px",
-    borderBottom: "1px solid #dadce0"
-  },
-  modalTitle: {
-    margin: 0,
     fontSize: "14px",
-    fontWeight: 600,
-    color: "#202124"
-  },
-  closeBtn: {
-    background: "transparent",
-    border: "none",
-    color: "#5f6368",
-    cursor: "pointer",
-    padding: "4px"
-  },
-  modalForm: {
-    padding: "16px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "16px"
-  },
-  modalLabel: {
-    display: "block",
-    fontSize: "11px",
     fontWeight: 700,
-    color: "var(--color-text-primary)",
-    marginBottom: "4px"
+    color: "#0f172a"
   },
-  modalInput: {
-    width: "100%",
-    fontSize: "13px",
-    padding: "6px 8px",
-    border: "1px solid #dadce0",
-    borderRadius: "4px",
-    background: "var(--color-bg-app)",
-    outline: "none"
+  iconBtn: {
+    background: '#fff',
+    border: '1px solid #e2e8f0',
+    borderRadius: '6px',
+    padding: '4px 8px',
+    fontSize: '12px',
+    fontWeight: 600,
+    color: '#334155',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center'
   },
-  modalFooter: {
-    display: "flex",
-    justifyContent: "flex-end",
-    gap: "8px",
-    paddingTop: "12px",
-    borderTop: "1px solid #dadce0"
+  toggleBtn: {
+    background: 'transparent',
+    border: 'none',
+    padding: '6px 12px',
+    borderRadius: '6px',
+    fontSize: '12px',
+    fontWeight: 600,
+    color: '#64748b',
+    cursor: 'pointer'
   },
-  btnGcpPrimary: {
-    padding: "6px 12px",
-    borderRadius: "4px",
-    border: "none",
-    background: "#1a73e8",
-    color: "var(--color-bg-surface)",
-    cursor: "pointer",
-    fontWeight: 500,
-    fontSize: "13px"
+  toggleBtnActive: {
+    background: '#fff',
+    color: '#0f172a',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
   },
-  btnGcpGray: {
-    padding: "6px 12px",
-    borderRadius: "4px",
-    border: "1px solid #dadce0",
-    background: "var(--color-bg-surface)",
-    color: "#3c4043",
-    cursor: "pointer",
-    fontWeight: 500,
-    fontSize: "13px"
+  insightAlert: {
+    background: '#fff',
+    padding: '12px',
+    borderRadius: '8px',
+    border: '1px solid #bae6fd',
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '8px'
+  },
+  btnAiAction: {
+    width: '100%',
+    padding: '10px',
+    background: '#0284c7',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '8px',
+    fontWeight: 600,
+    fontSize: '13px',
+    cursor: 'pointer',
+    marginTop: '4px'
   }
 };
