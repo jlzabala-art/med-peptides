@@ -151,6 +151,7 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
   const [visibleKPIs, setVisibleKPIs] = useState(ROLE_PRESETS.CEO.visibleKPIs);
   const [visibleWidgets, setVisibleWidgets] = useState(ROLE_PRESETS.CEO.visibleWidgets);
   const [isCustomizing, setIsCustomizing] = useState(false);
+  const [isExecutiveMode, setIsExecutiveMode] = useState(true);
 
   // Core Data Metrics
   const [loading, setLoading] = useState(true);

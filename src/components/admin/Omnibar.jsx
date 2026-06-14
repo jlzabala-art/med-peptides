@@ -9,6 +9,8 @@ import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import Activity from "lucide-react/dist/esm/icons/activity";
 import EyeOff from "lucide-react/dist/esm/icons/eye-off";
 import Tag from "lucide-react/dist/esm/icons/tag";
+import Terminal from "lucide-react/dist/esm/icons/terminal";
+import Zap from "lucide-react/dist/esm/icons/zap";
 import React, { useState, useEffect, useRef } from 'react';
 
 
@@ -32,7 +34,7 @@ const searchClient = algoliasearch(
 
 export default function Omnibar({ isOpen, onClose }) {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState({ patients: [], clinics: [], physicians: [], products: [] });
+  const [results, setResults] = useState({ patients: [], clinics: [], physicians: [], products: [], commands: [] });
   const [loading, setLoading] = useState(false);
   const [activePreview, setActivePreview] = useState(null);
   const inputRef = useRef(null);
@@ -41,7 +43,7 @@ export default function Omnibar({ isOpen, onClose }) {
   useEffect(() => {
     if (isOpen) {
       setQuery('');
-      setResults({ patients: [], clinics: [], physicians: [], products: [] });
+      setResults({ patients: [], clinics: [], physicians: [], products: [], commands: [] });
       setActivePreview(null);
       setTimeout(() => inputRef.current?.focus(), 50);
     }
@@ -57,8 +59,22 @@ export default function Omnibar({ isOpen, onClose }) {
 
   useEffect(() => {
     if (!query.trim() || query.length < 2) {
-      setResults({ patients: [], clinics: [], physicians: [], products: [] });
+      setResults({ patients: [], clinics: [], physicians: [], products: [], commands: [] });
       setActivePreview(null);
+      return;
+    }
+
+    if (query.startsWith('>')) {
+      const commandQuery = query.substring(1).trim().toLowerCase();
+      const mockCommands = [
+        { id: 'c1', title: 'Show delayed shipments', action: '/admin/logistics?filter=delayed', desc: 'Filters logistics view by delayed packages' },
+        { id: 'c2', title: 'Generate Q3 Revenue Report', action: '/admin/finance?report=q3', desc: 'Exports finance data to PDF' },
+        { id: 'c3', title: 'Analyze Lead Conversion Rate', action: '/admin/crm?action=analyze', desc: 'Triggers Atlas AI analysis on recent leads' }
+      ].filter(c => c.title.toLowerCase().includes(commandQuery));
+      
+      setResults({ patients: [], clinics: [], physicians: [], products: [], commands: mockCommands });
+      if (mockCommands.length > 0) setActivePreview({ type: 'command', data: mockCommands[0] });
+      else setActivePreview(null);
       return;
     }
 
@@ -131,6 +147,33 @@ export default function Omnibar({ isOpen, onClose }) {
         <div style={{ display: 'flex', maxHeight: '60vh', minHeight: '400px' }}>
           {/* Results Area (Left) */}
           <div style={{ flex: 1, overflowY: 'auto', borderRight: '1px solid #e2e8f0', padding: '0.5rem 0' }}>
+            
+            {/* Commands */}
+            {results.commands?.length > 0 && (
+              <div style={{ padding: '0.5rem 0' }}>
+                <div style={{ padding: '0.25rem 1.5rem', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: '#8b5cf6' }}>Commands</div>
+                {results.commands.map(cmd => (
+                  <div 
+                    key={cmd.id} 
+                    className="hover-bg" 
+                    onMouseEnter={() => setActivePreview({ type: 'command', data: cmd })}
+                    onClick={() => handleNavigate(cmd.action)}
+                    style={{ 
+                      padding: '0.75rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer',
+                      background: activePreview?.data?.id === cmd.id ? '#f5f3ff' : 'transparent'
+                    }}
+                  >
+                    <div style={{ width: 32, height: 32, borderRadius: '6px', backgroundColor: '#ede9fe', color: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Terminal size={16} /></div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, color: '#4c1d95' }}>{cmd.title}</div>
+                      <div style={{ fontSize: '0.8rem', color: '#8b5cf6' }}>{cmd.desc}</div>
+                    </div>
+                    <Zap size={16} color="#8b5cf6" />
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Products (Prioritized) */}
             {results.products.length > 0 && (
               <div style={{ padding: '0.5rem 0' }}>
@@ -251,6 +294,19 @@ export default function Omnibar({ isOpen, onClose }) {
                   <button onClick={() => handleNavigate(`/admin/products?search=${activePreview.data.name}`)} style={{ flex: 1, padding: '8px', background: '#0071bd', border: 'none', color: '#fff', borderRadius: '6px', cursor: 'pointer', fontWeight: 500 }}>Edit Item</button>
                 </div>
 
+              </div>
+            ) : activePreview?.type === 'command' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: '100%', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                <div style={{ width: 64, height: 64, background: '#ede9fe', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Terminal size={32} color="#8b5cf6" />
+                </div>
+                <div>
+                  <h3 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#4c1d95' }}>{activePreview.data.title}</h3>
+                  <p style={{ margin: 0, fontSize: '14px', color: '#7c3aed', lineHeight: '1.5' }}>{activePreview.data.desc}</p>
+                </div>
+                <button onClick={() => handleNavigate(activePreview.data.action)} style={{ padding: '10px 24px', background: '#8b5cf6', border: 'none', color: '#fff', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, marginTop: '1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <Zap size={18} /> Execute Command
+                </button>
               </div>
             ) : (
               <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>

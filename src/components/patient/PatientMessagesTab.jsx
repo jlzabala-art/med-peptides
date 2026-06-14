@@ -5,7 +5,7 @@ import { useUser } from '../../context/UserContext';
 export default function PatientMessagesTab() {
   const { user } = useUser();
 
-  if (!user) return <div>Loading messages...</div>;
+  if (!user) return <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Loading profile...</div>;
 
   return (
     <div style={{ padding: '1.5rem', height: '100%', display: 'flex', flexDirection: 'column' }}>

@@ -135,6 +135,7 @@ import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import PortalLayout from '../components/ui/PortalLayout';
 import PageTransition from '../components/PageTransition';
 import Omnibar from '../components/admin/Omnibar';
+import SpeedDialFAB from '../components/admin/widgets/SpeedDialFAB';
 
 import GlobalNotificationCenter from '../components/shared/widgets/GlobalNotificationCenter';
 import MarketIntelligenceHub from '../components/admin/market/MarketIntelligenceHub';
@@ -176,6 +177,7 @@ import AdminHomeLayoutTab from '../components/admin/AdminHomeLayoutTab';
 import AdminPlaceholderTab from '../components/admin/AdminPlaceholderTab';
 import AdminAIAgentsTab from '../components/admin/AdminAIAgentsTab';
 import AdminAuditLogsTab from '../components/admin/AdminAuditLogsTab';
+import AtlasMessagesHub from '../features/messages/AtlasMessagesHub';
 import AdminStorageTab from '../components/admin/AdminStorageTab';
 import AdminAIToolsTab from '../components/admin/AdminAIToolsTab';
 import AdminSkuMappingTab from '../components/admin/SkuMappingTab/AdminSkuMappingTab';
@@ -404,6 +406,7 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
       {tab === 'dashboard' && (
         <AdminMetricsDashboard />
       )}
+      {tab === 'messages' && <AtlasMessagesHub />}
       {tab === 'quotations' && <B2BQuotationsHub />}
       {tab === 'invoices' && <InvoiceIntelligenceHub />}
       {tab === 'workflows' && <AdminWorkflowsTab />}
@@ -522,7 +525,7 @@ export default function AdminDashboard() {
       ...group,
       items: group.items.filter(item => userProfile.allowedAdminTabs.includes(item.id))
     })).filter(group => group.items.length > 0);
-  }, [userProfile?.allowedAdminTabs, isAdmin, userProfile?.role]);
+  }, [userProfile, isAdmin]);
 
   // Derive active tab from the URL path instead of query params.
   // E.g., /admin/users -> 'users', /admin -> 'dashboard'
@@ -540,7 +543,7 @@ export default function AdminDashboard() {
         navigate(`/admin/${userProfile.allowedAdminTabs[0]}`);
       }
     }
-  }, [userProfile?.allowedAdminTabs, activeTab, navigate]);
+  }, [userProfile?.allowedAdminTabs, activeTab, navigate, isAdmin, userProfile?.role]);
 
   const navToTab = useCallback((tabId) => {
     navigate(`/admin/${tabId === 'dashboard' ? '' : tabId}`);
@@ -585,6 +588,7 @@ export default function AdminDashboard() {
         </React.Suspense>
       </div>
       <Omnibar isOpen={isOmnibarOpen} onClose={() => setIsOmnibarOpen(false)} />
+      <SpeedDialFAB onOpenOmnibar={() => setIsOmnibarOpen(true)} />
     </PortalLayout>
   );
 }

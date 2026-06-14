@@ -5,7 +5,7 @@ import { useDoctor } from '../../context/DoctorProvider';
 export default function DoctorMessagesTab() {
   const { doctorData } = useDoctor();
 
-  if (!doctorData) return <div>Loading messages...</div>;
+  if (!doctorData) return <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Loading profile...</div>;
 
   return (
     <div style={{ padding: '1.5rem', height: '100%', display: 'flex', flexDirection: 'column' }}>

@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 export default function ManagerMessagesTab() {
   const { currentUser, role } = useAuth(); // Assume role is managed somewhere globally
 
-  if (!currentUser) return <div>Loading messages...</div>;
+  if (!currentUser) return <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Loading profile...</div>;
 
   return (
     <div style={{ padding: '1.5rem', height: '100%', display: 'flex', flexDirection: 'column' }}>
