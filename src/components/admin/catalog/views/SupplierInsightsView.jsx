@@ -134,17 +134,17 @@ export default function SupplierInsightsView({ variants = [] }) {
       // Extract pricing
       const price = v.price || v.cost;
       if (price) s.prices.push(Number(price));
-      else s.missingDataFlags.push(`Missing price for ${v.sku || v.parentProductName}`);
+      else s.missingDataFlags.push(`Missing price for ${v.sku || v.productName}`);
 
       if (v.moq) s.moqs.push(Number(v.moq));
       if (v.leadTime) s.leadTimes.push(Number(v.leadTime));
-      else s.missingDataFlags.push(`Missing lead time for ${v.sku || v.parentProductName}`);
+      else s.missingDataFlags.push(`Missing lead time for ${v.sku || v.productName}`);
 
       s.coas.push(!!v.coa);
-      if (!v.coa) s.alerts.push(`Missing COA for ${v.sku || v.parentProductName}`);
+      if (!v.coa) s.alerts.push(`Missing COA for ${v.sku || v.productName}`);
 
       s.gmps.push(!!v.gmp);
-      if (!v.gmp) s.missingDataFlags.push(`Missing GMP for ${v.sku || v.parentProductName}`);
+      if (!v.gmp) s.missingDataFlags.push(`Missing GMP for ${v.sku || v.productName}`);
     });
 
     return Array.from(supplierMap.values())
@@ -1145,7 +1145,7 @@ export default function SupplierInsightsView({ variants = [] }) {
                               textOverflow: 'ellipsis',
                             }}
                           >
-                            {v.parentProductName} - {v.format} {v.size}
+                            {v.productName} - {v.format} {v.size}
                           </div>
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                             SKU: {v.sku || 'N/A'}

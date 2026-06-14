@@ -118,6 +118,7 @@ export function useCatalogData() {
             wholesalePrice: Number(v.wholesalePrice) || 0,
             format: v.format || '',
             size: v.size || '',
+            sku: v.sku || p.sku || '',
             // Compliance & Quality (Fake data fallback if missing)
             coa: v.hasCoa || (p.id ? p.id.charCodeAt(0) : 0) % 2 === 0 ? 'Valid' : 'Missing',
             gmp:
@@ -153,6 +154,7 @@ export function useCatalogData() {
           wholesalePrice: Number(p.wholesalePrice) || 0,
           format: p.format || '',
           size: p.size || '',
+          sku: p.sku || '',
           coa: p.hasCoa || (p.id ? p.id.charCodeAt(0) : 0) % 2 === 0 ? 'Valid' : 'Missing',
           gmp:
             p.hasGmp || (p.id ? p.id.charCodeAt(p.id.length - 1) : 0) % 2 === 0
