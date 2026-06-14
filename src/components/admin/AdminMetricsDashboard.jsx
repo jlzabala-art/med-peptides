@@ -64,7 +64,6 @@ import {
   CrmPipelineFunnel,
   WholesalersLeaderboard,
   AiCommandConsole,
-  GlobalActivityFeed,
 } from './widgets/CommandCenterWidgets';
 import HealthMatrixWidget from './widgets/HealthMatrixWidget';
 import AdminExecutiveSummaryWidget from './AdminExecutiveSummaryWidget';
@@ -90,7 +89,6 @@ const ROLE_PRESETS = {
       'crmPipeline',
       'wholesalersRanking',
       'aiWorkspace',
-      'activityFeed',
     ],
     kpiOrder: [
       'revenue',
@@ -104,40 +102,22 @@ const ROLE_PRESETS = {
   },
   Finance: {
     visibleKPIs: ['revenue', 'grossProfit', 'cashPosition', 'pendingApprovals'],
-    visibleWidgets: [
-      'todayPriorities',
-      'financeTasks',
-      'cashFlow',
-      'businessHealth',
-      'activityFeed',
-    ],
+    visibleWidgets: ['todayPriorities', 'financeTasks', 'cashFlow', 'businessHealth'],
     kpiOrder: ['revenue', 'grossProfit', 'cashPosition', 'pendingApprovals'],
   },
   Purchasing: {
     visibleKPIs: ['openOrders', 'openRFQs', 'pendingApprovals'],
-    visibleWidgets: ['todayPriorities', 'wholesalersRanking', 'businessHealth', 'activityFeed'],
+    visibleWidgets: ['todayPriorities', 'wholesalersRanking', 'businessHealth'],
     kpiOrder: ['openOrders', 'openRFQs', 'pendingApprovals'],
   },
   Sales: {
     visibleKPIs: ['revenue', 'openOrders', 'openRFQs'],
-    visibleWidgets: [
-      'todayPriorities',
-      'crmPipeline',
-      'wholesalersRanking',
-      'businessHealth',
-      'activityFeed',
-    ],
+    visibleWidgets: ['todayPriorities', 'crmPipeline', 'wholesalersRanking', 'businessHealth'],
     kpiOrder: ['revenue', 'openOrders', 'openRFQs'],
   },
   Operations: {
     visibleKPIs: ['openOrders', 'pendingApprovals', 'aiAlerts'],
-    visibleWidgets: [
-      'todayPriorities',
-      'businessHealth',
-      'wholesalersRanking',
-      'activityFeed',
-      'systemStatus',
-    ],
+    visibleWidgets: ['todayPriorities', 'businessHealth', 'wholesalersRanking', 'systemStatus'],
     kpiOrder: ['openOrders', 'pendingApprovals', 'aiAlerts'],
   },
 };
@@ -233,37 +213,12 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
   // Active Tab for Widgets
   const [aiWorkspaceTab, setAiWorkspaceTab] = useState('insights');
 
-  // Real-time Global Activity Feed (Simulation)
-  const [activityFeed, setActivityFeed] = useState([
-    { id: 1, text: 'RFQ #2304 Approved by CEO', time: '2 mins ago', type: 'rfq' },
-    { id: 2, text: 'PO #1920 Created for wholeseller BioPharma', time: '15 mins ago', type: 'po' },
-    { id: 3, text: 'Bill #9023 Paid (AED 12,500)', time: '1 hour ago', type: 'bill' },
-    { id: 4, text: 'New Lead: Clinic MedCare Dubai registered', time: '3 hours ago', type: 'lead' },
-    {
-      id: 5,
-      text: 'Supplier catalog synced with Zoho Inventory',
-      time: '5 hours ago',
-      type: 'sync',
-    },
-    { id: 6, text: 'AI Analysis Completed: Q2 Margin Optimization', time: '1 day ago', type: 'ai' },
-  ]);
-
   // Mobile Bottom Tab State
   const [mobileTab, setMobileTab] = useState('home');
 
   useEffect(() => {
     const interval = setInterval(() => {
       setDbLatency(`${Math.floor(Math.random() * 20) + 12}ms`);
-      const activityTypes = [
-        { text: 'AI detected new market price shift for peptide G3', type: 'ai' },
-        { text: 'RFQ #2411 received pricing from supplier B', type: 'rfq' },
-        { text: 'Supplier Bill #9244 matching completed', type: 'bill' },
-      ];
-      const randomActivity = activityTypes[Math.floor(Math.random() * activityTypes.length)];
-      setActivityFeed((prev) => [
-        { id: Date.now(), text: randomActivity.text, time: 'Just now', type: randomActivity.type },
-        ...prev.slice(0, 10),
-      ]);
     }, 15000);
     return () => clearInterval(interval);
   }, []);
@@ -569,7 +524,6 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
                     { id: 'crmPipeline', label: 'CRM Sales Funnel' },
                     { id: 'wholesalersRanking', label: 'Top Wholesalers Leaderboard' },
                     { id: 'aiWorkspace', label: 'AI Sync & Insights Hub' },
-                    { id: 'activityFeed', label: 'Real-time Activity Feed' },
                     { id: 'systemStatus', label: 'Infrastructure Specs' },
                   ].map((w) => (
                     <button
@@ -772,9 +726,6 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
 
         {/* RIGHT COLUMN: SIDEBAR METRICS & INFRASTRUCTURE */}
         <div className={styles.sideCol}>
-          {/* ── 9. GLOBAL ACTIVITY FEED ────────────────────────────────── */}
-          {visibleWidgets.includes('activityFeed') && <GlobalActivityFeed logs={activityFeed} />}
-
           {/* ── 10. INFRASTRUCTURE & TECH STATUS ───────────────────────── */}
           {visibleWidgets.includes('systemStatus') && (
             <div className={styles.glassCard} style={{ padding: '1.25rem' }}>
