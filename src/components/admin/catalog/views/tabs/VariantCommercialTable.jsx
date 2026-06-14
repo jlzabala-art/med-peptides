@@ -51,22 +51,28 @@ export default function VariantCommercialTable({ variants, parentProduct, onActi
       </thead>
       <tbody>
         {variants.map((v, i) => {
-          const landedCost =
-            v.cost && v.shippingCost ? Number(v.cost) + Number(v.shippingCost) : null;
-          const margin = v.msrp && v.cost ? (((v.msrp - v.cost) / v.msrp) * 100).toFixed(0) : null;
+          const rawCost = v.cost || v.unitCost;
+          const rawShipping = v.shippingCost || v.shipping;
+          const rawWholesale = v.wholesalePrice || v.wholesale;
+          const rawClinic = v.clinicPrice || v.clinic;
+          const rawMsrp = v.msrp || v.price;
+
+          const landedCost = rawCost && rawShipping ? Number(rawCost) + Number(rawShipping) : null;
+          const margin =
+            rawMsrp && rawCost ? (((rawMsrp - rawCost) / rawMsrp) * 100).toFixed(0) : null;
           return (
             <tr key={v.id || i} style={trStyle}>
               <td style={tdStyleMain}>{v.sku || '-'}</td>
               <td style={tdStyle}>{v.supplier || '-'}</td>
-              <td style={tdStyle}>{v.cost ? `$${v.cost}` : '-'}</td>
-              <td style={tdStyle}>{v.shippingCost ? `$${v.shippingCost}` : '-'}</td>
+              <td style={tdStyle}>{rawCost ? `$${rawCost}` : '-'}</td>
+              <td style={tdStyle}>{rawShipping ? `$${rawShipping}` : '-'}</td>
               <td style={tdStyle}>
                 <b>{landedCost ? `$${landedCost.toFixed(2)}` : '-'}</b>
               </td>
-              <td style={tdStyle}>{v.wholesalePrice ? `$${v.wholesalePrice}` : '-'}</td>
-              <td style={tdStyle}>{v.clinicPrice ? `$${v.clinicPrice}` : '-'}</td>
+              <td style={tdStyle}>{rawWholesale ? `$${rawWholesale}` : '-'}</td>
+              <td style={tdStyle}>{rawClinic ? `$${rawClinic}` : '-'}</td>
               <td style={tdStyle}>
-                <b>{v.msrp ? `$${v.msrp}` : '-'}</b>
+                <b>{rawMsrp ? `$${rawMsrp}` : '-'}</b>
               </td>
               <td style={tdStyle}>
                 <span style={{ color: margin > 50 ? '#10b981' : margin ? '#f59e0b' : 'inherit' }}>
