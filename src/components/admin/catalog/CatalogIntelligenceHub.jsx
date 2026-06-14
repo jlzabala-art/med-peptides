@@ -13,7 +13,7 @@ import InventoryIntelligenceView from './views/InventoryIntelligenceView';
 import SupplierInsightsView from './views/SupplierInsightsView';
 import RegulatoryTrackerView from './views/RegulatoryTrackerView';
 import ProductDetailsDrawer from "../products/ProductDetailsDrawer";
-import CreateProductModal from "../CreateProductModal";
+import SmartProductIntakeWizard from "./SmartProductIntakeWizard";
 import AdvancedFiltersDrawer from './AdvancedFiltersDrawer';
 import CatalogImportWizard from './CatalogImportWizard';
 
@@ -141,6 +141,104 @@ export default function CatalogIntelligenceHub() {
     });
   }, [products, activeCategories, searchQuery, activeWorkspace, advancedFilters]);
 
+  // --- External Filters Visibility ---
+  const activeFiltersVisuals = useMemo(() => {
+    const visuals = [];
+    const f = advancedFilters[activeWorkspace];
+    if (!f) return visuals;
+
+    if (activeWorkspace === 'products') {
+      if (f.supplier !== 'All Suppliers') visuals.push({ id: 'products.supplier', label: `Supplier: ${f.supplier}` });
+      if (f.minHealth > 0) visuals.push({ id: 'products.minHealth', label: `Health > ${f.minHealth}` });
+    } else if (activeWorkspace === 'inventory') {
+      if (!f.stockStatus.inStock) visuals.push({ id: 'inventory.stockStatus.inStock', label: `Hide In Stock` });
+      if (!f.stockStatus.lowStock) visuals.push({ id: 'inventory.stockStatus.lowStock', label: `Hide Low Stock` });
+      if (!f.stockStatus.outOfStock) visuals.push({ id: 'inventory.stockStatus.outOfStock', label: `Hide Out of Stock` });
+      if (f.maxReorder < 500) visuals.push({ id: 'inventory.maxReorder', label: `Max Reorder: ${f.maxReorder}` });
+      if (!f.performance.fastMovers) visuals.push({ id: 'inventory.performance.fastMovers', label: `Hide Fast Movers` });
+      if (!f.performance.deadStock) visuals.push({ id: 'inventory.performance.deadStock', label: `Hide Dead Stock` });
+    } else if (activeWorkspace === 'suppliers') {
+      if (f.supplier !== 'All Suppliers') visuals.push({ id: 'suppliers.supplier', label: `Supplier: ${f.supplier}` });
+      if (f.country !== 'All Countries') visuals.push({ id: 'suppliers.country', label: `Country: ${f.country}` });
+      if (f.minPerformance > 0) visuals.push({ id: 'suppliers.minPerformance', label: `Perf > ${f.minPerformance}` });
+      if (f.maxRisk < 100) visuals.push({ id: 'suppliers.maxRisk', label: `Risk < ${f.maxRisk}` });
+    } else if (activeWorkspace === 'regulatory') {
+      if (!f.status.registered) visuals.push({ id: 'regulatory.status.registered', label: `Hide Registered` });
+      if (!f.status.pending) visuals.push({ id: 'regulatory.status.pending', label: `Hide Pending` });
+      if (!f.documents.missingCOA) visuals.push({ id: 'regulatory.documents.missingCOA', label: `Hide Missing COA` });
+      if (!f.documents.missingSDS) visuals.push({ id: 'regulatory.documents.missingSDS', label: `Hide Missing SDS` });
+      if (!f.documents.missingDocs) visuals.push({ id: 'regulatory.documents.missingDocs', label: `Hide Missing Docs` });
+      if (f.country !== 'All Countries') visuals.push({ id: 'regulatory.country', label: `Country: ${f.country}` });
+      if (f.maxRisk < 100) visuals.push({ id: 'regulatory.maxRisk', label: `Risk < ${f.maxRisk}` });
+    }
+    return visuals;
+  }, [advancedFilters, activeWorkspace]);
+
+  const handleRemoveFilter = (filterId) => {
+    const parts = filterId.split('.');
+    setAdvancedFilters(prev => {
+      const newState = { ...prev };
+      const workspace = parts[0];
+      const key = parts[1];
+      
+      if (parts.length === 3) {
+        const subKey = parts[2];
+        newState[workspace] = {
+          ...newState[workspace],
+          [key]: { ...newState[workspace][key], [subKey]: true } // true is the default for boolean checkboxes
+        };
+      } else {
+        // Handle non-nested defaults
+        let defaultValue = 'All ' + (key === 'country' ? 'Countries' : 'Suppliers');
+        if (key === 'minHealth' || key === 'minPerformance') defaultValue = 0;
+        if (key === 'maxReorder') defaultValue = 500;
+        if (key === 'maxRisk') defaultValue = 100;
+        
+        newState[workspace] = { ...newState[workspace], [key]: defaultValue };
+      }
+      return newState;
+    });
+  };
+
+  const handleClearAllFilters = () => {
+    setAdvancedFilters({
+      products: { category: 'All Categories', supplier: 'All Suppliers', minHealth: 0 },
+      inventory: { stockStatus: { inStock: true, lowStock: true, outOfStock: true }, maxReorder: 500, performance: { fastMovers: true, deadStock: true } },
+      suppliers: { supplier: 'All Suppliers', country: 'All Countries', minPerformance: 0, maxRisk: 100 },
+      regulatory: { status: { registered: true, pending: true }, documents: { missingCOA: true, missingSDS: true, missingDocs: true }, country: 'All Countries', maxRisk: 100 }
+    });
+    setActiveCategories([]);
+  };
+
+  // --- Atlas AI Semantic Search Engine ---
+  useEffect(() => {
+    if (searchQuery.toLowerCase().startsWith('ask atlas:')) {
+      const intentText = searchQuery.substring(10).trim();
+      if (intentText.length > 3) {
+        const timer = setTimeout(() => {
+          import('../../../utils/atlasAiParser').then(({ parseAtlasIntent }) => {
+            const currentState = {
+              activeWorkspace,
+              activeCategories,
+              advancedFilters
+            };
+            
+            const { nextState, applied } = parseAtlasIntent(intentText, currentState);
+            
+            if (applied) {
+              setActiveWorkspace(nextState.workspace);
+              setActiveCategories(nextState.categories);
+              setAdvancedFilters(nextState.advancedFilters);
+              setSearchQuery('');
+              toast.success("Atlas AI: Applied filters based on your request ✨", { duration: 4000 });
+            }
+          });
+        }, 600);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [searchQuery, activeWorkspace, activeCategories, advancedFilters]);
+
   const handleAction = (action, product) => {
     if (action === 'edit') {
       setSelectedProduct(product);
@@ -228,6 +326,9 @@ export default function CatalogIntelligenceHub() {
         onOpenAdvancedFilters={() => setIsAdvancedFiltersOpen(true)}
         products={products}
         activeWorkspace={activeWorkspace}
+        activeFilters={activeFiltersVisuals}
+        onRemoveFilter={handleRemoveFilter}
+        onClearAllFilters={handleClearAllFilters}
       />
 
       {/* Workspace Content Router */}
@@ -248,9 +349,7 @@ export default function CatalogIntelligenceHub() {
       </div>
 
       {/* Modals & Drawers */}
-      {isCreateModalOpen && (
-        <CreateProductModal onClose={() => setIsCreateModalOpen(false)} onSuccess={() => { setIsCreateModalOpen(false); refresh(); }} />
-      )}
+      <SmartProductIntakeWizard isOpen={isCreateModalOpen} onClose={() => { setIsCreateModalOpen(false); refresh(); }} />
       {isDrawerOpen && selectedProduct && (
         <ProductDetailsDrawer product={selectedProduct} onClose={() => { setIsDrawerOpen(false); setSelectedProduct(null); }} onProductUpdated={() => refresh()} />
       )}
@@ -260,6 +359,8 @@ export default function CatalogIntelligenceHub() {
         activeWorkspace={activeWorkspace}
         advancedFilters={advancedFilters}
         setAdvancedFilters={setAdvancedFilters}
+        activeCategories={activeCategories}
+        onCategoryChange={setActiveCategories}
       />
       <CatalogImportWizard isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} />
 

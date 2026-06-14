@@ -475,29 +475,7 @@ export default function RegeneraCalendar() {
           }}
         />
         
-        {/* Mobile Floating Action Button */}
-        {mobile && !isPatient && (
-          <button 
-            className="cal-mobile-fab" 
-            onClick={openCreateModal}
-            style={{
-              position: 'fixed', bottom: '80px', right: '20px', 
-              width: '48px', height: '48px', // Reduced ~15%
-              borderRadius: '50%', 
-              backgroundColor: 'var(--cal-color-primary)', // Atlas primary green
-              color: 'white',
-              border: 'none', 
-              boxShadow: 'var(--cal-shadow-lg)', 
-              display: 'flex', alignItems: 'center', justifyContent: 'center', 
-              fontSize: '22px', cursor: 'pointer', zIndex: 100,
-              transition: 'transform 0.2s, box-shadow 0.2s'
-            }}
-            onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = 'var(--cal-shadow-md)'; }}
-            onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'var(--cal-shadow-lg)'; }}
-          >
-            +
-          </button>
-        )}
+
       </div>
 
       {/* Bottom Sheet / Modal for Create/Edit */}

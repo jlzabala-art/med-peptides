@@ -474,20 +474,6 @@ export default function AdminAccountManagersTab() {
         )}
       </div>
 
-      {isMobile && (
-        <button 
-          onClick={() => setIsWizardOpen(true)}
-          style={{
-            position: 'fixed', bottom: '2rem', right: '2rem', width: '56px', height: '56px', 
-            borderRadius: '50%', backgroundColor: 'var(--primary)', color: 'white', 
-            border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.2)', zIndex: 90, cursor: 'pointer'
-          }}
-        >
-          <Plus size={24} />
-        </button>
-      )}
-
       <AccountManagerDrawer
         manager={selectedManager}
         wholesellers={wholesellers}

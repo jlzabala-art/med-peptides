@@ -11,11 +11,48 @@ import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal";
 import RightWorkspacePanel from './RightWorkspacePanel';
 import toast from 'react-hot-toast';
 
-export default function AdvancedFiltersDrawer({ isOpen, onClose, activeWorkspace = 'products', advancedFilters, setAdvancedFilters }) {
+const CATEGORY_TREE = [
+  {
+    id: 'peptides',
+    label: 'Peptides',
+    children: [
+      { id: 'api_peptides', label: 'API Peptides' },
+      { id: 'finished_peptides', label: 'Finished Peptides' },
+      { id: 'research_peptides', label: 'Research Peptides' }
+    ]
+  },
+  {
+    id: 'longevity',
+    label: 'Longevity',
+    children: [
+      { id: 'anti_aging', label: 'Anti-Aging' },
+      { id: 'biomarkers', label: 'Biomarkers' },
+      { id: 'genomics', label: 'Genomics' }
+    ]
+  },
+  { id: 'hormonal_optimization', label: 'Hormonal Optimization', children: [] },
+  { id: 'metabolic_weight', label: 'Metabolic & Weight', children: [] },
+  { id: 'cognitive_mood', label: 'Cognitive & Mood', children: [] },
+  { id: 'immune_support', label: 'Immune Support', children: [] },
+  { id: 'testing', label: 'Testing', children: [] },
+  { id: 'raw_materials', label: 'Raw Materials', children: [] },
+  { id: 'medical_devices', label: 'Medical Devices', children: [] },
+  { id: 'services', label: 'Services', children: [] }
+];
+
+export default function AdvancedFiltersDrawer({ isOpen, onClose, activeWorkspace = 'products', advancedFilters, setAdvancedFilters, activeCategories = [], onCategoryChange }) {
   if (!isOpen) return null;
 
   const handleAction = (actionName) => {
     toast.success(`${actionName} action triggered`, { icon: '✨' });
+  };
+
+  const toggleCategory = (label) => {
+    if (activeCategories.includes(label)) {
+      onCategoryChange(activeCategories.filter(c => c !== label));
+    } else {
+      onCategoryChange([...activeCategories, label]);
+    }
   };
 
   const updateFilter = (workspace, key, value, subKey = null) => {
@@ -170,23 +207,41 @@ export default function AdvancedFiltersDrawer({ isOpen, onClose, activeWorkspace
         }
       `}</style>
       <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '2.25rem' }}>
-        {/* Saved Views Row */}
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button className="glass-btn" style={{ flex: 1, fontSize: '0.85rem' }} onClick={() => handleAction('Save View')}><Save size={16}/> Save View</button>
-          <button className="glass-btn" style={{ flex: 1, fontSize: '0.85rem' }} onClick={() => handleAction('Share')}><Share2 size={16}/> Share</button>
-          <button className="glass-btn" style={{ flex: 1, fontSize: '0.85rem' }} onClick={() => handleAction('Team')}><Users size={16}/> Team</button>
-        </div>
 
         {activeWorkspace === 'products' && (
           <>
             <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Category</label>
-              <select className="glass-select" value={advancedFilters.products.category} onChange={(e) => updateFilter('products', 'category', e.target.value)}>
-                <option>All Categories</option>
-                <option>Peptides</option>
-                <option>Longevity</option>
-                <option>Testing</option>
-              </select>
+              <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Categories</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto', paddingRight: '0.5rem', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '12px', padding: '0.85rem', background: 'rgba(255,255,255,0.7)' }}>
+                {CATEGORY_TREE.map(node => (
+                  <div key={node.id}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333', marginBottom: '0.5rem' }}>
+                      <input 
+                        type="checkbox" 
+                        className="glass-checkbox" 
+                        checked={activeCategories.includes(node.label)} 
+                        onChange={() => toggleCategory(node.label)} 
+                      /> 
+                      {node.label}
+                    </label>
+                    {node.children && node.children.length > 0 && (
+                      <div style={{ paddingLeft: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        {node.children.map(child => (
+                          <label key={child.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.9rem', cursor: 'pointer', color: '#555' }}>
+                            <input 
+                              type="checkbox" 
+                              className="glass-checkbox" 
+                              checked={activeCategories.includes(child.label)} 
+                              onChange={() => toggleCategory(child.label)} 
+                            /> 
+                            {child.label}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
             <div>
               <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Supplier</label>

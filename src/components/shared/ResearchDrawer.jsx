@@ -122,26 +122,30 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
   const { prefs, savePrefs, hasCompleted, isLoaded } = useGuestPreferences();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const [step, setStep] = useState(1);
   const [isClosing, setIsClosing] = useState(false);
   // Custom Mode State
   const [mode, setMode] = useState('personalization'); // 'personalization' | 'goal-detail'
   const [detailGoal, setDetailGoal] = useState(null);
+  
+  // AI State
+  const [aiInput, setAiInput] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isSummarizing, setIsSummarizing] = useState(false);
+
   // Form State (initialized from prefs if available)
   const [goal, setGoal] = useState(null);
   const [context, setContext] = useState('');
   const [experienceLevel, setExperienceLevel] = useState(null);
   const [preferences, setPreferences] = useState([]);
-  const totalSteps = 4;
   const inputRef = useRef(null);
   const scrollRef = useRef(null);
 
-  // Scroll to top on step change
+  // Scroll to top on summarize
   useEffect(() => {
-    if (scrollRef.current) {
+    if (scrollRef.current && isSummarizing) {
       scrollRef.current.scrollTop = 0;
     }
-  }, [step]);
+  }, [isSummarizing]);
 
   // Initialize and Open Logic
   useEffect(() => {
@@ -178,19 +182,18 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
   }, [isOpen, prefs]);
 
   useEffect(() => {
-    if (step === 2 && inputRef.current) {
+    if (isOpen && !isSummarizing && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [step]);
+  }, [isOpen, isSummarizing]);
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!isOpen || isClosing) return;
-      if (e.key === 'Enter') {
-        if (e.target.tagName === 'TEXTAREA') return; // let textarea have newlines
+      if (e.key === 'Enter' && e.metaKey) {
         e.preventDefault();
-        handleNext();
+        handleAnalyze();
       }
       if (e.key === 'Escape') {
         handleDismiss();
@@ -198,7 +201,7 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, step, goal, context, experienceLevel, preferences, isClosing]);
+  }, [isOpen, isClosing, aiInput]);
 
   if (!isOpen) return null;
 
@@ -210,179 +213,158 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
       setIsClosing(false);
       setMode('personalization');
       setDetailGoal(null);
+      setIsSummarizing(false);
+      setAiInput('');
       sessionStorage.setItem('researchDrawerDismissed', 'true');
     }, 300);
   };
 
-  const handleNext = () => {
-    if (step === 1 && !goal) return;
-    if (step === 3 && !experienceLevel) return;
-    // Autosave progress
-    savePrefs({ goal, context, experienceLevel, preferences });
-    if (step < 5) {
-      if (step === 1 && goal === 'explore') {
-        // Skip context and experience if explore
-        setStep(5); // Go straight to summary
-      } else {
-        setStep(s => s + 1);
-      }
-    }
+  const handleAnalyze = () => {
+    if (!aiInput.trim()) return;
+    setIsAnalyzing(true);
+    
+    // Simulate AI parsing
+    setTimeout(() => {
+      const lower = aiInput.toLowerCase();
+      
+      // Goal extraction
+      let extGoal = 'longevity'; // default
+      if (lower.match(/recover|heal|injury|joint|pain/)) extGoal = 'recovery';
+      else if (lower.match(/brain|focus|cogniti|memory|adhd/)) extGoal = 'cognition';
+      else if (lower.match(/weight|fat|metabol|lean/)) extGoal = 'weight-loss';
+      else if (lower.match(/muscle|strength|hypertrophy|bulk/)) extGoal = 'muscle';
+      else if (lower.match(/sleep|insomnia/)) extGoal = 'sleep';
+      
+      // Experience extraction
+      let extExp = 'beginner';
+      if (lower.match(/used before|some experience|intermediate/)) extExp = 'intermediate';
+      if (lower.match(/advanced|expert|years|protocol/)) extExp = 'advanced';
+
+      // Preferences extraction
+      const extPrefs = [];
+      if (lower.match(/oral|pill|no inject/)) extPrefs.push('oral-only');
+      if (lower.match(/vegan|plant/)) extPrefs.push('vegan');
+      if (lower.match(/budget|cheap|affordable/)) extPrefs.push('budget');
+      
+      setGoal(extGoal);
+      setExperienceLevel(extExp);
+      setPreferences(extPrefs);
+      setContext(aiInput);
+      
+      savePrefs({ goal: extGoal, context: aiInput, experienceLevel: extExp, preferences: extPrefs });
+      
+      setIsAnalyzing(false);
+      setIsSummarizing(true);
+    }, 1500); // 1.5s simulated AI thinking time
   };
 
-  const handleBack = () => {
-    if (step > 1) {
-      if (step === 5 && goal === 'explore') setStep(1);
-      else setStep(s => s - 1);
-    }
-  };
-
-  const togglePreference = (id) => {
-    setPreferences(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]);
-  };
-
-  const handleContextChip = (chip) => {
-    setContext(prev => {
-      const current = prev.trim();
-      if (!current) return chip;
-      return current.endsWith('.') || current.endsWith(',') ? `${current} ${chip}` : `${current}, ${chip}`;
-    });
+  const handleQuickPrompt = (prompt) => {
+    setAiInput(prompt);
+    if (inputRef.current) inputRef.current.focus();
   };
 
   const finishFlow = () => {
-    savePrefs({ goal, context, experienceLevel, preferences });
     onComplete?.();
     handleDismiss();
   };
 
   // Render Steps
-  const renderStep1 = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'fadeIn 0.3s ease' }}>
-      <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--text-main)' }}>
-        What brings you here today?
-      </h2>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.6rem' }}>
-        {Object.entries(GOAL_META).map(([id, meta]) => (
-          <GoalCard
-            key={id} id={id} meta={meta}
-            selected={goal === id}
-            onSelect={(id) => { setGoal(id); setTimeout(() => handleNext(), 150); }}
-          />
-        ))}
+  const renderAIOnboarding = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.3s ease' }}>
+      <div style={{ background: 'rgba(26, 115, 232, 0.05)', border: '1px solid rgba(26, 115, 232, 0.2)', padding: '1.25rem', borderRadius: '12px' }}>
+        <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Sparkles size={18} color="#1a73e8" />
+          Hi! Tell me about your research goals.
+        </h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0, lineHeight: 1.5 }}>
+          Describe what you want to achieve, your experience level, and any preferences. I will instantly build a custom protocol dashboard for you.
+        </p>
       </div>
-    </div>
-  );
+      
+      <div style={{ position: 'relative' }}>
+        <textarea
+          ref={inputRef}
+          value={aiInput}
+          onChange={(e) => setAiInput(e.target.value)}
+          placeholder="E.g., I'm a beginner looking to heal a nagging joint injury. I prefer oral administration over injections if possible."
+          disabled={isAnalyzing}
+          style={{
+            width: '100%',
+            minHeight: '140px',
+            padding: '1.25rem',
+            borderRadius: '12px',
+            border: `2px solid ${isAnalyzing ? '#1a73e8' : 'var(--border)'}`,
+            background: 'var(--surface-raised)',
+            color: 'var(--text-main)',
+            fontFamily: 'inherit',
+            fontSize: '1rem',
+            resize: 'vertical',
+            transition: 'border-color 0.3s ease',
+            opacity: isAnalyzing ? 0.7 : 1,
+          }}
+        />
+        {isAnalyzing && (
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(2px)',
+            borderRadius: '12px', flexDirection: 'column', gap: '0.5rem', color: '#1a73e8',
+            fontWeight: 600, fontSize: '0.95rem'
+          }}>
+            <Bot className="spin-slow" size={24} />
+            Analyzing your profile...
+          </div>
+        )}
+      </div>
 
-  const renderStep2 = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'fadeIn 0.3s ease' }}>
-      <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--text-main)' }}>
-        What are you trying to improve?
-      </h2>
-      <textarea
-        ref={inputRef}
-        value={context}
-        onChange={(e) => setContext(e.target.value)}
-        placeholder="Examples:&#10;'I feel mentally exhausted'&#10;'Improve recovery'&#10;'Support healthy aging'"
-        style={{
-          width: '100%',
-          minHeight: '120px',
-          padding: '1rem',
-          borderRadius: '8px',
-          border: '1px solid var(--border)',
-          background: 'var(--surface-raised)',
-          color: 'var(--text-main)',
-          fontFamily: 'inherit',
-          fontSize: '1rem',
-          resize: 'vertical',
-        }}
-      />
-      <div>
-        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.5rem', display: 'block' }}>
-          Quick chips:
-        </span>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-          {CONTEXT_QUICK_CHIPS.map(chip => (
+      {!isAnalyzing && (
+        <div>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem', display: 'block', fontWeight: 600 }}>
+            Quick Prompts:
+          </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <button
-              key={chip}
-              onClick={() => handleContextChip(chip)}
+              onClick={() => handleQuickPrompt("I want to optimize my longevity and slow down aging. I have intermediate experience.")}
               style={{
-                padding: '0.4rem 0.8rem', borderRadius: '16px',
+                padding: '0.75rem 1rem', borderRadius: '8px', textAlign: 'left',
                 border: '1px solid var(--border)', background: 'var(--surface)',
-                fontSize: '0.8rem', color: 'var(--text-main)', cursor: 'pointer',
-                transition: 'all 0.15s'
+                fontSize: '0.85rem', color: 'var(--text-main)', cursor: 'pointer',
+                transition: 'all 0.15s', display: 'flex', gap: '0.5rem', alignItems: 'center'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--border-light)'}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface-raised)'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'var(--surface)'}
             >
-              + {chip}
+              🌱 Longevity & Anti-aging (Intermediate)
             </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderStep3 = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'fadeIn 0.3s ease' }}>
-      <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--text-main)' }}>
-        Have you used peptides or protocols before?
-      </h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-        {Object.entries(LEVEL_META).map(([id, meta]) => (
-          <button
-            key={id}
-            onClick={() => { setExperienceLevel(id); setTimeout(() => handleNext(), 150); }}
-            style={{
-              padding: '0.85rem 1rem',
-              borderRadius: '8px',
-              border: `1px solid ${experienceLevel === id ? '#1a73e8' : '#e0e0e0'}`,
-              background: experienceLevel === id ? '#f8f9fa' : 'var(--color-bg-surface)',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem',
-              textAlign: 'left', transition: 'all 0.15s', width: '100%',
-              boxShadow: experienceLevel === id ? '0 1px 3px rgba(26,115,232,0.1)' : 'none'
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = experienceLevel === id ? '#f1f3f4' : '#f8f9fa'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = experienceLevel === id ? '#f8f9fa' : 'var(--color-bg-surface)'; }}
-          >
-            <div style={{ fontSize: '1.2rem' }}>{meta.icon}</div>
-            <span style={{ fontSize: '0.95rem', fontWeight: experienceLevel === id ? 700 : 500, color: experienceLevel === id ? '#1a73e8' : 'var(--text-main)' }}>
-              {meta.label}
-            </span>
-            {experienceLevel === id && (
-              <Check size={16} color="#1a73e8" style={{ marginLeft: 'auto' }} />
-            )}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderStep4 = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'fadeIn 0.3s ease' }}>
-      <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--text-main)' }}>
-        What matters most?
-      </h2>
-      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Select all that apply</span>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-        {PREFERENCE_OPTIONS.map(pref => {
-          const sel = preferences.includes(pref.id);
-          return (
             <button
-              key={pref.id}
-              onClick={() => togglePreference(pref.id)}
+              onClick={() => handleQuickPrompt("I'm an advanced researcher looking for protocols to maximize muscle hypertrophy and fat loss.")}
               style={{
-                padding: '0.6rem 1rem', borderRadius: '8px',
-                border: `1px solid ${sel ? '#1a73e8' : 'var(--border)'}`,
-                background: sel ? 'rgba(26, 115, 232, 0.08)' : 'var(--surface-raised)',
-                fontSize: '0.9rem', fontWeight: sel ? 600 : 500,
-                color: sel ? '#1a73e8' : 'var(--text-main)', cursor: 'pointer',
-                transition: 'all 0.15s'
+                padding: '0.75rem 1rem', borderRadius: '8px', textAlign: 'left',
+                border: '1px solid var(--border)', background: 'var(--surface)',
+                fontSize: '0.85rem', color: 'var(--text-main)', cursor: 'pointer',
+                transition: 'all 0.15s', display: 'flex', gap: '0.5rem', alignItems: 'center'
               }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface-raised)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'var(--surface)'}
             >
-              {pref.label} {sel && <Check size={12} strokeWidth={3} style={{ marginLeft: 4 }} />}
+              💪 Muscle & Fat Loss (Advanced)
             </button>
-          );
-        })}
-      </div>
+            <button
+              onClick={() => handleQuickPrompt("I'm a complete beginner looking to improve my cognitive function and focus at work.")}
+              style={{
+                padding: '0.75rem 1rem', borderRadius: '8px', textAlign: 'left',
+                border: '1px solid var(--border)', background: 'var(--surface)',
+                fontSize: '0.85rem', color: 'var(--text-main)', cursor: 'pointer',
+                transition: 'all 0.15s', display: 'flex', gap: '0.5rem', alignItems: 'center'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface-raised)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'var(--surface)'}
+            >
+              🧠 Brain Focus & Cognition (Beginner)
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -403,8 +385,8 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
       <div style={{ background: 'var(--surface-raised)', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--text-main)' }}>Your Profile</h3>
-          <button onClick={() => setStep(1)} style={{ background: 'none', border: 'none', color: '#1a73e8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.8rem' }}>
-            <Edit2 size={12} /> Edit
+          <button onClick={() => setIsSummarizing(false)} style={{ background: 'none', border: 'none', color: '#1a73e8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.8rem' }}>
+            <Edit2 size={12} /> Refine with AI
           </button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -505,6 +487,12 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .spin-slow {
+          animation: spin 3s linear infinite;
         }
       `}</style>
       {/* Backdrop */}
@@ -574,15 +562,10 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
         <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
           {mode === 'goal-detail' ? (
             renderGoalDetail()
+          ) : isSummarizing ? (
+            renderSummary()
           ) : (
-            <>
-              {step < 5 && <StepIndicator currentStep={step} totalSteps={totalSteps} />}
-              {step === 1 && renderStep1()}
-              {step === 2 && renderStep2()}
-              {step === 3 && renderStep3()}
-              {step === 4 && renderStep4()}
-              {step === 5 && renderSummary()}
-            </>
+            renderAIOnboarding()
           )}
         </div>
 
@@ -645,32 +628,15 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
           <div style={{ 
             padding: '1.5rem 2rem', 
             borderTop: '1px solid var(--border)',
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+            display: 'flex', justifyContent: 'flex-end', alignItems: 'center'
           }}>
-            {step > 1 ? (
+            {!isSummarizing ? (
               <button 
-                onClick={handleBack}
+                onClick={handleAnalyze}
+                disabled={!aiInput.trim() || isAnalyzing}
                 style={{
-                  background: 'transparent', border: '1px solid var(--border)',
-                  color: 'var(--text-main)', borderRadius: '8px',
-                  padding: '0.6rem 1.25rem', cursor: 'pointer',
-                  fontSize: '0.9rem', fontWeight: 600,
-                  transition: 'background 0.15s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--border-light)'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-              >
-                Back
-              </button>
-            ) : <div />}
-
-            {step < 5 ? (
-              <button 
-                onClick={handleNext}
-                disabled={step === 1 && !goal || step === 3 && !experienceLevel}
-                style={{
-                  background: (step === 1 && !goal) || (step === 3 && !experienceLevel) ? 'var(--border-light)' : '#1a73e8',
-                  color: (step === 1 && !goal) || (step === 3 && !experienceLevel) ? 'var(--text-light)' : 'white',
+                  background: !aiInput.trim() || isAnalyzing ? 'var(--border-light)' : '#1a73e8',
+                  color: !aiInput.trim() || isAnalyzing ? 'var(--text-light)' : 'white',
                   border: 'none', borderRadius: '8px',
                   padding: '0.6rem 1.25rem', cursor: 'pointer',
                   fontSize: '0.9rem', fontWeight: 600,
@@ -678,7 +644,7 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
                   transition: 'background 0.15s'
                 }}
               >
-                Continue <ChevronRight size={16} />
+                <Sparkles size={16} /> Analyze with AI
               </button>
             ) : (
               <button 
@@ -692,7 +658,7 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
                   transition: 'background 0.15s'
                 }}
               >
-                <Sparkles size={16} /> Generate protocol
+                Apply Profile to Dashboard <ChevronRight size={16} />
               </button>
             )}
           </div>

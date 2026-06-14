@@ -11,7 +11,7 @@ import React, { useState, useEffect } from 'react';
 
 
 
-import CategoryExplorerDrawer from './CategoryExplorerDrawer';
+
 
 export default function CatalogSmartSearch({ 
   searchQuery, 
@@ -34,7 +34,6 @@ export default function CatalogSmartSearch({
   ];
 
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
-  const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -132,32 +131,6 @@ export default function CatalogSmartSearch({
             <Sparkles size={18} color="var(--color-primary, #6366f1)" /> 
             AI Search
           </button>
-
-          {activeWorkspace === 'products' && (
-            <button
-              onClick={() => setIsCategoryDrawerOpen(true)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.75rem 1.25rem',
-                background: activeCategories.length > 0 ? 'linear-gradient(135deg, var(--color-primary, #6366f1), #818cf8)' : 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
-                border: '1px solid rgba(226, 232, 240, 0.8)',
-                borderRadius: '24px',
-                cursor: 'pointer',
-                fontWeight: 600,
-                color: activeCategories.length > 0 ? 'white' : 'var(--text-main, #1e293b)',
-                boxShadow: '0 2px 10px rgba(0, 0, 0, 0.03)',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
-              onMouseOut={(e) => e.currentTarget.style.transform = 'none'}
-            >
-              <Grid size={18} color={activeCategories.length > 0 ? 'white' : 'var(--color-primary, #6366f1)'} /> 
-              Categories {activeCategories.length > 0 && `(${activeCategories.length})`}
-            </button>
-          )}
 
           <button
             onClick={onOpenAdvancedFilters}
@@ -268,15 +241,6 @@ export default function CatalogSmartSearch({
         </div>
       )}
 
-      {activeWorkspace === 'products' && (
-        <CategoryExplorerDrawer 
-          isOpen={isCategoryDrawerOpen}
-          onClose={() => setIsCategoryDrawerOpen(false)}
-          activeCategories={activeCategories}
-          onCategoryChange={onCategoryChange}
-          products={products}
-        />
-      )}
     </div>
   );
 }

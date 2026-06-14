@@ -2,8 +2,9 @@ import Activity from 'lucide-react/dist/esm/icons/activity';
 import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
 import Settings from 'lucide-react/dist/esm/icons/settings';
 import Eye from 'lucide-react/dist/esm/icons/eye';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ExecutiveStatusBar from './widgets/ExecutiveStatusBar';
+import MobileExecutiveDashboard from './mobile/MobileExecutiveDashboard';
 
 import {
   DndContext,
@@ -175,7 +176,18 @@ function CommandCenterInner() {
   const { activeWorkspaceId, workspaces } = useWorkspace();
   const [showBuilder, setShowBuilder] = useState(false);
   const [isExecutiveMode, setIsExecutiveMode] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const activeTemplate = workspaces[activeWorkspaceId];
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  if (isMobile) {
+    return <MobileExecutiveDashboard />;
+  }
 
   return (
     <div style={{ paddingBottom: '4rem', background: 'var(--color-bg-app)' }}>

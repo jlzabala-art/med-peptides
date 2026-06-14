@@ -8,6 +8,7 @@ import { useHomeLayout, DEFAULT_GUEST_SECTIONS, DEFAULT_PRO_SECTIONS, PRO_ROLES 
 import HomeSectionRenderer from '../components/HomeSectionRenderer';
 import HomeLayoutSkeleton from '../components/HomeLayoutSkeleton';
 import MoleculeParticles from '../components/MoleculeParticles';
+import useGuestPreferences from '../hooks/useGuestPreferences';
 
 /**
  * HomeView — unified homepage router for all 8 roles.
@@ -60,6 +61,7 @@ export default function HomeView({
 
   // --- Seed-to-Hero Bridge ---
   const [heroSeedQuery, setHeroSeedQuery] = useState('');
+  const { prefs, hasCompleted } = useGuestPreferences();
 
   const handleSeedSearch = useCallback((query) => {
     setHeroSeedQuery(query);
@@ -81,12 +83,33 @@ export default function HomeView({
     );
   }, []);
 
-  // --- Layout Loading ---
-  const sections = loading 
+  // --- Layout Loading & Dynamic Reordering ---
+  let sections = loading 
     ? null 
     : (layout[renderRole] || [])
-        .filter(s => s.enabled && s.id !== 'FeaturedCategories')
-        .sort((a, b) => a.order - b.order);
+        .filter(s => s.enabled && s.id !== 'FeaturedCategories');
+
+  if (sections && hasCompleted && ['guest', 'patient'].includes(renderRole)) {
+    sections = sections.map(sec => {
+      let newOrder = sec.order;
+      let isEnabled = sec.enabled;
+
+      if (prefs?.experienceLevel === 'advanced' || prefs?.experienceLevel === 'intermediate') {
+        if (sec.id === 'StepByStepGuide' || sec.id === 'GuestIntroTeaser') isEnabled = false;
+        if (sec.id === 'ProtocolPreviewCards') newOrder = 0.5; // Right under Hero
+        if (sec.id === 'BeginnerCollections') isEnabled = false;
+      } else {
+        if (sec.id === 'BeginnerCollections') newOrder = 0.5; // Right under Hero
+        if (sec.id === 'ProtocolPreviewCards') newOrder = 90; // Move down
+      }
+
+      return { ...sec, order: newOrder, enabled: isEnabled };
+    }).filter(s => s.enabled);
+  }
+
+  if (sections) {
+    sections.sort((a, b) => a.order - b.order);
+  }
 
   const sharedProps = {
     onSelectProduct,

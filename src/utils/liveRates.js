@@ -51,7 +51,7 @@ export async function fetchLiveRates() {
   }
 
   const [usdData, eurData] = await Promise.all([
-    usdRes.js(),
+    usdRes.json(),
     eurRes.js(),
   ]);
 

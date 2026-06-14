@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { 
   Plus, Box, Building2, ShoppingCart, Receipt, CalendarPlus, 
-  MessageSquarePlus, GraduationCap, FileText, Zap, Search, Settings
+  MessageSquarePlus, GraduationCap, FileText, Zap, Search, Settings, Bot, CheckCircle2
 } from 'lucide-react';
 import { useScrollDirection } from '../../hooks/useScrollDirection';
 
@@ -92,7 +92,48 @@ const getContextConfig = (pathname) => {
     };
   }
 
-  // Default Fallback
+  if (isMatch('/admin/command-center') || isMatch('/admin/dashboard')) {
+    return {
+      id: 'dashboard',
+      theme: '#4f46e5', // Indigo for Atlas
+      icon: <Zap size={20} />,
+      label: 'Ask Atlas',
+      actions: [
+        { id: 'ask_atlas', label: 'Ask Atlas', icon: <Zap size={16} color="#4f46e5" />, bg: '#e0e7ff' },
+        { id: 'create_task', label: 'Create Task', icon: <FileText size={16} color="#4f46e5" />, bg: '#e0e7ff' },
+        { id: 'create_reminder', label: 'Create Reminder', icon: <CalendarPlus size={16} color="#4f46e5" />, bg: '#e0e7ff' },
+        { id: 'create_approval', label: 'Create Approval', icon: <CheckCircle2 size={16} color="#4f46e5" />, bg: '#e0e7ff' },
+      ]
+    };
+  }
+
+  if (isMatch('/admin/physicians') || isMatch('/admin/account-managers') || isMatch('/admin/users')) {
+    return {
+      id: 'users',
+      theme: '#0284c7', // Sky
+      icon: <Plus size={20} />,
+      label: 'Add Member',
+      actions: [
+        { id: 'new_user', label: 'Create User', icon: <Plus size={16} color="#0284c7" />, bg: '#e0f2fe' }
+      ]
+    };
+  }
+
+  // B2C Guest / Default
+  if (pathname === '/' || pathname.startsWith('/product') || pathname.startsWith('/collection')) {
+    return {
+      id: 'b2c_copilot',
+      theme: '#1a73e8', // AI Blue
+      icon: <Bot size={20} />,
+      label: 'AI Copilot',
+      actions: [
+        { id: 'open_ai_copilot', label: 'Ask Clinical AI', icon: <Bot size={16} color="#1a73e8" />, bg: '#e8f0fe' },
+        { id: 'open_personalization', label: 'Refine Profile', icon: <Settings size={16} color="#1a73e8" />, bg: '#e8f0fe' }
+      ]
+    };
+  }
+
+  // Admin Default Fallback
   return {
     id: 'default',
     theme: '#0f172a', // Slate 900
@@ -108,7 +149,6 @@ const getContextConfig = (pathname) => {
 export default function ContextualFAB() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
   const { isAtTop, scrollDirection } = useScrollDirection();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
@@ -120,8 +160,10 @@ export default function ContextualFAB() {
 
   // Close speed dial when navigating or scrolling
   useEffect(() => {
-    setIsOpen(false);
-  }, [location.pathname, scrollDirection]);
+    if (isOpen) {
+      setIsOpen(false);
+    }
+  }, [location.pathname, scrollDirection, isOpen]);
 
   // Do not render anything on Desktop
   if (!isMobile) return null;
@@ -132,8 +174,14 @@ export default function ContextualFAB() {
   const handleActionClick = (actionId) => {
     setIsOpen(false);
     console.log(`[FAB Action Clicked] ${actionId}`);
-    // Fallback simple routing if needed
-    // if (actionId === 'new_product') navigate('/admin/products?new=true');
+    
+    if (actionId === 'open_ai_copilot') {
+      window.dispatchEvent(new CustomEvent('open-clinical-ai', {
+        detail: { query: 'Hi, I need help with my research.', autoSend: false }
+      }));
+    } else if (actionId === 'open_personalization') {
+      window.dispatchEvent(new Event('open-research-drawer'));
+    }
   };
 
   return (

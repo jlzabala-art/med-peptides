@@ -6,7 +6,7 @@ import React from 'react';
 import useGuestPreferences from '../../hooks/useGuestPreferences';
 
 export default function ResearchIntakeCTA() {
-  const { hasCompleted, prefs, goalMeta } = useGuestPreferences();
+  const { hasCompleted, goalMeta } = useGuestPreferences();
 
   const handleOpenDrawer = () => {
     window.dispatchEvent(new Event('open-research-drawer'));
@@ -46,12 +46,12 @@ export default function ResearchIntakeCTA() {
       </div>
 
       <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-main)' }}>
-        {hasCompleted ? 'Update your research profile' : 'Personalize your research'}
+        {hasCompleted ? 'Update your research profile' : 'Personalize your research with AI'}
       </h2>
       <p style={{ margin: '0 0 1.5rem 0', color: 'var(--text-muted)', fontSize: '0.95rem', maxWidth: '500px' }}>
         {hasCompleted && goalMeta 
-          ? `Current focus: ${goalMeta.label}. Refine your preferences to get even more targeted protocol recommendations.`
-          : 'Answer a few quick questions so our ClinicalAI can generate highly relevant, targeted protocol recommendations tailored to your goals.'
+          ? `Current focus: ${goalMeta.label}. Chat with ClinicalAI to refine your preferences.`
+          : 'Tell ClinicalAI about your goals, experience, and what matters most. We will instantly optimize your experience.'
         }
       </p>
 

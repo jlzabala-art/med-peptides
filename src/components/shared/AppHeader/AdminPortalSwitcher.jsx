@@ -5,6 +5,7 @@ import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
 import Building2 from "lucide-react/dist/esm/icons/building-2";
 import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -39,7 +40,8 @@ export default function AdminPortalSwitcher() {
     { id: 'doctor', label: 'Clinical Portal', icon: Stethoscope, route: '/doctor' },
     { id: 'patient', label: 'Patient Portal', icon: User, route: '/paciente' },
     { id: 'wholesaler', label: 'Wholesaler Portal', icon: Building2, route: '/wholesaler' },
-    { id: 'compounding_pharmacy', label: 'Pharmacy Portal', icon: FlaskConical, route: '/pharmacy-dashboard' }
+    { id: 'compounding_pharmacy', label: 'Pharmacy Portal', icon: FlaskConical, route: '/pharmacy-dashboard' },
+    { id: 'b2c', label: 'B2C Storefront', icon: ShoppingCart, route: '/' }
   ];
 
   const currentPortal = portals.find(p => p.id === activeRole) || {

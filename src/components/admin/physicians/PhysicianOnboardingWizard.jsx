@@ -579,15 +579,7 @@ export default function PhysicianOnboardingWizard({ onClose, onComplete }) {
 
       </div>
 
-      {/* Mobile Preview Toggle */}
-      {isMobile && (
-        <button 
-          onClick={() => setShowMobilePreview(!showMobilePreview)}
-          style={{ position: 'fixed', bottom: '80px', right: '1rem', backgroundColor: 'var(--background)', border: '1px solid var(--border)', borderRadius: '30px', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', zIndex: 11 }}
-        >
-          <User size={16} /> Preview
-        </button>
-      )}
+
 
       {/* Mobile Profile Bottom Sheet */}
       {isMobile && showMobilePreview && (

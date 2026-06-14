@@ -16,22 +16,6 @@ import Download from "lucide-react/dist/esm/icons/download";
 import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import React, { useState } from 'react';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export default function RegulatoryTrackerView({ products = [] }) {
   // Generate mock compliance data if products list is empty or lacks compliance fields
   const mockProducts = products.length > 0 ? products : [
@@ -55,265 +39,226 @@ export default function RegulatoryTrackerView({ products = [] }) {
 
   const renderRiskBadge = (risk) => {
     switch(risk) {
-      case 'Green': return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200"><CheckCircle2 className="w-3 h-3 mr-1" /> Low Risk</span>;
-      case 'Amber': return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200"><AlertTriangle className="w-3 h-3 mr-1" /> Med Risk</span>;
-      case 'Red': return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800 border border-rose-200"><XCircle className="w-3 h-3 mr-1" /> High Risk</span>;
+      case 'Green': return <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 10px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 500, backgroundColor: '#d1fae5', color: '#065f46', border: '1px solid #a7f3d0' }}><CheckCircle2 size={12} style={{ marginRight: '4px' }} /> Low Risk</span>;
+      case 'Amber': return <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 10px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 500, backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }}><AlertTriangle size={12} style={{ marginRight: '4px' }} /> Med Risk</span>;
+      case 'Red': return <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 10px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 500, backgroundColor: '#ffe4e6', color: '#9f1239', border: '1px solid #fecdd3' }}><XCircle size={12} style={{ marginRight: '4px' }} /> High Risk</span>;
       default: return null;
     }
   };
 
   const renderStatusIcon = (status) => {
-    if (status === 'Valid' || status === 'Active') return <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />;
-    if (status === 'Missing') return <XCircle className="w-4 h-4 text-rose-500 mx-auto" />;
-    if (status === 'Pending') return <Clock className="w-4 h-4 text-amber-500 mx-auto" />;
-    if (status === 'Expired') return <AlertTriangle className="w-4 h-4 text-rose-500 mx-auto" />;
-    return <span className="text-sm text-gray-500">{status}</span>;
+    if (status === 'Valid' || status === 'Active') return <CheckCircle2 size={16} color="#10b981" style={{ margin: '0 auto' }} />;
+    if (status === 'Missing') return <XCircle size={16} color="#f43f5e" style={{ margin: '0 auto' }} />;
+    if (status === 'Pending') return <Clock size={16} color="#f59e0b" style={{ margin: '0 auto' }} />;
+    if (status === 'Expired') return <AlertTriangle size={16} color="#f43f5e" style={{ margin: '0 auto' }} />;
+    return <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>{status}</span>;
   };
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', fontFamily: 'Inter, sans-serif' }}>
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: '16px' }}>
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
-            <ShieldCheck className="w-7 h-7 text-indigo-600" />
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#111827', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+            <ShieldCheck size={28} color="#4f46e5" />
             Regulatory & Compliance
           </h2>
-          <p className="mt-1 text-sm text-gray-500">Monitor product registrations, certifications, and compliance risks.</p>
+          <p style={{ marginTop: '4px', fontSize: '0.875rem', color: '#6b7280', margin: '4px 0 0 0' }}>Monitor product registrations, certifications, and compliance risks.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-600 border border-gray-200 bg-white shadow-sm hover:bg-gray-50 h-9 px-4 py-2 text-gray-700">
-            <Download className="w-4 h-4 mr-2" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '6px', fontSize: '0.875rem', fontWeight: 500, border: '1px solid #e5e7eb', backgroundColor: '#fff', padding: '8px 16px', color: '#374151', cursor: 'pointer', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
+            <Download size={16} style={{ marginRight: '8px' }} />
             Export Audit Report
           </button>
         </div>
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px' }}>
         {[
-          { label: 'Compliance Score', value: `${metrics.score}%`, icon: Activity, color: 'text-indigo-600', bg: 'bg-indigo-50', trend: '+2%' },
-          { label: 'Registered', value: metrics.registered, icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Pending Reg.', value: metrics.pending, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Missing COA', value: metrics.missingCOA, icon: FileWarning, color: 'text-rose-600', bg: 'bg-rose-50' },
-          { label: 'Missing GMP', value: metrics.missingGMP, icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50' },
-          { label: 'Stability Issues', value: metrics.missingStability, icon: TrendingUp, color: 'text-amber-600', bg: 'bg-amber-50' },
+          { label: 'Compliance Score', value: `${metrics.score}%`, icon: Activity, color: '#4f46e5', bg: '#e0e7ff', trend: '+2%' },
+          { label: 'Registered', value: metrics.registered, icon: ShieldCheck, color: '#059669', bg: '#d1fae5' },
+          { label: 'Pending Reg.', value: metrics.pending, icon: Clock, color: '#d97706', bg: '#fef3c7' },
+          { label: 'Missing COA', value: metrics.missingCOA, icon: FileWarning, color: '#e11d48', bg: '#ffe4e6' },
+          { label: 'Missing GMP', value: metrics.missingGMP, icon: AlertTriangle, color: '#e11d48', bg: '#ffe4e6' },
+          { label: 'Stability Issues', value: metrics.missingStability, icon: TrendingUp, color: '#d97706', bg: '#fef3c7' },
         ].map((metric, i) => (
-          <div key={i} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div className={`absolute top-0 right-0 p-3 opacity-20 group-hover:scale-110 transition-transform ${metric.color}`}>
-              <metric.icon className="w-12 h-12 -mt-4 -mr-4" />
+          <div key={i} style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e5e7eb', padding: '16px', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 0, right: 0, padding: '12px', opacity: 0.1, color: metric.color }}>
+              <metric.icon size={48} style={{ marginTop: '-16px', marginRight: '-16px' }} />
             </div>
-            <div className={`inline-flex p-2 rounded-lg ${metric.bg} ${metric.color} mb-3`}>
-              <metric.icon className="w-5 h-5" />
+            <div style={{ display: 'inline-flex', padding: '8px', borderRadius: '8px', backgroundColor: metric.bg, color: metric.color, marginBottom: '12px' }}>
+              <metric.icon size={20} />
             </div>
-            <p className="text-sm font-medium text-gray-500">{metric.label}</p>
-            <div className="flex items-baseline gap-2 mt-1">
-              <h3 className="text-2xl font-bold text-gray-900">{metric.value}</h3>
-              {metric.trend && <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">{metric.trend}</span>}
+            <p style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280', margin: 0 }}>{metric.label}</p>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px' }}>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#111827', margin: 0 }}>{metric.value}</h3>
+              {metric.trend && <span style={{ fontSize: '0.75rem', fontWeight: 500, color: '#059669', backgroundColor: '#d1fae5', padding: '2px 6px', borderRadius: '4px' }}>{metric.trend}</span>}
             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
         {/* Main Content Area */}
-        <div className="lg:col-span-2 space-y-6">
+        <div style={{ gridColumn: 'span 2 / span 2', display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* AI Compliance Assistant */}
-          <div className="bg-gradient-to-r from-indigo-900 to-slate-900 rounded-xl p-6 shadow-lg text-white border border-indigo-800 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-            <div className="relative z-10 flex flex-col md:flex-row gap-6 items-start md:items-center">
-              <div className="flex-shrink-0 bg-indigo-500/20 p-3 rounded-xl border border-indigo-500/30">
-                <Bot className="w-8 h-8 text-indigo-300" />
+          <div style={{ background: 'linear-gradient(to right, #312e81, #0f172a)', borderRadius: '12px', padding: '24px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', color: '#fff', border: '1px solid #3730a3', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexWrap: 'wrap', gap: '24px', alignItems: 'center' }}>
+              <div style={{ flexShrink: 0, backgroundColor: 'rgba(99, 102, 241, 0.2)', padding: '12px', borderRadius: '12px', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
+                <Bot size={32} color="#a5b4fc" />
               </div>
-              <div className="flex-1 w-full space-y-3">
+              <div style={{ flex: 1, minWidth: '250px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">Atlas Compliance Assistant</h3>
-                  <p className="text-indigo-200 text-sm">Ask me about regulatory statuses, missing documents, or risk profiles.</p>
+                  <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#fff', margin: 0 }}>Atlas Compliance Assistant</h3>
+                  <p style={{ color: '#c7d2fe', fontSize: '0.875rem', margin: '4px 0 0 0' }}>Ask me about regulatory statuses, missing documents, or risk profiles.</p>
                 </div>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-4 w-4 text-indigo-300" />
+                <div style={{ position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, paddingLeft: '12px', display: 'flex', alignItems: 'center', pointerEvents: 'none' }}>
+                    <Search size={16} color="#a5b4fc" />
                   </div>
                   <input
                     type="text"
                     value={aiQuery}
                     onChange={(e) => setAiQuery(e.target.value)}
                     placeholder="e.g., 'Show products missing COA' or 'Which products are at high risk?'"
-                    className="block w-full pl-10 pr-3 py-2.5 border border-indigo-500/30 rounded-lg leading-5 bg-slate-800/50 text-indigo-100 placeholder-indigo-300/50 focus:outline-none focus:bg-slate-800 focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 sm:text-sm transition-colors"
+                    style={{ display: 'block', width: '100%', padding: '10px 12px 10px 36px', border: '1px solid rgba(99, 102, 241, 0.3)', borderRadius: '8px', backgroundColor: 'rgba(30, 41, 59, 0.5)', color: '#e0e7ff', fontSize: '0.875rem', outline: 'none' }}
                   />
                 </div>
-                <div className="flex flex-wrap gap-2 pt-1">
-                  <button onClick={() => setAiQuery('Show products missing COA')} className="text-xs px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 hover:bg-indigo-500/20 transition-colors">Missing COAs</button>
-                  <button onClick={() => setAiQuery('Show suppliers with missing GMP')} className="text-xs px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 hover:bg-indigo-500/20 transition-colors">GMP Issues</button>
-                  <button onClick={() => setAiQuery('Which products are at regulatory risk?')} className="text-xs px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 hover:bg-indigo-500/20 transition-colors">High Risk</button>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', paddingTop: '4px' }}>
+                  <button onClick={() => setAiQuery('Show products missing COA')} style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '9999px', backgroundColor: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', color: '#c7d2fe', cursor: 'pointer' }}>Missing COAs</button>
+                  <button onClick={() => setAiQuery('Show suppliers with missing GMP')} style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '9999px', backgroundColor: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', color: '#c7d2fe', cursor: 'pointer' }}>GMP Issues</button>
+                  <button onClick={() => setAiQuery('Which products are at regulatory risk?')} style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '9999px', backgroundColor: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', color: '#c7d2fe', cursor: 'pointer' }}>High Risk</button>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Compliance Table/Cards */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-            <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50/50">
-              <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                <FileSignature className="w-5 h-5 text-gray-500" />
+          <div style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div style={{ padding: '16px', borderBottom: '1px solid #e5e7eb', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px', backgroundColor: '#f9fafb' }}>
+              <h3 style={{ fontWeight: 600, color: '#111827', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                <FileSignature size={20} color="#6b7280" />
                 Product Compliance Matrix
               </h3>
-              <div className="flex items-center gap-2">
-                <div className="relative max-w-sm">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
-                  <input type="text" placeholder="Search matrix..." className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white w-full sm:w-64" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ position: 'relative', width: '100%', maxWidth: '300px' }}>
+                  <Search size={16} color="#9ca3af" style={{ position: 'absolute', left: '10px', top: '10px' }} />
+                  <input type="text" placeholder="Search matrix..." style={{ padding: '8px 16px 8px 36px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '0.875rem', width: '100%', outline: 'none' }} />
                 </div>
               </div>
             </div>
-            {/* Desktop Table */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 text-sm">
-                <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
+            
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ minWidth: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+                <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb', color: '#6b7280', textTransform: 'uppercase', fontSize: '0.75rem' }}>
                   <tr>
-                    <th scope="col" className="px-4 py-3 text-left font-medium">Product / Supplier</th>
-                    <th scope="col" className="px-3 py-3 text-center font-medium">Registration</th>
-                    <th scope="col" className="px-3 py-3 text-center font-medium">COA</th>
-                    <th scope="col" className="px-3 py-3 text-center font-medium">GMP</th>
-                    <th scope="col" className="px-3 py-3 text-center font-medium">Stability</th>
-                    <th scope="col" className="px-3 py-3 text-center font-medium">Import Permit</th>
-                    <th scope="col" className="px-4 py-3 text-right font-medium">Risk Level</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 500 }}>Product / Supplier</th>
+                    <th style={{ padding: '12px 12px', fontWeight: 500, textAlign: 'center' }}>Registration</th>
+                    <th style={{ padding: '12px 12px', fontWeight: 500, textAlign: 'center' }}>COA</th>
+                    <th style={{ padding: '12px 12px', fontWeight: 500, textAlign: 'center' }}>GMP</th>
+                    <th style={{ padding: '12px 12px', fontWeight: 500, textAlign: 'center' }}>Stability</th>
+                    <th style={{ padding: '12px 12px', fontWeight: 500, textAlign: 'center' }}>Import Permit</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 500, textAlign: 'right' }}>Risk Level</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody>
                   {mockProducts.map((product) => (
-                    <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">{product.name}</div>
-                        <div className="text-xs text-gray-500">{product.supplier}</div>
+                    <tr key={product.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                      <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
+                        <div style={{ fontWeight: 500, color: '#111827' }}>{product.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{product.supplier}</div>
                       </td>
-                      <td className="px-3 py-3 whitespace-nowrap text-center">{renderStatusIcon(product.registration)}</td>
-                      <td className="px-3 py-3 whitespace-nowrap text-center">{renderStatusIcon(product.coa)}</td>
-                      <td className="px-3 py-3 whitespace-nowrap text-center">{renderStatusIcon(product.gmp)}</td>
-                      <td className="px-3 py-3 whitespace-nowrap text-center">{renderStatusIcon(product.stability)}</td>
-                      <td className="px-3 py-3 whitespace-nowrap text-center">{renderStatusIcon(product.permit)}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-right">{renderRiskBadge(product.risk)}</td>
+                      <td style={{ padding: '12px', whiteSpace: 'nowrap', textAlign: 'center' }}>{renderStatusIcon(product.registration)}</td>
+                      <td style={{ padding: '12px', whiteSpace: 'nowrap', textAlign: 'center' }}>{renderStatusIcon(product.coa)}</td>
+                      <td style={{ padding: '12px', whiteSpace: 'nowrap', textAlign: 'center' }}>{renderStatusIcon(product.gmp)}</td>
+                      <td style={{ padding: '12px', whiteSpace: 'nowrap', textAlign: 'center' }}>{renderStatusIcon(product.stability)}</td>
+                      <td style={{ padding: '12px', whiteSpace: 'nowrap', textAlign: 'center' }}>{renderStatusIcon(product.permit)}</td>
+                      <td style={{ padding: '12px 16px', whiteSpace: 'nowrap', textAlign: 'right' }}>{renderRiskBadge(product.risk)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
 
-            {/* Mobile Cards */}
-            <div className="md:hidden divide-y divide-gray-200">
-              {mockProducts.map((product) => (
-                <div key={product.id} className="p-4 bg-white space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="font-medium text-gray-900 text-base">{product.name}</div>
-                      <div className="text-sm text-gray-500">{product.supplier}</div>
-                    </div>
-                    {renderRiskBadge(product.risk)}
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-sm pt-2 border-t border-gray-100">
-                    <div className="flex items-center justify-between bg-gray-50 px-2 py-1.5 rounded">
-                      <span className="text-gray-500 text-xs">Reg:</span>
-                      {renderStatusIcon(product.registration)}
-                    </div>
-                    <div className="flex items-center justify-between bg-gray-50 px-2 py-1.5 rounded">
-                      <span className="text-gray-500 text-xs">COA:</span>
-                      {renderStatusIcon(product.coa)}
-                    </div>
-                    <div className="flex items-center justify-between bg-gray-50 px-2 py-1.5 rounded">
-                      <span className="text-gray-500 text-xs">GMP:</span>
-                      {renderStatusIcon(product.gmp)}
-                    </div>
-                    <div className="flex items-center justify-between bg-gray-50 px-2 py-1.5 rounded">
-                      <span className="text-gray-500 text-xs">Stability:</span>
-                      {renderStatusIcon(product.stability)}
-                    </div>
-                  </div>
-                  <div className="pt-2 flex gap-2">
-                    <button className="flex-1 bg-white border border-gray-200 text-gray-700 py-1.5 px-3 rounded-lg text-sm font-medium hover:bg-gray-50">View Details</button>
-                    <button className="flex-1 bg-indigo-50 text-indigo-700 py-1.5 px-3 rounded-lg text-sm font-medium hover:bg-indigo-100 border border-indigo-100 flex items-center justify-center gap-1">
-                      <Bot className="w-3.5 h-3.5" /> Ask Atlas
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="p-3 border-t border-gray-200 bg-gray-50 text-center">
-              <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium inline-flex items-center">
-                View full matrix <ArrowRight className="w-4 h-4 ml-1" />
+            <div style={{ padding: '12px', borderTop: '1px solid #e5e7eb', backgroundColor: '#f9fafb', textAlign: 'center' }}>
+              <button style={{ fontSize: '0.875rem', color: '#4f46e5', fontWeight: 500, display: 'inline-flex', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer' }}>
+                View full matrix <ArrowRight size={16} style={{ marginLeft: '4px' }} />
               </button>
             </div>
           </div>
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* Regulatory Alerts */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
-              <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                <BellRing className="w-5 h-5 text-rose-500" />
+          <div style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', overflow: 'hidden' }}>
+            <div style={{ padding: '16px', borderBottom: '1px solid #e5e7eb', backgroundColor: '#f9fafb', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h3 style={{ fontWeight: 600, color: '#111827', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                <BellRing size={20} color="#f43f5e" />
                 Action Required
               </h3>
-              <span className="bg-rose-100 text-rose-700 text-xs font-bold px-2 py-0.5 rounded-full">3</span>
+              <span style={{ backgroundColor: '#ffe4e6', color: '#be123c', fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: '9999px' }}>3</span>
             </div>
-            <div className="divide-y divide-gray-100 p-2">
-              <div className="p-3 flex items-start gap-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
-                <div className="bg-rose-100 p-1.5 rounded-md mt-0.5"><Clock className="w-4 h-4 text-rose-600" /></div>
+            <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ padding: '12px', display: 'flex', alignItems: 'flex-start', gap: '12px', borderRadius: '8px', cursor: 'pointer' }}>
+                <div style={{ backgroundColor: '#ffe4e6', padding: '6px', borderRadius: '6px', marginTop: '2px' }}><Clock size={16} color="#e11d48" /></div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-900">Registration expiring soon</h4>
-                  <p className="text-xs text-gray-500 mt-0.5"><span className="font-semibold">Ipamorelin 5mg</span> expires in 12 days.</p>
-                  <button className="text-xs text-indigo-600 font-medium mt-1.5">Renew Now</button>
+                  <h4 style={{ fontSize: '0.875rem', fontWeight: 500, color: '#111827', margin: 0 }}>Registration expiring soon</h4>
+                  <p style={{ fontSize: '0.75rem', color: '#6b7280', margin: '2px 0 0 0' }}><span style={{ fontWeight: 600 }}>Ipamorelin 5mg</span> expires in 12 days.</p>
+                  <button style={{ fontSize: '0.75rem', color: '#4f46e5', fontWeight: 500, marginTop: '6px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Renew Now</button>
                 </div>
               </div>
-              <div className="p-3 flex items-start gap-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
-                <div className="bg-amber-100 p-1.5 rounded-md mt-0.5"><FileWarning className="w-4 h-4 text-amber-600" /></div>
+              <div style={{ padding: '12px', display: 'flex', alignItems: 'flex-start', gap: '12px', borderRadius: '8px', cursor: 'pointer' }}>
+                <div style={{ backgroundColor: '#fef3c7', padding: '6px', borderRadius: '6px', marginTop: '2px' }}><FileWarning size={16} color="#d97706" /></div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-900">Missing GMP Certificate</h4>
-                  <p className="text-xs text-gray-500 mt-0.5"><span className="font-semibold">BioPeptide Labs</span> is missing current GMP.</p>
-                  <button className="text-xs text-indigo-600 font-medium mt-1.5">Request Document</button>
+                  <h4 style={{ fontSize: '0.875rem', fontWeight: 500, color: '#111827', margin: 0 }}>Missing GMP Certificate</h4>
+                  <p style={{ fontSize: '0.75rem', color: '#6b7280', margin: '2px 0 0 0' }}><span style={{ fontWeight: 600 }}>BioPeptide Labs</span> is missing current GMP.</p>
+                  <button style={{ fontSize: '0.75rem', color: '#4f46e5', fontWeight: 500, marginTop: '6px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Request Document</button>
                 </div>
               </div>
-              <div className="p-3 flex items-start gap-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
-                <div className="bg-rose-100 p-1.5 rounded-md mt-0.5"><AlertCircle className="w-4 h-4 text-rose-600" /></div>
+              <div style={{ padding: '12px', display: 'flex', alignItems: 'flex-start', gap: '12px', borderRadius: '8px', cursor: 'pointer' }}>
+                <div style={{ backgroundColor: '#ffe4e6', padding: '6px', borderRadius: '6px', marginTop: '2px' }}><AlertCircle size={16} color="#e11d48" /></div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-900">Missing COA (Batch #492)</h4>
-                  <p className="text-xs text-gray-500 mt-0.5"><span className="font-semibold">TB-500 10mg</span> shipment arrived without COA.</p>
-                  <button className="text-xs text-indigo-600 font-medium mt-1.5">Resolve Issue</button>
+                  <h4 style={{ fontSize: '0.875rem', fontWeight: 500, color: '#111827', margin: 0 }}>Missing COA (Batch #492)</h4>
+                  <p style={{ fontSize: '0.75rem', color: '#6b7280', margin: '2px 0 0 0' }}><span style={{ fontWeight: 600 }}>TB-500 10mg</span> shipment arrived without COA.</p>
+                  <button style={{ fontSize: '0.75rem', color: '#4f46e5', fontWeight: 500, marginTop: '6px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Resolve Issue</button>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Compliance Calendar */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
-              <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-indigo-500" />
+          <div style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', overflow: 'hidden' }}>
+            <div style={{ padding: '16px', borderBottom: '1px solid #e5e7eb', backgroundColor: '#f9fafb', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h3 style={{ fontWeight: 600, color: '#111827', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                <Calendar size={20} color="#6366f1" />
                 Compliance Calendar
               </h3>
             </div>
-            <div className="p-4 space-y-4">
-              <div className="relative pl-4 border-l-2 border-amber-400">
-                <div className="absolute -left-1.5 top-1.5 w-3 h-3 bg-white border-2 border-amber-400 rounded-full"></div>
-                <div className="text-xs text-gray-500 font-medium mb-0.5">Next Week • Jun 18</div>
-                <div className="text-sm font-medium text-gray-900">EuroPeptides GMP Renewal</div>
-                <div className="text-xs text-gray-500 mt-1">Supplier facility certification renewal</div>
+            <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ position: 'relative', paddingLeft: '16px', borderLeft: '2px solid #fbbf24' }}>
+                <div style={{ position: 'absolute', left: '-6px', top: '6px', width: '10px', height: '10px', backgroundColor: '#fff', border: '2px solid #fbbf24', borderRadius: '50%' }}></div>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280', fontWeight: 500, marginBottom: '2px' }}>Next Week • Jun 18</div>
+                <div style={{ fontSize: '0.875rem', fontWeight: 500, color: '#111827' }}>EuroPeptides GMP Renewal</div>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '4px' }}>Supplier facility certification renewal</div>
               </div>
-              <div className="relative pl-4 border-l-2 border-rose-400">
-                <div className="absolute -left-1.5 top-1.5 w-3 h-3 bg-white border-2 border-rose-400 rounded-full"></div>
-                <div className="text-xs text-gray-500 font-medium mb-0.5">In 2 Weeks • Jun 25</div>
-                <div className="text-sm font-medium text-gray-900">Ipamorelin Registration Expiry</div>
-                <div className="text-xs text-gray-500 mt-1">Requires updated stability data submission</div>
+              <div style={{ position: 'relative', paddingLeft: '16px', borderLeft: '2px solid #fb7185' }}>
+                <div style={{ position: 'absolute', left: '-6px', top: '6px', width: '10px', height: '10px', backgroundColor: '#fff', border: '2px solid #fb7185', borderRadius: '50%' }}></div>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280', fontWeight: 500, marginBottom: '2px' }}>In 2 Weeks • Jun 25</div>
+                <div style={{ fontSize: '0.875rem', fontWeight: 500, color: '#111827' }}>Ipamorelin Registration Expiry</div>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '4px' }}>Requires updated stability data submission</div>
               </div>
-              <div className="relative pl-4 border-l-2 border-gray-300">
-                <div className="absolute -left-1.5 top-1.5 w-3 h-3 bg-white border-2 border-gray-300 rounded-full"></div>
-                <div className="text-xs text-gray-500 font-medium mb-0.5">Next Month • Jul 12</div>
-                <div className="text-sm font-medium text-gray-900">Q3 Internal Audit</div>
-                <div className="text-xs text-gray-500 mt-1">Quarterly compliance document review</div>
+              <div style={{ position: 'relative', paddingLeft: '16px', borderLeft: '2px solid #d1d5db' }}>
+                <div style={{ position: 'absolute', left: '-6px', top: '6px', width: '10px', height: '10px', backgroundColor: '#fff', border: '2px solid #d1d5db', borderRadius: '50%' }}></div>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280', fontWeight: 500, marginBottom: '2px' }}>Next Month • Jul 12</div>
+                <div style={{ fontSize: '0.875rem', fontWeight: 500, color: '#111827' }}>Q3 Internal Audit</div>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '4px' }}>Quarterly compliance document review</div>
               </div>
             </div>
-            <div className="p-3 border-t border-gray-200 bg-gray-50 text-center">
-              <button className="text-sm text-gray-600 hover:text-gray-900 font-medium inline-flex items-center">
-                Open full calendar <Calendar className="w-4 h-4 ml-1.5" />
+            <div style={{ padding: '12px', borderTop: '1px solid #e5e7eb', backgroundColor: '#f9fafb', textAlign: 'center' }}>
+              <button style={{ fontSize: '0.875rem', color: '#4b5563', fontWeight: 500, display: 'inline-flex', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer' }}>
+                Open full calendar <Calendar size={16} style={{ marginLeft: '6px' }} />
               </button>
             </div>
           </div>

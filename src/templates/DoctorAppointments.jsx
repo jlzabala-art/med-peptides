@@ -21,9 +21,10 @@ export default function DoctorAppointments() {
 
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
     const [loading, setLoading] = useState(true);
-    const [viewMode, setViewMode] = useState(window.innerWidth < 1024 ? 'Day' : 'Week'); // Day, Week, Month, Agenda
+    const [viewMode, setViewMode] = useState('Day'); // Default to Day view
     const [currentDate, setCurrentDate] = useState(new Date());
     const [calendarExpanded, setCalendarExpanded] = useState(false); // For mobile
+    const [activeFilter, setActiveFilter] = useState(null); // 'Prescription', 'Follow-Up', 'Genetic Test', 'Consultation'
 
     // Data
     const [events, setEvents] = useState([]);
@@ -128,7 +129,7 @@ export default function DoctorAppointments() {
     // Subcomponents
     const renderKPIs = () => (
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
-            <div style={styles.kpiCard} onClick={() => toast("Filtered by Prescriptions")}>
+            <div style={{...styles.kpiCard, border: activeFilter === 'Prescription' ? '2px solid #0284c7' : styles.kpiCard.border}} onClick={() => setActiveFilter(activeFilter === 'Prescription' ? null : 'Prescription')}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{...styles.kpiIconBox, background: '#e0f2fe', color: '#0284c7'}}><Pill size={20} /></div>
                     <div>
@@ -137,7 +138,7 @@ export default function DoctorAppointments() {
                     </div>
                 </div>
             </div>
-            <div style={styles.kpiCard} onClick={() => toast("Filtered by Follow-Ups")}>
+            <div style={{...styles.kpiCard, border: activeFilter === 'Follow-Up' ? '2px solid #d97706' : styles.kpiCard.border}} onClick={() => setActiveFilter(activeFilter === 'Follow-Up' ? null : 'Follow-Up')}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{...styles.kpiIconBox, background: '#fef3c7', color: '#d97706'}}><Clock size={20} /></div>
                     <div>
@@ -146,7 +147,7 @@ export default function DoctorAppointments() {
                     </div>
                 </div>
             </div>
-            <div style={styles.kpiCard} onClick={() => toast("Filtered by Tests")}>
+            <div style={{...styles.kpiCard, border: activeFilter === 'Genetic Test' ? '2px solid #db2777' : styles.kpiCard.border}} onClick={() => setActiveFilter(activeFilter === 'Genetic Test' ? null : 'Genetic Test')}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{...styles.kpiIconBox, background: '#fce7f3', color: '#db2777'}}><Activity size={20} /></div>
                     <div>
@@ -155,7 +156,7 @@ export default function DoctorAppointments() {
                     </div>
                 </div>
             </div>
-            <div style={styles.kpiCard} onClick={() => toast("Filtered by Consultations")}>
+            <div style={{...styles.kpiCard, border: activeFilter === 'Consultation' ? '2px solid #059669' : styles.kpiCard.border}} onClick={() => setActiveFilter(activeFilter === 'Consultation' ? null : 'Consultation')}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{...styles.kpiIconBox, background: '#d1fae5', color: '#059669'}}><Users size={20} /></div>
                     <div>
@@ -166,6 +167,8 @@ export default function DoctorAppointments() {
             </div>
         </div>
     );
+    
+    const filteredEvents = activeFilter ? events.filter(e => e.type === activeFilter) : events;
 
     const renderCalendar = () => (
         <div style={{ ...styles.card, flex: isMobile ? 'none' : '0 0 65%' }}>
@@ -193,7 +196,7 @@ export default function DoctorAppointments() {
             <div style={{ padding: '16px', overflowX: 'auto' }}>
                 {viewMode === 'Agenda' ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {events.map((ev, eIdx) => (
+                        {filteredEvents.map((ev, eIdx) => (
                             <div key={eIdx} style={{ background: `${ev.color}10`, borderLeft: `4px solid ${ev.color}`, padding: '12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <div>
                                     <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '14px' }}>{ev.title}</div>
@@ -226,7 +229,7 @@ export default function DoctorAppointments() {
                                 </div>
                                 
                                 {/* Plot events for current day */}
-                                {(viewMode === 'Day' || idx === 2) && events.map((ev, eIdx) => (
+                                {(viewMode === 'Day' || idx === 2) && filteredEvents.map((ev, eIdx) => (
                                     <div key={eIdx} style={{ background: `${ev.color}15`, borderLeft: `3px solid ${ev.color}`, padding: '8px', borderRadius: '4px', marginBottom: '8px', fontSize: '11px', cursor: 'pointer', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
                                         <div style={{ fontWeight: 700, color: '#0f172a' }}>{ev.title}</div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
@@ -270,7 +273,7 @@ export default function DoctorAppointments() {
                 <h3 style={styles.cardTitle}>Today's Agenda</h3>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {events.slice(0,4).map((ev, i) => (
+                {filteredEvents.slice(0,4).map((ev, i) => (
                     <div key={i} style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                         <div style={{ width: 8, height: 8, borderRadius: '50%', background: ev.color, marginTop: '6px' }} />
                         <div style={{ flex: 1 }}>
