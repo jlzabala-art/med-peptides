@@ -27,7 +27,9 @@ export default function CatalogSmartSearch({
   products = [],
   activeWorkspace = 'products',
   advancedFilters = {},
-  onUpdateAdvancedFilter
+  onUpdateAdvancedFilter,
+  activeQuickFilters = [],
+  onToggleQuickFilter
 }) {
   const placeholders = [
     "Ask Atlas: 'Compare suppliers for BPC-157'...",
@@ -158,6 +160,47 @@ export default function CatalogSmartSearch({
             <Filter size={18} color="var(--color-primary, #6366f1)" /> 
             Filters
           </button>
+
+          <div style={{ width: '1px', height: '24px', background: 'rgba(226, 232, 240, 0.8)', margin: '0 0.25rem', alignSelf: 'center' }}></div>
+
+          {[
+            { id: 'missing_coa', label: 'Missing COA' },
+            { id: 'single_source', label: 'Single Source' },
+            { id: 'out_of_stock', label: 'Out of Stock' },
+            { id: 'low_health', label: 'Low Health' }
+          ].map(qf => {
+            const isActive = activeQuickFilters.includes(qf.id);
+            return (
+              <button
+                key={qf.id}
+                onClick={() => onToggleQuickFilter && onToggleQuickFilter(qf.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '0.4rem 1rem',
+                  background: isActive ? 'var(--color-primary, #6366f1)' : '#ffffff',
+                  border: `1px solid ${isActive ? 'var(--color-primary, #6366f1)' : 'rgba(226, 232, 240, 0.8)'}`,
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  fontWeight: 500,
+                  fontSize: '0.85rem',
+                  color: isActive ? '#ffffff' : 'var(--text-main, #1e293b)',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.2s ease',
+                  boxShadow: isActive ? '0 2px 8px rgba(99,102,241, 0.25)' : 'none'
+                }}
+                onMouseOver={(e) => {
+                  if (!isActive) e.currentTarget.style.background = '#f8fafc';
+                }}
+                onMouseOut={(e) => {
+                  if (!isActive) e.currentTarget.style.background = '#ffffff';
+                }}
+              >
+                {qf.label}
+              </button>
+            );
+          })}
+
         </div>
       </div>
 

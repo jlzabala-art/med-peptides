@@ -1,33 +1,30 @@
 import Box from "lucide-react/dist/esm/icons/box";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Building2 from "lucide-react/dist/esm/icons/building-2";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import FileWarning from "lucide-react/dist/esm/icons/file-warning";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import Link from "lucide-react/dist/esm/icons/link";
+import Activity from "lucide-react/dist/esm/icons/activity";
 import React, { useMemo } from 'react';
 
-
-
-
-
-
-
-
-export default function CatalogKPIHeader({ products, onFilterSelect }) {
+export default function CatalogKPIHeader({ products, activeFilters = [], onFilterSelect }) {
   const kpis = useMemo(() => {
-    let active = 0;
-    const suppliers = new Set();
-    let regulatoryRisks = 0;
-    let missingData = 0;
-    let lowStock = 0;
+    let missingCoa = 0;
+    let missingSupplier = 0;
+    let regulatoryRisk = 0;
+    let singleSource = 0;
+    let lowHealth = 0;
 
+    // We can group by parent product to determine single source if products represent variants.
+    // Assuming products here is the main array.
     products.forEach(p => {
-      if (p.isActive !== false) active++;
-      if (p.supplier) suppliers.add(p.supplier);
-      if (p.registrationStatus !== 'Registered') regulatoryRisks++;
-      if (!p.sku || !p.supplier || !p.category) missingData++;
-      if (p.stock < 20) lowStock++;
+      // Logic from useCatalogData: COA might be 'Missing' if we derive it there.
+      // But here p is the raw product. Let's use simple heuristic based on the properties.
+      if (!p.hasCoa) missingCoa++;
+      if (!p.supplier) missingSupplier++;
+      if (p.registrationStatus !== 'Registered') regulatoryRisk++;
+      // Single source: if there's only one supplier for this sku/name... we just mock it for now
+      if (p.suppliersCount === 1 || !p.suppliersCount) singleSource++;
+      if ((p.healthScore || 100) < 70) lowHealth++;
     });
 
     return [
@@ -40,36 +37,44 @@ export default function CatalogKPIHeader({ products, onFilterSelect }) {
         bg: 'var(--color-primary-light)',
       },
       {
-        id: 'active',
-        label: 'Active Items',
-        value: active,
-        icon: CheckCircle,
-        color: '#16a34a',
-        bg: '#dcfce7',
-      },
-      {
-        id: 'suppliers',
-        label: 'Suppliers',
-        value: suppliers.size,
-        icon: Building2,
-        color: '#8b5cf6',
-        bg: '#ede9fe',
-      },
-      {
-        id: 'regulatory',
-        label: 'Regulatory Risks',
-        value: regulatoryRisks,
-        icon: AlertTriangle,
+        id: 'missing_coa',
+        label: 'Missing COA',
+        value: missingCoa,
+        icon: FileWarning,
         color: '#f59e0b',
         bg: '#fef3c7',
       },
       {
-        id: 'missing_data',
-        label: 'Missing Data',
-        value: missingData,
-        icon: FileWarning,
+        id: 'missing_supplier',
+        label: 'Missing Supplier',
+        value: missingSupplier,
+        icon: AlertCircle,
         color: '#ef4444',
         bg: '#fee2e2',
+      },
+      {
+        id: 'regulatory_risk',
+        label: 'Regulatory Risk',
+        value: regulatoryRisk,
+        icon: ShieldAlert,
+        color: '#8b5cf6',
+        bg: '#ede9fe',
+      },
+      {
+        id: 'single_source',
+        label: 'Single Source',
+        value: singleSource,
+        icon: Link,
+        color: '#0ea5e9',
+        bg: '#e0f2fe',
+      },
+      {
+        id: 'low_health',
+        label: 'Low Health',
+        value: lowHealth,
+        icon: Activity,
+        color: '#ec4899',
+        bg: '#fce7f3',
       }
     ];
   }, [products]);
@@ -81,7 +86,7 @@ export default function CatalogKPIHeader({ products, onFilterSelect }) {
           display: flex;
           overflow-x: auto;
           gap: 1rem;
-          margin-bottom: 1.5rem;
+          margin-bottom: 0;
           padding-bottom: 0.5rem;
           scroll-snap-type: x mandatory;
           -webkit-overflow-scrolling: touch;
@@ -103,62 +108,64 @@ export default function CatalogKPIHeader({ products, onFilterSelect }) {
         }
         @media (min-width: 1024px) {
           .kpi-container {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            overflow: hidden;
+            display: flex;
+            overflow-x: auto;
             scroll-snap-type: none;
-            gap: 1rem;
+            gap: 0.5rem;
           }
           .kpi-card {
-            flex: 1;
-            min-width: 0;
+            flex: 0 0 auto;
           }
         }
       `}</style>
       <div className="kpi-container">
-        {kpis.map(kpi => (
-          <div
-            key={kpi.id}
-            className="kpi-card"
-            onClick={() => onFilterSelect(kpi.id)}
-          style={{
-            backgroundColor: 'white',
-            padding: '1rem',
-            borderRadius: '12px',
-            border: '1px solid var(--border)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-            cursor: 'pointer',
-            boxShadow: 'var(--shadow-sm)',
-            transition: 'transform 0.2s, box-shadow 0.2s'
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.transform = 'none';
-            e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
-          }}
-        >
-          <div style={{
-            backgroundColor: kpi.bg,
-            color: kpi.color,
-            padding: '10px',
-            borderRadius: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <kpi.icon size={20} />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{kpi.label}</span>
-            <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>{kpi.value}</span>
-          </div>
-        </div>
-      ))}
+        {kpis.map(kpi => {
+          const isActive = activeFilters.some(f => f.id === kpi.id);
+          return (
+            <div
+              key={kpi.id}
+              className="kpi-card"
+              onClick={() => onFilterSelect(kpi.id)}
+              style={{
+                backgroundColor: isActive ? kpi.bg : 'var(--color-bg-surface, #ffffff)',
+                padding: '0.4rem 0.8rem',
+                borderRadius: '20px',
+                border: `1px solid ${isActive ? kpi.color : 'var(--color-border, #e2e8f0)'}`,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                cursor: 'pointer',
+                boxShadow: isActive ? `0 0 0 1px ${kpi.color}33` : 'none',
+                transition: 'all 0.2s ease',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={e => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = 'var(--color-bg-hover, #f8fafc)';
+                  e.currentTarget.style.borderColor = 'var(--color-border-hover, #cbd5e1)';
+                }
+              }}
+              onMouseLeave={e => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = 'var(--color-bg-surface, #ffffff)';
+                  e.currentTarget.style.borderColor = 'var(--color-border, #e2e8f0)';
+                }
+              }}
+            >
+              <div style={{ color: isActive ? kpi.color : 'var(--text-muted, #64748b)', display: 'flex' }}>
+                <kpi.icon size={14} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: isActive ? kpi.color : 'var(--text-main, #1e293b)' }}>
+                  {kpi.label}
+                </span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: isActive ? kpi.color : 'var(--text-main, #1e293b)', background: isActive ? 'rgba(255,255,255,0.5)' : 'var(--color-bg-hover, #f1f5f9)', padding: '0.1rem 0.4rem', borderRadius: '10px' }}>
+                  {kpi.value}
+                </span>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </>
   );

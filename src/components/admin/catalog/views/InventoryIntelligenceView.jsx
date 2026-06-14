@@ -598,58 +598,43 @@ export default function InventoryIntelligenceView({ variants = [] }) {
           <AlertCircle size={24} color="#0f172a" /> Intelligence Alerts
         </h2>
         <div className="carousel-container">
-          <div className="glass-card alert-card critical">
-            <AlertTriangle size={28} color="#ef4444" style={{ flexShrink: 0 }} />
-            <div>
-              <h4 style={{ margin: '0 0 0.5rem 0', color: '#7f1d1d', fontSize: '1.1rem' }}>
+          <div className="glass-card alert-card critical" style={{ padding: '1rem', alignItems: 'center' }}>
+            <AlertTriangle size={24} color="#ef4444" style={{ flexShrink: 0 }} />
+            <div style={{ flex: 1 }}>
+              <h4 style={{ margin: '0 0 0.25rem 0', color: '#7f1d1d', fontSize: '1rem' }}>
                 {outOfStockCount} Products Out of Stock
               </h4>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: '#991b1b' }}>
-                Revenue is being lost. Immediate replenishment required for top sellers like TB-500.
+              <p style={{ margin: 0, fontSize: '0.8rem', color: '#991b1b' }}>
+                Immediate replenishment required for top sellers.
               </p>
-              <button
-                className="action-btn outline"
-                style={{ marginTop: '1rem', background: 'white' }}
-              >
-                View Stock-outs
-              </button>
             </div>
+            <button className="action-btn outline" style={{ background: 'white', padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>View</button>
           </div>
 
-          <div className="glass-card alert-card warning">
-            <TrendingDown size={28} color="#f59e0b" style={{ flexShrink: 0 }} />
-            <div>
-              <h4 style={{ margin: '0 0 0.5rem 0', color: '#92400e', fontSize: '1.1rem' }}>
+          <div className="glass-card alert-card warning" style={{ padding: '1rem', alignItems: 'center' }}>
+            <TrendingDown size={24} color="#f59e0b" style={{ flexShrink: 0 }} />
+            <div style={{ flex: 1 }}>
+              <h4 style={{ margin: '0 0 0.25rem 0', color: '#92400e', fontSize: '1rem' }}>
                 {lowStockCount} Products Below Threshold
               </h4>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: '#b45309' }}>
-                These items will deplete within 14 days based on current sales velocity.
+              <p style={{ margin: 0, fontSize: '0.8rem', color: '#b45309' }}>
+                Depleting within 14 days based on current velocity.
               </p>
-              <button
-                className="action-btn outline"
-                style={{ marginTop: '1rem', background: 'white' }}
-              >
-                Review Reorders
-              </button>
             </div>
+            <button className="action-btn outline" style={{ background: 'white', padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Review</button>
           </div>
 
-          <div className="glass-card alert-card info">
-            <ArchiveX size={28} color="#3b82f6" style={{ flexShrink: 0 }} />
-            <div>
-              <h4 style={{ margin: '0 0 0.5rem 0', color: '#1e3a8a', fontSize: '1.1rem' }}>
+          <div className="glass-card alert-card info" style={{ padding: '1rem', alignItems: 'center' }}>
+            <ArchiveX size={24} color="#3b82f6" style={{ flexShrink: 0 }} />
+            <div style={{ flex: 1 }}>
+              <h4 style={{ margin: '0 0 0.25rem 0', color: '#1e3a8a', fontSize: '1rem' }}>
                 {deadStockCount} Slow Moving Assets
               </h4>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: '#1d4ed8' }}>
-                Capital is locked in inventory that hasn't moved in 120 days. Consider promotions.
+              <p style={{ margin: 0, fontSize: '0.8rem', color: '#1d4ed8' }}>
+                Capital is locked. Consider promotions.
               </p>
-              <button
-                className="action-btn outline"
-                style={{ marginTop: '1rem', background: 'white' }}
-              >
-                Analyze Dead Stock
-              </button>
             </div>
+            <button className="action-btn outline" style={{ background: 'white', padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Analyze</button>
           </div>
         </div>
       </div>
@@ -665,42 +650,59 @@ export default function InventoryIntelligenceView({ variants = [] }) {
             <thead>
               <tr>
                 <th>Product</th>
-                <th>Supplier</th>
-                <th>Current Stock</th>
-                <th>MOQ</th>
-                <th>Lead Time</th>
+                <th>Supplier / Stock</th>
+                <th>Forecast & Days Left</th>
+                <th>Risk & AI Conf.</th>
                 <th>Recommended Qty</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {reorderRecommendations.map((item) => (
-                <tr key={item.id}>
-                  <td style={{ fontWeight: 600, color: '#0f172a' }}>{item.name}</td>
-                  <td style={{ color: '#475569' }}>{item.supplier}</td>
-                  <td>
-                    <span className={`status-badge ${item.stock === 0 ? 'critical' : 'warning'}`}>
-                      {item.stock} / {item.reorderPoint}
-                    </span>
-                  </td>
-                  <td style={{ color: '#475569' }}>{item.moq}</td>
-                  <td style={{ color: '#475569' }}>{item.leadTime}</td>
-                  <td style={{ fontWeight: 700, color: '#0f172a' }}>
-                    {Math.max(item.moq, item.reorderPoint * 2 - item.stock)}
-                  </td>
-                  <td>
-                    <div className="action-group">
-                      <button className="action-btn primary">
-                        <Send size={14} /> Create PO
-                      </button>
-                      <button className="action-btn outline">RFQ</button>
-                      <button className="action-btn ai">
-                        <Sparkles size={14} /> Ask Atlas
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {reorderRecommendations.map((item) => {
+                const daysLeft = item.stock === 0 ? 0 : Math.max(1, Math.floor(item.stock / (item.price > 100 ? 2 : 5)));
+                const confidence = daysLeft < 7 ? '95%' : '82%';
+                return (
+                  <tr key={item.id}>
+                    <td style={{ fontWeight: 600, color: '#0f172a' }}>{item.name}</td>
+                    <td>
+                      <div style={{ color: '#475569', fontSize: '0.85rem' }}>{item.supplier}</div>
+                      <span className={`status-badge ${item.stock === 0 ? 'critical' : 'warning'}`} style={{ marginTop: '4px' }}>
+                        {item.stock} / {item.reorderPoint}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '1.25rem', fontWeight: 800 }}>{daysLeft}</span>
+                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>days<br/>remaining</span>
+                      </div>
+                      <div className="forecast-bar-container" style={{ width: '80px', height: '4px', marginTop: '4px' }}>
+                        <div className="forecast-bar" style={{ width: `${Math.min(100, Math.max(5, (daysLeft/30)*100))}%`, background: daysLeft < 7 ? '#ef4444' : daysLeft < 14 ? '#f59e0b' : '#22c55e' }} />
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: daysLeft < 7 ? '#ef4444' : '#f59e0b' }}>
+                          {daysLeft === 0 ? 'Critical (Stock-out)' : 'High Risk'}
+                        </span>
+                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}><Sparkles size={10} color="#8b5cf6" /> {confidence} AI Confidence</span>
+                      </div>
+                    </td>
+                    <td style={{ fontWeight: 700, color: '#0f172a', fontSize: '1.1rem' }}>
+                      {Math.max(item.moq, item.reorderPoint * 2 - item.stock)}
+                    </td>
+                    <td>
+                      <div className="action-group">
+                        <button className="action-btn primary" style={{ padding: '0.4rem 0.8rem' }}>
+                          <Send size={14} /> PO
+                        </button>
+                        <button className="action-btn ai" style={{ padding: '0.4rem 0.8rem' }}>
+                          <Sparkles size={14} /> AI
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
               {reorderRecommendations.length === 0 && (
                 <tr>
                   <td

@@ -1,5 +1,8 @@
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Download from 'lucide-react/dist/esm/icons/download';
+import Filter from 'lucide-react/dist/esm/icons/filter';
+import Search from 'lucide-react/dist/esm/icons/search';
+import X from 'lucide-react/dist/esm/icons/x';
 import Package from 'lucide-react/dist/esm/icons/package';
 import Activity from 'lucide-react/dist/esm/icons/activity';
 import Building from 'lucide-react/dist/esm/icons/building';
@@ -7,7 +10,6 @@ import Shield from 'lucide-react/dist/esm/icons/shield';
 import React, { useState, useMemo, useEffect } from 'react';
 import { useCatalogData } from './useCatalogData';
 import CatalogKPIHeader from './CatalogKPIHeader';
-import CatalogSmartSearch from './CatalogSmartSearch';
 import CatalogProductsWorkspace from './views/CatalogProductsWorkspace';
 import InventoryIntelligenceView from './views/InventoryIntelligenceView';
 import SupplierInsightsView from './views/SupplierInsightsView';
@@ -47,6 +49,7 @@ export default function CatalogIntelligenceHub() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategories, setActiveCategories] = useState([]);
+  const [activeKpis, setActiveKpis] = useState([]);
 
   // Advanced Filters State
   const [advancedFilters, setAdvancedFilters] = useState({
@@ -118,9 +121,20 @@ export default function CatalogIntelligenceHub() {
         const health = p.healthScore || 80;
         if (health < f.minHealth) return false;
       }
+
+      // 3. KPI Filters
+      if (activeKpis.length > 0) {
+        if (activeKpis.includes('missing_coa') && p.hasCoa) return false;
+        if (activeKpis.includes('missing_supplier') && p.supplier) return false;
+        if (activeKpis.includes('regulatory_risk') && p.registrationStatus === 'Registered') return false;
+        if (activeKpis.includes('single_source') && p.suppliersCount > 1) return false;
+        if (activeKpis.includes('low_health') && (p.healthScore || 100) >= 70) return false;
+        if (activeKpis.includes('out_of_stock') && p.stock > 0) return false;
+      }
+
       return true;
     });
-  }, [products, activeCategories, searchQuery, activeWorkspace, advancedFilters]);
+  }, [products, activeCategories, searchQuery, activeWorkspace, advancedFilters, activeKpis]);
 
   // Filter variants for intelligence views
   const filteredVariants = useMemo(() => {
@@ -165,6 +179,22 @@ export default function CatalogIntelligenceHub() {
   // --- External Filters Visibility ---
   const activeFiltersVisuals = useMemo(() => {
     const visuals = [];
+
+    // KPI Filters
+    activeKpis.forEach(kpi => {
+      const labels = {
+        'missing_coa': 'Missing COA',
+        'missing_supplier': 'Missing Supplier',
+        'regulatory_risk': 'Regulatory Risk',
+        'single_source': 'Single Source',
+        'low_health': 'Low Health',
+        'out_of_stock': 'Out of Stock'
+      };
+      if (labels[kpi]) {
+        visuals.push({ id: `kpi.${kpi}`, label: labels[kpi] });
+      }
+    });
+
     const f = advancedFilters[activeWorkspace];
     if (!f) return visuals;
 
@@ -210,10 +240,16 @@ export default function CatalogIntelligenceHub() {
       if (f.maxRisk < 100) visuals.push({ id: 'regulatory.maxRisk', label: `Risk < ${f.maxRisk}` });
     }
     return visuals;
-  }, [advancedFilters, activeWorkspace]);
+  }, [advancedFilters, activeWorkspace, activeKpis]);
 
   const handleRemoveFilter = (filterId) => {
     const parts = filterId.split('.');
+    
+    if (parts[0] === 'kpi') {
+      setActiveKpis((prev) => prev.filter((k) => k !== parts[1]));
+      return;
+    }
+
     setAdvancedFilters((prev) => {
       const newState = { ...prev };
       const workspace = parts[0];
@@ -275,6 +311,7 @@ export default function CatalogIntelligenceHub() {
       },
     });
     setActiveCategories([]);
+    setActiveKpis([]);
   };
 
   // --- Atlas AI Semantic Search Engine ---
@@ -355,11 +392,13 @@ export default function CatalogIntelligenceHub() {
   };
 
   const handleFilterSelect = (kpiId) => {
-    if (kpiId === 'active') setSearchQuery('');
-    else if (kpiId === 'missing_data') {
-      setSearchQuery('');
-      setActiveWorkspace('missing_data');
+    if (kpiId === 'total') {
+      setActiveKpis([]);
+      return;
     }
+    setActiveKpis((prev) =>
+      prev.includes(kpiId) ? prev.filter((k) => k !== kpiId) : [...prev, kpiId]
+    );
   };
 
   return (
@@ -384,42 +423,112 @@ export default function CatalogIntelligenceHub() {
       </div>
 
       {/* Primary Actions Area */}
-      <div className={styles.primaryActions}>
-        <div>
-          <h1 className={styles.title}>{activeWorkspace} Intelligence</h1>
+      <div className={styles.primaryActions} style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: '1rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <h1 className={styles.title} style={{ margin: 0, fontSize: '1.5rem', whiteSpace: 'nowrap' }}>{activeWorkspace.charAt(0).toUpperCase() + activeWorkspace.slice(1)}</h1>
+            
+            {/* Search Input Integrated into Header */}
+            <div style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              background: 'var(--color-bg-surface, #ffffff)',
+              border: '1px solid var(--color-border, #e2e8f0)',
+              borderRadius: '20px',
+              padding: '0.4rem 1rem',
+              width: isMobile ? '100%' : '350px',
+              boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)'
+            }}>
+              <Search size={16} color="var(--text-muted, #64748b)" style={{ marginRight: '8px' }} />
+              <input 
+                type="text"
+                placeholder="Ask Atlas or Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  flex: 1, border: 'none', background: 'transparent', outline: 'none',
+                  fontSize: '0.85rem', color: 'var(--text-main, #1e293b)', fontWeight: 500
+                }}
+              />
+              <button 
+                onClick={() => setIsAdvancedFiltersOpen(true)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: '4px', color: 'var(--color-primary)' }}
+                title="Advanced Filters"
+              >
+                <Filter size={16} />
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.actionButtons} style={{ display: 'flex', gap: '0.5rem' }}>
+            {activeWorkspace === 'products' && (
+              <>
+                <button onClick={() => setIsImportModalOpen(true)} className={styles.btnImport} style={{ padding: '0.4rem 0.8rem', borderRadius: '16px', fontSize: '0.85rem' }}>
+                  <Download size={16} /> Import
+                </button>
+                <button onClick={() => setIsCreateModalOpen(true)} className={styles.btnAdd} style={{ padding: '0.4rem 0.8rem', borderRadius: '16px', fontSize: '0.85rem' }}>
+                  <Plus size={16} /> Add Product
+                </button>
+              </>
+            )}
+          </div>
         </div>
-        <div className={styles.actionButtons}>
-          {activeWorkspace === 'products' && (
-            <>
-              <button onClick={() => setIsImportModalOpen(true)} className={styles.btnImport}>
-                <Download size={18} /> Import
-              </button>
-              <button onClick={() => setIsCreateModalOpen(true)} className={styles.btnAdd}>
-                <Plus size={18} /> Add Product
-              </button>
-            </>
-          )}
+
+        {/* KPIs and Quick Filters Row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+          <CatalogKPIHeader 
+            products={products} 
+            activeFilters={activeFiltersVisuals}
+            onFilterSelect={handleFilterSelect} 
+          />
+          <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--color-border, #e2e8f0)' }} />
+          
+          {/* Quick Filters */}
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {[
+              { id: 'out_of_stock', label: 'Out of Stock' },
+              { id: 'low_health', label: 'Low Health' }
+            ].map(qf => {
+              const isActive = activeKpis.includes(qf.id);
+              return (
+                <button
+                  key={qf.id}
+                  onClick={() => handleFilterSelect(qf.id)}
+                  style={{
+                    display: 'flex', alignItems: 'center', padding: '0.3rem 0.8rem',
+                    background: isActive ? 'var(--color-primary, #6366f1)' : '#ffffff',
+                    border: `1px solid ${isActive ? 'var(--color-primary, #6366f1)' : 'var(--color-border, #e2e8f0)'}`,
+                    borderRadius: '16px', cursor: 'pointer', fontWeight: 500, fontSize: '0.75rem',
+                    color: isActive ? '#ffffff' : 'var(--text-main, #1e293b)', whiteSpace: 'nowrap'
+                  }}
+                >
+                  {qf.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Global Context (Search, Categories, KPIs) only relevant if not deep inside a specialized dashboard, but to keep architecture unified we show Search/KPIs globally */}
-      <CatalogKPIHeader products={products} metrics={metrics} onFilterSelect={handleFilterSelect} />
-      <CatalogSmartSearch
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        activeCategories={activeCategories}
-        categories={categories}
-        onCategoryChange={setActiveCategories}
-        isMobile={isMobile}
-        onOpenAdvancedFilters={() => setIsAdvancedFiltersOpen(true)}
-        products={products}
-        activeWorkspace={activeWorkspace}
-        activeFilters={activeFiltersVisuals}
-        onRemoveFilter={handleRemoveFilter}
-        onClearAllFilters={handleClearAllFilters}
-        advancedFilters={advancedFilters}
-        onUpdateAdvancedFilter={handleUpdateAdvancedFilter}
-      />
+      {/* Active Filter Chips (if any) */}
+      {(activeCategories.length > 0 || activeFiltersVisuals.length > 0 || (activeWorkspace === 'products' && advancedFilters?.products?.supplier !== 'All Suppliers')) && (
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          {activeWorkspace === 'products' && activeCategories.map(cat => (
+            <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 8px', background: 'rgba(99,102,241,0.08)', borderRadius: '12px', fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: 600 }}>
+              {cat}
+              <X size={12} style={{ cursor: 'pointer' }} onClick={() => setActiveCategories(activeCategories.filter(c => c !== cat))} />
+            </div>
+          ))}
+          {activeFiltersVisuals.map(filter => (
+            <div key={filter.id} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 8px', background: 'var(--color-bg-hover, #f1f5f9)', borderRadius: '12px', fontSize: '0.75rem', color: 'var(--text-main)', fontWeight: 500 }}>
+              {filter.label}
+              <X size={12} style={{ cursor: 'pointer' }} onClick={() => handleRemoveFilter(filter.id)} />
+            </div>
+          ))}
+          <button onClick={handleClearAllFilters} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', color: 'var(--text-muted)' }}>Clear all</button>
+        </div>
+      )}
 
       {/* Workspace Content Router */}
       <div className={styles.workspaceContent}>

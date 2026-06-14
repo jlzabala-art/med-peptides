@@ -3,10 +3,8 @@ import Save from "lucide-react/dist/esm/icons/save";
 import Share2 from "lucide-react/dist/esm/icons/share-2";
 import Users from "lucide-react/dist/esm/icons/users";
 import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal";
-
-
-
-
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import React, { useState } from 'react';
 
 import RightWorkspacePanel from './RightWorkspacePanel';
 import toast from 'react-hot-toast';
@@ -205,190 +203,174 @@ export default function AdvancedFiltersDrawer({ isOpen, onClose, activeWorkspace
           background-position: right 1rem top 50%;
           background-size: 0.65rem auto;
         }
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        details[open] summary .accordion-icon { transform: rotate(180deg); }
+        .accordion-icon { transition: transform 0.3s ease; }
       `}</style>
-      <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '2.25rem' }}>
+      <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-        {activeWorkspace === 'products' && (
-          <>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Categories</label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto', paddingRight: '0.5rem', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '12px', padding: '0.85rem', background: 'rgba(255,255,255,0.7)' }}>
-                {CATEGORY_TREE.map(node => (
-                  <div key={node.id}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333', marginBottom: '0.5rem' }}>
-                      <input 
-                        type="checkbox" 
-                        className="glass-checkbox" 
-                        checked={activeCategories.includes(node.label)} 
-                        onChange={() => toggleCategory(node.label)} 
-                      /> 
-                      {node.label}
-                    </label>
-                    {node.children && node.children.length > 0 && (
-                      <div style={{ paddingLeft: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        {node.children.map(child => (
-                          <label key={child.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.9rem', cursor: 'pointer', color: '#555' }}>
-                            <input 
-                              type="checkbox" 
-                              className="glass-checkbox" 
-                              checked={activeCategories.includes(child.label)} 
-                              onChange={() => toggleCategory(child.label)} 
-                            /> 
-                            {child.label}
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+        {/* Product Section */}
+        <div style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(226, 232, 240, 0.8)', borderRadius: '16px', backdropFilter: 'blur(12px)', overflow: 'hidden' }}>
+          <details style={{ width: '100%' }}>
+            <summary style={{ padding: '1.25rem', fontWeight: 600, fontSize: '1rem', color: '#1e293b', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              Product Criteria
+              <ChevronDown size={20} className="accordion-icon" />
+            </summary>
+            <div style={{ padding: '0 1.25rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Categories</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto', paddingRight: '0.5rem', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '12px', padding: '0.85rem', background: 'rgba(255,255,255,0.7)' }}>
+                  {CATEGORY_TREE.map(node => (
+                    <div key={node.id}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333', marginBottom: '0.5rem' }}>
+                        <input type="checkbox" className="glass-checkbox" checked={activeCategories.includes(node.label)} onChange={() => toggleCategory(node.label)} /> 
+                        {node.label}
+                      </label>
+                      {node.children && node.children.length > 0 && (
+                        <div style={{ paddingLeft: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                          {node.children.map(child => (
+                            <label key={child.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.9rem', cursor: 'pointer', color: '#555' }}>
+                              <input type="checkbox" className="glass-checkbox" checked={activeCategories.includes(child.label)} onChange={() => toggleCategory(child.label)} /> 
+                              {child.label}
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Supplier</label>
-              <select className="glass-select" value={advancedFilters.products.supplier} onChange={(e) => updateFilter('products', 'supplier', e.target.value)}>
-                <option>All Suppliers</option>
-                <option>Atlas Bio Labs</option>
-                <option>Medipharm</option>
-              </select>
-            </div>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Health Score Range (Min)</label>
-              <input type="range" className="glass-range" min="0" max="100" value={advancedFilters.products.minHealth} onChange={(e) => updateFilter('products', 'minHealth', parseInt(e.target.value))} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#666', marginTop: '0.75rem', fontWeight: 500 }}>
-                <span>0</span>
-                <span style={{ fontWeight: 800, color: 'var(--color-primary)' }}>{advancedFilters.products.minHealth}</span>
-                <span>100</span>
-              </div>
-            </div>
-          </>
-        )}
 
-        {activeWorkspace === 'inventory' && (
-          <>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Stock Status</label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                  <input type="checkbox" className="glass-checkbox" checked={advancedFilters.inventory.stockStatus.inStock} onChange={(e) => updateFilter('inventory', 'stockStatus', e.target.checked, 'inStock')} /> In Stock
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                  <input type="checkbox" className="glass-checkbox" checked={advancedFilters.inventory.stockStatus.lowStock} onChange={(e) => updateFilter('inventory', 'stockStatus', e.target.checked, 'lowStock')} /> Low Stock
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                  <input type="checkbox" className="glass-checkbox" checked={advancedFilters.inventory.stockStatus.outOfStock} onChange={(e) => updateFilter('inventory', 'stockStatus', e.target.checked, 'outOfStock')} /> Out of Stock
-                </label>
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Stock Status</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
+                    <input type="checkbox" className="glass-checkbox" checked={advancedFilters.inventory.stockStatus.inStock} onChange={(e) => updateFilter('inventory', 'stockStatus', e.target.checked, 'inStock')} /> In Stock
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
+                    <input type="checkbox" className="glass-checkbox" checked={advancedFilters.inventory.stockStatus.lowStock} onChange={(e) => updateFilter('inventory', 'stockStatus', e.target.checked, 'lowStock')} /> Low Stock
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
+                    <input type="checkbox" className="glass-checkbox" checked={advancedFilters.inventory.stockStatus.outOfStock} onChange={(e) => updateFilter('inventory', 'stockStatus', e.target.checked, 'outOfStock')} /> Out of Stock
+                  </label>
+                </div>
               </div>
             </div>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Reorder Level (Max)</label>
-              <input type="range" className="glass-range" min="0" max="500" value={advancedFilters.inventory.maxReorder} onChange={(e) => updateFilter('inventory', 'maxReorder', parseInt(e.target.value))} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#666', marginTop: '0.75rem', fontWeight: 500 }}>
-                <span>0</span>
-                <span style={{ fontWeight: 800, color: 'var(--color-primary)' }}>{advancedFilters.inventory.maxReorder}</span>
-                <span>500</span>
-              </div>
-            </div>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Performance</label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                  <input type="checkbox" className="glass-checkbox" checked={advancedFilters.inventory.performance.fastMovers} onChange={(e) => updateFilter('inventory', 'performance', e.target.checked, 'fastMovers')} /> Fast Movers
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                  <input type="checkbox" className="glass-checkbox" checked={advancedFilters.inventory.performance.deadStock} onChange={(e) => updateFilter('inventory', 'performance', e.target.checked, 'deadStock')} /> Dead Stock
-                </label>
-              </div>
-            </div>
-          </>
-        )}
+          </details>
+        </div>
 
-        {activeWorkspace === 'suppliers' && (
-          <>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Supplier</label>
-              <select className="glass-select" value={advancedFilters.suppliers.supplier} onChange={(e) => updateFilter('suppliers', 'supplier', e.target.value)}>
-                <option>All Suppliers</option>
-                <option>Atlas Bio Labs</option>
-                <option>Medipharm</option>
-              </select>
-            </div>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Country</label>
-              <select className="glass-select" value={advancedFilters.suppliers.country} onChange={(e) => updateFilter('suppliers', 'country', e.target.value)}>
-                <option>All Countries</option>
-                <option>USA</option>
-                <option>China</option>
-                <option>India</option>
-                <option>Europe</option>
-              </select>
-            </div>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Performance Score (Min)</label>
-              <input type="range" className="glass-range" min="0" max="100" value={advancedFilters.suppliers.minPerformance} onChange={(e) => updateFilter('suppliers', 'minPerformance', parseInt(e.target.value))} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#666', marginTop: '0.75rem', fontWeight: 500 }}>
-                <span>0</span>
-                <span style={{ fontWeight: 800, color: 'var(--color-primary)' }}>{advancedFilters.suppliers.minPerformance}</span>
-                <span>100</span>
+        {/* Supplier Section */}
+        <div style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(226, 232, 240, 0.8)', borderRadius: '16px', backdropFilter: 'blur(12px)', overflow: 'hidden' }}>
+          <details style={{ width: '100%' }}>
+            <summary style={{ padding: '1.25rem', fontWeight: 600, fontSize: '1rem', color: '#1e293b', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              Supplier Network
+              <ChevronDown size={20} className="accordion-icon" />
+            </summary>
+            <div style={{ padding: '0 1.25rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Supplier</label>
+                <select className="glass-select" value={advancedFilters.suppliers.supplier} onChange={(e) => { updateFilter('suppliers', 'supplier', e.target.value); updateFilter('products', 'supplier', e.target.value); }}>
+                  <option>All Suppliers</option>
+                  <option>Atlas Bio Labs</option>
+                  <option>Medipharm</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Country</label>
+                <select className="glass-select" value={advancedFilters.suppliers.country} onChange={(e) => updateFilter('suppliers', 'country', e.target.value)}>
+                  <option>All Countries</option>
+                  <option>USA</option>
+                  <option>China</option>
+                  <option>India</option>
+                  <option>Europe</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Performance Score (Min)</label>
+                <input type="range" className="glass-range" min="0" max="100" value={advancedFilters.suppliers.minPerformance} onChange={(e) => updateFilter('suppliers', 'minPerformance', parseInt(e.target.value))} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#666', marginTop: '0.75rem', fontWeight: 500 }}>
+                  <span>0</span>
+                  <span style={{ fontWeight: 800, color: 'var(--color-primary)' }}>{advancedFilters.suppliers.minPerformance}</span>
+                  <span>100</span>
+                </div>
               </div>
             </div>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Risk Score (Max)</label>
-              <input type="range" className="glass-range" min="0" max="100" value={advancedFilters.suppliers.maxRisk} onChange={(e) => updateFilter('suppliers', 'maxRisk', parseInt(e.target.value))} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#666', marginTop: '0.75rem', fontWeight: 500 }}>
-                <span>0</span>
-                <span style={{ fontWeight: 800, color: 'var(--color-primary)' }}>{advancedFilters.suppliers.maxRisk}</span>
-                <span>100</span>
-              </div>
-            </div>
-          </>
-        )}
+          </details>
+        </div>
 
-        {activeWorkspace === 'regulatory' && (
-          <>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Registration Status</label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                  <input type="checkbox" className="glass-checkbox" checked={advancedFilters.regulatory.status.registered} onChange={(e) => updateFilter('regulatory', 'status', e.target.checked, 'registered')} /> Registered
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                  <input type="checkbox" className="glass-checkbox" checked={advancedFilters.regulatory.status.pending} onChange={(e) => updateFilter('regulatory', 'status', e.target.checked, 'pending')} /> Pending Registration
-                </label>
+        {/* Quality Section */}
+        <div style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(226, 232, 240, 0.8)', borderRadius: '16px', backdropFilter: 'blur(12px)', overflow: 'hidden' }}>
+          <details style={{ width: '100%' }}>
+            <summary style={{ padding: '1.25rem', fontWeight: 600, fontSize: '1rem', color: '#1e293b', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              Quality & Assurance
+              <ChevronDown size={20} className="accordion-icon" />
+            </summary>
+            <div style={{ padding: '0 1.25rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Health Score (Min)</label>
+                <input type="range" className="glass-range" min="0" max="100" value={advancedFilters.products.minHealth} onChange={(e) => updateFilter('products', 'minHealth', parseInt(e.target.value))} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#666', marginTop: '0.75rem', fontWeight: 500 }}>
+                  <span>0</span>
+                  <span style={{ fontWeight: 800, color: 'var(--color-primary)' }}>{advancedFilters.products.minHealth}</span>
+                  <span>100</span>
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Missing Documents</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
+                    <input type="checkbox" className="glass-checkbox" checked={advancedFilters.regulatory.documents.missingCOA} onChange={(e) => updateFilter('regulatory', 'documents', e.target.checked, 'missingCOA')} /> Missing COA
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
+                    <input type="checkbox" className="glass-checkbox" checked={advancedFilters.regulatory.documents.missingSDS} onChange={(e) => updateFilter('regulatory', 'documents', e.target.checked, 'missingSDS')} /> Missing SDS
+                  </label>
+                </div>
               </div>
             </div>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Document Issues</label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                  <input type="checkbox" className="glass-checkbox" checked={advancedFilters.regulatory.documents.missingCOA} onChange={(e) => updateFilter('regulatory', 'documents', e.target.checked, 'missingCOA')} /> Missing COA
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                  <input type="checkbox" className="glass-checkbox" checked={advancedFilters.regulatory.documents.missingSDS} onChange={(e) => updateFilter('regulatory', 'documents', e.target.checked, 'missingSDS')} /> Missing SDS
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                  <input type="checkbox" className="glass-checkbox" checked={advancedFilters.regulatory.documents.missingDocs} onChange={(e) => updateFilter('regulatory', 'documents', e.target.checked, 'missingDocs')} /> Missing Documents
-                </label>
+          </details>
+        </div>
+
+        {/* Regulatory Section */}
+        <div style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(226, 232, 240, 0.8)', borderRadius: '16px', backdropFilter: 'blur(12px)', overflow: 'hidden' }}>
+          <details style={{ width: '100%' }}>
+            <summary style={{ padding: '1.25rem', fontWeight: 600, fontSize: '1rem', color: '#1e293b', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              Regulatory Compliance
+              <ChevronDown size={20} className="accordion-icon" />
+            </summary>
+            <div style={{ padding: '0 1.25rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Registration Status</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
+                    <input type="checkbox" className="glass-checkbox" checked={advancedFilters.regulatory.status.registered} onChange={(e) => updateFilter('regulatory', 'status', e.target.checked, 'registered')} /> Registered
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
+                    <input type="checkbox" className="glass-checkbox" checked={advancedFilters.regulatory.status.pending} onChange={(e) => updateFilter('regulatory', 'status', e.target.checked, 'pending')} /> Pending
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Country</label>
+                <select className="glass-select" value={advancedFilters.regulatory.country} onChange={(e) => updateFilter('regulatory', 'country', e.target.value)}>
+                  <option>All Countries</option>
+                  <option>USA (FDA)</option>
+                  <option>Europe (EMA)</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Compliance Risk (Max)</label>
+                <input type="range" className="glass-range" min="0" max="100" value={advancedFilters.regulatory.maxRisk} onChange={(e) => updateFilter('regulatory', 'maxRisk', parseInt(e.target.value))} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#666', marginTop: '0.75rem', fontWeight: 500 }}>
+                  <span>0</span>
+                  <span style={{ fontWeight: 800, color: 'var(--color-primary)' }}>{advancedFilters.regulatory.maxRisk}</span>
+                  <span>100</span>
+                </div>
               </div>
             </div>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Country Registration</label>
-              <select className="glass-select" value={advancedFilters.regulatory.country} onChange={(e) => updateFilter('regulatory', 'country', e.target.value)}>
-                <option>All Countries</option>
-                <option>USA (FDA)</option>
-                <option>Europe (EMA)</option>
-              </select>
-            </div>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Compliance Risk (Max)</label>
-              <input type="range" className="glass-range" min="0" max="100" value={advancedFilters.regulatory.maxRisk} onChange={(e) => updateFilter('regulatory', 'maxRisk', parseInt(e.target.value))} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#666', marginTop: '0.75rem', fontWeight: 500 }}>
-                <span>0</span>
-                <span style={{ fontWeight: 800, color: 'var(--color-primary)' }}>{advancedFilters.regulatory.maxRisk}</span>
-                <span>100</span>
-              </div>
-            </div>
-          </>
-        )}
+          </details>
+        </div>
+
       </div>
     </RightWorkspacePanel>
   );

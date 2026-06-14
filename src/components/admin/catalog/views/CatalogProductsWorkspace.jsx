@@ -10,12 +10,13 @@ import LayoutTemplate from 'lucide-react/dist/esm/icons/layout-template';
 import Layers from 'lucide-react/dist/esm/icons/layers';
 import Tag from 'lucide-react/dist/esm/icons/tag';
 import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign';
-import Activity from 'lucide-react/dist/esm/icons/activity';
-import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
+import BarChart2 from 'lucide-react/dist/esm/icons/bar-chart-2';
+import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
 import React, { useState } from 'react';
 
 import CatalogTableView from './CatalogTableView';
 import CatalogCardsView from './CatalogCardsView';
+import CatalogOverviewDashboard from './CatalogOverviewDashboard';
 
 const CatalogProductsWorkspace = ({
   products = [],
@@ -27,7 +28,7 @@ const CatalogProductsWorkspace = ({
 }) => {
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [matrixViewType, setMatrixViewType] = useState('grouped'); // 'grouped' | 'flat'
-  const [contextualTab, setContextualTab] = useState('general'); // 'general' | 'pricing' | 'costs' | 'inventory' | 'regulatory'
+  const [contextualTab, setContextualTab] = useState('overview'); // 'overview' | 'items' | 'commercial' | 'analytics'
 
   const handleBulkAction = (action) => {
     setShowBulkActions(false);
@@ -254,11 +255,10 @@ const CatalogProductsWorkspace = ({
         }}
       >
         {[
-          { id: 'general', label: 'Items', icon: Box },
-          { id: 'pricing', label: 'Pricing Matrix', icon: Tag },
-          { id: 'costs', label: 'Costs', icon: DollarSign },
-          { id: 'inventory', label: 'Inventory', icon: Activity },
-          { id: 'regulatory', label: 'Regulatory', icon: ShieldCheck },
+          { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+          { id: 'items', label: 'Items', icon: Box },
+          { id: 'commercial', label: 'Commercial', icon: DollarSign },
+          { id: 'analytics', label: 'Analytics', icon: BarChart2 },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -373,6 +373,14 @@ const CatalogProductsWorkspace = ({
                 </p>
               </div>
             </div>
+          </div>
+        ) : contextualTab === 'overview' ? (
+          <CatalogOverviewDashboard products={products} variants={variants} onAction={onAction} />
+        ) : contextualTab === 'analytics' ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#64748b' }}>
+            <BarChart2 size={48} color="#cbd5e1" style={{ marginBottom: '1rem' }} />
+            <h3>Product Analytics</h3>
+            <p>Advanced metrics and reporting placeholder (coming soon)</p>
           </div>
         ) : (
           <div className="products-view" style={{ height: '100%' }}>

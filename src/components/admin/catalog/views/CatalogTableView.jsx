@@ -26,7 +26,7 @@ export default function CatalogTableView({
   selectedIds,
   onSelectionChange,
   matrixViewType = 'grouped',
-  contextualTab = 'general',
+  contextualTab = 'items',
 }) {
   const { user } = useAuth();
 
@@ -47,6 +47,32 @@ export default function CatalogTableView({
   }, [products, variants, matrixViewType]);
 
   const [visibleColumns, setVisibleColumns] = useState([]);
+  const [activeSavedView, setActiveSavedView] = useState('Default View');
+
+  const renderSavedViews = () => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>View:</span>
+      <select
+        value={activeSavedView}
+        onChange={(e) => setActiveSavedView(e.target.value)}
+        style={{
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-sm)',
+          padding: '0.25rem 0.5rem',
+          fontSize: '0.75rem',
+          fontWeight: 600,
+          color: 'var(--color-primary)',
+          backgroundColor: 'rgba(99,102,241,0.05)',
+          cursor: 'pointer',
+          outline: 'none'
+        }}
+      >
+        <option value="Default View">Default View</option>
+        <option value="Compact List">Compact List</option>
+        <option value="Expanded Details">Expanded Details</option>
+      </select>
+    </div>
+  );
 
   // Generate columns dynamically based on contextualTab
   const columns = useMemo(() => {
@@ -99,7 +125,7 @@ export default function CatalogTableView({
 
     let contextColumns = [];
 
-    if (contextualTab === 'general') {
+    if (contextualTab === 'items') {
       contextColumns = [
         {
           key: 'category',
@@ -199,7 +225,7 @@ export default function CatalogTableView({
           },
         },
       ];
-    } else if (contextualTab === 'pricing') {
+    } else if (contextualTab === 'commercial') {
       contextColumns = [
         {
           key: 'supplier',
@@ -212,9 +238,29 @@ export default function CatalogTableView({
         },
         {
           key: 'cost',
-          header: 'Unit Cost',
+          header: 'Base Cost',
           render: (row) => (
             <span style={{ fontSize: '0.85rem' }}>{row.cost ? `$${row.cost}` : '-'}</span>
+          ),
+        },
+        {
+          key: 'shipping',
+          header: 'Shipping/Duty',
+          render: (row) => (
+            <span style={{ fontSize: '0.85rem' }}>
+              {row.shippingCost ? `$${row.shippingCost}` : '-'}
+            </span>
+          ),
+        },
+        {
+          key: 'landed',
+          header: 'Landed Cost',
+          render: (row) => (
+            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+              {row.cost && row.shippingCost
+                ? `$${(Number(row.cost) + Number(row.shippingCost)).toFixed(2)}`
+                : '-'}
+            </span>
           ),
         },
         {
@@ -256,41 +302,6 @@ export default function CatalogTableView({
               </span>
             );
           },
-        },
-      ];
-    } else if (contextualTab === 'costs') {
-      contextColumns = [
-        {
-          key: 'supplier',
-          header: 'Supplier',
-          render: (row) => <span style={{ fontSize: '0.85rem' }}>{row.supplier || '-'}</span>,
-        },
-        {
-          key: 'cost',
-          header: 'Base Cost',
-          render: (row) => (
-            <span style={{ fontSize: '0.85rem' }}>{row.cost ? `$${row.cost}` : '-'}</span>
-          ),
-        },
-        {
-          key: 'shipping',
-          header: 'Shipping/Duty',
-          render: (row) => (
-            <span style={{ fontSize: '0.85rem' }}>
-              {row.shippingCost ? `$${row.shippingCost}` : '-'}
-            </span>
-          ),
-        },
-        {
-          key: 'landed',
-          header: 'Landed Cost',
-          render: (row) => (
-            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-              {row.cost && row.shippingCost
-                ? `$${(Number(row.cost) + Number(row.shippingCost)).toFixed(2)}`
-                : '-'}
-            </span>
-          ),
         },
       ];
     } else if (contextualTab === 'inventory') {
@@ -386,22 +397,22 @@ export default function CatalogTableView({
                 alignItems: 'center',
                 gap: '4px',
                 padding: '4px 8px',
-                background: 'rgba(168, 85, 247, 0.1)',
+                background: 'rgba(99, 102, 241, 0.1)',
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer',
-                color: '#a855f7',
+                color: '#6366f1',
                 fontSize: '0.75rem',
                 fontWeight: 600,
               }}
-              title="AI Insights"
+              title="Atlas AI"
             >
-              <Sparkles size={12} /> Analyze
+              <Sparkles size={12} /> Atlas
             </button>
             <AppActionGroup
               actions={[
+                { type: 'view', onClick: () => onAction('view', productRef) },
                 { type: 'edit', onClick: () => onAction('edit', productRef) },
-                { type: 'archive', onClick: () => onAction('archive', productRef) },
                 { type: 'delete', onClick: () => onAction('delete', productRef) },
               ]}
             />
@@ -608,6 +619,7 @@ export default function CatalogTableView({
         hideSearch={true}
         hidePagination={false}
         enableColumnSelection={true}
+        renderCustomFilters={renderSavedViews}
         enableExport={true}
         onExport={handleExport}
         visibleColumns={visibleColumns}
