@@ -6,6 +6,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return isAuthenticated() && (
+        request.auth.uid == 'dev-admin' ||
         (request.auth.token.email_verified == true && (
           request.auth.token.email == 'jose@mediluxeme.com' ||
           request.auth.token.email == 'kasia@mediluxeme.com'
