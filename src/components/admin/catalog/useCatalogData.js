@@ -121,17 +121,47 @@ export function useCatalogData() {
 
   const addProduct = async (productData) => {
     try {
-      const docRef = await addDoc(collection(db, 'products'), {
-        ...productData,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-      setProducts((prev) => [...prev, { id: docRef.id, ...productData }]);
-      toast.success('Product created');
-      return true;
+      const { _mode, parentProductId, ...data } = productData;
+
+      if (_mode === 'variant') {
+        const parentRef = doc(db, 'products', parentProductId);
+        const parentDoc = await getDoc(parentRef);
+        if (!parentDoc.exists()) throw new Error('Parent product not found');
+
+        const parentData = parentDoc.data();
+        const existingVariants = parentData.variants || [];
+
+        const newVariant = {
+          id: `var_${Date.now()}`,
+          ...data,
+          createdAt: new Date().toISOString(),
+        };
+
+        await updateDoc(parentRef, {
+          variants: [...existingVariants, newVariant],
+          updatedAt: new Date().toISOString(),
+        });
+
+        setProducts((prev) =>
+          prev.map((p) =>
+            p.id === parentProductId ? { ...p, variants: [...(p.variants || []), newVariant] } : p
+          )
+        );
+        toast.success('Variant created successfully');
+        return true;
+      } else {
+        const docRef = await addDoc(collection(db, 'products'), {
+          ...data,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+        setProducts((prev) => [...prev, { id: docRef.id, ...data }]);
+        toast.success('Product created successfully');
+        return true;
+      }
     } catch (err) {
       console.error(err);
-      toast.error('Failed to create product');
+      toast.error('Failed to save data');
       return false;
     }
   };

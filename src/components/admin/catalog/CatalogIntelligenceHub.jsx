@@ -7,6 +7,9 @@ import Package from 'lucide-react/dist/esm/icons/package';
 import Activity from 'lucide-react/dist/esm/icons/activity';
 import Building from 'lucide-react/dist/esm/icons/building';
 import Shield from 'lucide-react/dist/esm/icons/shield';
+import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
+import Tag from 'lucide-react/dist/esm/icons/tag';
+import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useMemo, useEffect } from 'react';
 import { useCatalogData } from './useCatalogData';
 import CatalogKPIHeader from './CatalogKPIHeader';
@@ -83,6 +86,8 @@ export default function CatalogIntelligenceHub() {
   const [aiProduct, setAiProduct] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
+  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+  const [intakeMode, setIntakeMode] = useState('product'); // 'product' | 'variant'
 
   // Derive categories for chips
   const categories = useMemo(() => {
@@ -129,7 +134,8 @@ export default function CatalogIntelligenceHub() {
       if (activeKpis.length > 0) {
         if (activeKpis.includes('missing_coa') && p.hasCoa) return false;
         if (activeKpis.includes('missing_supplier') && p.supplier) return false;
-        if (activeKpis.includes('regulatory_risk') && p.registrationStatus === 'Registered') return false;
+        if (activeKpis.includes('regulatory_risk') && p.registrationStatus === 'Registered')
+          return false;
         if (activeKpis.includes('single_source') && p.suppliersCount > 1) return false;
         if (activeKpis.includes('low_health') && (p.healthScore || 100) >= 70) return false;
         if (activeKpis.includes('out_of_stock') && p.stock > 0) return false;
@@ -184,14 +190,14 @@ export default function CatalogIntelligenceHub() {
     const visuals = [];
 
     // KPI Filters
-    activeKpis.forEach(kpi => {
+    activeKpis.forEach((kpi) => {
       const labels = {
-        'missing_coa': 'Missing COA',
-        'missing_supplier': 'Missing Supplier',
-        'regulatory_risk': 'Regulatory Risk',
-        'single_source': 'Single Source',
-        'low_health': 'Low Health',
-        'out_of_stock': 'Out of Stock'
+        missing_coa: 'Missing COA',
+        missing_supplier: 'Missing Supplier',
+        regulatory_risk: 'Regulatory Risk',
+        single_source: 'Single Source',
+        low_health: 'Low Health',
+        out_of_stock: 'Out of Stock',
       };
       if (labels[kpi]) {
         visuals.push({ id: `kpi.${kpi}`, label: labels[kpi] });
@@ -247,7 +253,7 @@ export default function CatalogIntelligenceHub() {
 
   const handleRemoveFilter = (filterId) => {
     const parts = filterId.split('.');
-    
+
     if (parts[0] === 'kpi') {
       setActiveKpis((prev) => prev.filter((k) => k !== parts[1]));
       return;
@@ -362,15 +368,35 @@ export default function CatalogIntelligenceHub() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <span style={{ fontWeight: 600 }}>Delete variant {variant.sku || 'N/A'}?</span>
             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-              <button onClick={() => toast.dismiss(t.id)} className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem' }}>Cancel</button>
-              <button onClick={() => {
-                // Implementation for variant deletion
-                toast.dismiss(t.id);
-                toast.success('Variant deleted (mock)');
-              }} style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', border: 'none', background: '#ef4444', color: 'white', cursor: 'pointer', fontSize: '0.875rem' }}>Delete</button>
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                className="btn btn-outline"
+                style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  // Implementation for variant deletion
+                  toast.dismiss(t.id);
+                  toast.success('Variant deleted (mock)');
+                }}
+                style={{
+                  padding: '0.4rem 0.8rem',
+                  borderRadius: '4px',
+                  border: 'none',
+                  background: '#ef4444',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                }}
+              >
+                Delete
+              </button>
             </div>
           </div>
-        ), { duration: Infinity }
+        ),
+        { duration: Infinity }
       );
     } else if (action === 'delete') {
       toast(
@@ -446,37 +472,73 @@ export default function CatalogIntelligenceHub() {
       </div>
 
       {/* Primary Actions Area */}
-      <div className={styles.primaryActions} style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: '1rem', marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+      <div
+        className={styles.primaryActions}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'stretch',
+          gap: '1rem',
+          marginBottom: '1rem',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '1rem',
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-            <h1 className={styles.title} style={{ margin: 0, fontSize: '1.5rem', whiteSpace: 'nowrap' }}>{activeWorkspace.charAt(0).toUpperCase() + activeWorkspace.slice(1)}</h1>
-            
+            <h1
+              className={styles.title}
+              style={{ margin: 0, fontSize: '1.5rem', whiteSpace: 'nowrap' }}
+            >
+              {activeWorkspace.charAt(0).toUpperCase() + activeWorkspace.slice(1)}
+            </h1>
+
             {/* Search Input Integrated into Header */}
-            <div style={{
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              background: 'var(--color-bg-surface, #ffffff)',
-              border: '1px solid var(--color-border, #e2e8f0)',
-              borderRadius: '20px',
-              padding: '0.4rem 1rem',
-              width: isMobile ? '100%' : '350px',
-              boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)'
-            }}>
+            <div
+              style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                background: 'var(--color-bg-surface, #ffffff)',
+                border: '1px solid var(--color-border, #e2e8f0)',
+                borderRadius: '20px',
+                padding: '0.4rem 1rem',
+                width: isMobile ? '100%' : '350px',
+                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)',
+              }}
+            >
               <Search size={16} color="var(--text-muted, #64748b)" style={{ marginRight: '8px' }} />
-              <input 
+              <input
                 type="text"
                 placeholder="Ask Atlas or Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
-                  flex: 1, border: 'none', background: 'transparent', outline: 'none',
-                  fontSize: '0.85rem', color: 'var(--text-main, #1e293b)', fontWeight: 500
+                  flex: 1,
+                  border: 'none',
+                  background: 'transparent',
+                  outline: 'none',
+                  fontSize: '0.85rem',
+                  color: 'var(--text-main, #1e293b)',
+                  fontWeight: 500,
                 }}
               />
-              <button 
+              <button
                 onClick={() => setIsAdvancedFiltersOpen(true)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: '4px', color: 'var(--color-primary)' }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  padding: '4px',
+                  color: 'var(--color-primary)',
+                }}
                 title="Advanced Filters"
               >
                 <Filter size={16} />
@@ -484,46 +546,171 @@ export default function CatalogIntelligenceHub() {
             </div>
           </div>
 
-          <div className={styles.actionButtons} style={{ display: 'flex', gap: '0.5rem' }}>
+          <div
+            className={styles.actionButtons}
+            style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}
+          >
             {activeWorkspace === 'products' && (
-              <>
-                <button onClick={() => setIsImportModalOpen(true)} className={styles.btnImport} style={{ padding: '0.4rem 0.8rem', borderRadius: '16px', fontSize: '0.85rem' }}>
-                  <Download size={16} /> Import
+              <div style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
+                  className={styles.btnAdd}
+                  style={{
+                    padding: '0.4rem 0.8rem',
+                    borderRadius: '16px',
+                    fontSize: '0.85rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                  }}
+                >
+                  <Plus size={16} /> Add Item <ChevronDown size={14} />
                 </button>
-                <button onClick={() => setIsCreateModalOpen(true)} className={styles.btnAdd} style={{ padding: '0.4rem 0.8rem', borderRadius: '16px', fontSize: '0.85rem' }}>
-                  <Plus size={16} /> Add Product
-                </button>
-              </>
+                <AnimatePresence>
+                  {isAddMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 0.5rem)',
+                        right: 0,
+                        background: 'white',
+                        borderRadius: '12px',
+                        boxShadow:
+                          '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
+                        border: '1px solid #e2e8f0',
+                        overflow: 'hidden',
+                        minWidth: '200px',
+                        zIndex: 100,
+                      }}
+                    >
+                      <button
+                        onClick={() => {
+                          setIntakeMode('product');
+                          setIsCreateModalOpen(true);
+                          setIsAddMenuOpen(false);
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.75rem',
+                          width: '100%',
+                          padding: '0.75rem 1rem',
+                          background: 'none',
+                          border: 'none',
+                          textAlign: 'left',
+                          cursor: 'pointer',
+                          borderBottom: '1px solid #f1f5f9',
+                        }}
+                      >
+                        <Package size={16} color="#0f172a" />
+                        <span style={{ fontSize: '0.875rem', color: '#0f172a', fontWeight: 500 }}>
+                          Add New Product
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIntakeMode('variant');
+                          setIsCreateModalOpen(true);
+                          setIsAddMenuOpen(false);
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.75rem',
+                          width: '100%',
+                          padding: '0.75rem 1rem',
+                          background: 'none',
+                          border: 'none',
+                          textAlign: 'left',
+                          cursor: 'pointer',
+                          borderBottom: '1px solid #f1f5f9',
+                        }}
+                      >
+                        <Tag size={16} color="#0f172a" />
+                        <span style={{ fontSize: '0.875rem', color: '#0f172a', fontWeight: 500 }}>
+                          Add Variant
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsImportModalOpen(true);
+                          setIsAddMenuOpen(false);
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.75rem',
+                          width: '100%',
+                          padding: '0.75rem 1rem',
+                          background: 'none',
+                          border: 'none',
+                          textAlign: 'left',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <Download size={16} color="#0f172a" />
+                        <span style={{ fontSize: '0.875rem', color: '#0f172a', fontWeight: 500 }}>
+                          Import Catalog
+                        </span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             )}
           </div>
         </div>
 
         {/* KPIs and Quick Filters Row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-          <CatalogKPIHeader 
-            products={products} 
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            overflowX: 'auto',
+            paddingBottom: '0.5rem',
+          }}
+        >
+          <CatalogKPIHeader
+            products={products}
             activeFilters={activeFiltersVisuals}
-            onFilterSelect={handleFilterSelect} 
+            onFilterSelect={handleFilterSelect}
           />
-          <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--color-border, #e2e8f0)' }} />
-          
+          <div
+            style={{
+              width: '1px',
+              height: '24px',
+              backgroundColor: 'var(--color-border, #e2e8f0)',
+            }}
+          />
+
           {/* Quick Filters */}
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             {[
               { id: 'out_of_stock', label: 'Out of Stock' },
-              { id: 'low_health', label: 'Low Health' }
-            ].map(qf => {
+              { id: 'low_health', label: 'Low Health' },
+            ].map((qf) => {
               const isActive = activeKpis.includes(qf.id);
               return (
                 <button
                   key={qf.id}
                   onClick={() => handleFilterSelect(qf.id)}
                   style={{
-                    display: 'flex', alignItems: 'center', padding: '0.3rem 0.8rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '0.3rem 0.8rem',
                     background: isActive ? 'var(--color-primary, #6366f1)' : '#ffffff',
                     border: `1px solid ${isActive ? 'var(--color-primary, #6366f1)' : 'var(--color-border, #e2e8f0)'}`,
-                    borderRadius: '16px', cursor: 'pointer', fontWeight: 500, fontSize: '0.75rem',
-                    color: isActive ? '#ffffff' : 'var(--text-main, #1e293b)', whiteSpace: 'nowrap'
+                    borderRadius: '16px',
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                    fontSize: '0.75rem',
+                    color: isActive ? '#ffffff' : 'var(--text-main, #1e293b)',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {qf.label}
@@ -535,21 +722,78 @@ export default function CatalogIntelligenceHub() {
       </div>
 
       {/* Active Filter Chips (if any) */}
-      {(activeCategories.length > 0 || activeFiltersVisuals.length > 0 || (activeWorkspace === 'products' && advancedFilters?.products?.supplier !== 'All Suppliers')) && (
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          {activeWorkspace === 'products' && activeCategories.map(cat => (
-            <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 8px', background: 'rgba(99,102,241,0.08)', borderRadius: '12px', fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: 600 }}>
-              {cat}
-              <X size={12} style={{ cursor: 'pointer' }} onClick={() => setActiveCategories(activeCategories.filter(c => c !== cat))} />
-            </div>
-          ))}
-          {activeFiltersVisuals.map(filter => (
-            <div key={filter.id} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 8px', background: 'var(--color-bg-hover, #f1f5f9)', borderRadius: '12px', fontSize: '0.75rem', color: 'var(--text-main)', fontWeight: 500 }}>
+      {(activeCategories.length > 0 ||
+        activeFiltersVisuals.length > 0 ||
+        (activeWorkspace === 'products' &&
+          advancedFilters?.products?.supplier !== 'All Suppliers')) && (
+        <div
+          style={{
+            display: 'flex',
+            gap: '0.5rem',
+            marginBottom: '1rem',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+          }}
+        >
+          {activeWorkspace === 'products' &&
+            activeCategories.map((cat) => (
+              <div
+                key={cat}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '2px 8px',
+                  background: 'rgba(99,102,241,0.08)',
+                  borderRadius: '12px',
+                  fontSize: '0.75rem',
+                  color: 'var(--color-primary)',
+                  fontWeight: 600,
+                }}
+              >
+                {cat}
+                <X
+                  size={12}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setActiveCategories(activeCategories.filter((c) => c !== cat))}
+                />
+              </div>
+            ))}
+          {activeFiltersVisuals.map((filter) => (
+            <div
+              key={filter.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '2px 8px',
+                background: 'var(--color-bg-hover, #f1f5f9)',
+                borderRadius: '12px',
+                fontSize: '0.75rem',
+                color: 'var(--text-main)',
+                fontWeight: 500,
+              }}
+            >
               {filter.label}
-              <X size={12} style={{ cursor: 'pointer' }} onClick={() => handleRemoveFilter(filter.id)} />
+              <X
+                size={12}
+                style={{ cursor: 'pointer' }}
+                onClick={() => handleRemoveFilter(filter.id)}
+              />
             </div>
           ))}
-          <button onClick={handleClearAllFilters} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', color: 'var(--text-muted)' }}>Clear all</button>
+          <button
+            onClick={handleClearAllFilters}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '0.75rem',
+              color: 'var(--text-muted)',
+            }}
+          >
+            Clear all
+          </button>
         </div>
       )}
 
@@ -605,6 +849,13 @@ export default function CatalogIntelligenceHub() {
         onCategoryChange={setActiveCategories}
       />
       <CatalogImportWizard isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} />
+      <SmartProductIntakeWizard
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onAddProduct={addProduct}
+        mode={intakeMode}
+        products={products}
+      />
       <ProductIntelligenceModal
         isOpen={isAiModalOpen}
         onClose={() => setIsAiModalOpen(false)}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { calculateVariantHealthScore } from '../../useVariantHealthScore';
-import { AppActionGroup } from '../../../ui/AppActionGroup';
+import AppActionGroup from '../../../../ui/AppActionGroup';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 
 const thStyle = {
@@ -140,9 +140,18 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
                   </button>
                   <AppActionGroup
                     actions={[
-                      { type: 'view', onClick: () => onAction && onAction('view_variant', parentProduct, v) },
-                      { type: 'edit', onClick: () => onAction && onAction('edit_variant', parentProduct, v) },
-                      { type: 'delete', onClick: () => onAction && onAction('delete_variant', parentProduct, v) },
+                      {
+                        type: 'view',
+                        onClick: () => onAction && onAction('view_variant', parentProduct, v),
+                      },
+                      {
+                        type: 'edit',
+                        onClick: () => onAction && onAction('edit_variant', parentProduct, v),
+                      },
+                      {
+                        type: 'delete',
+                        onClick: () => onAction && onAction('delete_variant', parentProduct, v),
+                      },
                     ]}
                   />
                 </div>

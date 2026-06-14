@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppActionGroup } from '../../../ui/AppActionGroup';
+import AppActionGroup from '../../../../ui/AppActionGroup';
 
 const thStyle = {
   padding: '12px',
@@ -64,9 +64,18 @@ export default function VariantAnalyticsTable({ variants, parentProduct, onActio
               >
                 <AppActionGroup
                   actions={[
-                    { type: 'view', onClick: () => onAction && onAction('view_variant', parentProduct, v) },
-                    { type: 'edit', onClick: () => onAction && onAction('edit_variant', parentProduct, v) },
-                    { type: 'delete', onClick: () => onAction && onAction('delete_variant', parentProduct, v) },
+                    {
+                      type: 'view',
+                      onClick: () => onAction && onAction('view_variant', parentProduct, v),
+                    },
+                    {
+                      type: 'edit',
+                      onClick: () => onAction && onAction('edit_variant', parentProduct, v),
+                    },
+                    {
+                      type: 'delete',
+                      onClick: () => onAction && onAction('delete_variant', parentProduct, v),
+                    },
                   ]}
                 />
               </div>
