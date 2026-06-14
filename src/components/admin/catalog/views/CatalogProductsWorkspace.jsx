@@ -6,6 +6,12 @@ import Edit from "lucide-react/dist/esm/icons/edit";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import Box from "lucide-react/dist/esm/icons/box";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import LayoutTemplate from "lucide-react/dist/esm/icons/layout-template";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import Tag from "lucide-react/dist/esm/icons/tag";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import React, { useState } from 'react';
 
 
@@ -26,6 +32,8 @@ const CatalogProductsWorkspace = ({
   onAction
 }) => {
   const [showBulkActions, setShowBulkActions] = useState(false);
+  const [matrixViewType, setMatrixViewType] = useState('grouped'); // 'grouped' | 'flat'
+  const [contextualTab, setContextualTab] = useState('general'); // 'general' | 'pricing' | 'costs' | 'inventory' | 'regulatory'
 
   const handleBulkAction = (action) => {
     setShowBulkActions(false);
@@ -37,9 +45,42 @@ const CatalogProductsWorkspace = ({
       {/* Toolbar */}
       <div className="workspace-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0' }}>
         <div className="toolbar-left">
-          <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#0f172a', fontWeight: '600' }}>Product Inventory</h2>
+          <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#0f172a', fontWeight: '600' }}>Item Command Center</h2>
         </div>
         <div className="toolbar-right" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          
+          {/* Hierarchy Toggle (Grouped vs Flat) */}
+          <div className="hierarchy-toggle" style={{ display: 'flex', backgroundColor: '#f1f5f9', borderRadius: '6px', padding: '4px' }}>
+            <button 
+              onClick={() => setMatrixViewType('grouped')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '4px', border: 'none', cursor: 'pointer',
+                backgroundColor: matrixViewType === 'grouped' ? '#ffffff' : 'transparent',
+                boxShadow: matrixViewType === 'grouped' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                color: matrixViewType === 'grouped' ? '#0f172a' : '#64748b',
+                transition: 'all 0.2s', fontSize: '0.875rem', fontWeight: 500
+              }}
+              title="Grouped by Product"
+            >
+              <Layers size={16} /> Grouped
+            </button>
+            <button 
+              onClick={() => setMatrixViewType('flat')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '4px', border: 'none', cursor: 'pointer',
+                backgroundColor: matrixViewType === 'flat' ? '#ffffff' : 'transparent',
+                boxShadow: matrixViewType === 'flat' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                color: matrixViewType === 'flat' ? '#0f172a' : '#64748b',
+                transition: 'all 0.2s', fontSize: '0.875rem', fontWeight: 500
+              }}
+              title="Flat Variants"
+            >
+              <LayoutTemplate size={16} /> Flat Variants
+            </button>
+          </div>
+
+          <div style={{ width: '1px', height: '24px', backgroundColor: '#e2e8f0' }}></div>
+
           {/* Display Mode Segmented Control */}
           <div className="display-mode-control" style={{ display: 'flex', backgroundColor: '#f1f5f9', borderRadius: '6px', padding: '4px' }}>
             <button 
@@ -110,6 +151,32 @@ const CatalogProductsWorkspace = ({
         </div>
       </div>
 
+      {/* Contextual Tabs */}
+      <div style={{ display: 'flex', gap: '2px', padding: '0 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0' }}>
+        {[
+          { id: 'general', label: 'Items', icon: Box },
+          { id: 'pricing', label: 'Pricing Matrix', icon: Tag },
+          { id: 'costs', label: 'Costs', icon: DollarSign },
+          { id: 'inventory', label: 'Inventory', icon: Activity },
+          { id: 'regulatory', label: 'Regulatory', icon: ShieldCheck }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setContextualTab(tab.id)}
+            style={{
+              padding: '12px 16px', border: 'none', background: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: 500,
+              color: contextualTab === tab.id ? '#2563eb' : '#64748b',
+              borderBottom: contextualTab === tab.id ? '2px solid #2563eb' : '2px solid transparent',
+              transition: 'all 0.2s'
+            }}
+          >
+            <tab.icon size={16} />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* Main Content Area */}
       <div className="workspace-content" style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
         {loading ? (
@@ -142,7 +209,12 @@ const CatalogProductsWorkspace = ({
         ) : (
           <div className="products-view" style={{ height: '100%' }}>
             {activeDisplayMode === 'table' ? (
-              <CatalogTableView products={products} onAction={onAction} />
+              <CatalogTableView 
+                products={products} 
+                onAction={onAction} 
+                matrixViewType={matrixViewType}
+                contextualTab={contextualTab}
+              />
             ) : (
               <CatalogCardsView products={products} onAction={onAction} />
             )}
