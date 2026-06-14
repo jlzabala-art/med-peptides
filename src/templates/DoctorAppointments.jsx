@@ -21,7 +21,7 @@ export default function DoctorAppointments() {
 
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
     const [loading, setLoading] = useState(true);
-    const [viewMode, setViewMode] = useState('Week'); // Day, Week, Month, Agenda
+    const [viewMode, setViewMode] = useState(window.innerWidth < 1024 ? 'Day' : 'Week'); // Day, Week, Month, Agenda
     const [currentDate, setCurrentDate] = useState(new Date());
     const [calendarExpanded, setCalendarExpanded] = useState(false); // For mobile
 
@@ -189,36 +189,114 @@ export default function DoctorAppointments() {
                 )}
             </div>
             
-            {/* Custom CSS Grid Calendar (Simplified Week View for illustration) */}
+            {/* Calendar View Body based on viewMode */}
             <div style={{ padding: '16px', overflowX: 'auto' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '80px repeat(5, 1fr)', gap: '8px', minWidth: '600px' }}>
-                    {/* Time Column */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', paddingTop: '40px', color: '#94a3b8', fontSize: '12px', textAlign: 'right', paddingRight: '12px' }}>
-                        <span>09:00</span>
-                        <span>10:00</span>
-                        <span>11:00</span>
-                        <span>12:00</span>
-                        <span>13:00</span>
-                        <span>14:00</span>
-                        <span>15:00</span>
-                        <span>16:00</span>
-                    </div>
-                    {/* Days */}
-                    {['Mon 12', 'Tue 13', 'Wed 14', 'Thu 15', 'Fri 16'].map((day, idx) => (
-                        <div key={day} style={{ position: 'relative', borderLeft: '1px solid #e2e8f0', paddingLeft: '8px', minHeight: '400px' }}>
-                            <div style={{ fontSize: '13px', fontWeight: 600, color: idx === 2 ? '#0ea5e9' : '#475569', marginBottom: '16px', textAlign: 'center' }}>
-                                {day}
-                            </div>
-                            
-                            {/* Plot events for Wednesday (mock current day) */}
-                            {idx === 2 && events.map((ev, eIdx) => (
-                                <div key={eIdx} style={{ background: `${ev.color}15`, borderLeft: `3px solid ${ev.color}`, padding: '8px', borderRadius: '4px', marginBottom: '8px', fontSize: '11px', cursor: 'pointer' }}>
-                                    <div style={{ fontWeight: 700, color: '#0f172a' }}>{ev.title}</div>
-                                    <div style={{ color: '#64748b' }}>{ev.time} • {ev.type}</div>
+                {viewMode === 'Agenda' ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {events.map((ev, eIdx) => (
+                            <div key={eIdx} style={{ background: `${ev.color}10`, borderLeft: `4px solid ${ev.color}`, padding: '12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div>
+                                    <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '14px' }}>{ev.title}</div>
+                                    <div style={{ color: '#64748b', fontSize: '12px', marginTop: '4px' }}>{ev.date.toLocaleDateString()} • {ev.type}</div>
                                 </div>
-                            ))}
+                                <div style={{ fontSize: '14px', fontWeight: 600, color: ev.color, background: `${ev.color}20`, padding: '4px 12px', borderRadius: '12px' }}>
+                                    {ev.time}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: viewMode === 'Day' ? '80px 1fr' : '80px repeat(5, 1fr)', gap: '8px', minWidth: viewMode === 'Day' ? 'auto' : '600px' }}>
+                        {/* Time Column */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', paddingTop: '40px', color: '#94a3b8', fontSize: '12px', textAlign: 'right', paddingRight: '12px' }}>
+                            <span>09:00</span>
+                            <span>10:00</span>
+                            <span>11:00</span>
+                            <span>12:00</span>
+                            <span>13:00</span>
+                            <span>14:00</span>
+                            <span>15:00</span>
+                            <span>16:00</span>
                         </div>
-                    ))}
+                        {/* Days */}
+                        {(viewMode === 'Day' ? ['Today'] : ['Mon 12', 'Tue 13', 'Wed 14', 'Thu 15', 'Fri 16']).map((day, idx) => (
+                            <div key={day} style={{ position: 'relative', borderLeft: '1px solid #e2e8f0', paddingLeft: '8px', minHeight: '400px' }}>
+                                <div style={{ fontSize: '13px', fontWeight: 600, color: (viewMode==='Day' || idx === 2) ? '#0ea5e9' : '#475569', marginBottom: '16px', textAlign: 'center' }}>
+                                    {day}
+                                </div>
+                                
+                                {/* Plot events for current day */}
+                                {(viewMode === 'Day' || idx === 2) && events.map((ev, eIdx) => (
+                                    <div key={eIdx} style={{ background: `${ev.color}15`, borderLeft: `3px solid ${ev.color}`, padding: '8px', borderRadius: '4px', marginBottom: '8px', fontSize: '11px', cursor: 'pointer', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                                        <div style={{ fontWeight: 700, color: '#0f172a' }}>{ev.title}</div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                                            <span style={{ color: '#64748b' }}>{ev.time}</span>
+                                            <span style={{ background: ev.color, color: 'white', padding: '2px 6px', borderRadius: '10px', fontSize: '9px', fontWeight: 600 }}>{ev.type}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+
+    const renderAtlasRecommendations = () => (
+        <div style={{ ...styles.card, border: '1px solid #cce8ff', background: '#f0f9ff' }}>
+            <div style={{ ...styles.cardHeader, background: 'transparent', borderBottom: '1px solid #bae6fd' }}>
+                <BrainCircuit size={16} color="#0284c7" />
+                <h3 style={{ ...styles.cardTitle, color: '#0284c7' }}>Atlas Clinical Insights</h3>
+            </div>
+            <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={styles.insightAlert}>
+                    <AlertTriangle size={14} color="#ea580c" style={{flexShrink: 0}} />
+                    <span style={{ fontSize: '13px', color: '#9a3412', lineHeight: 1.4 }}><strong>2 Prescriptions</strong> expire this week. Automated follow-up suggested.</span>
+                </div>
+                <div style={styles.insightAlert}>
+                    <CheckCircle2 size={14} color="#059669" style={{flexShrink: 0}} />
+                    <span style={{ fontSize: '13px', color: '#065f46', lineHeight: 1.4 }}><strong>Gwen Stacy's</strong> genetic markers indicate high compatibility for current protocol.</span>
+                </div>
+                <button style={styles.btnAiAction}>Automate Follow-Ups</button>
+            </div>
+        </div>
+    );
+
+    const renderTodaysAgenda = () => (
+        <div style={styles.card}>
+            <div style={styles.cardHeader}>
+                <CalendarIcon size={16} color="#475569" />
+                <h3 style={styles.cardTitle}>Today's Agenda</h3>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {events.slice(0,4).map((ev, i) => (
+                    <div key={i} style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: ev.color, marginTop: '6px' }} />
+                        <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>{ev.title}</div>
+                            <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>{ev.time} • {ev.type}</div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+
+    const renderFollowUpTasks = () => (
+        <div style={styles.card}>
+            <div style={styles.cardHeader}>
+                <Clock size={16} color="#475569" />
+                <h3 style={styles.cardTitle}>Follow-Up Tasks</h3>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ padding: '12px 16px', fontSize: '13px', color: '#475569', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Review Lab Panel for Bruce Banner</span>
+                    <span style={{ color: '#ef4444', fontWeight: 600 }}>Due</span>
+                </div>
+                <div style={{ padding: '12px 16px', fontSize: '13px', color: '#475569', display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #f1f5f9' }}>
+                    <span>Patient check-in: Magenta Medical</span>
+                    <span style={{ color: '#f59e0b', fontWeight: 600 }}>Tomorrow</span>
                 </div>
             </div>
         </div>
@@ -226,62 +304,9 @@ export default function DoctorAppointments() {
 
     const renderRightPanel = () => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', flex: isMobile ? 'none' : '0 0 calc(35% - 24px)' }}>
-            
-            {/* Atlas AI Recommendations */}
-            <div style={{ ...styles.card, border: '1px solid #cce8ff', background: '#f0f9ff' }}>
-                <div style={{ ...styles.cardHeader, background: 'transparent', borderBottom: '1px solid #bae6fd' }}>
-                    <BrainCircuit size={16} color="#0284c7" />
-                    <h3 style={{ ...styles.cardTitle, color: '#0284c7' }}>Atlas Clinical Insights</h3>
-                </div>
-                <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div style={styles.insightAlert}>
-                        <AlertTriangle size={14} color="#ea580c" style={{flexShrink: 0}} />
-                        <span style={{ fontSize: '13px', color: '#9a3412', lineHeight: 1.4 }}><strong>2 Prescriptions</strong> expire this week. Automated follow-up suggested.</span>
-                    </div>
-                    <div style={styles.insightAlert}>
-                        <CheckCircle2 size={14} color="#059669" style={{flexShrink: 0}} />
-                        <span style={{ fontSize: '13px', color: '#065f46', lineHeight: 1.4 }}><strong>Gwen Stacy's</strong> genetic markers indicate high compatibility for current protocol.</span>
-                    </div>
-                    <button style={styles.btnAiAction}>Automate Follow-Ups</button>
-                </div>
-            </div>
-
-            {/* Today's Agenda List */}
-            <div style={styles.card}>
-                <div style={styles.cardHeader}>
-                    <CalendarIcon size={16} color="#475569" />
-                    <h3 style={styles.cardTitle}>Today's Agenda</h3>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    {events.slice(0,4).map((ev, i) => (
-                        <div key={i} style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: ev.color, marginTop: '6px' }} />
-                            <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>{ev.title}</div>
-                                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>{ev.time} • {ev.type}</div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-            
-            {/* Upcoming Appointments & Follow-ups */}
-             <div style={styles.card}>
-                <div style={styles.cardHeader}>
-                    <Clock size={16} color="#475569" />
-                    <h3 style={styles.cardTitle}>Follow-Up Tasks</h3>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ padding: '12px 16px', fontSize: '13px', color: '#475569', display: 'flex', justifyContent: 'space-between' }}>
-                        <span>Review Lab Panel for Bruce Banner</span>
-                        <span style={{ color: '#ef4444', fontWeight: 600 }}>Due</span>
-                    </div>
-                    <div style={{ padding: '12px 16px', fontSize: '13px', color: '#475569', display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #f1f5f9' }}>
-                        <span>Patient check-in: Magenta Medical</span>
-                        <span style={{ color: '#f59e0b', fontWeight: 600 }}>Tomorrow</span>
-                    </div>
-                </div>
-            </div>
+            {renderAtlasRecommendations()}
+            {renderTodaysAgenda()}
+            {renderFollowUpTasks()}
         </div>
     );
 
@@ -315,7 +340,8 @@ export default function DoctorAppointments() {
 
             {isMobile ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                    {renderRightPanel()}
+                    {renderTodaysAgenda()}
+                    {renderAtlasRecommendations()}
                     <div>
                         <button 
                             onClick={() => setCalendarExpanded(!calendarExpanded)}

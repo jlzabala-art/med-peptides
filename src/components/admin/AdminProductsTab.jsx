@@ -1561,6 +1561,97 @@ export default function AdminProductsTab({
     );
   };
 
+  const renderMobileProductCard = (group) => {
+    const mainVariant = group.variants[0] || {};
+    return (
+      <div key={group.name} style={{ backgroundColor: 'var(--surface)', borderRadius: '12px', padding: '1rem', marginBottom: '1rem', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.5rem', boxShadow: 'var(--shadow-sm)' }} onClick={() => { setDrawerProduct(mainVariant); setIsDrawerOpen(true); }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>{mainVariant.sku || 'N/A'}</div>
+            <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)' }}>{group.name}</div>
+          </div>
+          <div style={{ padding: '4px 8px', borderRadius: '4px', backgroundColor: mainVariant.isActive !== false ? 'rgba(22, 163, 74, 0.1)' : 'rgba(220, 38, 38, 0.1)', color: mainVariant.isActive !== false ? '#16a34a' : '#dc2626', fontSize: '0.7rem', fontWeight: 600 }}>
+            {mainVariant.isActive !== false ? 'Active' : 'Inactive'}
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '1rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Package size={14} color="#64748b"/> {group.totalStock} in stock</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><DollarSign size={14} color="#64748b"/> {mainVariant.retailPrice || mainVariant.price || '---'}</div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderMobileView = () => (
+    <div style={{ padding: '1rem', paddingBottom: '100px' }}>
+      {/* Compact Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>Item Intelligence</h2>
+        <button onClick={() => setIsFilterDrawerOpen(true)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Settings size={18} color="var(--text-main)" />
+        </button>
+      </div>
+
+      {/* Intelligence Summary */}
+      <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '1rem', scrollbarWidth: 'none', margin: '0 -1rem', paddingLeft: '1rem', paddingRight: '1rem' }}>
+        {[
+          { label: 'Total', val: products.length, color: '#0ea5e9', bg: '#f0f9ff' },
+          { label: 'Low Stock', val: products.filter(p => p.stock > 0 && p.stock <= 20).length, color: '#ea580c', bg: '#fff7ed' },
+          { label: 'Out of Stock', val: products.filter(p => p.stock === 0).length, color: '#dc2626', bg: '#fef2f2' },
+          { label: 'Pending Reg', val: products.filter(p => p.registrationStatus !== 'Registered').length, color: '#9333ea', bg: '#faf5ff' },
+        ].map(k => (
+          <div key={k.label} style={{ flexShrink: 0, width: '100px', backgroundColor: k.bg, padding: '12px', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '4px', border: `1px solid ${k.color}20` }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: k.color }}>{k.val}</div>
+            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)' }}>{k.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Search & Filters */}
+      <div style={{ position: 'relative', marginBottom: '1rem' }}>
+        <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+        <input
+          type="text"
+          placeholder="Search items..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--surface)', fontSize: '0.9rem', outline: 'none' }}
+        />
+      </div>
+      
+      {/* Product List */}
+      <div>
+        {groupedProductsArray.length === 0 ? (
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No items found.</div>
+        ) : (
+          groupedProductsArray.map(renderMobileProductCard)
+        )}
+      </div>
+
+      {renderPagination()}
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        {renderMobileView()}
+        {isCreateProductModalOpen && (
+          <CreateProductModal 
+            isOpen={isCreateProductModalOpen} 
+            onClose={() => setIsCreateProductModalOpen(false)} 
+            onProductCreated={() => { fetchProducts(); setIsCreateProductModalOpen(false); }}
+          />
+        )}
+        <ProductDrawer product={drawerProduct} isOpen={isDrawerOpen} onClose={() => { setIsDrawerOpen(false); setDrawerProduct(null); }} onUpdate={fetchProducts} />
+        {renderBulkActionsBar()}
+        {renderCatalogModal()}
+        {renderBulkOrderModal()}
+        <FilterDrawer />
+      </>
+    );
+  }
+
   return (
     <div style={{ marginBottom: '2rem' }}>
       <div style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: 'var(--color-bg-app)', paddingBottom: '0.5rem', margin: '0 -1.5rem', padding: '0 1.5rem 0.5rem 1.5rem', borderBottom: '1px solid var(--border)' }}>
