@@ -250,7 +250,7 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
         },
         body: formDataObj
     })
-    .then(response => response.js())
+    .then(response => response.json())
     .then(data => {
         trackFormEngagement('institutional_inquiry', 'success');
 

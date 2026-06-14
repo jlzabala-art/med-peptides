@@ -216,7 +216,7 @@ export default function AdminFinanceWidget() {
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.js();
+      const json = await res.json();
 
       if (json.formattedData?.formatType === 'finance_summary') {
         setData(json.formattedData);

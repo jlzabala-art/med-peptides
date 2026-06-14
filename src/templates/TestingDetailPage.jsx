@@ -12,7 +12,7 @@ import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
 import React, { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePageMeta } from '../hooks/usePageMeta';
-import { getSupplementWithVariants, getActiveSupplements } from '../repositories/supplementRepository';
+import { getSupplementWithVariants } from '../repositories/supplementRepository';
 import { trackRecentView } from '../utils/recentViews';
 import { resolveAndFormatPrice } from '../utils/resolvePrice';
 import { usePricingTier } from '../hooks/usePricingTier';
@@ -30,10 +30,6 @@ import { usePricingTier } from '../hooks/usePricingTier';
 import { DetailSkeleton } from '../components/shared/SkeletonLoader';
 import ProtocolTOC from '../components/protocol/ProtocolTOC';
 
-function nameToSlug(name) {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-}
-
 export default function TestingDetailPage({ onAddToCart, region }) {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -46,8 +42,12 @@ export default function TestingDetailPage({ onAddToCart, region }) {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setError(null);
+    
+    // Defer state updates to avoid React synchronous effect warning
+    Promise.resolve().then(() => {
+      setLoading(true);
+      setError(null);
+    });
 
     getSupplementWithVariants(slug)
       .then((data) => {

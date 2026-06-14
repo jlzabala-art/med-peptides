@@ -24,7 +24,7 @@ export default function ProtectedRoute({ allowedRoles }) {
   // Si está logueado pero el rol no está en la lista permitida
   if (allowedRoles && !allowedRoles.includes(activeRole)) {
     // Redirigir al dashboard base (el App router ya decide adónde lo manda según el rol)
-    return <Navigate to="/paciente" replace />;
+    return <Navigate to="/patient" replace />;
   }
 
   return <Outlet />;

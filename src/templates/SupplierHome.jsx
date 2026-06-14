@@ -6,7 +6,7 @@ import Settings from "lucide-react/dist/esm/icons/settings";
 import LogOut from "lucide-react/dist/esm/icons/log-out";
 import Package from "lucide-react/dist/esm/icons/package";
 import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
 
 

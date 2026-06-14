@@ -589,7 +589,7 @@ export default function AdminAnalyticsTab() {
         signal: abortRef.current.signal,
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.js();
+      const json = await res.json();
       writeCache(periodDays, json);
       setData(json);
       setLastRefresh(new Date());

@@ -79,25 +79,25 @@ export default function ProtocolValidation({ products }) {
     return { status, score, hardConflicts, softConflicts, warnings, recommendedFixes };
   };
 
-  async function loadAndValidate() {
-    const data = await getProtocolById(protocolId);
-    if (!data) return;
-
-    setProtocol(data);
-    const results = performValidation(data);
-    setValidationResults(results);
-
-    // Sync results with backend for institutional logging
-    await updateProtocol(protocolId, {
-      validationStatus: results.status,
-      lastValidationAt: new Date().toISOString(),
-      safetyScore: results.score,
-      protocol_validation_cache: results
-    });
-  }
-
   // Simulation of a multi-stage clinical scan for better UX
   useEffect(() => {
+    async function loadAndValidate() {
+      const data = await getProtocolById(protocolId);
+      if (!data) return;
+
+      setProtocol(data);
+      const results = performValidation(data);
+      setValidationResults(results);
+
+      // Sync results with backend for institutional logging
+      await updateProtocol(protocolId, {
+        validationStatus: results.status,
+        lastValidationAt: new Date().toISOString(),
+        safetyScore: results.score,
+        protocol_validation_cache: results
+      });
+    }
+
     if (protocolId) {
       const stages = [
         'Fetching protocol data...',
@@ -124,7 +124,7 @@ export default function ProtocolValidation({ products }) {
 
       return () => clearInterval(stageInterval);
     }
-  }, [protocolId]);
+  }, [protocolId, products]);
 
   const handleApprove = async () => {
     if (validationResults.status === 'blocked' && !bypassWarning) return;

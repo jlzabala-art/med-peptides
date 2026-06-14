@@ -21,7 +21,7 @@ import Beaker from "lucide-react/dist/esm/icons/beaker";
 import History from "lucide-react/dist/esm/icons/history";
 import FileSearch from "lucide-react/dist/esm/icons/file-search";
 import Dna from "lucide-react/dist/esm/icons/dna";
-/* eslint-disable react-hooks/set-state-in-effect, no-undef, no-unused-vars */
+/* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 
@@ -73,16 +73,16 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeStep]);
 
-  async function loadProtocol() {
-    setLoading(true);
-    const data = await getProtocolById(protocolId);
-    if (data) {
-      setProtocol(data);
-    }
-    setLoading(false);
-  }
-
   useEffect(() => {
+    async function loadProtocol() {
+      setLoading(true);
+      const data = await getProtocolById(protocolId);
+      if (data) {
+        setProtocol(data);
+      }
+      setLoading(false);
+    }
+
     if (protocolId) {
       loadProtocol();
     }

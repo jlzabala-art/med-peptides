@@ -90,7 +90,7 @@ export function useAppSettings() {
 
     let cancelled = false;
     fetch('https://ipapi.co/json/')
-      .then((res) => res.js())
+      .then((res) => res.json())
       .then((data) => {
         if (cancelled || !data.country_name) return;
 

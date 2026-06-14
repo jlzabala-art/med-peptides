@@ -1,6 +1,6 @@
 import Globe from "lucide-react/dist/esm/icons/globe";
 import Menu from "lucide-react/dist/esm/icons/menu";
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { FiSearch, FiBell, FiCpu } from 'react-icons/fi';
 
@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AtlasHealthLogo from '../components/brand/AtlasHealthLogo';
+import UserDropdown from '../navigation/UserDropdown';
 
 export default function PortalHeader({ onToggleAI, onToggleSidebar }) {
   const { userProfile, activeRole } = useAuth();
@@ -16,8 +17,11 @@ export default function PortalHeader({ onToggleAI, onToggleSidebar }) {
   const location = useLocation();
   const { t, i18n } = useTranslation();
 
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
   const toggleLanguage = () => {
-    const newLang = i18n.language === 'en' ? 'es' : 'en';
+    const currentLang = i18n.language || window.localStorage.getItem('language') || 'en';
+    const newLang = currentLang.startsWith('en') ? 'es' : 'en';
     i18n.changeLanguage(newLang);
     localStorage.setItem('language', newLang);
   };
@@ -70,7 +74,7 @@ export default function PortalHeader({ onToggleAI, onToggleSidebar }) {
             borderRadius: '4px',
             lineHeight: '1'
           }}>
-            {i18n.language.toUpperCase()}
+            {(i18n.language || 'en').substring(0, 2).toUpperCase()}
           </span>
         </button>
 
@@ -111,7 +115,12 @@ export default function PortalHeader({ onToggleAI, onToggleSidebar }) {
         </button>
 
         {/* User Profile */}
-        <div className="user-profile" onClick={() => navigate('/profile')} title="Manage Account Settings">
+        <div 
+          className="user-profile" 
+          onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} 
+          title="Manage Account Settings"
+          style={{ position: 'relative' }}
+        >
           <div className="avatar">
             {(() => {
               const first = userProfile?.firstName || '';
@@ -137,6 +146,17 @@ export default function PortalHeader({ onToggleAI, onToggleSidebar }) {
             <span className="user-name">{userProfile?.firstName || 'User'}</span>
             <span className="user-role">{activeRole}</span>
           </div>
+          {isUserMenuOpen && (
+            <UserDropdown 
+              user={userProfile}
+              userProfile={userProfile}
+              onClose={() => setIsUserMenuOpen(false)}
+              onLogout={() => {
+                setIsUserMenuOpen(false);
+                navigate('/login');
+              }}
+            />
+          )}
         </div>
       </div>
 

@@ -60,47 +60,47 @@ export default function CatalogTableView({
       render: (row) => <span style={{ fontSize: '0.85rem' }}>{row.category || '-'}</span>
     },
     {
-      key: 'supplier',
-      header: 'Supplier',
-      render: (row) => <span style={{ fontSize: '0.85rem' }}>{row.supplier || '-'}</span>
-    },
-    {
-      key: 'stock',
-      header: 'Stock',
-      sortValue: row => row.stock,
+      key: 'coverage',
+      header: 'Coverage',
       render: (row) => {
-        let color = '#dc2626';
-        if (row.stock > 20) color = '#16a34a';
-        else if (row.stock > 0) color = '#ea580c';
+        const variants = row.variants || [];
+        const uniqueSuppliers = new Set(variants.map(v => v.supplier).filter(Boolean));
+        const count = uniqueSuppliers.size;
+        
+        let coverageText = 'No Source';
+        let color = '#94a3b8'; // gray
+        let bg = 'rgba(148, 163, 184, 0.1)';
+        
+        if (count === 1) {
+           coverageText = 'Single Source';
+           color = '#f59e0b'; 
+           bg = 'rgba(245, 158, 11, 0.1)';
+        } else if (count === 2) {
+           coverageText = 'Dual Source';
+           color = '#3b82f6';
+           bg = 'rgba(59, 130, 246, 0.1)';
+        } else if (count >= 3) {
+           coverageText = 'Multi Source';
+           color = '#10b981';
+           bg = 'rgba(16, 185, 129, 0.1)';
+        }
+
         return (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color }}>
-              {row.stock || 0}
-            </span>
-            {row.stock < 20 && <AlertCircle size={14} color="#ea580c" />}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+            <div style={{ 
+              fontWeight: 600, 
+              color: color, 
+              fontSize: '0.75rem', 
+              background: bg, 
+              padding: '2px 8px', 
+              borderRadius: '12px' 
+            }}>
+              {coverageText}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{count} Supplier{count !== 1 ? 's' : ''}</div>
           </div>
         );
       }
-    },
-    {
-      key: 'regulatory',
-      header: 'Regulatory',
-      render: (row) => (
-        <span style={{
-          fontSize: '0.75rem',
-          fontWeight: 600,
-          color: row.registrationStatus === 'Registered' ? '#16a34a' : (row.registrationStatus === 'Pending' ? '#d97706' : '#64748b'),
-          backgroundColor: row.registrationStatus === 'Registered' ? '#dcfce7' : (row.registrationStatus === 'Pending' ? '#fef3c7' : '#f1f5f9'),
-          padding: '2px 8px',
-          borderRadius: '12px',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '4px'
-        }}>
-          {row.registrationStatus === 'Registered' ? <ShieldCheck size={12}/> : <ShieldAlert size={12}/>}
-          {row.registrationStatus || 'Unregistered'}
-        </span>
-      )
     },
     {
       key: 'health',

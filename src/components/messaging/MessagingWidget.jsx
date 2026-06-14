@@ -72,7 +72,10 @@ export default function MessagingWidget({ role, ownerId }) {
   }, [showNewChat, isAdmin, effectiveRole, allUsers.length]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      const t = setTimeout(() => setLoading(false), 2000);
+      return () => clearTimeout(t);
+    }
     const q =
       effectiveRole === 'admin' || isAdmin
         ? query(collection(db, 'conversations'), orderBy('lastMessageAt', 'desc'))
@@ -340,7 +343,7 @@ export default function MessagingWidget({ role, ownerId }) {
                   color: 'var(--color-text-tertiary)',
                 }}
               >
-                Loading...
+                {/* Empty instead of explicit Loading... text per user request */}
               </div>
             ) : filtered.length === 0 ? (
               <div

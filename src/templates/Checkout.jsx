@@ -1521,7 +1521,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
 
               {/* Secondary: View My Orders */}
               <button
-                onClick={() => { window.location.href = '/paciente/orders'; }}
+                onClick={() => { window.location.href = '/patient/orders'; }}
                 style={{
                   padding: '1.1rem 1.5rem',
                   background: 'rgba(0,0,0,0.03)',
@@ -2913,7 +2913,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
           </>
         ) : (
           <div className="co-fab-inner">
-            <button type="button" className="co-fab-btn" onClick={() => { window.location.href = '/paciente/orders'; }} style={{ background: 'var(--color-text-primary)' }}>
+            <button type="button" className="co-fab-btn" onClick={() => { window.location.href = '/patient/orders'; }} style={{ background: 'var(--color-text-primary)' }}>
               <span>View My Orders</span>
               <ArrowLeft size={18} strokeWidth={2.5} style={{ transform: 'rotate(180deg)' }} />
             </button>

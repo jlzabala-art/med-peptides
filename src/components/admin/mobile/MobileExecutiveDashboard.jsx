@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   CheckCircle2, AlertTriangle, ArrowRight, ChevronRight, BarChart3, 
   DollarSign, Activity, Settings, TrendingUp, TrendingDown,
-  BrainCircuit, ShieldAlert, Zap, Factory, PackageSearch, Users, Star, Box
+  BrainCircuit, ShieldAlert, Zap, Factory, PackageSearch, Users, Star, Box, Check, Cpu
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -25,12 +25,12 @@ export default function MobileExecutiveDashboard() {
   ];
 
   const kpis = [
-    { label: 'Revenue', value: '$84.2K', color: '#16a34a' },
-    { label: 'Cash Position', value: '$124.5K', color: '#0284c7' },
-    { label: 'Open Orders', value: '42', color: '#d97706' },
-    { label: 'Approvals', value: '8', color: '#dc2626' },
-    { label: 'AI Alerts', value: '3', color: '#9333ea' },
-    { label: 'Gross Profit', value: '41%', color: '#059669' }
+    { label: 'Revenue', value: '$84.2K', color: '#10b981', trend: '+12%' },
+    { label: 'Cash Position', value: '$124.5K', color: '#38bdf8', trend: '+5%' },
+    { label: 'Open Orders', value: '42', color: '#fbbf24', trend: '-2' },
+    { label: 'Approvals', value: '8', color: '#f43f5e', trend: '+3' },
+    { label: 'AI Alerts', value: '3', color: '#c084fc', trend: 'New' },
+    { label: 'Gross Profit', value: '41%', color: '#10b981', trend: '+1.2%' }
   ];
 
   const health = [
@@ -57,149 +57,235 @@ export default function MobileExecutiveDashboard() {
   ];
 
   return (
-    <div style={{ padding: '1rem', paddingBottom: '100px', backgroundColor: '#f8fafc', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ 
+      padding: '1.5rem 1rem', 
+      paddingBottom: '120px', 
+      backgroundColor: '#0f172a', 
+      minHeight: '100vh', 
+      fontFamily: 'Inter, sans-serif',
+      color: '#f8fafc',
+      backgroundImage: 'radial-gradient(circle at top right, rgba(14, 165, 233, 0.1), transparent 400px), radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.05), transparent 400px)'
+    }}>
       
-      {/* 1. Today's Focus */}
-      <div style={{ backgroundColor: 'var(--surface, #fff)', borderRadius: '12px', border: '1px solid #bae6fd', overflow: 'hidden', marginBottom: '1rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-        <div style={{ backgroundColor: '#f0f9ff', padding: '12px 16px', borderBottom: '1px solid #bae6fd', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <BrainCircuit size={18} color="#0284c7" />
-          <h2 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, color: '#0369a1' }}>TODAY'S FOCUS</h2>
+      {/* 1. Today's Focus - Premium Glassmorphism */}
+      <div style={{ 
+        background: 'rgba(30, 41, 59, 0.7)', 
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderRadius: '20px', 
+        border: '1px solid rgba(255, 255, 255, 0.1)', 
+        overflow: 'hidden', 
+        marginBottom: '1.5rem', 
+        boxShadow: '0 20px 40px -15px rgba(0,0,0,0.5)' 
+      }}>
+        <div style={{ 
+          background: 'linear-gradient(90deg, rgba(14, 165, 233, 0.15), rgba(139, 92, 246, 0.15))', 
+          padding: '16px 20px', 
+          borderBottom: '1px solid rgba(255, 255, 255, 0.05)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '12px' 
+        }}>
+          <div style={{ padding: '8px', background: 'rgba(14, 165, 233, 0.2)', borderRadius: '12px' }}>
+            <BrainCircuit size={20} color="#38bdf8" />
+          </div>
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, color: '#f8fafc', letterSpacing: '0.02em' }}>
+            ATLAS INTELLIGENCE
+          </h2>
         </div>
-        <div style={{ padding: '16px' }}>
-          <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+        <div style={{ padding: '20px' }}>
+          <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
             {priorities.map((p, i) => (
-              <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.9rem', color: '#334155' }}>
-                <span style={{ color: '#0ea5e9' }}>•</span>
+              <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                <div style={{ marginTop: '2px', color: '#38bdf8' }}>
+                  <CheckCircle2 size={16} />
+                </div>
                 <div>
-                  <div style={{ fontWeight: 600 }}>{p.title}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Impact: {p.impact}</div>
+                  <div style={{ fontWeight: 600, color: '#f1f5f9', fontSize: '0.95rem', marginBottom: '2px' }}>{p.title}</div>
+                  <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Impact: <span style={{ color: p.impact.includes('+') ? '#10b981' : p.impact.includes('Critical') ? '#ef4444' : '#eab308', fontWeight: 600 }}>{p.impact}</span></div>
                 </div>
               </li>
             ))}
           </ul>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-            <button style={{ padding: '10px', backgroundColor: '#0284c7', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '0.9rem' }} onClick={() => toast.success('Resolving priorities...')}>Resolve</button>
-            <button style={{ padding: '10px', backgroundColor: '#f1f5f9', color: '#0f172a', border: '1px solid #cbd5e1', borderRadius: '8px', fontWeight: 600, fontSize: '0.9rem' }} onClick={() => toast('Atlas AI listening...')}>Ask Atlas</button>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <button 
+              onClick={() => toast.success('Resolving priorities...')}
+              style={{ 
+                padding: '12px', 
+                background: 'linear-gradient(135deg, #0ea5e9, #6366f1)', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '12px', 
+                fontWeight: 700, 
+                fontSize: '0.9rem',
+                boxShadow: '0 4px 14px rgba(14, 165, 233, 0.4)',
+                cursor: 'pointer'
+              }}>
+              Resolve All
+            </button>
+            <button 
+              onClick={() => toast('Atlas AI listening...')}
+              style={{ 
+                padding: '12px', 
+                background: 'rgba(255, 255, 255, 0.05)', 
+                color: '#f8fafc', 
+                border: '1px solid rgba(255, 255, 255, 0.1)', 
+                borderRadius: '12px', 
+                fontWeight: 600, 
+                fontSize: '0.9rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                cursor: 'pointer'
+              }}>
+              <Zap size={16} color="#fbbf24" /> Ask Atlas
+            </button>
           </div>
         </div>
       </div>
 
-      {/* 2. Priority Queue */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.75rem', paddingLeft: '4px' }}>Priority Queue</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {queue.map(q => (
-            <div key={q.id} style={{ backgroundColor: 'var(--surface, #fff)', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={() => toast(`Opening drawer for: ${q.title}`)}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '0.65rem', fontWeight: 700, backgroundColor: '#f1f5f9', color: '#475569', padding: '2px 6px', borderRadius: '4px', display: 'inline-block', marginBottom: '4px' }}>{q.badge}</div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#0f172a', lineHeight: 1.3 }}>{q.title}</div>
-                <div style={{ fontSize: '0.75rem', color: '#ea580c', fontWeight: 500, marginTop: '2px' }}>{q.impact}</div>
+      {/* 3. Executive KPI Snapshot */}
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem', paddingLeft: '4px' }}>Pulse Dashboard</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          {kpis.map(kpi => (
+            <div key={kpi.label} style={{ 
+              background: 'rgba(30, 41, 59, 0.5)', 
+              border: '1px solid rgba(255, 255, 255, 0.05)', 
+              borderRadius: '16px', 
+              padding: '16px', 
+              height: '100px', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              justifyContent: 'space-between',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '50px', height: '50px', background: `radial-gradient(circle, ${kpi.color}30, transparent 70%)` }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 600 }}>{kpi.label}</div>
+                <div style={{ fontSize: '0.7rem', fontWeight: 700, color: kpi.trend.includes('-') ? '#ef4444' : kpi.color, background: `${kpi.trend.includes('-') ? '#ef4444' : kpi.color}15`, padding: '2px 6px', borderRadius: '4px' }}>
+                  {kpi.trend}
+                </div>
               </div>
-              <ChevronRight size={18} color="#94a3b8" />
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f8fafc', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>{kpi.value}</div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* 3. Executive KPI Snapshot */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.75rem', paddingLeft: '4px' }}>Snapshot</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-          {kpis.map(kpi => (
-            <div key={kpi.label} style={{ backgroundColor: 'var(--surface, #fff)', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px', height: '90px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>{kpi.label}</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: kpi.color }}>{kpi.value}</div>
+      {/* 2. Priority Queue */}
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem', paddingLeft: '4px' }}>Action Queue</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {queue.map(q => (
+            <div key={q.id} 
+              style={{ 
+                background: 'rgba(30, 41, 59, 0.6)', 
+                border: '1px solid rgba(255, 255, 255, 0.08)', 
+                borderRadius: '16px', 
+                padding: '16px', 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                transition: 'all 0.2s ease',
+                cursor: 'pointer'
+              }} 
+              onClick={() => toast(`Opening drawer for: ${q.title}`)}
+            >
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.05em', backgroundColor: 'rgba(255,255,255,0.1)', color: '#cbd5e1', padding: '3px 8px', borderRadius: '6px', display: 'inline-block', marginBottom: '8px' }}>{q.badge}</div>
+                <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc', lineHeight: 1.4, marginBottom: '4px' }}>{q.title}</div>
+                <div style={{ fontSize: '0.8rem', color: q.impact.includes('-') ? '#f43f5e' : '#10b981', fontWeight: 600 }}>{q.impact}</div>
+              </div>
+              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '50%' }}>
+                <ChevronRight size={18} color="#94a3b8" />
+              </div>
             </div>
           ))}
         </div>
       </div>
 
       {/* 4. Executive AI Brief */}
-      <div style={{ marginBottom: '1.5rem', backgroundColor: 'var(--surface, #fff)', border: '1px solid #e0e7ff', borderRadius: '12px', padding: '16px' }}>
-        <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#4f46e5', textTransform: 'uppercase', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Zap size={14} /> Executive AI Brief
+      <div style={{ 
+        marginBottom: '2rem', 
+        background: 'linear-gradient(180deg, rgba(99, 102, 241, 0.15) 0%, rgba(30, 41, 59, 0.6) 100%)', 
+        border: '1px solid rgba(99, 102, 241, 0.3)', 
+        borderRadius: '20px', 
+        padding: '20px',
+        boxShadow: '0 10px 30px -10px rgba(99, 102, 241, 0.2)'
+      }}>
+        <h3 style={{ fontSize: '0.8rem', fontWeight: 800, color: '#818cf8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Cpu size={16} /> Strategy Insights
         </h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
-          <div style={{ fontSize: '0.85rem', color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>• High conversion rate in UAE clinics this week.</div>
-          <div style={{ fontSize: '0.85rem', color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>• Freight costs from China down 4% overall.</div>
-          <div style={{ fontSize: '0.85rem', color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>• Recommend purchasing BPC-157 before Q3.</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+          <div style={{ fontSize: '0.9rem', color: '#e2e8f0', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+            <div style={{ color: '#818cf8', marginTop: '2px' }}><ArrowRight size={14} /></div>
+            <span style={{ lineHeight: 1.5 }}>High conversion rate in UAE clinics this week (+14%).</span>
+          </div>
+          <div style={{ fontSize: '0.9rem', color: '#e2e8f0', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+            <div style={{ color: '#818cf8', marginTop: '2px' }}><ArrowRight size={14} /></div>
+            <span style={{ lineHeight: 1.5 }}>Freight costs from China down 4% overall. Opportunity to bulk order.</span>
+          </div>
+          <div style={{ fontSize: '0.9rem', color: '#e2e8f0', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+            <div style={{ color: '#818cf8', marginTop: '2px' }}><ArrowRight size={14} /></div>
+            <span style={{ lineHeight: 1.5 }}>Recommend purchasing BPC-157 before Q3 due to projected shortage.</span>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button style={{ flex: 1, padding: '8px', fontSize: '0.8rem', fontWeight: 600, color: '#4f46e5', backgroundColor: '#eef2ff', border: 'none', borderRadius: '6px' }}>View More</button>
-          <button style={{ flex: 1, padding: '8px', fontSize: '0.8rem', fontWeight: 600, color: '#334155', backgroundColor: '#f1f5f9', border: 'none', borderRadius: '6px' }}>Ask Atlas</button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button style={{ flex: 1, padding: '12px', fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc', background: 'rgba(99, 102, 241, 0.5)', border: '1px solid rgba(99, 102, 241, 0.5)', borderRadius: '10px' }}>Deep Dive</button>
+          <button style={{ flex: 1, padding: '12px', fontSize: '0.85rem', fontWeight: 700, color: '#cbd5e1', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '10px' }}>Dismiss</button>
         </div>
       </div>
 
       {/* 5. Business Health Matrix */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.75rem', paddingLeft: '4px' }}>Health Matrix</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', backgroundColor: 'var(--surface, #fff)', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px' }}>
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem', paddingLeft: '4px' }}>Health Matrix</h3>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: '1fr 1fr', 
+          gap: '12px', 
+          background: 'rgba(30, 41, 59, 0.6)', 
+          border: '1px solid rgba(255, 255, 255, 0.08)', 
+          borderRadius: '20px', 
+          padding: '20px' 
+        }}>
           {health.map(item => (
-            <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: item.status === 'green' ? '#10b981' : item.status === 'yellow' ? '#f59e0b' : '#ef4444' }} />
-              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#334155' }}>{item.label}</span>
+            <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ 
+                width: '12px', 
+                height: '12px', 
+                borderRadius: '50%', 
+                backgroundColor: item.status === 'green' ? '#10b981' : item.status === 'yellow' ? '#f59e0b' : '#ef4444',
+                boxShadow: `0 0 10px ${item.status === 'green' ? '#10b981' : item.status === 'yellow' ? '#f59e0b' : '#ef4444'}80`
+              }} />
+              <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#e2e8f0' }}>{item.label}</span>
             </div>
           ))}
         </div>
-      </div>
-
-      {/* 6. Atlas Sourcing Hub */}
-      <div style={{ marginBottom: '1.5rem', backgroundColor: 'var(--surface, #fff)', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
-        <div 
-          onClick={() => setSourcingExpanded(!sourcingExpanded)}
-          style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', backgroundColor: sourcingExpanded ? '#f8fafc' : 'transparent' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <PackageSearch size={16} color="#64748b" />
-            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a' }}>Atlas Sourcing Hub</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#059669', backgroundColor: '#d1fae5', padding: '2px 6px', borderRadius: '4px' }}>94% Conf.</div>
-            <ChevronRight size={16} color="#94a3b8" style={{ transform: sourcingExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
-          </div>
-        </div>
-        {sourcingExpanded && (
-          <div style={{ padding: '16px', borderTop: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '0.85rem', color: '#475569', marginBottom: '8px' }}>AI has identified 2 new vetted suppliers for Retatrutide.</div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0ea5e9', marginBottom: '12px' }}>Est. Impact: 12% margin increase</div>
-            <button style={{ width: '100%', padding: '8px', backgroundColor: '#0f172a', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600 }}>Review Suppliers</button>
-          </div>
-        )}
       </div>
 
       {/* 7. CRM Funnel */}
-      <div style={{ marginBottom: '1.5rem', backgroundColor: 'var(--surface, #fff)', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px' }}>
-        <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Users size={14} /> Pipeline
+      <div style={{ 
+        marginBottom: '2rem', 
+        background: 'rgba(30, 41, 59, 0.6)', 
+        border: '1px solid rgba(255, 255, 255, 0.08)', 
+        borderRadius: '20px', 
+        padding: '20px' 
+      }}>
+        <h3 style={{ fontSize: '0.8rem', fontWeight: 800, color: '#f8fafc', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Users size={16} color="#38bdf8" /> Sales Pipeline
         </h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {funnel.map(stage => (
             <div key={stage.label}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '8px' }}>
                 <span>{stage.label}</span>
-                <span>{stage.value}</span>
+                <span style={{ color: '#f8fafc' }}>{stage.value}</span>
               </div>
-              <div style={{ height: '8px', backgroundColor: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${stage.percent}%`, backgroundColor: '#3b82f6', borderRadius: '4px' }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 8. Top Wholesalers */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.75rem', paddingLeft: '4px' }}>Top Wholesalers</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {wholesalers.map((w, i) => (
-            <div key={i} style={{ backgroundColor: 'var(--surface, #fff)', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#0f172a' }}>{w.name}</div>
-                <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>{w.revenue} • <span style={{ color: w.growth.startsWith('+') ? '#16a34a' : '#dc2626' }}>{w.growth}</span></div>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                <div style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 600 }}>AI SCORE</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0ea5e9' }}>{w.score}</div>
+              <div style={{ height: '8px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${stage.percent}%`, background: 'linear-gradient(90deg, #0ea5e9, #38bdf8)', borderRadius: '4px', boxShadow: '0 0 10px rgba(14, 165, 233, 0.5)' }} />
               </div>
             </div>
           ))}

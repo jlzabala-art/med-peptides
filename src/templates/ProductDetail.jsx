@@ -25,7 +25,7 @@ import Scale from "lucide-react/dist/esm/icons/scale";
 import Bot from "lucide-react/dist/esm/icons/bot";
 import X from "lucide-react/dist/esm/icons/x";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-/* eslint-disable react-hooks/set-state-in-effect, no-undef, no-unused-vars */
+/* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useState, useEffect, useMemo } from 'react';
 import { trackPeptideView, trackPurchaseIntent } from '../hooks/useAnalytics';
 import { trackRecentView } from '../utils/recentViews';

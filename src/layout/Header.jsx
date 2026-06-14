@@ -912,7 +912,7 @@ function Header(props) {
                         <LayoutDashboard size={18} /> {t('header.adminBoard', 'Admin Board')}
                       </Link>
                     ) : (
-                      <Link to="/paciente" className="drawer-link" onClick={() => setMobileMenuOpen(false)}><LayoutDashboard size={18} /> {t('header.dashboard', 'Dashboard')}</Link>
+                      <Link to="/patient" className="drawer-link" onClick={() => setMobileMenuOpen(false)}><LayoutDashboard size={18} /> {t('header.dashboard', 'Dashboard')}</Link>
                     )}                    <button 
                       onClick={() => { logout(); setMobileMenuOpen(false); }}
                       style={{ width: '100%', background: 'none', border: 'none', color: 'var(--text-muted)', textAlign: 'left' }}

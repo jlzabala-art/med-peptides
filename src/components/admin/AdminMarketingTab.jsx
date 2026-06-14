@@ -45,7 +45,7 @@ export default function AdminMarketingTab() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code })
       })
-      .then(res => res.js())
+      .then(res => res.json())
       .then(data => {
         if(data.success) {
           notifier.info('LinkedIn conectado correctamente!');
@@ -108,7 +108,7 @@ export default function AdminMarketingTab() {
     setAuthLoading(true);
     try {
       const res = await fetch('https://us-central1-med-peptides-app.cloudfunctions.net/generateLinkedinAuthUrl');
-      const data = await res.js();
+      const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
       } else {

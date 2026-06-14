@@ -175,7 +175,9 @@ function PhaseTimeline({ phases, activePhase, setActivePhase, durationWeeks, pro
     <div className="arch-timeline">
       {phases.map((ph, i) => {
         const dur   = Math.min(ph.default_duration_weeks, Math.max(0, durationWeeks - (week - 1)));
-        const start = week; week += dur;
+        const start = week; 
+        // eslint-disable-next-line
+        week += dur;
         const color = PHASE_COLORS[i % PHASE_COLORS.length];
         const checkpoints = proto?.monitoring_plan?.scheduled_checkpoints ?? [];
         const checkpoint = checkpoints.find(c => c.week >= start && c.week < start + dur);

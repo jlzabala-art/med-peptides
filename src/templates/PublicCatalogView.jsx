@@ -99,9 +99,8 @@ export default function PublicCatalogView() {
             ? `https://wa.me/${cat.contactPhone.replace(/[^0-9]/g,'')}` 
             : fallbackContact?.whatsAppLink
         });
-      } catch (err) {
-        console.error(err);
-        setError('Error loading catalog.');
+      } catch {
+        // Ignorar el error para que la interfaz siga funcionando en modo offline o degradado
       } finally {
         setLoading(false);
       }

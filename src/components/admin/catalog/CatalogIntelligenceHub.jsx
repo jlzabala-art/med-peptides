@@ -16,6 +16,7 @@ import ProductDetailsDrawer from "../products/ProductDetailsDrawer";
 import SmartProductIntakeWizard from "./SmartProductIntakeWizard";
 import AdvancedFiltersDrawer from './AdvancedFiltersDrawer';
 import CatalogImportWizard from './CatalogImportWizard';
+import ProductIntelligenceModal from './ProductIntelligenceModal';
 
 
 
@@ -26,7 +27,7 @@ import toast from 'react-hot-toast';
 import styles from './CatalogIntelligenceHub.module.css';
 
 export default function CatalogIntelligenceHub() {
-  const { products, loading, refresh, updateProduct, deleteProduct } = useCatalogData();
+  const { products, loading, refresh, updateProduct, deleteProduct, addProduct } = useCatalogData();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
@@ -55,6 +56,8 @@ export default function CatalogIntelligenceHub() {
   const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [aiProduct, setAiProduct] = useState(null);
 
   // Derive categories for chips
   const categories = useMemo(() => {
@@ -200,6 +203,21 @@ export default function CatalogIntelligenceHub() {
     });
   };
 
+  const handleUpdateAdvancedFilter = (workspace, key, value, subKey = null) => {
+    setAdvancedFilters(prev => {
+      const newState = { ...prev };
+      if (subKey) {
+        newState[workspace] = {
+          ...newState[workspace],
+          [key]: { ...newState[workspace][key], [subKey]: value }
+        };
+      } else {
+        newState[workspace] = { ...newState[workspace], [key]: value };
+      }
+      return newState;
+    });
+  };
+
   const handleClearAllFilters = () => {
     setAdvancedFilters({
       products: { category: 'All Categories', supplier: 'All Suppliers', minHealth: 0 },
@@ -257,7 +275,8 @@ export default function CatalogIntelligenceHub() {
         { duration: Infinity }
       );
     } else if (action === 'ai') {
-      toast('AI Insights coming soon for ' + product.name, { icon: '✨' });
+      setAiProduct(product);
+      setIsAiModalOpen(true);
     }
   };
 
@@ -329,6 +348,8 @@ export default function CatalogIntelligenceHub() {
         activeFilters={activeFiltersVisuals}
         onRemoveFilter={handleRemoveFilter}
         onClearAllFilters={handleClearAllFilters}
+        advancedFilters={advancedFilters}
+        onUpdateAdvancedFilter={handleUpdateAdvancedFilter}
       />
 
       {/* Workspace Content Router */}
@@ -349,7 +370,7 @@ export default function CatalogIntelligenceHub() {
       </div>
 
       {/* Modals & Drawers */}
-      <SmartProductIntakeWizard isOpen={isCreateModalOpen} onClose={() => { setIsCreateModalOpen(false); refresh(); }} />
+      <SmartProductIntakeWizard isOpen={isCreateModalOpen} onClose={() => { setIsCreateModalOpen(false); refresh(); }} onAddProduct={addProduct} />
       {isDrawerOpen && selectedProduct && (
         <ProductDetailsDrawer product={selectedProduct} onClose={() => { setIsDrawerOpen(false); setSelectedProduct(null); }} onProductUpdated={() => refresh()} />
       )}
@@ -363,6 +384,7 @@ export default function CatalogIntelligenceHub() {
         onCategoryChange={setActiveCategories}
       />
       <CatalogImportWizard isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} />
+      <ProductIntelligenceModal isOpen={isAiModalOpen} onClose={() => setIsAiModalOpen(false)} product={aiProduct} />
 
       {/* Mobile Floating Action Button */}
       {isMobile && activeWorkspace === 'products' && (

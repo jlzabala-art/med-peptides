@@ -500,7 +500,7 @@ export default function AdminZohoCRMWidget({
         throw new Error(`Search failed: ${res.status}`);
       }
 
-      const result = await res.js();
+      const result = await res.json();
       if (result.found) {
         setSearchResult(result);
       } else {

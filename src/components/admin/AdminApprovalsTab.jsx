@@ -113,7 +113,7 @@ export default function AdminApprovalsTab() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ poId, billId })
       });
-      const data = await res.js();
+      const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to run AI Audit');
       toast.success(`AI Audit completado con Score: ${data.result.confidenceScore}%`);
     } catch (e) {

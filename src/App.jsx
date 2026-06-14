@@ -298,8 +298,7 @@ function App() {
 
   
   const isHome = location.pathname === '/' || ['/clinic', '/doctor', '/wholesaler', '/sales_agent', '/staff', '/patient'].includes(location.pathname);
-
-
+  const isPortalRoute = /^\/(admin|doctor|patient|wholesaler|pharmacy-dashboard|staff|clinic)/.test(location.pathname);
 
   const handleCategorySelect = (cat) => {
     console.log('[App] Category Select:', cat);
@@ -369,7 +368,7 @@ function App() {
         navigate('/admin');
       }
     } else if (cat === 'Dashboard') {
-      navigate('/paciente');
+      navigate('/patient');
     } else if (cat === 'Settings') {
       navigate('/settings');
     } else if (cat === 'Legal') {
@@ -634,7 +633,7 @@ function App() {
       )}
 
       {/* ── Mobile Navigation ── */}
-      <BottomTabBar />
+      {!isPortalRoute && <BottomTabBar />}
       </div>
   );
 }

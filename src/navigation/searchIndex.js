@@ -103,7 +103,7 @@ export const searchIndex = [
     title: 'Patient Dashboard',
     description: 'Overview of active protocols and next steps',
     category: 'Portal',
-    path: '/paciente',
+    path: '/patient',
     iconName: 'layout-dashboard',
     roles: ['patient', 'guest']
   },

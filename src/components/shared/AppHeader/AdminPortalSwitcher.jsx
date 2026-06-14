@@ -38,10 +38,10 @@ export default function AdminPortalSwitcher() {
   const portals = [
     { id: 'admin', label: 'Admin Console', icon: Shield, route: '/admin' },
     { id: 'doctor', label: 'Clinical Portal', icon: Stethoscope, route: '/doctor' },
-    { id: 'patient', label: 'Patient Portal', icon: User, route: '/paciente' },
+    { id: 'patient', label: 'Patient Portal', icon: User, route: '/patient' },
     { id: 'wholesaler', label: 'Wholesaler Portal', icon: Building2, route: '/wholesaler' },
     { id: 'compounding_pharmacy', label: 'Pharmacy Portal', icon: FlaskConical, route: '/pharmacy-dashboard' },
-    { id: 'b2c', label: 'B2C Storefront', icon: ShoppingCart, route: '/' }
+    { id: 'b2c', label: 'Go to B2C Shop', icon: ShoppingCart, route: '/' }
   ];
 
   const currentPortal = portals.find(p => p.id === activeRole) || {
@@ -74,8 +74,15 @@ export default function AdminPortalSwitcher() {
         }}
         title="Switch portal view"
       >
+        <style>
+          {`
+            @media (max-width: 720px) {
+              .admin-switcher-label { display: none; }
+            }
+          `}
+        </style>
         {currentPortal.icon && <currentPortal.icon size={16} />}
-        {currentPortal.label}
+        <span className="admin-switcher-label">{currentPortal.label}</span>
         <ChevronDown size={14} />
       </button>
 
@@ -83,7 +90,7 @@ export default function AdminPortalSwitcher() {
         <div style={{
           position: 'absolute',
           top: '100%',
-          right: 0,
+          left: 0,
           marginTop: '0.5rem',
           background: 'white',
           borderRadius: '8px',

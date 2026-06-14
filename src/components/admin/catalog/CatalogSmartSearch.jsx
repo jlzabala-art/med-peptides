@@ -17,6 +17,7 @@ export default function CatalogSmartSearch({
   searchQuery, 
   onSearchChange,
   activeCategories = [],
+  categories = [],
   onCategoryChange,
   onOpenAdvancedFilters,
   activeFilters = [], 
@@ -24,7 +25,9 @@ export default function CatalogSmartSearch({
   onClearAllFilters,
   isMobile,
   products = [],
-  activeWorkspace = 'products'
+  activeWorkspace = 'products',
+  advancedFilters = {},
+  onUpdateAdvancedFilter
 }) {
   const placeholders = [
     "Ask Atlas: 'Compare suppliers for BPC-157'...",
@@ -158,8 +161,10 @@ export default function CatalogSmartSearch({
         </div>
       </div>
 
-      {/* Selected Categories & Active Filter Chips */}
-      {(activeCategories.length > 0 || (activeFilters && activeFilters.length > 0)) && (
+      {/* Quick Dropdown Filters removed as requested */}
+
+      {/* Selected Categories, Supplier & Active Filter Chips */}
+      {(activeCategories.length > 0 || (activeFilters && activeFilters.length > 0) || (activeWorkspace === 'products' && advancedFilters?.products?.supplier && advancedFilters.products.supplier !== 'All Suppliers')) && (
         <div style={{
           display: 'flex',
           gap: '0.6rem',
@@ -197,6 +202,29 @@ export default function CatalogSmartSearch({
             </div>
           ))}
 
+          {activeWorkspace === 'products' && advancedFilters?.products?.supplier && advancedFilters.products.supplier !== 'All Suppliers' && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 12px',
+              background: 'linear-gradient(135deg, rgba(99,102,241,0.05), rgba(168,85,247,0.05))',
+              border: '1px solid rgba(99,102,241,0.2)',
+              borderRadius: '16px',
+              fontSize: '0.8rem',
+              color: 'var(--text-main, #1e293b)',
+              fontWeight: 500,
+            }}>
+              Supplier: {advancedFilters.products.supplier}
+              <button 
+                onClick={() => onUpdateAdvancedFilter('products', 'supplier', 'All Suppliers')}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', padding: '2px', color: 'inherit' }}
+              >
+                <X size={12} />
+              </button>
+            </div>
+          )}
+
           {activeFilters && activeFilters.map(filter => (
             <div key={filter.id} style={{
               display: 'flex',
@@ -222,7 +250,12 @@ export default function CatalogSmartSearch({
           <button 
             onClick={() => {
               if (onClearAllFilters) onClearAllFilters();
-              if (activeWorkspace === 'products') onCategoryChange([]);
+              if (activeWorkspace === 'products') {
+                onCategoryChange([]);
+                if (advancedFilters?.products?.supplier) {
+                  onUpdateAdvancedFilter('products', 'supplier', 'All Suppliers');
+                }
+              }
             }}
             style={{
               background: 'none',

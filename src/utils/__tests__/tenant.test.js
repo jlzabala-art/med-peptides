@@ -1,7 +1,7 @@
 import { describe, test, vi, expect, beforeEach } from 'vitest';
 import { getTenantSlugFromPath, resolveTenantBySlug, resolveTenantById } from '../resolveTenant';
-import { resolveVariantPrice, formatPrice, setActiveTenantForResolution, getActiveTenantForResolution } from '../resolvePrice';
-import { resolveProductPrice, resolveLowestProductPrice } from '../resolveProductPrice';
+import { resolveVariantPrice, setActiveTenantForResolution, getActiveTenantForResolution } from '../resolvePrice';
+import { resolveProductPrice } from '../resolveProductPrice';
 
 // Mock Firebase Firestore
 vi.mock('firebase/firestore', () => {
@@ -36,7 +36,7 @@ vi.mock('firebase/firestore', () => {
       docs: data.map(item => ({
         id: item.id,
         data: () => {
-          const { id, ...rest } = item;
+          const { id: _id, ...rest } = item;
           return rest;
         }
       }))

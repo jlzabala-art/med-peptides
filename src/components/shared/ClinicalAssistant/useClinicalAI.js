@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
+/* eslint-disable no-unused-vars */
 const uuidv4 = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -689,7 +689,7 @@ IMPORTANT: The patient retains full purchasing autonomy. Never instruct them wha
         }
         throw new Error('API Error');
       }
-      const data = await response.js();
+      const data = await response.json();
       const fullReply      = data.reply || '';
       const formattedData  = data.formatted || null;
       const agentName      = data.agentName || 'AgentRAG';  // ← agent identity
@@ -1143,7 +1143,7 @@ Before beginning, establish a clean and sterile working environment. Gather all 
         body,
       });
 
-      const data = await resp.js();
+      const data = await resp.json();
       
       setMessages(prev => [
         ...prev,
@@ -1195,7 +1195,7 @@ Before beginning, establish a clean and sterile working environment. Gather all 
         headers: { 'Content-Type': 'application/json' },
         body,
       });
-      const data = await resp.js();
+      const data = await resp.json();
       const confirmReply = data.reply || '✅ Acción ejecutada correctamente.';
       const auditId = data.auditId || null;
       setMessages(prev => [

@@ -3,7 +3,7 @@ import Info from "lucide-react/dist/esm/icons/info";
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import Calculator from "lucide-react/dist/esm/icons/calculator";
 import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
-/* eslint-disable no-unused-vars */
+ 
 import React, { useState, useMemo } from 'react';
 
 

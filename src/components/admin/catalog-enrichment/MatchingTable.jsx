@@ -92,7 +92,7 @@ export default function MatchingTable({ auditResults, loading, onRowClick }) {
                   </td>
 
                   <td>{res.supplier || <span style={{ color: 'var(--text-muted)' }}>-</span>}</td>
-                  <td>{res.price ? `$${res.price.toFixed(2)}` : <span style={{ color: 'var(--text-muted)' }}>-</span>}</td>
+                  <td>{res.price ? (!isNaN(Number(res.price)) ? `$${Number(res.price).toFixed(2)}` : res.price) : <span style={{ color: 'var(--text-muted)' }}>-</span>}</td>
                   <td>{getStatusBadge(res.zohoStatus)}</td>
                   <td>
                     {res.confidence >= 90 ? (

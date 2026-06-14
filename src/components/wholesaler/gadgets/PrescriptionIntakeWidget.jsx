@@ -141,7 +141,7 @@ export default function PrescriptionIntakeWidget() {
         throw new Error(`Server returned ${response.status}`);
       }
 
-      const data = await response.js();
+      const data = await response.json();
       // Match the catalog items from backend response with frontend catalog details to get slugs etc.
       const enrichedCatalogItems = (data.catalog || []).map(item => {
         const matchedProd = dbCatalog.find(p => p.slug === item.product?.id || p.id === item.product?.id || p.name === item.name || p.displayName === item.name);

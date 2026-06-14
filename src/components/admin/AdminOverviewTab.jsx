@@ -56,7 +56,7 @@ export default function AdminOverviewTab({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mode: 'status', userProfile: { role: 'admin', uid: 'overview' } }),
     })
-      .then((r) => r.js())
+      .then((r) => r.json())
       .then((d) => setSkuStats(d?.statusCounts || null))
       .catch(() => {});
   }, []);

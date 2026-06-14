@@ -169,7 +169,7 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
         body: JSON.stringify({ mode: 'build_and_explain', query: combinedPrompt, products: allProducts, protocols: [], ownerId, ownerType })
       });
 
-      const data = await response.js();
+      const data = await response.json();
       if (data.extras && data.extras.catalogData) {
         const suggestedCatalog = data.extras.catalogData;
         const extractedIds = [];

@@ -189,7 +189,7 @@ export default function AppRouter(props) {
             />
           }>
             <Route element={<ProtectedRoute allowedRoles={['professional', 'patient', 'doctor', 'admin']} />}>
-              <Route path="/paciente" element={<UserDashboard onOpenCart={() => setActiveModal('cart')} />} />
+              <Route path="/patient" element={<UserDashboard onOpenCart={() => setActiveModal('cart')} />} />
               <Route path="/calendar" element={<CalendarPage />} />
               <Route path="/account/supervisor" element={<UserDashboard onOpenCart={() => setActiveModal('cart')} />} />
             </Route>
@@ -197,14 +197,14 @@ export default function AppRouter(props) {
           
 
           
-          <Route path="/wholesaler/*" element={activeRole === 'wholesaler' || activeRole === 'admin' ? <WholesalerRoutes /> : <Navigate to="/paciente" replace />} />
+          <Route path="/wholesaler/*" element={activeRole === 'wholesaler' || activeRole === 'admin' ? <WholesalerRoutes /> : <Navigate to="/patient" replace />} />
           <Route path="/wholeseller/*" element={<Navigate to="/wholesaler" replace />} />
           <Route path="/catalog/:catalogSlug" element={<PublicCatalogView />} />
           <Route path="/partner/:tenantSlug/catalog/:catalogSlug" element={<PublicCatalogView />} />
           <Route path="/catalog/track/:eventId" element={<CatalogEmailTracker />} />
-          <Route path="/clinic-dashboard/*" element={activeRole === 'clinic' || activeRole === 'admin' ? <ClinicRoutes /> : <Navigate to="/paciente" replace />} />
-          <Route path="/pharmacy-dashboard/*" element={activeRole === 'compounding_pharmacy' || activeRole === 'admin' ? <PharmacyRoutes /> : <Navigate to="/paciente" replace />} />
-          <Route path="/supplier-dashboard/*" element={activeRole === 'supplier' || activeRole === 'admin' ? <SupplierRoutes /> : <Navigate to="/paciente" replace />} />
+          <Route path="/clinic-dashboard/*" element={activeRole === 'clinic' || activeRole === 'admin' ? <ClinicRoutes /> : <Navigate to="/patient" replace />} />
+          <Route path="/pharmacy-dashboard/*" element={activeRole === 'compounding_pharmacy' || activeRole === 'admin' ? <PharmacyRoutes /> : <Navigate to="/patient" replace />} />
+          <Route path="/supplier-dashboard/*" element={activeRole === 'supplier' || activeRole === 'admin' ? <SupplierRoutes /> : <Navigate to="/patient" replace />} />
           
 
       </Routes>

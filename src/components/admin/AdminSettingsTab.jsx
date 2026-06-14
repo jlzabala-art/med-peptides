@@ -34,7 +34,7 @@ export default function AdminSettingsTab({ readOnly = false }) {
     try {
       const response = await fetch('/backups.js?t=' + new Date().getTime());
       if (response.ok) {
-        const data = await response.js();
+        const data = await response.json();
         setBackups(data);
       }
     } catch (e) {

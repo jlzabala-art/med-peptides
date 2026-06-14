@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+ 
 // src/scripts/pushBlogToFirebase.js
 // This script reads local blogPosts data and syncs it to Firestore using the Firebase Admin SDK.
 // Run with: npm run push-blog

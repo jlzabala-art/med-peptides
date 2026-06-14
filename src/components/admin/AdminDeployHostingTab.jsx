@@ -88,7 +88,7 @@ export default function AdminDeployHostingTab() {
     setIsBackingUpCode(true);
     try {
       const response = await fetch('/api/run-code-backup');
-      const data = await response.js();
+      const data = await response.json();
       if (!data.success) {
         throw new Error(data.error || 'Failed to trigger code backup');
       }

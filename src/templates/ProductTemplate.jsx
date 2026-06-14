@@ -30,6 +30,7 @@ export default function ProductTemplate({
   const location = useLocation();
 
   // 1. Resolve active product from the global products array (Blueprints)
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const product = useMemo(() => {
     if (!products || products.length === 0) return null;
     const targetSlug = (slug || '').toLowerCase().trim();

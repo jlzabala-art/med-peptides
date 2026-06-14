@@ -264,10 +264,10 @@ export default function CopilotWorkspacePanel() {
         </div>
 
         {/* WORKSPACE CONTENT */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: isMobile ? 'column' : 'row', overflow: 'hidden' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: isMobile ? 'column' : 'row', overflowY: isMobile ? 'auto' : 'hidden', overflowX: 'hidden' }}>
           
-          {/* LEFT: MAIN WORKSPACE (70%) */}
-          <div style={{ width: isMobile ? '100%' : '70%', height: '100%', overflowY: 'auto', background: '#f8fafc', padding: isMobile ? '16px' : '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {/* LEFT: MAIN WORKSPACE */}
+          <div style={{ width: isMobile ? '100%' : '70%', height: isMobile ? 'auto' : '100%', overflowY: isMobile ? 'visible' : 'auto', background: '#f8fafc', padding: isMobile ? '16px' : '32px', display: 'flex', flexDirection: 'column', gap: '24px', flexShrink: 0 }}>
             
             {/* Top Recommendation Block */}
             <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: isMobile ? '20px' : '32px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -361,15 +361,15 @@ export default function CopilotWorkspacePanel() {
             )}
           </div>
 
-          {/* RIGHT: CONTEXT PANEL (30% Desktop / Stacked Mobile) */}
-          <div style={{ width: isMobile ? '100%' : '30%', height: isMobile ? 'auto' : '100%', borderLeft: isMobile ? 'none' : '1px solid #e2e8f0', background: '#fff', display: 'flex', flexDirection: 'column', padding: '0', overflowY: isMobile ? 'visible' : 'auto' }}>
+          {/* RIGHT: CONTEXT PANEL */}
+          <div style={{ width: isMobile ? '100%' : '30%', height: isMobile ? 'auto' : '100%', borderLeft: isMobile ? 'none' : '1px solid #e2e8f0', background: isMobile ? '#f8fafc' : '#fff', display: 'flex', flexDirection: 'column', padding: '0', overflowY: isMobile ? 'visible' : 'auto', flexShrink: 0 }}>
             
             {/* Desktop: Render components normally. Mobile: Render as accordions or stack */}
             <div style={{ padding: isMobile ? '0 16px 16px' : '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
               
               {/* Alerts */}
               <div>
-                {(!isMobile || true) && <div style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '12px' }}>Context Alerts</div>}
+                <div><div style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '12px' }}>Context Alerts</div></div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {data.alerts.map(alert => (
                     <AlertChip key={alert.id} alert={alert} onClick={() => {
@@ -447,7 +447,7 @@ export default function CopilotWorkspacePanel() {
             <span style={{ position: 'absolute', left: '16px', color: '#94a3b8', fontSize: '14px', fontWeight: 600 }}>&gt;</span>
             <input 
               type="text" 
-              placeholder={`Ask Atlas as ${data.role || modes.find(m => m.id === mode).label}...`}
+              placeholder={`Ask Atlas as ${data.role || (modes.find(m => m.id === mode)?.label || 'Atlas')}...`}
               value={query}
               onChange={e => setQuery(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleExecute()}

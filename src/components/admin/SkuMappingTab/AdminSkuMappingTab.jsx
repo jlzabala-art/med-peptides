@@ -110,7 +110,7 @@ async function callAgent(mode, extra = {}, token) {
     body: JSON.stringify({ mode, ...extra }),
   });
   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-  return resp.js();
+  return resp.json();
 }
 
 export default function AdminSkuMappingTab() {
@@ -175,7 +175,7 @@ export default function AdminSkuMappingTab() {
   }, [user, userProfile]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadStatus();
   }, []);
 

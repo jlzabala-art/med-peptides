@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const CopilotContext = createContext(null);
@@ -10,7 +11,7 @@ export function CopilotProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCommandBarOpen, setIsCommandBarOpen] = useState(false);
   const [panelWidth, setPanelWidth] = useState('context'); // 'compact', 'context', 'full'
-  const [mode, setMode] = useState('operational'); // operational, medical, commercial, executive, personal
+  const [mode, setMode] = useState('operations'); // operations, medical, commercial, executive, personal
   const [contextData, setContextData] = useState({
     entityType: 'Module', // e.g., 'Patient', 'Clinic', 'Physician', 'Module'
     entityId: null,

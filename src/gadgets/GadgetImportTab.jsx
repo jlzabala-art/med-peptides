@@ -125,7 +125,7 @@ export default function GadgetImportTab({ title, description, context, apiUrl, a
         });
 
         if (!response.ok) throw new Error("API request failed: " + await response.text());
-        const responseData = await response.js();
+        const responseData = await response.json();
 
         if (responseData.success) {
           addLog(`Success: AI extracted ${responseData.items.length} items from ${file.name}.`);

@@ -107,6 +107,7 @@ export default function ProtocolHistory() {
     };
     fetchProtocols();
     return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [retryKey]); // re-runs when the user clicks "Retry"
 
   // ── Memoized filtering

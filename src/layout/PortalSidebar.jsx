@@ -42,7 +42,7 @@ function SidebarNavItem({ tab, isActive, onPin, isPinned, showPin }) {
       <NavLink
         to={tab.path}
         className={({ isActive: a }) => `sidebar-link ${a ? 'active' : ''}`}
-        end={['/admin', '/doctor', '/supplier', '/paciente', '/patient', '/wholesaler'].includes(tab.path)}
+        end={['/admin', '/doctor', '/supplier', '/patient', '/patient', '/wholesaler'].includes(tab.path)}
       >
         <motion.div
           variants={{ hover: { scale: 1.08 } }}

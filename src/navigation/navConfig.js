@@ -171,13 +171,13 @@ export const ROLE_NAV_MENUS = {
     { label: 'Resources',     path: null,                    dropdown: 'resources', icon: 'BookMarked' },
   ],
   staff: [
-    { label: 'Dashboard',     path: '/paciente',            dropdown: null,        icon: 'Home' },
+    { label: 'Dashboard',     path: '/patient',            dropdown: null,        icon: 'Home' },
     { label: 'Knowledge Hub', path: null,                    dropdown: 'catalog',  icon: 'BookCopy' },
     { label: 'Orders',        path: '/orders',               dropdown: null,        icon: 'Package' },
     { label: 'Resources',     path: null,                    dropdown: 'resources', icon: 'BookMarked' },
   ],
   sales_agent: [
-    { label: 'Dashboard',     path: '/paciente',            dropdown: null,        icon: 'Home' },
+    { label: 'Dashboard',     path: '/patient',            dropdown: null,        icon: 'Home' },
     { label: 'Knowledge Hub', path: null,                    dropdown: 'catalog',  icon: 'BookCopy' },
     { label: 'Orders',        path: '/orders',               dropdown: null,        icon: 'Package' },
     { label: 'Resources',     path: null,                    dropdown: 'resources', icon: 'BookMarked' },

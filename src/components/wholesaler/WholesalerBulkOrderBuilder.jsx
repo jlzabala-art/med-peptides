@@ -398,7 +398,7 @@ export default function WholesalerBulkOrderBuilder() {
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ bulkOrderId: bulkId, notes }),
       });
-      const json = await res.js();
+      const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Submit failed');
       setDone(true);
       showToast(`✅ Bulk order enviado al admin. ${json.aggregated_items?.length || 0} líneas, ${json.totalItems || 0} unidades totales.`);

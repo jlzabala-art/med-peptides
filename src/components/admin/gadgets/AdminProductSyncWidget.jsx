@@ -495,7 +495,7 @@ export default function AdminProductSyncWidget() {
         body: JSON.stringify({ action: 'full_sync', dryRun: false }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.js();
+      const json = await res.json();
       setSyncResults(json);
     } catch (err) {
       console.error('[AdminProductSyncWidget]', err);

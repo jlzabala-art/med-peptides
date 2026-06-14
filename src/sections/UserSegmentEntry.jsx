@@ -169,7 +169,7 @@ function ProfessionalCTA({ navigate }) {
         <span className="use-trust-item">✓ Cold-chain logistics</span>
       </div>
       <div className="use-cta-actions">
-        <button className="use-cta-btn use-cta-btn--dark" onClick={() => navigate('/paciente')}>
+        <button className="use-cta-btn use-cta-btn--dark" onClick={() => navigate('/patient')}>
           Go to Dashboard <ArrowRight size={16} />
         </button>
         <button className="use-cta-btn use-cta-btn--ghost" onClick={() => navigate('/contact')}>

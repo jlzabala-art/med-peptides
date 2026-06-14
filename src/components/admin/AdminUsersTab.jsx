@@ -289,7 +289,7 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
         if (!response.ok) {
           throw new Error(`Failed to fetch Zoho Books data: ${response.status}`);
         }
-        const data = await response.js();
+        const data = await response.json();
         if (data.found) {
           setZohoFinancialData(data);
         } else {
@@ -329,7 +329,7 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
       if (!response.ok) {
         throw new Error(`Zoho Books server error: ${response.status}`);
       }
-      const data = await response.js();
+      const data = await response.json();
       if (data.found) {
         setZohoData(data);
       } else {

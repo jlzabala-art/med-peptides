@@ -122,7 +122,7 @@ export default function QuotationsModule() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rfqText: text })
       });
-      const data = await res.js();
+      const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'AI Failed');
       const r = data.result;
       setCustomerName(r.customerName || '');

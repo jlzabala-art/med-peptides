@@ -36,7 +36,7 @@ export default function AdminGadgetRepositoryTab() {
 
   React.useEffect(() => {
     fetch('/gadgets-catalog.js')
-      .then(res => res.js())
+      .then(res => res.json())
       .then(data => {
         setGadgets(data);
         setLoading(false);

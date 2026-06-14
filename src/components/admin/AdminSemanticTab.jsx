@@ -102,7 +102,7 @@ export default function AdminSemanticTab({ readOnly = false }) {
       body: JSON.stringify(body),
     });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    return resp.js();
+    return resp.json();
   };
 
   // Fetch products from Firestore

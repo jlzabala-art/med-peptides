@@ -96,7 +96,7 @@ export default function HealthNewsletterSection() {
       });
 
       if (!res.ok) {
-        const data = await res.js().catch(() => ({}));
+        const data = await res.json().catch(() => ({}));
         if (res.status === 409) {
           setStatus('success'); // Already subscribed — still show success
           return;

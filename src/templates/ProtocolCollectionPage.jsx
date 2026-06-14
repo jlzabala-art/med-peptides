@@ -24,7 +24,8 @@ import Tag from "lucide-react/dist/esm/icons/tag";
  * - Complexity-based categorization
  * - Responsive grid and list views
  */
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { motion, AnimatePresence } from 'framer-motion';
 

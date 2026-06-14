@@ -38,7 +38,7 @@ export default function AIContextSummary({ entityType, entityId }) {
       });
 
       if (!resp.ok) throw new Error('Failed to fetch AI summary');
-      const data = await resp.js();
+      const data = await resp.json();
       setSummary(data.reply);
     } catch (err) {
       console.error(err);

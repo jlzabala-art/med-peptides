@@ -114,7 +114,7 @@ const newArticles = `  },
 
 export default blogPosts;`;
 
-content = content.replace(/  \}\n\];\n\nexport default blogPosts;(\n*)$/, newArticles);
+content = content.replace(/ {2}\}\n\];\n\nexport default blogPosts;(\n*)$/, newArticles);
 
 fs.writeFileSync(path, content, 'utf8');
 console.log("Updated blogData.js successfully!");

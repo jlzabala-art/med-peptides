@@ -493,6 +493,27 @@ export default function SupplierInsightsView({ products }) {
                   <span>Current</span>
                 </div>
 
+                <h4 style={{ borderBottom: '1px solid var(--border, #e5e7eb)', paddingBottom: '0.5rem', marginBottom: '1rem', marginTop: '2rem' }}>Products from {selectedSupplier.name}</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {(() => {
+                    const supplierProducts = (products || []).filter(p => p.supplier === selectedSupplier.name || p.vendor === selectedSupplier.name);
+                    if (supplierProducts.length === 0) {
+                      return <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem', padding: '1rem', background: 'var(--bg-hover, #f9fafb)', borderRadius: '8px', textAlign: 'center' }}>No products found for this supplier.</div>;
+                    }
+                    return supplierProducts.map(p => (
+                      <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem', border: '1px solid var(--border, #e5e7eb)', borderRadius: '8px', background: 'var(--bg-card, #fff)' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '6px', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+                          {p.images?.length > 0 ? <img src={p.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Package size={20} color="#94a3b8" />}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name || p.displayName}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>SKU: {p.sku || 'N/A'} | Category: {p.category || '-'}</div>
+                        </div>
+                      </div>
+                    ));
+                  })()}
+                </div>
+
               </div>
             </motion.div>
           </>

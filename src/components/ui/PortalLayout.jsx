@@ -194,7 +194,7 @@ export default function PortalLayout({
 
   // Reset enrichedContext when the active tab/page changes
   useEffect(() => {
-    setEnrichedContext(null);
+    Promise.resolve().then(() => setEnrichedContext(null));
   }, [pageContext?.activeTab]);
 
   useEffect(() => {
@@ -240,13 +240,13 @@ export default function PortalLayout({
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
       box-sizing: border-box;
       width: 100%;
-      overflow: hidden;
+      overflow: visible;
     }
     .portal-header-left {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      overflow: hidden;
+      overflow: visible;
       min-width: 0;
       flex-shrink: 1;
     }
@@ -280,7 +280,7 @@ export default function PortalLayout({
     .portal-header-center {
       min-width: 0;
       padding: 0 0.75rem;
-      overflow: hidden;
+      overflow: visible;
     }
     .portal-header-search-bar {
       display: flex;
@@ -348,7 +348,6 @@ export default function PortalLayout({
     @media (max-width: 720px) {
       /* Hide ALL text in left, show only logo + hamburger */
       .portal-header-sep { display: none; }
-      .portal-header-switcher { display: none; }
       .portal-header-logo { height: 28px; }
       /* Replace search bar with icon */
       .portal-header-search-bar { display: none; }

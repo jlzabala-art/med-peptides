@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect, no-undef, no-unused-vars */
+ 
 /**
  * src/data/v2/index.js — Phase 4a
  * ─────────────────────────────────────────────────────────────────────

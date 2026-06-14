@@ -143,7 +143,7 @@ import MarketIntelligenceHub from '../components/admin/market/MarketIntelligence
 // ── Lazy tab components ────────────────────────────────────────────────────────
 import AdminUsersTab from '../components/admin/AdminUsersTab';
 import AdminPhysiciansTab from '../components/admin/physicians/AdminPhysiciansTab';
-import AtlasCommandCenter from '../components/admin/geography/AtlasCommandCenter';
+import AtlasCommandCenter from '../components/admin/AtlasCommandCenter';
 import AdminWholesellersTab from '../components/admin/AdminWholesellersTab';
 import AdminAccountManagersTab from '../components/admin/AdminAccountManagersTab';
 import AdminWorkflowsTab from '../components/admin/AdminWorkflowsTab';
@@ -245,7 +245,6 @@ const NAV_GROUPS = [
       { id: 'dashboard',        label: 'Dashboard',           icon: Activity },
       { id: 'messages',         label: 'Messages',            icon: MessageSquare },
       { id: 'calendar',         label: 'Calendar',            icon: Calendar },
-      { id: 'b2c-shop',         label: 'Go to B2C Shop',      icon: Globe },
     ],
   },
   {

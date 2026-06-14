@@ -3,7 +3,7 @@ import { X, UploadCloud, ChevronRight, ChevronLeft, Save, Bot, CheckCircle } fro
 import toast from 'react-hot-toast';
 import { extractApiPeptidesFromImage } from '../../../services/atlasAiService';
 
-export default function SmartProductIntakeWizard({ isOpen, onClose }) {
+export default function SmartProductIntakeWizard({ isOpen, onClose, onAddProduct }) {
   const [step, setStep] = useState(1);
   const [isProcessingAI, setIsProcessingAI] = useState(false);
   const [formData, setFormData] = useState({
@@ -55,10 +55,14 @@ export default function SmartProductIntakeWizard({ isOpen, onClose }) {
     }
   };
 
-  const handleSave = () => {
-    toast.success("Product added successfully!");
-    onClose();
-    // Here we would typically call addProduct(formData)
+  const handleSave = async () => {
+    if (onAddProduct) {
+      const success = await onAddProduct(formData);
+      if (success) onClose();
+    } else {
+      toast.success("Product added successfully!");
+      onClose();
+    }
   };
 
   return (

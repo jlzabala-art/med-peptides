@@ -16,7 +16,7 @@ content = content.replace(/const renderBiomarkersContent = \(\) => \(/, 'const r
 //   );
 // Actually, let's just find "                    </div>\n  );" and replace with "                    </div>\n    </>\n  );"
 
-content = content.replace(/                    <\/div>\n  \);/g, '                    </div>\n    </>\n  );');
+content = content.replace(/ {20}<\/div>\n {2}\);/g, '                    </div>\n    </>\n  );');
 
 fs.writeFileSync(file, content, 'utf8');
 console.log('Fixed');

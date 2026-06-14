@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Checkbox } from '../../components/ui';
+import { Checkbox, TextField, Select, Button } from '../../components/ui';
 import './CalendarCloud.css';
 
 import FullCalendar from '@fullcalendar/react';
@@ -92,7 +92,7 @@ export default function RegeneraCalendar() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('create');
-  const [wizardStep, setWizardStep] = useState(1);
+
   const [contextDrawerOpen, setContextDrawerOpen] = useState(false);
   // Sync component state with global store mobile
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -162,7 +162,7 @@ export default function RegeneraCalendar() {
     if (isPatient) return;
     setModalMode('create');
     setEventForm(defaultEventForm);
-    setWizardStep(1);
+
     setModalOpen(true);
   };
 
@@ -180,7 +180,7 @@ export default function RegeneraCalendar() {
       ...defaultEventForm,
       start: info.dateStr + (info.dateStr.includes('T') ? '' : 'T08:00'),
     });
-    setWizardStep(1);
+
     setModalOpen(true);
   };
 
@@ -207,7 +207,7 @@ export default function RegeneraCalendar() {
       refillReminder: event.extendedProps?.refillReminder || false,
       symptoms: event.extendedProps?.symptoms || '',
     });
-    setWizardStep(1);
+
     setModalOpen(true);
   };
 
@@ -672,240 +672,158 @@ export default function RegeneraCalendar() {
               )}
             </div>
 
-            {/* 3-Step Wizard */}
-            <div className="cal-wizard-steps">
-              <div
-                className={`wizard-step ${wizardStep === 1 ? 'active' : ''}`}
-                onClick={() => setWizardStep(1)}
-                style={{ cursor: 'pointer' }}
-              >
-                1. Who
-              </div>
-              <div
-                className={`wizard-step ${wizardStep === 2 ? 'active' : ''}`}
-                onClick={() => {
-                  if (eventForm.type) setWizardStep(2);
-                }}
-                style={{ cursor: eventForm.type ? 'pointer' : 'not-allowed' }}
-              >
-                2. What
-              </div>
-              <div
-                className={`wizard-step ${wizardStep === 3 ? 'active' : ''}`}
-                onClick={() => {
-                  if (eventForm.type) setWizardStep(3);
-                }}
-                style={{ cursor: eventForm.type ? 'pointer' : 'not-allowed' }}
-              >
-                3. Details
-              </div>
-            </div>
-
             <form
               onSubmit={handleSubmit}
               style={{ display: 'flex', flexDirection: 'column', flex: 1, overflowY: 'auto' }}
             >
               <div className="cal-dialog-body" style={{ paddingBottom: '1rem', flex: 1 }}>
-                {/* STEP 1: Who */}
-                <div
-                  style={{
-                    display: wizardStep === 1 ? 'block' : 'none',
-                    animation: 'slideUp 0.2s ease-out',
-                  }}
-                >
-                  <div className="cal-form-group">
-                    <label className="cal-form-label">Patient</label>
-                    <select
-                      value={eventForm.patientId}
-                      onChange={(e) => setEventForm({ ...eventForm, patientId: e.target.value })}
-                      className="cal-input"
-                      disabled={isPatient}
-                    >
-                      <option value="">- Search patient -</option>
-                      <option value="p1">John Doe</option>
-                      <option value="p2">Jane Smith</option>
-                    </select>
-                  </div>
+                
+                {/* SECTION 1: Patient & Type */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <Select
+                    label="Patient"
+                    id="patientId"
+                    value={eventForm.patientId}
+                    onChange={(e) => setEventForm({ ...eventForm, patientId: e.target.value })}
+                    disabled={isPatient}
+                    options={[
+                      { value: '', label: '- Search patient -' },
+                      { value: 'p1', label: 'John Doe' },
+                      { value: 'p2', label: 'Jane Smith' }
+                    ]}
+                  />
 
-                  <div className="cal-form-group">
-                    <label className="cal-form-label">Event Type</label>
-                    <select
-                      value={eventForm.type}
-                      onChange={(e) => setEventForm({ ...eventForm, type: e.target.value })}
-                      className="cal-input"
-                      disabled={isPatient}
-                    >
-                      <option value="prescription">💊 Prescription</option>
-                      <option value="protocol">📋 Protocol</option>
-                      <option value="order">📦 Order</option>
-                      <option value="test">🧬 Test</option>
-                      <option value="followup">📞 Follow-up</option>
-                      <option value="consultation">🏥 Consultation</option>
-                    </select>
-                  </div>
+                  <Select
+                    label="Event Type"
+                    id="eventType"
+                    value={eventForm.type}
+                    onChange={(e) => setEventForm({ ...eventForm, type: e.target.value })}
+                    disabled={isPatient}
+                    options={[
+                      { value: 'prescription', label: '💊 Prescription' },
+                      { value: 'protocol', label: '📋 Protocol' },
+                      { value: 'order', label: '📦 Order' },
+                      { value: 'test', label: '🧬 Test' },
+                      { value: 'followup', label: '📞 Follow-up' },
+                      { value: 'consultation', label: '🏥 Consultation' }
+                    ]}
+                  />
 
-                  <div style={{ display: 'flex', gap: '1rem' }}>
-                    <div className="cal-form-group" style={{ flex: 1 }}>
-                      <label className="cal-form-label">Date & Time</label>
-                      <input
-                        type="datetime-local"
-                        required
-                        value={eventForm.start}
-                        onChange={(e) => setEventForm({ ...eventForm, start: e.target.value })}
-                        className="cal-input"
-                        disabled={isPatient}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Premium AI Smart Scheduling Card */}
-                  {!isPatient && (
-                    <div
-                      className="atlas-card"
-                      style={{
-                        marginTop: '1rem',
-                        background: 'linear-gradient(to right, #f8fafc, #eff6ff)',
-                        border: '1px solid #bfdbfe',
-                        padding: '12px',
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          marginBottom: '4px',
-                        }}
-                      >
-                        <span style={{ fontSize: '1.2rem' }}>✨</span>
-                        <span style={{ fontWeight: 600, color: '#1e40af', fontSize: '0.9rem' }}>
-                          Smart Scheduling Assistant
-                        </span>
-                      </div>
-                      <p style={{ fontSize: '0.75rem', color: '#3b82f6', margin: 0 }}>
-                        Find the best available slot based on patient history, provider availability
-                        and protocol requirements.
-                      </p>
-                    </div>
-                  )}
+                  <TextField
+                    label="Date & Time"
+                    type="datetime-local"
+                    id="eventStart"
+                    required
+                    value={eventForm.start}
+                    onChange={(e) => setEventForm({ ...eventForm, start: e.target.value })}
+                    disabled={isPatient}
+                  />
                 </div>
 
-                {/* STEP 2: What */}
-                <div
-                  style={{
-                    display: wizardStep === 2 ? 'block' : 'none',
-                    animation: 'slideUp 0.2s ease-out',
-                  }}
-                >
-                  {eventForm.type === 'prescription' && (
-                    <>
-                      <div style={{ display: 'flex', gap: '1rem' }}>
-                        <div className="cal-form-group" style={{ flex: 1 }}>
-                          <label className="cal-form-label">Medication / Compound</label>
-                          <input
-                            type="text"
-                            placeholder="e.g., BPC-157"
-                            className="cal-input"
-                            disabled={isPatient}
-                          />
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', gap: '1rem' }}>
-                        <div className="cal-form-group" style={{ flex: 1 }}>
-                          <label className="cal-form-label">Dosage</label>
-                          <input
-                            type="text"
-                            placeholder="e.g., 500mcg"
-                            value={eventForm.dosage}
-                            onChange={(e) => setEventForm({ ...eventForm, dosage: e.target.value })}
-                            className="cal-input"
-                            disabled={isPatient}
-                          />
-                        </div>
-                        <div className="cal-form-group" style={{ flex: 1 }}>
-                          <label className="cal-form-label">Injection Site</label>
-                          <select
-                            value={eventForm.injectionSite}
-                            onChange={(e) =>
-                              setEventForm({ ...eventForm, injectionSite: e.target.value })
-                            }
-                            className="cal-input"
-                            disabled={isPatient}
-                          >
-                            <option value="">- Select -</option>
-                            <option value="abdomen">Abdomen</option>
-                            <option value="thigh">Thigh</option>
-                          </select>
-                        </div>
-                      </div>
-                    </>
-                  )}
+                {/* Premium AI Smart Scheduling Card */}
+                {!isPatient && (
+                  <div
+                    className="atlas-card"
+                    style={{
+                      marginBottom: '1.5rem',
+                      background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)',
+                      border: '1px solid #bfdbfe',
+                      padding: '16px',
+                      borderRadius: '12px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '1.2rem' }}>✨</span>
+                      <span style={{ fontWeight: 700, color: '#1e40af', fontSize: '0.9rem', letterSpacing: '-0.01em' }}>
+                        Smart Scheduling
+                      </span>
+                    </div>
+                    <p style={{ fontSize: '0.8rem', color: '#3b82f6', margin: 0, lineHeight: 1.4 }}>
+                      Optimum slot suggested based on patient history, provider availability, and active protocols.
+                    </p>
+                  </div>
+                )}
 
-                  {eventForm.type === 'consultation' && (
-                    <div className="cal-form-group">
-                      <label className="cal-form-label">Location / Link</label>
-                      <input
-                        type="text"
+                {/* SECTION 2: Specific Details */}
+                {eventForm.type && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', padding: '1.2rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                    <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.8rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {eventForm.type.charAt(0).toUpperCase() + eventForm.type.slice(1)} Details
+                    </h4>
+                    
+                    {eventForm.type === 'prescription' && (
+                      <>
+                        <TextField
+                          label="Medication / Compound"
+                          placeholder="e.g., BPC-157"
+                          id="medicationCompound"
+                          disabled={isPatient}
+                        />
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                          <div style={{ flex: 1 }}>
+                            <TextField
+                              label="Dosage"
+                              placeholder="e.g., 500mcg"
+                              id="eventDosage"
+                              value={eventForm.dosage}
+                              onChange={(e) => setEventForm({ ...eventForm, dosage: e.target.value })}
+                              disabled={isPatient}
+                            />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <Select
+                              label="Site"
+                              id="injectionSite"
+                              value={eventForm.injectionSite}
+                              onChange={(e) => setEventForm({ ...eventForm, injectionSite: e.target.value })}
+                              disabled={isPatient}
+                              options={[
+                                { value: '', label: '- Select -' },
+                                { value: 'abdomen', label: 'Abdomen' },
+                                { value: 'thigh', label: 'Thigh' }
+                              ]}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {eventForm.type === 'consultation' && (
+                      <TextField
+                        label="Location / Link"
                         placeholder="Zoom link or Clinic Room"
-                        className="cal-input"
+                        id="consultationLocation"
                         disabled={isPatient}
                       />
-                    </div>
-                  )}
+                    )}
 
-                  {eventForm.type !== 'prescription' && eventForm.type !== 'consultation' && (
-                    <div className="cal-form-group">
-                      <label className="cal-form-label">
-                        {eventForm.type.charAt(0).toUpperCase() + eventForm.type.slice(1)} Details
-                      </label>
-                      <input
-                        type="text"
+                    {eventForm.type !== 'prescription' && eventForm.type !== 'consultation' && (
+                      <TextField
+                        label={`${eventForm.type} details`}
                         placeholder={`Enter ${eventForm.type} details...`}
-                        className="cal-input"
                         disabled={isPatient}
                       />
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
 
-                {/* STEP 3: Details */}
-                <div
-                  style={{
-                    display: wizardStep === 3 ? 'block' : 'none',
-                    animation: 'slideUp 0.2s ease-out',
-                  }}
-                >
-                  <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                    <label
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        fontSize: '0.85rem',
-                      }}
-                    >
+                {/* SECTION 3: Additional Notes & Options */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div style={{ display: 'flex', gap: '1.5rem', padding: '0 0.5rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', fontWeight: 500, color: '#334155', cursor: 'pointer' }}>
                       <Checkbox
                         checked={eventForm.prn}
                         onChange={(e) => setEventForm({ ...eventForm, prn: e.target.checked })}
                         disabled={isPatient}
-                      />{' '}
-                      PRN
+                      />
+                      PRN (As needed)
                     </label>
-                    <label
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        fontSize: '0.85rem',
-                      }}
-                    >
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', fontWeight: 500, color: '#334155', cursor: 'pointer' }}>
                       <Checkbox
                         checked={eventForm.refillReminder}
-                        onChange={(e) =>
-                          setEventForm({ ...eventForm, refillReminder: e.target.checked })
-                        }
+                        onChange={(e) => setEventForm({ ...eventForm, refillReminder: e.target.checked })}
                         disabled={isPatient}
-                      />{' '}
+                      />
                       Refill Reminder
                     </label>
                   </div>
@@ -913,60 +831,39 @@ export default function RegeneraCalendar() {
                   <div className="cal-form-group">
                     <label className="cal-form-label">Internal Notes</label>
                     <textarea
-                      rows="4"
-                      placeholder="Context or instructions..."
+                      rows="3"
+                      placeholder="Context, symptoms, or special instructions..."
                       value={eventForm.symptoms}
                       onChange={(e) => setEventForm({ ...eventForm, symptoms: e.target.value })}
                       className="cal-input"
                       disabled={isPatient}
+                      style={{ resize: 'none' }}
                     />
                   </div>
                 </div>
               </div>
 
-              <div
-                className="cal-dialog-footer"
-                style={{
-                  paddingTop: '1rem',
-                  borderTop: '1px solid var(--cal-border)',
-                  marginTop: 'auto',
-                }}
-              >
+              <div className="cal-dialog-footer" style={{ paddingTop: '1.25rem', borderTop: '1px solid var(--cal-border)', marginTop: 'auto', background: 'var(--cal-bg-surface)', display: 'flex', justifyContent: 'space-between' }}>
                 {!isPatient && modalMode === 'edit' ? (
-                  <button
-                    type="button"
-                    className="cal-btn-outline"
-                    style={{ color: '#dc2626', borderColor: '#fca5a5' }}
+                  <Button
+                    variant="danger"
                     onClick={handleDelete}
                   >
-                    Delete
-                  </button>
+                    Delete Event
+                  </Button>
                 ) : (
-                  <button
-                    type="button"
-                    className="cal-btn-outline"
+                  <Button
+                    variant="ghost"
                     onClick={() => setModalOpen(false)}
                   >
                     Cancel
-                  </button>
+                  </Button>
                 )}
 
                 {!isPatient && (
-                  <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}>
-                    {wizardStep < 3 ? (
-                      <button
-                        type="button"
-                        className="cal-btn-primary"
-                        onClick={() => setWizardStep(wizardStep + 1)}
-                      >
-                        Next →
-                      </button>
-                    ) : (
-                      <button type="submit" className="cal-btn-primary">
-                        {modalMode === 'create' ? 'Save Event' : 'Update'}
-                      </button>
-                    )}
-                  </div>
+                  <Button variant="primary" type="submit">
+                    {modalMode === 'create' ? 'Save Event' : 'Update'}
+                  </Button>
                 )}
               </div>
             </form>

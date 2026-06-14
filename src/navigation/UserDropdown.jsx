@@ -67,7 +67,7 @@ import '../styles/header.css';
 
 // ── Icon map for all known paths ──────────────────────────────────────────────
 const PATH_ICONS = {
-  '/paciente':                          <LayoutDashboard size={15} />,
+  '/patient':                          <LayoutDashboard size={15} />,
   '/admin':                              <ShieldCheck size={15} />,
   '/my-protocols':                       <FlaskConical size={15} />,
   '/saved':                              <Bookmark size={15} />,
