@@ -1,3 +1,7 @@
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import Bot from "lucide-react/dist/esm/icons/bot";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 /**
  * SupplementDetailPage — Phase 2: premium hero + full layout
@@ -10,7 +14,10 @@ import { getSupplementWithVariants, getActiveSupplements } from '../repositories
 import { trackRecentView } from '../utils/recentViews';
 import { resolveAndFormatPrice } from '../utils/resolvePrice';
 import { usePricingTier } from '../hooks/usePricingTier';
-import { Clock, Zap, ShoppingCart, Bot } from 'lucide-react';
+
+
+
+
 import { DetailSkeleton } from '../components/shared/SkeletonLoader';
 import ProtocolTOC from "../components/protocol/ProtocolTOC";
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,7 +30,6 @@ function nameToSlug(name) {
 /* ── Smart Protocol Slug Resolver for Supplements ────────────────────────── */
 function resolveProtocolSlug(p) {
   const name = (p || '').toLowerCase();
-  
   if (name.includes('sleep') || name.includes('circadian') || name.includes('insomnia')) {
     return 'sleep-circadian-6w';
   }
@@ -54,7 +60,6 @@ function resolveProtocolSlug(p) {
   if (name.includes('immune') || name.includes('inflammation') || name.includes('thymic')) {
     return 'immune-modulation-8w';
   }
-  
   return 'collection';
 }
 
@@ -286,7 +291,6 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
         <div style={{ position: 'absolute', bottom: '-60px', left: '5%', width: '260px', height: '260px', borderRadius: '50%', background: accent, opacity: 0.06, filter: 'blur(55px)' }} />
         {/* Extra orb — top left */}
         <div style={{ position: 'absolute', top: '20%', left: '-60px', width: '200px', height: '200px', borderRadius: '50%', background: accent, opacity: 0.04, filter: 'blur(50px)' }} />
-        
         {/* Floating background icons */}
         <div style={{ position: 'absolute', inset: 0, opacity: 0.05, pointerEvents: 'none' }}>
           <div style={{ position: 'absolute', top: '15%', left: '10%', fontSize: '2rem' }}>{CATEGORY_ICON[supplement.category] || '🧬'}</div>
@@ -512,7 +516,6 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
 
       {/* ── Body ── */}
       <div className="sdp-body">
-        
         {/* Sticky left index */}
         <div className="sdp-toc-container">
           <ProtocolTOC
@@ -549,7 +552,6 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
         }}>
           {/* Neon accent glow */}
           <div style={{ position: 'absolute', top: '-100px', right: '-100px', width: '250px', height: '250px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0, 102, 204, 0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
-          
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.25rem', flexDirection: 'row', flexWrap: 'wrap' }} className="sdp-ai-widget-header">
             <div style={{
               width: '56px',
@@ -882,7 +884,6 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
           }}>
             {/* Subtle glow */}
             <div style={{ position: 'absolute', top: 0, right: 0, width: '200px', height: '200px', background: `radial-gradient(circle, ${accent}0a 0%, transparent 70%)`, pointerEvents: 'none' }} />
-            
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
               <span style={{ fontSize: '1.4rem' }}>🧬</span>
               <div>
@@ -892,7 +893,6 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
                 <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: 0, fontWeight: 600 }}>Integrated programs containing {supplement.name}</p>
               </div>
             </div>
-            
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }} className="sdp-protocols-list">
               {supplement.protocols.map((p, i) => (
                 <div
@@ -972,7 +972,6 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
                         } catch (e) {
                           // Ignore localStorage errors
                         }
-                        
                         const targetSlug = resolveProtocolSlug(p);
                         const realProtocolTitles = {
                           'sleep-circadian-6w': 'DSIP & Epithalon Circadian Sleep Protocol',
@@ -1096,7 +1095,6 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
             </span>
           </div>
         </div>
-        
         <button
           disabled={!priceDisplay.perUnit}
           onClick={() => onAddToCart(normalisedVar, 1)}

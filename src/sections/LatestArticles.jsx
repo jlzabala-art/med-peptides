@@ -1,9 +1,11 @@
- 
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useBlogPosts } from '../hooks/useBlogPosts';
 import BlogCard from '../components/blog/BlogCard';
-import { ArrowRight, BookOpen } from 'lucide-react';
+
+
 import './LatestArticles.css';
 
 export default function LatestArticles() {

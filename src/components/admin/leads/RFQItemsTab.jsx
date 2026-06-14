@@ -1,6 +1,21 @@
+import Link from "lucide-react/dist/esm/icons/link";
+import Edit2 from "lucide-react/dist/esm/icons/edit-2";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Check from "lucide-react/dist/esm/icons/check";
+import X from "lucide-react/dist/esm/icons/x";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import React, { useState, useEffect } from 'react';
 import { TextField, Checkbox } from '../../../components/ui';
-import { Link, Edit2, Plus, Check, X, Trash2, ArrowUpRight, AlertTriangle } from 'lucide-react';
+
+
+
+
+
+
+
+
 import { doc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { findMatchingProduct, getFuzzySuggestions, slugify } from './LeadUtils';
@@ -8,10 +23,8 @@ import { findMatchingProduct, getFuzzySuggestions, slugify } from './LeadUtils';
 function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUpdated }) {
   const match = findMatchingProduct(item.peptide_name, catalogProducts);
   const suggestions = !match ? getFuzzySuggestions(item.peptide_name, catalogProducts) : [];
-  
   const [stockInput, setStockInput] = useState(match ? match.stock || 0 : 0);
   const [isUpdatingStock, setIsUpdatingStock] = useState(false);
-  
   const generateCleanSku = (name) => {
     let clean = slugify(name).toUpperCase();
     clean = clean.replace(/\b(AND|OR|WITH|FOR|OF|TO|THE|A|AN)\b/g, '');
@@ -60,7 +73,6 @@ function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUp
     try {
       const finalCategory = category === 'Other' ? customCategory : category;
       const docId = slugify(item.peptide_name + '-' + dosage);
-      
       const newProduct = {
         id: docId,
         name: item.peptide_name,

@@ -1,6 +1,15 @@
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import Info from "lucide-react/dist/esm/icons/info";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import Calculator from "lucide-react/dist/esm/icons/calculator";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
 /* eslint-disable no-unused-vars */
 import React, { useState, useMemo } from 'react';
-import { Beaker, Info, RefreshCw, Calculator, HelpCircle } from 'lucide-react';
+
+
+
+
+
 
 export default function ReconstitutionGuide({ product, selectedVariant }) {
   const [diluent, setDiluent] = useState(2); // ml of Bacteriostatic Water
@@ -25,11 +34,9 @@ export default function ReconstitutionGuide({ product, selectedVariant }) {
   const results = useMemo(() => {
     const totalMcg = vialMg * 1000;
     const mcgPerMl = totalMcg / diluent;
-    
     // Formula: (desiredDose / totalMcg) * diluent * (syringeMaxUnits / syringeCapacityMl)
     // For standard 1.0ml (100u) syringe, it simplifies to (desiredDose / mcgPerMl) * 100
     const unitsForDose = (desiredDose / mcgPerMl) * 100;
-    
     // Limit to max units of selected syringe
     const cappedUnits = Math.min(unitsForDose, syringeConfig.maxUnits);
     const volumeMl = (unitsForDose / 100);
@@ -172,13 +179,10 @@ export default function ReconstitutionGuide({ product, selectedVariant }) {
             {/* Needle Connection */}
             <rect x="47" y="5" width="6" height="15" fill="#E2E8F0" stroke="#718096" strokeWidth="1" />
             <line x1="50" y1="5" x2="50" y2="0" stroke="#4A5568" strokeWidth="1.5" />
-            
             {/* Syringe Body Background */}
             <rect x={barrelX} y={barrelY} width={barrelWidth} height={barrelHeight} rx="2" fill="#FFFFFF" stroke="#A0AEC0" strokeWidth="2" />
-            
             {/* Liquid Fill */}
             <rect x={barrelX + 1} y={barrelY} width={barrelWidth - 2} height={fluidHeight} fill="rgba(0, 209, 255, 0.28)" />
-            
             {/* Tick marks on barrel */}
             {Array.from({ length: 11 }).map((_, i) => {
               const tickY = barrelY + (i / 10) * barrelHeight;
@@ -213,10 +217,8 @@ export default function ReconstitutionGuide({ product, selectedVariant }) {
             {/* Plunger Head */}
             <rect x={barrelX + 1} y={plungerY} width={barrelWidth - 2} height="8" fill="#4A5568" rx="1" />
             <line x1={barrelX + 1} y1={plungerY + 4} x2={barrelX + barrelWidth - 1} y2={plungerY + 4} stroke="#2D3748" strokeWidth="2" />
-            
             {/* Plunger Rod */}
             <rect x="46" y={plungerY + 8} width="8" height="150" fill="#CBD5E0" stroke="#718096" strokeWidth="1" />
-            
             {/* Plunger Bottom Thumb Press */}
             <rect x="30" y={plungerY + 115} width="40" height="8" fill="#718096" rx="2" />
           </svg>

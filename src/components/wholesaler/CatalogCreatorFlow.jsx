@@ -1,3 +1,23 @@
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import Save from "lucide-react/dist/esm/icons/save";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Check from "lucide-react/dist/esm/icons/check";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Layout from "lucide-react/dist/esm/icons/layout";
+import Search from "lucide-react/dist/esm/icons/search";
+import X from "lucide-react/dist/esm/icons/x";
+import Send from "lucide-react/dist/esm/icons/send";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import Lightbulb from "lucide-react/dist/esm/icons/lightbulb";
+import History from "lucide-react/dist/esm/icons/history";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import React, { useState, useEffect, useRef } from 'react';
 import { catalogRepository } from '../../repositories/catalogRepository';
 import { productRepository } from '../../repositories/productRepository';
@@ -8,11 +28,26 @@ import { getAuth } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
-import { 
-  ArrowLeft, Save, Bot, Sparkles, Check, 
-  Trash2, Plus, Layout, Search, X, Send, ShoppingCart, Lightbulb, History, ChevronDown, ChevronRight,
-  FileText, Activity, AlertCircle, RefreshCw
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { renderAIMarkdown } from '../shared/ClinicalAssistant/utils/markdownRenderer';
 
 const CANONICAL_GOALS = ['cognitive_mood', 'hormonal_optimization', 'immune_support', 'longevity_anti_aging', 'metabolic_weight', 'recovery_repair', 'sleep_circadian'];
@@ -55,13 +90,10 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
   const [advancedSettings, setAdvancedSettings] = useState(DISCOVERY_QUESTIONS.reduce((acc, q) => ({...acc, [q.id]: 'Use your judgement'}), {}));
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  
   const [isGenerating, setIsGenerating] = useState(false);
   const [genStepIndex, setGenStepIndex] = useState(0);
   const genSteps = ["Analyzing products...", "Building sections...", "Writing scientific content...", "Preparing catalog..."];
-  
   const [errorState, setErrorState] = useState(null); // { message, details }
-  
   const [aiRecommendations, setAiRecommendations] = useState([]); // Products recommended by AI
   const [showRecommendations, setShowRecommendations] = useState(false);
 
@@ -137,7 +169,7 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
         body: JSON.stringify({ mode: 'build_and_explain', query: combinedPrompt, products: allProducts, protocols: [], ownerId, ownerType })
       });
 
-      const data = await response.json();
+      const data = await response.js();
       if (data.extras && data.extras.catalogData) {
         const suggestedCatalog = data.extras.catalogData;
         const extractedIds = [];
@@ -148,7 +180,6 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
             }
           });
         }
-        
         // Populate recommendations instead of auto-applying if there were no previous items
         if ((catalog.sections[0]?.products?.length || 0) === 0) {
           setAiRecommendations(extractedIds);
@@ -210,7 +241,6 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
   if (loadingDb) return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading Database...</div>;
 
   const selectedProductsInFlow = catalog.sections[0]?.products || [];
-  
   // Calculate Scores
   const calculateScore = () => {
     let score = 50;
@@ -227,7 +257,6 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
   // Layouts
   return (
     <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', height: isMobile ? 'auto' : 'calc(100vh - 100px)', backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #dadce0', overflow: 'hidden' }}>
-      
       {/* LEFT PANEL: AI Prompt & Settings */}
       <div style={{ width: isMobile ? '100%' : '55%', borderRight: isMobile ? 'none' : '1px solid #dadce0', display: 'flex', flexDirection: 'column', padding: '2rem', overflowY: 'auto' }}>
         <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: '#5f6368', cursor: 'pointer', marginBottom: '1.5rem', padding: 0, fontWeight: 600 }}>
@@ -320,7 +349,6 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
         {rightPanelTab === 'summary' ? (
           <div style={{ padding: '2rem', overflowY: 'auto', flex: 1 }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#202124', marginBottom: '1.5rem' }}>{catalog.title || 'Untitled Catalog'}</h3>
-            
             {/* AI SCORE CARDS */}
             <div style={{ display: 'flex', gap: '12px', marginBottom: '2rem' }}>
               <div style={{ flex: 1, background: '#fff', padding: '12px', borderRadius: '8px', border: '1px solid #dadce0', textAlign: 'center' }}>

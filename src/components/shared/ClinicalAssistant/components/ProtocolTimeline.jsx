@@ -1,7 +1,12 @@
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, ArrowRight } from 'lucide-react';
+
+
+
 
 export default function ProtocolTimeline({ phases = [] }) {
   return (

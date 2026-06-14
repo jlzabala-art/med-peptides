@@ -1,3 +1,9 @@
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Dna from "lucide-react/dist/esm/icons/dna";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Star from "lucide-react/dist/esm/icons/star";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
 /* eslint-disable no-unused-vars */
 /**
  * DiscoveryHub.jsx — Phase 4-B
@@ -16,7 +22,12 @@
  */
 
 import { useState, useRef, useEffect, Suspense, lazy, useMemo } from 'react';
-import { Clock, Dna, FlaskConical, Sparkles, Star, TrendingUp } from 'lucide-react';
+
+
+
+
+
+
 import TrendingPeptides from './TrendingPeptides';
 import TrendingProtocols from './TrendingProtocols';
 import NovelAcquisitions from './NovelAcquisitions';
@@ -25,7 +36,7 @@ import { useCategoryBestItems } from '../hooks/useCategoryBestItems';
 import { getRecentViews } from '../utils/recentViews';
 
 // Lazy-load FeaturedPeptides to keep the hub's initial bundle lightweight
-const FeaturedPeptides = lazy(() => import('./FeaturedPeptides'));
+import FeaturedPeptides from './FeaturedPeptides';
 
 // ── Tab definitions ────────────────────────────────────────────────────────────
 

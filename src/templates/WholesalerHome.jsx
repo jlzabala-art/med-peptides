@@ -1,3 +1,32 @@
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import Package from "lucide-react/dist/esm/icons/package";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Settings from "lucide-react/dist/esm/icons/settings";
+import LogOut from "lucide-react/dist/esm/icons/log-out";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import Box from "lucide-react/dist/esm/icons/box";
+import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
+import Laptop from "lucide-react/dist/esm/icons/laptop";
+import Bell from "lucide-react/dist/esm/icons/bell";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import Paintbrush from "lucide-react/dist/esm/icons/paintbrush";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Users from "lucide-react/dist/esm/icons/users";
+import FileText from "lucide-react/dist/esm/icons/file-text";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
@@ -9,13 +38,35 @@ import {
   collection, query, where, orderBy, limit, onSnapshot, doc, updateDoc, serverTimestamp, getDocs
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import {
-  LayoutDashboard, Layers, Package, TrendingUp, Settings,
-  LogOut, ChevronRight, ArrowRight, Clock, CheckCircle2,
-  AlertCircle, Truck, Box, BarChart3, Laptop, Bell,
-  MapPin, Paintbrush, Globe, MessageSquare, Brain, Mail,
-  Sparkles, ChevronUp, ChevronDown, ClipboardList, Zap, Users, FileText
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import WholesalerBulkOrderBuilder from '../components/wholesaler/WholesalerBulkOrderBuilder';
 import AdminMetricsDashboard from '../components/admin/AdminMetricsDashboard';
@@ -195,7 +246,6 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [acting, setActing] = useState(false);
-  
   // Kit status states
   const [kitStatus, setKitStatus] = useState(rx.kitStatus || 'kit_dispatched');
   const [collectionLabelUrl, setCollectionLabelUrl] = useState(rx.collectionLabelUrl || '');
@@ -230,14 +280,12 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
     setActing(true);
     try {
       const updateData = { kitStatus: statusVal, updatedAt: serverTimestamp() };
-      
       // Auto-set status metadata in timeline
       const timelineEvent = {
         event: `kit_status_${statusVal}`,
         note: t('wholesaler.timeline_notes.kit_status_updated', { status: t(`wholesaler.kit_steps.${statusVal}`, { defaultValue: statusVal }) }),
         timestamp: new Date().toISOString()
       };
-      
       await updateDoc(doc(db, 'prescriptions', rx.id), {
         ...updateData,
         timeline: [...(rx.timeline || []), timelineEvent]
@@ -304,7 +352,6 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
 
   const handleAddRecommendation = () => {
     if (!selectedProduct) return;
-    
     // Find item details from catalog
     let matchedItem = catalogProducts.find(p => p.id === selectedProduct);
     let itemType = 'product';
@@ -312,9 +359,7 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
       matchedItem = catalogProtocols.find(p => p.id === selectedProduct);
       itemType = 'protocol';
     }
-    
     if (!matchedItem) return;
-    
     const newRec = {
       productId: matchedItem.id,
       name: matchedItem.name,
@@ -375,7 +420,6 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
       >
         {expanded ? <ChevronUp size={16} color="#5f6368" /> : <ChevronDown size={16} color="#5f6368" />}
         <ClipboardList size={16} color="#6366f1" />
-        
         <div style={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
           <div>
             <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#202124', display: 'flex', alignItems: 'center' }}>
@@ -421,7 +465,6 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
               )}
             </div>
           </div>
-          
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             {hasTestingItems && (
               <span style={{
@@ -431,7 +474,6 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
                 TEST DIAGNÓSTICO
               </span>
             )}
-            
             <span style={{
               padding: '0.15rem 0.5rem', borderRadius: '2px',
               border: `1px solid ${step.color}40`, color: step.color, background: step.bg,
@@ -446,7 +488,6 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
       {/* Expanded details drawer */}
       {expanded && (
         <div style={{ padding: '1rem', background: '#f8f9fa', borderTop: '1px solid #dadce0', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          
           {/* Section 1: Prescribed items detail */}
           <div style={detailBlock}>
             <div style={detailTitle}>📝 Productos Prescritos</div>
@@ -466,11 +507,9 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
           {/* Section 2: Testing kit manager */}
           {hasTestingItems && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', flexWrap: 'wrap' }}>
-              
               {/* Left Column: Logistics Status Tracker */}
               <div style={detailBlock}>
                 <div style={detailTitle}>🔬 Gestión de Estado de Kit</div>
-                
                 <div style={{ marginBottom: '0.75rem' }}>
                   <label style={labelStyle}>Estado de logística actual:</label>
                   <select 
@@ -535,7 +574,6 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
               {/* Right Column: Recommendations Builder */}
               <div style={detailBlock}>
                 <div style={detailTitle}>💡 Constructor de Recomendaciones de Receta</div>
-                
                 {/* Add recommendation selector */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 0.5fr 1fr', gap: '0.4rem', marginBottom: '0.6rem' }}>
                   <div>

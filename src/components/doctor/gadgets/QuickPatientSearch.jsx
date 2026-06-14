@@ -1,5 +1,8 @@
+import Search from "lucide-react/dist/esm/icons/search";
+import UserPlus from "lucide-react/dist/esm/icons/user-plus";
 import React, { useState } from 'react';
-import { Search, UserPlus } from 'lucide-react';
+
+
 import { useNavigate } from 'react-router-dom';
 
 export default function QuickPatientSearch() {
@@ -11,7 +14,6 @@ export default function QuickPatientSearch() {
       <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <Search size={18} color="#0ea5e9" /> Patient Lookup
       </h3>
-      
       <div style={{ position: 'relative', flex: 1 }}>
         <input 
           type="text" 

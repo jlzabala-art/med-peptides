@@ -1,6 +1,15 @@
+import Activity from "lucide-react/dist/esm/icons/activity";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Package from "lucide-react/dist/esm/icons/package";
+import CreditCard from "lucide-react/dist/esm/icons/credit-card";
+import TestTube from "lucide-react/dist/esm/icons/test-tube";
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react';
-import { Activity, FlaskConical, Package, CreditCard, TestTube } from 'lucide-react';
+
+
+
+
+
 import { SectionAccordion } from './SectionAccordion';
 import ProtocolTechnicalPeptides from './ProtocolTechnicalPeptides';
 import ProtocolTechnicalSupplements from './ProtocolTechnicalSupplements';
@@ -90,7 +99,6 @@ export const ProtocolTechnicalSection = ({
       activeProtocolPhases.forEach(ph => {
         const dur = ph.default_duration_weeks || ph.duration_weeks || 4;
         const drugs = ph.drugs || ph.compounds || ph.medications || [];
-        
         drugs.forEach(d => {
           const logic = d.dose_logic || {};
           const canonicalVials =

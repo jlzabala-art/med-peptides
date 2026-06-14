@@ -1,4 +1,6 @@
- 
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import MessageCircle from "lucide-react/dist/esm/icons/message-circle";
+import Globe from "lucide-react/dist/esm/icons/globe";
 /**
  * TrustHub.jsx — Phase 5-A
  *
@@ -12,7 +14,9 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { ShieldCheck, MessageCircle, Globe } from 'lucide-react';
+
+
+
 import TrustStrip from './TrustStrip';
 import EmotionalTrust from './EmotionalTrust';
 import GlobalLogistics from './GlobalLogistics';

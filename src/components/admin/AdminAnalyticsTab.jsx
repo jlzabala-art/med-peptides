@@ -1,19 +1,29 @@
+import Users from "lucide-react/dist/esm/icons/users";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import Search from "lucide-react/dist/esm/icons/search";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import BarChart2 from "lucide-react/dist/esm/icons/bar-chart-2";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useState, useEffect, useRef } from 'react';
-import {
-  Users,
-  Eye,
-  ShoppingCart,
-  TrendingUp,
-  Globe,
-  FlaskConical,
-  BookOpen,
-  Search,
-  RefreshCw,
-  AlertCircle,
-  BarChart2,
-  CheckCircle2,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
 import PlatformHealth from './analytics/PlatformHealth';
 import ExplorationJourney from './analytics/ExplorationJourney';
 import DiscoveryInsights from './analytics/DiscoveryInsights';
@@ -579,7 +589,7 @@ export default function AdminAnalyticsTab() {
         signal: abortRef.current.signal,
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
+      const json = await res.js();
       writeCache(periodDays, json);
       setData(json);
       setLastRefresh(new Date());
@@ -708,15 +718,12 @@ export default function AdminAnalyticsTab() {
           grid-template-columns: 1fr 1fr;
           gap: 2rem;
         }
-        
         @media (max-width: 1400px) {
           .metrics-grid { grid-template-columns: repeat(3, 1fr); }
         }
-        
         @media (max-width: 1100px) {
           .insights-main-row { grid-template-columns: 1fr; }
         }
-        
         @media (max-width: 768px) {
           .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
           .insights-secondary-row { grid-template-columns: 1fr; }
@@ -937,11 +944,9 @@ export default function AdminAnalyticsTab() {
           accentColor="var(--success)"
         />
       </div>
-    
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: AdminAnalyticsTab | Props: none
       </div>
-    
 </div>
   );
 }

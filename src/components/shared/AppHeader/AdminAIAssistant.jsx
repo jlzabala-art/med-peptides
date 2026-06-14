@@ -1,5 +1,14 @@
+import Bot from "lucide-react/dist/esm/icons/bot";
+import X from "lucide-react/dist/esm/icons/x";
+import Send from "lucide-react/dist/esm/icons/send";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
 import React, { useState } from 'react';
-import { Bot, X, Send, Sparkles, XCircle } from 'lucide-react';
+
+
+
+
+
 
 export default function AdminAIAssistant({ onClose }) {
   const [messages, setMessages] = useState([
@@ -15,12 +24,10 @@ export default function AdminAIAssistant({ onClose }) {
   const handleSend = (e) => {
     e.preventDefault();
     if (!input.trim()) return;
-    
     // Add user message
     const newMessages = [...messages, { id: Date.now(), role: 'user', content: input }];
     setMessages(newMessages);
     setInput('');
-    
     // Simulate AI response
     setTimeout(() => {
       setMessages([...newMessages, { 
@@ -50,7 +57,6 @@ export default function AdminAIAssistant({ onClose }) {
         onClick={onClose}
         aria-hidden="true"
       />
-      
       {/* Slide-over Panel */}
       <div 
         style={{
@@ -126,7 +132,6 @@ export default function AdminAIAssistant({ onClose }) {
               }}>
                 {msg.content}
               </div>
-              
               {/* Suggestions Chips */}
               {msg.suggestions && msg.suggestions.length > 0 && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.75rem' }}>

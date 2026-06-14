@@ -1,7 +1,20 @@
+import Shield from "lucide-react/dist/esm/icons/shield";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import User from "lucide-react/dist/esm/icons/user";
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Shield, ChevronDown, User, Stethoscope, Building2, FlaskConical, LayoutDashboard } from 'lucide-react';
+
+
+
+
+
+
+
 
 export default function AdminPortalSwitcher() {
   const { isAdmin, activeRole, switchActiveRole } = useAuth();

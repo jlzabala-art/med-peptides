@@ -1,11 +1,25 @@
+import X from "lucide-react/dist/esm/icons/x";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Database from "lucide-react/dist/esm/icons/database";
+import Search from "lucide-react/dist/esm/icons/search";
+import Package from "lucide-react/dist/esm/icons/package";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Activity from "lucide-react/dist/esm/icons/activity";
 import React from 'react';
-import { X, Sparkles, AlertCircle, Database, Search, Package, DollarSign, Activity } from 'lucide-react';
+
+
+
+
+
+
+
+
 
 export default function ProductPreviewDrawer({ selectedItem, onClose }) {
   if (!selectedItem) return null;
 
   const { item, productInfo, confidence, reason, supplier, price, zohoStatus } = selectedItem;
-  
   const isMatch = confidence > 0;
   const needsReview = confidence > 0 && confidence < 90;
 
@@ -65,7 +79,6 @@ export default function ProductPreviewDrawer({ selectedItem, onClose }) {
 
         {/* Scrollable Content */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
           {/* AI Explanation Box */}
           {needsReview && (
             <div style={{ 
@@ -100,13 +113,10 @@ export default function ProductPreviewDrawer({ selectedItem, onClose }) {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.5rem', fontSize: '0.85rem' }}>
                   <span style={{ color: 'var(--text-muted)' }}>Name:</span>
                   <span style={{ fontWeight: 500, color: 'var(--text-main)' }}>{productInfo.name}</span>
-                  
                   <span style={{ color: 'var(--text-muted)' }}>Category:</span>
                   <span>{productInfo.category || 'N/A'}</span>
-                  
                   <span style={{ color: 'var(--text-muted)' }}>Supplier:</span>
                   <span>{supplier || 'Unknown'}</span>
-                  
                   <span style={{ color: 'var(--text-muted)' }}>Stock:</span>
                   <span>{productInfo.stockCount || 0} units</span>
                 </div>

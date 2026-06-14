@@ -1,7 +1,20 @@
+import Droplets from "lucide-react/dist/esm/icons/droplets";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import Syringe from "lucide-react/dist/esm/icons/syringe";
+import Pipette from "lucide-react/dist/esm/icons/pipette";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Snowflake from "lucide-react/dist/esm/icons/snowflake";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Droplets, Beaker, Syringe, Pipette, FlaskConical, Snowflake, CheckCircle2 } from 'lucide-react';
+
+
+
+
+
+
+
 
 export default function VisualReconWidget({ 
   peptideName = "Peptide", 
@@ -96,7 +109,6 @@ export default function VisualReconWidget({
           <div style={{ fontSize: '0.6rem', color: 'var(--color-text-tertiary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {isSpanish ? 'AJUSTAR CALCULADORA' : 'ADJUST CALCULATOR'}
           </div>
-          
           {/* Vial Mg control */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ fontSize: '0.72rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>{isSpanish ? 'Vial' : 'Vial'}: <strong>{currentVialMg}mg</strong></div>
@@ -154,7 +166,6 @@ export default function VisualReconWidget({
             </div>
           </div>
         </div>
-        
         <div style={{ 
           display: 'flex', 
           flexDirection: 'column', 
@@ -187,7 +198,6 @@ export default function VisualReconWidget({
               zIndex: 1
             }} />
           ))}
-          
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${syringeFillPercentage}%` }}
@@ -205,7 +215,6 @@ export default function VisualReconWidget({
             <Droplets size={12} color="var(--primary)" opacity={0.6} />
           </motion.div>
         </div>
-        
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.4rem', padding: '0 4px' }}>
           <span style={{ fontSize: '0.5rem', fontWeight: 700, color: 'var(--color-text-tertiary)' }}>0 IU</span>
           <span style={{ fontSize: '0.5rem', fontWeight: 700, color: 'var(--color-text-tertiary)' }}>50 IU</span>
@@ -242,4 +251,3 @@ export default function VisualReconWidget({
     </div>
   );
 }
-

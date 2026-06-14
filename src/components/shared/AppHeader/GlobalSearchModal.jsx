@@ -1,9 +1,38 @@
+import Search from "lucide-react/dist/esm/icons/search";
+import X from "lucide-react/dist/esm/icons/x";
+import Users from "lucide-react/dist/esm/icons/users";
+import Package from "lucide-react/dist/esm/icons/package";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import BarChart from "lucide-react/dist/esm/icons/bar-chart";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import Layout from "lucide-react/dist/esm/icons/layout";
+import Settings from "lucide-react/dist/esm/icons/settings";
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import User from "lucide-react/dist/esm/icons/user";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { searchIndex } from '../../../navigation/searchIndex';
 import { performDatabaseSearch } from '../../../services/searchDatabaseService';
-import { Search, X, Users, Package, Globe, BarChart, Activity, Brain, Layout, Settings, LayoutDashboard, FlaskConical, FileText, User, Loader2 } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const ICONS = {
   'users': <Users size={16} />,
@@ -84,7 +113,6 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
     // 2. Debounced Dynamic Database Search
     const timeoutId = setTimeout(async () => {
       const dynamicResults = await performDatabaseSearch(query, activeRole);
-      
       setCombinedResults((prev) => {
         // Merge static + dynamic, cap at 10 results total
         const merged = [...staticResults.slice(0, 4), ...dynamicResults];
@@ -235,7 +263,6 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
                     }}>
                       {ICONS[item.iconName] || <Search size={16} />}
                     </div>
-                    
                     {/* Text */}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -253,7 +280,6 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
                         {item.description}
                       </p>
                     </div>
-                    
                     {/* Action Badge */}
                     {item.pendingAction && (
                       <div style={{ marginRight: '1rem' }}>
@@ -278,7 +304,6 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
               </div>
             )}
           </div>
-          
           {/* Footer */}
           <div style={{ 
             padding: '0.75rem 1.5rem', backgroundColor: 'var(--color-bg-app)', 
@@ -301,7 +326,6 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
           </div>
         </div>
       </div>
-      
       <style>
         {`
           @keyframes fadeIn {

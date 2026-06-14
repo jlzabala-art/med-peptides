@@ -1,3 +1,21 @@
+import LayoutGrid from "lucide-react/dist/esm/icons/layout-grid";
+import List from "lucide-react/dist/esm/icons/list";
+import Search from "lucide-react/dist/esm/icons/search";
+import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import X from "lucide-react/dist/esm/icons/x";
+import Check from "lucide-react/dist/esm/icons/check";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Droplets from "lucide-react/dist/esm/icons/droplets";
+import Tag from "lucide-react/dist/esm/icons/tag";
+import Weight from "lucide-react/dist/esm/icons/weight";
+import Dumbbell from "lucide-react/dist/esm/icons/dumbbell";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 /**
  * PeptideCollectionPage — Phase 3a: Filter state + derived options.
@@ -9,11 +27,24 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePageMeta } from '../hooks/usePageMeta';
-import {
-  LayoutGrid, List, Search, SlidersHorizontal, ArrowRight, FlaskConical, X, Check,
-  Brain, Moon, Activity, Shield,
-  Zap, Sparkles, Droplets, Tag, Weight, Dumbbell
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getActiveProducts } from '../repositories/productRepository';
 import '../styles/collection_shared.css';
@@ -192,7 +223,6 @@ function buildDosageRange(doc) {
 /* ── Normalize Firestore doc → card shape ─────────────────────────────────── */
 function normalizeProduct(doc) {
   let rawCat = (doc.category_main || doc.category || 'Other Research Peptides');
-  
   // ── Strict Category Normalization ──
   const canonicalCategories = Object.keys(CATEGORY_COLOR);
   let cat = 'Other Research Peptides';

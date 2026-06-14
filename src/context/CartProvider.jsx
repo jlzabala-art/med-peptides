@@ -227,6 +227,104 @@ export function CartProvider({ children }) {
 
   const cartCount = useMemo(() => Object.values(cart).reduce((a, b) => a + b, 0), [cart]);
 
+  // ── Global Cart Event Listeners ──────────────────────────────────────────
+  useEffect(() => {
+    const handleAddToCartDirect = (e) => {
+      const { product, delta = 1, metadata = {} } = e.detail || {};
+      if (!product) return;
+
+      updateCart(product, delta);
+
+      const itemKey = product.name;
+      if (Object.keys(metadata).length > 0) {
+        setCartMetadata(prev => ({
+          ...prev,
+          [itemKey]: { ...(prev[itemKey] || {}), ...metadata },
+        }));
+      }
+
+      const rxId  = product.prescriptionId || metadata.prescriptionId || null;
+      const docId = product.doctorId       || metadata.supervisingPhysicianId || null;
+      if (rxId || docId) {
+        setCartOwnership(prev => ({
+          ...prev,
+          prescriptionId:         rxId  ?? prev.prescriptionId,
+          supervisingPhysicianId: docId ?? prev.supervisingPhysicianId,
+          source: 'from_prescription',
+        }));
+      }
+      setActiveModal('cart');
+    };
+    window.addEventListener('add-to-cart-direct', handleAddToCartDirect);
+    return () => window.removeEventListener('add-to-cart-direct', handleAddToCartDirect);
+  }, [updateCart, setActiveModal]);
+
+  useEffect(() => {
+    const handleRxAddToCart = (e) => {
+      const { items = [], prescriptionId, source = 'refill', doctorId } = e.detail || {};
+      items.forEach(item => {
+        if (!item?.name) return;
+        updateCart({ name: item.name, id: item.id || item.name }, item.quantity || 1);
+        setCartMetadata(prev => ({
+          ...prev,
+          [item.name]: {
+            ...(prev[item.name] || {}),
+            prescriptionId,
+            source,
+            supervisingPhysicianId: doctorId || item.doctorId || null,
+          },
+        }));
+      });
+      if (prescriptionId) {
+        setCartOwnership(prev => ({
+          ...prev,
+          prescriptionId,
+          source,
+          supervisingPhysicianId: doctorId ?? prev.supervisingPhysicianId,
+        }));
+      }
+    };
+    window.addEventListener('rx-add-to-cart', handleRxAddToCart);
+    return () => window.removeEventListener('rx-add-to-cart', handleRxAddToCart);
+  }, [updateCart]);
+
+  const acceptRecommendation = useCallback((recommendation) => {
+    if (!recommendation) return;
+
+    const { id, doctorId, adminId, products: recProducts = [], protocols: recProtocols = [], peptides = [] } = recommendation;
+
+    recProducts.forEach(item => {
+      if (item.name && item.qty > 0) {
+        setCart(prev => ({ ...prev, [item.name]: (prev[item.name] || 0) + item.qty }));
+        setCartMetadata(prev => ({
+          ...prev,
+          [item.name]: { ...(prev[item.name] || {}), source: 'doctor_recommended', recommendationId: id },
+        }));
+      }
+    });
+
+    peptides.forEach(peptideName => {
+      const name = typeof peptideName === 'string' ? peptideName : peptideName.name;
+      if (name) {
+        setCart(prev => ({ ...prev, [name]: (prev[name] || 0) + 1 }));
+        setCartMetadata(prev => ({
+          ...prev,
+          [name]: { ...(prev[name] || {}), source: 'doctor_recommended', recommendationId: id },
+        }));
+      }
+    });
+
+    setCartOwnership(prev => ({
+      ...prev,
+      supervisingPhysicianId: doctorId ?? prev.supervisingPhysicianId,
+      supervisingAdminId: adminId ?? prev.supervisingAdminId,
+      source: adminId ? 'admin_recommended' : 'doctor_recommended',
+      recommendationId: id ?? null,
+    }));
+
+    setActiveModal('cart');
+  }, [setActiveModal]);
+
   return (
     <CartContext.Provider value={{
       cart, setCart,
@@ -235,7 +333,8 @@ export function CartProvider({ children }) {
       updateCart,
       removeProtocolBundle,
       cartBreakdown,
-      cartCount
+      cartCount,
+      acceptRecommendation
     }}>
       {children}
     </CartContext.Provider>

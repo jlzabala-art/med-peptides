@@ -1,8 +1,15 @@
+import ActivitySquare from "lucide-react/dist/esm/icons/activity-square";
+import Battery from "lucide-react/dist/esm/icons/battery";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import Frown from "lucide-react/dist/esm/icons/frown";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
-import { ActivitySquare, Battery, Moon, Activity as PainIcon } from 'lucide-react';
+
+
+
+
 
 export default function ClinicalProgressMonitorWidget() {
   const { user } = useAuth();
@@ -11,7 +18,6 @@ export default function ClinicalProgressMonitorWidget() {
 
   useEffect(() => {
     if (!user?.uid) return;
-    
     // Get last 20 symptom logs for this doctor
     const q = query(
       collection(db, 'symptom_logs'),
@@ -55,7 +61,6 @@ export default function ClinicalProgressMonitorWidget() {
         <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <ActivitySquare size={18} color="var(--primary)" /> Monitor Clínico (Síntomas)
         </h3>
-        
         <select 
           value={selectedPatient} 
           onChange={e => setSelectedPatient(e.target.value)}
@@ -82,7 +87,6 @@ export default function ClinicalProgressMonitorWidget() {
                   <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#0f172a', fontWeight: 700 }}>{log.patientName}</h4>
                   <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>{dateStr}</span>
                 </div>
-                
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', marginBottom: '0.8rem' }}>
                   <div style={{ background: 'var(--color-bg-surface)', padding: '0.5rem', borderRadius: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
                     <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 800, marginBottom: '0.2rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.2rem' }}>
@@ -98,7 +102,7 @@ export default function ClinicalProgressMonitorWidget() {
                   </div>
                   <div style={{ background: 'var(--color-bg-surface)', padding: '0.5rem', borderRadius: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
                     <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 800, marginBottom: '0.2rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.2rem' }}>
-                      <PainIcon size={10}/> Dolor
+                      <Frown size={10}/> Dolor
                     </div>
                     <div style={{ fontSize: '1.2rem', fontWeight: 800, color: getScoreColor(log.painLevel, true) }}>{log.painLevel}/10</div>
                   </div>

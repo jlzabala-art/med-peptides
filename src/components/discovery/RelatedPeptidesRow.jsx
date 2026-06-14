@@ -1,5 +1,7 @@
- 
-import { ArrowRight, Sparkles } from 'lucide-react';
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+
+
 import { useNavigate } from 'react-router-dom';
 import { trackPeptideView } from '../../hooks/useAnalytics';
 
@@ -36,7 +38,6 @@ export default function RelatedPeptidesRow({ peptides = [], allProducts = [], ti
           padding-bottom: 2rem;
           position: relative;
         }
-        
         .rp-header {
           display: flex;
           align-items: center;
@@ -234,7 +235,6 @@ export default function RelatedPeptidesRow({ peptides = [], allProducts = [], ti
             -webkit-overflow-scrolling: touch;
           }
           .rp-grid::-webkit-scrollbar { display: none; }
-          
           .rp-card {
             min-width: 280px;
             max-width: 280px;

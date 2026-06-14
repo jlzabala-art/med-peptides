@@ -1,6 +1,15 @@
+import Clock from "lucide-react/dist/esm/icons/clock";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Activity from "lucide-react/dist/esm/icons/activity";
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, ArrowRight, AlertTriangle, CheckCircle2, Activity } from 'lucide-react';
+
+
+
+
+
 
 export default function PriorityActionCenter({ activities }) {
   const navigate = useNavigate();
@@ -21,7 +30,6 @@ export default function PriorityActionCenter({ activities }) {
           View All Queue
         </button>
       </div>
-      
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', flex: 1 }}>
         {defaultActivities.map(activity => {
           const Icon = activity.icon;

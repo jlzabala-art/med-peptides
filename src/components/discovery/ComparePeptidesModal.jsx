@@ -1,6 +1,8 @@
- 
+import X from "lucide-react/dist/esm/icons/x";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import React, { useEffect } from 'react';
-import { X, ShieldCheck } from 'lucide-react';
+
+
 import ComparePeptidesBlock from './ComparePeptidesBlock';
 import { lockScroll, unlockScroll } from '../../utils/scrollLock';
 
@@ -50,7 +52,6 @@ export default function ComparePeptidesModal({ isOpen, onClose, block, allProduc
               <X size={20} />
             </button>
           </div>
-          
           <div style={{ padding: '2rem' }}>
             <ComparePeptidesBlock block={block} allProducts={allProducts} />
           </div>

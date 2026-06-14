@@ -689,7 +689,7 @@ IMPORTANT: The patient retains full purchasing autonomy. Never instruct them wha
         }
         throw new Error('API Error');
       }
-      const data = await response.json();
+      const data = await response.js();
       const fullReply      = data.reply || '';
       const formattedData  = data.formatted || null;
       const agentName      = data.agentName || 'AgentRAG';  // ← agent identity
@@ -1143,7 +1143,7 @@ Before beginning, establish a clean and sterile working environment. Gather all 
         body,
       });
 
-      const data = await resp.json();
+      const data = await resp.js();
       
       setMessages(prev => [
         ...prev,
@@ -1195,7 +1195,7 @@ Before beginning, establish a clean and sterile working environment. Gather all 
         headers: { 'Content-Type': 'application/json' },
         body,
       });
-      const data = await resp.json();
+      const data = await resp.js();
       const confirmReply = data.reply || '✅ Acción ejecutada correctamente.';
       const auditId = data.auditId || null;
       setMessages(prev => [

@@ -1,13 +1,46 @@
+import Target from "lucide-react/dist/esm/icons/target";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
+import Download from "lucide-react/dist/esm/icons/download";
+import PlusCircle from "lucide-react/dist/esm/icons/plus-circle";
+import FileUp from "lucide-react/dist/esm/icons/file-up";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
+import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import BadgePercent from "lucide-react/dist/esm/icons/badge-percent";
+import Landmark from "lucide-react/dist/esm/icons/landmark";
+import Check from "lucide-react/dist/esm/icons/check";
+import X from "lucide-react/dist/esm/icons/x";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Coins from "lucide-react/dist/esm/icons/coins";
+import UserCheck from "lucide-react/dist/esm/icons/user-check";
 import React, { useState, useMemo, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { usePreferences } from '../../../context/PreferencesContext';
 import SkeletonLoader from '../../ui/SkeletonLoader';
 import AnimatedNumber from '../../ui/AnimatedNumber';
-import { 
-  Target, AlertTriangle, TrendingDown, Download, PlusCircle, FileUp, Sparkles, 
-  ArrowUpRight, BarChart3, ShieldAlert, BadgePercent, Landmark, Check, X, RefreshCw, 
-  ChevronRight, Calendar, Coins, UserCheck
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { exportToCSV } from '../../../utils/exportUtils';
 import { useToast } from '../../../hooks/useToast';
 
@@ -148,7 +181,6 @@ export default function FinanceBudget({ dashboardData }) {
 
   return (
     <div className="anim-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      
       {/* 11. Quick Actions Top Toolbar */}
       <div className="glass-card-premium" style={{ 
         display: 'flex', 
@@ -342,7 +374,6 @@ export default function FinanceBudget({ dashboardData }) {
                 Connected
               </span>
             </div>
-            
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '4px' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Connected Account:</span>
@@ -387,7 +418,6 @@ export default function FinanceBudget({ dashboardData }) {
         <div style={{ gridColumn: isMobile ? '1' : 'span 8' }}>
           <div className="glass-card-premium" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>Operating Budget Distribution</h3>
-            
             <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '1.5rem', alignItems: 'center' }}>
               {/* Donut Chart */}
               <div style={{ position: 'relative', width: isMobile ? '180px' : '220px', height: isMobile ? '180px' : '220px', flexShrink: 0 }}>
@@ -433,7 +463,6 @@ export default function FinanceBudget({ dashboardData }) {
                       const isOver = data.spent > data.budget;
                       const filledBlocks = Math.round(pct / 10);
                       const barString = '█'.repeat(Math.min(filledBlocks, 10)) + '░'.repeat(Math.max(10 - filledBlocks, 0));
-                      
                       return (
                         <tr key={name} style={{ borderBottom: '1px solid var(--border)' }}>
                           <td style={{ padding: '8px 6px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-main)' }}>

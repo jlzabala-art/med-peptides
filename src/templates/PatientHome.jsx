@@ -1,18 +1,52 @@
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Target from "lucide-react/dist/esm/icons/target";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Package from "lucide-react/dist/esm/icons/package";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Box from "lucide-react/dist/esm/icons/box";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Users from "lucide-react/dist/esm/icons/users";
+import Settings from "lucide-react/dist/esm/icons/settings";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Brain from "lucide-react/dist/esm/icons/brain";
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { usePatientAIProfile } from '../hooks/usePatientAIProfile';
 import RefillReminderBanner from '../components/shared/RefillReminderBanner';
-import {
-  ChevronRight, Sparkles, Bot, Clock, Target, ArrowRight,
-  Package, CheckCircle2, Truck, AlertCircle, Box, Beaker, FileText, TrendingUp,
-  LayoutDashboard, ClipboardList, Users, Settings
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import AppPortalLayout from '../layout/AppPortalLayout';
 import DashboardEngine from '../engine/DashboardEngine';
-import { MessageSquare, Brain } from 'lucide-react';
+
+
 
 // ── Goal → peptide metadata ───────────────────────────────────────────────────
 export const GOAL_PEPTIDE_MAP = {

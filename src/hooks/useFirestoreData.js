@@ -14,7 +14,7 @@ export function useFirestoreData() {
       const snap = await getDocs(collection(db, 'peptide_faq'));
       return snap.docs.map((d) => ({ ...d.data(), faqId: d.id }));
     },
-    staleTime: 1000 * 60 * 60, // 1 hour
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours
   });
 
   // ── Supplements (Firestore, cached via React Query) ──────────────────────
@@ -23,7 +23,7 @@ export function useFirestoreData() {
     queryFn: async () => {
       return await getActiveSupplements();
     },
-    staleTime: 1000 * 60 * 60, // 1 hour
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours
   });
 
   // ── Protocol Index for Search ─────────────────────────────────────────────

@@ -1,5 +1,8 @@
+import List from "lucide-react/dist/esm/icons/list";
+import X from "lucide-react/dist/esm/icons/x";
 import React, { useState } from 'react';
-import { List, X } from 'lucide-react';
+
+
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function MobileTOCDrawer({ children }) {

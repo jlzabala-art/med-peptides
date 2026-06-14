@@ -1,19 +1,27 @@
- 
+import PlusSquare from "lucide-react/dist/esm/icons/plus-square";
+import Search from "lucide-react/dist/esm/icons/search";
+import Library from "lucide-react/dist/esm/icons/library";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import User from "lucide-react/dist/esm/icons/user";
+import Bell from "lucide-react/dist/esm/icons/bell";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  PlusSquare,
-  Search,
-  Library,
-  Clock,
-  ShieldAlert,
-  BarChart3,
-  Activity,
-  ChevronRight,
-  User,
-  Bell,
-  CheckCircle2,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
 import { getSavedProtocolsList } from '../services/protocolStorage';
 import { useAuth } from '../context/AuthContext';
 import PowerSearch from './PowerSearch';

@@ -1,5 +1,6 @@
+import Building2 from "lucide-react/dist/esm/icons/building-2";
 import React, { useState } from 'react';
-import { Building2 } from 'lucide-react';
+
 
 export default function WholesalerCohortTable({ wholesalersWithStats }) {
   const [expanded, setExpanded] = useState({});

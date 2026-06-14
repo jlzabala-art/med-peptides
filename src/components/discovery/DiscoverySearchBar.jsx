@@ -1,6 +1,10 @@
- 
+import Search from "lucide-react/dist/esm/icons/search";
+import X from "lucide-react/dist/esm/icons/x";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import { useState, useRef, useEffect } from 'react';
-import { Search, X, Sparkles } from 'lucide-react';
+
+
+
 
 /**
  * DiscoverySearchBar — enhanced semantic search input with suggestions.

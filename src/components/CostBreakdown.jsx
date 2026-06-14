@@ -1,13 +1,11 @@
 /* eslint-disable no-unused-vars */
 import React from 'react';
-import { 
-  X, 
-  AlertCircle, 
-  Info, 
-  TrendingUp, 
-  Package, 
-  DollarSign 
-} from 'lucide-react';
+import X from "lucide-react/dist/esm/icons/x";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Info from "lucide-react/dist/esm/icons/info";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Package from "lucide-react/dist/esm/icons/package";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
 import { useTranslation } from 'react-i18next';
 
 export default function CostBreakdown({ protocol = {}, products = [], onClose, items: directItems }) {

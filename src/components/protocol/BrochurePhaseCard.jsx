@@ -1,6 +1,16 @@
- 
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Target from "lucide-react/dist/esm/icons/target";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
 import React, { memo } from 'react';
-import { Calendar, Clock, Target, FlaskConical, Activity, BookOpen } from 'lucide-react';
+
+
+
+
+
+
 import { safeStr } from '../../utils/textUtils';
 
 /**

@@ -1,5 +1,6 @@
+import X from "lucide-react/dist/esm/icons/x";
 import React, { useEffect } from 'react';
-import { X } from 'lucide-react';
+
 
 /**
  * StandardDrawer
@@ -25,7 +26,6 @@ export default function StandardDrawer({
   width = '500px',
   bodyPadding = '1.5rem'
 }) {
-  
   // Prevent body scroll when open
   useEffect(() => {
     if (isOpen) {
@@ -60,7 +60,6 @@ export default function StandardDrawer({
       backdropFilter: 'blur(2px)',
       animation: 'drawerFadeIn 0.2s ease-out'
     }}>
-      
       {/* Backdrop click layer */}
       <div 
         style={{ position: 'absolute', inset: 0 }} 
@@ -78,7 +77,6 @@ export default function StandardDrawer({
         flexDirection: 'column',
         animation: 'drawerSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
       }}>
-        
         {/* Header */}
         <div style={{
           padding: '1.5rem',

@@ -1,10 +1,37 @@
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Target from "lucide-react/dist/esm/icons/target";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Package from "lucide-react/dist/esm/icons/package";
+import Syringe from "lucide-react/dist/esm/icons/syringe";
+import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
+import Info from "lucide-react/dist/esm/icons/info";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useMemo, useEffect } from 'react';
-import {
-  AlertTriangle, CheckCircle2, ChevronRight, Clock, DollarSign,
-  FlaskConical, Layers, ShieldCheck, Target, Zap, Package,
-  Syringe, BarChart3, Info, XCircle, TrendingDown,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { getProtocolTemplate } from '../repositories/protocolRepository';
 import '../styles/architect.css';
 

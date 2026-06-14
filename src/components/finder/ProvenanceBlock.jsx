@@ -1,6 +1,16 @@
- 
+import User from "lucide-react/dist/esm/icons/user";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Database from "lucide-react/dist/esm/icons/database";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Info from "lucide-react/dist/esm/icons/info";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import React from 'react';
-import { User, FileText, Database, ShieldCheck, Info, AlertTriangle } from 'lucide-react';
+
+
+
+
+
+
 
 /**
  * Compact provenance block to display protocol authorship and source metadata.
@@ -70,7 +80,6 @@ const ProvenanceBlock = ({ metadata }) => {
             Protocol Provenance & Authorship
           </h3>
         </div>
-        
         {/* Compact Badges */}
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           {protocol_is_physician_authored && (
@@ -156,4 +165,3 @@ const ProvenanceBlock = ({ metadata }) => {
 };
 
 export default ProvenanceBlock;
-

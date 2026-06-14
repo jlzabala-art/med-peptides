@@ -1,7 +1,24 @@
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import X from "lucide-react/dist/esm/icons/x";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Package from "lucide-react/dist/esm/icons/package";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Send from "lucide-react/dist/esm/icons/send";
+import Save from "lucide-react/dist/esm/icons/save";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, addDoc, serverTimestamp, getDocs, where, increment, arrayUnion, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { ShoppingCart, Plus, X, CheckCircle, Package, FileText, Send, Save, ExternalLink } from 'lucide-react';
+
+
+
+
+
+
+
+
+
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import ERPListDetailLayout from '../../components/shared/ERPListDetailLayout';
 import { StatusChip , Checkbox } from '../../components/ui';
@@ -17,11 +34,11 @@ const TERMINAL_STATES = ['DELIVERED', 'INVOICED', 'CANCELLED'];
 function fmt(date) {
   if (!date) return 'N/A';
   const d = date?.toDate ? date.toDate() : new Date(date);
-  return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+  return d.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 function fmtCurrency(amount) {
-  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount || 0);
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(amount || 0);
 }
 
 // ── List Item ─────────────────────────────────────────────────────────────────
@@ -98,7 +115,6 @@ function SODetail({ so, onClose, onStatusChange, onEdit }) {
         for (const item of so.items) {
           const itemName = item.name || item.itemName;
           if (!itemName) continue;
-          
           const q = query(collection(db, 'products'), where('name', '==', itemName));
           const snap = await getDocs(q);
           if (!snap.empty) {
@@ -121,18 +137,18 @@ function SODetail({ so, onClose, onStatusChange, onEdit }) {
         })
       });
 
-      alert(so.isDropship ? "Factura generada con éxito (Stock no modificado por ser Dropship)." : "Factura generada con éxito y stock actualizado.");
+      alert(so.isDropship ? "Invoice generated successfully (Stock unmodified due to Dropship)." : "Invoice generated successfully and stock updated.");
       onStatusChange?.();
     } catch (e) {
       console.error(e);
-      alert("Error al generar Factura");
+      alert("Error generating invoice");
     } finally {
       setLoadingAction(false);
     }
   };
 
   const handleGenerateDropshipPO = async () => {
-    const supplier = window.prompt("Introduce el nombre del proveedor para este pedido Dropship:");
+    const supplier = window.prompt("Enter the supplier name for this Dropship order:");
     if (!supplier) return;
     setLoadingAction(true);
     try {
@@ -152,7 +168,7 @@ function SODetail({ so, onClose, onStatusChange, onEdit }) {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         linkedSalesOrderId: so.id,
-        notes: `Envío Directo a Cliente: ${so.customerName}`
+        notes: `Direct Shipment to Customer: ${so.customerName}`
       };
 
       await addDoc(collection(db, 'purchaseOrders'), payload);
@@ -166,11 +182,11 @@ function SODetail({ so, onClose, onStatusChange, onEdit }) {
         })
       });
 
-      alert("Purchase Order (Dropship) generado con éxito.");
+      alert("Purchase Order (Dropship) generated successfully.");
       onStatusChange?.();
     } catch (e) {
       console.error(e);
-      alert("Error al generar PO.");
+      alert("Error generating PO.");
     } finally {
       setLoadingAction(false);
     }
@@ -189,12 +205,12 @@ function SODetail({ so, onClose, onStatusChange, onEdit }) {
             <StatusChip status={so.status || 'CONFIRMED'} />
           </div>
           <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.25rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <span>Fecha de pedido: {fmt(so.createdAt)}</span>
+            <span>Order Date: {fmt(so.createdAt)}</span>
             {so.zohoId && (
               <>
                 <span>•</span>
                 <a href={`https://books.zoho.eu/app#/salesorders/${so.zohoId}`} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                  Ver en Zoho Books <ExternalLink size={12} />
+                  View in Zoho Books <ExternalLink size={12} />
                 </a>
               </>
             )}
@@ -265,7 +281,7 @@ function SODetail({ so, onClose, onStatusChange, onEdit }) {
               </div>
               {isTerminal && (
                 <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.5rem', fontStyle: 'italic' }}>
-                  Este pedido está {so.status?.toLowerCase().replace(/_/g, ' ')} y no puede ser modificado.
+                  This order is {so.status?.toLowerCase().replace(/_/g, ' ')} and cannot be modified.
                 </p>
               )}
             </div>
@@ -275,10 +291,10 @@ function SODetail({ so, onClose, onStatusChange, onEdit }) {
             {so.linkedDocumentId && (
               <>
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <div style={sectionTitle}>Documento de Origen</div>
+                  <div style={sectionTitle}>Source Document</div>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.75rem', backgroundColor: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '6px', fontSize: '0.82rem', color: '#6b21a8' }}>
                     <FileText size={13} />
-                    Presupuesto Ref: <strong>{so.linkedDocumentNumber}</strong>
+                    Quote Ref: <strong>{so.linkedDocumentNumber}</strong>
                   </div>
                 </div>
                 <div style={divider} />
@@ -287,12 +303,12 @@ function SODetail({ so, onClose, onStatusChange, onEdit }) {
 
             {/* Customer Block */}
             <div style={{ marginBottom: '1.5rem' }}>
-              <div style={sectionTitle}>Cliente</div>
+              <div style={sectionTitle}>Customer</div>
               <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{so.customerName || '—'}</div>
               {so.customerEmail && <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '0.25rem' }}>✉ {so.customerEmail}</div>}
               {so.isDropship && (
                 <div style={{ marginTop: '0.5rem', display: 'inline-flex', padding: '0.2rem 0.5rem', backgroundColor: '#fef9c3', border: '1px solid #fef08a', borderRadius: '4px', fontSize: '0.75rem', color: '#854d0e', fontWeight: 600 }}>
-                  Pedido Dropshipping (Envío directo)
+                  Dropship Order (Direct Shipping)
                 </div>
               )}
             </div>
@@ -344,7 +360,7 @@ function SODetail({ so, onClose, onStatusChange, onEdit }) {
               disabled={loadingAction}
               style={{ padding: '0.5rem 1rem', backgroundColor: '#f59e0b', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
             >
-              Generar PO (Dropship)
+              Generate PO (Dropship)
             </button>
           )}
           {so.status !== 'Closed' && so.status !== 'INVOICED' && so.status !== 'CANCELLED' && (
@@ -353,7 +369,7 @@ function SODetail({ so, onClose, onStatusChange, onEdit }) {
               disabled={loadingAction}
               style={{ padding: '0.5rem 1.25rem', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
             >
-              Generar Factura
+              Generate Invoice
             </button>
           )}
           {so.status !== 'Closed' && so.status !== 'CANCELLED' && (
@@ -362,7 +378,7 @@ function SODetail({ so, onClose, onStatusChange, onEdit }) {
               disabled={loadingAction}
               style={{ padding: '0.5rem 1rem', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
             >
-              Cancelar Pedido
+              Cancel Order
             </button>
           )}
         </div>
@@ -384,9 +400,8 @@ function SalesOrderFormModal({ order, onClose, onSave }) {
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
-    if (!customerName || items.length === 0) return alert("Falta cliente o artículos");
+    if (!customerName || items.length === 0) return alert("Missing customer or items");
     setSaving(true);
-    
     const subTotal = items.reduce((acc, item) => acc + ((parseFloat(item.rate) || 0) * (parseInt(item.quantity) || 0)), 0);
     const taxTotal = subTotal * 0.21;
     const grandTotal = subTotal + taxTotal;
@@ -423,7 +438,7 @@ function SalesOrderFormModal({ order, onClose, onSave }) {
       onSave();
     } catch (e) {
       console.error(e);
-      alert("Error al guardar pedido de venta");
+      alert("Error saving sales order");
     } finally {
       setSaving(false);
     }
@@ -446,28 +461,28 @@ function SalesOrderFormModal({ order, onClose, onSave }) {
         <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>Nombre del Cliente *</label>
-              <input value={customerName} onChange={e => setCustomerName(e.target.value)} className="gcp-input" style={{ width: '100%' }} placeholder="Ej. Dr. Martínez" />
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>Customer Name *</label>
+              <input value={customerName} onChange={e => setCustomerName(e.target.value)} className="gcp-input" style={{ width: '100%' }} placeholder="E.g. Dr. Smith" />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>Email del Cliente</label>
-              <input value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} className="gcp-input" style={{ width: '100%' }} placeholder="email@ejemplo.com" />
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>Customer Email</label>
+              <input value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} className="gcp-input" style={{ width: '100%' }} placeholder="email@example.com" />
             </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>Fecha de Pedido</label>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>Order Date</label>
               <input type="date" value={orderDate} onChange={e => setOrderDate(e.target.value)} className="gcp-input" style={{ width: '100%' }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>Fecha de Envío</label>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>Shipment Date</label>
               <input type="date" value={shipmentDate} onChange={e => setShipmentDate(e.target.value)} className="gcp-input" style={{ width: '100%' }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>Condiciones de Pago</label>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>Payment Terms</label>
               <select value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} className="gcp-input" style={{ width: '100%' }}>
-                <option value="Due on receipt">Vencimiento al recibir</option>
+                <option value="Due on receipt">Due on receipt</option>
                 <option value="Net 15">Net 15</option>
                 <option value="Net 30">Net 30</option>
                 <option value="Net 60">Net 60</option>
@@ -478,18 +493,18 @@ function SalesOrderFormModal({ order, onClose, onSave }) {
           <div>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.82rem', color: '#1e293b' }}>
               <Checkbox checked={isDropship} onChange={e => setIsDropship(e.target.checked)} />
-              Pedido Dropshipping (Envío directo de Proveedor a Cliente)
+              Dropship Order (Directly from Supplier to Customer)
             </label>
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Detalle de Artículos</label>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Item Details</label>
             <B2BOrderBuilderTable items={items} onChange={setItems} />
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>Notas</label>
-            <textarea value={notes} onChange={e => setNotes(e.target.value)} className="gcp-input" style={{ width: '100%', height: '60px', padding: '0.5rem' }} placeholder="Notas opcionales..." />
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>Notes</label>
+            <textarea value={notes} onChange={e => setNotes(e.target.value)} className="gcp-input" style={{ width: '100%', height: '60px', padding: '0.5rem' }} placeholder="Optional notes..." />
           </div>
         </div>
 

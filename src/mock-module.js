@@ -1,0 +1,15 @@
+export const canvg = {};
+export const html2canvas = {};
+export const createSlice = () => ({ actions: {}, reducer: () => {} });
+export const current = (x) => x;
+export const prepareAutoBatched = () => {};
+export const configureStore = () => ({ dispatch: () => {}, getState: () => ({}), subscribe: () => {} });
+export const combineReducers = () => {};
+export const autoBatchEnhancer = () => {};
+export const createAction = () => {};
+export const createListenerMiddleware = () => ({ middleware: () => {} });
+export const Provider = ({children}) => children;
+export const useSelector = () => ({});
+export const useDispatch = () => () => {};
+export const shallowEqual = (a, b) => a === b;
+export default {};

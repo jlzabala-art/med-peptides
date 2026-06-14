@@ -1,6 +1,10 @@
- 
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+import X from "lucide-react/dist/esm/icons/x";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useEffect } from 'react';
-import { HelpCircle, X, Loader2 } from 'lucide-react';
+
+
+
 import FAQAccordion from './FAQAccordion';
 import { lockScroll, unlockScroll } from '../../utils/scrollLock';
 
@@ -61,7 +65,6 @@ export default function FAQModal({ isOpen, onClose, faqItems, loading = false, p
             <X size={22} />
           </button>
         </div>
-        
         <div style={{ padding: '1.5rem', overflowY: 'auto', flex: 1, backgroundColor: '#fcfdfe' }}>
           {loading ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '4rem 0', gap: '1rem', color: 'var(--primary)' }}>
@@ -99,4 +102,3 @@ export default function FAQModal({ isOpen, onClose, faqItems, loading = false, p
     </>
   );
 }
-

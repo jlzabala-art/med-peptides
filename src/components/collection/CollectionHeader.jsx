@@ -1,6 +1,8 @@
- 
+import Search from "lucide-react/dist/esm/icons/search";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import React from 'react';
-import { Search, Sparkles } from 'lucide-react';
+
+
 
 /**
  * Shared header for all collections (Peptides, Supplements, Protocols).
@@ -21,7 +23,6 @@ export default function CollectionHeader({
           <h1 className="col-header-title">{title}</h1>
           {subtitle && <p className="col-header-subtitle">{subtitle}</p>}
         </div>
-        
         <div className="col-header-actions">
           <div className="col-search-wrapper">
             <Search className="col-search-icon" size={18} />

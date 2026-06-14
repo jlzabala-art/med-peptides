@@ -1,6 +1,9 @@
+import X from "lucide-react/dist/esm/icons/x";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles } from 'lucide-react';
+
+
 
 export default function ChatFAB({ isOpen, setIsOpen, hasNewActivity, isProductPage }) {
   if (isProductPage) return null;

@@ -1,7 +1,21 @@
- 
+import X from "lucide-react/dist/esm/icons/x";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Droplets from "lucide-react/dist/esm/icons/droplets";
+import Target from "lucide-react/dist/esm/icons/target";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Scale from "lucide-react/dist/esm/icons/scale";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, CheckCircle, Droplets, Target, ShieldCheck, Scale, Zap, Beaker } from 'lucide-react';
+
+
+
+
+
+
+
+
 import { resolveProductPrice } from '../../utils/resolveProductPrice';
 
 const ProductComparator = ({ compareList, setCompareList, onClose }) => {

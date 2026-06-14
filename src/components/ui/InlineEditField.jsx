@@ -1,5 +1,10 @@
+import Edit2 from "lucide-react/dist/esm/icons/edit-2";
+import Check from "lucide-react/dist/esm/icons/check";
+import X from "lucide-react/dist/esm/icons/x";
 import React, { useState, useRef, useEffect } from 'react';
-import { Edit2, Check, X } from 'lucide-react';
+
+
+
 
 export default function InlineEditField({
   value,

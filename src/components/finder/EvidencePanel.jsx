@@ -1,6 +1,16 @@
- 
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import React, { useState } from 'react';
-import { BookOpen, ExternalLink, ChevronDown, ChevronUp, Clock, AlertCircle } from 'lucide-react';
+
+
+
+
+
+
 
 export default function EvidencePanel({ evidence }) {
   const [expanded, setExpanded] = useState({});
@@ -33,12 +43,10 @@ export default function EvidencePanel({ evidence }) {
           <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Evidence for {compound}
           </div>
-          
           <div style={{ display: 'grid', gap: '0.75rem' }}>
             {articles.map((article, idx) => {
               const pmid = article.pmid || `idx-${idx}`;
               const isExpanded = expanded[pmid];
-              
               return (
                 <div key={pmid} style={{ padding: '1rem', backgroundColor: 'white', border: '1px solid var(--border)', borderRadius: '12px', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
@@ -47,7 +55,6 @@ export default function EvidencePanel({ evidence }) {
                       <Clock size={10} /> {article.year}
                     </span>
                   </div>
-                  
                   <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-main)', margin: '0 0 0.5rem 0', lineHeight: 1.4 }}>
                     {article.title}
                   </h4>

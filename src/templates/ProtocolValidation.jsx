@@ -1,11 +1,27 @@
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import Info from "lucide-react/dist/esm/icons/info";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Lock from "lucide-react/dist/esm/icons/lock";
 /* eslint-disable no-unused-vars, react-hooks/set-state-in-effect */
 import React, { useState, useEffect, useMemo } from 'react';
 import { Checkbox } from '../components/ui';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import {
-  ShieldCheck, AlertTriangle, AlertCircle, CheckCircle2,
-  ArrowRight, ArrowLeft, Loader2, Info, ChevronRight, Lock
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 import { getProtocolById, updateProtocol } from '../services/protocolStorage';
 
 export default function ProtocolValidation({ products }) {
@@ -219,7 +235,6 @@ export default function ProtocolValidation({ products }) {
         .step-completed { color: var(--success); display: flex; align-items: center; gap: 4px; }
         .step-active { color: var(--secondary); border-bottom: 2px solid var(--secondary); }
         .step-pending { color: #94a3b8; }
-        
         .safety-hero { text-align: center; padding: 3rem; border-radius: 24px; color: white; margin-bottom: 2rem; transition: background 0.5s ease; }
         .status-pass { background: linear-gradient(135deg, #059669 0%, #064e3b 100%); }
         .status-warning { background: linear-gradient(135deg, #d97706 0%, #78350f 100%); }
@@ -242,12 +257,9 @@ export default function ProtocolValidation({ products }) {
         .finding-card h4 { display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem; font-size: 1rem; }
         .finding-card.hard h4 { color: #dc2626; }
         .finding-card.warn h4 { color: #d97706; }
-        
         .sticky-action-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 1rem; box-shadow: 0 -10px 30px rgba(0,0,0,0.05); z-index: 100; }
         .action-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; }
-        
         .bypass-checkbox { display: flex; gap: 12px; padding: 1.25rem; background: #fff1f2; border-radius: 12px; border: 1px solid #fecaca; color: #991b1b; font-size: 0.85rem; cursor: pointer; align-items: center; }
-        
         @media (max-width: 640px) { .action-grid { grid-template-columns: 1fr; } .btn-secondary-clinical { order: 2; } }
       `}</style>
     </div>

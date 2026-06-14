@@ -1,3 +1,13 @@
+import Search from "lucide-react/dist/esm/icons/search";
+import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Edit2 from "lucide-react/dist/esm/icons/edit-2";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import X from "lucide-react/dist/esm/icons/x";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import Info from "lucide-react/dist/esm/icons/info";
+import Check from "lucide-react/dist/esm/icons/check";
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   collection,
@@ -16,18 +26,16 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
-import {
-  Search,
-  UploadCloud,
-  CheckCircle2,
-  AlertTriangle,
-  Edit2,
-  Sparkles,
-  X,
-  Loader2,
-  Info,
-  Check,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 import DataTable from '../ui/DataTable';
 
 const CANONICAL_GOALS = [
@@ -94,7 +102,7 @@ export default function AdminSemanticTab({ readOnly = false }) {
       body: JSON.stringify(body),
     });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    return resp.json();
+    return resp.js();
   };
 
   // Fetch products from Firestore
@@ -1042,11 +1050,9 @@ export default function AdminSemanticTab({ readOnly = false }) {
           </div>
         </div>
       )}
-    
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: AdminSemanticTab | Props: none
       </div>
-    
 </div>
   );
 }

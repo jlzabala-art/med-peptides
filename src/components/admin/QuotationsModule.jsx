@@ -1,3 +1,15 @@
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Search from "lucide-react/dist/esm/icons/search";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Edit from "lucide-react/dist/esm/icons/edit";
+import Send from "lucide-react/dist/esm/icons/send";
+import X from "lucide-react/dist/esm/icons/x";
+import Link from "lucide-react/dist/esm/icons/link";
+import Save from "lucide-react/dist/esm/icons/save";
+import Trash from "lucide-react/dist/esm/icons/trash";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useState, useEffect } from 'react';
 import { db, functions } from '../../firebase';
 import { collection, addDoc, query, orderBy, limit, doc, updateDoc, getDocs, serverTimestamp } from 'firebase/firestore';
@@ -6,7 +18,18 @@ import B2BDocumentsLayout from './B2BDocumentsLayout';
 import ZohoPaperPreview from './ZohoPaperPreview';
 import B2BOrderBuilderTable from './B2BOrderBuilderTable';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, Search, FileText, CheckCircle, Edit, Send, X, Link, Save, Trash, Bot, Loader2 } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
 import toast from 'react-hot-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -56,7 +79,6 @@ export default function QuotationsModule() {
 
   const handleSaveDraft = async () => {
     if (!customerName || items.length === 0) return toast.error("Falta cliente o artículos");
-    
     const subTotal = items.reduce((acc, item) => acc + ((parseFloat(item.rate) || 0) * (parseInt(item.quantity) || 0)), 0);
     const taxTotal = subTotal * 0.21; // 21% IVA por defecto (ajustable)
     const grandTotal = subTotal + taxTotal;
@@ -90,22 +112,18 @@ export default function QuotationsModule() {
   const handleAnalyzeRFQ = async () => {
     const text = window.prompt("Pega aquí el contenido del email o texto del RFQ:");
     if (!text) return;
-    
     setAiLoading(true);
     try {
       const url = window.location.hostname === 'localhost'
         ? 'http://127.0.0.1:5001/med-peptides-app/us-central1/analyzeRFQEndpoint'
         : 'https://us-central1-med-peptides-app.cloudfunctions.net/analyzeRFQEndpoint';
-        
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rfqText: text })
       });
-      
-      const data = await res.json();
+      const data = await res.js();
       if (!res.ok) throw new Error(data.error || 'AI Failed');
-      
       const r = data.result;
       setCustomerName(r.customerName || '');
       setCustomerEmail(r.customerEmail || '');
@@ -177,7 +195,6 @@ export default function QuotationsModule() {
       'Accepted': '#10b981',
       'Declined': '#ef4444'
     };
-    
     return (
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
@@ -283,7 +300,6 @@ export default function QuotationsModule() {
             )}
           </div>
         </div>
-        
         {/* A4 Document Wrapper */}
         <ZohoPaperPreview 
           docType="QUOTATION" 

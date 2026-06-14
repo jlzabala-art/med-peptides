@@ -1,3 +1,27 @@
+import Users from "lucide-react/dist/esm/icons/users";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Target from "lucide-react/dist/esm/icons/target";
+import Trello from "lucide-react/dist/esm/icons/trello";
+import List from "lucide-react/dist/esm/icons/list";
+import Map from "lucide-react/dist/esm/icons/map";
+import Search from "lucide-react/dist/esm/icons/search";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import Star from "lucide-react/dist/esm/icons/star";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Archive from "lucide-react/dist/esm/icons/archive";
+import CheckSquare from "lucide-react/dist/esm/icons/check-square";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import X from "lucide-react/dist/esm/icons/x";
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -8,11 +32,30 @@ import { useToast } from '../../hooks/useToast';
 import AdminPageHeader from './AdminPageHeader';
 import DataTable from '../ui/DataTable';
 import AppEntityCell from '../ui/AppEntityCell';
-import { 
-  Users, FileText, Mail, Calendar, AlertTriangle, ArrowUpRight, DollarSign, 
-  Target, Trello, List, Map, Search, Sparkles, RefreshCw, Star, Trash2, 
-  Archive, CheckSquare, ShieldAlert, BarChart3, Globe, Phone, MapPin, X
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import LeadKanbanBoard from './leads/LeadKanbanBoard';
 import LeadProfileDrawer from './leads/LeadProfileDrawer';
 import { calculateDetailedAIScore } from './leads/LeadUtils';
@@ -29,13 +72,11 @@ export default function AdminLeadsTab() {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [catalogProducts, setCatalogProducts] = useState([]);
-  
   // View State
   const [currentView, setCurrentView] = useState('kanban'); // 'kanban', 'table'
   const [searchTerm, setSearchTerm] = useState(deepLinkSearch || '');
   const [selectedTypeTab, setSelectedTypeTab] = useState('All');
   const [activeKpiFilter, setActiveKpiFilter] = useState('all');
-  
   // Drawer State
   const [selectedLead, setSelectedLead] = useState(null);
 
@@ -57,7 +98,6 @@ export default function AdminLeadsTab() {
 
       const allProducts = productsSnap.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
       setCatalogProducts(allProducts);
-      
       const rfqs = rfqsSnap.docs.map(d => {
         const data = d.data();
         const rawCreatedAt = data.createdAt;
@@ -70,7 +110,6 @@ export default function AdminLeadsTab() {
             if (!isNaN(parsedDate.getTime())) isoCreatedAt = parsedDate.toISOString();
           }
         }
-        
         return {
           id: d.id,
           name: data.clientName || 'Magenta Compounding Pharmacy',
@@ -89,7 +128,6 @@ export default function AdminLeadsTab() {
 
       // Add a couple of high fidelity B2C/distributor mock leads if none exist
       const combined = [...(leadsData || []), ...rfqs].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      
       const mapped = combined.map(l => {
         let st = l.status;
         if(st === 'completed') st = 'won';
@@ -117,14 +155,12 @@ export default function AdminLeadsTab() {
     try {
       const leadToUpdate = leads.find(l => l.id === leadId);
       if (!leadToUpdate) return;
-      
       if (leadToUpdate.type === 'rfq') {
          await updateDoc(doc(db, 'agency_rfqs', leadId), { status: newStatus.toUpperCase() });
       } else {
          const updatedLead = { ...leadToUpdate, status: newStatus };
          await catalogRepository.saveLeadRequest(updatedLead);
       }
-      
       setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
       toast.success(`Lead moved to ${newStatus}`);
     } catch (err) {
@@ -224,7 +260,6 @@ export default function AdminLeadsTab() {
     const activeOpps = leads.filter(l => l.status !== 'won' && l.status !== 'lost').length;
     const rfqsCount = leads.filter(l => l.type === 'rfq').length;
     const quotesCount = leads.filter(l => l.status === 'quoted' || l.status === 'pricing').length;
-    
     const revenue = leads.reduce((acc, lead) => {
       if (lead.status === 'lost') return acc;
       const items = lead.originalData?.items || [];
@@ -383,7 +418,6 @@ export default function AdminLeadsTab() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1280px', margin: '0 auto', paddingBottom: '3rem' }}>
-      
       {/* Page Header */}
       <AdminPageHeader
         title="Commercial Sourcing CRM (Leads)"
@@ -438,7 +472,6 @@ export default function AdminLeadsTab() {
 
       {/* Side-by-Side Content: Forecasting & Filter Switcher */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
-        
         {/* Revenue Forecasting Chart Widget */}
         <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>

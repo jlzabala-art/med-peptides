@@ -1,7 +1,8 @@
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { ShieldAlert } from 'lucide-react';
+
 
 export default function RestrictedCatalogRoute({ catalogName, children }) {
   const { userProfile, loading, activeRole } = useAuth();
@@ -21,7 +22,6 @@ export default function RestrictedCatalogRoute({ catalogName, children }) {
 
   // Check if the user has specific catalog restrictions
   const allowedCatalogs = userProfile?.allowedCatalogs;
-  
   if (allowedCatalogs && Array.isArray(allowedCatalogs)) {
     if (!allowedCatalogs.includes(catalogName)) {
       return (

@@ -1,6 +1,33 @@
+import X from "lucide-react/dist/esm/icons/x";
+import Search from "lucide-react/dist/esm/icons/search";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import User from "lucide-react/dist/esm/icons/user";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import Filter from "lucide-react/dist/esm/icons/filter";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Download from "lucide-react/dist/esm/icons/download";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Search, Clock, Calendar, ChevronRight, FileText, User, RefreshCw, Layers, Filter, CheckCircle2, AlertCircle, Download, AlertTriangle } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { getSavedProtocolsList, deleteProtocol } from '../../services/protocolStorage';
 import { generateProtocolICS } from '../../services/calendarService';
 import { generateClinicalPDF } from '../../services/pdfService';
@@ -52,10 +79,8 @@ const ProtocolHistoryModal = ({ isOpen, onClose, onSelect, onCompare }) => {
     const matchesSearch = (p.protocol_name?.toLowerCase() || '').includes(search.toLowerCase()) ||
                           (p.therapeutic_category?.toLowerCase() || '').includes(search.toLowerCase()) ||
                           (p.created_by?.user_name?.toLowerCase() || '').includes(search.toLowerCase());
-    
     const matchesCategory = filterCategory === 'all' || p.therapeutic_category === filterCategory;
     const matchesStatus = filterStatus === 'all' || p.status === filterStatus;
-    
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
@@ -151,7 +176,6 @@ const ProtocolHistoryModal = ({ isOpen, onClose, onSelect, onCompare }) => {
               style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.75rem', borderRadius: '12px', border: '1.5px solid var(--border)', fontSize: '0.9rem', outline: 'none', backgroundColor: 'white' }}
             />
           </div>
-          
           <select 
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
@@ -234,7 +258,6 @@ const ProtocolHistoryModal = ({ isOpen, onClose, onSelect, onCompare }) => {
                           </div>
                         </div>
                       </div>
-                      
                       {/* Action Buttons Row */}
                        <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
                          {/* Quick Actions Menu Button */}

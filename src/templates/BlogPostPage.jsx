@@ -1,29 +1,42 @@
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import User from "lucide-react/dist/esm/icons/user";
+import Tag from "lucide-react/dist/esm/icons/tag";
+import Share2 from "lucide-react/dist/esm/icons/share-2";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Check from "lucide-react/dist/esm/icons/check";
+import Copy from "lucide-react/dist/esm/icons/copy";
+import XIcon from "lucide-react/dist/esm/icons/x";
+import LinkIcon from "lucide-react/dist/esm/icons/link";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
 /* eslint-disable no-unused-vars */
 import React, { useMemo, useEffect, useState, useCallback } from 'react';
 import { trackBlogView } from '../utils/analytics';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Calendar, 
-  Clock, 
-  User, 
-  Tag, 
-  Share2, 
-  Sparkles, 
-  ChevronRight,
-  BookOpen,
-  ArrowRight,
-  Check,
-  Copy,
-  X as XIcon,
-  Link as LinkIcon,
-  Plus,
-  ShoppingCart
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { usePageMeta } from '../hooks/usePageMeta';
 import { useBlogPosts } from '../hooks/useBlogPosts';
-import { products } from '../data/products';
-import { supplements } from '../data/supplements';
+import { useStaticData } from '../hooks/useStaticData';
 import { PROTOCOL_BLUEPRINTS } from '../data/protocolBlueprints';
 import '../styles/blog.css';
 
@@ -69,6 +82,7 @@ const renderParagraph = (text, complicatedWords = []) => {
 
 // InteractiveResourceCard component: renders a detailed card for products, supplements or protocols
 const InteractiveResourceCard = ({ link, accentColor, bgColor }) => {
+  const { products, supplements } = useStaticData();
   const navigate = useNavigate();
   const [added, setAdded] = useState(false);
 
@@ -496,7 +510,6 @@ useEffect(() => {
           pointerEvents: 'none',
           zIndex: 0
         }} />
-        
         <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
           <Link 
             to="/blog" 
@@ -591,10 +604,8 @@ useEffect(() => {
       {/* Main Content Layout */}
       <div className="page-container" style={{ marginTop: '3.5rem', marginBottom: '6rem' }}>
         <div className="grid-2-sidebar">
-          
           {/* Article Body */}
           <article style={{ fontSize: '1.1rem', lineHeight: '1.8', color: 'var(--text-main)' }}>
-            
             {/* Featured Image with SEO metadata title & alt */}
             {post.heroImageUrl && (
               <div className="blog-post__featured-image-wrapper" style={{
@@ -886,7 +897,6 @@ useEffect(() => {
 
           {/* Sidebar */}
           <aside style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-            
             {/* Interactive ClinicAI Integration Widget */}
             <div 
               className="card" 

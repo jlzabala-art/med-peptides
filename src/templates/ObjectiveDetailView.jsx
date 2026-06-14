@@ -1,6 +1,23 @@
+import Info from "lucide-react/dist/esm/icons/info";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Bot from "lucide-react/dist/esm/icons/bot";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo } from 'react';
-import { Info, HelpCircle, BookOpen, ChevronRight, Beaker, Zap, Activity, FlaskConical, Bot } from 'lucide-react';
+
+
+
+
+
+
+
+
+
 import MobileProductCard from '../snippets/MobileProductCard';
 import FAQModal from '../components/discovery/FAQModal';
 import PubMedPreviewPanel from '../components/discovery/PubMedPreviewPanel';
@@ -46,7 +63,6 @@ export default function ObjectiveDetailView({
     const groups = {};
     // Products associated with this scientific research goal
     const filtered = products.filter(p => p.objective && p.objective.includes(objectiveId));
-    
     filtered.forEach(p => {
       const familyName = p.name;
       if (!groups[familyName]) {
@@ -98,7 +114,6 @@ export default function ObjectiveDetailView({
         <p style={{ maxWidth: '750px', margin: '0 auto', color: 'var(--text-muted)', fontSize: '1.1rem', lineHeight: 1.6 }}>
           Peer-reviewed research catalog curated for <strong>{objectiveId.toLowerCase()}</strong> studies. High-purity peptides analyzed for consistent experimental outcomes.
         </p>
-        
         <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: 'rgba(0,163,224,0.05)', borderRadius: '16px', textAlign: 'left', maxWidth: '800px', margin: '2rem auto 0', border: '1px solid rgba(0,163,224,0.1)' }}>
           <h4 style={{ fontSize: '0.9rem', color: 'var(--primary)', fontWeight: 700, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Research Focus</h4>
           <p style={{ fontSize: '1rem', color: 'var(--text-main)', lineHeight: 1.6, margin: 0 }}>

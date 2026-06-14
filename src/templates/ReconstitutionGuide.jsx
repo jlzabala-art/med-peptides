@@ -1,15 +1,20 @@
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import Droplets from "lucide-react/dist/esm/icons/droplets";
+import Syringe from "lucide-react/dist/esm/icons/syringe";
+import Snowflake from "lucide-react/dist/esm/icons/snowflake";
+import Calculator from "lucide-react/dist/esm/icons/calculator";
 /* eslint-disable no-unused-vars */
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  FlaskConical,
-  ArrowRight,
-  ChevronDown,
-  Droplets,
-  Syringe,
-  Snowflake,
-  Calculator,
-} from 'lucide-react';
+
+
+
+
+
+
+
 import { usePageMeta } from '../hooks/usePageMeta';
 import '../styles/reconstitution_guide.css';
 

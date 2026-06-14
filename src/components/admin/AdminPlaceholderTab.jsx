@@ -1,5 +1,16 @@
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
 /* eslint-disable no-unused-vars */
-import { Sparkles, Clock, CheckCircle2, ArrowRight, Zap, Calendar } from 'lucide-react';
+
+
+
+
+
+
 
 const PRIORITY_CONFIG = {
   next: { label: 'Up Next', Icon: Zap, bg: '#dc262615', border: '#dc262630', text: 'var(--color-danger)', glow: '#dc262622' },

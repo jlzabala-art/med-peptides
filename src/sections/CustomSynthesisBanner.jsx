@@ -1,6 +1,8 @@
- 
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React from 'react';
-import { Beaker, ArrowRight } from 'lucide-react';
+
+
 
 export default function CustomSynthesisBanner({ onNavigate, compact = false }) {
   if (compact) {

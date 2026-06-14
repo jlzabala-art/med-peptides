@@ -1,5 +1,6 @@
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
 import React from 'react';
-import { ShoppingCart } from 'lucide-react';
+
 import AdminPageHeader from './AdminPageHeader';
 import POWidget from '../widgets/purchase/POWidget';
 

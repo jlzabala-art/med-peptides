@@ -1,11 +1,58 @@
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import X from "lucide-react/dist/esm/icons/x";
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Package from "lucide-react/dist/esm/icons/package";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import Award from "lucide-react/dist/esm/icons/award";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import BarChart4 from "lucide-react/dist/esm/icons/bar-chart-4";
+import Filter from "lucide-react/dist/esm/icons/filter";
+import Search from "lucide-react/dist/esm/icons/search";
+import Check from "lucide-react/dist/esm/icons/check";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Download from "lucide-react/dist/esm/icons/download";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import React, { useState, useEffect, useMemo } from 'react';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, addDoc, serverTimestamp, arrayUnion } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { 
-  ShoppingCart, Plus, X, Building2, FileText, CheckCircle, Package, ExternalLink,
-  Truck, ClipboardList, ShieldAlert, Award, Calendar, BarChart4, Filter, Search, Check,
-  Sparkles, Download, RefreshCw, Layers, DollarSign, Clock, ArrowRight, Eye, AlertTriangle
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import { StatusChip, Tabs } from '../../components/ui';
 import ERPActivityTimeline from '../../components/shared/ERPActivityTimeline';
@@ -60,7 +107,6 @@ function PODetail({ po, onClose, onStatusChange, onEdit }) {
   const destination = po.destination || 'Dubai Freezone (DXB)';
   const shippingWeight = po.shippingWeight || '42 kg';
   const etaDays = po.etaDays || '3 days';
-  
   // Mock Supplier Snapshot details
   const supplierRating = 96;
   const supplierResponse = '12h average';
@@ -112,11 +158,9 @@ function PODetail({ po, onClose, onStatusChange, onEdit }) {
 
       {/* Tab contents */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem' }}>
-        
         {/* OVERVIEW TAB */}
         {detailTab === 'overview' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            
             {/* Status Timeline Progress Engine */}
             <div style={{ padding: '1rem', backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: '8px' }}>
               <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Procurement Stage Flow</span>
@@ -126,7 +170,6 @@ function PODetail({ po, onClose, onStatusChange, onEdit }) {
                   const stageUpper = stage.toUpperCase();
                   const poStatusUpper = (po.status || 'DRAFT').toUpperCase();
                   const isPassed = idx <= ['DRAFT', 'APPROVED', 'SENT_TO_SUPPLIER', 'CONFIRMED', 'PRODUCTION', 'SHIPPED', 'RECEIVED', 'CLOSED'].indexOf(poStatusUpper);
-                  
                   return (
                     <div key={stage} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2, flex: 1 }}>
                       <div style={{ 
@@ -370,7 +413,6 @@ export default function POList() {
   const [showForm, setShowForm] = useState(false);
   const [selectedPo, setSelectedPo] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  
   // Custom states for redesign workspace
   const [activeKpiFilter, setActiveKpiFilter] = useState('all');
   const [activeTabPanel, setActiveTabPanel] = useState('directory'); // directory, calendar, analytics
@@ -464,7 +506,6 @@ export default function POList() {
     const partiallyReceived = pos.filter(p => p.status?.toUpperCase() === 'PARTIALLY_RECEIVED').length;
     const delayed = pos.filter(p => p.status?.toUpperCase() === 'APPROVED' && Math.random() > 0.8).length || 1;
     const spend30d = pos.reduce((sum, p) => sum + (p.totalAmount || 0), 0) + 456000;
-    
     return { total, pendingApproval, awaitingShipment, partiallyReceived, delayed, spend30d };
   }, [pos]);
 
@@ -508,7 +549,6 @@ export default function POList() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1280px', margin: '0 auto', paddingBottom: '3rem' }}>
-      
       {/* Page Header and Quick Actions */}
       <AdminPageHeader
         title="Procurement Workspace"
@@ -624,11 +664,9 @@ export default function POList() {
 
       {/* Main Switchboard */}
       <div style={{ flex: 1, minHeight: 0 }}>
-        
         {/* DIRECTORY SPLIT LAYOUT */}
         {activeTabPanel === 'directory' && (
           <div style={{ display: 'flex', gap: '1.25rem', height: '100%', alignItems: 'flex-start' }}>
-            
             {/* Left PO list cards panel */}
             <div style={{ 
               flex: selectedPo && !isMobile ? '0 0 35%' : '1', 
@@ -653,7 +691,6 @@ export default function POList() {
                   const isSelected = selectedPo?.id === p.id;
                   const poStatus = p.status || 'DRAFT';
                   const expectedDelivery = 'Jun 18';
-                  
                   return (
                     <div
                       key={p.id}
@@ -784,7 +821,6 @@ export default function POList() {
         {/* 18. PROCUREMENT ANALYTICS PANEL */}
         {activeTabPanel === 'analytics' && (
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.5fr 1fr', gap: '1.25rem' }}>
-            
             {/* Spend Chart */}
             <div className="glass-card-premium" style={{ padding: '1.5rem', border: '1px solid var(--border)' }}>
               <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 800 }}>Procurement Spend Trend (Monthly)</h3>

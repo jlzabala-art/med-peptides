@@ -1,7 +1,9 @@
- 
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Minus from "lucide-react/dist/esm/icons/minus";
 import React, { useState } from 'react';
-import { Plus, Minus } from 'lucide-react';
-import homeData from '../data/homeData.json';
+
+
+import homeData from '../data/homeData.js';
 import { renderTitle } from '../utils/textFormatter';
 
 const QuickFAQ = () => {

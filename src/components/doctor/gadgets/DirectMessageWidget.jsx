@@ -1,8 +1,15 @@
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Send from "lucide-react/dist/esm/icons/send";
+import User from "lucide-react/dist/esm/icons/user";
+import Clock from "lucide-react/dist/esm/icons/clock";
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, getDocs, addDoc, serverTimestamp, orderBy } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
-import { MessageSquare, Send, User, Clock } from 'lucide-react';
+
+
+
+
 
 export default function DirectMessageWidget() {
   const { user } = useAuth();
@@ -34,7 +41,6 @@ export default function DirectMessageWidget() {
       setMessages([]);
       return;
     }
-    
     async function fetchMessages() {
       try {
         const q = query(
@@ -66,7 +72,6 @@ export default function DirectMessageWidget() {
         }
       }
     }
-    
     fetchMessages();
   }, [selectedPatient, user]);
 
@@ -81,7 +86,6 @@ export default function DirectMessageWidget() {
   const handleSend = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedPatient) return;
-    
     setLoading(true);
     try {
       const p = patients.find(x => x.patientId === selectedPatient);
@@ -93,9 +97,7 @@ export default function DirectMessageWidget() {
         text: newMessage.trim(),
         createdAt: serverTimestamp()
       };
-      
       await addDoc(collection(db, 'secure_messages'), newMsgObj);
-      
       // Optimistic update
       setMessages(prev => [...prev, { ...newMsgObj, createdAt: { toMillis: () => Date.now() } }]);
       setNewMessage('');

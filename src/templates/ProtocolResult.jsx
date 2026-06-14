@@ -1,31 +1,52 @@
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Package from "lucide-react/dist/esm/icons/package";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Send from "lucide-react/dist/esm/icons/send";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import Info from "lucide-react/dist/esm/icons/info";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Heart from "lucide-react/dist/esm/icons/heart";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import History from "lucide-react/dist/esm/icons/history";
+import FileSearch from "lucide-react/dist/esm/icons/file-search";
+import Dna from "lucide-react/dist/esm/icons/dna";
 /* eslint-disable react-hooks/set-state-in-effect, no-undef, no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  ShieldCheck, 
-  Clock, 
-  Package, 
-  DollarSign, 
-  AlertCircle, 
-  CheckCircle2, 
-  ChevronRight, 
-  FileText, 
-  Send, 
-  Loader2, 
-  ExternalLink,
-  Info,
-  Calendar,
-  Activity,
-  Heart,
-  Shield,
-  Zap,
-  FlaskConical,
-  Beaker,
-  History,
-  FileSearch,
-  Dna
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { getProtocolById } from '../services/protocolStorage';
 import CostBreakdown from '../components/CostBreakdown';
@@ -34,12 +55,10 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const protocolId = searchParams.get('id');
-  
   const [loading, setLoading] = useState(true);
   const [protocol, setProtocol] = useState(null);
   const [showCostBreakdown, setShowCostBreakdown] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  
   // Checkout-Style Navigation State
   // Can be 'phase-0', 'phase-1', ... or 'summary'
   const [activeStep, setActiveStep] = useState('phase-0');
@@ -120,14 +139,11 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
   const nestedData = (rawData.protocolData && typeof rawData.protocolData === 'object' && !Array.isArray(rawData.protocolData)) 
     ? rawData.protocolData 
     : {};
-  
   // Create a flattened data object for easier access
   const data = { ...rawData, ...nestedData };
-  
   const formData = data.formData || {};
   const confidenceScore = data.confidenceScore || 0;
   const validationStatus = data.status || 'pending';
-  
   // Extract critical V4 caches
   const timelineCache = Array.isArray(data.timelineCache)
     ? data.timelineCache
@@ -154,7 +170,6 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
     }}>
       {/* Scrollable Container */}
       <div className="container" style={{ maxWidth: '700px', padding: '1.5rem' }}>
-        
         {/* Header Section */}
         <header style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
           <button 
@@ -381,7 +396,6 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
         </div>
 
         {/* --- DYNAMIC PROTOCOL VIEWS --- */}
-        
         {/* VIEW A: PHASE SCREEN */}
         {activeStep.startsWith('phase-') && timelineCache && timelineCache.length > 0 && (
           <section style={{ marginBottom: '2.5rem', animation: 'fadeIn 0.3s ease-out' }}>
@@ -389,7 +403,6 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
                const phaseIdx = parseInt(activeStep.replace('phase-', ''));
                const phase = timelineCache[phaseIdx];
                if (!phase) return null;
-               
                let startWeek = 1;
                for (let i = 0; i < phaseIdx; i++) {
                  const p = timelineCache[i];
@@ -399,7 +412,6 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
                const phaseMatch = phase.duration ? phase.duration.match(/\d+/) : null;
                const durationWeeks = phaseMatch ? parseInt(phaseMatch[0]) : 4;
                const endWeek = startWeek + durationWeeks - 1;
-               
                return (
                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                    <div className="clinical-card" style={{ padding: '1.5rem', border: '2px solid var(--primary)', backgroundColor: 'var(--color-bg-app)', boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
@@ -419,7 +431,6 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
                       <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1.5rem', color: 'var(--text-main)', lineHeight: 1.1 }}>
                         {phase.name}
                       </h2>
-                      
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                           <h4 style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -469,7 +480,6 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
                             </span>
                             <ChevronRight size={18} style={{ transform: expandedSections.schedule ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
                           </button>
-                          
                           {expandedSections.schedule && (
                              <div className="collapse-content" style={{ animation: 'fadeIn 0.2s ease-out' }}>
                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
@@ -506,7 +516,6 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
                             </span>
                             <ChevronRight size={18} style={{ transform: expandedSections.safety ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} color="var(--color-success)" />
                           </button>
-                          
                           {expandedSections.safety && (
                              <div className="collapse-content" style={{ animation: 'fadeIn 0.2s ease-out' }}>
                                 <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
@@ -535,7 +544,6 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
             })()}
           </section>
         )}
-        
         {/* VIEW B: SUMMARY SCREEN */}
         {activeStep === 'summary' && (
           <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
@@ -544,7 +552,6 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
             <h3 className="clinical-heading" style={{ fontSize: '1.2rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                <FileText size={20} color="var(--primary)" /> Patient Clinical Guide
             </h3>
-            
             <div style={{ display: 'grid', gap: '1.5rem' }}>
               {patientGuide.programAtAGlance && (
                 <div className="clinical-card" style={{ padding: '1.5rem', border: 'none', backgroundColor: '#f0f9ff' }}>
@@ -809,7 +816,6 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
                 <div style={{ fontWeight: 800 }}>${((costCache?.totalEstimatedCost || 0) / (timelineCache?.length || 1)).toFixed(2)}</div>
               </div>
             </div>
-            
             <button 
               onClick={() => setShowCostBreakdown(true)}
               className="btn btn-secondary"

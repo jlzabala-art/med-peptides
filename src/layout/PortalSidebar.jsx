@@ -1,9 +1,16 @@
+import Pin from "lucide-react/dist/esm/icons/pin";
+import PinOff from "lucide-react/dist/esm/icons/pin-off";
+import Star from "lucide-react/dist/esm/icons/star";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import React, { useState, useEffect, useCallback } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { getPortalTabs } from '../config/portalConfig';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Pin, PinOff, Star, ChevronDown } from 'lucide-react';
+
+
+
+
 import AtlasHealthLogo from '../components/brand/AtlasHealthLogo';
 
 const STORAGE_KEY = (uid, role) => `atlas_pinned_${uid}_${role}`;
@@ -66,7 +73,6 @@ export default function PortalSidebar({ isOpen, onClose }) {
   const uid = user?.uid || 'anon';
   const tabs = getPortalTabs(activeRole);
   const { pinned, toggle } = usePinnedTabs(uid, activeRole);
-  
   const [openCategory, setOpenCategory] = useState(null);
 
   const pinnedTabs = tabs.filter(t => pinned.includes(t.id));

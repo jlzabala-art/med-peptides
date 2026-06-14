@@ -1,7 +1,14 @@
+import Scale from "lucide-react/dist/esm/icons/scale";
+import Check from "lucide-react/dist/esm/icons/check";
+import X from "lucide-react/dist/esm/icons/x";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Scale, Check, X, AlertCircle } from 'lucide-react';
+
+
+
+
 
 export default function ComparisonMatrix({ 
   compounds = [], 
@@ -85,7 +92,6 @@ export default function ComparisonMatrix({
           </tbody>
         </table>
       </div>
-      
       <div style={{ padding: '0.75rem 1rem', backgroundColor: 'var(--color-bg-surface)', fontSize: '0.62rem', color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>
         * Based on current clinical research data and comparative analysis.
       </div>

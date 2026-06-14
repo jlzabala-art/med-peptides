@@ -1,5 +1,12 @@
+import Search from "lucide-react/dist/esm/icons/search";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Loader2, Plus, Trash2 } from 'lucide-react';
+
+
+
+
 import { useUnifiedCatalogSearch } from '../../hooks/useUnifiedCatalogSearch';
 
 function AutocompleteCell({ item, onSelect }) {
@@ -76,7 +83,6 @@ function AutocompleteCell({ item, onSelect }) {
 }
 
 export default function B2BOrderBuilderTable({ items, onChange }) {
-  
   const handleAddItem = () => {
     onChange([...items, { id: Date.now().toString(), name: '', quantity: 1, rate: 0, type: '', unit: 'vials', isApiWithScore: false }]);
   };
@@ -183,7 +189,6 @@ export default function B2BOrderBuilderTable({ items, onChange }) {
           })}
         </tbody>
       </table>
-      
       <div style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fafbfc' }}>
         <button onClick={handleAddItem} className="btn" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#fff', border: '1px dashed var(--border)', color: 'var(--color-text-secondary)', padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>
           <Plus size={14} /> Añadir otra línea

@@ -1,5 +1,12 @@
+import Bell from "lucide-react/dist/esm/icons/bell";
+import Check from "lucide-react/dist/esm/icons/check";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import X from "lucide-react/dist/esm/icons/x";
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Check, Trash2, X } from 'lucide-react';
+
+
+
+
 import { collection, query, where, orderBy, limit, onSnapshot, doc, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
@@ -103,7 +110,6 @@ const NotificationBell = () => {
               </button>
             )}
           </div>
-          
           <div className="notif-dropdown-body">
             {notifications.length === 0 ? (
               <div className="notif-empty">
@@ -143,7 +149,6 @@ const NotificationBell = () => {
               </div>
             )}
           </div>
-          
           <div className="notif-dropdown-footer">
             <button onClick={() => setIsOpen(false)}>Close</button>
           </div>

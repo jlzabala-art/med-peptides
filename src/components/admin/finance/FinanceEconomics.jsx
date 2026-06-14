@@ -1,7 +1,18 @@
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import PieChart from "lucide-react/dist/esm/icons/pie-chart";
+import Landmark from "lucide-react/dist/esm/icons/landmark";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
-import { AlertTriangle, TrendingUp, DollarSign, CheckCircle, PieChart, Landmark } from 'lucide-react';
+
+
+
+
+
+
 import ProfitMarginAnalysis from './ProfitMarginAnalysis';
 
 export default function FinanceEconomics({ dashboardData }) {
@@ -40,10 +51,8 @@ export default function FinanceEconomics({ dashboardData }) {
 
   return (
     <div className="anim-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      
       {/* Metrics Row */}
       <div className="finance-grid-3">
-        
         {/* LTV:CAC */}
         <div className="glass-card-premium" style={{ padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: 0, right: 0, width: '128px', height: '128px', background: 'rgba(16, 185, 129, 0.1)', filter: 'blur(40px)', borderRadius: '50%', pointerEvents: 'none' }} />
@@ -51,7 +60,6 @@ export default function FinanceEconomics({ dashboardData }) {
             <TrendingUp style={{ width: '16px', height: '16px', color: 'var(--success)' }} />
             Unit Economics (LTV:CAC)
           </h3>
-          
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
             <div>
               <p style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)', margin: '0 0 0.25rem 0' }}>Customer LTV</p>
@@ -62,13 +70,11 @@ export default function FinanceEconomics({ dashboardData }) {
               <p style={{ fontSize: '1.875rem', fontWeight: '800', color: 'var(--warning)', margin: 0 }}>$380</p>
             </div>
           </div>
-          
           <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '1rem', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
             <span style={{ fontWeight: '800', color: 'var(--success)', fontSize: '0.875rem' }}>Ratio</span>
             <span style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--success)' }}>3.2 : 1</span>
           </div>
         </div>
-        
         {/* B2B Revenue */}
         <div className="glass-card-premium" style={{ padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: 0, right: 0, width: '128px', height: '128px', background: 'rgba(59, 130, 246, 0.1)', filter: 'blur(40px)', borderRadius: '50%', pointerEvents: 'none' }} />
@@ -76,10 +82,8 @@ export default function FinanceEconomics({ dashboardData }) {
             <PieChart style={{ width: '16px', height: '16px', color: '#3b82f6' }} />
             B2B Revenue Concentration
           </h3>
-          
           <p style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)', margin: '0 0 0.25rem 0' }}>Lotusland Total Billed</p>
           <p style={{ fontSize: '2.25rem', fontWeight: '800', color: '#3b82f6', margin: '0 0 1.5rem 0' }}>${lotusBilled.toLocaleString()}</p>
-          
           <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '16px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
             <p style={{ fontSize: '0.75rem', fontWeight: '600', color: '#1e3a8a', lineHeight: 1.6, margin: 0 }}>
               <span style={{ fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'rgba(59, 130, 246, 0.2)', padding: '0.125rem 0.5rem', borderRadius: '4px', marginRight: '0.5rem' }}>Note</span>
@@ -87,7 +91,6 @@ export default function FinanceEconomics({ dashboardData }) {
             </p>
           </div>
         </div>
-        
         {/* Tax Liability */}
         <div className="glass-card-premium" style={{ padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: 0, right: 0, width: '128px', height: '128px', background: 'rgba(244, 63, 94, 0.1)', filter: 'blur(40px)', borderRadius: '50%', pointerEvents: 'none' }} />
@@ -95,16 +98,13 @@ export default function FinanceEconomics({ dashboardData }) {
             <Landmark style={{ width: '16px', height: '16px', color: 'var(--error)' }} />
             Estimated Tax Liability
           </h3>
-          
           <p style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)', margin: '0 0 0.25rem 0' }}>Accrued VAT/Corporate (5%)</p>
           <p style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--error)', margin: '0 0 1.5rem 0' }}>$12,450.00</p>
-          
           <div className="finance-progress-bg" style={{ background: 'var(--surface-raised)' }}>
             <div className="finance-progress-bar" style={{ width: '45%', background: 'var(--error)' }} />
           </div>
           <div style={{ textAlign: 'right', marginTop: '0.5rem', fontSize: '0.75rem', fontWeight: '800', color: 'var(--error)' }}>45% of Target</div>
         </div>
-        
       </div>
 
       {/* Protocol Margin Analysis */}
@@ -117,7 +117,6 @@ export default function FinanceEconomics({ dashboardData }) {
             <AlertTriangle style={{ width: '24px', height: '24px', color: 'var(--warning)' }} />
             AI Margin Protection Alerts
           </h3>
-          
           {marginAlerts.length === 0 ? (
             <div style={{ padding: '3rem', textAlign: 'center', background: 'var(--surface-raised)', borderRadius: '16px', border: '2px dashed var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                <div style={{ background: 'rgba(16, 185, 129, 0.2)', padding: '1rem', borderRadius: '50%', marginBottom: '1rem' }}>
@@ -142,7 +141,6 @@ export default function FinanceEconomics({ dashboardData }) {
                       <span style={{ background: 'rgba(220, 38, 38, 0.1)', padding: '0.375rem 0.75rem', borderRadius: '8px', color: 'var(--text-muted)', border: '1px solid rgba(220, 38, 38, 0.2)' }}>Current Margin: <span style={{ color: 'var(--error)' }}>{alert.current_margin_percent}%</span></span>
                     </div>
                   </div>
-                  
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', background: 'var(--surface)', padding: '1rem', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)', width: '100%', flexWrap: 'wrap', justifyContent: 'space-between' }}>
                     <div>
                       <div style={{ fontSize: '0.625rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '800', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Suggested Price</div>

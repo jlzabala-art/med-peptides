@@ -1,8 +1,8 @@
- 
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
+
 import { Link } from 'react-router-dom';
-import homeData from '../data/homeData.json';
+import homeData from '../data/homeData.js';
 import { renderWithGradient } from '../utils/textUtils';
 
 const StartHere = () => {
@@ -23,7 +23,6 @@ const StartHere = () => {
                 {cta} <ArrowRight size={18} />
               </Link>
             </div>
-            
             <div className="flex-1 min-w-300">
               <div className="visual-abstract glass-card p-l bg-dark">
                 <div className="peptide-chain-viz">
@@ -35,7 +34,6 @@ const StartHere = () => {
               </div>
             </div>
           </div>
-          
           {/* Decorative blur */}
           <div className="absolute -bottom-50 -right-50 w-300 h-300 bg-primary opacity-10 blur-3xl"></div>
         </div>

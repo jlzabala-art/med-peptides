@@ -1,6 +1,7 @@
+import X from "lucide-react/dist/esm/icons/x";
 import { useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+
 
 /**
  * Modal — accessible dialog rendered via portal.

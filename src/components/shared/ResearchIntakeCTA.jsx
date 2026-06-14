@@ -1,5 +1,8 @@
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 import React from 'react';
-import { Sparkles, ChevronRight } from 'lucide-react';
+
+
 import useGuestPreferences from '../../hooks/useGuestPreferences';
 
 export default function ResearchIntakeCTA() {
@@ -45,7 +48,6 @@ export default function ResearchIntakeCTA() {
       <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-main)' }}>
         {hasCompleted ? 'Update your research profile' : 'Personalize your research'}
       </h2>
-      
       <p style={{ margin: '0 0 1.5rem 0', color: 'var(--text-muted)', fontSize: '0.95rem', maxWidth: '500px' }}>
         {hasCompleted && goalMeta 
           ? `Current focus: ${goalMeta.label}. Refine your preferences to get even more targeted protocol recommendations.`

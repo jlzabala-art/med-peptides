@@ -14,8 +14,8 @@ const __dirname = path.dirname(__filename);
 
 import { readFileSync } from 'fs';
 
-// Load service account credentials. Use env var or fallback to scripts/serviceAccountKey.json.
-const serviceAccountPath = process.env.GOOGLE_APPLICATION_CREDENTIALS || path.resolve(__dirname, '../../scripts/serviceAccountKey.json');
+// Load service account credentials. Use env var or fallback to scripts/serviceAccountKey.js.
+const serviceAccountPath = process.env.GOOGLE_APPLICATION_CREDENTIALS || path.resolve(__dirname, '../../scripts/serviceAccountKey.js');
 let serviceAccount;
 try {
   serviceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));

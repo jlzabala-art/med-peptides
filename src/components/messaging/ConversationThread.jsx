@@ -1,3 +1,9 @@
+import Send from "lucide-react/dist/esm/icons/send";
+import Package from "lucide-react/dist/esm/icons/package";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
+import Check from "lucide-react/dist/esm/icons/check";
 import React, { useState, useEffect, useRef } from 'react';
 import {
   collection,
@@ -11,7 +17,12 @@ import {
   increment
 } from 'firebase/firestore';
 import { db, storage, uploadBytes, getDownloadURL, ref } from '../../firebase';
-import { Send, Package, FileText, CheckCircle2, UploadCloud, Check } from 'lucide-react';
+
+
+
+
+
+
 import { useAuth } from '../../context/AuthContext';
 import ContextAttachment from './ContextAttachment';
 
@@ -38,7 +49,6 @@ export default function ConversationThread({ conversationId, conversationType, r
       const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       setMessages(msgs);
       setLoading(false);
-      
       if (user && msgs.length > 0) {
         const convRef = doc(db, 'conversations', conversationId);
         updateDoc(convRef, {
@@ -103,13 +113,11 @@ export default function ConversationThread({ conversationId, conversationType, r
   const handleSend = async (e, directText = null) => {
     if (e && e.preventDefault) e.preventDefault();
     const textToSend = directText !== null ? directText : inputText;
-    
     if (!textToSend.trim() && pendingAttachments.length === 0) return;
     if (!user || !conversationId) return;
 
     const content = textToSend.trim();
     const attachmentsToSent = [...pendingAttachments];
-    
     setInputText('');
     setPendingAttachments([]);
 
@@ -159,7 +167,6 @@ export default function ConversationThread({ conversationId, conversationType, r
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
-    
     const textData = e.dataTransfer.getData('text/plain');
     if (textData) {
       if (textData.toLowerCase().includes('sku')) {
@@ -197,7 +204,6 @@ export default function ConversationThread({ conversationId, conversationType, r
           </div>
         </div>
       )}
-      
       <div style={{ padding: '1rem', background: 'var(--color-bg-surface)', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800 }}>
@@ -263,7 +269,6 @@ export default function ConversationThread({ conversationId, conversationType, r
 
       {/* Input */}
       <div style={{ padding: '0.75rem', background: 'var(--color-bg-surface)', borderTop: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        
         {pendingAttachments.length > 0 && (
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', padding: '0.5rem', background: 'var(--color-bg-app)', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
             <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', width: '100%' }}>Pending attachments:</div>
@@ -308,12 +313,10 @@ export default function ConversationThread({ conversationId, conversationType, r
           }} title="Adjuntar documento / SKU" style={{ background: 'transparent', border: 'none', color: 'var(--color-text-tertiary)', cursor: 'pointer', padding: '0.3rem' }}>
             <FileText size={18} />
           </button>
-          
           <input type="file" id="fileUpload" style={{ display: 'none' }} onChange={handleFileSelect} />
           <button type="button" onClick={() => document.getElementById('fileUpload').click()} title="Adjuntar archivo" style={{ background: 'transparent', border: 'none', color: 'var(--color-text-tertiary)', cursor: 'pointer', padding: '0.3rem' }}>
             <UploadCloud size={18} />
           </button>
-          
           <input 
             type="text" 
             placeholder={pendingAttachments.length > 0 ? "Add a message to your attachments..." : "Type a message..."}
@@ -321,7 +324,6 @@ export default function ConversationThread({ conversationId, conversationType, r
             onChange={handleInputChange}
             style={{ flex: 1, padding: '0.6rem 1rem', borderRadius: '20px', border: '1px solid var(--color-border)', background: 'var(--color-bg-app)', fontSize: '0.85rem' }}
           />
-          
           <button type="submit" disabled={!inputText.trim() && pendingAttachments.length === 0} style={{ background: 'var(--color-primary)', border: 'none', color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (inputText.trim() || pendingAttachments.length > 0) ? 'pointer' : 'not-allowed', opacity: (inputText.trim() || pendingAttachments.length > 0) ? 1 : 0.5 }}>
             <Send size={16} style={{ marginLeft: '-2px' }}/>
           </button>

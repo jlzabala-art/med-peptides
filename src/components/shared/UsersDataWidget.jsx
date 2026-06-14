@@ -1,9 +1,18 @@
+import Check from "lucide-react/dist/esm/icons/check";
+import X from "lucide-react/dist/esm/icons/x";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Star from "lucide-react/dist/esm/icons/star";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import React, { useState, useEffect, useCallback } from 'react';
 import { collection, query, where, orderBy, limit, getDocs, startAfter, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import DataTable from '../ui/DataTable';
 import AppFilterBar from '../ui/AppFilterBar';
-import { Check, X, Shield, Star, Trash2 } from 'lucide-react';
+
+
+
+
+
 
 export default function UsersDataWidget({
   portalContext = 'admin', // 'admin', 'physician', 'clinic'
@@ -14,7 +23,6 @@ export default function UsersDataWidget({
 }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  
   // Paginación (GCP Style)
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const [pageHistory, setPageHistory] = useState([null]); // Array de cursores 'startAfter' (el índice 0 es null para la pag 1)
@@ -63,7 +71,6 @@ export default function UsersDataWidget({
 
       const docs = snapshot.docs;
       const hasMore = docs.length > rowsPerPage;
-      
       // Si hay más, nos quedamos con los primeros N
       const visibleDocs = hasMore ? docs.slice(0, rowsPerPage) : docs;
 
@@ -221,7 +228,6 @@ export default function UsersDataWidget({
           keyField="id"
           emptyTitle="No users found"
           emptyDescription="There are no users matching the current criteria."
-          
           // GCP Pagination Props
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={setRowsPerPage}

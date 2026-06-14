@@ -1,5 +1,20 @@
+import Users from "lucide-react/dist/esm/icons/users";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Cpu from "lucide-react/dist/esm/icons/cpu";
+import Edit2 from "lucide-react/dist/esm/icons/edit-2";
+import Copy from "lucide-react/dist/esm/icons/copy";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import React from 'react';
-import { Users, Shield, Globe, DollarSign, Cpu, Edit2, Copy, Trash2 } from 'lucide-react';
+
+
+
+
+
+
+
+
 
 export default function RoleCardsView({ roles, onEditRole, onCloneRole, onDeleteRole }) {
   return (
@@ -64,7 +79,6 @@ export default function RoleCardsView({ roles, onEditRole, onCloneRole, onDelete
 
           {/* Stats Grid */}
           <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                 <Users size={14} />

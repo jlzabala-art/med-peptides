@@ -1,6 +1,59 @@
+import Menu from "lucide-react/dist/esm/icons/menu";
+import X from "lucide-react/dist/esm/icons/x";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import Search from "lucide-react/dist/esm/icons/search";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import LogIn from "lucide-react/dist/esm/icons/log-in";
+import LogOut from "lucide-react/dist/esm/icons/log-out";
+import User from "lucide-react/dist/esm/icons/user";
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Home from "lucide-react/dist/esm/icons/home";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Calculator from "lucide-react/dist/esm/icons/calculator";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Package from "lucide-react/dist/esm/icons/package";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import Users from "lucide-react/dist/esm/icons/users";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import BookCopy from "lucide-react/dist/esm/icons/book-copy";
+import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
+import BookMarked from "lucide-react/dist/esm/icons/book-marked";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 /* eslint-disable no-unused-vars */
 import { memo, useState, useRef, useEffect, useCallback } from 'react';
-import { Menu, X, ShoppingCart, Search, ChevronDown, LogIn, LogOut, User, LayoutDashboard, Globe, Home, ShieldCheck, Calculator, BookOpen, Beaker, HelpCircle, FlaskConical, ClipboardList, Package, ShoppingBag, Brain, Users, Activity, BookCopy, GraduationCap, BookMarked, Sparkles } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import ReactDOM from 'react-dom';
 import { REGION_FLAGS } from '../data/regions';
@@ -129,7 +182,6 @@ function Header(props) {
   const navRef = useRef(null);
 
   const role = isAdmin ? 'admin' : isProfessional ? 'professional' : 'guest';
-  
   // Universal Flag & Name Lookup
   const currentCountry = COUNTRIES.find(c => c.code === (selectedCountryCode || region));
   const displayFlag = REGION_FLAGS[selectedCountryCode] || currentCountry?.flag || REGION_FLAGS[region] || '🌐';
@@ -271,7 +323,6 @@ function Header(props) {
             )}
           </span>
         </div>
-        
         {/* Right Side: Desktop Nav + Actions + Mobile Hamburger */}
           <div ref={navRef} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             {/* REGULAR NAV */}
@@ -635,7 +686,6 @@ function Header(props) {
             animation: 'slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
             overflow: 'hidden'
           }} onClick={(e) => e.stopPropagation()}>
-            
             {/* Drawer Header */}
             <div style={{ 
               padding: '1.5rem', 
@@ -672,7 +722,6 @@ function Header(props) {
               {/* DYNAMIC ROLE-BASED MOBILE NAV */}
               {(() => {
                 const navItems = ROLE_NAV_MENUS[activeRole] || ROLE_NAV_MENUS.guest;
-                
                 // Map Lucide name strings to actual components
                 const ICON_MAP = {
                   Home: Home,

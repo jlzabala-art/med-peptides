@@ -1,6 +1,9 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import { get, set, del } from 'idb-keyval';
 import { HelmetProvider } from 'react-helmet-async';
 
 // Contexts
@@ -13,21 +16,30 @@ import { ThemeProvider } from '../context/ThemeContext';
 import { NotificationProvider } from '../context/NotificationContext';
 import { PreferencesProvider } from '../context/PreferencesContext';
 import { HeaderProvider } from '../context/HeaderContext';
+import { CopilotProvider } from '../context/CopilotContext';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 15, // 15 minutes
-      cacheTime: 1000 * 60 * 30, // 30 minutes
+      staleTime: 1000 * 60 * 60 * 24, // 24 hours
+      gcTime: 1000 * 60 * 60 * 24, // 24 hours (Replaces cacheTime in RQv5)
       retry: 1,
       refetchOnWindowFocus: false,
     },
   },
 });
 
+const persister = createAsyncStoragePersister({
+  storage: {
+    getItem: async (key) => await get(key),
+    setItem: async (key, value) => await set(key, value),
+    removeItem: async (key) => await del(key),
+  },
+});
+
 export default function AppProviders({ children }) {
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
       <BrowserRouter>
         <AuthProvider>
           <PermissionsProvider>
@@ -38,9 +50,11 @@ export default function AppProviders({ children }) {
                     <ThemeProvider>
                       <NotificationProvider>
                         <PreferencesProvider>
-                          <HeaderProvider>
-                            {children}
-                          </HeaderProvider>
+                          <CopilotProvider>
+                            <HeaderProvider>
+                              {children}
+                            </HeaderProvider>
+                          </CopilotProvider>
                         </PreferencesProvider>
                       </NotificationProvider>
                     </ThemeProvider>
@@ -51,6 +65,6 @@ export default function AppProviders({ children }) {
           </PermissionsProvider>
         </AuthProvider>
       </BrowserRouter>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }

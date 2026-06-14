@@ -1,29 +1,29 @@
  
-import wm_001    from './wm_001--structured-weight-management.json'           with { type: 'json' };
-import wm_002    from './wm_002--weight-management-combination.json'           with { type: 'json' };
-import wm_003    from './wm_003--retatrutide-metabolic-research.json'          with { type: 'json' };
-import wm_004    from './wm_004--tirzepatide-metabolic-adjunct.json'           with { type: 'json' };
-import wm_005    from './wm_005--weight-management-advanced-longevity.json'    with { type: 'json' };
-import cog_001   from './cog_001--cognitive-support.json'                      with { type: 'json' };
-import cog_002   from './cog_002--focus-and-resilience.json'                   with { type: 'json' };
-import energy_001 from './energy_001--mitochondrial-energy.json'               with { type: 'json' };
-import energy_002 from './energy_002--mitochondrial-resilience.json'           with { type: 'json' };
-import horm_001  from './horm_001--hormonal-support.json'                      with { type: 'json' };
-import horm_002  from './horm_002--gh-axis-support.json'                       with { type: 'json' };
-import immune_001 from './immune_001--immune-modulation.json'                  with { type: 'json' };
-import immune_002 from './immune_002--immune-reset.json'                       with { type: 'json' };
-import lon_001   from './lon_001--longevity-foundation.json'                   with { type: 'json' };
-import lon_002   from './lon_002--longevity-circadian.json'                    with { type: 'json' };
-import met_001   from './met_001--metabolic-optimization.json'                 with { type: 'json' };
-import met_002   from './met_002--metabolic-retatrutide-motsc.json'            with { type: 'json' };
-import neuro_001 from './neuro_001--neuro-restoration-advanced.json'           with { type: 'json' };
-import sa_001    from './sa_001--skin-aesthetics-ghkcu.json'                   with { type: 'json' };
-import skin_001  from './skin_001--skin-rejuvenation-ghkcu.json'               with { type: 'json' };
-import skin_002  from './skin_002--skin-repair-aging.json'                     with { type: 'json' };
-import sleep_001 from './sleep_001--sleep-restoration-dsip.json'               with { type: 'json' };
-import sleep_002 from './sleep_002--sleep-circadian-epithalon.json'            with { type: 'json' };
-import rec_001   from './rec_001--recovery-foundation.json'                    with { type: 'json' };
-import rec_002   from './rec_002--recovery-advanced.json'                      with { type: 'json' };
+import wm_001    from './wm_001--structured-weight-management.js'           with { type: 'json' };
+import wm_002    from './wm_002--weight-management-combination.js'           with { type: 'json' };
+import wm_003    from './wm_003--retatrutide-metabolic-research.js'          with { type: 'json' };
+import wm_004    from './wm_004--tirzepatide-metabolic-adjunct.js'           with { type: 'json' };
+import wm_005    from './wm_005--weight-management-advanced-longevity.js'    with { type: 'json' };
+import cog_001   from './cog_001--cognitive-support.js'                      with { type: 'json' };
+import cog_002   from './cog_002--focus-and-resilience.js'                   with { type: 'json' };
+import energy_001 from './energy_001--mitochondrial-energy.js'               with { type: 'json' };
+import energy_002 from './energy_002--mitochondrial-resilience.js'           with { type: 'json' };
+import horm_001  from './horm_001--hormonal-support.js'                      with { type: 'json' };
+import horm_002  from './horm_002--gh-axis-support.js'                       with { type: 'json' };
+import immune_001 from './immune_001--immune-modulation.js'                  with { type: 'json' };
+import immune_002 from './immune_002--immune-reset.js'                       with { type: 'json' };
+import lon_001   from './lon_001--longevity-foundation.js'                   with { type: 'json' };
+import lon_002   from './lon_002--longevity-circadian.js'                    with { type: 'json' };
+import met_001   from './met_001--metabolic-optimization.js'                 with { type: 'json' };
+import met_002   from './met_002--metabolic-retatrutide-motsc.js'            with { type: 'json' };
+import neuro_001 from './neuro_001--neuro-restoration-advanced.js'           with { type: 'json' };
+import sa_001    from './sa_001--skin-aesthetics-ghkcu.js'                   with { type: 'json' };
+import skin_001  from './skin_001--skin-rejuvenation-ghkcu.js'               with { type: 'json' };
+import skin_002  from './skin_002--skin-repair-aging.js'                     with { type: 'json' };
+import sleep_001 from './sleep_001--sleep-restoration-dsip.js'               with { type: 'json' };
+import sleep_002 from './sleep_002--sleep-circadian-epithalon.js'            with { type: 'json' };
+import rec_001   from './rec_001--recovery-foundation.js'                    with { type: 'json' };
+import rec_002   from './rec_002--recovery-advanced.js'                      with { type: 'json' };
 
 export const protocolBundle = [
   // Weight Management (5)

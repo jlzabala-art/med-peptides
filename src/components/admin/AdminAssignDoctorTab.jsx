@@ -1,3 +1,11 @@
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import User from "lucide-react/dist/esm/icons/user";
+import Link2 from "lucide-react/dist/esm/icons/link-2";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
@@ -7,16 +15,16 @@ import {
   getAllRelationships,
   updateRelationshipStatus,
 } from '../../services/assignmentService';
-import {
-  Stethoscope,
-  User,
-  Link2,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  RefreshCw,
-  AlertTriangle,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+import toast from 'react-hot-toast';
+import notifier from '../../services/NotificationService';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 const displayName = (u) =>
@@ -130,13 +138,14 @@ export default function AdminAssignPhysicianTab({ adminUid }) {
 
   // ── revoke ────────────────────────────────────────────────────────────────
   async function handleRevoke(relId) {
-    if (!window.confirm('Revoke this relationship?')) return;
-    try {
-      await updateRelationshipStatus(relId, 'revoked');
-      await fetchRels();
-    } catch (e) {
-      alert(e.message);
-    }
+    notifier.confirmCritical('Revoke this relationship?', async () => {
+      try {
+        await updateRelationshipStatus(relId, 'revoked');
+        await fetchRels();
+      } catch (e) {
+        toast.error(e.message);
+      }
+    });
   };
 
   // ── name lookups ──────────────────────────────────────────────────────────
@@ -439,11 +448,9 @@ export default function AdminAssignPhysicianTab({ adminUid }) {
           </div>
         )}
       </div>
-    
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: AdminAssignDoctorTab | Props: none
       </div>
-    
 </div>
   );
 }

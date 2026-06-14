@@ -1,9 +1,12 @@
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import React, { useState, useEffect } from 'react';
 import { Checkbox } from '../../../components/ui';
 import BaseImportTab from './BaseImportTab';
 import { db } from '../../../firebase';
 import { collection, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
-import { CheckCircle, AlertCircle } from 'lucide-react';
+
+
 import { useShop } from '../../../context/ShopProvider';
 import Fuse from 'fuse.js';
 
@@ -22,7 +25,6 @@ export default function ImportPriceListsTab() {
     const promises = finalData.map(item => {
       const productId = item.mappedProductId;
       if (!productId) return null;
-      
       const finalCost = parseFloat(item.unit_cost);
       if (isNaN(finalCost)) return null;
 
@@ -45,7 +47,6 @@ export default function ImportPriceListsTab() {
         lastImportedAt: new Date().toISOString()
       });
     }).filter(Boolean);
-    
     await Promise.all(promises);
   };
 
@@ -81,7 +82,6 @@ export default function ImportPriceListsTab() {
 
     const mappingComplete = mappedId && mappedId !== '__CREATE_NEW__';
     const score = item.confidence_score || 0;
-    
     let confColor = '#10b981'; // Green
     if (score < 50) confColor = '#ef4444'; // Red
     else if (score < 80) confColor = '#f59e0b'; // Yellow

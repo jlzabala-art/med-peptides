@@ -1,8 +1,13 @@
+import X from "lucide-react/dist/esm/icons/x";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Package from "lucide-react/dist/esm/icons/package";
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, addDoc, doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { useAuth } from '../../../context/AuthContext';
-import { X, Plus, Package } from 'lucide-react';
+
+
+
 import { useToast } from '../../../hooks/useToast';
 
 export default function BulkOrderSelectionModal({ isOpen, onClose, selectedProducts }) {
@@ -43,7 +48,6 @@ export default function BulkOrderSelectionModal({ isOpen, onClose, selectedProdu
     setSubmitting(true);
     try {
       const ref = doc(db, 'bulk_orders', draftId);
-      
       // format items to add
       const newItems = selectedProducts.map(p => ({
         productId: p.id,
@@ -133,7 +137,6 @@ export default function BulkOrderSelectionModal({ isOpen, onClose, selectedProdu
             <div style={{ textAlign: 'center', color: '#64748b', padding: '2rem 0' }}>Loading your drafts...</div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              
               {drafts.length > 0 && !isCreating && (
                 <>
                   <h4 style={{ margin: 0, fontSize: '0.9rem', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Open Drafts</h4>
@@ -163,7 +166,6 @@ export default function BulkOrderSelectionModal({ isOpen, onClose, selectedProdu
                       <span style={{ fontSize: '0.85rem', color: '#3b82f6', fontWeight: 600 }}>Select</span>
                     </button>
                   ))}
-                  
                   <div style={{ textAlign: 'center', margin: '1rem 0' }}>
                     <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>or</span>
                   </div>

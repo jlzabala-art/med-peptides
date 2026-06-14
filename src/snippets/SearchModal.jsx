@@ -1,5 +1,32 @@
+import Search from "lucide-react/dist/esm/icons/search";
+import X from "lucide-react/dist/esm/icons/x";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+import Leaf from "lucide-react/dist/esm/icons/leaf";
+import MessageCircle from "lucide-react/dist/esm/icons/message-circle";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
-import { Search, X, FlaskConical, Beaker, Activity, Sparkles, ClipboardList, Clock, ArrowRight, HelpCircle, Leaf, MessageCircle, Bot, SlidersHorizontal } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { searchProducts, searchProtocols, searchSupplements, getSearchThemes, isQuestion, buildFAQIndex } from '../utils/searchEngine';
@@ -181,7 +208,6 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
   }, [searchTerm, products, protocolIndex, activeClinicalFilters]);
 
   const protocolResults = useMemo(() => searchProtocols(searchTerm, protocolIndex), [searchTerm, protocolIndex]);
-  
   const supplementResults = useMemo(() => {
     let res = searchSupplements(searchTerm, supplementCatalogue);
     if (activeClinicalFilters.route) {
@@ -196,7 +222,6 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
   // When the modal opens with a pre-filled query, auto-switch to the first
   // tab that actually has results — avoids confusing "no results" screens.
   // IMPORTANT: must live AFTER the useMemo declarations to avoid TDZ in minified bundles.
-   
   // When the modal opens with a pre-filled query, auto-expand the first
   // section that actually has results.
   useEffect(() => {
@@ -507,7 +532,6 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
                 Clinical Filters {activeClinicalFilters.route || activeClinicalFilters.storage ? '(Active)' : ''}
               </button>
             </div>
-            
             {showFilters && (
               <div style={{
                 padding: '0.5rem 1.5rem 1rem',
@@ -540,7 +564,6 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
                     <option value="Nasal">Intranasal</option>
                   </select>
                 </div>
-                
                 {/* Storage Stability Filter */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                   <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: THEME.textMuted, fontWeight: 700 }}>
@@ -681,7 +704,6 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
                 <ClinicalAIConsultationCard searchTerm={searchTerm} THEME={THEME} onClose={onClose} isMobile={isMobile} />
               </div>
             )}
-            
             {/* Contextual AI Suggestions */}
             {searchTerm.trim().length > 2 && (
               <div style={{ 
@@ -957,7 +979,6 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
               onClick={() => {
                 const classification = classifyQuery(searchTerm, { catalogIndex: products });
                 const intent = QUERY_TYPE_TO_INTENT[classification.query_type] || "guided_discovery";
-                
                 const ctx = {
                   source: "search_modal_dock",
                   currentQuery: searchTerm || "",
@@ -1430,7 +1451,6 @@ function SearchEmptyState({ query, THEME, onClose, isMobile }) {
           We couldn't find anything for "{query}", but our ClinicalAI can still assist you.
         </p>
       </div>
-      
       <button
         onClick={() => {
           window.dispatchEvent(new CustomEvent('open-clinical-ai', { 

@@ -1,7 +1,28 @@
+import X from "lucide-react/dist/esm/icons/x";
+import Send from "lucide-react/dist/esm/icons/send";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Save from "lucide-react/dist/esm/icons/save";
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import CreditCard from "lucide-react/dist/esm/icons/credit-card";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
 import React, { useState, useEffect, useRef } from 'react';
 import { addDoc, updateDoc, doc, collection, serverTimestamp, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { X, Send, Plus, Trash2, CheckCircle, Save, Building2, Phone, Mail, CreditCard, ExternalLink } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
 import { Card } from '../ui';
 import ProductAutocomplete from '../shared/ProductAutocomplete';
 

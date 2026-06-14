@@ -1,16 +1,32 @@
+import Briefcase from "lucide-react/dist/esm/icons/briefcase";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Search from "lucide-react/dist/esm/icons/search";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import User from "lucide-react/dist/esm/icons/user";
+import Building from "lucide-react/dist/esm/icons/building";
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, getDocs, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions } from '../../firebase';
-import { Briefcase, Plus, Search, Loader2, CheckCircle, FileText, User, Building } from 'lucide-react';
+
+
+
+
+
+
+
+
 import { Card, TextField, Select } from '../ui';
+import toast from 'react-hot-toast';
+import notifier from '../../services/NotificationService';
 
 export default function AdminAgencyDealsTab() {
   const [deals, setDeals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
-  
   // Contacts from Zoho/Firebase
   const [contacts, setContacts] = useState([]);
 
@@ -65,7 +81,6 @@ export default function AdminAgencyDealsTab() {
     setSaving(true);
     try {
       const calculatedCommission = calculateTotalCommission();
-      
       const newDeal = {
         supplierId: formData.supplierId || 'unknown_supplier',
         supplierName: formData.supplierName,
@@ -90,24 +105,24 @@ export default function AdminAgencyDealsTab() {
       loadDeals();
     } catch (err) {
       console.error(err);
-      alert('Failed to create deal.');
+      toast.error('Failed to create deal.');
     }
     setSaving(false);
   };
 
   const handleInvoiceDeal = async (dealId) => {
-    if (!window.confirm("This will mark the deal as INVOICED. In a full implementation, this triggers a Zoho Books Sales Invoice generation. Proceed?")) return;
-    
-    try {
-      await updateDoc(doc(db, 'agency_orders', dealId), {
-        status: 'INVOICED',
-        invoicedAt: serverTimestamp()
-      });
-      loadDeals();
-    } catch (err) {
-      console.error(err);
-      alert('Error updating deal status.');
-    }
+    notifier.confirmCritical("This will mark the deal as INVOICED. In a full implementation, this triggers a Zoho Books Sales Invoice generation. Proceed?", async () => {
+      try {
+        await updateDoc(doc(db, 'agency_orders', dealId), {
+          status: 'INVOICED',
+          invoicedAt: serverTimestamp()
+        });
+        loadDeals();
+      } catch (err) {
+        console.error(err);
+        toast.error('Error updating deal status.');
+      }
+    });
   };
 
   return (
@@ -201,9 +216,7 @@ export default function AdminAgencyDealsTab() {
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Card style={{ width: '500px', padding: '1.5rem', maxHeight: '90vh', overflowY: 'auto' }}>
             <h3 style={{ margin: '0 0 1.5rem', fontSize: '1.25rem', fontWeight: 700 }}>New Agency Deal</h3>
-            
             <form onSubmit={handleCreateDeal} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.25rem' }}>Supplier (Vendor)</label>

@@ -1,5 +1,8 @@
+import Search from "lucide-react/dist/esm/icons/search";
+import Filter from "lucide-react/dist/esm/icons/filter";
 import React from 'react';
-import { Search, Filter } from 'lucide-react';
+
+
 
 export default function AppFilterBar({ 
   searchQuery, 
@@ -15,7 +18,6 @@ export default function AppFilterBar({
 }) {
   return (
     <div className="gcp-filter-bar-container" style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-      
       {/* Search Row */}
       {onSearchChange && (
         <div className="gcp-filter-bar-search" style={{ display: 'flex', flex: 1, minWidth: '200px', position: 'relative' }}>
@@ -48,7 +50,6 @@ export default function AppFilterBar({
           />
         </div>
       )}
-      
       {/* Filters & Actions Container */}
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem' }}>
 
@@ -135,7 +136,6 @@ export default function AppFilterBar({
       )}
 
       </div>
-      
     </div>
   );
 }

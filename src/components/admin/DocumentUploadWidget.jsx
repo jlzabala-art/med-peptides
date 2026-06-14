@@ -1,9 +1,27 @@
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import X from "lucide-react/dist/esm/icons/x";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import Database from "lucide-react/dist/esm/icons/database";
+import Bot from "lucide-react/dist/esm/icons/bot";
 import React, { useState, useEffect, useRef } from 'react';
 import { db, storage } from '../../firebase';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { useAuth } from '../../context/AuthContext';
-import { FileText, UploadCloud, CheckCircle, Clock, AlertCircle, X, ExternalLink, Database, Bot } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+import notifier from '../../services/NotificationService';
 
 /**
  * DocumentUploadWidget
@@ -72,7 +90,7 @@ export default function DocumentUploadWidget({
       (error) => {
         console.error('Upload failed:', error);
         setUploading(false);
-        alert('File upload failed: ' + error.message);
+        notifier.info('File upload failed: ' + error.message);
       },
       async () => {
         try {
@@ -104,16 +122,17 @@ export default function DocumentUploadWidget({
   };
 
   const handleDelete = async (docId, storagePath) => {
-    if (!window.confirm('Are you sure you want to delete this document?')) return;
-    try {
-      if (storagePath) {
-        await deleteObject(ref(storage, storagePath)).catch(e => console.warn('Storage object already deleted or missing', e));
+    notifier.confirmCritical('Are you sure you want to delete this document?', async () => {
+      try {
+        if (storagePath) {
+          await deleteObject(ref(storage, storagePath)).catch(e => console.warn('Storage object already deleted or missing', e));
+        }
+        await deleteDoc(doc(db, 'uploaded_documents', docId));
+      } catch (e) {
+        console.error('Error deleting document:', e);
+        notifier.info('Error deleting document');
       }
-      await deleteDoc(doc(db, 'uploaded_documents', docId));
-    } catch (e) {
-      console.error('Error deleting document:', e);
-      alert('Error deleting document');
-    }
+    });
   };
 
   return (

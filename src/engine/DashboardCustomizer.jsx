@@ -1,5 +1,14 @@
+import X from "lucide-react/dist/esm/icons/x";
+import GripVertical from "lucide-react/dist/esm/icons/grip-vertical";
+import Check from "lucide-react/dist/esm/icons/check";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import EyeOff from "lucide-react/dist/esm/icons/eye-off";
 import React, { useState } from 'react';
-import { X, GripVertical, Check, Eye, EyeOff } from 'lucide-react';
+
+
+
+
+
 import {
   DndContext,
   closestCenter,
@@ -46,7 +55,6 @@ function SortableItem({ id, widget, onToggle }) {
         <button {...attributes} {...listeners} style={{ background: 'none', border: 'none', cursor: 'grab', display: 'flex', alignItems: 'center', color: 'var(--color-text-tertiary)' }}>
           <GripVertical size={20} />
         </button>
-        
         <div style={{ flex: 1, fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {formatId(widget.id)}
           {!widget.enabled && <span style={{ fontSize: '0.7rem', background: '#f1f5f9', color: 'var(--color-text-secondary)', padding: '0.2rem 0.5rem', borderRadius: '8px', fontWeight: 600 }}>Oculto</span>}
@@ -107,7 +115,6 @@ export default function DashboardCustomizer({ currentConfig, defaultConfig, onCl
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', justifyContent: 'flex-end' }}>
       <div style={{ width: '400px', maxWidth: '100%', background: 'white', height: '100%', display: 'flex', flexDirection: 'column', boxShadow: '-4px 0 24px rgba(0,0,0,0.1)' }}>
-        
         {/* Header */}
         <div style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>Personalizar Panel</h2>

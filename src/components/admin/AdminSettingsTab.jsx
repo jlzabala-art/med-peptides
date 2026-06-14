@@ -1,9 +1,19 @@
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import HardDrive from "lucide-react/dist/esm/icons/hard-drive";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import GitCommit from "lucide-react/dist/esm/icons/git-commit";
 import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Globe, Truck, HardDrive, Trash2, GitCommit } from 'lucide-react';
+
+
+
+
+
 import DataTable from '../ui/DataTable';
 import ScreenPermissionsSettings from './ScreenPermissionsSettings';
+import notifier from '../../services/NotificationService';
 
 export default function AdminSettingsTab({ readOnly = false }) {
   const [settings, setSettings] = useState({
@@ -22,9 +32,9 @@ export default function AdminSettingsTab({ readOnly = false }) {
 
   async function fetchBackups() {
     try {
-      const response = await fetch('/backups.json?t=' + new Date().getTime());
+      const response = await fetch('/backups.js?t=' + new Date().getTime());
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.js();
         setBackups(data);
       }
     } catch (e) {
@@ -57,7 +67,7 @@ export default function AdminSettingsTab({ readOnly = false }) {
       await setDoc(doc(db, 'settings', 'global'), newSettings);
     } catch (err) {
       console.error('Error updating settings:', err);
-      alert('Failed to save settings.');
+      notifier.info('Failed to save settings.');
     }
   };
 
@@ -412,7 +422,7 @@ export default function AdminSettingsTab({ readOnly = false }) {
               Object.keys(sessionStorage)
                 .filter((k) => k.startsWith('rp_'))
                 .forEach((k) => sessionStorage.removeItem(k));
-              alert('Cache cleared. Reloading...');
+              notifier.info('Cache cleared. Reloading...');
               window.location.reload();
             }}
           >
@@ -464,14 +474,11 @@ export default function AdminSettingsTab({ readOnly = false }) {
           </div>
         </div>
       </div>
-      
       {/* Dynamic Role Permissions */}
       <ScreenPermissionsSettings />
-    
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: AdminSettingsTab | Props: none
       </div>
-    
 </div>
   );
 }

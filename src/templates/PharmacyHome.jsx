@@ -1,11 +1,27 @@
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import History from "lucide-react/dist/esm/icons/history";
+import Settings from "lucide-react/dist/esm/icons/settings";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Inbox from "lucide-react/dist/esm/icons/inbox";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Brain from "lucide-react/dist/esm/icons/brain";
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, ShoppingBag, Plus, History, Settings, FlaskConical, Inbox } from 'lucide-react';
+
+
+
+
+
+
+
 import AppPortalLayout from '../layout/AppPortalLayout';
 import DashboardEngine from '../engine/DashboardEngine';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import { useLocation, Outlet } from 'react-router-dom';
-import { MessageSquare, Brain } from 'lucide-react';
+
+
 
 export const PHARMACY_NAV_GROUPS = [
   {

@@ -1,7 +1,8 @@
+import X from "lucide-react/dist/esm/icons/x";
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+
 
 export default function SupportEscalationCard({ 
   showSupportCard, 

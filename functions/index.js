@@ -59,6 +59,9 @@ exports.protocolCompute = require('./src/triggers/protocolCompute').protocolComp
 exports.publicProtocols = require('./src/http/api_protocols').publicProtocols;
 exports.syncProductToAlgolia = require('./src/triggers/algoliaSync').syncProductToAlgolia;
 exports.syncProtocolToAlgolia = require('./src/triggers/algoliaSync').syncProtocolToAlgolia;
+exports.syncPatientToAlgolia = require('./src/triggers/algoliaSync').syncPatientToAlgolia;
+exports.syncClinicToAlgolia = require('./src/triggers/algoliaSync').syncClinicToAlgolia;
+exports.syncPhysicianToAlgolia = require('./src/triggers/algoliaSync').syncPhysicianToAlgolia;
 exports.reconcileSupplierInvoice   = require("./src/http/reconcile_supplier_invoice").reconcileSupplierInvoice; // 3-way invoice matching
 
 exports.acceptInvitation           = require("./src/http/acceptInvitation").acceptInvitation;
@@ -157,3 +160,12 @@ exports.analyzeRFQEndpoint = aiOperations.analyzeRFQEndpoint;
 // ── Webhooks ────────────────────────────────────────────────────────────────
 const zohoWebhooks = require("./src/http/zohoWebhooks");
 exports.zohoWebhooks = zohoWebhooks.zohoWebhooks;
+
+// ── Strategic Upgrade (Phase 2) ─────────────────────────────────────────────
+exports.calculateRevenueAttribution = require("./src/http/calculateRevenueAttribution").calculateRevenueAttribution;
+
+// ── Strategic Upgrade (Phase 4) ─────────────────────────────────────────────
+const timelineTriggers = require("./src/triggers/timelineTriggers");
+exports.onOrderCreatedForTimeline = timelineTriggers.onOrderCreated;
+exports.onPatientCreatedForTimeline = timelineTriggers.onPatientCreated;
+exports.onTaskCompletedForTimeline = timelineTriggers.onTaskCompleted;

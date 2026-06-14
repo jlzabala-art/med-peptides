@@ -1,6 +1,12 @@
- 
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import Check from "lucide-react/dist/esm/icons/check";
+import CreditCard from "lucide-react/dist/esm/icons/credit-card";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import React, { useMemo, useState } from 'react';
-import { ShoppingCart, Check, CreditCard, Sparkles } from 'lucide-react';
+
+
+
+
 import { derivePhaseSupply, ACCESSORY_DEFS } from '../../utils/supplyMath';
 import { resolveProductPrice } from '../../utils/resolveProductPrice';
 
@@ -47,10 +53,8 @@ const ProtocolEconomicSection = ({
   // 1. Calculate Peptide Requirements and Costs
   const peptideItems = useMemo(() => {
     if (!activeProtocolPhases || activeProtocolPhases.length === 0) return [];
-    
     // Derive phase supply
     const phases = derivePhaseSupply(activeProtocolPhases);
-    
     // Deduplicate and aggregate vial counts
     const peptideMap = new Map();
     phases.forEach(ph => {
@@ -73,10 +77,8 @@ const ProtocolEconomicSection = ({
       const priceObj = catalogProduct 
         ? resolveProductPrice(catalogProduct, { tier: localTier, countryCode: region }) 
         : null;
-      
       const unitPrice = priceObj?.amount ?? 79.99; // Standard fallback Unit Price
       const currency = priceObj?.currency ?? 'USD';
-      
       return {
         id: catalogProduct?.id || item.productId || item.slug,
         slug: item.slug,
@@ -100,7 +102,6 @@ const ProtocolEconomicSection = ({
 
       const unitPrice = priceObj?.amount ?? 39.99; // Fallback supplement price
       const currency = priceObj?.currency ?? 'USD';
-      
       // Assume 1 bottle is needed for the protocol (or calculate based on duration if available)
       const qty = s.duration_weeks ? Math.ceil(s.duration_weeks / 4) : 1;
 
@@ -548,7 +549,6 @@ const ProtocolEconomicSection = ({
             <div className="pes-action-hint">
               Click the button to automatically add all selected items and clinical configurations to your shopping cart.
             </div>
-            
             <button
               onClick={handleAddToCart}
               disabled={isAdded}

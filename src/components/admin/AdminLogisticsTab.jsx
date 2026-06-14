@@ -1,24 +1,33 @@
+import PackageSearch from "lucide-react/dist/esm/icons/package-search";
+import FileCheck from "lucide-react/dist/esm/icons/file-check";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Package from "lucide-react/dist/esm/icons/package";
 import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, doc, updateDoc, limit, startAfter, getCountFromServer, orderBy, where } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Card, CardContent } from '../ui/Card';
-import { PackageSearch, FileCheck, Truck, Clock, CheckCircle, Package } from 'lucide-react';
+
+
+
+
+
+
 import DataTable from '../ui/DataTable';
 import KittingRiskAnalysis from './KittingRiskAnalysis';
+import notifier from '../../services/NotificationService';
 
 export default function AdminLogisticsTab() {
   const [activeTab, setActiveTab] = useState('supplier_shipments'); // 'supplier_shipments' or 'agency_rfqs'
-  
   const [dataList, setDataList] = useState([]);
   const [loading, setLoading] = useState(true);
-  
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pageCursors, setPageCursors] = useState({});
   const PAGE_SIZE = 20;
 
   const [editingItem, setEditingItem] = useState(null);
-  
   // Real-time KPIs
   const [kpiStats, setKpiStats] = useState({ total: 0 });
 
@@ -43,7 +52,6 @@ export default function AdminLogisticsTab() {
       const q = query(baseQ, ...qConstraints);
       const snap = await getDocs(q);
       const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      
       setDataList(data);
 
       if (snap.docs.length > 0) {
@@ -70,12 +78,10 @@ export default function AdminLogisticsTab() {
     try {
       const ref = doc(db, activeTab, editingItem.id);
       const payload = { status: editingItem.status };
-      
       if (activeTab === 'supplier_shipments') {
         payload.trackingNumber = editingItem.trackingNumber || '';
         payload.carrier = editingItem.carrier || '';
       }
-      
       if (editingItem.status === 'DELIVERED') {
         payload.deliveredAt = new Date();
       }
@@ -85,7 +91,7 @@ export default function AdminLogisticsTab() {
       loadData(currentPage);
     } catch (err) {
       console.error("Failed to update status:", err);
-      alert("Error updating status.");
+      notifier.info("Error updating status.");
     }
   };
 
@@ -217,7 +223,6 @@ export default function AdminLogisticsTab() {
                   )}
                 </select>
               </div>
-              
               {activeTab === 'supplier_shipments' && (
                 <>
                   <div>

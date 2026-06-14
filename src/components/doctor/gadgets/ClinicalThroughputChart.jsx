@@ -1,6 +1,7 @@
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
 import React from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp } from 'lucide-react';
+
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function ClinicalThroughputChart({ data }) {
@@ -25,7 +26,6 @@ export default function ClinicalThroughputChart({ data }) {
           <option>This Month</option>
         </select>
       </div>
-      
       <div style={{ flex: 1, width: '100%', minHeight: '250px' }}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>

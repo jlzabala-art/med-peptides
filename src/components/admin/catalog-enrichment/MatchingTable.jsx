@@ -1,9 +1,15 @@
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React from 'react';
 import { Card } from '../../ui';
-import { AlertCircle, CheckCircle, HelpCircle, Loader2 } from 'lucide-react';
+
+
+
+
 
 export default function MatchingTable({ auditResults, loading, onRowClick }) {
-  
   const getConfidenceColor = (conf) => {
     if (conf >= 90) return 'var(--color-success)';
     if (conf >= 60) return '#f59e0b'; // yellow/orange
@@ -71,7 +77,6 @@ export default function MatchingTable({ auditResults, loading, onRowClick }) {
                   <td style={{ color: res.productInfo ? 'var(--text-main)' : 'var(--text-muted)' }}>
                     {res.productInfo?.name || <span style={{ fontStyle: 'italic' }}>No Match</span>}
                   </td>
-                  
                   {/* Confidence Column */}
                   <td style={{ textAlign: 'center' }}>
                     {res.confidence > 0 ? (
@@ -87,11 +92,8 @@ export default function MatchingTable({ auditResults, loading, onRowClick }) {
                   </td>
 
                   <td>{res.supplier || <span style={{ color: 'var(--text-muted)' }}>-</span>}</td>
-                  
                   <td>{res.price ? `$${res.price.toFixed(2)}` : <span style={{ color: 'var(--text-muted)' }}>-</span>}</td>
-                  
                   <td>{getStatusBadge(res.zohoStatus)}</td>
-                  
                   <td>
                     {res.confidence >= 90 ? (
                       <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-success)', fontSize: '0.8rem', fontWeight: 600 }}>

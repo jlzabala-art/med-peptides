@@ -1,19 +1,28 @@
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import Target from "lucide-react/dist/esm/icons/target";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import Microscope from "lucide-react/dist/esm/icons/microscope";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import BrainCircuit from "lucide-react/dist/esm/icons/brain-circuit";
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  BookOpen,
-  ArrowRight,
-  Layers,
-  Target,
-  Clock,
-  FlaskConical,
-  ShieldCheck,
-  ChevronDown,
-  Microscope,
-  Zap,
-  BrainCircuit,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
 import '../styles/what_are_protocols.css';
 
 /* Encode a context object for admin ClinicalAI deep-link */

@@ -5,8 +5,8 @@ import path from 'path';
 // ─── 1. FILE PATH CONFIGURATION ──────────────────────────────────────────────
 const functionsAiPath = '/Users/joseluiszabala/Documents/Antigravity/regenpept-web/functions/src/http/ai.js';
 const supplementsJsPath = '/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/data/supplements.js';
-const supplementsJsonPath = '/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/data/v2/supplements.v2.json';
-const catalogJsonPath = '/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/data/v2/catalog.v2.json';
+const supplementsJsonPath = '/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/data/v2/supplements.v2.js';
+const catalogJsonPath = '/Users/joseluiszabala/Documents/Antigravity/regenpept-web/src/data/v2/catalog.v2.js';
 
 console.log('🚀 Starting Clinical Data Cleanup & AI Code Update...\n');
 
@@ -407,7 +407,7 @@ try {
   process.exit(1);
 }
 
-// ─── 5. PROCESS src/data/v2/supplements.v2.json (JSON MAPPING) ──────────────
+// ─── 5. PROCESS src/data/v2/supplements.v2.js (JSON MAPPING) ──────────────
 try {
   const jsonContent = fs.readFileSync(supplementsJsonPath, 'utf8');
   const list = JSON.parse(jsonContent);
@@ -460,14 +460,14 @@ try {
   });
 
   fs.writeFileSync(supplementsJsonPath, JSON.stringify(updatedList, null, 2), 'utf8');
-  console.log(`✅ Successfully updated ${updatedJsonCount} items in supplements.v2.json!`);
+  console.log(`✅ Successfully updated ${updatedJsonCount} items in supplements.v2.js!`);
 
 } catch (err) {
-  console.error('❌ Failed to process supplements.v2.json:', err.message);
+  console.error('❌ Failed to process supplements.v2.js:', err.message);
   process.exit(1);
 }
 
-// ─── 6. PROCESS src/data/v2/catalog.v2.json (JSON MAPPING) ──────────────────
+// ─── 6. PROCESS src/data/v2/catalog.v2.js (JSON MAPPING) ──────────────────
 try {
   const jsonContent = fs.readFileSync(catalogJsonPath, 'utf8');
   const catalog = JSON.parse(jsonContent);
@@ -521,10 +521,10 @@ try {
   });
 
   fs.writeFileSync(catalogJsonPath, JSON.stringify(updatedCatalog, null, 2), 'utf8');
-  console.log(`✅ Successfully updated ${updatedCatalogCount} items in catalog.v2.json!`);
+  console.log(`✅ Successfully updated ${updatedCatalogCount} items in catalog.v2.js!`);
 
 } catch (err) {
-  console.error('❌ Failed to process catalog.v2.json:', err.message);
+  console.error('❌ Failed to process catalog.v2.js:', err.message);
   process.exit(1);
 }
 

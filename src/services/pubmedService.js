@@ -134,7 +134,7 @@ async function refreshPubMedCache(slug, searchQuery) {
 
     const searchUrl = `${API_BASE}/esearch.fcgi?db=pubmed&term=${encodeURIComponent(searchQuery)}&retmode=json&retmax=3`;
     const searchRes = await fetch(searchUrl, { signal: controller.signal });
-    const searchData = await searchRes.json();
+    const searchData = await searchRes.js();
     clearTimeout(timeoutId);
 
     const ids = searchData.esearchresult?.idlist || [];
@@ -162,7 +162,7 @@ async function refreshPubMedCache(slug, searchQuery) {
 
     const summaryUrl = `${API_BASE}/esummary.fcgi?db=pubmed&id=${ids.join(',')}&retmode=json`;
     const summaryRes = await fetch(summaryUrl);
-    const summaryData = await summaryRes.json();
+    const summaryData = await summaryRes.js();
 
     const articles = ids.map(id => {
       const info = summaryData.result?.[id];

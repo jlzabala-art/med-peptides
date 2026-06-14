@@ -1,7 +1,13 @@
- 
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import Search from "lucide-react/dist/esm/icons/search";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Bot, Search, Sparkles } from 'lucide-react';
+
+
+
+
 
 /**
  * GoalEntryFlow — Phase 1 of Rules 5.0

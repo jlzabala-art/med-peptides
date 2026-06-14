@@ -1,10 +1,34 @@
+import GitBranch from "lucide-react/dist/esm/icons/git-branch";
+import GitCommit from "lucide-react/dist/esm/icons/git-commit";
+import Database from "lucide-react/dist/esm/icons/database";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Terminal from "lucide-react/dist/esm/icons/terminal";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import HardDriveDownload from "lucide-react/dist/esm/icons/hard-drive-download";
+import Server from "lucide-react/dist/esm/icons/server";
+import CalendarIcon from "lucide-react/dist/esm/icons/calendar";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { GitBranch, GitCommit, Database, Clock, Terminal, Activity, ShieldCheck, HardDriveDownload, Server, Calendar as CalendarIcon, CheckCircle, XCircle } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
 import { db, functions } from '../../firebase';
 import { collection, query, orderBy, getDocs, limit, where } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import AppFilterBar from '../ui/AppFilterBar';
+import toast from 'react-hot-toast';
 
 export default function AdminDeployHostingTab() {
   const [isDeploying, setIsDeploying] = useState(false);
@@ -26,14 +50,12 @@ export default function AdminDeployHostingTab() {
         endDate.setHours(23, 59, 59, 999);
         constraints.push(where('timestamp', '<=', endDate));
       }
-      
       const q = query(
         collection(db, 'system_backups'), 
         ...constraints, 
         orderBy('timestamp', 'desc'), 
         limit(20)
       );
-      
       const querySnapshot = await getDocs(q);
       const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setBackups(data);
@@ -56,7 +78,7 @@ export default function AdminDeployHostingTab() {
       setTimeout(fetchBackups, 2000);
     } catch (err) {
       console.error("Error triggering DB backup", err);
-      alert("Error triggering DB backup. Check console for details.");
+      toast.error("Error triggering DB backup. Check console for details.");
     } finally {
       setIsBackingUpDB(false);
     }
@@ -66,14 +88,14 @@ export default function AdminDeployHostingTab() {
     setIsBackingUpCode(true);
     try {
       const response = await fetch('/api/run-code-backup');
-      const data = await response.json();
+      const data = await response.js();
       if (!data.success) {
         throw new Error(data.error || 'Failed to trigger code backup');
       }
-      alert("Code backup executed successfully via local script.");
+      toast.success("Code backup executed successfully via local script.");
     } catch (err) {
       console.error("Error triggering Code backup", err);
-      alert("Error triggering Code backup. This relies on the local Vite dev server plugin.");
+      toast.error("Error triggering Code backup. This relies on the local Vite dev server plugin.");
     } finally {
       setIsBackingUpCode(false);
     }
@@ -97,7 +119,6 @@ export default function AdminDeployHostingTab() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-        
         {/* GIT REPOSITORY CARD */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
@@ -109,7 +130,6 @@ export default function AdminDeployHostingTab() {
             </div>
             <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Version Control</h2>
           </div>
-          
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.85rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: 'var(--text-muted)' }}>Active Branch</span>
@@ -223,7 +243,6 @@ export default function AdminDeployHostingTab() {
             </button>
           </div>
         </div>
-        
         <div style={{ padding: '1rem 1.5rem', backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border-light)' }}>
           <AppFilterBar 
             dateRange={dateRange}

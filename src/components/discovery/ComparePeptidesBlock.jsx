@@ -1,5 +1,7 @@
- 
-import { CheckCircle, MinusCircle } from 'lucide-react';
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import MinusCircle from "lucide-react/dist/esm/icons/minus-circle";
+
+
 import { trackPeptideView } from '../../hooks/useAnalytics';
 
 /**

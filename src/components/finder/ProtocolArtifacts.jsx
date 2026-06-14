@@ -1,10 +1,39 @@
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import Clipboard from "lucide-react/dist/esm/icons/clipboard";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Info from "lucide-react/dist/esm/icons/info";
+import User from "lucide-react/dist/esm/icons/user";
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Download from "lucide-react/dist/esm/icons/download";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 /* eslint-disable no-unused-vars */
 import React from 'react';
-import { 
-  CheckCircle2, AlertTriangle, Activity, Calendar, ShieldAlert, 
-  Beaker, Clipboard, Zap, TrendingUp, Clock, Info, User, 
-  Stethoscope, FileText, Download, Eye, AlertCircle
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { generatePatientGuide, generateClinicalPDF } from '../../services/pdfService';
 import { generateProtocolICS } from '../../services/calendarService';
 
@@ -51,7 +80,6 @@ const ArtifactHeader = ({ title, id, type, date, duration }) => (
 export const PatientAdministrationGuide = ({ data }) => {
   const { protocol_id, protocol_title, duration_weeks, patientContext, _timeline, monitoringSchedule } = data;
   const timeline = _timeline || [];
-  
   return (
     <div className="artifact-preview" style={{ background: 'white', color: 'var(--color-text-primary)', minHeight: '842px', padding: '4rem', maxWidth: '800px', margin: '0 auto', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)', fontFamily: 'Inter, sans-serif' }}>
       <ArtifactHeader 
@@ -97,7 +125,6 @@ export const PatientAdministrationGuide = ({ data }) => {
             {timeline.slice(0, 12).map((w, i) => {
               const weekNum = w?.week || i + 1;
               const meds = w?.medications || (w?.events ? w.events.filter(e => e.type === 'medication') : []);
-              
               return meds.map((c, j) => (
                 <tr key={`${i}-${j}`} style={{ borderTop: j === 0 ? '1px solid #e2e8f0' : 'none' }}>
                   <td style={{ padding: '1rem', fontSize: '0.85rem', fontWeight: 700 }}>{j === 0 ? `Week ${weekNum}` : ''}</td>
@@ -334,7 +361,6 @@ export const generateTimelineEvents = (data) => {
     if (wk.phase && wk.phase !== currentPhase) {
       const eventDate = new Date(startDate);
       eventDate.setDate(startDate.getDate() + (wk.week - 1) * 7);
-      
       events.push({
         title: `Phase Transition: ${wk.phase}`,
         date: eventDate.toISOString().split('T')[0],
@@ -351,7 +377,6 @@ export const generateTimelineEvents = (data) => {
     const lastWeek = timeline[timeline.length - 1];
     const completionDate = new Date(startDate);
     completionDate.setDate(startDate.getDate() + (lastWeek.week * 7));
-    
     events.push({
       title: 'Protocol Completion',
       date: completionDate.toISOString().split('T')[0],
@@ -400,7 +425,7 @@ export const ArtifactPreviewOverlay = ({ type, data, onClose }) => {
                       const url = URL.createObjectURL(blob);
                       const a = document.createElement('a');
                       a.href = url;
-                      a.download = `Optimization_Path_${data.protocol_id || 'EXPORT'}.json`;
+                      a.download = `Optimization_Path_${data.protocol_id || 'EXPORT'}.js`;
                       a.click();
                       URL.revokeObjectURL(url);
                     }
@@ -431,7 +456,6 @@ export const ArtifactPreviewOverlay = ({ type, data, onClose }) => {
                       <h3 style={{ margin: 0 }}>Calendar Events Manifest</h3>
                       <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)' }}>{timeline_event_list.length} Events Scheduled</div>
                    </div>
-                   
                    <div style={{ display: 'grid', gap: '1rem' }}>
                       {timeline_event_list.slice(0, 50).map((evt, i) => (
                         <div key={i} style={{ padding: '1rem', border: '1px solid #e2e8f0', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -451,7 +475,6 @@ export const ArtifactPreviewOverlay = ({ type, data, onClose }) => {
                         </div>
                       )}
                    </div>
-                   
                    <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'var(--color-bg-app)', borderRadius: '12px', border: '1px solid #cbd5e1' }}>
                       <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--color-text-secondary)', textTransform: 'uppercase', marginBottom: '1rem' }}>Raw ICS Header Preview</div>
                       <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--color-text-primary)', lineHeight: 1.5 }}>

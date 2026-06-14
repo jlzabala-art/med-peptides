@@ -1,10 +1,18 @@
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Activity from "lucide-react/dist/esm/icons/activity";
 import React, { useMemo } from 'react';
-import { TrendingUp, TrendingDown, DollarSign, Activity } from 'lucide-react';
+
+
+
+
 import { PROTOCOL_BLUEPRINTS } from '../../../data/protocolBlueprints';
-import { products as peptides } from '../../../data/products';
+import { useStaticData } from '../../../hooks/useStaticData';
 import { usePreferences } from '../../../context/PreferencesContext';
 
 export default function ProfitMarginAnalysis() {
+  const { products: peptides } = useStaticData();
   const { formatCurrency } = usePreferences();
 
   // Compute protocol margins dynamically
@@ -19,13 +27,11 @@ export default function ProfitMarginAnalysis() {
       totalCost += 4.00; // 1x Alcohol Swabs
 
       const blueprints = protocol.phase_blueprints || protocol.phases || [];
-      
       blueprints.forEach(phase => {
         const drugs = phase.medications || phase.drugs || phase.compounds || [];
         drugs.forEach(drug => {
           const name = drug.product_title || drug.name || drug.compound;
           const qty = drug.dose_logic?.vials_required || drug.procurement?.vialCount || 1;
-          
           // Find peptide price
           const matchedPeptide = peptides.find(p => p.name.toLowerCase().includes(name.toLowerCase()));
           if (matchedPeptide) {

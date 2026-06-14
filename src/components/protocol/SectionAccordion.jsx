@@ -1,5 +1,8 @@
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
 import React, { useState, useCallback } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+
+
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function SectionAccordion({ title, icon: Icon, defaultOpen = false, children, accentColor = 'var(--color-primary)' }) {

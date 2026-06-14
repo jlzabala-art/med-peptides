@@ -23,7 +23,7 @@ import HowItWorks from '../sections/HowItWorks';
 import EmotionalTrust from '../sections/EmotionalTrust';
 // import FloatingProCTA from '../sections/FloatingProCTA'; // Disabled floating CTA
 import GoalLifestyleStrip from '../sections/GoalLifestyleStrip';
-const KeyPeptides = lazy(() => import('../sections/KeyPeptides'));
+import KeyPeptides from '../sections/KeyPeptides';
 import ClinicalAIPromo from '../sections/ClinicalAIPromo';
 import KnowledgeHubShowcase from '../sections/KnowledgeHubShowcase';
 
@@ -35,7 +35,7 @@ import GuidedSearchHints from '../sections/GuidedSearchHints';
 import GoalEntryFlow from '../sections/GoalEntryFlow';
 import RecentlyExplored from '../sections/RecentlyExplored';
 import EternaDiagnosticsShowcase from '../sections/EternaDiagnosticsShowcase';
-const LatestArticles = lazy(() => import('../sections/LatestArticles'));
+import LatestArticles from '../sections/LatestArticles';
 
 // Guest Intelligence — preferences, newsletter
 import ResearchIntakeCTA from '../components/shared/ResearchIntakeCTA';

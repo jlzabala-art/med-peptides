@@ -1,7 +1,12 @@
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Package from "lucide-react/dist/esm/icons/package";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
-import { AlertCircle, ArrowRight, Package } from 'lucide-react';
+
+
+
 
 export default function AdminSupplyNotifierWidget({
   ownerId = 'admin',

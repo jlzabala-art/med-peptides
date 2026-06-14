@@ -1,6 +1,16 @@
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import PackageX from "lucide-react/dist/esm/icons/package-x";
+import Replace from "lucide-react/dist/esm/icons/replace";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import PackageSearch from "lucide-react/dist/esm/icons/package-search";
 import React, { useState } from 'react';
-import { AlertTriangle, PackageX, Replace, Zap, PackageSearch } from 'lucide-react';
+
+
+
+
+
 import { PROTOCOL_BLUEPRINTS } from '../../data/protocolBlueprints';
+import notifier from '../../services/NotificationService';
 
 // Mock current physical stock levels
 const mockInventoryStock = {
@@ -20,7 +30,6 @@ export default function KittingRiskAnalysis() {
   // Analyze protocols to find which ones can't be fulfilled
   const risks = Object.entries(PROTOCOL_BLUEPRINTS).map(([key, protocol]) => {
     let bottlenecks = [];
-    
     // Check base supplies
     if (mockInventoryStock['Bacteriostatic Water 30ml'] < 2) bottlenecks.push({ item: 'Bacteriostatic Water', type: 'supply', shortage: true });
     if (mockInventoryStock['Insulin Syringes 100-pack'] < 1) bottlenecks.push({ item: 'Insulin Syringes', type: 'supply', shortage: true });
@@ -32,7 +41,6 @@ export default function KittingRiskAnalysis() {
       const drugs = phase.medications || phase.drugs || phase.compounds || [];
       drugs.forEach(drug => {
         const name = drug.product_title || drug.name || drug.compound;
-        
         // Very basic mock check for this demo
         if (name.includes('Tirzepatide')) {
           if (mockInventoryStock['Tirzepatide 10mg/vial'] < 1) {
@@ -58,7 +66,7 @@ export default function KittingRiskAnalysis() {
   const handleResolve = (riskId, bottleneck) => {
     setResolving(riskId + bottleneck.item);
     setTimeout(() => {
-      alert(`Automated substitution rule applied for ${bottleneck.item} via Zoho Inventory API.`);
+      notifier.info(`Automated substitution rule applied for ${bottleneck.item} via Zoho Inventory API.`);
       setResolving(null);
     }, 1000);
   };
@@ -73,7 +81,6 @@ export default function KittingRiskAnalysis() {
           Kitting Risk Alerts (Composite Items)
         </h3>
       </div>
-      
       <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
         The following Clinical Protocols (Composite Items) are at risk of Stock Out because one or more underlying components are unavailable in the warehouse.
       </p>

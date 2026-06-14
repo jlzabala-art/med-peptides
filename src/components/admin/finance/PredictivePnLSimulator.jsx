@@ -1,5 +1,12 @@
+import Bot from "lucide-react/dist/esm/icons/bot";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import React, { useState } from 'react';
-import { Bot, Sparkles, TrendingUp, AlertTriangle } from 'lucide-react';
+
+
+
+
 import { 
   ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, Area 
 } from 'recharts';
@@ -27,7 +34,6 @@ export default function PredictivePnLSimulator({ pnl2026 }) {
     // Simulate Atlas AI processing time
     setTimeout(() => {
       const lowerQuery = query.toLowerCase();
-      
       // Basic Natural Language Parser for Simulation
       // Looking for percentages
       const pctMatch = lowerQuery.match(/(\d+)\s*%/);
@@ -112,7 +118,6 @@ export default function PredictivePnLSimulator({ pnl2026 }) {
       </div>
 
       <div style={{ padding: '2rem', background: 'var(--surface)' }}>
-        
         {/* Input Area */}
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
           <div style={{ flex: 1, position: 'relative' }}>
@@ -161,7 +166,6 @@ export default function PredictivePnLSimulator({ pnl2026 }) {
         {/* Results Area */}
         {projectedData && !simulating && (
           <div className="anim-fade-up">
-            
             {/* Insights Banner */}
             <div style={{ 
               marginBottom: '2rem', 
@@ -203,7 +207,6 @@ export default function PredictivePnLSimulator({ pnl2026 }) {
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}
                   />
                   <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                  
                   <Bar 
                     dataKey="baselineProfit" 
                     name="Beneficio Actual (Real)" 
@@ -231,7 +234,6 @@ export default function PredictivePnLSimulator({ pnl2026 }) {
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
-            
           </div>
         )}
 

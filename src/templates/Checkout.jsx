@@ -1,6 +1,59 @@
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import CreditCard from "lucide-react/dist/esm/icons/credit-card";
+import Landmark from "lucide-react/dist/esm/icons/landmark";
+import Send from "lucide-react/dist/esm/icons/send";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import FileDown from "lucide-react/dist/esm/icons/file-down";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import Check from "lucide-react/dist/esm/icons/check";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import MessageCircle from "lucide-react/dist/esm/icons/message-circle";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import EyeOff from "lucide-react/dist/esm/icons/eye-off";
+import Lock from "lucide-react/dist/esm/icons/lock";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Minus from "lucide-react/dist/esm/icons/minus";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import UserCheck from "lucide-react/dist/esm/icons/user-check";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Package from "lucide-react/dist/esm/icons/package";
+import FileSearch from "lucide-react/dist/esm/icons/file-search";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Dna from "lucide-react/dist/esm/icons/dna";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { ArrowLeft, ShieldCheck, CreditCard, Landmark, Send, CheckCircle2, FileDown, ChevronRight, ChevronDown, ChevronUp, Check, Activity, Truck, BookOpen, MessageCircle, Eye, EyeOff, Lock, Plus, Minus, Sparkles, UserCheck, Zap, Package, FileSearch, Shield, Dna } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { motion, AnimatePresence } from 'framer-motion';
 import Select from 'react-select';
 import { useAuth } from '../context/AuthContext';
@@ -59,11 +112,9 @@ const scanCatalogProducts = (text, productsList = []) => {
   productsList.forEach(prod => {
     if (!prod || !prod.name) return;
     const nameLower = prod.name.toLowerCase();
-    
     // Look for exact word match or standard contains to prevent false positives on very short names
     const isShort = nameLower.length <= 3;
     let matches = false;
-    
     if (isShort) {
       const rx = new RegExp(`\\b${nameLower}\\b`, 'i');
       matches = rx.test(textLower);
@@ -154,7 +205,6 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
       const dosageRegex = /\b\d+(?:\.\d+)?\s*(?:mg|mcg|ml|µg)\b/i;
       const dosageMatch = text.match(dosageRegex);
       const extractedDose = dosageMatch ? dosageMatch[0].toLowerCase().replace(/\s+/g, '') : '';
-      
       const frequencyRegex = /\b(?:weekly|daily|twice\s+a\s+week|every\s+other\s+day|subcutaneous|sub-q|sc)\b/i;
       const frequencyMatch = text.match(frequencyRegex);
 
@@ -300,7 +350,6 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
   const protocolGroups = useMemo(() => {
     const groups = {};
     const bundles = cartMetadata.protocolBundles ?? [];
-    
     // 1. Initialize groups from explicit bundles
     bundles.forEach(b => {
       groups[b.id] = {
@@ -338,7 +387,6 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
       const meta = cartMetadata[i.itemKey];
       return !meta?.isProtocol && !meta?.protocolId;
     });
-    
     let subtotal = individualItems.reduce((a, i) => a + i.lineTotal, 0);
 
     // 2. Add Bundle Totals from explicit bundles
@@ -442,9 +490,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
       peptide_name: itemNames || 'none',
       order_total: checkoutTotals.display
     });
-    
     let currentUid = user?.uid;
-    
     // ── 1. Auto-register if not logged in ──
     if (!currentUid) {
       try {
@@ -515,7 +561,6 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
         source: orderSource,      // 'patient_selected' | 'from_prescription' | 'refill' | 'doctor_recommended'
         recommendationId,         // links back to recommendations collection when applicable
         prescriptionId,           // links to prescriptions/{id}; triggers onOrderCreatedForRx CF when set
-        
         // Tenant attribution B2B franchise
         tenantId: cartOwnership?.tenantId || null,
         ownerType: cartOwnership?.ownerType || null,
@@ -596,7 +641,6 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
 
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const W = doc.internal.pageSize.getWidth();
-    
     // Use final data if available (post-checkout), otherwise current state
     const targetItems = finalOrderData ? finalOrderData.items : enrichedCartItems;
     const targetTotals = finalOrderData ? finalOrderData.totals : checkoutTotals;
@@ -648,7 +692,6 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
     fy += 8;
     doc.setFont('helvetica','bold'); doc.setFontSize(12);
     doc.text('Total:', W-45, fy, { align: 'right' }); doc.text(`$${total.toFixed(2)}`, W-15, fy, { align: 'right' });
-    
     fy += 12;
     doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(100,116,139);
     doc.text('*Final price subject to professional review and approval.', W-15, fy, { align: 'right' });
@@ -666,7 +709,6 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
         const { name, items, patientGuide } = group;
         const totalUnits = items.reduce((a, i) => a + i.qty, 0);
         const weeks = Math.max(1, Math.round(totalUnits / Math.max(1, items.length)));
-        
         // Group Header
         doc.setFillColor(248, 250, 252); doc.rect(15, fy, W-30, 10, 'F');
         doc.setTextColor(30, 41, 59); doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
@@ -693,7 +735,6 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
         // --- Expected Results Chart (PDF Render) ---
         if (patientGuide?.expectedResults) {
           if (fy > doc.internal.pageSize.getHeight() - 70) { doc.addPage(); fy = 20; }
-          
           doc.setTextColor(0, 54, 102); doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
           doc.text(`Expected Clinical Outcomes: ${patientGuide.expectedResults.metric}`, 15, fy);
           fy += 6;
@@ -713,7 +754,6 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
             doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(71, 85, 105);
             doc.text(label, 15, fy + 4);
             doc.text(valueStr, W - 15, fy + 4, { align: 'right' });
-            
             fy += 6;
             doc.setFillColor(224, 242, 254); doc.rect(15, fy, chartW, barH, 'F');
             doc.setFillColor(0, 112, 192); doc.rect(15, fy, pct, barH, 'F');
@@ -727,10 +767,8 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
           if (fy > doc.internal.pageSize.getHeight() - 40) { doc.addPage(); fy = 20; }
           doc.setFillColor(240, 253, 244); doc.setDrawColor(220, 252, 231);
           doc.rect(15, fy, W-30, 18, 'FD');
-          
           doc.setTextColor(22, 101, 52); doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
           doc.text('Clinical Safety & Monitoring', 20, fy + 6);
-          
           doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
           const safetyText = `• Side Effects: Monitor for ${patientGuide.safetyNotes.sideEffects?.join(', ') || 'standard markers'}.\n• Labs: ${patientGuide.safetyNotes.recommendedTests?.join(', ') || 'Routine panel'}.`;
           doc.text(safetyText, 20, fy + 11);
@@ -747,7 +785,6 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
     doc.setFontSize(8); doc.setTextColor(148,163,184);
     doc.text('Atlas Health — Advanced Research Solutions | info@Atlas Health.com', W/2, footY, { align: 'center' });
     doc.save(`Atlas Health-Order-${targetOrderId}.pdf`);
-   
   }, [orderId, formData, enrichedCartItems, protocolGroups, checkoutTotals, selectedShipping, finalOrderData]);
 
   // ── Preview Receipt (HTML popup — same format as email) ──────────────
@@ -1112,113 +1149,6 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId, formData, enrichedCartItems, checkoutTotals, selectedShipping]);
-
-  // ── Order Summary panel (reused in sidebar + sheet) ──────────────────
-  const SummaryItems = () => {
-    const individualItems = enrichedCartItems.filter(i => {
-      const meta = cartMetadata[i.itemKey];
-      return !meta?.isProtocol && !meta?.protocolId;
-    });
-
-    const protocolGroupsList = Object.values(protocolGroups);
-
-    return (
-      <>
-        {/* ── Individual Peptides (Not in a bundle) ── */}
-        {individualItems.length > 0 && individualItems.map(({ itemKey, qty, namePart, dosagePart, unitPrice, lineTotal }) => (
-          <div key={itemKey} className="co-item-row" style={{ position: 'relative', borderBottom: '1px solid #f1f5f9', paddingBottom: '1rem', marginBottom: '1rem' }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="co-item-name">{namePart}</div>
-              {dosagePart && <div className="co-item-variant">{dosagePart}</div>}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.4rem' }}>
-                <div className="co-item-qty-controls" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(0,0,0,0.03)', borderRadius: '6px', padding: '2px' }}>
-                  <button 
-                    type="button"
-                    onClick={() => updateCart(itemKey, -1)}
-                    style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }}
-                  >
-                    <Minus size={12} strokeWidth={3} />
-                  </button>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700, minWidth: '1.2rem', textAlign: 'center', color: '#0f172a' }}>{qty}</span>
-                  <button 
-                    type="button"
-                    onClick={() => updateCart(itemKey, 1)}
-                    style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }}
-                  >
-                    <Plus size={12} strokeWidth={3} />
-                  </button>
-                </div>
-                <div className="co-item-qty" style={{ margin: 0 }}>× ${unitPrice.toFixed(2)}</div>
-              </div>
-            </div>
-            <div className="co-item-price" style={{ fontWeight: 800, color: '#0f172a' }}>${lineTotal.toFixed(2)}</div>
-          </div>
-        ))}
-
-        {/* ── Protocol Bundles (Grouped) ── */}
-        {protocolGroupsList.map(group => (
-          <div key={group.name} className="co-item-row co-bundle-row" style={{ 
-            background: 'rgba(0,163,224,0.04)', 
-            margin: '0.5rem -1.5rem', 
-            padding: '1.25rem 1.5rem',
-            borderLeft: '5px solid var(--primary)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.75rem'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                  <div className="co-item-name" style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '1rem' }}>{group.name}</div>
-                  <span style={{ 
-                    fontSize: '0.65rem', 
-                    fontWeight: 900, 
-                    backgroundColor: 'var(--primary)', 
-                    color: 'var(--color-bg-surface)', 
-                    padding: '2px 8px', 
-                    borderRadius: '4px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}>Bundle</span>
-                </div>
-                {group.goal && <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>{group.goal}</div>}
-              </div>
-              <div className="co-item-price" style={{ color: 'var(--primary)', fontWeight: 900, fontSize: '1.1rem' }}>
-                ${(group.bundleTotal || 0).toFixed(0)}
-              </div>
-            </div>
-
-            {/* List of included items in this specific bundle */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', background: 'rgba(255,255,255,0.5)', padding: '0.75rem', borderRadius: '8px' }}>
-               {/* Use group.products (from cartMetadata.protocolBundles) if available, otherwise fallback to group.items */}
-               {(group.products?.length > 0 ? group.products : group.items).map((i, idx) => {
-                 const name = typeof i === 'string' ? i : (i.name || i.itemKey);
-                 const qty = typeof i === 'string' ? null : i.qty;
-                 const isAcc = i.isAccessory || name.toLowerCase().includes('water') || name.toLowerCase().includes('syringe') || name.toLowerCase().includes('pad');
-                 
-                 return (
-                   <div key={`${name}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: 'var(--color-text-primary)' }}>
-                     {isAcc ? <Package size={12} color="var(--color-text-tertiary)" /> : <Activity size={12} color="var(--primary)" />}
-                     <span style={{ fontWeight: 600 }}>{name}</span>
-                     {qty > 0 && <span style={{ color: 'var(--color-text-tertiary)', fontWeight: 500 }}>(x{qty})</span>}
-                     <span style={{ marginLeft: 'auto', color: 'var(--color-success)', fontWeight: 700, fontSize: '0.7rem' }}>INCLUDED</span>
-                   </div>
-                 );
-               })}
-            </div>
-          </div>
-        ))}
-
-        <div className="co-total-row" style={{ marginTop: '1.5rem' }}>
-          <div>
-            <div className="co-total-label">Estimated Total</div>
-            {checkoutTotals.subtext && <div className="co-total-sub">*{checkoutTotals.subtext}</div>}
-          </div>
-          <div className="co-total-amount">{checkoutTotals.display}</div>
-        </div>
-      </>
-    );
-  };
 
   // ── Protocol Activation Page ──────────────────────────────────────────
   if (isDone) {
@@ -1753,14 +1683,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
   const stepDotClass = s => step === s ? 'active' : step > s ? 'done' : 'pending';
 
   // ── Payment card helper ───────────────────────────────────────────────
-  const PayCard = ({ method, icon: Icon, label }) => (
-    <div className={`co-pay-card${formData.paymentMethod === method ? ' selected' : ''}`}
-      role="button" onClick={() => set({ paymentMethod: method })}>
-      <Icon size={26} color={formData.paymentMethod === method ? 'var(--primary)' : 'var(--color-text-tertiary)'} strokeWidth={1.5} />
-      <span className="co-pay-card-label">{label}</span>
-      {formData.paymentMethod === method && <span className="co-pay-badge">✓ Selected</span>}
-    </div>
-  );
+  
 
   // ── Main render ───────────────────────────────────────────────────────
   return (
@@ -2295,66 +2218,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
                 >
                   {step1Valid && <div className="co-section-valid"><Check size={13} /> Identity verified</div>}
 
-                  <div className="co-field">
-                    <label className="co-label">Country *</label>
-                    <Select options={countryOptions} value={formData.country} styles={selectStyles}
-                      onChange={opt => set({ country: opt })} placeholder="Search for your country..." />
-                  </div>
-
-                  <div className="co-field">
-                    <label className="co-label">Delivery Address *</label>
-                    <textarea required rows={3} className={`co-input${formData.address ? ' valid' : ''}`} value={formData.address}
-                      onChange={e => set({ address: e.target.value })}
-                      placeholder="Street Name, Unit/Bldg Number, City, Postal Code" autoComplete="street-address"
-                      style={{ resize:'vertical', lineHeight:1.5 }} />
-                  </div>
-
-                  <div className="co-field">
-                    <label className="co-label">Shipping Method *</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.5rem' }}>
-                      <div 
-                        onClick={() => setSelectedShipping('standard')}
-                        style={{
-                          padding: '1.25rem',
-                          borderRadius: '16px',
-                          border: `2px solid ${selectedShipping === 'standard' ? 'var(--primary)' : 'var(--color-border)'}`,
-                          background: selectedShipping === 'standard' ? 'rgba(0,113,189,0.04)' : 'var(--color-bg-surface)',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        <div style={{ fontWeight: 800, fontSize: '0.95rem', color: selectedShipping === 'standard' ? 'var(--primary)' : 'var(--color-text-primary)' }}>Standard</div>
-                        <div style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>5-7 business days</div>
-                        <div style={{ marginTop: '0.75rem', fontWeight: 900, color: 'var(--primary)', fontSize: '1.1rem' }}>${shippingCosts.standard.toFixed(2)}</div>
-                      </div>
-                      <div 
-                        onClick={() => setSelectedShipping('express')}
-                        style={{
-                          padding: '1.25rem',
-                          borderRadius: '16px',
-                          border: `2px solid ${selectedShipping === 'express' ? 'var(--primary)' : 'var(--color-border)'}`,
-                          background: selectedShipping === 'express' ? 'rgba(0,113,189,0.04)' : 'var(--color-bg-surface)',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        <div style={{ fontWeight: 800, fontSize: '0.95rem', color: selectedShipping === 'express' ? 'var(--primary)' : 'var(--color-text-primary)' }}>Express</div>
-                        <div style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>2-3 business days</div>
-                        <div style={{ marginTop: '0.75rem', fontWeight: 900, color: 'var(--primary)', fontSize: '1.1rem' }}>${shippingCosts.express.toFixed(2)}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="co-field">
-                    <label className="co-label">Order Notes / Delivery Instructions (Optional)</label>
-                    <textarea 
-                      className="co-input" 
-                      value={formData.orderNotes}
-                      onChange={e => set({ orderNotes: e.target.value })}
-                      placeholder="E.g. Department name, specific laboratory, or delivery gate..."
-                      style={{ minHeight: '80px', padding: '0.75rem', resize: 'vertical' }}
-                    />
-                  </div>
+                    <ShippingForm formData={formData} set={set} countryOptions={countryOptions} selectStyles={selectStyles} selectedShipping={selectedShipping} setSelectedShipping={setSelectedShipping} shippingCosts={shippingCosts} />
 
                   <div className="co-cta-row">
                     <button type="button" className="co-btn-back" onClick={goBack}>← Back</button>
@@ -2474,7 +2338,6 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
                                       const val = valMatch ? parseFloat(valMatch[1]) : 50; // fallback for viz
                                       const max = 100; // simplified for review
                                       const pct = Math.min(Math.round((val / max) * 100), 100);
-                                      
                                       return (
                                         <div key={i}>
                                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '2px', fontWeight: 600, color: '#0369a1' }}>
@@ -2558,7 +2421,6 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
                         onChange={handlePrescriptionUpload}
                         style={{ display: 'none' }}
                       />
-                      
                       {isScanningPrescription ? (
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '1rem 0' }}>
                           <div style={{
@@ -2970,16 +2832,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
                     </div>
                   </div>
 
-                  <div>
-                    <label className="co-label">Payment Method *</label>
-                    <p style={{ fontSize:'0.85rem', color:'var(--color-text-secondary)', margin:'0.25rem 0 1rem' }}>
-                      Select how you prefer to complete the transaction once approved.
-                    </p>
-                    <div className="co-pay-grid">
-                      <PayCard method="credit_card" icon={CreditCard} label="Credit Card" />
-                      <PayCard method="bank_transfer" icon={Landmark} label="Bank Transfer" />
-                    </div>
-                  </div>
+                    <PaymentSection formData={formData} set={set} />
 
                   <div className="co-cta-row" style={{ marginTop: '2rem' }}>
                     <button type="button" className="co-btn-back" onClick={goBack}>← Back</button>
@@ -3002,7 +2855,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
             </div>
             <div className="co-summary-card">
               <div className="co-summary-title">Order Summary — {totalItems} item{totalItems !== 1 ? 's' : ''}</div>
-              <SummaryItems />
+              <OrderSummary enrichedCartItems={enrichedCartItems} cartMetadata={cartMetadata} protocolGroups={protocolGroups} checkoutTotals={checkoutTotals} updateCart={updateCart} />
             </div>
           </div>
 
@@ -3028,7 +2881,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
                 exit={{ height: 0, opacity: 0 }}
                 className="co-sheet-body"
               >
-                <SummaryItems />
+                <OrderSummary enrichedCartItems={enrichedCartItems} cartMetadata={cartMetadata} protocolGroups={protocolGroups} checkoutTotals={checkoutTotals} updateCart={updateCart} />
               </motion.div>
             )}
           </AnimatePresence>

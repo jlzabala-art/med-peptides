@@ -1,3 +1,6 @@
+import Bell from "lucide-react/dist/esm/icons/bell";
+import X from "lucide-react/dist/esm/icons/x";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 /**
  * RefillReminderBanner.jsx
  *
@@ -13,7 +16,9 @@
  *   <RefillReminderBanner role="doctor" onNavigate={(id) => navigate(`/orders/${id}`)} />
  */
 import { useRefillReminders } from '../../hooks/useRefillReminders';
-import { Bell, X, RefreshCw } from 'lucide-react';
+
+
+
 
 // Role-specific colours
 const ROLE_PALETTE = {

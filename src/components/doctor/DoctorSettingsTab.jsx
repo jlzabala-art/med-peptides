@@ -1,6 +1,17 @@
+import User from "lucide-react/dist/esm/icons/user";
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Save from "lucide-react/dist/esm/icons/save";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { User, Building2, AlertCircle, Save, CheckCircle2, Loader2 } from 'lucide-react';
+
+
+
+
+
+
 import Card from '../ui/Card';
 import { useTranslation } from 'react-i18next';
 
@@ -63,20 +74,17 @@ export default function DoctorSettingsTab() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '800px', padding: '2rem 0' }}>
-      
       <div>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-text-primary)', margin: '0 0 0.5rem' }}>{t('doctor.settings.profile_title')}</h2>
         <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>{t('doctor.settings.profile_desc')}</p>
       </div>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        
         <Card>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid #e2e8f0' }}>
             <User size={20} color="var(--primary)" />
             <h3 style={{ margin: 0, fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>{t('doctor.settings.personal_info')}</h3>
           </div>
-          
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
             <div>
               <label style={labelStyle}>{t('doctor.settings.first_name')}</label>
@@ -98,7 +106,6 @@ export default function DoctorSettingsTab() {
             <Building2 size={20} color="var(--primary)" />
             <h3 style={{ margin: 0, fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>{t('doctor.settings.prof_info')}</h3>
           </div>
-          
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
             <div>
               <label style={labelStyle}>{t('doctor.settings.specialty')}</label>
@@ -136,7 +143,6 @@ export default function DoctorSettingsTab() {
               {saving ? <Loader2 size={18} className="spin" /> : <Save size={18} />}
               {saving ? t('doctor.settings.saving') : t('doctor.settings.save_changes')}
             </button>
-            
             {saved && (
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', color: 'var(--color-success)', fontWeight: 600 }}>
                 <CheckCircle2 size={18} /> {t('doctor.settings.changes_saved')}

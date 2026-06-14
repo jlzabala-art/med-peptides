@@ -1,6 +1,16 @@
- 
+import Microscope from "lucide-react/dist/esm/icons/microscope";
+import Pill from "lucide-react/dist/esm/icons/pill";
+import BrainCircuit from "lucide-react/dist/esm/icons/brain-circuit";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Zap from "lucide-react/dist/esm/icons/zap";
 import React from 'react';
-import { Microscope, Pill, BrainCircuit, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+
+
+
+
+
+
 import { useNavigate } from 'react-router-dom';
 import '../styles/knowledge_hub_showcase.css';
 

@@ -1,18 +1,32 @@
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import History from "lucide-react/dist/esm/icons/history";
+import Settings from "lucide-react/dist/esm/icons/settings";
+import LogOut from "lucide-react/dist/esm/icons/log-out";
+import Package from "lucide-react/dist/esm/icons/package";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, ShoppingBag, Globe, History, Settings, LogOut, Package } from 'lucide-react';
+
+
+
+
+
+
+
 import AppPortalLayout from '../layout/AppPortalLayout';
 import DashboardEngine from '../engine/DashboardEngine';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import { Routes, Route, useNavigate, useLocation, Navigate, Outlet } from 'react-router-dom';
-import { MessageSquare } from 'lucide-react';
+
 import OrdersTab from '../components/admin/OrdersTab';
 import AdminClientsTab from '../components/admin/AdminClientsTab';
-import AdminProductsTab from '../components/admin/AdminProductsTab';
+import CatalogIntelligenceHub from "../components/admin/catalog/CatalogIntelligenceHub";
 import AdminAccountManagersTab from '../components/admin/AdminAccountManagersTab';
 import ShippingTrackerTab from '../components/supplier/ShippingTrackerTab';
 import ClinicalAIWidget from '../components/admin/ClinicalAIWidget';
-const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
+import MessagingWidget from '../components/messaging/MessagingWidget';
 const SUPPLIER_NAV_GROUPS = [
   {
     id: 'overview',
@@ -52,7 +66,6 @@ export function SupplierDashboardTab({ userProfile }) {
             Panel de control B2B corporativo (Venta de materias primas y distribución masiva).
           </p>
         </div>
-        
         <div style={{ background: 'white', padding: '1rem 1.5rem', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', fontWeight: 800 }}>
             {userProfile?.firstName?.[0] || 'S'}

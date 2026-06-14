@@ -1,5 +1,12 @@
+import ImageIcon from "lucide-react/dist/esm/icons/image";
+import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
+import Edit3 from "lucide-react/dist/esm/icons/edit-3";
+import Briefcase from "lucide-react/dist/esm/icons/briefcase";
 import React, { useState } from 'react';
-import { Image as ImageIcon, UploadCloud, Edit3, Briefcase } from 'lucide-react';
+
+
+
+
 
 export default function CoBranding({ ownerId, ownerType }) {
   const [logoUrl, setLogoUrl] = useState('');
@@ -34,7 +41,6 @@ export default function CoBranding({ ownerId, ownerType }) {
         gap: '2rem',
         alignItems: 'start'
       }}>
-        
         {/* Settings Form */}
         <div style={{
           backgroundColor: 'var(--color-bg-surface)',
@@ -44,7 +50,6 @@ export default function CoBranding({ ownerId, ownerType }) {
           boxShadow: 'var(--shadow-sm)'
         }}>
           <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: 'var(--text-main)', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.5rem' }}>Brand Assets</h3>
-          
           <div style={{ marginBottom: '1.5rem' }}>
             <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--text-main)' }}>
               Secondary Logo / Clinic Badge
@@ -147,7 +152,6 @@ export default function CoBranding({ ownerId, ownerType }) {
             }}>
               View Custom Catalog
             </button>
-            
             <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
               Powered by Atlas Health Infrastructure
             </div>

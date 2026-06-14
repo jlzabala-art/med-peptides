@@ -1,6 +1,20 @@
- 
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Lock from "lucide-react/dist/esm/icons/lock";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React, { useEffect, useState } from 'react';
-import { Shield, Lock, Eye, FileText, ChevronRight, Mail, HelpCircle, ArrowRight } from 'lucide-react';
+
+
+
+
+
+
+
+
 
 const PrivacyPolicy = () => {
   const [activeSection, setActiveSection] = useState(0);
@@ -63,7 +77,6 @@ const PrivacyPolicy = () => {
       const offset = 120;
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - offset;
-      
       window.scrollTo({
         top: offsetPosition,
         behavior: 'smooth'

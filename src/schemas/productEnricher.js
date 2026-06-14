@@ -3,7 +3,7 @@
  * productEnricher.js
  * ─────────────────────────────────────────────────────────────────────────────
  * Enriches normalized v2 products with data from external JSON sources
- * (clinicalData.json, researchData.json, safetyData.json).
+ * (clinicalData.js, researchData.js, safetyData.js).
  * ─────────────────────────────────────────────────────────────────────────────
  */
 

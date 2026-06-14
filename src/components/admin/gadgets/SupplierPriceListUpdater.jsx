@@ -1,9 +1,18 @@
+import Upload from "lucide-react/dist/esm/icons/upload";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import React, { useState } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { doc, writeBatch } from 'firebase/firestore';
 import { db, functions } from '../../../firebase';
 import * as XLSX from 'xlsx';
-import { Upload, Loader2, Sparkles, CheckCircle, AlertTriangle } from 'lucide-react';
+
+
+
+
+
 import { Card } from '../../ui';
 
 export default function SupplierPriceListUpdater() {
@@ -19,7 +28,6 @@ export default function SupplierPriceListUpdater() {
     setIsParsing(true);
     setParsedItems(null);
     setSuccessMsg('');
-    
     try {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
@@ -45,7 +53,6 @@ export default function SupplierPriceListUpdater() {
   const handleCommitChanges = async () => {
     if (!parsedItems) return;
     setIsSaving(true);
-    
     try {
       const batch = writeBatch(db);
       let updatesCount = 0;

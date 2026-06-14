@@ -1,5 +1,12 @@
+import Package from "lucide-react/dist/esm/icons/package";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import CreditCard from "lucide-react/dist/esm/icons/credit-card";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
 import React from 'react';
-import { Package, ShoppingBag, CreditCard, ExternalLink } from 'lucide-react';
+
+
+
+
 
 export default function RichMessageCard({ type, referenceId, text }) {
   let icon = null;

@@ -1,3 +1,6 @@
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
 import React, { useMemo } from 'react';
 import {
   BarChart,
@@ -11,13 +14,14 @@ import {
   Line,
   ComposedChart
 } from 'recharts';
-import { Calendar, DollarSign, TrendingUp } from 'lucide-react';
+
+
+
 
 export default function FinancePnL({ pnl2026 }) {
   // Parse the Zoho Books pnl2026. 
   // Normally Zoho returns an array or object. We'll ensure it maps to recharts data format.
   // We'll mock the missing months if data isn't perfect, to ensure 12 months are shown.
-  
   const chartData = useMemo(() => {
     // Basic mock of 12 months for 2026 just in case real data is incomplete
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

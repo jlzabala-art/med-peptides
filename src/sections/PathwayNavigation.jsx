@@ -1,6 +1,18 @@
- 
+import Target from "lucide-react/dist/esm/icons/target";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import React, { useEffect, useRef } from 'react';
-import { Target, Zap, Activity, Brain, Moon, Sparkles, ShieldCheck } from 'lucide-react';
+
+
+
+
+
+
+
 import '../styles/pathway_navigation.css';
 
 const PATHWAYS = [

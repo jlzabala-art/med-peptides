@@ -1,3 +1,6 @@
+import Truck from "lucide-react/dist/esm/icons/truck";
+import Check from "lucide-react/dist/esm/icons/check";
+import PackageOpen from "lucide-react/dist/esm/icons/package-open";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import {
@@ -9,7 +12,9 @@ import {
   updateDoc,
   serverTimestamp,
 } from 'firebase/firestore';
-import { Truck, Check, PackageOpen } from 'lucide-react';
+
+
+
 
 export default function GlobalLogisticsQueueWidget({
   ownerId = 'admin',

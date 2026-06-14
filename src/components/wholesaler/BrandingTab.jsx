@@ -1,8 +1,19 @@
+import Paintbrush from "lucide-react/dist/esm/icons/paintbrush";
+import Check from "lucide-react/dist/esm/icons/check";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+import Save from "lucide-react/dist/esm/icons/save";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
-import { Paintbrush, Check, Globe, HelpCircle, Save, AlertCircle } from 'lucide-react';
+
+
+
+
+
+
 
 export default function BrandingTab() {
   const { userProfile } = useAuth();
@@ -225,7 +236,6 @@ export default function BrandingTab() {
 
         <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
           <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '1rem' }}>Support & Checkout Overrides</h3>
-          
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
             <div>
               <label style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem', color: 'var(--color-text-primary)', marginBottom: '0.5rem' }}>Support Email Address</label>

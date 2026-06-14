@@ -1,9 +1,18 @@
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Battery from "lucide-react/dist/esm/icons/battery";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import Frown from "lucide-react/dist/esm/icons/frown";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-import { Activity, Battery, Moon, Activity as PainIcon, CheckCircle2 } from 'lucide-react';
+
+
+
+
+
 
 export default function SymptomLoggerWidget() {
   const { user } = useAuth();
@@ -85,7 +94,6 @@ export default function SymptomLoggerWidget() {
       <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <Activity size={18} color="var(--primary)" /> {t('patient.symptoms.title')}
       </h3>
-      
       {success ? (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--color-success)', gap: '1rem', padding: '1rem 0' }}>
           <CheckCircle2 size={40} />
@@ -105,7 +113,7 @@ export default function SymptomLoggerWidget() {
 
           {renderSlider(t('patient.symptoms.energy_label'), energy, setEnergy, <Battery size={14} />, 1, 10)}
           {renderSlider(t('patient.symptoms.sleep_label'), sleep, setSleep, <Moon size={14} />, 1, 10)}
-          {renderSlider(t('patient.symptoms.pain_label'), pain, setPain, <PainIcon size={14} />, 0, 10)}
+          {renderSlider(t('patient.symptoms.pain_label'), pain, setPain, <Frown size={14} />, 0, 10)}
 
           <div>
             <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--color-text-secondary)', marginBottom: '0.4rem', textTransform: 'uppercase' }}>{t('patient.symptoms.side_effects_label')}</label>

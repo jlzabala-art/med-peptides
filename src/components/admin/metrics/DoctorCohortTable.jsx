@@ -1,5 +1,6 @@
+import Users from "lucide-react/dist/esm/icons/users";
 import React, { useState } from 'react';
-import { Users } from 'lucide-react';
+
 
 export default function DoctorCohortTable({ wholesalerId, scopedDoctors, doctorsWithPatients }) {
   const [expanded, setExpanded] = useState({});

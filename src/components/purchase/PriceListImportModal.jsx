@@ -1,8 +1,21 @@
+import X from "lucide-react/dist/esm/icons/x";
+import Upload from "lucide-react/dist/esm/icons/upload";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import FileText from "lucide-react/dist/esm/icons/file-text";
 import React, { useState } from 'react';
 import { collection, query, where, getDocs, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { extractApiPeptidesFromImage } from '../../services/atlasAiService';
-import { X, Upload, Loader2, CheckCircle2, AlertCircle, Sparkles, FileText } from 'lucide-react';
+
+
+
+
+
+
+
 import { Card } from '../../components/ui';
 
 export default function PriceListImportModal({ onClose, onImportSuccess, onAddToRfq, openRfq }) {
@@ -35,13 +48,10 @@ export default function PriceListImportModal({ onClose, onImportSuccess, onAddTo
     try {
       setStatus('extracting');
       addLog("Initializing Atlas AI Vision Model...");
-      
       const data = await extractApiPeptidesFromImage(file);
-      
       if (!data || data.length === 0) {
         throw new Error("No peptides were detected in the image.");
       }
-      
       addLog(`Atlas AI successfully extracted ${data.length} peptides.`);
       // Attach a default quantity of 1 to each item for the user to edit
       setExtractedData(data.map(item => ({ ...item, quantity: 1, unit: 'g' })));
@@ -56,7 +66,6 @@ export default function PriceListImportModal({ onClose, onImportSuccess, onAddTo
 
   const handleSaveToCatalog = async () => {
     if (!extractedData) return;
-    
     try {
       setStatus('saving');
       addLog("Starting database cataloging process...");
@@ -67,13 +76,11 @@ export default function PriceListImportModal({ onClose, onImportSuccess, onAddTo
 
       for (const item of extractedData) {
         addLog(`Processing ${item.peptideName}...`);
-        
         // Search for existing API peptide (case insensitive approx via multiple queries or manual filter)
         // Since Firebase doesn't do case-insensitive natively well, we'll fetch all API Peptides and filter in JS
         // for safety and speed given small expected catalog size
         const q = query(productsRef, where('category', '==', 'API Peptide'));
         const snap = await getDocs(q);
-        
         const existingDoc = snap.docs.find(d => 
           d.data().name?.toLowerCase() === item.peptideName.toLowerCase()
         );
@@ -106,7 +113,6 @@ export default function PriceListImportModal({ onClose, onImportSuccess, onAddTo
 
       addLog(`Process complete. Created: ${newCount}, Updated: ${updateCount}.`);
       setStatus('success');
-      
       setTimeout(() => {
         if (onImportSuccess) onImportSuccess();
         onClose();
@@ -131,7 +137,6 @@ export default function PriceListImportModal({ onClose, onImportSuccess, onAddTo
         </div>
 
         <div className="modal-body" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
           {/* File Selection */}
           {!previewUrl && (
             <div style={{ border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '3rem 2rem', textAlign: 'center', backgroundColor: '#f8fafc' }}>

@@ -1,9 +1,16 @@
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Search from "lucide-react/dist/esm/icons/search";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { catalog } from '../../../data/v2/index.js';
-import { Plus, Search, FileText, CheckCircle2 } from 'lucide-react';
+
+
+
+
 
 export default function PrescriptionGeneratorWidget() {
   const { user } = useAuth();
@@ -24,7 +31,6 @@ export default function PrescriptionGeneratorWidget() {
         const qPatients = query(collection(db, 'doctor_patient_relationships'), where('doctorId', '==', user.uid), where('status', '==', 'active'));
         const snapP = await getDocs(qPatients);
         setPatients(snapP.docs.map(d => ({ id: d.id, ...d.data() })));
-        
         const qProtocols = query(collection(db, 'custom_protocols'), where('doctorId', '==', user.uid));
         const snapProt = await getDocs(qProtocols);
         setProtocols(snapProt.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -43,7 +49,6 @@ export default function PrescriptionGeneratorWidget() {
     setLoading(true);
     try {
       const p = patients.find(x => x.patientId === selectedPatient);
-      
       let productName = selectedProduct;
       let peptidesList = [selectedProduct];
       let instructions = dose;
@@ -60,13 +65,11 @@ export default function PrescriptionGeneratorWidget() {
         const prod = catalog.find(x => x.id === selectedProduct);
         if (prod) productName = prod.name;
       }
-      
       // Calculate dates
       const now = new Date();
       const endD = new Date(now.getTime() + (durationDays * 24 * 60 * 60 * 1000));
       // Alert 10 days before the end date to account for shipping
       const alertD = new Date(endD.getTime() - (10 * 24 * 60 * 60 * 1000));
-      
       await addDoc(collection(db, 'recommendations'), {
         doctorId: user.uid,
         doctorName: user.displayName || 'Physician',
@@ -103,7 +106,6 @@ export default function PrescriptionGeneratorWidget() {
       <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.25rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <FileText size={20} color="var(--primary)" /> Generar Receta
       </h3>
-      
       {success ? (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--color-success)', gap: '1rem' }}>
           <CheckCircle2 size={48} />

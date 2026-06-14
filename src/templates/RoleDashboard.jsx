@@ -1,28 +1,57 @@
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import Settings from "lucide-react/dist/esm/icons/settings";
+import Search from "lucide-react/dist/esm/icons/search";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Users from "lucide-react/dist/esm/icons/users";
+import Database from "lucide-react/dist/esm/icons/database";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import PackageSearch from "lucide-react/dist/esm/icons/package-search";
+import MailPlus from "lucide-react/dist/esm/icons/mail-plus";
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import LogOut from "lucide-react/dist/esm/icons/log-out";
 /* eslint-disable no-unused-vars, react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { ShieldCheck, ArrowLeft, Settings, Search, Globe, Users, Database, Layers, PackageSearch, MailPlus, LayoutDashboard, ShoppingCart, Activity, FlaskConical, LogOut } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import AppPortalLayout from '../layout/AppPortalLayout';
 
-const AdminUsersTab = React.lazy(() => import('../components/admin/AdminUsersTab'));
-const AdminProductsTab = React.lazy(() => import('../components/admin/AdminProductsTab'));
-const AdminSettingsTab = React.lazy(() => import('../components/admin/AdminSettingsTab'));
-const AdminInvitationsTab = React.lazy(() => import('../components/admin/AdminInvitationsTab'));
-const AdminCostsTab = React.lazy(() => import('../components/admin/AdminCostsTab'));
-const AdminRelationshipsTab = React.lazy(() => import('../components/admin/AdminRelationshipsTab'));
-const AdminSemanticTab = React.lazy(() => import('../components/admin/AdminSemanticTab'));
-const AdminPricesTab = React.lazy(() => import('../components/admin/AdminPricesTab'));
-const AdminVariantsTab = React.lazy(() => import('../components/admin/AdminVariantsTab'));
-const AdminProtocolsTab = React.lazy(() => import('../components/admin/AdminProtocolsTab'));
-const AdminBlueprintsTab = React.lazy(() => import('../components/admin/AdminWorkflowsTab'));
+import AdminUsersTab from '../components/admin/AdminUsersTab';
+import CatalogIntelligenceHub from '../components/admin/catalog/CatalogIntelligenceHub';
+import AdminSettingsTab from '../components/admin/AdminSettingsTab';
+import AdminInvitationsTab from '../components/admin/AdminInvitationsTab';
+import AdminCostsTab from '../components/admin/AdminCostsTab';
+import AdminRelationshipsTab from '../components/admin/AdminRelationshipsTab';
+import AdminSemanticTab from '../components/admin/AdminSemanticTab';
+import AdminPricesTab from '../components/admin/AdminPricesTab';
+import AdminVariantsTab from '../components/admin/AdminVariantsTab';
+import AdminProtocolsTab from '../components/admin/AdminProtocolsTab';
+import AdminBlueprintsTab from '../components/admin/AdminWorkflowsTab';
 
 // New B2B Modules
-const DoctorPatientsTab = React.lazy(() => import('../components/doctor/DoctorPatientsTab'));
-const DoctorProtocolsTab = React.lazy(() => import('../components/doctor/DoctorProtocolsTab'));
-const OrdersTab = React.lazy(() => import('../components/admin/OrdersTab'));
+import DoctorPatientsTab from '../components/doctor/DoctorPatientsTab';
+import DoctorProtocolsTab from '../components/doctor/DoctorProtocolsTab';
+import OrdersTab from '../components/admin/OrdersTab';
 
 // Premium loading fallback for workplace modules
 function WorkplaceLoadingFallback() {
@@ -73,7 +102,7 @@ export default function RoleDashboard({ onBack }) {
   // Map of ALL possible tabs and their components/icons
   const TAB_REGISTRY = {
     users: { component: AdminUsersTab, label: 'Users', icon: Users },
-    products: { component: AdminProductsTab, label: 'Products', icon: PackageSearch },
+    products: { component: CatalogIntelligenceHub, label: 'Products', icon: PackageSearch },
     costs: { component: AdminCostsTab, label: 'Costs', icon: Database },
     prices: { component: AdminPricesTab, label: 'Prices', icon: Globe },
     relationships: { component: AdminRelationshipsTab, label: 'Relations', icon: Layers },
@@ -90,7 +119,6 @@ export default function RoleDashboard({ onBack }) {
   async function fetchViewConfig(currentRoleKey) {
     try {
       setConfigLoading(true);
-      
       let searchKey = currentRoleKey;
       if (searchKey.endsWith('_pending')) {
          searchKey = searchKey.replace('_pending', ''); 
@@ -98,7 +126,6 @@ export default function RoleDashboard({ onBack }) {
 
       const docRef = doc(db, 'viewConfigs', searchKey);
       const docSnap = await getDoc(docRef);
-      
       if (docSnap.exists()) {
         const configData = docSnap.data();
         setViewConfig(configData);
@@ -178,7 +205,6 @@ export default function RoleDashboard({ onBack }) {
               const tabConfig = viewConfig.tabs[activeTab];
               const tabReg = TAB_REGISTRY[activeTab];
               if (!tabReg || !tabConfig) return null;
-              
               const Component = tabReg.component;
               return (
                 <Component 

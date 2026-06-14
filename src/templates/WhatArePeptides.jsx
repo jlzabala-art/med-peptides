@@ -1,19 +1,28 @@
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Dna from "lucide-react/dist/esm/icons/dna";
+import Microscope from "lucide-react/dist/esm/icons/microscope";
+import Heart from "lucide-react/dist/esm/icons/heart";
 /* eslint-disable no-unused-vars */
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  BookOpen,
-  ArrowRight,
-  Zap,
-  ShieldCheck,
-  Activity,
-  Brain,
-  ChevronDown,
-  FlaskConical,
-  Dna,
-  Microscope,
-  Heart,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
 import '../styles/what_are_peptides.css';
 
 /* ── Data ─────────────────────────────────────────────────────── */
@@ -325,7 +334,6 @@ export default function WhatArePeptides() {
               Help Center
             </span>
             <h2 className="wap-section__title">Common Questions</h2>
-            
             <div className="wap-faq">
               <FaqItem 
                 question="Are peptides legal?"

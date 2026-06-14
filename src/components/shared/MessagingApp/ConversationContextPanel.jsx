@@ -1,5 +1,32 @@
+import User from "lucide-react/dist/esm/icons/user";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Briefcase from "lucide-react/dist/esm/icons/briefcase";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import PlusCircle from "lucide-react/dist/esm/icons/plus-circle";
+import LinkIcon from "lucide-react/dist/esm/icons/link";
+import FileText from "lucide-react/dist/esm/icons/file-text";
 import React from 'react';
-import { User, Activity, ShoppingBag, ClipboardList, Briefcase, Truck, Mail, Phone, Calendar, Clock, AlertTriangle, PlusCircle, Link as LinkIcon, FileText } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import './MessagingApp.css';
 
 export default function ConversationContextPanel({ conversation }) {
@@ -35,7 +62,6 @@ export default function ConversationContextPanel({ conversation }) {
           </div>
         </div>
       </div>
-      
       <div className="context-card">
         <h4><ShoppingBag size={16} /> Recent Orders</h4>
         <div className="context-list-item">
@@ -56,7 +82,6 @@ export default function ConversationContextPanel({ conversation }) {
           <p><strong>Status:</strong> Active Partner</p>
         </div>
       </div>
-      
       <div className="context-card">
         <h4><Activity size={16} /> Performance Metrics</h4>
         <div className="metrics-grid">
@@ -107,7 +132,6 @@ export default function ConversationContextPanel({ conversation }) {
         </div>
         <h3 className="context-name">{conversation.title || 'Unknown Contact'}</h3>
         <span className={`context-role-badge badge-${contextType}`}>{contextType}</span>
-        
         <div className="context-quick-actions">
           <button className="quick-action-btn" title="Email"><Mail size={16} /></button>
           <button className="quick-action-btn" title="Call"><Phone size={16} /></button>

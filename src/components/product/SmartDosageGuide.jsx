@@ -1,6 +1,19 @@
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import Info from "lucide-react/dist/esm/icons/info";
+import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
 /* eslint-disable no-unused-vars */
 import { useMemo, useState } from 'react';
-import { Clock, Zap, AlertTriangle, ChevronDown, ChevronUp, Info, GraduationCap } from 'lucide-react';
+
+
+
+
+
+
+
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { getPeptidePK } from '../../data/peptidePharmacokinetics';
 
@@ -95,15 +108,12 @@ export default function SmartDosageGuide({ product, selectedVariant }) {
     const steps = 15;
     const maxTime = Math.max(halfLifeHours * 4, 12); // Display up to 4 half-lives
     const isDays = maxTime > 36;
-    
     for (let i = 0; i <= steps; i++) {
       const t = (i / steps) * maxTime;
       const concentration = Math.round(100 * Math.pow(0.5, t / halfLifeHours));
-      
       const timeLabel = isDays 
         ? `${(t / 24).toFixed(1)}d`
         : `${Math.round(t)}h`;
-        
       points.push({
         time: t,
         concentration,

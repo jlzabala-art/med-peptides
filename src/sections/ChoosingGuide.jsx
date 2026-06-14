@@ -1,7 +1,11 @@
- 
+import Search from "lucide-react/dist/esm/icons/search";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
 import React from 'react';
-import { Search, FlaskConical, Beaker } from 'lucide-react';
-import homeData from '../data/homeData.json';
+
+
+
+import homeData from '../data/homeData.js';
 import { renderWithGradient } from '../utils/textUtils';
 
 const IconMap = {

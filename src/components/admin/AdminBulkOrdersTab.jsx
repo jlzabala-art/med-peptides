@@ -1,3 +1,20 @@
+import Layers from "lucide-react/dist/esm/icons/layers";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import Package from "lucide-react/dist/esm/icons/package";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Building from "lucide-react/dist/esm/icons/building";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import PackageSearch from "lucide-react/dist/esm/icons/package-search";
+import Filter from "lucide-react/dist/esm/icons/filter";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Plus from "lucide-react/dist/esm/icons/plus";
 /**
  * AdminBulkOrdersTab.jsx
  *
@@ -24,25 +41,20 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 import { logAction } from '../../services/auditLogger';
-import {
-  Layers,
-  ChevronDown,
-  ChevronUp,
-  CheckCircle2,
-  Truck,
-  Package,
-  Clock,
-  Eye,
-  AlertCircle,
-  Building,
-  ClipboardList,
-  ShoppingBag,
-  PackageSearch,
-  Filter,
-  RefreshCw,
-  ArrowRight,
-  Plus,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { BULK_STATUS, BULK_STATUS_META } from '../../config/prescriptionConfig';
 import AdminBulkOrderBuilder from './AdminBulkOrderBuilder';
 import B2BOrderApprovalsWidget from './gadgets/B2BOrderApprovalsWidget';
@@ -268,13 +280,13 @@ function BulkActions({ order, onUpdate }) {
     draft: {
       label: 'Submit Order',
       nextStatus: 'submitted',
-      icon: CheckCircle2,
+      icon: CheckCircle,
       color: '#6366f1',
     },
     submitted: {
       label: 'Confirm Order',
       nextStatus: 'confirmed',
-      icon: CheckCircle2,
+      icon: CheckCircle,
       color: 'var(--color-success)',
     },
     confirmed: { label: 'Mark Shipped', nextStatus: 'shipped', icon: Truck, color: '#f59e0b' },
@@ -470,7 +482,6 @@ export default function AdminBulkOrdersTab() {
         ? [...orders.find((o) => o.id === orderId).timeline, event]
         : [event],
     });
-    
     await logAction(
       auth.currentUser?.uid || 'unknown_admin',
       'admin',

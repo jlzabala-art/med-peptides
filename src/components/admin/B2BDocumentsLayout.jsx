@@ -1,5 +1,14 @@
+import Search from "lucide-react/dist/esm/icons/search";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Filter from "lucide-react/dist/esm/icons/filter";
+import MoreVertical from "lucide-react/dist/esm/icons/more-vertical";
+import FileText from "lucide-react/dist/esm/icons/file-text";
 import React from 'react';
-import { Search, Plus, Filter, MoreVertical, FileText } from 'lucide-react';
+
+
+
+
+
 
 export default function B2BDocumentsLayout({
   title,
@@ -13,7 +22,6 @@ export default function B2BDocumentsLayout({
 }) {
   return (
     <div style={{ display: 'flex', height: 'calc(100vh - 64px)', background: 'var(--color-bg-app)', overflow: 'hidden' }}>
-      
       {/* LEFT SIDEBAR (List View) */}
       <div style={{ 
         width: '320px', 
@@ -46,7 +54,6 @@ export default function B2BDocumentsLayout({
               <Plus size={14} /> Nuevo
             </button>
           </div>
-          
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <div style={{ 
               flex: 1, 

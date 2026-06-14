@@ -1,6 +1,15 @@
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Users from "lucide-react/dist/esm/icons/users";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 /* eslint-disable no-unused-vars */
 import React from 'react';
-import { CheckCircle2, TrendingUp, Users, Clock, Sparkles } from 'lucide-react';
+
+
+
+
+
 import OutcomeProgressBar from './OutcomeProgressBar';
 
 /**
@@ -39,7 +48,6 @@ export default function ProtocolOutcomesSection({ expectedOutcomes, accentColor 
     const entries = Object.entries(qr);
     if (entries.length > 0) {
       const isNested = entries.some(([_, val]) => val && typeof val === 'object' && !Array.isArray(val));
-      
       if (isNested) {
         normalizedRanges = entries.map(([key, val]) => {
           const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -79,14 +87,12 @@ export default function ProtocolOutcomesSection({ expectedOutcomes, accentColor 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      
       {/* Upper Grid: Qualitative Goals + Quantitative Ranges */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
         gap: '1.25rem',
       }}>
-        
         {/* Left Column: Qualitative Clinical Goals */}
         {generalOutcomes.length > 0 && (
           <div style={{
@@ -110,7 +116,6 @@ export default function ProtocolOutcomesSection({ expectedOutcomes, accentColor 
                 Primary Therapeutic Outcomes
               </span>
             </div>
-            
             <ul style={{
               margin: 0,
               padding: 0,
@@ -172,7 +177,6 @@ export default function ProtocolOutcomesSection({ expectedOutcomes, accentColor 
                       {block.label}
                     </div>
                   )}
-                  
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.95rem' }}>
                     {block.items.map((item, i) => (
                       <div key={i} style={{

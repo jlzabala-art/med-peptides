@@ -27,3 +27,8 @@ dist-ssr
 serviceAccount*.json
 .env.local
 .firebase-config
+.firebase
+firebase-export/
+cypress/videos/
+cypress/screenshots/
+node_modules_bad/

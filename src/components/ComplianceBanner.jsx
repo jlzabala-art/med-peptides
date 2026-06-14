@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldAlert } from 'lucide-react';
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
 import { useTranslation } from 'react-i18next';
 
 const ComplianceBanner = () => {

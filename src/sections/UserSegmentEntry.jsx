@@ -1,4 +1,12 @@
- 
+import Building from "lucide-react/dist/esm/icons/building";
+import Pill from "lucide-react/dist/esm/icons/pill";
+import Microscope from "lucide-react/dist/esm/icons/microscope";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import UserCheck from "lucide-react/dist/esm/icons/user-check";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Heart from "lucide-react/dist/esm/icons/heart";
 /**
  * UserSegmentEntry
  * ─────────────────────────────────────────────────────────────────────────────
@@ -12,7 +20,15 @@
  * A registered-but-pending user is still treated as a guest for pricing/content.
  */
 
-import { Building, Pill, Microscope, Truck, UserCheck, ArrowRight, Clock, CheckCircle, Heart } from 'lucide-react';
+
+
+
+
+
+
+
+
+
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 

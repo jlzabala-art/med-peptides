@@ -1,11 +1,21 @@
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import Bot from "lucide-react/dist/esm/icons/bot";
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import AdminPageHeader from './AdminPageHeader';
-import { Loader2, ShieldCheck, CheckCircle, XCircle, Bot } from 'lucide-react';
+
+
+
+
+
 import DataTable from '../ui/DataTable';
 import { Card } from '../ui/Card';
 import toast from 'react-hot-toast';
+import notifier from '../../services/NotificationService';
 
 export default function AdminApprovalsTab() {
   const [pendingDocs, setPendingDocs] = useState([]);
@@ -58,16 +68,17 @@ export default function AdminApprovalsTab() {
   }, []);
 
   const handleApprove = async (id, type) => {
-    if (!window.confirm('¿Aprobar este documento?')) return;
-    try {
-      const collectionName = type === 'Purchase Order' ? 'purchaseOrders' : 'purchaseBills';
-      const approvedStatus = type === 'Purchase Order' ? 'open' : 'unpaid';
-      await updateDoc(doc(db, collectionName, id), { status: approvedStatus });
-      toast.success('Documento aprobado.');
-    } catch (e) {
-      console.error(e);
-      toast.error('Error al aprobar');
-    }
+    notifier.confirmCritical('¿Aprobar este documento?', async () => {
+      try {
+        const collectionName = type === 'Purchase Order' ? 'purchaseOrders' : 'purchaseBills';
+        const approvedStatus = type === 'Purchase Order' ? 'open' : 'unpaid';
+        await updateDoc(doc(db, collectionName, id), { status: approvedStatus });
+        toast.success('Documento aprobado.');
+      } catch (e) {
+        console.error(e);
+        toast.error('Error al aprobar');
+      }
+    });
   };
 
   const handleReject = async (id, type) => {
@@ -97,14 +108,12 @@ export default function AdminApprovalsTab() {
       const url = window.location.hostname === 'localhost' 
         ? 'http://127.0.0.1:5001/med-peptides-app/us-central1/threeWayMatching'
         : 'https://us-central1-med-peptides-app.cloudfunctions.net/threeWayMatching';
-      
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ poId, billId })
       });
-      
-      const data = await res.json();
+      const data = await res.js();
       if (!res.ok) throw new Error(data.error || 'Failed to run AI Audit');
       toast.success(`AI Audit completado con Score: ${data.result.confidenceScore}%`);
     } catch (e) {

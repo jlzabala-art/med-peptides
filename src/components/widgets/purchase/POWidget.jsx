@@ -1,3 +1,12 @@
+import X from "lucide-react/dist/esm/icons/x";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Save from "lucide-react/dist/esm/icons/save";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Package from "lucide-react/dist/esm/icons/package";
+import Link from "lucide-react/dist/esm/icons/link";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
 /**
  * POWidget – Reusable Purchase Order widget.
  * Can be embedded in any portal (admin, wholesaler, supplier, etc.)
@@ -12,7 +21,15 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, orderBy, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, increment } from 'firebase/firestore';
 import { db } from '../../../firebase';
-import { X, Plus, Trash2, Save, FileText, CheckCircle, Package, Link, ShoppingCart } from 'lucide-react';
+
+
+
+
+
+
+
+
+
 
 const STATUS_OPTIONS = ['open', 'sent', 'closed'];
 const STATUS_STYLE = {
@@ -211,13 +228,11 @@ function POForm({ po, collectionName, onClose }) {
 
       // 2. Update this PO to 'closed' status
       await updateDoc(doc(db, collectionName, po.id), { status: 'closed', updatedAt: serverTimestamp() });
-      
       // 3. Increment Inventory
       if (items && items.length > 0) {
         for (const item of items) {
           const itemName = item.name || item.itemName;
           if (!itemName) continue;
-          
           const q = query(collection(db, 'products'), where('name', '==', itemName));
           const snap = await getDocs(q);
           if (!snap.empty) {

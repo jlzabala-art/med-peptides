@@ -1,6 +1,12 @@
- 
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Microscope from "lucide-react/dist/esm/icons/microscope";
+import FileCheck from "lucide-react/dist/esm/icons/file-check";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import React from 'react';
-import { ShieldCheck, Microscope, FileCheck, AlertCircle } from 'lucide-react';
+
+
+
+
 
 const SafetyCheck = () => {
   const protocols = [
@@ -48,7 +54,6 @@ const SafetyCheck = () => {
               </div>
             ))}
           </div>
-          
           <div className="mt-xl p-m bg-darker border border-radius-s border-dashed border-secondary text-center">
             <p className="p-s text-secondary">
               <span className="text-primary font-bold">Researcher Notice:</span> By accessing this catalog, you acknowledge that these molecules are designated for in-vitro laboratory research only.

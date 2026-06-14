@@ -1,12 +1,43 @@
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import Microscope from "lucide-react/dist/esm/icons/microscope";
+import Clipboard from "lucide-react/dist/esm/icons/clipboard";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Star from "lucide-react/dist/esm/icons/star";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import Info from "lucide-react/dist/esm/icons/info";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import Hash from "lucide-react/dist/esm/icons/hash";
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import Zap from "lucide-react/dist/esm/icons/zap";
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import {
-  FlaskConical, CheckCircle, AlertTriangle, ArrowRight, ChevronDown, ChevronUp,
-  Microscope, Clipboard, Activity, Star, ShieldAlert, Info, ExternalLink, Hash,
-  Stethoscope, Beaker, BookOpen, Zap,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ── Design tokens (match project palette) ────────────────────────────────────
 const T = {

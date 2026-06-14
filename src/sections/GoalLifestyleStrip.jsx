@@ -1,7 +1,24 @@
+import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Pill from "lucide-react/dist/esm/icons/pill";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import X from "lucide-react/dist/esm/icons/x";
+import Microscope from "lucide-react/dist/esm/icons/microscope";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 /* eslint-disable no-unused-vars */
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, FlaskConical, Pill, ClipboardList, Bot, X, Microscope, ArrowRight } from 'lucide-react';
+
+
+
+
+
+
+
+
+
 
 /**
  * GoalLifestyleStrip — Clinical Pathway 2.0
@@ -166,7 +183,6 @@ export default function GoalLifestyleStrip({ onSelectCategory, onOpenSearch, onS
 
   const handleGoalClick = (goal) => {
     if (isDragging) return;
-    
     if (goal.isIntro) {
       const richPrompt = CLINICAL_AI_CONTEXTS['intro'];
       const cleanLabel = "I am ready to embark on a wonderful journey to improve my health!";
@@ -305,7 +321,6 @@ export default function GoalLifestyleStrip({ onSelectCategory, onOpenSearch, onS
                     <div className="gls-info">
                       <h3 className="gls-label">{goal.label}</h3>
                       <p className="gls-desc">{goal.desc}</p>
-                      
                       <div className="gls-card-footer">
                         <span className="gls-footer-cta">Explore Paths</span>
                         <span className="gls-footer-arrow">↓</span>
@@ -998,14 +1013,12 @@ export default function GoalLifestyleStrip({ onSelectCategory, onOpenSearch, onS
           .gls-title           { font-size: 1.45rem; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
           .gls-subtitle        { font-size: 0.82rem; margin-bottom: 1.25rem; line-height: 1.4; }
           .gls-container       { padding: 2rem 0; }
-          
           /* Change carousel strip into a highly-optimized 2-column grid on mobile */
           .gls-strip {
             display: block;
             overflow-x: visible;
             cursor: default !important;
           }
-          
           .gls-inner {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -1015,7 +1028,6 @@ export default function GoalLifestyleStrip({ onSelectCategory, onOpenSearch, onS
             margin: 0;
             box-sizing: border-box;
           }
-          
           .gls-card {
             flex: none;
             width: 100% !important;
@@ -1026,18 +1038,14 @@ export default function GoalLifestyleStrip({ onSelectCategory, onOpenSearch, onS
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
             grid-column: auto !important;
           }
-          
           .gls-intro-card-new,
           .gls-card:first-child {
             grid-column: auto !important;
           }
-          
           .gls-image-container {
             height: 140px; /* Increased from 105px for taller and beautifully clear photos on mobile */
           }
-          
 
-          
           .gls-position-badge {
             font-size: 0.48rem;
             top: 0.4rem;
@@ -1045,7 +1053,6 @@ export default function GoalLifestyleStrip({ onSelectCategory, onOpenSearch, onS
             padding: 0.18rem 0.4rem;
             border-radius: 4px;
           }
-          
           .gls-start-here {
             font-size: 0.46rem;
             padding: 0.18rem 0.4rem;
@@ -1053,11 +1060,9 @@ export default function GoalLifestyleStrip({ onSelectCategory, onOpenSearch, onS
             left: 0.4rem;
             border-radius: 4px;
           }
-          
           .gls-info {
             padding: 0.5rem 0.6rem 0.6rem;
           }
-          
           .gls-label {
             font-size: 0.76rem;
             font-weight: 900;
@@ -1065,7 +1070,6 @@ export default function GoalLifestyleStrip({ onSelectCategory, onOpenSearch, onS
             margin-bottom: 0.15rem;
             letter-spacing: -0.01em;
           }
-          
           .gls-desc {
             font-size: 0.6rem;
             margin-bottom: 0.25rem;
@@ -1077,22 +1081,18 @@ export default function GoalLifestyleStrip({ onSelectCategory, onOpenSearch, onS
             text-overflow: ellipsis;
             height: 2.45em; /* exact height to perfectly align footer borders */
           }
-          
           .gls-card-footer {
             margin-top: 0.35rem;
             padding-top: 0.35rem;
             border-top: 1px solid rgba(0,0,0,0.04);
           }
-          
           .gls-footer-cta {
             font-size: 0.55rem;
             font-weight: 800;
           }
-          
           .gls-footer-arrow {
             font-size: 0.8rem;
           }
- 
           /* Hide pagination, scroll hints, and fade borders when grid is active */
           .gls-progress-counter { display: none !important; }
           .gls-scroll-hint       { display: none !important; }

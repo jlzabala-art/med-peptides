@@ -1,4 +1,19 @@
-import { ArrowRight, Eye, FlaskConical, Beaker, Zap, Activity, ShieldCheck, Bot } from 'lucide-react';
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Bot from "lucide-react/dist/esm/icons/bot";
+
+
+
+
+
+
+
+
 import { motion } from 'framer-motion';
 
 export default function ProductCard({
@@ -52,7 +67,6 @@ export default function ProductCard({
       aria-label={`Product card for ${title}`}
     >
       <div className="col-card-accent" />
-      
       {/* Hover Overlay Actions */}
       <div className="col-card-hover-overlay" style={{
         position: 'absolute', top: '0.75rem', right: '0.75rem',
@@ -90,7 +104,6 @@ export default function ProductCard({
           <Eye size={14} color={color} />
         </div>
       </div>
-      
       <div className="col-card-body">
         <div className="col-card-header">
           <h3 className="col-card-title">{title}</h3>
@@ -112,19 +125,16 @@ export default function ProductCard({
             )}
           </div>
         </div>
-        
         {subtitle && (
           <p className="col-card-subtitle" style={{ color: isList ? 'var(--text-muted)' : color }}>
             {subtitle}
           </p>
         )}
-        
         {isList && description && (
           <p className="col-card-subtitle" style={{ color: 'var(--text-muted)' }}>
             {description.slice(0, 120)}{description.length > 120 ? '…' : ''}
           </p>
         )}
-        
         {!isList && tags.length > 0 && (
           <div className="col-card-tags">
             {tags.slice(0, 3).map((t, i) => (

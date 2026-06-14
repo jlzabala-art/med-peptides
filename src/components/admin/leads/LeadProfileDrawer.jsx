@@ -1,9 +1,50 @@
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import Building from "lucide-react/dist/esm/icons/building";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Target from "lucide-react/dist/esm/icons/target";
+import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import User from "lucide-react/dist/esm/icons/user";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import List from "lucide-react/dist/esm/icons/list";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import BarChart2 from "lucide-react/dist/esm/icons/bar-chart-2";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import X from "lucide-react/dist/esm/icons/x";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Download from "lucide-react/dist/esm/icons/download";
+import Upload from "lucide-react/dist/esm/icons/upload";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import React, { useState } from 'react';
-import { 
-  Mail, Phone, MapPin, Building, Clock, Target, ArrowUpRight, CheckCircle2, 
-  ShieldAlert, User, DollarSign, List, FileText, BarChart2, Zap, X, 
-  MessageSquare, Calendar, ChevronRight, Download, Upload, AlertCircle, RefreshCw
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { calculateDetailedAIScore } from './LeadUtils';
 import RFQItemsTab from './RFQItemsTab';
 import toast from 'react-hot-toast';
@@ -23,7 +64,6 @@ export default function LeadProfileDrawer({
 
   const aiDetails = calculateDetailedAIScore(lead);
   const isRFQ = lead.type === 'rfq';
-  
   // Calculate value
   const value = isRFQ 
     ? (lead.originalData?.items || []).reduce((sum, item) => sum + ((item.clientUnitPrice || 250) * (item.quantity || 1)), 0)
@@ -33,7 +73,6 @@ export default function LeadProfileDrawer({
   const owner = lead.assignedOwner || 'Jose';
   const country = lead.country || (isRFQ ? 'Spain' : 'UAE');
   const leadType = lead.leadType || (isRFQ ? 'Compounding Pharmacy' : 'Clinic');
-  
   const TABS = [
     { id: 'Overview', icon: BarChart2 },
     ...(isRFQ ? [{ id: 'RFQ Items', icon: List }] : []),
@@ -70,7 +109,6 @@ export default function LeadProfileDrawer({
           animation: 'fadeIn 0.2s ease-out'
         }}
       />
-      
       {/* Drawer */}
       <div style={{
         position: 'fixed', top: 0, right: 0, bottom: 0,
@@ -81,7 +119,6 @@ export default function LeadProfileDrawer({
         display: 'flex', flexDirection: 'column',
         animation: 'slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
       }}>
-        
         {/* Commercial Header */}
         <div style={{
           padding: '1.5rem',
@@ -125,7 +162,6 @@ export default function LeadProfileDrawer({
               </div>
             </div>
           </div>
-          
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Est. Revenue:</span>
@@ -209,11 +245,9 @@ export default function LeadProfileDrawer({
 
         {/* Tab Content */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', backgroundColor: 'var(--color-bg-base, #f1f5f9)' }}>
-          
           {/* OVERVIEW TAB */}
           {activeTab === 'Overview' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              
               {/* Recommended Next Action Engine */}
               <div style={{ 
                 padding: '1rem 1.25rem', 
@@ -413,7 +447,6 @@ export default function LeadProfileDrawer({
               <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 800 }}>HubSpot-Style Activity Timeline</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', position: 'relative', paddingLeft: '1.5rem' }}>
                 <div style={{ position: 'absolute', top: '5px', bottom: '5px', left: '6px', width: '2px', backgroundColor: 'var(--border)' }} />
-                
                 {[
                   { title: 'RFQ Generated', details: 'RFQ Number RFQ-2026-001 created automatically from custom proforma upload.', date: 'Today, 2:10 PM', icon: Zap, bg: '#f5f3ff', color: '#8b5cf6' },
                   { title: 'Email Interaction', details: 'Client replied to pricing options, requesting express customs routing via Madrid freezone.', date: 'Yesterday, 4:15 PM', icon: Mail, bg: '#eff6ff', color: '#3b82f6' },

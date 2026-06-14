@@ -1,6 +1,14 @@
- 
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Microscope from "lucide-react/dist/esm/icons/microscope";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import Send from "lucide-react/dist/esm/icons/send";
 import React from 'react';
-import { Beaker, ShieldCheck, Microscope, ArrowLeft, Send } from 'lucide-react';
+
+
+
+
+
 
 export default function CustomSynthesis({ onBack }) {
   return (

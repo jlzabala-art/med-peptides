@@ -1,3 +1,29 @@
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Copy from "lucide-react/dist/esm/icons/copy";
+import Send from "lucide-react/dist/esm/icons/send";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Search from "lucide-react/dist/esm/icons/search";
+import Filter from "lucide-react/dist/esm/icons/filter";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import X from "lucide-react/dist/esm/icons/x";
+import Edit from "lucide-react/dist/esm/icons/edit";
+import Archive from "lucide-react/dist/esm/icons/archive";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import UserCheck from "lucide-react/dist/esm/icons/user-check";
+import UserX from "lucide-react/dist/esm/icons/user-x";
+import Inbox from "lucide-react/dist/esm/icons/inbox";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Link from "lucide-react/dist/esm/icons/link";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Link2Off from "lucide-react/dist/esm/icons/link-2-off";
+import User from "lucide-react/dist/esm/icons/user";
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import Download from "lucide-react/dist/esm/icons/download";
+import Plus from "lucide-react/dist/esm/icons/plus";
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useLocation } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
@@ -17,32 +43,30 @@ import {
   orderBy
 } from 'firebase/firestore';
 import { db } from '../../firebase';
-import {
-  ShieldCheck,
-  XCircle,
-  CheckCircle2,
-  Copy,
-  Send,
-  Mail,
-  Search,
-  Filter,
-  Trash2,
-  X,
-  Edit,
-  Archive,
-  Eye,
-  UserCheck,
-  UserX,
-  Inbox,
-  Clock,
-  AlertCircle,
-  Link,
-  DollarSign,
-  Link2Off,
-  User,
-  Building2,
-  ChevronDown,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { functions } from '../../firebase';
 import { httpsCallable } from 'firebase/functions';
 import { getApprovalEmailHtml } from '../../data/emailTemplate';
@@ -50,9 +74,11 @@ import { useAuth } from '../../context/AuthContext';
 import AdminUsersTable from './AdminUsersTable';
 import { logAction } from '../../services/auditLogger.js';
 import { exportToCSV } from '../../utils/exportUtils';
-import { Download, Plus } from 'lucide-react';
+
+
 import { useToast } from '../../hooks/useToast';
 import { ToastContainer } from '../common/Toast';
+import notifier from '../../services/NotificationService';
 import CreateUserModal from './CreateUserModal';
 import UserDetailsModal from './UserDetailsModal';
 import AppFilterBar from '../ui/AppFilterBar';
@@ -263,7 +289,7 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
         if (!response.ok) {
           throw new Error(`Failed to fetch Zoho Books data: ${response.status}`);
         }
-        const data = await response.json();
+        const data = await response.js();
         if (data.found) {
           setZohoFinancialData(data);
         } else {
@@ -303,7 +329,7 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
       if (!response.ok) {
         throw new Error(`Zoho Books server error: ${response.status}`);
       }
-      const data = await response.json();
+      const data = await response.js();
       if (data.found) {
         setZohoData(data);
       } else {
@@ -426,19 +452,20 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
   };
 
   async function handleRevokeAssignment(relId) {
-    if (!window.confirm('Are you sure you want to unlink this user from this wholesaler?')) return;
-    try {
-      const relRef = doc(db, 'doctor_patient_relationships', relId);
-      await updateDoc(relRef, {
-        status: 'revoked',
-        updatedAt: new Date().toISOString(),
-      });
-      await logAction(user?.uid || 'admin', 'admin', 'RELATIONSHIP_REVOKE_BY_ADMIN', relId);
-      fetchUsers();
-    } catch (err) {
-      console.error('Error revoking relationship:', err);
-      toast.error('Failed to revoke relationship.');
-    }
+    notifier.confirmCritical('Are you sure you want to unlink this user from this wholesaler?', async () => {
+      try {
+        const relRef = doc(db, 'doctor_patient_relationships', relId);
+        await updateDoc(relRef, {
+          status: 'revoked',
+          updatedAt: new Date().toISOString(),
+        });
+        await logAction(user?.uid || 'admin', 'admin', 'RELATIONSHIP_REVOKE_BY_ADMIN', relId);
+        fetchUsers();
+      } catch (err) {
+        console.error('Error revoking relationship:', err);
+        toast.error('Failed to revoke relationship.');
+      }
+    });
   };
 
   async function fetchUsers(page = 1, newPageSize = pageSize) {
@@ -451,11 +478,10 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
 
       const usersRef = collection(db, 'users');
       let baseConstraints = [];
-      
       const appliedRole = defaultRole || (roleFilter !== 'all' ? roleFilter : null);
       if (appliedRole) {
         // Apply role filter on the server so pagination counts exactly 20 matching roles.
-        // This requires a composite index on roles (array) and createdAt (desc) which we added to firestore.indexes.json.
+        // This requires a composite index on roles (array) and createdAt (desc) which we added to firestore.indexes.js.
         baseConstraints.push(where('roles', 'array-contains', appliedRole));
       }
 
@@ -468,11 +494,9 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
 
       // 2. Build the query
       let qConstraints = [...baseConstraints, orderBy('createdAt', 'desc'), limit(newPageSize)];
-      
       if (page > 1 && pageCursors[page]) {
         qConstraints.push(startAfter(pageCursors[page]));
       }
-      
       const [usersSnapshot, relSnap] = await Promise.all([
         getDocs(query(usersRef, ...qConstraints)),
         getDocs(
@@ -500,7 +524,6 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
           summary: `Users panel: ${usersList.length} total users. ${pending.length} pending approval, ${doctors.length} doctors, ${patients.length} patients.`
         }
       }));
-      
       // Store cursor for the NEXT page
       if (usersSnapshot.docs.length > 0) {
         setPageCursors(prev => ({
@@ -590,24 +613,24 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
       ? "Are you sure you want to REVOKE this user's professional access?"
       : 'Approve this user for professional access?';
 
-    if (!window.confirm(confirmMessage)) return;
-
-    try {
-      const userRef = doc(db, 'users', userId);
-      await updateDoc(userRef, {
-        approved: !currentStatus,
-      });
-      await logAction(
-        user?.uid || 'admin',
-        'admin',
-        currentStatus ? 'USER_REVOKE' : 'USER_APPROVE',
-        userId
-      );
-      fetchUsers(); // Refresh list
-    } catch (err) {
-      console.error('Error updating user status:', err);
-      toast.error('Failed to update user status.');
-    }
+    notifier.confirmCritical(confirmMessage, async () => {
+      try {
+        const userRef = doc(db, 'users', userId);
+        await updateDoc(userRef, {
+          approved: !currentStatus,
+        });
+        await logAction(
+          user?.uid || 'admin',
+          'admin',
+          currentStatus ? 'USER_REVOKE' : 'USER_APPROVE',
+          userId
+        );
+        fetchUsers(); // Refresh list
+      } catch (err) {
+        console.error('Error updating user status:', err);
+        toast.error('Failed to update user status.');
+      }
+    });
   };
 
   async function handleToggleArchive(userId, currentStatus) {
@@ -615,47 +638,46 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
     const confirmMessage = currentStatus
       ? 'Unarchive this user?'
       : 'Archive this user? They will be hidden from the main list.';
-    if (!window.confirm(confirmMessage)) return;
-    try {
-      const userRef = doc(db, 'users', userId);
-      await updateDoc(userRef, { isArchived: !currentStatus });
-      await logAction(
-        user?.uid || 'admin',
-        'admin',
-        currentStatus ? 'USER_UNARCHIVE' : 'USER_ARCHIVE',
-        userId
-      );
-      fetchUsers();
-    } catch (err) {
-      console.error('Error archiving user:', err);
-      toast.error('Failed to archive user.');
-    }
+    notifier.confirmCritical(confirmMessage, async () => {
+      try {
+        const userRef = doc(db, 'users', userId);
+        await updateDoc(userRef, { isArchived: !currentStatus });
+        await logAction(
+          user?.uid || 'admin',
+          'admin',
+          currentStatus ? 'USER_UNARCHIVE' : 'USER_ARCHIVE',
+          userId
+        );
+        fetchUsers();
+      } catch (err) {
+        console.error('Error archiving user:', err);
+        toast.error('Failed to archive user.');
+      }
+    });
   };
 
   async function handleImpersonate(userId) {
     if (readOnly) return;
-    if (!window.confirm("Are you sure you want to log in as this user in a new tab?")) return;
-    
-    try {
-      const toastId = toast.loading('Generating secure session...', { position: 'bottom-right' });
-      const generateToken = httpsCallable(functions, 'generateImpersonationToken');
-      
-      const { data } = await generateToken({ targetUid: userId });
-      
-      if (data && data.customToken) {
-        toast.dismiss(toastId);
-        toast.success('Session generated! Opening in new tab.');
-        // Open the impersonation route with the token
-        const impersonateUrl = `${window.location.origin}/impersonate?token=${data.customToken}`;
-        window.open(impersonateUrl, '_blank');
-      } else {
-        throw new Error('No custom token returned');
+    notifier.confirmCritical("Are you sure you want to log in as this user in a new tab?", async () => {
+      try {
+        const toastId = toast.loading('Generating secure session...', { position: 'bottom-right' });
+        const generateToken = httpsCallable(functions, 'generateImpersonationToken');
+        const { data } = await generateToken({ targetUid: userId });
+        if (data && data.customToken) {
+          toast.dismiss(toastId);
+          toast.success('Session generated! Opening in new tab.');
+          // Open the impersonation route with the token
+          const impersonateUrl = `${window.location.origin}/impersonate?token=${data.customToken}`;
+          window.open(impersonateUrl, '_blank');
+        } else {
+          throw new Error('No custom token returned');
+        }
+      } catch (err) {
+        console.error('Error generating impersonation token:', err);
+        toast.dismiss();
+        toast.error(err.message || 'Failed to impersonate user.');
       }
-    } catch (err) {
-      console.error('Error generating impersonation token:', err);
-      toast.dismiss();
-      toast.error(err.message || 'Failed to impersonate user.');
-    }
+    });
   }
 
   async function handleSaveUser(e) {
@@ -710,11 +732,9 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
   async function handleSendWelcomeOffer(user) {
     if (readOnly) return;
 
-    const confirmSend = window.confirm(`Send welcome/re-engagement offer email to ${user.email}?`);
-    if (!confirmSend) return;
-
-    setSendingEmail(user.id);
-    try {
+    notifier.confirmCritical(`Send welcome/re-engagement offer email to ${user.email}?`, async () => {
+      setSendingEmail(user.id);
+      try {
       const welcomeBody = `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
           <div style="background: linear-gradient(135deg, #003666, #005a9c); color: #fff; padding: 20px; text-align: center; border-radius: 6px 6px 0 0;">
@@ -758,10 +778,11 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
       toast.success(`Welcome offer sent successfully to ${user.email}`);
     } catch (error) {
       console.error('FAILED to send welcome email...', error);
-      toast.error('Failed to send offer. Check console for details.');
-    } finally {
-      setSendingEmail(null);
-    }
+        toast.error('Failed to send offer. Check console for details.');
+      } finally {
+        setSendingEmail(null);
+      }
+    });
   };
 
   const showEmailPreview = (user) => {
@@ -799,40 +820,40 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
     if (action === 'assignRole')
       confirmMsg = `Assign the role '${payload}' to ${selectedUserIds.length} users?`;
 
-    if (!window.confirm(confirmMsg)) return;
+    notifier.confirmCritical(confirmMsg, async () => {
+      try {
+        setLoading(true);
+        for (const uid of selectedUserIds) {
+          const userRef = doc(db, 'users', uid);
+          const uDoc = await getDoc(userRef);
+          if (!uDoc.exists()) continue;
+          const uData = uDoc.data();
 
-    try {
-      setLoading(true);
-      for (const uid of selectedUserIds) {
-        const userRef = doc(db, 'users', uid);
-        const uDoc = await getDoc(userRef);
-        if (!uDoc.exists()) continue;
-        const uData = uDoc.data();
-
-        if (action === 'approve') await updateDoc(userRef, { approved: true });
-        if (action === 'revoke') await updateDoc(userRef, { approved: false });
-        if (action === 'archive') await updateDoc(userRef, { isArchived: true });
-        if (action === 'delete') await updateDoc(userRef, { isDeleted: true });
-        if (action === 'assignRole') {
-          const currentRoles = uData.roles || (uData.role ? [uData.role] : []);
-          if (!currentRoles.includes(payload)) {
-            currentRoles.push(payload);
-            await updateDoc(userRef, { roles: currentRoles });
+          if (action === 'approve') await updateDoc(userRef, { approved: true });
+          if (action === 'revoke') await updateDoc(userRef, { approved: false });
+          if (action === 'archive') await updateDoc(userRef, { isArchived: true });
+          if (action === 'delete') await updateDoc(userRef, { isDeleted: true });
+          if (action === 'assignRole') {
+            const currentRoles = uData.roles || (uData.role ? [uData.role] : []);
+            if (!currentRoles.includes(payload)) {
+              currentRoles.push(payload);
+              await updateDoc(userRef, { roles: currentRoles });
+            }
           }
-        }
 
-        await logAction(user?.uid || 'admin', 'admin', `BULK_USER_${action.toUpperCase()}`, uid, {
-          payload,
-        });
+          await logAction(user?.uid || 'admin', 'admin', `BULK_USER_${action.toUpperCase()}`, uid, {
+            payload,
+          });
+        }
+        setSelectedUserIds([]);
+        fetchUsers();
+      } catch (err) {
+        console.error('Bulk action error:', err);
+        toast.error('Bulk action failed.');
+      } finally {
+        setLoading(false);
       }
-      setSelectedUserIds([]);
-      fetchUsers();
-    } catch (err) {
-      console.error(`Error performing bulk ${action}:`, err);
-      toast.error(`Failed to perform bulk action: ${action}`);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   const isPatientView = defaultRole === 'patient';
@@ -844,7 +865,6 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
     if (showArchived ? !u.isArchived : u.isArchived) return false;
 
     // Role filtering is now handled natively by the Firestore query in baseConstraints.
-    
     if (isPatientView && purchaseFilter !== 'all') {
       const hasPurchased =
         purchasedUserIds.has(u.id) ||
@@ -2818,11 +2838,9 @@ export default function AdminUsersTab({ defaultRole = null, readOnly = false, ca
         onRefresh={fetchUsers}
         defaultRole={defaultRole}
       />
-    
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: AdminUsersTab | Props: none
       </div>
-    
 </div>
   );
 }

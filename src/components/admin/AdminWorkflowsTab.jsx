@@ -1,8 +1,25 @@
+import Settings2 from "lucide-react/dist/esm/icons/settings-2";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Users from "lucide-react/dist/esm/icons/users";
+import ToggleLeft from "lucide-react/dist/esm/icons/toggle-left";
+import ToggleRight from "lucide-react/dist/esm/icons/toggle-right";
+import Save from "lucide-react/dist/esm/icons/save";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Card } from '../ui';
-import { Settings2, Zap, ShieldCheck, Mail, Users, ToggleLeft, ToggleRight, Save, Loader2 } from 'lucide-react';
+
+
+
+
+
+
+
+
+
 
 const DEFAULT_WORKFLOWS = {
   replenishment: {
@@ -163,7 +180,6 @@ export default function AdminWorkflowsTab() {
               {Object.keys(wf.params).map(paramKey => {
                 const val = wf.params[paramKey];
                 const type = typeof val;
-                
                 return (
                   <div key={paramKey} style={{ backgroundColor: 'var(--color-bg-secondary)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
                     <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '600', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>

@@ -1,3 +1,32 @@
+import Activity from "lucide-react/dist/esm/icons/activity";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Download from "lucide-react/dist/esm/icons/download";
+import Droplets from "lucide-react/dist/esm/icons/droplets";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import Package from "lucide-react/dist/esm/icons/package";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import Star from "lucide-react/dist/esm/icons/star";
+import Syringe from "lucide-react/dist/esm/icons/syringe";
+import Target from "lucide-react/dist/esm/icons/target";
+import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
+import Users from "lucide-react/dist/esm/icons/users";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import TestTube from "lucide-react/dist/esm/icons/test-tube";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useEffect, useState, useCallback, useRef, useMemo, memo, Suspense, lazy } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -6,37 +35,35 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ProtocolTOC from '../components/protocol/ProtocolTOC';
 import MobileTOCDrawer from '../components/protocol/MobileTOCDrawer';
 
-import {
-  Activity,
-  AlertCircle,
-  AlertTriangle,
-  ArrowLeft,
-  BookOpen,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  Clock,
-  Download,
-  Droplets,
-  DollarSign,
-  FlaskConical,
-  Layers,
-  Package,
-  ShieldCheck,
-  ShoppingCart,
-  Star,
-  Syringe,
-  Target,
-  TrendingDown,
-  Users,
-  XCircle,
-  Zap,
-  Calendar,
-  TestTube,
-  CheckCircle2,
-  Sparkles,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { getProtocolTemplate, getTemplatesByObjective, getTemplatesByPrefix } from '../repositories/protocolRepository';
 import { trackEvent } from '../hooks/useAnalytics';
 import { generateClinicalProtocol, generatePatientGuide, getCachedProtocolPDF, cacheProtocolPDF, getProtocolFilename } from '../services/pdfService';
@@ -60,7 +87,7 @@ import PharmacokineticsSimulator from '../components/protocol/PharmacokineticsSi
 import ProtocolOutcomesSection from '../components/protocol/ProtocolOutcomesSection';
 import { useDailyDose } from '../hooks/useDailyDose';
 
-import protocolIndex from '../data/protocol_search_index.json';
+import protocolIndex from "../data/protocol_search_index.json";
 import { normalizeProtocol, frequencyToInjectionsPerWeek } from '../utils/protocolSchemaAdapter';
 import ClinicalAssistant from '../components/shared/ClinicalAssistant';
 
@@ -482,7 +509,6 @@ export default function ProtocolTemplate({
   // ── Background pre-caching ───────────────────────────────────────────────
   useEffect(() => {
     if (!protocol || loading) return;
-    
     const timer = setTimeout(async () => {
       try {
         const cachedUrl = await getCachedProtocolPDF(protocol);
@@ -1151,7 +1177,6 @@ export default function ProtocolTemplate({
                 <span className="proto-stat__val">{intensity}</span>
                 <span className="proto-stat__label">Intensity</span>
               </div>
-              
               {dailyDoseSource === 'clinic' && (
                 <div className="proto-stat" style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
                   <ShieldCheck size={14} color="var(--color-success)" />
@@ -1312,7 +1337,6 @@ export default function ProtocolTemplate({
 
       {/* ── Body ─────────────────────────────────────────────────────────── */}
       <div className="proto-detail__body">
-        
         <div className="container pt-grid">
           {/* Left: TOC */}
           <aside className="pt-toc-col">
@@ -1374,7 +1398,6 @@ export default function ProtocolTemplate({
                       {overviewSummary}
                     </p>
                   )}
-                  
                   {longDescription && (
                     <div style={{ fontFamily: "'Inter', sans-serif", color: 'var(--color-text-secondary)', fontSize: '0.9rem', lineHeight: 1.75, letterSpacing: '0.01em' }}>
                       {longDescription}

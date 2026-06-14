@@ -1,5 +1,12 @@
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import Bot from "lucide-react/dist/esm/icons/bot";
 import React from 'react';
-import { ShieldCheck, ClipboardList, BookOpen, Bot } from 'lucide-react';
+
+
+
+
 import { useTranslation } from 'react-i18next';
 import '../../styles/trust_row.css';
 

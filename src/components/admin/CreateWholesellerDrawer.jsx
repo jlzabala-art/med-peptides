@@ -1,5 +1,12 @@
+import X from "lucide-react/dist/esm/icons/x";
+import Search from "lucide-react/dist/esm/icons/search";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import React, { useState } from 'react';
-import { X, Search, CheckCircle2, AlertCircle } from 'lucide-react';
+
+
+
+
 import { getAllCountries, getZonesForCountry } from '../../data/geographyZones';
 
 export default function CreateWholesellerDrawer({ onClose, onSuccess }) {
@@ -21,12 +28,10 @@ export default function CreateWholesellerDrawer({ onClose, onSuccess }) {
     setIsSearchingBigin(true);
     setBiginResults([]);
     setSelectedBiginContact(null);
-    
     try {
       // Mocking the call to Firebase Function / Zoho API
       // In production, this would be: await httpsCallable(functions, 'searchZohoBigin')({ email: searchEmail });
       await new Promise(r => setTimeout(r, 1500));
-      
       // Mock results
       const mockResults = [
         { id: 'zoho_101', name: 'Acme Corp', email: searchEmail, phone: '+1 555-0198', address: '123 Business Rd' },
@@ -101,10 +106,8 @@ export default function CreateWholesellerDrawer({ onClose, onSuccess }) {
             <X size={24} />
           </button>
         </div>
-        
         <div style={{ padding: '1.5rem', flex: 1, overflowY: 'auto' }}>
           <form id="create-ws-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            
             {/* Zoho Bigin Integration Section */}
             <div style={{ backgroundColor: 'var(--color-bg-app)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
@@ -167,7 +170,6 @@ export default function CreateWholesellerDrawer({ onClose, onSuccess }) {
                 style={{ width: '100%', padding: '0.75rem' }}
               />
             </div>
-            
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem' }}>
                 Supplier Type
@@ -227,7 +229,6 @@ export default function CreateWholesellerDrawer({ onClose, onSuccess }) {
                 <input id="ws-logistics" type="text" placeholder="e.g. Fahad Al-Mansoori" className="app-input" style={{ width: '100%', padding: '0.5rem' }} />
               </div>
             </div>
-            
             {/* Geography Assignment */}
             <div style={{ backgroundColor: 'var(--color-bg-app)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem' }}>
@@ -271,7 +272,6 @@ export default function CreateWholesellerDrawer({ onClose, onSuccess }) {
 
           </form>
         </div>
-        
         <div style={{ padding: '1.5rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
           <button className="btn btn-outline" onClick={onClose}>
             Cancel

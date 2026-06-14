@@ -1,8 +1,13 @@
+import Package from "lucide-react/dist/esm/icons/package";
+import Minus from "lucide-react/dist/esm/icons/minus";
+import Plus from "lucide-react/dist/esm/icons/plus";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, onSnapshot, doc, setDoc } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
-import { Package, Minus, Plus } from 'lucide-react';
+
+
+
 import { catalog } from '../../../data/v2/index.js';
 
 export default function RealTimeStockManagerWidget() {
@@ -12,7 +17,6 @@ export default function RealTimeStockManagerWidget() {
   useEffect(() => {
     if (!user?.uid) return;
     const q = query(collection(db, 'wholesaler_inventory'), where('wholesalerId', '==', user.uid));
-    
     const unsub = onSnapshot(q, (snap) => {
       const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       // Merge with catalog for names if they don't exist yet
@@ -27,7 +31,6 @@ export default function RealTimeStockManagerWidget() {
     try {
       const docRef = doc(db, 'wholesaler_inventory', `${user.uid}_${productId}`);
       const prodData = catalog.find(p => p.id === productId);
-      
       await setDoc(docRef, {
         wholesalerId: user.uid,
         productId: productId,
@@ -45,7 +48,6 @@ export default function RealTimeStockManagerWidget() {
       <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <Package size={18} color="var(--primary)" /> Inventario Físico (Clinic)
       </h3>
-      
       <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {catalog.slice(0, 5).map(prod => { // For demo purposes, we show 5 key products to track
           const invItem = inventory.find(i => i.productId === prod.id) || { quantity: 0, threshold: 5 };
@@ -57,7 +59,6 @@ export default function RealTimeStockManagerWidget() {
                 <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.95rem' }}>{prod.name}</div>
                 {isLow && <div style={{ fontSize: '0.75rem', color: 'var(--color-danger)', fontWeight: 800, marginTop: '0.2rem' }}>Stock Bajo</div>}
               </div>
-              
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <button 
                   onClick={() => updateQuantity(prod.id, invItem.quantity, -1)}

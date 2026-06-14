@@ -1,5 +1,8 @@
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, CheckCircle } from 'lucide-react';
+
+
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { getVariants } from '../../repositories/productRepository';
@@ -40,14 +43,12 @@ export default function VariantPricingEditor({ product, categoryDiscount }) {
 
     try {
       const variantRef = doc(db, 'products', product.id, 'variants', variantId);
-      
       // We assume pricing structure: { pricing: { retailPrice: { base: X }, clinicPrice: { base: Y, override: true } } }
       const updateData = {
         [`pricing.${field}.base`]: priceVal,
         [`pricing.${field}.override`]: field === 'clinicPrice' || field === 'wholesalePrice' ? true : undefined,
         updatedAt: new Date().toISOString()
       };
-      
       await updateDoc(variantRef, updateData);
 
       setVariants(prev => prev.map(v => {
@@ -78,12 +79,10 @@ export default function VariantPricingEditor({ product, categoryDiscount }) {
 
     try {
       const variantRef = doc(db, 'products', product.id, 'variants', variantId);
-      
       const updateData = {
         [`pricing.${field}.override`]: isOverride ? true : false,
         updatedAt: new Date().toISOString()
       };
-      
       // If switching back to Auto, recalculate base price immediately
       if (!isOverride) {
         const variant = variants.find(v => v.id === variantId);
@@ -91,7 +90,6 @@ export default function VariantPricingEditor({ product, categoryDiscount }) {
         const computed = parseFloat((retail * (1 - categoryDiscount / 100)).toFixed(2));
         updateData[`pricing.${field}.base`] = computed;
       }
-      
       await updateDoc(variantRef, updateData);
 
       setVariants(prev => prev.map(v => {
@@ -99,7 +97,6 @@ export default function VariantPricingEditor({ product, categoryDiscount }) {
           const newBase = !isOverride 
             ? parseFloat(((v.pricing?.retailPrice?.base || 0) * (1 - categoryDiscount / 100)).toFixed(2)) 
             : v.pricing?.[field]?.base;
-            
           return {
             ...v,
             pricing: {
@@ -149,9 +146,7 @@ export default function VariantPricingEditor({ product, categoryDiscount }) {
               const targetKey = `${v.id}-${field}`;
               const isSaving = savingTarget === targetKey;
               const isSaved = savedTarget === targetKey;
-              
               const isToggleSaving = savingTarget === `${v.id}-${field}-toggle`;
-              
               const isB2B = field === 'clinicPrice' || field === 'wholesalePrice';
 
               return (

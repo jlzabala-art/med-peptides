@@ -1,3 +1,10 @@
+import GitCompare from "lucide-react/dist/esm/icons/git-compare";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Search from "lucide-react/dist/esm/icons/search";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 /* eslint-disable no-unused-vars */
 /**
  * ExpertAccessStrip.jsx — Phase 6-A
@@ -21,15 +28,13 @@
  */
 
 import { Link } from 'react-router-dom';
-import {
-  GitCompare,
-  FlaskConical,
-  Search,
-  BookOpen,
-  ChevronRight,
-  Beaker,
-  Sparkles,
-} from 'lucide-react';
+
+
+
+
+
+
+
 
 // ── Shortcut definitions ───────────────────────────────────────────────────────
 

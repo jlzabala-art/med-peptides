@@ -1,9 +1,18 @@
- 
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Star from "lucide-react/dist/esm/icons/star";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import React, { memo } from 'react';
-import {
-  CheckCircle2, AlertTriangle, XCircle, Clock,
-  Star, ChevronRight, Trash2,
-} from 'lucide-react';
+
+
+
+
+
+
+
 
 /* ─── helpers (fuera del componente para no recrearlos en cada render) ─── */
 

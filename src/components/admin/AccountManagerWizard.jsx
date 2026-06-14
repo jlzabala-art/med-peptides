@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { Shield, Map, User, CheckCircle2, X } from 'lucide-react';
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Map from "lucide-react/dist/esm/icons/map";
+import User from "lucide-react/dist/esm/icons/user";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import X from "lucide-react/dist/esm/icons/x";
 import { TextField, Toggle } from '../ui';
 import { functions } from '../../firebase';
 import { httpsCallable } from 'firebase/functions';

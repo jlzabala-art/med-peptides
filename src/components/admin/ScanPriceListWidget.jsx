@@ -1,6 +1,19 @@
+import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { UploadCloud, CheckCircle, RefreshCw, XCircle, AlertTriangle, ArrowRight, BookOpen } from 'lucide-react';
+
+
+
+
+
+
+
 import { getFunctions, httpsCallable } from 'firebase/firestore';
 import { db, functions } from '../../../firebase';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -36,7 +49,6 @@ export default function ScanPriceListWidget({ onClose, onScanComplete }) {
       const reader = new FileReader();
       reader.onloadend = async () => {
         const base64Data = reader.result;
-        
         try {
           const parsePriceListImage = httpsCallable(functions, 'parsePriceListImage');
           const result = await parsePriceListImage({
@@ -69,7 +81,6 @@ export default function ScanPriceListWidget({ onClose, onScanComplete }) {
 
   const handleApply = async () => {
     if (!scanResult || scanResult.length === 0) return;
-    
     setIsApplying(true);
     try {
       const promises = scanResult
@@ -81,7 +92,6 @@ export default function ScanPriceListWidget({ onClose, onScanComplete }) {
             updatedAt: new Date().toISOString()
           });
         });
-      
       await Promise.all(promises);
       if (onScanComplete) onScanComplete();
       onClose();
@@ -121,7 +131,6 @@ export default function ScanPriceListWidget({ onClose, onScanComplete }) {
                 )}
                 <span style={styles.subText}>Supports JPG, PNG, WEBP</span>
               </div>
-              
               {error && (
                 <div style={styles.errorBox}>
                   <AlertTriangle size={16} /> {error}

@@ -1,3 +1,6 @@
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import Check from "lucide-react/dist/esm/icons/check";
+import X from "lucide-react/dist/esm/icons/x";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import {
@@ -9,7 +12,9 @@ import {
   updateDoc,
   serverTimestamp,
 } from 'firebase/firestore';
-import { Building2, Check, X } from 'lucide-react';
+
+
+
 
 export default function B2BOrderApprovalsWidget({
   ownerId = 'admin',

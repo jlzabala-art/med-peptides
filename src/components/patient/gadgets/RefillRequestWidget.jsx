@@ -1,9 +1,12 @@
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-import { RefreshCw, CheckCircle2 } from 'lucide-react';
+
+
 
 export default function RefillRequestWidget() {
   const { user } = useAuth();
@@ -56,7 +59,6 @@ export default function RefillRequestWidget() {
       <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <RefreshCw size={18} color="var(--primary)" /> {t('patient.refill.title')}
       </h3>
-      
       {success ? (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--color-success)', gap: '1rem', padding: '1rem 0' }}>
           <CheckCircle2 size={40} />

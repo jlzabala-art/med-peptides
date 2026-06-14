@@ -1,10 +1,34 @@
+import Activity from "lucide-react/dist/esm/icons/activity";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Dna from "lucide-react/dist/esm/icons/dna";
+import Flame from "lucide-react/dist/esm/icons/flame";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Heart from "lucide-react/dist/esm/icons/heart";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 /* eslint-disable no-undef */
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Activity, ArrowRight, Brain, ChevronDown, ChevronUp, Clock, Dna, Flame,
-  FlaskConical, Heart, Layers, Moon, Shield, Sparkles
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { useCategoryBestItems } from '../hooks/useCategoryBestItems';
 import { useResponsive } from '../hooks/useResponsive';
 import { useAnalytics } from '../hooks/useAnalytics';

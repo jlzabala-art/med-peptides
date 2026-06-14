@@ -1,8 +1,15 @@
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { CheckCircle, XCircle, FileText, Loader2 } from 'lucide-react';
+
+
+
+
 import ZohoPaperPreview from '../admin/ZohoPaperPreview'; // We can reuse the A4 rendering
 
 export default function B2BClientQuoteView() {
@@ -72,7 +79,6 @@ export default function B2BClientQuoteView() {
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>Revisión de Presupuesto</h1>
           <p style={{ color: '#64748b', margin: '0.2rem 0 0 0', fontSize: '0.9rem' }}>{quote.documentNumber}</p>
         </div>
-        
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           {quote.status === 'Accepted' && (
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#16a34a', fontWeight: 700, padding: '0.5rem 1rem', background: '#f0fdf4', borderRadius: '8px' }}>

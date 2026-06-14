@@ -1,5 +1,36 @@
+import Search from "lucide-react/dist/esm/icons/search";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import Edit from "lucide-react/dist/esm/icons/edit";
+import Link from "lucide-react/dist/esm/icons/link";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Archive from "lucide-react/dist/esm/icons/archive";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import MoreHorizontal from "lucide-react/dist/esm/icons/more-horizontal";
+import EyeOff from "lucide-react/dist/esm/icons/eye-off";
+import Download from "lucide-react/dist/esm/icons/download";
+import Package from "lucide-react/dist/esm/icons/package";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Bot from "lucide-react/dist/esm/icons/bot";
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Eye, Edit, Link, DollarSign, Mail, Archive, Trash2, CheckCircle, XCircle, MoreHorizontal, EyeOff, Download, Package, ClipboardList, Bot } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const ACTION_CONFIG = {
   view: { icon: Eye, label: 'View', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-primary)' },
@@ -34,9 +65,7 @@ export default function AppActionGroup({ actions, maxVisible = 2 }) {
     if (menuOpen) document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
-  
   const order = ['view', 'edit', 'assign', 'pricing', 'send', 'approve', 'revoke', 'archive', 'hide', 'show', 'download', 'delete'];
-  
   const sortedActions = [...actions].sort((a, b) => {
     return order.indexOf(a.type) - order.indexOf(b.type);
   });
@@ -48,7 +77,6 @@ export default function AppActionGroup({ actions, maxVisible = 2 }) {
     const config = ACTION_CONFIG[action.type];
     if (!config) return null;
     const Icon = config.icon;
-    
     return (
       <button
         key={idx}
@@ -88,7 +116,6 @@ export default function AppActionGroup({ actions, maxVisible = 2 }) {
   return (
     <div style={{ display: 'flex', gap: '2px', alignItems: 'center', position: 'relative' }} ref={menuRef}>
       {visibleActions.map((action, idx) => renderButton(action, idx))}
-      
       {hiddenActions.length > 0 && (
         <div style={{ position: 'relative' }}>
           <button

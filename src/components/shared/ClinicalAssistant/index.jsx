@@ -1,3 +1,10 @@
+import Scale from "lucide-react/dist/esm/icons/scale";
+import PanelLeft from "lucide-react/dist/esm/icons/panel-left";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import History from "lucide-react/dist/esm/icons/history";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -10,7 +17,13 @@ import { buildCatalogIndex } from '../../../utils/classifyQuery';
 import { useClinicalAIConfig } from '../../../hooks/useClinicalAIConfig';
 import BottomSheet from '../BottomSheet';
 import { useClinicalAI } from './useClinicalAI';
-import { Scale, PanelLeft, Plus, Trash2, History, Sparkles, BookOpen } from 'lucide-react';
+
+
+
+
+
+
+
 
 // Components
 import ChatHeader from './components/ChatHeader';
@@ -213,7 +226,6 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
               }
             ];
           });
-          
           setIsPulsing(true);
           // Focus input after a short delay
           setTimeout(() => {
@@ -666,7 +678,6 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
             </motion.div>
           )}
         </AnimatePresence>
-        
         <QuickMatchChip 
           quickMatch={quickMatch}
           onDismiss={() => setQuickMatch(null)}
@@ -703,7 +714,6 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
             onUploadStock={handleUploadStock}
           />
         </div>
-        
         {/* Widget Watermark */}
         <div style={{ textAlign: 'right', fontSize: '10px', color: 'var(--text-muted)', opacity: 0.5, padding: '0 1rem 0.5rem 0', position: 'absolute', bottom: 0, right: 0, zIndex: 10 }}>
           Widget: ClinicAIWidget (Agent: {agentType})
@@ -796,4 +806,3 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
     </>
   );
 }
-

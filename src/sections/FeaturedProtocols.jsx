@@ -1,6 +1,21 @@
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Flame from "lucide-react/dist/esm/icons/flame";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Clock, Layers, Activity, ArrowRight, Flame, RefreshCw, Eye, Loader2 } from 'lucide-react';
+
+
+
+
+
+
+
+
 import { useNavigate } from 'react-router-dom';
 import { getPublicProtocols } from '../services/protocolStorage.js';
 import { useQuery } from '@tanstack/react-query';
@@ -192,7 +207,6 @@ function ProtocolCard({ protocol, onClick, highlighted, className = '', onQuickP
   const duration      = protocol.duration_weeks ? `${protocol.duration_weeks}w` : getDuration(protocol);
   const phaseCount    = protocol.phase_count   ?? getPhaseCount(protocol);
   const compoundCount = protocol.compound_count ?? getCompoundCount(protocol);
-  
   const statusStyle   = getStatusStyle(status);
   const catColor      = getCategoryColor(protocol.category || '');
   const category      = humanize(protocol.category || '');
@@ -300,7 +314,6 @@ function ProtocolAccordionItem({ protocol, isOpen, onToggle, onClick }) {
         </div>
         <div className="accordion-icon">{isOpen ? '−' : '+'}</div>
       </div>
-      
       {isOpen && (
         <div className="accordion-content">
           {status && (
@@ -408,7 +421,6 @@ function CategoryAccordion({ category, protocols, isActive, onToggle, onProtocol
               onClick={onProtocolClick}
             />
           ))}
-          
           {visibleCount < protocols.length && (
             <button 
               className="load-more-category-btn" 
@@ -545,7 +557,6 @@ export default function FeaturedProtocols({ searchQuery = '' }) {
   // Resume browsing logic
   useEffect(() => {
     if (loading || !featured.length) return;
-    
     const lastId = localStorage.getItem('Atlas Health_last_protocol_id');
     if (lastId) {
       setResumedId(lastId);
@@ -553,7 +564,6 @@ export default function FeaturedProtocols({ searchQuery = '' }) {
       if (index !== -1) {
         const targetPage = Math.floor(index / 4);
         setPage(targetPage);
-        
         // Optional: clear the highlight after 3 seconds for a better UX
         setTimeout(() => setResumedId(null), 3000);
       }
@@ -675,7 +685,6 @@ export default function FeaturedProtocols({ searchQuery = '' }) {
     <>
     <section className="protocols-section" ref={sectionRef}>
       <div className="protocols-container">
-        
         <div className="protocols-full-header">
           <div className="protocols-header">
             <p className="protocols-badge">Therapeutic Blueprints</p>
@@ -797,7 +806,6 @@ export default function FeaturedProtocols({ searchQuery = '' }) {
                         onProtocolClick={handleCardClick}
                       />
                     ))}
-                  
                   {visibleCategoriesCount < Object.keys(groupedProtocols).length && (
                     <button 
                       className="load-more-btn" 

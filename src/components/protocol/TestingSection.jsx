@@ -1,6 +1,12 @@
- 
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import React from 'react';
-import { Activity, Beaker, FileText, CheckCircle } from 'lucide-react';
+
+
+
+
 import './TestingSection.css';
 
 export default function TestingSection({ protocol }) {

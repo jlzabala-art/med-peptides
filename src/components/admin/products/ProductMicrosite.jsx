@@ -1,9 +1,24 @@
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import LineChart from "lucide-react/dist/esm/icons/line-chart";
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import Link2 from "lucide-react/dist/esm/icons/link-2";
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions } from '../../../firebase';
 import { collection, getDocs } from 'firebase/firestore';
-import { ChevronDown, ChevronUp, Bot, MessageSquare, FileText, LineChart, Stethoscope, Link2 } from 'lucide-react';
+
+
+
+
+
+
+
+
 import AppStatusToggle from '../../ui/AppStatusToggle';
 
 export default function ProductMicrosite({ product, onUpdateProduct }) {
@@ -107,7 +122,6 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
   const handleSendChat = (e) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
-    
     const newLog = [...chatLog, { role: 'user', text: chatInput }];
     setChatLog(newLog);
     setChatInput('');
@@ -267,7 +281,6 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
                 </div>
               )}
             </div>
-            
             <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.5rem' }}>
               <h4 style={{ margin: '0 0 1rem', fontSize: '1rem', color: '#0f172a', fontWeight: 700, borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>Clinical Applications</h4>
               <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
@@ -302,7 +315,6 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
                 </ul>
               </div>
             )}
-            
             {/* Contact Action */}
             <div style={{ marginTop: '1rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.5rem', display: 'flex', justifyContent: 'flex-start' }}>
               <button 
@@ -360,7 +372,6 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
                     <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', backgroundColor: '#e2e8f0', color: '#475569', borderRadius: '4px', fontWeight: 600 }}>{batch.documentType || 'CoA'}</span>
                   </div>
                 </div>
-                
                 {batch.extractedData && (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', fontSize: '0.85rem' }}>
                     <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px' }}><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>Peptide</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.peptide_name || 'N/A'}</span></div>
@@ -370,7 +381,6 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
                     <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px' }}><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>Result / Status</span><span style={{ fontWeight: 700, color: batch.extractedData.conclusion === 'Pass' || batch.extractedData.conclusion === 'Approved' ? '#10b981' : '#f59e0b' }}>{batch.extractedData.conclusion || 'N/A'}</span></div>
                   </div>
                 )}
-                
                 {batch.url && (
                   <div style={{ marginTop: '1rem', borderTop: '1px solid #e2e8f0', paddingTop: '0.75rem' }}>
                     <a href={batch.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: '#3b82f6', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -513,7 +523,6 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
               </div>
             </div>
           </div>
-          
           <div style={{ backgroundColor: 'white', padding: '1.25rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
             <h5 style={{ margin: '0 0 1rem', fontSize: '0.9rem', color: '#0f172a' }}>Purchase Information</h5>
             <div style={{ marginBottom: '0.75rem' }}>

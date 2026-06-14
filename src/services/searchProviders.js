@@ -1,7 +1,12 @@
+import Box from "lucide-react/dist/esm/icons/box";
+import User from "lucide-react/dist/esm/icons/user";
+import Package from "lucide-react/dist/esm/icons/package";
 import { db } from '../firebase';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { searchAlgolia } from './algoliaSearch';
-import { Box, User, Package } from 'lucide-react';
+
+
+
 
 const fuzzyMatch = (q, text) => text?.toLowerCase().includes(q.toLowerCase());
 

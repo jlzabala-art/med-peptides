@@ -1,10 +1,30 @@
+import Dna from "lucide-react/dist/esm/icons/dna";
+import Heart from "lucide-react/dist/esm/icons/heart";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Check from "lucide-react/dist/esm/icons/check";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Smartphone from "lucide-react/dist/esm/icons/smartphone";
+import Cpu from "lucide-react/dist/esm/icons/cpu";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Dna, Heart, Activity, FileText, Sparkles, ChevronRight, 
-  Plus, Check, ShieldCheck, Smartphone, Cpu, ArrowRight 
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 function useMediaQuery(query) {
@@ -205,7 +225,6 @@ export default function EternaDiagnosticsShowcase({ onSelectProduct }) {
       }} />
 
       <div>
-        
         {/* Section Header */}
         <div className="section-header">
           <div className="section-eyebrow" style={{ color: '#a855f7', borderColor: 'rgba(168, 85, 247, 0.25)', background: 'rgba(168, 85, 247, 0.1)' }}>
@@ -229,7 +248,6 @@ export default function EternaDiagnosticsShowcase({ onSelectProduct }) {
           alignItems: 'center',
           marginBottom: '5.5rem'
         }}>
-          
           {/* Left Column: Product Info & Core Value Prop */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -360,7 +378,6 @@ export default function EternaDiagnosticsShowcase({ onSelectProduct }) {
                 </div>
               </div>
 
-              
               {!isMobile ? (
                 <>
                   {/* App Tab selectors */}

@@ -1,12 +1,52 @@
+import Target from "lucide-react/dist/esm/icons/target";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Info from "lucide-react/dist/esm/icons/info";
+import Filter from "lucide-react/dist/esm/icons/filter";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import User from "lucide-react/dist/esm/icons/user";
+import Clipboard from "lucide-react/dist/esm/icons/clipboard";
+import Ruler from "lucide-react/dist/esm/icons/ruler";
+import Weight from "lucide-react/dist/esm/icons/weight";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Microscope from "lucide-react/dist/esm/icons/microscope";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import Dumbbell from "lucide-react/dist/esm/icons/dumbbell";
+import Heart from "lucide-react/dist/esm/icons/heart";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { 
-  Target, Zap, Activity, Brain, Moon, Sparkles, ShieldCheck, 
-  ChevronRight, ArrowRight, Info, Filter, Beaker, Shield,
-  User, Clipboard, Ruler, Weight, AlertTriangle, Clock,
-  Microscope, RefreshCw, Dumbbell, Heart
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import GoalLifestyleStrip from '../sections/GoalLifestyleStrip';
 
 import { protocolBundle } from '../services/protocol_finder_2_0_protocols_bundle/index.js';
@@ -244,7 +284,6 @@ export default function ProtocolFinder({ onOpenSearch, protocolIndex = [] }) {
 
   const handleSearch = () => {
     setIsAnalyzing(true);
-    
     // Simulate "Clinical Analysis"
     setTimeout(() => {
       if (!protocolBundle || protocolBundle.length === 0) {
@@ -267,7 +306,6 @@ export default function ProtocolFinder({ onOpenSearch, protocolIndex = [] }) {
         };
         return GOAL_MAP[selection.goal]?.includes(primaryGoal);
       });
-      
       if (candidates.length === 0) {
         // Fallback: search all protocols if no category match
         const queryParts = [selection.goal, selection.intensity, selection.experience].filter(Boolean);
@@ -280,7 +318,6 @@ export default function ProtocolFinder({ onOpenSearch, protocolIndex = [] }) {
       const scored = candidates.map(p => {
         let score = 0;
         const pTags = (p.tags || []).map(t => t.toLowerCase());
-        
         // Intensity Mapping Score
         const intensityMap = {
           conservative: ['simple', 'standard', 'moderate'],
@@ -303,7 +340,6 @@ export default function ProtocolFinder({ onOpenSearch, protocolIndex = [] }) {
         Object.entries(selection.specificResponses).forEach(([key, val]) => {
           // 1. Direct tag match (backup)
           if (pTags.includes(val.toLowerCase())) score += 40;
-          
           // 2. Canonical Marker Alignment (Primary)
           const alignmentData = p.metadata?.marker_alignment?.[key]?.[val];
           if (alignmentData) {
@@ -321,7 +357,6 @@ export default function ProtocolFinder({ onOpenSearch, protocolIndex = [] }) {
       if (bestMatch) {
         navigate(`/protocol/${bestMatch.protocol_slug}`, { state: { alignment: selection } });
       }
-      
       setIsAnalyzing(false);
     }, 1500);
   };
@@ -368,7 +403,6 @@ export default function ProtocolFinder({ onOpenSearch, protocolIndex = [] }) {
           {step === 2 && (
             <div className="finder-step animate-in">
               <h2 className="step-title">02. Biological Context</h2>
-              
               <div className="finder-field-group">
                 <label className="field-label"><User size={14} /> Age Group</label>
                 <div className="selection-mini-grid">
@@ -452,7 +486,6 @@ export default function ProtocolFinder({ onOpenSearch, protocolIndex = [] }) {
             <div className="finder-step animate-in">
               <h2 className="step-title">03. Goal-Specific Clinical Markers</h2>
               <p className="step-desc">Identifying precise biological objectives for the {selection.goal} pathway.</p>
-              
               <div className="specific-questions">
                 {(GOAL_SPECIFIC_QUESTIONS[selection.goal] || []).map((q, idx) => (
                   <div key={q.id} className="finder-field-group" style={{ animationDelay: `${idx * 0.1}s` }}>
@@ -478,7 +511,6 @@ export default function ProtocolFinder({ onOpenSearch, protocolIndex = [] }) {
                     </div>
                   </div>
                 ))}
-                
                 {(!GOAL_SPECIFIC_QUESTIONS[selection.goal] || GOAL_SPECIFIC_QUESTIONS[selection.goal].length === 0) && (
                   <div className="no-questions-notice" style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(0,0,0,0.02)', borderRadius: '20px' }}>
                     <Info size={24} style={{ marginBottom: '1rem', color: 'var(--primary)' }} />
@@ -503,7 +535,6 @@ export default function ProtocolFinder({ onOpenSearch, protocolIndex = [] }) {
           {step === 4 && (
             <div className="finder-step animate-in">
               <h2 className="step-title">04. Customization</h2>
-              
               <div className="finder-field-group">
                 <label className="field-label"><Clock size={14} /> Protocol Intensity (Tempo)</label>
                 <div className="selection-list">
@@ -552,7 +583,6 @@ export default function ProtocolFinder({ onOpenSearch, protocolIndex = [] }) {
           {step === 5 && (
             <div className="finder-step animate-in">
               <h2 className="step-title">05. Final Analysis Summary</h2>
-              
               <div className="summary-card">
                 <div className="summary-header">
                   <ShieldCheck size={20} color="var(--primary)" />

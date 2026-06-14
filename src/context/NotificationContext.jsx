@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
-import { collection, query, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, orderBy, limit, doc, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const NotificationContext = createContext();
@@ -39,8 +39,32 @@ export function NotificationProvider({ children }) {
     return () => unsubscribe();
   }, [user]);
 
+  const markAsRead = async (notificationId) => {
+    if (!user) return;
+    try {
+      await updateDoc(doc(db, 'notifications', notificationId), { read: true });
+    } catch (e) {
+      console.error('Error marking as read:', e);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    if (!user || notifications.length === 0) return;
+    try {
+      const batch = writeBatch(db);
+      notifications.forEach((n) => {
+        if (!n.read) {
+          batch.update(doc(db, 'notifications', n.id), { read: true });
+        }
+      });
+      await batch.commit();
+    } catch (e) {
+      console.error('Error marking all as read:', e);
+    }
+  };
+
   return (
-    <NotificationContext.Provider value={{ notifications, unreadCount }}>
+    <NotificationContext.Provider value={{ notifications, unreadCount, markAsRead, markAllAsRead }}>
       {children}
     </NotificationContext.Provider>
   );

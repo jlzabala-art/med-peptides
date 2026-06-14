@@ -1,7 +1,28 @@
+import Activity from "lucide-react/dist/esm/icons/activity";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
+import Search from "lucide-react/dist/esm/icons/search";
+import Clock from "lucide-react/dist/esm/icons/clock";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, ShieldCheck, AlertTriangle, CheckCircle2, XCircle, RefreshCw, ChevronRight, FileText, BarChart3, Search, Clock } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
 import { runValidationSuite } from '../validation/engine/runner';
 
 export default function ValidationDashboard({ products }) {
@@ -42,7 +63,6 @@ export default function ValidationDashboard({ products }) {
   return (
     <div className="template-root" style={{ padding: '4rem 1.5rem', backgroundColor: 'var(--background)', minHeight: '100vh', color: 'var(--text-main)' }}>
       <div className="pb-wrapper" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        
         {/* Header */}
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
           <div>
@@ -52,7 +72,6 @@ export default function ValidationDashboard({ products }) {
             <h1 style={{ fontSize: '2.5rem', fontWeight: 700, margin: 0 }}>Quality Assurance Dashboard</h1>
             <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>Automated clinical plausibility testing across 50 patient scenarios.</p>
           </div>
-          
           <button 
             onClick={handleRunTests} 
             disabled={isRunning}

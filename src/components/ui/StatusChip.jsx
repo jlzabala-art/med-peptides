@@ -1,9 +1,15 @@
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Package from "lucide-react/dist/esm/icons/package";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import React from 'react';
-import { CheckCircle, Clock, Package, AlertCircle } from 'lucide-react';
+
+
+
+
 
 export default function StatusChip({ status }) {
   const normalized = status?.toLowerCase() || 'unknown';
-  
   switch(normalized) {
     case 'completed':
     case 'delivered':

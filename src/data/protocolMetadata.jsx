@@ -1,8 +1,22 @@
- 
+import Activity from "lucide-react/dist/esm/icons/activity";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import Flame from "lucide-react/dist/esm/icons/flame";
+import Waves from "lucide-react/dist/esm/icons/waves";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Dna from "lucide-react/dist/esm/icons/dna";
 import React from 'react';
-import { 
-  Activity, TrendingUp, Zap, Brain, Moon, Flame, Waves, Shield, Dna
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
 
 export const PRIMARY_OBJECTIVES = [
   { id: "Longevity", label: "Longevity", icon: <Dna size={22} />, description: "Anti-Aging markers", popular: true },

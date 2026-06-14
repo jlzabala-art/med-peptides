@@ -1,6 +1,25 @@
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import PlayCircle from "lucide-react/dist/esm/icons/play-circle";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import Award from "lucide-react/dist/esm/icons/award";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Circle from "lucide-react/dist/esm/icons/circle";
+import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
-import { ChevronRight, PlayCircle, BookOpen, Award, Clock, ChevronDown, CheckCircle2, Circle, GraduationCap, HelpCircle } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 import { useAuth } from '../context/AuthContext';
 import { usePageMeta } from '../hooks/usePageMeta';
 

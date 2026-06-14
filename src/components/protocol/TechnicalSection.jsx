@@ -1,8 +1,15 @@
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Zap from "lucide-react/dist/esm/icons/zap";
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { ChevronDown, Beaker, ShieldCheck, Zap } from 'lucide-react';
+
+
+
+
 
 /**
  * TechnicalSection Component
@@ -113,7 +120,6 @@ const AccordionItem = ({ item, isOpen, onClick }) => {
           <ChevronDown size={20} style={{ color: 'var(--color-text-tertiary, #6b7280)' }} />
         </motion.div>
       </button>
-      
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
@@ -144,7 +150,6 @@ const TechnicalDetails = ({ item }) => {
             {item.rationale || "Información clínica en proceso de actualización por el equipo médico."}
           </p>
         </div>
-        
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
           <div style={{ padding: '0.75rem', borderRadius: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
             <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary, #6b7280)', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '0.25rem' }}>Vía de Adm.</div>

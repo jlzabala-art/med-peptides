@@ -1,8 +1,15 @@
+import AlertOctagon from "lucide-react/dist/esm/icons/alert-octagon";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import PackageSearch from "lucide-react/dist/esm/icons/package-search";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
-import { AlertOctagon, Calendar, PackageSearch, ArrowRight } from 'lucide-react';
+
+
+
+
 
 // Demo data fallback for illustration
 const DEMO_BATCHES = [
@@ -84,14 +91,12 @@ export default function BatchExpirationTrackerWidget() {
           batches.map(batch => {
             const days = getDaysUntilExpiry(batch.expiryDate);
             const color = getStatusColor(days);
-            
             return (
               <div key={batch.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'var(--color-bg-app)', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ fontWeight: 800, color: 'var(--color-text-primary)', fontSize: '0.95rem' }}>{batch.product}</span>
                   <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.75rem', fontFamily: 'monospace' }}>Lote: {batch.batchId} • Qty: {batch.quantity} ud.</span>
                 </div>
-                
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.2rem' }}>
                   <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>Caduca en</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>

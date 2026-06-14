@@ -1,3 +1,8 @@
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Users from "lucide-react/dist/esm/icons/users";
+import Search from "lucide-react/dist/esm/icons/search";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import React, { useState, useEffect } from 'react';
 import {
   collection,
@@ -10,7 +15,11 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
-import { MessageSquare, Users, Search, Plus, ArrowLeft } from 'lucide-react';
+
+
+
+
+
 import ConversationThread from './ConversationThread';
 
 const mobileStyles = `
@@ -54,10 +63,8 @@ export default function MessagingWidget({ role, ownerId }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showNewChat, setShowNewChat] = useState(false);
   const [newChatName, setNewChatName] = useState('');
-  
   // Admin User Search state
   const [allUsers, setAllUsers] = useState([]);
-  
   useEffect(() => {
     if (showNewChat && (isAdmin || effectiveRole === 'admin') && allUsers.length === 0) {
       import('firebase/firestore').then(({ collection, getDocs, query }) => {

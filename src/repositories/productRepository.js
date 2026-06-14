@@ -30,8 +30,6 @@ import {
   orderBy,
 } from 'firebase/firestore';
 import { db } from '../firebase';
-// v2 canonical catalog — replaces legacy data/products.js enrichment
-import { catalog as localProducts } from '../data/v2/index.js';
 
 // Build a lookup map from normalised product name → local enrichment fields.
 // This is built once at module load time (O(n), tiny dataset).
@@ -55,26 +53,30 @@ const _buildEnrichEntry = (p) => ({
 });
 
 // Primary key: exact normalised name (e.g. "tb-500 (thymosin β4)")
-const _localEnrichmentByName = new Map(
-  localProducts.map((p) => [(p.name ?? '').toLowerCase().trim(), _buildEnrichEntry(p)])
-);
+let _localEnrichmentByName = null;
+let _localEnrichmentBySlug = null;
 
-// Secondary key: the "base" token before any parenthetical, normalised
-// e.g. "TB-500 (Thymosin β4)" → "tb-500"
-// This lets us match Firestore docs whose name is just the short form.
-const _localEnrichmentBySlug = new Map();
-for (const p of localProducts) {
-  const full = (p.name ?? '').toLowerCase().trim();
-  // Extract everything before the first '(' or other delimiter
-  const baseSlug = full.replace(/\s*[(/|].*$/, '').trim();
-  if (baseSlug && baseSlug !== full && !_localEnrichmentBySlug.has(baseSlug)) {
-    _localEnrichmentBySlug.set(baseSlug, _buildEnrichEntry(p));
-  }
-  // Also index by each alias so alias-named Firestore docs are found
-  for (const alias of (p.searchAliases ?? [])) {
-    const aliasKey = alias.toLowerCase().trim();
-    if (aliasKey && !_localEnrichmentBySlug.has(aliasKey)) {
-      _localEnrichmentBySlug.set(aliasKey, _buildEnrichEntry(p));
+async function _initEnrichmentMaps() {
+  if (_localEnrichmentByName && _localEnrichmentBySlug) return;
+
+  const { catalog: localProducts } = await import('../data/v2/index.js');
+  
+  _localEnrichmentByName = new Map(
+    localProducts.map((p) => [(p.name ?? '').toLowerCase().trim(), _buildEnrichEntry(p)])
+  );
+
+  _localEnrichmentBySlug = new Map();
+  for (const p of localProducts) {
+    const full = (p.name ?? '').toLowerCase().trim();
+    const baseSlug = full.replace(/\s*[(/|].*$/, '').trim();
+    if (baseSlug && baseSlug !== full && !_localEnrichmentBySlug.has(baseSlug)) {
+      _localEnrichmentBySlug.set(baseSlug, _buildEnrichEntry(p));
+    }
+    for (const alias of (p.searchAliases ?? [])) {
+      const aliasKey = alias.toLowerCase().trim();
+      if (aliasKey && !_localEnrichmentBySlug.has(aliasKey)) {
+        _localEnrichmentBySlug.set(aliasKey, _buildEnrichEntry(p));
+      }
     }
   }
 }
@@ -90,6 +92,8 @@ for (const p of localProducts) {
  *   4. Prefix substring match (Firestore name starts with a local product name token)
  */
 function _resolveLocalEnrich(firestoreName, firestoreId) {
+  if (!_localEnrichmentByName || !_localEnrichmentBySlug) return {};
+
   const nameKey = (firestoreName ?? '').toLowerCase().trim();
 
   // 1. Exact match
@@ -380,6 +384,7 @@ export async function getCatalog() {
     }
 
     // ── Build the final catalog array ───────────────────────────────────────
+    await _initEnrichmentMaps();
     const catalog = [];
 
     for (const { base, variants } of groups.values()) {

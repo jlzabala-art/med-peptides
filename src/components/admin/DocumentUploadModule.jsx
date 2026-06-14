@@ -1,3 +1,24 @@
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import X from "lucide-react/dist/esm/icons/x";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import Database from "lucide-react/dist/esm/icons/database";
+import Search from "lucide-react/dist/esm/icons/search";
+import Filter from "lucide-react/dist/esm/icons/filter";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Share2 from "lucide-react/dist/esm/icons/share-2";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Download from "lucide-react/dist/esm/icons/download";
+import Edit2 from "lucide-react/dist/esm/icons/edit-2";
+import Archive from "lucide-react/dist/esm/icons/archive";
+import ArchiveRestore from "lucide-react/dist/esm/icons/archive-restore";
+import Eye from "lucide-react/dist/esm/icons/eye";
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Checkbox } from '../../components/ui';
 import { db, storage, functions } from '../../firebase';
@@ -5,18 +26,36 @@ import { collection, query, orderBy, getDocs, addDoc, serverTimestamp, updateDoc
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { httpsCallable } from 'firebase/functions';
 import { useAuth } from '../../context/AuthContext';
-import { FileText, UploadCloud, CheckCircle, Clock, AlertCircle, X, ExternalLink, Database, Search, Filter, Calendar, Trash2, Share2, Mail, ChevronDown, ChevronRight, Download, Edit2 } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { Link } from 'react-router-dom';
-import { Archive, ArchiveRestore, Eye } from 'lucide-react';
+
+
+
+import notifier from '../../services/NotificationService';
 
 export default function DocumentUploadModule() {
   const { user } = useAuth();
-  
   // Data states
   const [documents, setDocuments] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  
   // Upload states
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -29,7 +68,6 @@ export default function DocumentUploadModule() {
   const [filterType, setFilterType] = useState('ALL');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
@@ -38,7 +76,6 @@ export default function DocumentUploadModule() {
   const [selectedDocs, setSelectedDocs] = useState(new Set());
   const [expandedGroups, setExpandedGroups] = useState(new Set());
   const [showArchived, setShowArchived] = useState(false);
-  
   // Inline Edit
   const [editingDocId, setEditingDocId] = useState(null);
   const [editingName, setEditingName] = useState('');
@@ -53,9 +90,7 @@ export default function DocumentUploadModule() {
           getDocs(query(collection(db, 'uploaded_documents'), orderBy('createdAt', 'desc'))),
           getDocs(query(collection(db, 'products'), orderBy('name')))
         ]);
-        
         const prods = prodsSnap.docs.map(d => ({ id: d.id, ...d.data(), variants: [] }));
-        
         await Promise.all(prods.map(async (prod) => {
           try {
             const vSnap = await getDocs(collection(db, 'products', prod.id, 'variants'));
@@ -103,7 +138,6 @@ export default function DocumentUploadModule() {
 
     const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const storageRef = ref(storage, `uploads/admin/documents/${Date.now()}_${safeName}`);
-    
     const uploadTask = uploadBytesResumable(storageRef, file);
 
     uploadTask.on(
@@ -112,7 +146,7 @@ export default function DocumentUploadModule() {
       (error) => {
         console.error('Upload failed:', error);
         setUploading(false);
-        alert('File upload failed: ' + error.message);
+        notifier.info('File upload failed: ' + error.message);
       },
       async () => {
         try {
@@ -132,13 +166,11 @@ export default function DocumentUploadModule() {
           };
           const docRef = await addDoc(collection(db, 'uploaded_documents'), newDocData);
           setDocuments(prev => [{ id: docRef.id, ...newDocData, createdAt: { toDate: () => new Date() } }, ...prev]);
-          
           // Trigger AI COA Parser if it's a PDF
           if (file.type === 'application/pdf' && documentType === 'COA') {
             try {
               const parseCOA = httpsCallable(functions, 'parseCOADocument');
               const aiResult = await parseCOA({ docId: docRef.id, storagePath: storageRef.fullPath });
-              
               if (aiResult.data?.success) {
                 const extracted = aiResult.data.extractedData;
                 setDocuments(prev => prev.map(d => 
@@ -201,12 +233,10 @@ export default function DocumentUploadModule() {
 
   const guessProductVariantId = (fileName, extractedData) => {
     if (!products || products.length === 0) return { productId: null, variantId: null };
-    
     // If AI extracted data, use it directly to find the exact variant
     if (extractedData?.peptide_name) {
       const pepName = extractedData.peptide_name.toLowerCase();
       const dosageStr = extractedData.dosage ? extractedData.dosage.toLowerCase().replace(/\s+/g, '') : null;
-      
       const prodMatch = products.find(p => p.name.toLowerCase().includes(pepName) || pepName.includes(p.name.toLowerCase()));
       if (prodMatch) {
         if (dosageStr && prodMatch.variants?.length > 0) {
@@ -223,7 +253,6 @@ export default function DocumentUploadModule() {
     const lowerName = fileName.toLowerCase();
     const sortedProducts = [...products].sort((a, b) => b.name.length - a.name.length);
     const match = sortedProducts.find(p => lowerName.includes(p.name.toLowerCase()));
-    
     if (match) {
       // Try to guess variant from filename if AI didn't provide it
       if (match.variants?.length > 0) {
@@ -232,7 +261,6 @@ export default function DocumentUploadModule() {
       }
       return { productId: match.id, variantId: null };
     }
-    
     return { productId: null, variantId: null };
   };
 
@@ -302,25 +330,26 @@ export default function DocumentUploadModule() {
       setDocuments(prev => prev.map(d => d.id === docId ? { ...d, productId, variantId } : d));
     } catch(err) {
       console.error("Error assigning product:", err);
-      alert("Error assigning product");
+      notifier.info("Error assigning product");
     }
   };
 
   const handleBulkDelete = async () => {
-    if (!window.confirm(`Are you sure you want to delete ${selectedDocs.size} documents?`)) return;
-    try {
-      for (const docId of selectedDocs) {
-        const d = documents.find(x => x.id === docId);
-        if (d) {
-          if (d.storagePath) await deleteObject(ref(storage, d.storagePath)).catch(e => console.warn(e));
-          await deleteDoc(doc(db, 'uploaded_documents', docId));
+    notifier.confirmCritical(`Are you sure you want to delete ${selectedDocs.size} documents?`, async () => {
+      try {
+        for (const docId of selectedDocs) {
+          const d = documents.find(x => x.id === docId);
+          if (d) {
+            if (d.storagePath) await deleteObject(ref(storage, d.storagePath)).catch(e => console.warn(e));
+            await deleteDoc(doc(db, 'uploaded_documents', docId));
+          }
         }
+        setDocuments(prev => prev.filter(d => !selectedDocs.has(d.id)));
+        setSelectedDocs(new Set());
+      } catch(err) {
+        console.error("Error bulk deleting:", err);
       }
-      setDocuments(prev => prev.filter(d => !selectedDocs.has(d.id)));
-      setSelectedDocs(new Set());
-    } catch(err) {
-      console.error("Error bulk deleting:", err);
-    }
+    });
   };
 
   const handleBulkArchive = async (archive) => {
@@ -407,7 +436,7 @@ export default function DocumentUploadModule() {
         }
       } catch (err) {
         console.error("Error renaming document:", err);
-        alert("Failed to rename document.");
+        notifier.info("Failed to rename document.");
       }
     }
     setEditingDocId(null);
@@ -432,13 +461,12 @@ export default function DocumentUploadModule() {
             updatedAt: new Date().toISOString()
           });
         });
-      
       await Promise.all(promises);
-      alert('¡Precios actualizados correctamente en el catálogo!');
+      notifier.info('¡Precios actualizados correctamente en el catálogo!');
       setDrawerDoc(null);
     } catch (err) {
       console.error("Failed to apply prices:", err);
-      alert("Error al guardar algunos precios.");
+      notifier.info("Error al guardar algunos precios.");
     } finally {
       setIsApplyingPrices(false);
     }
@@ -446,7 +474,6 @@ export default function DocumentUploadModule() {
 
   return (
     <div style={{ position: 'relative', minHeight: '80vh' }}>
-      
       {/* Upload Header Area */}
       <div style={{ maxWidth: '1000px', margin: '0 auto 2rem auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
         <div 
@@ -482,7 +509,6 @@ export default function DocumentUploadModule() {
             {uploading ? `Uploading... ${Math.round(progress)}%` : 'Browse Files'}
           </button>
         </div>
-        
         {/* AI Cost Notification */}
         <div style={{ padding: '1rem 1.5rem', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.2)', background: 'rgba(59, 130, 246, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -500,7 +526,6 @@ export default function DocumentUploadModule() {
 
       {/* Main Table Section */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', backgroundColor: 'white', borderRadius: '16px', border: '1px solid var(--border)', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
-        
         {/* Sticky Bulk Action Bar */}
         {selectedDocs.size > 0 && (
           <div style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: 'rgba(239, 246, 255, 0.95)', backdropFilter: 'blur(8px)', borderBottom: '1px solid var(--primary)', padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -617,7 +642,6 @@ export default function DocumentUploadModule() {
                     const guessed = (!variant.productId && !variant.variantId) ? guessProductVariantId(variant.fileName, variant.extractedData) : null;
                     const suggestedProduct = guessed?.productId ? products.find(p => p.id === guessed.productId) : null;
                     const suggestedVariant = guessed?.variantId && suggestedProduct ? suggestedProduct.variants?.find(v => v.id === guessed.variantId) : null;
-                    
                     const currentVal = variant.productId ? (variant.variantId ? `${variant.productId}::${variant.variantId}` : `${variant.productId}::master`) : "";
 
                     return (
@@ -711,7 +735,6 @@ export default function DocumentUploadModule() {
                             )}
                           </div>
                         </div>
-                        
                         {/* AI Status Column */}
                         <div>
                           {variant.status === 'processing' && (
@@ -788,7 +811,6 @@ export default function DocumentUploadModule() {
       {drawerDoc && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'flex-end' }}>
           <div style={{ width: '800px', maxWidth: '90vw', backgroundColor: 'var(--background)', height: '100%', display: 'flex', flexDirection: 'column', boxShadow: '-4px 0 24px rgba(0,0,0,0.1)', animation: 'slideInRight 0.3s ease-out' }}>
-            
             {/* Drawer Header */}
             <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', backgroundColor: 'white' }}>
               <div>
@@ -910,11 +932,9 @@ export default function DocumentUploadModule() {
                 </>
               )}
             </div>
-            
           </div>
         </div>
       )}
-      
       {/* Required CSS for slide animation */}
       <style>{`
         @keyframes slideInRight {

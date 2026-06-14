@@ -1,6 +1,17 @@
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import X from "lucide-react/dist/esm/icons/x";
+import Search from "lucide-react/dist/esm/icons/search";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { MapPin, ShieldCheck, Globe, X, Search, ChevronRight } from 'lucide-react';
+
+
+
+
+
+
 import { REGION_FLAGS } from '../data/regions';
 import { COUNTRIES } from '../data/countries';
 
@@ -25,7 +36,6 @@ export default function AccessCatalogOverlay({
   // Combine static country list with main regions and sorting
   const sortedCountries = useMemo(() => {
     const searchLower = (searchTerm || '').toLowerCase();
-    
     // 1. Get regional keys from EXCHANGE_RATES but filter out 'row' and 'eu'
     const regionalList = mainRegionKeys
       .filter(key => key !== 'eu' && EXCHANGE_RATES && EXCHANGE_RATES[key])
@@ -169,7 +179,6 @@ export default function AccessCatalogOverlay({
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
             <img src="/atlas-health-logo.png" alt="Atlas Health Logo" style={{ width: '60px', height: '60px', borderRadius: '16px' }} />
           </div>
-          
           <h2 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
             Select Destination
           </h2>
@@ -263,7 +272,6 @@ export default function AccessCatalogOverlay({
               <Globe size={14} /> Recommended based on your IP
             </div>
           )}
-          
           <button 
             onClick={() => handleGuestAccess()}
             disabled={!selectedRegion}

@@ -1,5 +1,12 @@
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import Droplets from "lucide-react/dist/esm/icons/droplets";
+import Package from "lucide-react/dist/esm/icons/package";
+import Syringe from "lucide-react/dist/esm/icons/syringe";
 import React, { useState, memo } from 'react';
-import { ChevronDown, Droplets, Package, Syringe } from 'lucide-react';
+
+
+
+
 import { motion, AnimatePresence } from 'framer-motion';
 
 const OPTIONAL_ACCESSORIES = [

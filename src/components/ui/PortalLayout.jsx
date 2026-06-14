@@ -1,5 +1,24 @@
+import Menu from "lucide-react/dist/esm/icons/menu";
+import Search from "lucide-react/dist/esm/icons/search";
+import Bell from "lucide-react/dist/esm/icons/bell";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+import User from "lucide-react/dist/esm/icons/user";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import X from "lucide-react/dist/esm/icons/x";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Maximize2 from "lucide-react/dist/esm/icons/maximize-2";
+import List from "lucide-react/dist/esm/icons/list";
 import React, { useState, useEffect } from 'react';
-import { Menu, Search, Bell, HelpCircle, User, Bot, X, Sparkles, Maximize2, List } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 import ClinicalAssistant from '../shared/ClinicalAssistant';
 import SidebarGadget from '../shared/AppSidebar/SidebarGadget';
 import { db } from '../../firebase';
@@ -14,6 +33,8 @@ import AvatarGenerator from './AvatarGenerator';
 import AdminPortalSwitcher from '../shared/AppHeader/AdminPortalSwitcher';
 import GlobalPreferencesDropdown from '../shared/AppHeader/GlobalPreferencesDropdown';
 import useAdminNotifications from '../../hooks/useAdminNotifications';
+import { useCopilot } from '../../context/CopilotContext';
+import CopilotWorkspacePanel from '../ai-copilot/CopilotWorkspacePanel';
 
 // ── Atlas AI — Suggested Prompts per Role ──────────────────────────────────────
 const ROLE_SUGGESTED_PROMPTS = {
@@ -94,12 +115,11 @@ export default function PortalLayout({
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isAiOpen, setAiOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const { toggleCopilot, isOpen: isCopilotOpen } = useCopilot();
   // Holds live data injected by admin tab components via 'admin-context-update' events
   const [enrichedContext, setEnrichedContext] = useState(null);
-  
   // Real-time attention notifications state
   const [isNotificationsOpen, setNotificationsOpen] = useState(false);
-  
   // Command Palette
   const [isPaletteOpen, setPaletteOpen] = useState(false);
 
@@ -353,15 +373,8 @@ export default function PortalLayout({
               <Menu size={20} color="var(--color-text-primary)" />
             </button>
           )}
-          <img
-            src="/atlas-health-logo.png"
-            alt="Atlas Health"
-            className="portal-header-logo"
-            onError={(e) => { e.target.onerror = null; e.target.src = '/logo.png'; }}
-          />
           {portalTitle && (
             <>
-              <span className="portal-header-sep">|</span>
               <span className="portal-header-title">{portalTitle}</span>
               <span className="portal-header-sep">|</span>
               <span className="portal-header-switcher"><AdminPortalSwitcher /></span>
@@ -400,15 +413,6 @@ export default function PortalLayout({
             <GlobalPreferencesDropdown />
           </span>
 
-          <button
-            onClick={() => setAiOpen(!isAiOpen)}
-            style={iconBtnStyle}
-            title="Ask Atlas AI"
-          >
-            <Sparkles size={20} color={isAiOpen ? 'var(--color-primary)' : 'var(--color-text-secondary)'} />
-          </button>
-          <button style={iconBtnStyle} title="Help"><HelpCircle size={20} color="var(--color-text-secondary)" /></button>
-          
           {/* Notifications Dropdown (GCP Attention Style) */}
           <div style={{ position: 'relative' }}>
             <button 
@@ -521,6 +525,30 @@ export default function PortalLayout({
             )}
           </div>
 
+          <button
+            onClick={() => {
+              if (roleContext === 'admin') {
+                toggleCopilot();
+              } else {
+                setAiOpen(!isAiOpen);
+              }
+            }}
+            style={{
+              ...iconBtnStyle,
+              padding: '0.4rem 0.8rem',
+              borderRadius: '24px',
+              gap: '6px',
+              backgroundColor: (roleContext === 'admin' ? isCopilotOpen : isAiOpen) ? 'rgba(168, 85, 247, 0.1)' : 'rgba(255,255,255,0.5)',
+              borderColor: (roleContext === 'admin' ? isCopilotOpen : isAiOpen) ? 'rgba(168, 85, 247, 0.4)' : 'rgba(0,0,0,0.05)'
+            }}
+            title="Ask Atlas anything"
+          >
+            <Sparkles size={16} color={(roleContext === 'admin' ? isCopilotOpen : isAiOpen) ? '#a855f7' : 'var(--color-text-secondary)'} />
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: (roleContext === 'admin' ? isCopilotOpen : isAiOpen) ? '#a855f7' : 'var(--color-text-secondary)', display: isMobile ? 'none' : 'inline' }}>
+              Atlas AI
+            </span>
+          </button>
+
           <div style={{ marginLeft: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <AvatarGenerator 
               name={(userProfile?.firstName && userProfile?.lastName) ? `${userProfile.firstName} ${userProfile.lastName}` : (userProfile?.fullName || userProfile?.displayName)}
@@ -528,7 +556,6 @@ export default function PortalLayout({
               size={36}
               onClick={() => routerNavigate(`/${roleContext}/my-profile`)}
             />
-            
             {/* Header Actions (Logout icon from AdminDashboard) */}
             {headerActions}
           </div>
@@ -537,7 +564,6 @@ export default function PortalLayout({
 
       {/* MAIN LAYOUT WRAPPER */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        
         {/* LEFT SIDEBAR GADGET */}
         <SidebarGadget 
           groups={sidebarNavGroups}
@@ -562,7 +588,8 @@ export default function PortalLayout({
           {children}
         </main>
 
-        {isAiOpen && (
+        {/* AdminAIAssistant removed in favor of CopilotWorkspacePanel */}
+        {isAiOpen && roleContext !== 'admin' && (
           <aside style={{
             width: isMobile ? '100%' : '300px',
             position: isMobile ? 'absolute' : 'relative',
@@ -617,6 +644,7 @@ export default function PortalLayout({
           }
         }}
       />
+      <CopilotWorkspacePanel />
     </div>
   );
 }

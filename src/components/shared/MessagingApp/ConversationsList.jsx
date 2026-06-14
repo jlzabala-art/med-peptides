@@ -1,5 +1,24 @@
+import User from "lucide-react/dist/esm/icons/user";
+import Users from "lucide-react/dist/esm/icons/users";
+import Search from "lucide-react/dist/esm/icons/search";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Filter from "lucide-react/dist/esm/icons/filter";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Briefcase from "lucide-react/dist/esm/icons/briefcase";
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import Truck from "lucide-react/dist/esm/icons/truck";
 import React, { useState } from 'react';
-import { User, Users, Search, Plus, Filter, MessageSquare, Briefcase, Stethoscope, Building2, Truck } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 import './MessagingApp.css';
 
 export default function ConversationsList({ conversations, activeConversation, onSelect, currentUserId }) {
@@ -46,7 +65,6 @@ export default function ConversationsList({ conversations, activeConversation, o
   const filteredConversations = conversations.filter(c => {
     const title = getConvoTitle(c).toLowerCase();
     const role = getConvoRole(c).toLowerCase();
-    
     // Search match
     if (searchTerm && !title.includes(searchTerm.toLowerCase()) && !c.lastMessage?.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false;

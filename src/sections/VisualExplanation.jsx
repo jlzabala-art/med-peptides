@@ -1,5 +1,11 @@
- 
-import { ArrowRight, Cpu, Zap, Activity } from 'lucide-react';
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Cpu from "lucide-react/dist/esm/icons/cpu";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Activity from "lucide-react/dist/esm/icons/activity";
+
+
+
+
 
 export default function VisualExplanation() {
   const steps = [

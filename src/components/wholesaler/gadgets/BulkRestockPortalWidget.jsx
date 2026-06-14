@@ -1,8 +1,15 @@
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Minus from "lucide-react/dist/esm/icons/minus";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import React, { useState } from 'react';
 import { db } from '../../../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
-import { ShoppingCart, Plus, Minus, CheckCircle2 } from 'lucide-react';
+
+
+
+
 import { catalog } from '../../../data/v2/index.js';
 
 export default function BulkRestockPortalWidget() {
@@ -45,7 +52,6 @@ export default function BulkRestockPortalWidget() {
         status: 'pending_admin_approval',
         createdAt: serverTimestamp()
       });
-      
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -93,7 +99,6 @@ export default function BulkRestockPortalWidget() {
                     <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.95rem' }}>{prod.name}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.2rem' }}>Cajas de 10 viales</div>
                   </div>
-                  
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <button 
                       onClick={() => updateCart(prod.id, -1)}

@@ -1,79 +1,84 @@
-import React, { useState, Suspense } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import AdminDashboard from '../templates/AdminDashboard';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 
 // ── All tab components are lazy-loaded for optimal code splitting ──────────────
-const DocumentUploadModule = React.lazy(() => import('../components/admin/DocumentUploadModule'));
-const AdminLeadsTab = React.lazy(() => import('../components/admin/AdminLeadsTab'));
-const UserProfileTab = React.lazy(() => import('../components/shared/UserProfileTab'));
+import DocumentUploadModule from '../components/admin/DocumentUploadModule';
+import AdminLeadsTab from '../components/admin/AdminLeadsTab';
+import UserProfileTab from '../components/shared/UserProfileTab';
 
 // ── Lazy tab components ────────────────────────────────────────────────────────
-const CalendarPage = React.lazy(() => import('../components/calendar/CalendarPage'));
-const AdminUsersTab        = React.lazy(() => import('../components/admin/AdminUsersTab'));
-const AdminWholesellersTab = React.lazy(() => import('../components/admin/AdminWholesellersTab'));
-const AdminAccountManagersTab = React.lazy(() => import('../components/admin/AdminAccountManagersTab'));
-const AdminProductsTab     = React.lazy(() => import('../components/admin/AdminProductsTab'));
-const AdminCompetitorsTab  = React.lazy(() => import('../components/admin/AdminCompetitorsTab'));
-const AdminSettingsTab     = React.lazy(() => import('../components/admin/AdminSettingsTab'));
-const AdminInvitationsTab  = React.lazy(() => import('../components/admin/AdminInvitationsTab'));
-const AdminCostsTab        = React.lazy(() => import('../components/admin/AdminCostsTab'));
-const AdminRelationshipsTab= React.lazy(() => import('../components/admin/AdminRelationshipsTab'));
-const AdminSemanticTab     = React.lazy(() => import('../components/admin/AdminSemanticTab'));
-const AdminPricesTab       = React.lazy(() => import('../components/admin/AdminPricesTab'));
-const AdminViewsConfigTab  = React.lazy(() => import('../components/admin/AdminViewsConfigTab'));
-const AdminVariantsTab     = React.lazy(() => import('../components/admin/AdminVariantsTab'));
-const AdminProtocolsTab    = React.lazy(() => import('../components/admin/AdminProtocolsTab'));
-const AdminProtocolView    = React.lazy(() => import('../components/admin/AdminProtocolView'));
-const AdminProtocolEdit    = React.lazy(() => import('../components/admin/AdminProtocolEdit'));
-const AdminMetricsDashboard= React.lazy(() => import('../components/admin/AdminMetricsDashboard'));
-const OrdersTab            = React.lazy(() => import('../components/admin/OrdersTab'));
-const AdminAccessLevelsTab = React.lazy(() => import('../components/admin/AdminAccessLevelsTab'));
-const ClinicalAIWidget   = React.lazy(() => import('../components/admin/ClinicalAIWidget'));
-const AdminAnalyticsTab    = React.lazy(() => import('../components/admin/AdminAnalyticsTab'));
-const AdminClinicalLogsTab = React.lazy(() => import('../components/admin/AdminClinicalLogsTab'));
-const AdminHomeLayoutTab   = React.lazy(() => import('../components/admin/AdminHomeLayoutTab'));
-const AdminPlaceholderTab  = React.lazy(() => import('../components/admin/AdminPlaceholderTab'));
-const AdminClinicsTab      = React.lazy(() => import('../components/admin/AdminClinicsTab'));
-const AdminAIAgentsTab     = React.lazy(() => import('../components/admin/AdminAIAgentsTab'));
-const AdminDeployHostingTab= React.lazy(() => import('../components/admin/AdminDeployHostingTab'));
-const AdminStorageTab      = React.lazy(() => import('../components/admin/AdminStorageTab'));
-const AdminAIToolsTab      = React.lazy(() => import('../components/admin/AdminAIToolsTab'));
-const AdminSkuMappingTab   = React.lazy(() => import('../components/admin/SkuMappingTab/AdminSkuMappingTab'));
-const AdminZohoCRMWidget   = React.lazy(() => import('../components/admin/gadgets/AdminZohoCRMWidget'));
-const AdminBulkOrdersTab   = React.lazy(() => import('../components/admin/AdminBulkOrdersTab'));
-const AdminFinanceWidget   = React.lazy(() => import('../components/admin/gadgets/AdminFinanceWidget'));
-const AdminEmailTemplatesTab = React.lazy(() => import('../components/admin/AdminEmailTemplatesTab'));
-const AdminProductSyncWidget = React.lazy(() => import('../components/admin/gadgets/AdminProductSyncWidget'));
-const AdminGadgetRepositoryTab = React.lazy(() => import('../components/admin/AdminGadgetRepositoryTab'));
-const CatalogList = React.lazy(() => import('../components/wholesaler/CatalogList'));
-const CatalogCreatorFlow = React.lazy(() => import('../components/wholesaler/CatalogCreatorFlow'));
-const EmailCampaignBuilder = React.lazy(() => import('../components/wholesaler/EmailCampaignBuilder'));
-const AdminAgencyDealsTab = React.lazy(() => import('../components/admin/AdminAgencyDealsTab'));
-const AdminLogisticsTab = React.lazy(() => import('../components/admin/AdminLogisticsTab'));
-const AdminPaymentsMadeTab = React.lazy(() => import('../components/admin/AdminPaymentsMadeTab'));
-const AdminPaymentsReceivedTab = React.lazy(() => import('../components/admin/AdminPaymentsReceivedTab'));
-const AdminFinanceTab = React.lazy(() => import('../components/admin/AdminFinanceTab'));
-const AdminApprovalsTab    = React.lazy(() => import('../components/admin/AdminApprovalsTab'));
-const CouponsManager = React.lazy(() => import('../components/marketing/CouponsManager'));
-const ReferralTracking = React.lazy(() => import('../components/marketing/ReferralTracking'));
-const CoBranding = React.lazy(() => import('../components/marketing/CoBranding'));
-const DripMarketing = React.lazy(() => import('../components/marketing/DripMarketing'));
-const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
-const AdminCatalogEnrichmentTab = React.lazy(() => import('../components/admin/AdminCatalogEnrichmentTab'));
-const AdminRFQTab = React.lazy(() => import('../components/admin/AdminRFQTab'));
-const PurchaseRFQList = React.lazy(() => import('../pages/Purchase/RFQList'));
-const PurchasePOList = React.lazy(() => import('../pages/Purchase/POList'));
-const PurchaseBillList = React.lazy(() => import('../pages/Purchase/BillList'));
-const ImportPriceListsTab = React.lazy(() => import('../components/admin/imports/ImportPriceListsTab'));
-const ImportCoATab = React.lazy(() => import('../components/admin/imports/ImportCoATab'));
-const ImportCatalogsTab = React.lazy(() => import('../components/admin/imports/ImportCatalogsTab'));
-const ImportRFQTab = React.lazy(() => import('../components/admin/imports/ImportRFQTab'));
-const ShippingTrackerTab = React.lazy(() => import('../components/supplier/ShippingTrackerTab'));
-const AdminMarketingTab = React.lazy(() => import('../components/admin/AdminMarketingTab'));
-const QuotationsModule = React.lazy(() => import('../pages/Sales/QuotationList'));
-const SalesOrdersModule = React.lazy(() => import('../pages/Sales/SalesOrderList'));
-const InvoicesModule = React.lazy(() => import('../components/admin/InvoicesModule'));
+const CalendarPage = lazy(() => import('../components/calendar/CalendarPage'));
+import AdminUsersTab from '../components/admin/AdminUsersTab';
+import AdminPhysiciansTab from '../components/admin/physicians/AdminPhysiciansTab';
+import AdminPatientsTab from '../components/admin/AdminPatientsTab';
+import AtlasCommandCenter from '../components/admin/AtlasCommandCenter';
+import AdminWholesellersTab from '../components/admin/AdminWholesellersTab';
+import AdminAccountManagersTab from '../components/admin/AdminAccountManagersTab';
+const CatalogIntelligenceHub = lazy(() => import('../components/admin/catalog/CatalogIntelligenceHub'));
+import AdminCompetitorsTab from '../components/admin/AdminCompetitorsTab';
+import AdminSettingsTab from '../components/admin/AdminSettingsTab';
+import AdminInvitationsTab from '../components/admin/AdminInvitationsTab';
+import AdminCostsTab from '../components/admin/AdminCostsTab';
+import AdminRelationshipsTab from '../components/admin/AdminRelationshipsTab';
+import AdminSemanticTab from '../components/admin/AdminSemanticTab';
+import AdminPricesTab from '../components/admin/AdminPricesTab';
+import AdminViewsConfigTab from '../components/admin/AdminViewsConfigTab';
+import PricingVisibilityTab from '../components/admin/visibility/PricingVisibilityTab';
+import AdminVariantsTab from '../components/admin/AdminVariantsTab';
+const AdminProtocolsTab = lazy(() => import('../components/admin/AdminProtocolsTab'));
+import AdminProtocolView from '../components/admin/AdminProtocolView';
+const AdminProtocolEdit = lazy(() => import('../components/admin/AdminProtocolEdit'));
+const AdminMetricsDashboard = lazy(() => import('../components/admin/AdminMetricsDashboard'));
+import OrdersTab from '../components/admin/OrdersTab';
+import AdminAccessLevelsTab from '../components/admin/AdminAccessLevelsTab';
+import ClinicalAIWidget from '../components/admin/ClinicalAIWidget';
+import AdminAnalyticsTab from '../components/admin/AdminAnalyticsTab';
+import AdminClinicalLogsTab from '../components/admin/AdminClinicalLogsTab';
+import AdminHomeLayoutTab from '../components/admin/AdminHomeLayoutTab';
+import AdminPlaceholderTab from '../components/admin/AdminPlaceholderTab';
+import AdminClinicsTab from '../components/admin/AdminClinicsTab';
+import AdminAIAgentsTab from '../components/admin/AdminAIAgentsTab';
+import AdminDeployHostingTab from '../components/admin/AdminDeployHostingTab';
+import AdminStorageTab from '../components/admin/AdminStorageTab';
+import AdminAIToolsTab from '../components/admin/AdminAIToolsTab';
+import AdminSkuMappingTab from '../components/admin/SkuMappingTab/AdminSkuMappingTab';
+import AdminZohoCRMWidget from '../components/admin/gadgets/AdminZohoCRMWidget';
+import AdminBulkOrdersTab from '../components/admin/AdminBulkOrdersTab';
+import AdminFinanceWidget from '../components/admin/gadgets/AdminFinanceWidget';
+import AdminEmailTemplatesTab from '../components/admin/AdminEmailTemplatesTab';
+import AdminProductSyncWidget from '../components/admin/gadgets/AdminProductSyncWidget';
+import AdminGadgetRepositoryTab from '../components/admin/AdminGadgetRepositoryTab';
+const CatalogList = lazy(() => import('../components/wholesaler/CatalogList'));
+const CatalogCreatorFlow = lazy(() => import('../components/wholesaler/CatalogCreatorFlow'));
+const EmailCampaignBuilder = lazy(() => import('../components/wholesaler/EmailCampaignBuilder'));
+import AdminAgencyDealsTab from '../components/admin/AdminAgencyDealsTab';
+import AdminLogisticsTab from '../components/admin/AdminLogisticsTab';
+import AdminPaymentsMadeTab from '../components/admin/AdminPaymentsMadeTab';
+import AdminPaymentsReceivedTab from '../components/admin/AdminPaymentsReceivedTab';
+import AdminFinanceTab from '../components/admin/AdminFinanceTab';
+import AdminApprovalsTab from '../components/admin/AdminApprovalsTab';
+import CouponsManager from '../components/marketing/CouponsManager';
+import ReferralTracking from '../components/marketing/ReferralTracking';
+import CoBranding from '../components/marketing/CoBranding';
+import DripMarketing from '../components/marketing/DripMarketing';
+const MessagingWidget = lazy(() => import('../components/messaging/MessagingWidget'));
+import AdminCatalogEnrichmentTab from '../components/admin/AdminCatalogEnrichmentTab';
+import AdminRFQTab from '../components/admin/AdminRFQTab';
+const PurchaseRFQList = lazy(() => import('../pages/Purchase/RFQList'));
+const PurchasePOList = lazy(() => import('../pages/Purchase/POList'));
+const PurchaseBillList = lazy(() => import('../pages/Purchase/BillList'));
+import ImportPriceListsTab from '../components/admin/imports/ImportPriceListsTab';
+import ImportCoATab from '../components/admin/imports/ImportCoATab';
+import ImportCatalogsTab from '../components/admin/imports/ImportCatalogsTab';
+import ImportRFQTab from '../components/admin/imports/ImportRFQTab';
+import AdminPrescriptionIntakeTab from '../components/admin/AdminPrescriptionIntakeTab';
+import ShippingTrackerTab from '../components/supplier/ShippingTrackerTab';
+import AdminMarketingTab from '../components/admin/AdminMarketingTab';
+const B2BQuotationsHub = lazy(() => import('../features/quotations/B2BQuotationsHub'));
+const SalesOrdersHub = lazy(() => import('../features/sales-orders/SalesOrdersHub'));
+const InvoiceIntelligenceHub = lazy(() => import('../features/invoices/InvoiceIntelligenceHub'));
 // ── Premium loading skeleton for lazy-loaded admin tabs ────────────────────────
 const AdminTabSkeleton = () => (
   <div style={{ padding: '2rem' }}>
@@ -103,12 +108,12 @@ export default function AdminRoutes() {
         <Route path="wholesellers" element={<AdminTabErrorBoundary tabId="wholesellers" tabLabel="Wholesellers"><AdminWholesellersTab /></AdminTabErrorBoundary>} />
         <Route path="account-managers" element={<AdminTabErrorBoundary tabId="account-managers" tabLabel="Account Managers"><AdminAccountManagersTab /></AdminTabErrorBoundary>} />
         <Route path="clinics" element={<AdminTabErrorBoundary tabId="clinics" tabLabel="Clinics"><AdminClinicsTab /></AdminTabErrorBoundary>} />
-        <Route path="doctors" element={<AdminTabErrorBoundary tabId="doctors" tabLabel="Doctors"><AdminUsersTab defaultRole="doctor" readOnly={false} canApprove={true} /></AdminTabErrorBoundary>} />
-        <Route path="patients" element={<AdminTabErrorBoundary tabId="patients" tabLabel="Patients"><AdminUsersTab defaultRole="patient" readOnly={false} canApprove={true} /></AdminTabErrorBoundary>} />
+        <Route path="doctors" element={<AdminTabErrorBoundary tabId="doctors" tabLabel="Doctors"><AdminPhysiciansTab /></AdminTabErrorBoundary>} />
+        <Route path="patients" element={<AdminTabErrorBoundary tabId="patients" tabLabel="Patients"><AdminPatientsTab /></AdminTabErrorBoundary>} />
         <Route path="rfq" element={<AdminTabErrorBoundary tabId="rfq" tabLabel="RFQ"><AdminRFQTab /></AdminTabErrorBoundary>} />
         <Route path="approvals" element={<AdminTabErrorBoundary tabId="approvals" tabLabel="Approvals"><AdminApprovalsTab /></AdminTabErrorBoundary>} />
         <Route path="users" element={<AdminTabErrorBoundary tabId="users" tabLabel="Users"><AdminUsersTab readOnly={false} canApprove={true} /></AdminTabErrorBoundary>} />
-        <Route path="products" element={<AdminTabErrorBoundary tabId="products" tabLabel="Products"><AdminProductsTab readOnly={false} hideCosts={false} allowedCategories={['All']} /></AdminTabErrorBoundary>} />
+        <Route path="products" element={<AdminTabErrorBoundary tabId="products" tabLabel="Products"><CatalogIntelligenceHub readOnly={false} hideCosts={false} allowedCategories={['All']} /></AdminTabErrorBoundary>} />
         <Route path="competitors" element={<AdminTabErrorBoundary tabId="competitors" tabLabel="Competitor Analysis"><AdminCompetitorsTab /></AdminTabErrorBoundary>} />
         <Route path="costs" element={<AdminTabErrorBoundary tabId="costs" tabLabel="Costs"><AdminCostsTab readOnly={false} /></AdminTabErrorBoundary>} />
         <Route path="prices" element={<AdminTabErrorBoundary tabId="prices" tabLabel="Prices"><AdminPricesTab /></AdminTabErrorBoundary>} />
@@ -118,9 +123,9 @@ export default function AdminRoutes() {
         <Route path="invitations" element={<AdminTabErrorBoundary tabId="invitations" tabLabel="Invitations"><AdminInvitationsTab readOnly={false} /></AdminTabErrorBoundary>} />
         <Route path="views" element={<AdminTabErrorBoundary tabId="views" tabLabel="Views"><AdminViewsConfigTab /></AdminTabErrorBoundary>} />
         <Route path="orders" element={<AdminTabErrorBoundary tabId="orders" tabLabel="B2C Orders"><OrdersTab readOnly={false} /></AdminTabErrorBoundary>} />
-        <Route path="quotations" element={<AdminTabErrorBoundary tabId="quotations" tabLabel="Quotations (B2B)"><QuotationsModule /></AdminTabErrorBoundary>} />
-        <Route path="sales-orders" element={<AdminTabErrorBoundary tabId="sales-orders" tabLabel="Sales Orders (B2B)"><SalesOrdersModule /></AdminTabErrorBoundary>} />
-        <Route path="invoices" element={<AdminTabErrorBoundary tabId="invoices" tabLabel="Invoices (B2B)"><InvoicesModule /></AdminTabErrorBoundary>} />
+        <Route path="quotations" element={<AdminTabErrorBoundary tabId="quotations" tabLabel="Quotations (B2B)"><B2BQuotationsHub /></AdminTabErrorBoundary>} />
+        <Route path="sales-orders" element={<AdminTabErrorBoundary tabId="sales-orders" tabLabel="Sales Orders (B2B)"><SalesOrdersHub /></AdminTabErrorBoundary>} />
+        <Route path="invoices" element={<AdminTabErrorBoundary tabId="invoices" tabLabel="Invoices (B2B)"><InvoiceIntelligenceHub /></AdminTabErrorBoundary>} />
         <Route path="stock" element={<AdminTabErrorBoundary tabId="stock" tabLabel="Stock & Inventory"><AdminVariantsTab /></AdminTabErrorBoundary>} />
         <Route path="bulk-orders" element={<AdminTabErrorBoundary tabId="bulk-orders" tabLabel="Bulk Orders"><AdminBulkOrdersTab /></AdminTabErrorBoundary>} />
         <Route path="access-levels" element={<AdminTabErrorBoundary tabId="access-levels" tabLabel="Access Levels"><AdminAccessLevelsTab /></AdminTabErrorBoundary>} />
@@ -131,7 +136,7 @@ export default function AdminRoutes() {
         <Route path="prescription-agent" element={<AdminTabErrorBoundary tabId="prescription-agent" tabLabel="Prescription Agent"><AdminPlaceholderTab title="Prescription Agent" description="Manage logic for AI prescription recommendations." tags={['AI', 'Medical']} color="var(--color-primary)" /></AdminTabErrorBoundary>} />
         <Route path="analytics" element={<AdminTabErrorBoundary tabId="analytics" tabLabel="Analytics"><AdminAnalyticsTab /></AdminTabErrorBoundary>} />
         <Route path="ai-logs" element={<AdminTabErrorBoundary tabId="ai-logs" tabLabel="AI Logs"><AdminClinicalLogsTab /></AdminTabErrorBoundary>} />
-        <Route path="geography-areas" element={<AdminTabErrorBoundary tabId="geography-areas" tabLabel="Geography Areas"><AdminPlaceholderTab title="Geography Areas" description="Manage international deployment areas and borders." tags={['Regions', 'Geography']} color="var(--color-primary)" /></AdminTabErrorBoundary>} />
+        <Route path="command-center" element={<AdminTabErrorBoundary tabId="command-center" tabLabel="Command Center"><AtlasCommandCenter /></AdminTabErrorBoundary>} />
         <Route path="territory-rules" element={<AdminTabErrorBoundary tabId="territory-rules" tabLabel="Territory Rules"><AdminPlaceholderTab title="Territory Rules" description="Configure exclusivity rules and protected categories." tags={['Rules', 'Protection']} color="var(--color-primary)" /></AdminTabErrorBoundary>} />
         <Route path="co-branding" element={<AdminTabErrorBoundary tabId="co-branding" tabLabel="Co-Branding"><CoBranding ownerId="admin" ownerType="admin" /></AdminTabErrorBoundary>} />
         <Route path="coupons" element={<AdminTabErrorBoundary tabId="coupons" tabLabel="Coupons"><CouponsManager ownerId="admin" ownerType="admin" /></AdminTabErrorBoundary>} />
@@ -139,7 +144,7 @@ export default function AdminRoutes() {
         <Route path="drip-marketing" element={<AdminTabErrorBoundary tabId="drip-marketing" tabLabel="Drip Marketing"><DripMarketing ownerId="admin" ownerType="admin" /></AdminTabErrorBoundary>} />
         <Route path="payments-made" element={<AdminTabErrorBoundary tabId="payments-made" tabLabel="Payments Made"><AdminPaymentsMadeTab /></AdminTabErrorBoundary>} />
         <Route path="payments-received" element={<AdminTabErrorBoundary tabId="payments-received" tabLabel="Payments Received"><AdminPaymentsReceivedTab /></AdminTabErrorBoundary>} />
-        <Route path="pricing-visibility" element={<AdminTabErrorBoundary tabId="pricing-visibility" tabLabel="Pricing Visibility"><AdminPlaceholderTab title="Pricing Visibility" description="Configure regional pricing walls and product visibility." tags={['Pricing', 'Access']} color="var(--color-primary)" /></AdminTabErrorBoundary>} />
+        <Route path="pricing-visibility" element={<AdminTabErrorBoundary tabId="pricing-visibility" tabLabel="Pricing Visibility"><PricingVisibilityTab /></AdminTabErrorBoundary>} />
         <Route path="leads" element={<AdminTabErrorBoundary tabId="leads" tabLabel="Leads"><AdminLeadsTab /></AdminTabErrorBoundary>} />
         <Route path="marketing" element={<AdminTabErrorBoundary tabId="marketing" tabLabel="Marketing & Content"><AdminMarketingTab /></AdminTabErrorBoundary>} />
         <Route path="messages" element={<AdminTabErrorBoundary tabId="messages" tabLabel="Messages"><MessagingWidget role="admin" ownerId="admin" /></AdminTabErrorBoundary>} />
@@ -211,7 +216,7 @@ export default function AdminRoutes() {
         <Route path="import-prices" element={<AdminTabErrorBoundary tabId="import-prices" tabLabel="Import Prices"><ImportPriceListsTab /></AdminTabErrorBoundary>} />
         <Route path="import-coa" element={<AdminTabErrorBoundary tabId="import-coa" tabLabel="Import CoAs"><ImportCoATab /></AdminTabErrorBoundary>} />
         <Route path="import-rfq" element={<AdminTabErrorBoundary tabId="import-rfq" tabLabel="Import RFQ"><ImportRFQTab /></AdminTabErrorBoundary>} />
-        <Route path="import-prescriptions" element={<AdminTabErrorBoundary tabId="import-prescriptions" tabLabel="Import Prescriptions"><AdminPlaceholderTab title="Import Prescriptions" description="Upload patient prescriptions and doctor notes." tags={['Medical', 'Imports']} color="var(--color-primary)" /></AdminTabErrorBoundary>} />
+        <Route path="import-prescriptions" element={<AdminTabErrorBoundary tabId="import-prescriptions" tabLabel="Import Prescriptions"><AdminPrescriptionIntakeTab /></AdminTabErrorBoundary>} />
         <Route path="import-bloodworks" element={<AdminTabErrorBoundary tabId="import-bloodworks" tabLabel="Import Bloodworks"><AdminPlaceholderTab title="Import Bloodworks" description="Upload lab results and blood panels." tags={['Labs', 'Imports']} color="var(--color-primary)" /></AdminTabErrorBoundary>} />
         
         

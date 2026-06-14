@@ -1,12 +1,16 @@
+import X from "lucide-react/dist/esm/icons/x";
+import GripVertical from "lucide-react/dist/esm/icons/grip-vertical";
+import Settings2 from "lucide-react/dist/esm/icons/settings-2";
 import React, { useState, useEffect } from 'react';
-import { X, GripVertical, Settings2 } from 'lucide-react';
+
+
+
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 function SortableCategory({ group }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: group.id });
-  
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -59,9 +63,7 @@ export default function SidebarOrderModal({ isOpen, onClose, groups, onSave }) {
       setItems((items) => {
         const oldIndex = items.findIndex((i) => i.id === active.id);
         const newIndex = items.findIndex((i) => i.id === over.id);
-        
         const newOrder = arrayMove(items, oldIndex, newIndex);
-        
         // Ensure "favorites" is always forced to the top if present
         const favIndex = newOrder.findIndex(i => i.id === 'favorites');
         if (favIndex > 0) {

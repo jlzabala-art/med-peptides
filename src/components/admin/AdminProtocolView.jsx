@@ -1,8 +1,13 @@
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import Edit3 from "lucide-react/dist/esm/icons/edit-3";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { ArrowLeft, Edit3, FlaskConical } from 'lucide-react';
+
+
+
 const ProtocolHeaderCharts = lazy(() => import('../protocol/ProtocolHeaderCharts'));
 const ProtocolGanttChart = lazy(() => import('../protocol/ProtocolGanttChart'));
 const InjectionDoseChart = lazy(() => import('../protocol/InjectionDoseChart'));
@@ -66,7 +71,6 @@ export default function AdminProtocolView() {
                 <ProtocolHeaderCharts protocol={protocol} />
               </Suspense>
             </div>
-            
             <div className="apv-hero-gantt" style={{ marginTop: '1.5rem' }}>
               <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Loading Gantt Timeline...</div>}>
                 <ProtocolGanttChart phases={protocol.phases || []} durationScale={1} />

@@ -1,5 +1,12 @@
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import RotateCcw from "lucide-react/dist/esm/icons/rotate-ccw";
+import Search from "lucide-react/dist/esm/icons/search";
+import Lightbulb from "lucide-react/dist/esm/icons/lightbulb";
 /* eslint-disable no-unused-vars */
-import { AlertTriangle, RotateCcw, Search, Lightbulb } from 'lucide-react';
+
+
+
+
 
 /* ─────────────────────────────────────────────────────────────────────────
    PHASE 6 — Friction Insights

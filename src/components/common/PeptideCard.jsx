@@ -1,6 +1,7 @@
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 /* eslint-disable no-unused-vars */
 import React, { useRef, useEffect, useState, memo } from 'react';
-import { ArrowRight } from 'lucide-react';
+
 
 /**
  * PeptideCard — componente compartido para TrendingPeptides y NovelAcquisitions.

@@ -1,3 +1,14 @@
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import PackageSearch from "lucide-react/dist/esm/icons/package-search";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import BarChart2 from "lucide-react/dist/esm/icons/bar-chart-2";
+import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
+import ArrowDownRight from "lucide-react/dist/esm/icons/arrow-down-right";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 /**
  * AdminFinanceWidget.jsx
  *
@@ -10,19 +21,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { auth } from '../../../firebase';
-import {
-  TrendingUp,
-  DollarSign,
-  PackageSearch,
-  RefreshCw,
-  AlertCircle,
-  ChevronDown,
-  ChevronUp,
-  BarChart2,
-  ArrowUpRight,
-  ArrowDownRight,
-  Sparkles,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
 import { Card, CardHeader, CardContent, CardFooter } from '../../ui/Card';
 import Button from '../../ui/Button';
 
@@ -207,7 +216,7 @@ export default function AdminFinanceWidget() {
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
+      const json = await res.js();
 
       if (json.formattedData?.formatType === 'finance_summary') {
         setData(json.formattedData);

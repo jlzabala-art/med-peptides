@@ -1,5 +1,19 @@
- 
-import { ShieldCheck, FileCheck, Globe, MessageCircle, FlaskConical, Truck, Lock, Activity } from 'lucide-react';
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import FileCheck from "lucide-react/dist/esm/icons/file-check";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import MessageCircle from "lucide-react/dist/esm/icons/message-circle";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import Lock from "lucide-react/dist/esm/icons/lock";
+import Activity from "lucide-react/dist/esm/icons/activity";
+
+
+
+
+
+
+
+
 import homeData from '../data/homeData.json';
 
 const iconMap = {

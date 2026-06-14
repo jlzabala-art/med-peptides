@@ -1,11 +1,17 @@
+import Pipette from "lucide-react/dist/esm/icons/pipette";
+import Droplets from "lucide-react/dist/esm/icons/droplets";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Snowflake from "lucide-react/dist/esm/icons/snowflake";
 /* eslint-disable no-unused-vars */
 import React from 'react';
-import { Pipette, Droplets, FlaskConical, Snowflake } from 'lucide-react';
+
+
+
+
 import { motion } from 'framer-motion';
 
 export default function VisualRecon({ data }) {
   const { compound = 'Peptide', solvent = 'BAC Water', ratio = '2ml' } = data || {};
-  
   // Basic language detection (could be passed as prop but we'll stick to bilingual for now)
   const steps = [
     { 
@@ -74,7 +80,6 @@ export default function VisualRecon({ data }) {
           </motion.div>
         ))}
       </div>
-      
       <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: 'rgba(0,75,135,0.05)', borderRadius: '12px', border: '1px dashed var(--primary)' }}>
         <p style={{ margin: 0, fontSize: '0.65rem', color: 'var(--primary)', fontWeight: 600, textAlign: 'center' }}>
           ⚠️ RESEARCH ONLY: Not for human use. Follow laboratory safety standards.

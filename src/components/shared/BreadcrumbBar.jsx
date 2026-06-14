@@ -1,9 +1,10 @@
+import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
 /**
  * BreadcrumbBar — Shared header bar for all portal dashboards
  * Shows: ← Back  [GroupEmoji GroupName] › [Current Page]  [optional actions]
  */
 import React from 'react';
-import { ChevronLeft } from 'lucide-react';
+
 import './AppSidebar/AppSidebar.css'; // reuses .breadcrumb-bar styles
 
 export default function BreadcrumbBar({ groups = [], activeId, onBack, actions }) {

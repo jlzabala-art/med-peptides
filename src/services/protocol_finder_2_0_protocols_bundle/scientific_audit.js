@@ -4,7 +4,7 @@ import path from 'path';
 import { SCIENTIFIC_STANDARDS, standardizeData } from './ScientificStandards.js';
 
 const bundleDir = './src/services/protocol_finder_2_0_protocols_bundle';
-const files = fs.readdirSync(bundleDir).filter(f => f.endsWith('.json') && !f.includes('package'));
+const files = fs.readdirSync(bundleDir).filter(f => f.endsWith('.js') && !f.includes('package'));
 
 const results = [];
 const fixMode = process.argv.includes('--fix');

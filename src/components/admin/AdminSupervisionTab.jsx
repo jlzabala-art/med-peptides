@@ -14,6 +14,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { getAllRelationships, updateRelationshipStatus } from '../../services/assignmentService';
 import { collection, getDocs, query, where } from 'firebase/firestore';
+import notifier from '../../services/NotificationService';
 import { db } from '../../firebase';
 import { MetricCard, StatusChip } from '../ui';
 
@@ -153,7 +154,7 @@ export default function AdminSupervisionTab({ onNavigateToClinicalAI }) {
       await updateRelationshipStatus(relId, newStatus);
       await loadData();
     } catch (e) {
-      alert('Error: ' + e.message);
+      notifier.info('Error: ' + e.message);
     } finally {
       setActionLoading(null);
     }
@@ -504,9 +505,9 @@ export default function AdminSupervisionTab({ onNavigateToClinicalAI }) {
                         <button
                           style={s.actionBtn('var(--color-danger)')}
                           onClick={() => {
-                            if (window.confirm('Revoke this relationship?')) {
+                            notifier.confirmCritical('Revoke this relationship?', async () => {
                               handleAction(r.id, 'revoked');
-                            }
+                            });
                           }}
                           disabled={isLoading('revoked')}
                         >

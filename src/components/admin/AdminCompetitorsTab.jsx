@@ -1,8 +1,27 @@
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import X from "lucide-react/dist/esm/icons/x";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Save from "lucide-react/dist/esm/icons/save";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Settings from "lucide-react/dist/esm/icons/settings";
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect, useMemo } from 'react';
 import { collection, doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { ShieldAlert, RefreshCw, Plus, X, Globe, Save, Activity, CheckCircle, AlertCircle, Settings } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 import AdminPageHeader from './AdminPageHeader';
 import { useToast } from '../../hooks/useToast';
 import CompetitorAnalysisWidget from './CompetitorAnalysisWidget';
@@ -12,7 +31,6 @@ export default function AdminCompetitorsTab() {
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [selectedTier, setSelectedTier] = useState('retail');
-  
   const { toast } = useToast();
 
   // Settings State
@@ -21,7 +39,6 @@ export default function AdminCompetitorsTab() {
     { name: "UAE Peptides", url: "https://uaepeptides.com/collections/all" }
   ]);
   const [scrapeFrequency, setScrapeFrequency] = useState("Diario");
-  
   const [newCompName, setNewCompName] = useState('');
   const [newCompUrl, setNewCompUrl] = useState('');
 
@@ -32,7 +49,6 @@ export default function AdminCompetitorsTab() {
       if (cacheDoc.exists()) {
         setCacheData(cacheDoc.data());
       }
-      
       const settingsDoc = await getDoc(doc(db, 'settings', 'competitor_analysis'));
       if (settingsDoc.exists()) {
         const data = settingsDoc.data();
@@ -62,7 +78,6 @@ export default function AdminCompetitorsTab() {
       const projectId = "med-peptides-app"; 
       const url = `https://us-central1-${projectId}.cloudfunctions.net/forceScrapeCompetitors`;
       await fetch(url, { method: 'POST' });
-      
       setTimeout(() => {
         fetchData();
         setScanning(false);
@@ -110,7 +125,6 @@ export default function AdminCompetitorsTab() {
       const myPPM = match.myPPMs ? match.myPPMs[selectedTier] : null;
       let isOverallCheaper = true;
       let isOverallExpensive = true;
-      
       if (!myPPM) return;
 
       match.competitors.forEach(comp => {
@@ -186,7 +200,6 @@ export default function AdminCompetitorsTab() {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          
           <select 
             value={selectedTier} 
             onChange={(e) => setSelectedTier(e.target.value)}
@@ -208,7 +221,6 @@ export default function AdminCompetitorsTab() {
             <RefreshCw size={16} className={scanning ? 'spin' : ''} /> 
             {scanning ? 'Scanning...' : 'Force Scan Now'}
           </button>
-          
           <button 
             onClick={() => setShowSettings(!showSettings)}
             className="btn btn-outline"
@@ -217,7 +229,6 @@ export default function AdminCompetitorsTab() {
             <Settings size={16} /> Config
           </button>
         </div>
-        
         <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)' }}></div>
           Data last updated: {lastUpdatedStr}
@@ -228,7 +239,6 @@ export default function AdminCompetitorsTab() {
         <div style={{ background: 'var(--bg-surface)', padding: '2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', marginBottom: '2rem', boxShadow: '0 10px 40px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.05)', animation: 'slideDown 0.3s ease-out', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, background: 'var(--primary)', filter: 'blur(100px)', opacity: 0.1, pointerEvents: 'none' }}></div>
           <div style={{ position: 'absolute', bottom: -50, left: -50, width: 200, height: 200, background: '#00BCD4', filter: 'blur(100px)', opacity: 0.1, pointerEvents: 'none' }}></div>
-          
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', position: 'relative' }}>
             <div style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '0.6rem', borderRadius: '10px' }}><Settings size={20} /></div>
             <div>
@@ -236,7 +246,6 @@ export default function AdminCompetitorsTab() {
               <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>Administra las URLs de la competencia y la frecuencia de búsqueda automática.</p>
             </div>
           </div>
-          
           <div style={{ marginBottom: '2rem', background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
             <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.5rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Frecuencia de Exploración</label>
             <select 
@@ -268,7 +277,6 @@ export default function AdminCompetitorsTab() {
               </div>
             ))}
           </div>
-          
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', background: 'rgba(255,255,255,0.01)', padding: '1.25rem', borderRadius: '12px', border: '1px dashed var(--border)', position: 'relative' }}>
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Store Name</label>
@@ -282,7 +290,6 @@ export default function AdminCompetitorsTab() {
               <Plus size={16} /> Add Store
             </button>
           </div>
-          
           <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border)', paddingTop: '1.5rem', display: 'flex', justifyContent: 'flex-end', position: 'relative' }}>
             <button onClick={handleSaveSettings} className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 2rem', borderRadius: '8px', fontWeight: 700, boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)' }}>
               <Save size={18} /> Save Settings
@@ -306,7 +313,6 @@ export default function AdminCompetitorsTab() {
         <div style={{ display: 'grid', gap: '1.5rem' }}>
           {cacheData.matches.map((match, idx) => {
             const myPPM = match.myPPMs ? match.myPPMs[selectedTier] : 0;
-            
             return (
               <div key={idx} style={{ 
                 background: 'var(--bg-surface)', 
@@ -340,7 +346,6 @@ export default function AdminCompetitorsTab() {
                     Our {selectedTier.toUpperCase()} PPM: ${myPPM ? myPPM.toFixed(2) : '0'}/mg
                   </div>
                 </div>
-                
                 <div style={{ padding: '1rem 1.5rem' }}>
                   <CompetitorAnalysisWidget 
                     matchData={match.competitors} 

@@ -1,7 +1,15 @@
- 
+import Microscope from "lucide-react/dist/esm/icons/microscope";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import UserCheck from "lucide-react/dist/esm/icons/user-check";
+import Timer from "lucide-react/dist/esm/icons/timer";
 import React from 'react';
-import { Microscope, Activity, Brain, UserCheck, Timer } from 'lucide-react';
-import homeData from '../data/homeData.json';
+
+
+
+
+
+import homeData from '../data/homeData.js';
 import { renderTitle } from '../utils/textFormatter';
 
 const iconMap = {

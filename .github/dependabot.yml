@@ -1,0 +1,25 @@
+version: 2
+updates:
+  # Mantenimiento automático para dependencias de Node.js (NPM)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    ignore:
+      # Podemos ignorar dependencias si causan problemas frecuentes
+      # - dependency-name: "react"
+    labels:
+      - "dependencies"
+      - "npm"
+
+  # Mantenimiento automático para las propias GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "actions"

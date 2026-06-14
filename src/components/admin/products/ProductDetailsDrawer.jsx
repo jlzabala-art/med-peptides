@@ -1,15 +1,80 @@
+import X from "lucide-react/dist/esm/icons/x";
+import Save from "lucide-react/dist/esm/icons/save";
+import Edit3 from "lucide-react/dist/esm/icons/edit-3";
+import Settings from "lucide-react/dist/esm/icons/settings";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import PackageOpen from "lucide-react/dist/esm/icons/package-open";
+import ImageIcon from "lucide-react/dist/esm/icons/image";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Share2 from "lucide-react/dist/esm/icons/share-2";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Copy from "lucide-react/dist/esm/icons/copy";
+import Archive from "lucide-react/dist/esm/icons/archive";
+import Award from "lucide-react/dist/esm/icons/award";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Trash from "lucide-react/dist/esm/icons/trash";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Link from "lucide-react/dist/esm/icons/link";
+import History from "lucide-react/dist/esm/icons/history";
+import Check from "lucide-react/dist/esm/icons/check";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import Info from "lucide-react/dist/esm/icons/info";
+import AlertOctagon from "lucide-react/dist/esm/icons/alert-octagon";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  X, Save, Edit3, Settings, DollarSign, PackageOpen, Image as ImageIcon, Shield, Share2, 
-  Trash2, Copy, Archive, Award, FileText, CheckCircle2, AlertTriangle, Sparkles, 
-  UploadCloud, Brain, Globe, Plus, Trash, Eye, Activity, Link, History, Check,
-  RefreshCw, TrendingUp, ChevronDown, ChevronUp, ExternalLink, Info, AlertOctagon, HelpCircle
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { Button, StatusChip, Card } from '../../ui';
 import { doc, updateDoc, deleteDoc, addDoc, collection } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { useToast } from '../../../hooks/useToast';
+import notifier from '../../../services/NotificationService';
 
 export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave }) {
   const { toast } = useToast();
@@ -19,7 +84,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
   const [showAiAdvisor, setShowAiAdvisor] = useState(true);
   const [timelineEvents, setTimelineEvents] = useState([]);
   const scrollContainerRef = React.useRef(null);
-  
   // Mobile detection
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   useEffect(() => {
@@ -56,7 +120,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
       [section]: !prev[section]
     }));
   };
-  
   // Local form state
   const [form, setForm] = useState({});
   const [zohoSyncing, setZohoSyncing] = useState(false);
@@ -79,17 +142,14 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
         supplierLeadTime: product.supplierLeadTime || 14, // in days
         lastPurchasePrice: product.lastPurchasePrice || product.costPrice || 42,
         lastPurchaseDate: product.lastPurchaseDate || '2026-04-12',
-        
         // Lifecycle Stage
         lifecycleStage: product.lifecycleStage || (product.isActive ? 'Published' : 'Draft'),
-        
         // Pricing
         guestVialPrice: product.guestVialPrice || 0, // Retail
         proVialPrice: product.proVialPrice || 0, // Clinic
         wholesalerPrice: product.wholesalerPrice || 0,
         distributorPrice: product.distributorPrice || 0,
         costPrice: product.costPrice || 0, // Internal Cost
-        
         // MOQ Prices
         moq_1: product.moq_1 || product.guestVialPrice || 0,
         moq_10: product.moq_10 || product.proVialPrice || 0,
@@ -123,7 +183,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
         regulatoryNotes: product.regulatoryNotes || '',
         countries: product.countries || ['UAE', 'EU'],
         requiredDocs: product.requiredDocs || ['CoA', 'GMP'],
-        
         // Doc Compliance Checklist
         docStatus_coa: product.docStatus_coa || 'Approved',
         docStatus_msds: product.docStatus_msds || 'Pending',
@@ -325,7 +384,7 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
 
   // Delete product
   const handleDelete = async () => {
-    if (window.confirm(`Are you sure you want to permanently delete "${form.name}"?`)) {
+    notifier.confirmCritical(`Are you sure you want to permanently delete "${form.name}"?`, async () => {
       try {
         await deleteDoc(doc(db, 'products', product.id));
         toast.success('Product deleted.');
@@ -335,7 +394,7 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
         console.error(err);
         toast.error('Failed to delete product.');
       }
-    }
+    });
   };
 
   // AI Product Improver
@@ -532,7 +591,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
                           {form.stock > 0 ? 'In Stock' : 'Out of Stock'}
                         </span>
                       </div>
-                      
                       {/* Product Header Card Grid */}
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '8px 16px', fontSize: '0.8rem', color: '#94a3b8' }}>
                         <div>SKU: <strong style={{ color: '#cbd5e1' }}>{form.sku || 'N/A'}</strong></div>
@@ -649,7 +707,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
                   </div>
                   <span style={{ fontSize: '0.8rem', fontWeight: 700, color: completionPercent > 80 ? '#34d399' : '#f59e0b' }}>{completionPercent}%</span>
                 </div>
-                
                 {/* Readiness checklist inline summary */}
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {checklistItems.map((item, idx) => (
@@ -783,11 +840,9 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
 
               {/* Content Panel Area */}
               <div ref={scrollContainerRef} style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
-                
                 {/* 15. Mobile UX: Accordion sections replacing standard Tabs on mobile viewports */}
                 {isMobile ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    
                     {/* ACCORDION 1: OVERVIEW */}
                     <div style={{ border: '1px solid #1e293b', borderRadius: '8px', overflow: 'hidden' }}>
                       <button 
@@ -1006,7 +1061,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
 
                 {/* Advisor Insights Panel Body */}
                 <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  
                   {/* Real-time Diagnostics Detection list */}
                   <div style={{
                     backgroundColor: '#111827',
@@ -1015,7 +1069,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
                     border: '1px solid #1f2937'
                   }}>
                     <span style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>Anomalies Detected</span>
-                    
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       {!form.guestVialPrice && (
                         <div style={{ fontSize: '0.75rem', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -1053,7 +1106,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
                   {/* AI Quick Actions Panel */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Automations</span>
-                    
                     <button
                       onClick={() => triggerAiAction('fix')}
                       style={{
@@ -1212,7 +1264,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-          
           {/* Summary Card */}
           <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937', color: '#fff' }}>
             <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '4px', textTransform: 'uppercase', fontWeight: 600 }}>Supplier & Origins</span>
@@ -1249,7 +1300,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
 
         {/* Global Compliance Status & Zoho Sync Logs */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
-          
           <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937', color: '#fff' }}>
             <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '#f8fafc', fontWeight: 600 }}>Regional Compliance Summary</h4>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', fontSize: '0.75rem', textAlign: 'center' }}>
@@ -1270,7 +1320,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
                 </div>
               ))}
             </div>
-            
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', fontSize: '0.75rem', borderTop: '1px solid #1f2937', paddingTop: '0.75rem' }}>
               <div>COA Compliance: <span style={{ color: form.docStatus_coa === 'Approved' ? '#10b981' : '#ef4444', fontWeight: 600 }}>{form.docStatus_coa}</span></div>
               <div>MSDS: <span style={{ color: form.docStatus_msds === 'Approved' ? '#10b981' : '#f59e0b', fontWeight: 600 }}>{form.docStatus_msds}</span></div>
@@ -1406,13 +1455,10 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        
         {/* Pricing Dashboard */}
         <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
           <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Pricing Dashboard</h3>
-          
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-            
             {/* Base Cost Box */}
             <div style={{
               padding: '1rem',
@@ -1469,7 +1515,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
               <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>MOQ Pricing Matrix</h3>
               <p style={{ margin: '2px 0 0 0', fontSize: '0.75rem', color: '#64748b' }}>Volume tier price grids and margin curves</p>
             </div>
-            
             <button
               onClick={autoGenMoq}
               style={{
@@ -1512,7 +1557,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
                   const val = form[tier.key] || 0;
                   const unitMargin = val > 0 ? ((val - cost) / val) * 100 : 0;
                   const discountPercent = retail > 0 ? ((retail - val) / retail) * 100 : 0;
-                  
                   return (
                     <tr key={idx} style={{ borderBottom: '1px solid #1f2937' }}>
                       <td style={{ padding: '0.6rem 0.5rem', fontWeight: 600 }}>{tier.qty} Unit{tier.qty > 1 && 's'}</td>
@@ -1553,10 +1597,8 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
   function renderInventoryTab() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        
         {/* KPI Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
-          
           <div style={{ backgroundColor: '#111827', border: '1px solid #374151', borderRadius: '8px', padding: '1rem' }}>
             <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Current Stock</span>
             <input
@@ -1679,11 +1721,9 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
   function renderMediaTab() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        
         {/* Gallery */}
         <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
           <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Product Gallery</h3>
-          
           <div style={{
             border: '2px dashed #334155',
             borderRadius: '8px',
@@ -1708,7 +1748,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
                 <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1e293b', color: '#64748b' }}><ImageIcon size={20} /></div>
               )}
             </div>
-            
             {/* Standard mock images */}
             {['Technical Diagram', 'Packaging Box', 'Certificates File'].map((label, idx) => (
               <div key={idx} style={{ border: '1px dashed #334155', borderRadius: '6px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0f172a', color: '#64748b', padding: '4px', textAlign: 'center' }}>
@@ -1722,7 +1761,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
         {/* Media URLs Section */}
         <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
           <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Technical & Marketing Documents</h3>
-          
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>COA Document Link</label>
@@ -1759,11 +1797,9 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
   function renderRegulatoryTab() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        
         {/* Compliance Dashboard Card */}
         <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
           <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Compliance Dashboard</h3>
-          
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Global Registration Status</label>
@@ -1830,7 +1866,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
         {/* Certificate matrices */}
         <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
           <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Compliance Documents Checklist</h3>
-          
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px' }}>
             {[
               { id: 'docStatus_coa', label: 'CoA (Analysis)' },
@@ -1892,7 +1927,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
               <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Zoho Product Sync Configuration</h3>
               <p style={{ margin: '2px 0 0 0', fontSize: '0.75rem', color: '#64748b' }}>Configure Zoho Books API and Inventory sync triggers</p>
             </div>
-            
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
                 onClick={triggerZohoSync}
@@ -2010,7 +2044,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
           <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Product Relations & Cross-Sells</h3>
-          
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {listFields.map((field) => (
               <div key={field.key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -2078,7 +2111,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
     return (
       <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
         <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Product Audit Activity Feed</h3>
-        
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', position: 'relative', paddingLeft: '1rem' }}>
           {/* Vertical line connector */}
           <div style={{
@@ -2105,7 +2137,6 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
                   top: '4px',
                   zIndex: 2
                 }} />
-                
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
                     <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: '4px' }}>

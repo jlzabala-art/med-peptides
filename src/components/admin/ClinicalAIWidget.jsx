@@ -1,15 +1,21 @@
+import Brain from "lucide-react/dist/esm/icons/brain";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Compass from "lucide-react/dist/esm/icons/compass";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Clock from "lucide-react/dist/esm/icons/clock";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useState, useEffect, useMemo } from 'react';
-import {
-  Brain,
-  MessageSquare,
-  Compass,
-  RefreshCw,
-  AlertCircle,
-  AlertTriangle,
-  FlaskConical,
-  Clock,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
 import { collection, query, getDocs, orderBy, limit } from 'firebase/firestore';
 import CuriosityMap from './gadgets/CuriosityMap';
 import LanguageSplit from './gadgets/LanguageSplit';
@@ -918,7 +924,6 @@ export default function AdminClinicalAITab({ context = null }) {
 
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        
         .gcp-card {
           background: white;
           border: 1px solid #dadce0;
@@ -956,11 +961,9 @@ export default function AdminClinicalAITab({ context = null }) {
           }
         }
       `}</style>
-    
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: AdminClinicalAITab | Props: none
       </div>
-    
 </div>
   );
 }

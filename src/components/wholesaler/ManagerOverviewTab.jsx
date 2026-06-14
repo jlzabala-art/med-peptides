@@ -1,8 +1,15 @@
+import Users from "lucide-react/dist/esm/icons/users";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Users, ShoppingBag, TrendingUp, AlertCircle } from 'lucide-react';
+
+
+
+
 
 export default function ManagerOverviewTab() {
   const { currentUser } = useAuth();
@@ -18,7 +25,6 @@ export default function ManagerOverviewTab() {
         const usersRef = collection(db, 'users');
         const qUsers = query(usersRef, where('assignedAccountManagerId', '==', currentUser.uid));
         const usersSnap = await getDocs(qUsers);
-        
         // Count orders
         const ordersRef = collection(db, 'orders');
         const qOrders = query(ordersRef, where('assignedAccountManagerId', '==', currentUser.uid));

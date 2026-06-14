@@ -1,0 +1,16877 @@
+export default JSON.parse(`[
+  {
+    "id": "cog_001",
+    "protocol_duration_weeks": 6,
+    "bundleVersion": "2.0",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_is_physician_authored": false,
+    "seeded_at": "2026-04-25T06:10:36.132Z",
+    "protocol_source_version": "v5.0",
+    "dosing_enrichment": {
+      "titration_note": "Begin Semax at 300 mcg/day (intranasal) for weeks 1–2 to assess tolerability. If well tolerated, may increase to 600 mcg/day in weeks 3–4 for enhanced BDNF stimulation.",
+      "cycling_recommendation": "12-week active cycle followed by 4–8 week washout. Continuous use beyond 16 weeks not supported by current evidence.",
+      "maintenance_dose": "Semax: 300–600 mcg/day intranasal (morning). Selank: 300 mcg 3x/week intranasal.",
+      "timing_optimization": "Administer Semax in the morning (pre-work) for optimal cognitive activation. Avoid administration after 14:00 to prevent sleep onset interference."
+    },
+    "complexity_level": "simple",
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_source_reference": "internal_guide",
+    "protocol_slug": "cognitive-support-6w",
+    "protocol_is_curated": true,
+    "number_of_phases": 1,
+    "risk_class": "low_to_moderate",
+    "protocol_review_status": "approved",
+    "protocol_source_type": "curated_library",
+    "washout_recommended_weeks": 4,
+    "active": true,
+    "protocol_id": "cog_001",
+    "economics": {
+      "total_protocol_cost_estimate": 480,
+      "total_vials_required": 6
+    },
+    "protocol_author_title": "Peptide Specialists",
+    "confidence_score": 88,
+    "physician_supervision_required": false,
+    "status": "approved",
+    "_patchSchema": "antigravity_v2",
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "CBC",
+          "CMP",
+          "Lipid Panel"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "CBC",
+          "CMP"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Active psychiatric disorder (uncontrolled)",
+        "Concurrent use of MAOIs",
+        "Pregnancy or breastfeeding"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+    "clinical_evidence_update_2026": {
+      "evidence_limitations": [
+        "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+        "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+        "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+      ],
+      "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+      "last_updated_at": "2026-04-26T08:05:00.000Z",
+      "latest_clinical_notes": [
+        "Semax and Selank remain region-specific/exploratory outside Russia and selected markets.",
+        "Cognitive protocols should screen for anxiety severity, bipolar/psychosis history, seizure risk, stimulant use, sleep impairment, and blood pressure.",
+        "Evidence remains less robust than approved neuropsychiatric therapies; use conservative claims."
+      ],
+      "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+      "regulatory_status": "Semax, Selank, and Pinealon are not FDA- or EMA-approved. Evidence base remains mainly Russian/regional clinical literature plus preclinical/translational studies.",
+      "evidence_update": "Maintain evidence grade C/exploratory-translational and avoid language implying established Western regulatory approval.",
+      "updated_at": "2026-04-26T09:05:00+02:00",
+      "source_refs": [],
+      "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+    },
+    "eligibility_rules": {
+      "indications": [
+        "cognitive_fatigue_or_mental_fog",
+        "stress_related_attention_impairment",
+        "reduced_task_initiation_or_executive_drive",
+        "mild_working_memory_or_focus_support_need",
+        "high_cognitive_load_professional_context"
+      ],
+      "contraindications": [
+        "No broad Western post-marketing safety database; discontinue and review if neurological, psychiatric, or cardiovascular symptoms worsen."
+      ],
+      "required_patient_inputs": [
+        "cognitive_baseline_score",
+        "sleep_quality",
+        "anxiety_or_stress_score",
+        "blood_pressure",
+        "age_group",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ]
+    },
+    "_schemaGapFixed": {
+      "_nanoseconds": 229000000,
+      "_seconds": 1777190715
+    },
+    "generated_protocol_template": {
+      "patient_context": {
+        "tempo_preference": "standard"
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "_schemaVersion": "antigravity_v2",
+    "_bundleCreatedAt": "2026-04-26T09:05:00+02:00",
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "Legacy fields retained for backward compatibility; phase_blueprints are preferred when present.",
+      "enabled": true
+    },
+    "_syncSource": "export/protocols/cog_001.js",
+    "overview_summary": "Semax & Selank Neurocognitive Protocol",
+    "safety_profile": {
+      "drug_interactions": [
+        "Theoretical potentiation with CNS stimulants (caffeine, modafinil) — monitor for overstimulation",
+        "Avoid concurrent use with MAO inhibitors (theoretical serotonergic interaction)",
+        "Selank may potentiate sedative effects of anxiolytic medications"
+      ],
+      "monitoring_required": [
+        "Subjective cognitive VAS score (0–10) at weeks 0, 4, 8, 12",
+        "Blood pressure monitoring — Semax mild vasoconstrictive potential",
+        "Sleep quality assessment at each checkpoint",
+        "HAM-A or GAD-7 anxiety score at baseline and week 8 for Selank response tracking"
+      ],
+      "adverse_events_serious": [
+        "No serious adverse events reported in published clinical literature at standard doses (300–600 mcg/day)"
+      ],
+      "adverse_events_common": [
+        "Mild nasal irritation or epistaxis (15–20%) from intranasal delivery",
+        "Transient headache, especially in first 1–2 weeks (8–12%)",
+        "Mild stimulation or restlessness at higher Semax doses (5–10%)",
+        "Transient sleep onset delay if Semax administered after 14:00"
+      ]
+    },
+    "canonical_enrichment": {
+      "compatibleWith": "antigravity_v2_firebase_import",
+      "auditFieldsCompleted": [
+        "eligibility_rules.indications",
+        "metadata.evidence_grade",
+        "metadata.clinical_summary",
+        "washout_recommended_weeks",
+        "expected_outcomes.qualitative",
+        "phase_blueprints",
+        "physician_supervision_required"
+      ],
+      "generatedAt": "2026-04-26T06:53:24Z"
+    },
+    "monitoring_plan": {
+      "baseline_required": [
+        "cognitive_baseline_score",
+        "sleep_quality",
+        "anxiety_or_stress_score",
+        "blood_pressure",
+        "current_CNS_medication_review"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "week": 2,
+          "type": "early_tolerance_review",
+          "measures": [
+            "headache",
+            "sleep_latency",
+            "nasal_tolerance",
+            "overstimulation"
+          ],
+          "purpose": "Assess early CNS tolerability and dosing suitability."
+        },
+        {
+          "week": 4,
+          "type": "cognitive_response_review",
+          "measures": [
+            "focus_score",
+            "stress_score",
+            "sleep_quality",
+            "blood_pressure"
+          ],
+          "purpose": "Evaluate initial cognitive and stress-response signal."
+        },
+        {
+          "week": 6,
+          "type": "final_outcome_review",
+          "measures": [
+            "cognitive_baseline_score",
+            "functional_focus",
+            "sleep_quality",
+            "adverse_events"
+          ],
+          "purpose": "Determine whether washout, continuation, or protocol change is appropriate."
+        }
+      ]
+    },
+    "_syncedAt": "2026-04-26T12:46:25.512Z",
+    "updated_at": "2026-05-04T14:35:44.631Z",
+    "protocol_author_organization": "Atlas Health",
+    "recommended_supplements": [
+      "lion-s-mane-mushroom",
+      "ginkgo-biloba",
+      "l-theanine"
+    ],
+    "primary_goal": "Cognitive Support",
+    "metadata": {
+      "longDescription": "Semax (Met-Glu-His-Phe-Pro-Gly-Pro) is a heptapeptide analogue of the ACTH(4-10) fragment developed by the Institute of Molecular Genetics (Russia). It upregulates BDNF and NGF in the hippocampus, enhances dopaminergic and serotonergic neurotransmission, and increases regional cerebral blood flow without stimulant side-effects (Dolotov OV et al., J Neurochem 2006; Eremin KO et al., Bull Exp Biol Med 2005). Selank (Thr-Lys-Pro-Arg-Pro-Gly-Pro) is a synthetic analogue of the immunomodulatory tetrapeptide tuftsin that potentiates GABAergic inhibition, reduces CRF-driven HPA axis hyperactivation, and upregulates BDNF, producing anxiolytic and cognitive-enhancing effects without dependence (Semenova TP et al., Bull Exp Biol Med 2010; Medvedev VE et al., Ther Arch 2015). The combination addresses the anxiety–cognition dyad: Selank reduces stress-induced cognitive interference while Semax directly augments executive function and memory consolidation.",
+      "primary_goal": "Cognitive Support",
+      "keywords": [
+        "Semax nootropic protocol",
+        "Selank anxiolytic peptide",
+        "BDNF peptide protocol",
+        "cognitive enhancement peptide",
+        "intranasal nootropic",
+        "ACTH analog peptide"
+      ],
+      "references": [
+        {
+          "pmid": "16805834",
+          "citation": "Dolotov OV et al. Semax stimulates BDNF expression in the mouse brain. J Neurochem 2006;97(Suppl 1):82-86."
+        },
+        {
+          "pmid": "16400394",
+          "citation": "Eremin KO et al. Semax activates brain dopaminergic systems. Bull Exp Biol Med 2005;140:274-276."
+        },
+        {
+          "pmid": "20737030",
+          "citation": "Semenova TP et al. Selank anxiolytic effects. Bull Exp Biol Med 2010;150:65-67."
+        }
+      ],
+      "scientificName": "Semax & Selank ACTH/MSH-Derived Nootropic & Anxiolytic Protocol",
+      "description": "6-week intranasal neurocognitive protocol combining Semax BDNF/ACTH analog nootropism with Selank anxiolytic tuftsin-derived GABAergic modulation for focus, memory, and stress resilience."
+    },
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "protocol_version": "v6.1",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible"
+    ],
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
+    "protocol_title": "Semax & Selank Neurocognitive Protocol",
+    "category": "Cognitive Support",
+    "syncedAt": "2026-05-16T14:32:31.842Z",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "age_variant_match",
+        "stress_profile",
+        "sleep_profile"
+      ],
+      "profile_notes": [
+        "Prefer conservative tempo if sleep instability is present."
+      ],
+      "allow_acceleration": false,
+      "base_duration_weeks": 6,
+      "notes": "Default generator rules – pending clinical review.",
+      "tempo_variants": [
+        "standard"
+      ],
+      "allow_extension": false
+    },
+    "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
+    "_patchedAt": {
+      "schema_gap_fix": "2026-04-26T12:37:11Z"
+    },
+    "variant_rules": {
+      "age_variants": {
+        "18-35": {
+          "default_duration_weeks": 8,
+          "monitoring_intensity": "standard"
+        },
+        "36-50": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "moderate"
+        },
+        "51-65": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "enhanced"
+        },
+        "65+": {
+          "default_duration_weeks": 16,
+          "monitoring_intensity": "enhanced"
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "recommended_flags": [],
+          "special_notes": [
+            "Use conservative ramping if sensitivity profile is high."
+          ]
+        },
+        "male": {
+          "recommended_flags": [],
+          "special_notes": [
+            "Reassess tolerance and response before escalation."
+          ]
+        }
+      },
+      "duration_variants": {
+        "8_weeks": {
+          "mode": "short",
+          "extra_monitoring": false
+        },
+        "12_weeks": {
+          "mode": "standard",
+          "extra_monitoring": false
+        },
+        "16_weeks": {
+          "mode": "extended",
+          "extra_monitoring": true
+        },
+        "20_weeks": {
+          "mode": "extended_plus",
+          "extra_monitoring": true
+        }
+      },
+      "tempo_variants": {
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "tempo": {
+        "standard": {
+          "notes": "Standard tempo – no adjustment.",
+          "phase_duration_multiplier": 1
+        },
+        "accelerated": {
+          "notes": "Accelerated tempo – physician review required.",
+          "phase_duration_multiplier": 0.75
+        },
+        "extended": {
+          "notes": "Extended tempo – for slower responders.",
+          "phase_duration_multiplier": 1.33
+        }
+      }
+    },
+    "phase_blueprints": [
+      {
+        "phase_key": "neurocognitive_support",
+        "phase_title": "Neurocognitive Support",
+        "default_start_week": 1,
+        "default_duration_weeks": 6,
+        "clinical_purpose": [
+          "neurotrophic_activation",
+          "anxiolytic_support",
+          "attention_and_working_memory_support"
+        ],
+        "drugs": [
+          {
+            "product_id": "prd_semax",
+            "product_title": "Semax",
+            "route": "intranasal",
+            "dose_logic": {
+              "dose_unit": "mcg",
+              "starting_daily_dose": 300,
+              "possible_daily_dose": 600,
+              "administration_frequency": "daily",
+              "timing_hint": "morning_only",
+              "max_time_recommendation": "before_14:00"
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_semax",
+              "route": "intranasal"
+            }
+          },
+          {
+            "product_id": "prd_selank",
+            "product_title": "Selank",
+            "route": "intranasal",
+            "dose_logic": {
+              "dose_unit": "mcg",
+              "dose_per_administration": 300,
+              "administration_frequency": "3x_week",
+              "timing_hint": "morning_or_midday"
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_selank",
+              "route": "intranasal"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 1,
+            "event_type": "baseline_review",
+            "title": "Baseline cognitive and stress review"
+          },
+          {
+            "week": 4,
+            "event_type": "checkpoint",
+            "title": "Cognitive response and sleep tolerance review"
+          },
+          {
+            "week": 6,
+            "event_type": "outcome_review",
+            "title": "Final response and washout decision"
+          }
+        ]
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.906Z",
+    "synergy_rationale": "Semax acts as a powerful nootropic by upregulating BDNF and enhancing dopaminergic tone, which can sometimes be overstimulating. Selank acts as a GABAergic modulator, dampening anxiety and HPA-axis stress. Together, they create a state of 'calm focus'—high cognitive output without the jitteriness.",
+    "clinical_timeline": [
+      {
+        "phase": "Weeks 1-2",
+        "expected": "Immediate reduction in brain fog and acute anxiety."
+      },
+      {
+        "phase": "Weeks 3-4",
+        "expected": "Noticeable improvements in sustained focus and stress resilience."
+      },
+      {
+        "phase": "Weeks 5-6",
+        "expected": "Enhanced learning capacity and memory recall."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "Focus on REM and deep sleep for memory consolidation.",
+      "nutrition": "Brain-healthy fats (DHA/EPA), antioxidant-rich foods, avoid sugar spikes.",
+      "activity": "Aerobic exercise to promote neurogenesis (BDNF).",
+      "hydration": "Consistent hydration (even mild dehydration impairs cognition)."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:17.980Z",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Neurocognitive Support",
+        "start_week": 1,
+        "end_week": 6,
+        "drugs_used": [
+          {
+            "product_slug": "semax",
+            "selected_strength": "nasal",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 3,
+            "route": "intranasal",
+            "weekly_dose": "2100 mcg",
+            "weekly_dose_amount": 2100,
+            "weekly_dose_unit": "mcg"
+          },
+          {
+            "product_slug": "selank",
+            "selected_strength": "nasal",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 3,
+            "route": "intranasal",
+            "weekly_dose": "1750 mcg",
+            "weekly_dose_amount": 1750,
+            "weekly_dose_unit": "mcg"
+          }
+        ]
+      }
+    ],
+    "expected_outcomes": {
+      "0": "Enhanced focus and executive function",
+      "1": "Reduction in stress-induced anxiety",
+      "2": "Improved memory consolidation",
+      "3": "Clearer cognitive processing",
+      "qualitative": [
+        "Improved working memory, attention, and executive function",
+        "Reduction in cognitive fog and subjective fatigue",
+        "Enhanced neuroprotective signaling and BDNF/NGF expression",
+        "Improved stress resilience and emotional regulation",
+        "Sustained mental clarity during high cognitive-demand activities"
+      ]
+    }
+  },
+  {
+    "id": "cog_002",
+    "protocol_duration_weeks": 8,
+    "bundleVersion": "2.0",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_is_physician_authored": false,
+    "seeded_at": "2026-04-25T06:10:36.133Z",
+    "protocol_source_version": "v5.0",
+    "dosing_enrichment": {
+      "titration_note": "Start Selank at 300 mcg intranasal 2x/day for weeks 1–4 to establish anxiolytic baseline. If tolerating well, maintain dose. Add Semax 300 mcg/day (morning only) from week 5 onward for adjunctive dopaminergic activation.",
+      "cycling_recommendation": "12-week active protocol followed by 6–8 week washout period. Continuous use beyond 16 weeks not supported by current evidence; cycling preserves receptor sensitivity.",
+      "maintenance_dose": "Selank: 300–500 mcg intranasal 2x/day. Semax (adjunct, weeks 5–12): 300 mcg intranasal each morning.",
+      "timing_optimization": "Administer Selank in the morning and early evening (split dose). Semax morning only (avoid after 14:00 to prevent sleep onset interference)."
+    },
+    "complexity_level": "moderate",
+    "eligibility_rules": {
+      "indications": [
+        "stress_related_focus_impairment",
+        "anxious_cognitive_interference",
+        "burnout_recovery_with_cognitive_volatility",
+        "need_for_non_sedating_anxiolytic_cognitive_support",
+        "executive_function_support_under_high_stress_load"
+      ],
+      "contraindications": [
+        "active_epilepsy_or_uncontrolled_seizure_disorder",
+        "uncontrolled_psychosis_or_schizophrenia",
+        "pregnancy_or_breastfeeding",
+        "severe_hepatic_impairment"
+      ],
+      "supported_goals": [
+        "focus_resilience",
+        "stress_resilience",
+        "cognitive_flexibility",
+        "anxious_focus_support"
+      ],
+      "relative_cautions": [],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "patient_demographic",
+        "age_group",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ]
+    },
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_source_reference": "internal_guide",
+    "protocol_slug": "focus-resilience-8w",
+    "protocol_is_curated": true,
+    "number_of_phases": 2,
+    "risk_class": "low_to_moderate",
+    "protocol_review_status": "approved",
+    "protocol_source_type": "curated_library",
+    "washout_recommended_weeks": 6,
+    "active": true,
+    "overview_summary": "Eight-week cognitive protocol pairing Semax with Pinealon to support attention, executive function, and neuroprotective signaling.",
+    "protocol_id": "cog_002",
+    "protocol_version": "v6.0",
+    "economics": {
+      "total_protocol_cost_estimate": 520,
+      "total_vials_required": 10
+    },
+    "protocol_author_title": "Peptide Specialists",
+    "confidence_score": 89,
+    "uploadedAt": "2026-04-20T09:29:12.814Z",
+    "variant_rules": {
+      "tempo_variants": {
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "duration_variants": {
+        "20_weeks": {
+          "mode": "extended_plus",
+          "extra_monitoring": true
+        },
+        "16_weeks": {
+          "mode": "extended",
+          "extra_monitoring": true
+        },
+        "12_weeks": {
+          "mode": "standard",
+          "extra_monitoring": false
+        },
+        "8_weeks": {
+          "mode": "short",
+          "extra_monitoring": false
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "special_notes": [
+            "Use conservative ramping if sensitivity profile is high."
+          ],
+          "recommended_flags": []
+        },
+        "male": {
+          "special_notes": [
+            "Reassess tolerance and response before escalation."
+          ],
+          "recommended_flags": [
+            "sleep_recovery_watch"
+          ]
+        }
+      },
+      "age_variants": {
+        "51-65": {
+          "monitoring_intensity": "enhanced",
+          "default_duration_weeks": 12
+        },
+        "36-50": {
+          "monitoring_intensity": "moderate",
+          "default_duration_weeks": 12
+        },
+        "18-35": {
+          "monitoring_intensity": "standard",
+          "default_duration_weeks": 8
+        },
+        "65+": {
+          "monitoring_intensity": "enhanced",
+          "default_duration_weeks": 16
+        }
+      }
+    },
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode.",
+      "enabled": true
+    },
+    "physician_supervision_required": false,
+    "status": "approved",
+    "_patchSchema": "antigravity_v2",
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "CBC",
+          "CMP",
+          "Lipid Panel"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "CBC",
+          "CMP"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Active psychiatric disorder (uncontrolled)",
+        "Concurrent use of MAOIs",
+        "Pregnancy or breastfeeding"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+    "_schemaGapFixed": {
+      "_nanoseconds": 978000000,
+      "_seconds": 1777190715
+    },
+    "_schemaVersion": "antigravity_v2",
+    "_bundleCreatedAt": "2026-04-26T09:05:00+02:00",
+    "clinical_evidence_update_2026": {
+      "evidence_limitations": [
+        "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+        "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+        "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+      ],
+      "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+      "last_updated_at": "2026-04-26T08:05:00.000Z",
+      "latest_clinical_notes": [
+        "Pinealon evidence remains exploratory, primarily preclinical or region-specific.",
+        "Semax should be monitored for headache, overstimulation, blood pressure changes, and sleep disruption.",
+        "Avoid claims of neurodegeneration treatment without neurologist supervision and diagnostic confirmation."
+      ],
+      "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+      "regulatory_status": "Semax, Selank, and Pinealon are not FDA- or EMA-approved. Evidence base remains mainly Russian/regional clinical literature plus preclinical/translational studies.",
+      "evidence_update": "Maintain evidence grade C/exploratory-translational and avoid language implying established Western regulatory approval.",
+      "updated_at": "2026-04-26T09:05:00+02:00",
+      "source_refs": [],
+      "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+    },
+    "_syncSource": "export/protocols/cog_002.js",
+    "canonical_enrichment": {
+      "compatibleWith": "antigravity_v2_firebase_import",
+      "auditFieldsCompleted": [
+        "eligibility_rules.indications",
+        "metadata.evidence_grade",
+        "metadata.clinical_summary",
+        "washout_recommended_weeks",
+        "expected_outcomes.qualitative",
+        "phase_blueprints",
+        "physician_supervision_required"
+      ],
+      "generatedAt": "2026-04-26T06:53:24Z"
+    },
+    "monitoring_plan": {
+      "baseline_required": [
+        "stress_score",
+        "sleep_quality",
+        "focus_baseline",
+        "anxiety_pattern"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "measures": [
+            "stress",
+            "sleep",
+            "focus"
+          ],
+          "purpose": "Assess early stabilization",
+          "type": "stability_review",
+          "week": 4
+        },
+        {
+          "measures": [
+            "recovery_from_stress",
+            "focus_under_load"
+          ],
+          "purpose": "Assess resilience progression",
+          "type": "resilience_reassessment",
+          "week": 8
+        },
+        {
+          "measures": [
+            "overall_resilience",
+            "sleep",
+            "focus"
+          ],
+          "purpose": "End-of-cycle evaluation",
+          "type": "final_outcome_review",
+          "week": 12
+        }
+      ]
+    },
+    "_enrichmentVersion": "content_v1",
+    "_syncedAt": "2026-04-26T12:46:26.955Z",
+    "_enrichedAt": "2026-04-26T12:45:55Z",
+    "safety_profile": {
+      "drug_interactions": [
+        "Potential additive sedation with benzodiazepines or Z-drugs — use caution and monitor",
+        "Theoretical GABAergic potentiation with alcohol — advise avoidance",
+        "May attenuate stimulant effect of high-dose Semax — titrate adjunct carefully",
+        "No known interactions with SSRIs at standard doses; monitor for combined serotonergic effects"
+      ],
+      "monitoring_required": [
+        "HAM-A or GAD-7 anxiety score at baseline, week 4, week 8, week 12",
+        "Sleep quality assessment (PSQI or VAS) at each checkpoint",
+        "Cognitive VAS score (0–10) for focus-under-load at baseline and week 8",
+        "Blood pressure monitoring (Semax mild vasoconstrictive potential when added week 5+)"
+      ],
+      "adverse_events_serious": [
+        "No serious adverse events reported in published clinical trials at standard doses (300–500 mcg Selank)",
+        "No dependency or withdrawal syndrome documented — favorable safety vs. benzodiazepines"
+      ],
+      "adverse_events_common": [
+        "Mild nasal irritation or rhinorrhea (10–15%) from intranasal delivery",
+        "Transient sedation or calming effect (desired in some, problematic if driving) — 8–12%",
+        "Mild headache in the first 1–2 weeks (6–10%)",
+        "Appetite changes (mild) — reported anecdotally in < 5%"
+      ],
+      "common_side_effects": [
+        "Mild nasal irritation or rhinitis (Semax intranasal, ~10–15% of users)",
+        "Transient headache within 30–60 minutes of Semax administration (<10%)",
+        "Mild injection-site discomfort with subcutaneous Pinealon (<8%)",
+        "Transient agitation or restlessness, particularly at higher Semax doses (~8%)",
+        "Mild sleep-onset delay if Semax administered after 14:00 (~12%)",
+        "Appetite fluctuation in early titration phase (~6%)"
+      ],
+      "contraindication_summary": "Contraindicated in active epilepsy or uncontrolled seizure disorders (Semax lowers seizure threshold at supratherapeutic doses). Avoid in uncontrolled psychosis or schizophrenia spectrum disorders. Not for use in pregnancy or breastfeeding. Severe hepatic impairment is a relative contraindication due to limited metabolic safety data. Use with caution in patients on CNS stimulants, MAOIs, or serotonergic agents. No FDA-approved interaction database available; physician supervision required."
+    },
+    "updated_at": "2026-05-04T14:35:44.633Z",
+    "protocol_author_organization": "Atlas Health",
+    "recommended_supplements": [
+      "lion-s-mane-mushroom",
+      "ginkgo-biloba",
+      "acetyl-carnitine"
+    ],
+    "primary_goal": "Cognitive Support",
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible"
+    ],
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
+    "protocol_title": "Semax & Pinealon Neuro-Executive Protocol",
+    "category": "Cognitive Support",
+    "syncedAt": "2026-05-16T14:32:33.635Z",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "stress_pattern",
+        "sleep_profile",
+        "age_variant_match"
+      ],
+      "profile_notes": [
+        "Prefer conservative tempo if insomnia or high reactivity is present."
+      ],
+      "base_duration_weeks": 8
+    },
+    "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
+    "metadata": {
+      "longDescription": "This protocol pairs Semax (ACTH-derived nootropic; see cog_001) with Pinealon (Glu-Asp-Arg), a tripeptide bioregulator isolated from pineal gland extract. Pinealon penetrates the blood-brain barrier and interacts with neuronal DNA regulatory elements, modulating gene expression involved in antioxidant defense, circadian signaling, and neuronal survival (Khavinson VKh et al., Neurosci Behav Physiol 2002; Khavinson V et al., Adv Gerontol 2013). Preclinical and Russian clinical data demonstrate Pinealon-mediated neuroprotection in hypoxia, ischemia, and age-related neurodegeneration models. By combining Semax (acute BDNF/NGF upregulation, improved cerebral blood flow) with Pinealon (epigenetic neuroprotection, gene-level antioxidant activity), this protocol targets both functional cognitive enhancement and structural neuroprotection — particularly relevant for aging populations, early cognitive decline, and post-ischemic recovery.",
+      "primary_goal": "Cognitive Support",
+      "keywords": [
+        "Semax Pinealon protocol",
+        "epigenetic neuroprotection peptide",
+        "cognitive longevity protocol",
+        "Pinealon bioregulator",
+        "executive function peptide",
+        "neuroprotective peptide stack"
+      ],
+      "references": [
+        {
+          "pmid": "12503660",
+          "citation": "Khavinson VKh et al. Peptide regulation of aging. Neurosci Behav Physiol 2002;32:555-558."
+        },
+        {
+          "pmid": "24212892",
+          "citation": "Khavinson V et al. Peptide regulation of neurogenesis. Adv Gerontol 2013;26:27-37."
+        },
+        {
+          "pmid": "16805834",
+          "citation": "Dolotov OV et al. Semax stimulates BDNF expression. J Neurochem 2006;97(Suppl 1):82-86."
+        }
+      ],
+      "scientificName": "Semax & Pinealon Prefrontal–Hippocampal Neuro-Executive Protocol",
+      "description": "8-week dual intranasal/injectable protocol combining Semax BDNF induction with Pinealon epigenetic peptide bioregulation for executive function, neuroprotection, and cognitive longevity."
+    },
+    "_patchedAt": {
+      "phase3a_fix": "2026-05-17T08:56:29.759546+00:00"
+    },
+    "_last_synced_at": "2026-05-17T09:24:08.914Z",
+    "phase_blueprints": [
+      {
+        "clinical_events": [
+          {
+            "event_type": "baseline_review",
+            "title": "Baseline stress-resilience and attention review",
+            "week": 1
+          }
+        ],
+        "clinical_purpose": [
+          "stress_modulation",
+          "anxious_focus_support",
+          "tolerance_building"
+        ],
+        "default_duration_weeks": 4,
+        "default_start_week": 1,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_days_default": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+              ],
+              "administration_frequency": "daily",
+              "dose_unit": "mcg",
+              "timing_hint": "Administer in the morning or split AM/PM to sustain anxiolytic effect",
+              "starting_weekly_dose": 500,
+              "dose_per_administration": 71
+            },
+            "product_id": "prd_selank",
+            "product_title": "Selank",
+            "route": "intranasal",
+            "variantRef": {
+              "productId": "prd_selank",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          },
+          {
+            "dose_logic": {
+              "activation_condition": "if_attention_deficit_pattern_present",
+              "administration_days_default": [
+                "Tuesday",
+                "Thursday"
+              ],
+              "administration_frequency": "2x_week",
+              "dose_unit": "mcg",
+              "intensity_label": "optional_low",
+              "starting_weekly_dose": 500,
+              "dose_per_administration": 250,
+              "timing_hint": "Administer in the morning for BDNF and cognitive activation"
+            },
+            "product_id": "prd_semax",
+            "product_title": "Semax",
+            "route": "intranasal",
+            "variantRef": {
+              "productId": "prd_semax",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          }
+        ],
+        "phase_key": "stabilization",
+        "phase_title": "Stabilization",
+        "phase_id": "cog_002_ph1",
+        "phase_name": "Neurological Priming",
+        "duration_weeks": 3
+      },
+      {
+        "clinical_events": [
+          {
+            "event_type": "checkpoint",
+            "title": "Stress response and cognitive control reassessment",
+            "week": 6
+          }
+        ],
+        "clinical_purpose": [
+          "stress_tolerance",
+          "executive_focus",
+          "recovery_support"
+        ],
+        "default_duration_weeks": 4,
+        "default_start_week": 5,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_days_default": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "administration_frequency": "5x_week",
+              "dose_unit": "mcg",
+              "starting_weekly_dose": 1,
+              "dose_per_administration": 200,
+              "timing_hint": "Administer on weekdays; supports sustained cognitive load and anxiolysis"
+            },
+            "product_id": "prd_selank",
+            "product_title": "Selank",
+            "route": "intranasal",
+            "variantRef": {
+              "productId": "prd_selank",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          },
+          {
+            "dose_logic": {
+              "activation_condition": "if_focus_activation_needed",
+              "administration_days_default": [
+                "Monday",
+                "Wednesday",
+                "Friday"
+              ],
+              "administration_frequency": "3x_week",
+              "dose_unit": "mcg",
+              "intensity_label": "conditional",
+              "starting_weekly_dose": 900,
+              "dose_per_administration": 300,
+              "timing_hint": "Administer in the morning on training/work days for peak BDNF effect"
+            },
+            "product_id": "prd_semax",
+            "product_title": "Semax",
+            "route": "intranasal",
+            "variantRef": {
+              "productId": "prd_semax",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          }
+        ],
+        "phase_key": "adaptive_focus",
+        "phase_title": "Adaptive Focus",
+        "phase_id": "cog_002_ph2",
+        "phase_name": "Active Cognitive Enhancement",
+        "duration_weeks": 3
+      },
+      {
+        "clinical_events": [
+          {
+            "event_type": "outcome_review",
+            "title": "Final resilience and focus review",
+            "week": 12
+          }
+        ],
+        "clinical_purpose": [
+          "resilience_maintenance",
+          "relapse_prevention"
+        ],
+        "default_duration_weeks": 4,
+        "default_start_week": 9,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_days_default": [
+                "Monday",
+                "Wednesday",
+                "Friday"
+              ],
+              "administration_frequency": "3x_week",
+              "dose_unit": "mcg",
+              "starting_weekly_dose": 1,
+              "dose_per_administration": 333,
+              "timing_hint": "Step-down maintenance; continue 3x/week indefinitely or cycle 4 weeks off"
+            },
+            "product_id": "prd_selank",
+            "product_title": "Selank",
+            "route": "intranasal",
+            "variantRef": {
+              "productId": "prd_selank",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          }
+        ],
+        "phase_key": "maintenance",
+        "phase_title": "Maintenance",
+        "phase_id": "cog_002_ph3",
+        "phase_name": "Maintenance",
+        "duration_weeks": 2
+      }
+    ],
+    "synergy_rationale": "This multi-compound protocol is designed to provide synergistic effects, targeting multiple complementary biological pathways simultaneously to achieve cognitive support more effectively than monotherapy.",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "Focus on REM and deep sleep for memory consolidation.",
+      "nutrition": "Brain-healthy fats (DHA/EPA), antioxidant-rich foods, avoid sugar spikes.",
+      "activity": "Aerobic exercise to promote neurogenesis (BDNF).",
+      "hydration": "Consistent hydration (even mild dehydration impairs cognition)."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:18.435Z",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Neuroactivation",
+        "start_week": 1,
+        "end_week": 4,
+        "drugs_used": [
+          {
+            "product_slug": "semax",
+            "selected_strength": "10mg",
+            "route": "intranasal",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 2,
+            "faq_ref": "semax_faq",
+            "pubmed_ref": "semax_pubmed",
+            "weekly_dose": "2100 mcg",
+            "weekly_dose_amount": 2100,
+            "weekly_dose_unit": "mcg"
+          },
+          {
+            "product_slug": "pinealon",
+            "selected_strength": "10mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 4,
+            "faq_ref": "pinealon_faq",
+            "pubmed_ref": "pinealon_pubmed",
+            "weekly_dose": "2.1 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 2.1,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Stabilization",
+        "start_week": 5,
+        "end_week": 8,
+        "drugs_used": [
+          {
+            "product_slug": "semax",
+            "selected_strength": "5mg",
+            "dosing_frequency": "5x_week",
+            "vials_required_for_phase": 2,
+            "route": "intranasal",
+            "weekly_dose": "1500 mcg",
+            "weekly_dose_amount": 1500,
+            "weekly_dose_unit": "mcg"
+          },
+          {
+            "product_slug": "pinealon",
+            "selected_strength": "10mg",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 2,
+            "route": "subcutaneous",
+            "weekly_dose": "2.1 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 2.1,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "expected_outcomes": {
+      "0": "Improved focus",
+      "1": "Better memory retention",
+      "2": "Reduced mental fatigue",
+      "qualitative": [
+        "Improved working memory, attention, and executive function",
+        "Reduction in cognitive fog and subjective fatigue",
+        "Enhanced neuroprotective signaling and BDNF/NGF expression",
+        "Improved stress resilience and emotional regulation",
+        "Sustained mental clarity during high cognitive-demand activities"
+      ]
+    }
+  },
+  {
+    "id": "energy_001",
+    "protocol_duration_weeks": 10,
+    "bundleVersion": "2.0",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_is_physician_authored": false,
+    "seeded_at": "2026-04-25T06:10:36.133Z",
+    "protocol_source_version": "v5.0",
+    "dosing_enrichment": {
+      "titration_note": "Introduce MOTS-c at 5 mg 3x/week from week 1 (no titration needed at standard dose). If SS-31 included, start at 20 mg/day weeks 1-2, increase to 40 mg/day week 3+. Monitor fatigue VAS score weekly for first 4 weeks.",
+      "cycling_recommendation": "12-week active cycle followed by 4-week washout. MOTS-c receptor sensitivity is maintained with cycling; SS-31 mitochondrial stabilization benefits persist post-cycle.",
+      "maintenance_dose": "MOTS-c: 5 mg subcutaneous 3x/week (Mon/Wed/Fri). SS-31 (Elamipretide): 40 mg/day subcutaneous if available. NAD+ precursor (NMN 500 mg oral) as adjunct daily.",
+      "timing_optimization": "MOTS-c best administered fasted or 90 min pre-exercise to leverage AMPK activation during metabolic demand. SS-31 morning subcutaneous. NMN with morning meal."
+    },
+    "complexity_level": "moderate",
+    "eligibility_rules": {
+      "indications": [
+        "chronic_fatigue_or_low_energy_state",
+        "post_exertional_fatigue_or_reduced_recovery",
+        "age_related_mitochondrial_decline",
+        "metabolic_inefficiency_with_fatigue",
+        "post_viral_fatigue_support_when_medically_assessed"
+      ],
+      "contraindications": [
+        "active_malignancy",
+        "severe_mitochondrial_disease_requiring_medical_management",
+        "pregnancy_or_breastfeeding",
+        "known_hypersensitivity_to_mots_c_or_ss31"
+      ],
+      "supported_goals": [
+        "mitochondrial_energy",
+        "fatigue_support",
+        "bioenergetic_support",
+        "metabolic_efficiency"
+      ],
+      "relative_cautions": [],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "patient_demographic",
+        "age_group",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ]
+    },
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_source_reference": "internal_guide",
+    "protocol_slug": "mitochondrial-energy-10w",
+    "protocol_is_curated": true,
+    "number_of_phases": 2,
+    "risk_class": "moderate",
+    "protocol_review_status": "approved",
+    "protocol_source_type": "curated_library",
+    "washout_recommended_weeks": 4,
+    "active": true,
+    "overview_summary": "Protocol focused on mitochondrial optimization and ATP production efficiency.",
+    "protocol_id": "energy_001",
+    "protocol_version": "v6.0",
+    "economics": {
+      "total_protocol_cost_estimate": 950,
+      "total_vials_required": 25
+    },
+    "protocol_author_title": "Peptide Specialists",
+    "confidence_score": 92,
+    "uploadedAt": "2026-04-20T09:29:12.816Z",
+    "variant_rules": {
+      "tempo_variants": {
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "duration_variants": {
+        "20_weeks": {
+          "mode": "extended_plus",
+          "extra_monitoring": true
+        },
+        "16_weeks": {
+          "mode": "extended",
+          "extra_monitoring": true
+        },
+        "12_weeks": {
+          "mode": "standard",
+          "extra_monitoring": false
+        },
+        "8_weeks": {
+          "mode": "short",
+          "extra_monitoring": false
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "special_notes": [
+            "Use conservative ramping if sensitivity profile is high."
+          ],
+          "recommended_flags": []
+        },
+        "male": {
+          "special_notes": [
+            "Reassess tolerance and response before escalation."
+          ],
+          "recommended_flags": []
+        }
+      },
+      "age_variants": {
+        "51-65": {
+          "monitoring_intensity": "enhanced",
+          "default_duration_weeks": 16
+        },
+        "36-50": {
+          "monitoring_intensity": "moderate",
+          "default_duration_weeks": 12
+        },
+        "18-35": {
+          "monitoring_intensity": "standard",
+          "default_duration_weeks": 8
+        },
+        "65+": {
+          "monitoring_intensity": "enhanced",
+          "default_duration_weeks": 16
+        }
+      }
+    },
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode.",
+      "enabled": true
+    },
+    "physician_supervision_required": true,
+    "status": "approved",
+    "_patchedAt": {},
+    "_patchSchema": "antigravity_v2",
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "CBC",
+          "CMP",
+          "Lipid Panel"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "CBC",
+          "CMP"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Mitochondrial disease (consult specialist)",
+        "Severe renal impairment (CrCl < 30)",
+        "Pregnancy"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (15–35%)",
+          "management": "Rotate sites; use proper aseptic technique."
+        },
+        {
+          "effect": "Fluid retention / mild edema",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Reduce dose; monitor blood pressure; salt restriction."
+        },
+        {
+          "effect": "Nausea / GI discomfort",
+          "frequency": "Common (10–25%)",
+          "management": "Dose with food; split doses; titrate slowly."
+        },
+        {
+          "effect": "Elevated fasting glucose",
+          "frequency": "Uncommon (5%)",
+          "management": "Monitor fasting glucose weekly; consult if persistent."
+        },
+        {
+          "effect": "Mood changes / irritability",
+          "frequency": "Rare (<3%)",
+          "management": "Reduce dose; psychological support if needed."
+        }
+      ],
+      "escalation_criteria": [
+        "Severe or worsening edema — STOP, cardiovascular evaluation",
+        "Fasting glucose > 7.0 mmol/L (126 mg/dL) on two occasions — Endocrinology referral",
+        "Allergic reaction — STOP, emergency protocol",
+        "Hypertensive urgency (BP > 180/110) — STOP, immediate medical attention"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+    "_schemaGapFixed": {
+      "_nanoseconds": 922000000,
+      "_seconds": 1777190716
+    },
+    "_schemaVersion": "antigravity_v2",
+    "_bundleCreatedAt": "2026-04-26T09:05:00+02:00",
+    "clinical_evidence_update_2026": {
+      "evidence_limitations": [
+        "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+        "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+        "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+      ],
+      "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+      "last_updated_at": "2026-04-26T08:05:00.000Z",
+      "latest_clinical_notes": [
+        "Elamipretide regulatory status should be updated: accelerated FDA approval exists for Barth syndrome, but not for general fatigue or performance indications.",
+        "Continue to treat MOTS-c as investigational with limited human efficacy data.",
+        "For fatigue protocols, strengthen baseline exclusion of anemia, thyroid disease, sleep apnea, depression, medication adverse effects, and uncontrolled cardiometabolic disease before peptide use."
+      ],
+      "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+      "regulatory_status": "Elamipretide is FDA accelerated-approved as Forzinity for Barth syndrome in patients weighing at least 30 kg (approved September 19, 2025). Use for general fatigue, performance, mitochondrial optimization, long-COVID fatigue, or non-Barth mitochondrial support remains off-label/investigational and requires physician oversight.",
+      "evidence_update": "Forzinity approval strengthens the regulatory status of elamipretide for a narrow rare-disease indication only; it should not be represented as broadly approved for fatigue or longevity uses.",
+      "updated_at": "2026-04-26T09:05:00+02:00",
+      "source_refs": [
+        {
+          "type": "regulatory",
+          "source": "FDA",
+          "date": "2025-09-19",
+          "note": "Accelerated approval of Forzinity (elamipretide) for Barth syndrome, patients ≥30 kg."
+        }
+      ],
+      "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+    },
+    "_syncSource": "export/protocols/energy_001.js",
+    "canonical_enrichment": {
+      "compatibleWith": "antigravity_v2_firebase_import",
+      "auditFieldsCompleted": [
+        "eligibility_rules.indications",
+        "metadata.evidence_grade",
+        "metadata.clinical_summary",
+        "washout_recommended_weeks",
+        "expected_outcomes.qualitative",
+        "phase_blueprints",
+        "physician_supervision_required"
+      ],
+      "generatedAt": "2026-04-26T06:53:24Z"
+    },
+    "monitoring_plan": {
+      "baseline_required": [
+        "fatigue_score",
+        "exercise_tolerance",
+        "sleep_quality",
+        "metabolic_profile"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "week": 4,
+          "type": "energy_review",
+          "measures": [
+            "fatigue",
+            "exercise_recovery",
+            "sleep"
+          ],
+          "purpose": "Confirm tolerance and early signal"
+        },
+        {
+          "week": 8,
+          "type": "bioenergetic_reassessment",
+          "measures": [
+            "fatigue",
+            "training_tolerance",
+            "perceived_exertion"
+          ],
+          "purpose": "Assess mitochondrial response"
+        },
+        {
+          "week": 12,
+          "type": "final_outcome_review",
+          "measures": [
+            "overall_energy",
+            "recovery_capacity"
+          ],
+          "purpose": "End-of-cycle evaluation"
+        }
+      ]
+    },
+    "_enrichmentVersion": "content_v1",
+    "_syncedAt": "2026-04-26T12:46:27.257Z",
+    "_enrichedAt": "2026-04-26T12:45:55Z",
+    "safety_profile": {
+      "drug_interactions": [
+        "Insulin/antidiabetics: additive glucose lowering via AMPK - adjust doses",
+        "Metformin: synergistic AMPK activation - generally beneficial, monitor for excessive lactate",
+        "Anticoagulants: no known interaction; monitor empirically if thrombopenic"
+      ],
+      "monitoring_required": [
+        "VAS fatigue score (0-10) at baseline, week 4, week 8, week 12",
+        "Fasting glucose and fasting insulin (HOMA-IR) at baseline and week 12",
+        "CRP and IL-6 at baseline and week 12",
+        "6-minute walk test or standardized exercise tolerance at baseline and week 12",
+        "CBC at baseline to rule out anemia as fatigue cause"
+      ],
+      "adverse_events_serious": [
+        "No serious adverse events reported in MOTS-c Phase I (n=12; dose-escalation study)",
+        "SS-31: injection site reactions in 17% in MMPOWER trials; no systemic serious events at 40 mg/day",
+        "Theoretical hypoglycemia risk in diabetics on insulin - monitor closely"
+      ],
+      "adverse_events_common": [
+        "Injection site reactions (erythema, mild pain): 10-20% - rotate administration sites",
+        "Mild hypoglycemia if fasted protocol extended (5-8%) - monitor glucose",
+        "Transient flu-like symptoms in first week (10%) - resolve spontaneously",
+        "Mild nausea with NMN adjunct in sensitive patients (5%)"
+      ],
+      "common_side_effects": [
+        "Injection-site redness and mild induration (SS-31/MOTS-c SC injection, ~20–25% of users)",
+        "Transient fatigue or 'energy crash' in weeks 1–2 during mitochondrial adaptation (~15%)",
+        "Mild nausea, particularly with higher SS-31 doses (~10%)",
+        "Transient flushing or warmth sensation post-injection (~8%)",
+        "Low-grade myalgia during early exercise re-adaptation phase (~10%)",
+        "Headache in first 1–2 weeks of MOTS-c initiation (~7%)"
+      ],
+      "contraindication_summary": "Contraindicated in active malignancy due to mitochondrial AMPK pathway interactions that may theoretically influence cancer cell metabolism. Avoid in severe primary mitochondrial disease requiring specialist management. Not for use in pregnancy or breastfeeding (no safety data). Known hypersensitivity to MOTS-c or SS-31 is an absolute contraindication. Use with caution in patients on metformin (AMPK overlap), immunosuppressants, or cardiac medications. Patients with post-viral fatigue syndromes should begin at reduced dose with careful physician monitoring."
+    },
+    "updated_at": "2026-05-04T14:35:44.634Z",
+    "protocol_author_organization": "Atlas Health",
+    "recommended_supplements": [
+      "co-q10",
+      "nmn",
+      "rhodiola-rosea",
+      "b-complex"
+    ],
+    "primary_goal": "Energy / Mitochondrial",
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible"
+    ],
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
+    "protocol_title": "MOTS-c Mitochondrial Energy Protocol",
+    "category": "Energy & Metabolism",
+    "syncedAt": "2026-05-16T14:32:32.915Z",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "age_variant_match",
+        "fatigue_pattern",
+        "exercise_load"
+      ],
+      "profile_notes": [
+        "Escalate cautiously in highly reactive or sleep-fragile users."
+      ],
+      "base_duration_weeks": 10
+    },
+    "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
+    "phase_blueprints": [
+      {
+        "phase_key": "activation",
+        "phase_title": "Mitochondrial Activation",
+        "default_start_week": 1,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "bioenergetic_support",
+          "fatigue_reduction",
+          "tolerance_building"
+        ],
+        "drugs": [
+          {
+            "product_id": "prd_motsc",
+            "product_title": "MOTS-c",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "3x_week",
+              "administration_days_default": [
+                "Monday",
+                "Wednesday",
+                "Friday"
+              ],
+              "timing_hint": "morning",
+              "starting_weekly_dose": 0.5
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_motsc",
+              "route": "subcutaneous"
+            }
+          },
+          {
+            "product_id": "prd_elamipretide",
+            "product_title": "Elamipretide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "daily",
+              "administration_days_default": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+              ],
+              "activation_condition": "if_clinician_enables_mito_support_variant",
+              "intensity_label": "optional_low"
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_elamipretide",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 1,
+            "event_type": "baseline_review",
+            "title": "Baseline energy, recovery, and exercise tolerance review"
+          }
+        ]
+      },
+      {
+        "phase_key": "optimization",
+        "phase_title": "Bioenergetic Optimization",
+        "default_start_week": 5,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "mitochondrial_efficiency",
+          "recovery_support",
+          "fatigue_resilience"
+        ],
+        "drugs": [
+          {
+            "product_id": "prd_motsc",
+            "product_title": "MOTS-c",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "3x_week",
+              "administration_days_default": [
+                "Monday",
+                "Wednesday",
+                "Friday"
+              ],
+              "starting_weekly_dose": 1
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_motsc",
+              "route": "subcutaneous"
+            }
+          },
+          {
+            "product_id": "prd_elamipretide",
+            "product_title": "Elamipretide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "daily",
+              "administration_days_default": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+              ],
+              "activation_condition": "if_mitochondrial_support_priority_high",
+              "intensity_label": "conditional"
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_elamipretide",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 6,
+            "event_type": "checkpoint",
+            "title": "Fatigue and recovery checkpoint"
+          }
+        ]
+      },
+      {
+        "phase_key": "maintenance",
+        "phase_title": "Maintenance",
+        "default_start_week": 9,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "response_maintenance",
+          "exercise_recovery_support"
+        ],
+        "drugs": [
+          {
+            "product_id": "prd_motsc",
+            "product_title": "MOTS-c",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "2x_week",
+              "administration_days_default": [
+                "Tuesday",
+                "Thursday"
+              ],
+              "starting_weekly_dose": 1
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_motsc",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 12,
+            "event_type": "outcome_review",
+            "title": "Final mitochondrial energy review"
+          }
+        ]
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.920Z",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "Quality sleep to clear metabolic waste.",
+      "nutrition": "Mitochondrial-supportive diet (healthy fats, B-vitamins).",
+      "activity": "Consistent aerobic exercise.",
+      "hydration": "Standard adequate hydration."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:23.478Z",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Activation",
+        "start_week": 1,
+        "end_week": 5,
+        "drugs_used": [
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 15,
+            "route": "subcutaneous",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose": "15 mg",
+            "weekly_dose_amount": 15,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Maintenance",
+        "start_week": 6,
+        "end_week": 10,
+        "drugs_used": [
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "dosing_frequency": "2x_week",
+            "vials_required_for_phase": 10,
+            "route": "subcutaneous",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose": "10 mg",
+            "weekly_dose_amount": 10,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "complexity_level": "standard",
+      "visibility": "public",
+      "scientificName": "MOTS-c Mitokine AMPK-Activating Mitochondrial Energy Restoration Protocol",
+      "primary_goal": "Energy / Mitochondrial"
+    },
+    "expected_outcomes": {
+      "0": "Sustained energy",
+      "1": "Reduced cellular fatigue",
+      "2": "Enhanced mitochondrial function",
+      "qualitative": [
+        "Cellular rejuvenation and reduction of biological aging biomarkers",
+        "Improved mitochondrial efficiency and oxidative stress resilience",
+        "Enhanced skin elasticity, hydration, and collagen density",
+        "Support for telomere integrity and reduced epigenetic age",
+        "Improved systemic energy and functional healthspan"
+      ]
+    }
+  },
+  {
+    "id": "energy_002",
+    "protocol_duration_weeks": 10,
+    "bundleVersion": "2.0",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_is_physician_authored": false,
+    "seeded_at": "2026-04-25T06:10:36.134Z",
+    "protocol_source_version": "v5.0",
+    "dosing_enrichment": {
+      "titration_note": "Weeks 1-4: MOTS-c 5 mg 3x/week + SS-31 40 mg/day. Weeks 5-8: increase MOTS-c to 10 mg 3x/week if well tolerated; maintain SS-31. Weeks 9-16: full dose with NR/NMN adjunct. Monitor VO2 and fatigue VAS at each phase.",
+      "cycling_recommendation": "16-week active protocol with 6-week washout. More aggressive than energy_001 due to higher SS-31 dose and potential NR/NMN precursor saturation. Cycling preserves mitochondrial autophagy (mitophagy) responsiveness.",
+      "maintenance_dose": "MOTS-c: 10 mg subcutaneous 3x/week (enhanced dose). SS-31: 40-80 mg/day subcutaneous. NR (Nicotinamide Riboside) 500 mg oral 2x/day or NMN 1000 mg oral daily as NAD+ precursor adjunct.",
+      "timing_optimization": "MOTS-c: fasted state, pre-exercise preferred. SS-31: morning subcutaneous. NAD+ precursor: with morning and evening meals. Avoid SS-31 within 2 hours of antioxidant supplementation (may attenuate mitohormesis)."
+    },
+    "complexity_level": "advanced",
+    "eligibility_rules": {
+      "indications": [
+        "moderate_to_severe_fatigue_with_impaired_recovery",
+        "post_viral_or_long_covid_fatigue_support_when_medically_assessed",
+        "mitochondrial_resilience_optimization",
+        "athletic_or_high_demand_recovery_support",
+        "non_response_to_baseline_mitochondrial_energy_protocol"
+      ],
+      "contraindications": [
+        "active_malignancy",
+        "pregnancy_or_breastfeeding",
+        "severe_hepatic_or_renal_impairment",
+        "known_hypersensitivity_to_protocol_compounds"
+      ],
+      "supported_goals": [
+        "mitochondrial_resilience",
+        "recovery_support",
+        "cellular_resilience",
+        "fatigue_resilience"
+      ],
+      "relative_cautions": [],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "patient_demographic",
+        "age_group",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ]
+    },
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_source_reference": "internal_guide",
+    "protocol_slug": "mitochondrial-resilience-10w",
+    "protocol_is_curated": true,
+    "number_of_phases": 2,
+    "risk_class": "moderate_to_advanced",
+    "protocol_review_status": "approved",
+    "protocol_source_type": "curated_library",
+    "washout_recommended_weeks": 6,
+    "active": true,
+    "overview_summary": "Mitochondrial support protocol using SS-31 and NMN with MOTS-C for broader metabolic and bioenergetic support.",
+    "protocol_id": "energy_002",
+    "protocol_version": "v6.0",
+    "economics": {
+      "total_protocol_cost_estimate": 1180,
+      "total_vials_required": 20
+    },
+    "protocol_author_title": "Peptide Specialists",
+    "confidence_score": 91,
+    "uploadedAt": "2026-04-20T09:29:12.819Z",
+    "variant_rules": {
+      "tempo_variants": {
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "duration_variants": {
+        "20_weeks": {
+          "mode": "extended_plus",
+          "extra_monitoring": true
+        },
+        "16_weeks": {
+          "mode": "extended",
+          "extra_monitoring": true
+        },
+        "12_weeks": {
+          "mode": "standard",
+          "extra_monitoring": false
+        },
+        "8_weeks": {
+          "mode": "short",
+          "extra_monitoring": false
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "special_notes": [
+            "Use conservative ramping if sensitivity profile is high."
+          ],
+          "recommended_flags": []
+        },
+        "male": {
+          "special_notes": [
+            "Reassess tolerance and response before escalation."
+          ],
+          "recommended_flags": []
+        }
+      },
+      "age_variants": {
+        "51-65": {
+          "monitoring_intensity": "enhanced",
+          "default_duration_weeks": 16
+        },
+        "36-50": {
+          "monitoring_intensity": "moderate",
+          "default_duration_weeks": 12
+        },
+        "18-35": {
+          "monitoring_intensity": "standard",
+          "default_duration_weeks": 8
+        },
+        "65+": {
+          "monitoring_intensity": "enhanced",
+          "default_duration_weeks": 20
+        }
+      }
+    },
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode.",
+      "enabled": true
+    },
+    "physician_supervision_required": true,
+    "status": "approved",
+    "_patchedAt": {},
+    "_patchSchema": "antigravity_v2",
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "CBC",
+          "CMP",
+          "Lipid Panel"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "CBC",
+          "CMP"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Mitochondrial disease (consult specialist)",
+        "Severe renal impairment (CrCl < 30)",
+        "Pregnancy"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+    "_schemaGapFixed": {
+      "_nanoseconds": 912000000,
+      "_seconds": 1777190717
+    },
+    "_schemaVersion": "antigravity_v2",
+    "_bundleCreatedAt": "2026-04-26T09:05:00+02:00",
+    "clinical_evidence_update_2026": {
+      "evidence_limitations": [
+        "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+        "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+        "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+      ],
+      "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+      "last_updated_at": "2026-04-26T08:05:00.000Z",
+      "latest_clinical_notes": [
+        "Elamipretide evidence is strongest for rare mitochondrial disease contexts; broader fatigue use remains extrapolative.",
+        "NAD+ precursors retain a stronger supplement safety base than injectable peptide components, but efficacy endpoints remain heterogeneous.",
+        "Consider explicit monitoring for injection-site reactions and functional fatigue scales."
+      ],
+      "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+      "regulatory_status": "Elamipretide is FDA accelerated-approved as Forzinity for Barth syndrome in patients weighing at least 30 kg (approved September 19, 2025). Use for general fatigue, performance, mitochondrial optimization, long-COVID fatigue, or non-Barth mitochondrial support remains off-label/investigational and requires physician oversight.",
+      "evidence_update": "Forzinity approval strengthens the regulatory status of elamipretide for a narrow rare-disease indication only; it should not be represented as broadly approved for fatigue or longevity uses.",
+      "updated_at": "2026-04-26T09:05:00+02:00",
+      "source_refs": [
+        {
+          "type": "regulatory",
+          "source": "FDA",
+          "date": "2025-09-19",
+          "note": "Accelerated approval of Forzinity (elamipretide) for Barth syndrome, patients ≥30 kg."
+        }
+      ],
+      "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+    },
+    "_syncSource": "export/protocols/energy_002.js",
+    "canonical_enrichment": {
+      "compatibleWith": "antigravity_v2_firebase_import",
+      "auditFieldsCompleted": [
+        "eligibility_rules.indications",
+        "metadata.evidence_grade",
+        "metadata.clinical_summary",
+        "washout_recommended_weeks",
+        "expected_outcomes.qualitative",
+        "phase_blueprints",
+        "physician_supervision_required"
+      ],
+      "generatedAt": "2026-04-26T06:53:24Z"
+    },
+    "monitoring_plan": {
+      "baseline_required": [
+        "fatigue_score",
+        "recovery_score",
+        "exercise_tolerance",
+        "sleep_quality"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "week": 4,
+          "type": "repair_review",
+          "measures": [
+            "fatigue",
+            "recovery",
+            "sleep"
+          ],
+          "purpose": "Confirm early repair signal"
+        },
+        {
+          "week": 8,
+          "type": "resilience_reassessment",
+          "measures": [
+            "stress_tolerance",
+            "fatigue_resilience"
+          ],
+          "purpose": "Assess midpoint response"
+        },
+        {
+          "week": 12,
+          "type": "final_outcome_review",
+          "measures": [
+            "overall_resilience",
+            "fatigue",
+            "recovery"
+          ],
+          "purpose": "End-of-cycle evaluation"
+        }
+      ]
+    },
+    "_enrichmentVersion": "content_v1",
+    "_syncedAt": "2026-04-26T12:46:27.813Z",
+    "_enrichedAt": "2026-04-26T12:45:55Z",
+    "safety_profile": {
+      "drug_interactions": [
+        "Insulin and antidiabetics: additive glucose-lowering risk - adjust doses carefully",
+        "Metformin: synergistic AMPK activation - monitor for excessive lactate accumulation",
+        "Sirtuins (resveratrol supplements): NR/NMN may amplify sirtuin activation - generally beneficial",
+        "Anticoagulants: no known interaction; monitor empirically in thrombopenic patients"
+      ],
+      "monitoring_required": [
+        "VAS fatigue score at baseline, week 4, week 8, week 12, week 16",
+        "Fasting glucose and HOMA-IR at baseline and week 8 and week 16",
+        "VO2max or 6-minute walk test at baseline and week 16",
+        "CRP, IL-6, NAD+ levels (if measurable) at baseline and week 12",
+        "CBC to rule out anemia or mitochondrial cytopenias at baseline"
+      ],
+      "adverse_events_serious": [
+        "No serious adverse events in MOTS-c Phase I at standard doses",
+        "SS-31 at 80 mg/day: injection site induration in MMPOWER-3 (17%); no systemic serious events",
+        "NR: no serious adverse events in human RCTs up to 2000 mg/day"
+      ],
+      "adverse_events_common": [
+        "Injection site reactions (MOTS-c + SS-31): 15-25% - rotate sites aggressively",
+        "Mild GI discomfort with high-dose NR/NMN (10-15%) - split dose or take with food",
+        "Transient flushing with NR in some patients (5%)",
+        "Mild hypoglycemia if fasted protocol extended (8-12%) - monitor glucose"
+      ],
+      "common_side_effects": [
+        "Injection-site discomfort, erythema, or mild bruising (SS-31 SC, ~18–22% of users)",
+        "Mild flushing or skin warmth post-SS-31 injection (~10%)",
+        "GI discomfort (nausea, bloating) with oral NMN supplementation, especially >500 mg/day (~12–15%)",
+        "Transient fatigue in adaptation phase weeks 1–3 (~12%)",
+        "Mild headache during initial mitochondrial upregulation (~8%)",
+        "Sleep disruption if NMN taken in afternoon/evening (~10% — administer NMN before noon)"
+      ],
+      "contraindication_summary": "Contraindicated in active malignancy (SS-31 mitochondrial rescue and NMN NAD+ repletion may provide metabolic substrate to rapidly dividing cells — requires oncologist clearance). Avoid in pregnancy or breastfeeding (no safety data). Severe hepatic or renal impairment: exercise caution with NMN metabolism. Known hypersensitivity to any protocol compound is an absolute contraindication. NMN may interact with NAD+ precursor metabolism pathways — monitor in patients on warfarin or chemotherapy. Physician supervision required throughout protocol."
+    },
+    "updated_at": "2026-05-04T14:35:44.634Z",
+    "protocol_author_organization": "Atlas Health",
+    "recommended_supplements": [
+      "co-q10",
+      "nmn",
+      "rhodiola-rosea",
+      "b-complex"
+    ],
+    "primary_goal": "Energy / Mitochondrial",
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible"
+    ],
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
+    "protocol_title": "SS-31 & NMN Bioenergetic Resilience Protocol",
+    "category": "Energy & Metabolism",
+    "syncedAt": "2026-05-16T14:32:34.964Z",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "recovery_pattern",
+        "fatigue_pattern",
+        "age_variant_match"
+      ],
+      "profile_notes": [
+        "Prefer for recovery-fragile phenotypes over performance-first profiles."
+      ],
+      "base_duration_weeks": 10
+    },
+    "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
+    "phase_blueprints": [
+      {
+        "phase_key": "repair",
+        "phase_title": "Mitochondrial Repair",
+        "default_start_week": 1,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "membrane_support",
+          "resilience_building",
+          "fatigue_recovery"
+        ],
+        "drugs": [
+          {
+            "product_id": "prd_elamipretide",
+            "product_title": "Elamipretide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "daily",
+              "administration_days_default": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+              ],
+              "timing_hint": "consistent_daily_use",
+              "starting_weekly_dose": 0.5
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_elamipretide",
+              "route": "subcutaneous"
+            }
+          },
+          {
+            "product_id": "prd_motsc",
+            "product_title": "MOTS-c",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "2x_week",
+              "administration_days_default": [
+                "Tuesday",
+                "Thursday"
+              ],
+              "activation_condition": "if_metabolic_adaptation_needed",
+              "intensity_label": "optional_low"
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_motsc",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 1,
+            "event_type": "baseline_review",
+            "title": "Baseline resilience and fatigue review"
+          }
+        ]
+      },
+      {
+        "phase_key": "adaptation",
+        "phase_title": "Adaptive Resilience",
+        "default_start_week": 5,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "oxidative_stress_resilience",
+          "recovery_capacity",
+          "bioenergetic_stability"
+        ],
+        "drugs": [
+          {
+            "product_id": "prd_elamipretide",
+            "product_title": "Elamipretide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "daily",
+              "administration_days_default": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+              ],
+              "starting_weekly_dose": 1
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_elamipretide",
+              "route": "subcutaneous"
+            }
+          },
+          {
+            "product_id": "prd_motsc",
+            "product_title": "MOTS-c",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "3x_week",
+              "administration_days_default": [
+                "Monday",
+                "Wednesday",
+                "Friday"
+              ],
+              "activation_condition": "if_recovery_plateau",
+              "intensity_label": "conditional"
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_motsc",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 8,
+            "event_type": "checkpoint",
+            "title": "Resilience reassessment"
+          }
+        ]
+      },
+      {
+        "phase_key": "consolidation",
+        "phase_title": "Consolidation",
+        "default_start_week": 9,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "maintenance_of_response",
+          "fatigue_prevention"
+        ],
+        "drugs": [
+          {
+            "product_id": "prd_elamipretide",
+            "product_title": "Elamipretide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "5x_week",
+              "administration_days_default": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "starting_weekly_dose": 1
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_elamipretide",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 12,
+            "event_type": "outcome_review",
+            "title": "Final mitochondrial resilience review"
+          }
+        ]
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.921Z",
+    "synergy_rationale": "This multi-compound protocol is designed to provide synergistic effects, targeting multiple complementary biological pathways simultaneously to achieve energy / mitochondrial more effectively than monotherapy.",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "Quality sleep to clear metabolic waste.",
+      "nutrition": "Mitochondrial-supportive diet (healthy fats, B-vitamins).",
+      "activity": "Consistent aerobic exercise.",
+      "hydration": "Standard adequate hydration."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:24.041Z",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Mitochondrial Rescue",
+        "start_week": 1,
+        "end_week": 5,
+        "drugs_used": [
+          {
+            "product_slug": "ss-31",
+            "selected_strength": "10mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 5,
+            "faq_ref": "ss31_faq",
+            "pubmed_ref": "ss31_pubmed",
+            "weekly_dose": "5 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "nmn",
+            "selected_strength": "50mg",
+            "route": "oral",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 2,
+            "faq_ref": "nmn_faq",
+            "pubmed_ref": "nmn_pubmed",
+            "weekly_dose": "1750 mg",
+            "weekly_dose_amount": 1750,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Bioenergetic Maintenance",
+        "start_week": 6,
+        "end_week": 10,
+        "drugs_used": [
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "2x_week",
+            "vials_required_for_phase": 10,
+            "faq_ref": "motsc_faq",
+            "pubmed_ref": "motsc_pubmed",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose": "10 mg",
+            "weekly_dose_amount": 10,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "ss-31",
+            "selected_strength": "10mg",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 3,
+            "route": "subcutaneous",
+            "weekly_dose": "5 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 5,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "complexity_level": "advanced",
+      "visibility": "public",
+      "scientificName": "SS-31 & NMN Cardiolipin-Targeting Mitochondrial Bioenergetic Resilience Protocol",
+      "primary_goal": "Energy / Mitochondrial"
+    },
+    "expected_outcomes": {
+      "0": "Sustained energy",
+      "1": "Reduced cellular fatigue",
+      "2": "Enhanced mitochondrial function",
+      "qualitative": [
+        "Cellular rejuvenation and reduction of biological aging biomarkers",
+        "Improved mitochondrial efficiency and oxidative stress resilience",
+        "Enhanced skin elasticity, hydration, and collagen density",
+        "Support for telomere integrity and reduced epigenetic age",
+        "Improved systemic energy and functional healthspan"
+      ]
+    }
+  },
+  {
+    "id": "horm_001",
+    "protocol_duration_weeks": 12,
+    "bundleVersion": "2.0",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_is_physician_authored": false,
+    "seeded_at": "2026-04-25T06:10:36.132Z",
+    "protocol_source_version": "v5.0",
+    "dosing_enrichment": {
+      "titration_note": "Start Ipamorelin 200 mcg + CJC-1295 100 mcg 2x/day (AM + bedtime) for weeks 1-4. If well tolerated and IGF-1 response confirmed at week 4, add midday dose (3x/day) for weeks 5-12. Monitor IGF-1 monthly.",
+      "cycling_recommendation": "12-week active cycle followed by 4-6 week washout. GH axis desensitization prevents with cycling; HPTA recovery confirmed within 4-6 weeks off protocol per IGF-1 normalization data.",
+      "maintenance_dose": "Ipamorelin: 300 mcg subcutaneous 3x/day (morning, pre-workout, bedtime). CJC-1295 (no DAC): 100-200 mcg subcutaneous 3x/day co-administered with Ipamorelin.",
+      "timing_optimization": "Administer in fasted state (90 min post-meal) for optimal GH pulse. Bedtime dose is most physiologically relevant - mimics natural nocturnal GH surge. Avoid administration after large carbohydrate meals as insulin blunts GH release."
+    },
+    "complexity_level": "advanced",
+    "eligibility_rules": {
+      "indications": [
+        "low_normal_IGF1_with_somatopause_symptoms",
+        "poor_recovery_or_reduced_lean_mass",
+        "sleep_architecture_disruption_with_low_recovery",
+        "age_related_decline_in_GH_axis_markers",
+        "body_composition_support_under_physician_supervision"
+      ],
+      "contraindications": [
+        "active_malignancy_or_history_of_hormone_sensitive_cancer",
+        "pituitary_adenoma_or_active_pituitary_disease",
+        "uncontrolled_diabetes_mellitus",
+        "severe_obstructive_sleep_apnea_untreated",
+        "pregnancy_or_breastfeeding",
+        "severe_carpal_tunnel_syndrome"
+      ],
+      "supported_goals": [
+        "hormonal_support",
+        "reproductive_axis_support",
+        "libido_signal_support",
+        "hpga_support"
+      ],
+      "relative_cautions": [],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "patient_demographic",
+        "age_group",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ]
+    },
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_source_reference": "internal_guide",
+    "protocol_slug": "hormonal-support-12w",
+    "protocol_is_curated": true,
+    "number_of_phases": 2,
+    "risk_class": "moderate",
+    "protocol_review_status": "approved",
+    "protocol_source_type": "curated_library",
+    "washout_recommended_weeks": 4,
+    "active": true,
+    "overview_summary": "Advanced protocol for hormonal optimization using growth hormone secretagogues.",
+    "protocol_id": "horm_001",
+    "protocol_version": "v6.0",
+    "economics": {
+      "total_protocol_cost_estimate": 1200,
+      "total_vials_required": 18
+    },
+    "protocol_author_title": "Peptide Specialists",
+    "confidence_score": 90,
+    "uploadedAt": "2026-04-20T09:29:12.819Z",
+    "variant_rules": {
+      "tempo_variants": {
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "duration_variants": {
+        "20_weeks": {
+          "mode": "extended_plus",
+          "extra_monitoring": true
+        },
+        "16_weeks": {
+          "mode": "extended",
+          "extra_monitoring": true
+        },
+        "12_weeks": {
+          "mode": "standard",
+          "extra_monitoring": false
+        },
+        "8_weeks": {
+          "mode": "short",
+          "extra_monitoring": false
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "special_notes": [
+            "Use conservative ramping if sensitivity profile is high."
+          ],
+          "recommended_flags": [
+            "hormonal_cyclicity_watch"
+          ]
+        },
+        "male": {
+          "special_notes": [
+            "Reassess tolerance and response before escalation."
+          ],
+          "recommended_flags": []
+        }
+      },
+      "age_variants": {
+        "51-65": {
+          "monitoring_intensity": "enhanced",
+          "default_duration_weeks": 16
+        },
+        "36-50": {
+          "monitoring_intensity": "moderate",
+          "default_duration_weeks": 12
+        },
+        "18-35": {
+          "monitoring_intensity": "standard",
+          "default_duration_weeks": 8
+        },
+        "65+": {
+          "monitoring_intensity": "enhanced",
+          "default_duration_weeks": 16
+        }
+      }
+    },
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode.",
+      "enabled": true
+    },
+    "physician_supervision_required": true,
+    "status": "approved",
+    "_patchedAt": {},
+    "_patchSchema": "antigravity_v2",
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "Testosterone (Free/Total)",
+          "IGF-1",
+          "Estradiol",
+          "CBC",
+          "PSA (Men)"
+        ]
+      },
+      {
+        "week": 8,
+        "labs": [
+          "IGF-1",
+          "CBC"
+        ]
+      },
+      {
+        "week": 16,
+        "labs": [
+          "Testosterone (Free/Total)",
+          "IGF-1",
+          "Estradiol",
+          "PSA (Men)"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Active malignancy (GH-sensitive)",
+        "Diabetic retinopathy",
+        "Pregnancy",
+        "Active intracranial hypertension"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (15–35%)",
+          "management": "Rotate sites; use proper aseptic technique."
+        },
+        {
+          "effect": "Fluid retention / mild edema",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Reduce dose; monitor blood pressure; salt restriction."
+        },
+        {
+          "effect": "Nausea / GI discomfort",
+          "frequency": "Common (10–25%)",
+          "management": "Dose with food; split doses; titrate slowly."
+        },
+        {
+          "effect": "Elevated fasting glucose",
+          "frequency": "Uncommon (5%)",
+          "management": "Monitor fasting glucose weekly; consult if persistent."
+        },
+        {
+          "effect": "Mood changes / irritability",
+          "frequency": "Rare (<3%)",
+          "management": "Reduce dose; psychological support if needed."
+        }
+      ],
+      "escalation_criteria": [
+        "Severe or worsening edema — STOP, cardiovascular evaluation",
+        "Fasting glucose > 7.0 mmol/L (126 mg/dL) on two occasions — Endocrinology referral",
+        "Allergic reaction — STOP, emergency protocol",
+        "Hypertensive urgency (BP > 180/110) — STOP, immediate medical attention"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+    "_schemaGapFixed": {
+      "_nanoseconds": 670000000,
+      "_seconds": 1777190718
+    },
+    "_schemaVersion": "antigravity_v2",
+    "_bundleCreatedAt": "2026-04-26T09:05:00+02:00",
+    "clinical_evidence_update_2026": {
+      "evidence_limitations": [
+        "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+        "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+        "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+      ],
+      "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+      "last_updated_at": "2026-04-26T08:05:00.000Z",
+      "latest_clinical_notes": [
+        "GH secretagogue combinations remain research/off-label in most jurisdictions.",
+        "Baseline IGF-1, fasting glucose/HbA1c, malignancy history, sleep apnea risk, edema, and carpal tunnel symptoms should be explicitly monitored.",
+        "Avoid implying equivalence with FDA-approved GH replacement."
+      ],
+      "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+      "regulatory_status": "CJC-1295, ipamorelin, kisspeptin, gonadorelin and related endocrine peptide protocols are not general FDA/EMA-approved longevity protocols. Use should remain physician-supervised with endocrine and cancer-screening precautions.",
+      "evidence_update": "Maintain IGF-1/glucose/pituitary/endocrine monitoring and avoid use in active malignancy or uncontrolled diabetes.",
+      "updated_at": "2026-04-26T09:05:00+02:00",
+      "source_refs": [],
+      "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+    },
+    "_syncSource": "export/protocols/horm_001.js",
+    "canonical_enrichment": {
+      "compatibleWith": "antigravity_v2_firebase_import",
+      "auditFieldsCompleted": [
+        "eligibility_rules.indications",
+        "metadata.evidence_grade",
+        "metadata.clinical_summary",
+        "washout_recommended_weeks",
+        "expected_outcomes.qualitative",
+        "phase_blueprints",
+        "physician_supervision_required"
+      ],
+      "generatedAt": "2026-04-26T06:53:24Z"
+    },
+    "monitoring_plan": {
+      "baseline_required": [
+        "symptom_inventory",
+        "sleep_quality",
+        "stress_load",
+        "cycle_or_libido_pattern",
+        "IGF-1",
+        "fasting_glucose",
+        "HbA1c",
+        "fasting_insulin",
+        "lipid_profile",
+        "TSH",
+        "free_T4",
+        "blood_pressure",
+        "sleep_apnea_screening",
+        "body_composition"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "measures": [
+            "sleep",
+            "symptoms",
+            "tolerance"
+          ],
+          "purpose": "Confirm early tolerance",
+          "type": "tolerance_review",
+          "week": 4
+        },
+        {
+          "measures": [
+            "subjective_response",
+            "cycle_or_libido_stability"
+          ],
+          "purpose": "Mid-cycle reassessment",
+          "type": "axis_reassessment",
+          "week": 8
+        },
+        {
+          "measures": [
+            "overall_response",
+            "stability"
+          ],
+          "purpose": "End-of-cycle evaluation",
+          "type": "final_outcome_review",
+          "week": 12
+        },
+        {
+          "week": 4,
+          "type": "endocrine_tolerance_review",
+          "measures": [
+            "IGF-1",
+            "fasting_glucose",
+            "edema_symptoms",
+            "sleep_quality"
+          ],
+          "purpose": "Confirm early GH-axis response and tolerability."
+        },
+        {
+          "week": 8,
+          "type": "axis_reassessment",
+          "measures": [
+            "IGF-1",
+            "HbA1c",
+            "body_composition",
+            "blood_pressure"
+          ],
+          "purpose": "Assess endocrine response and cardiometabolic safety."
+        },
+        {
+          "week": 12,
+          "type": "final_outcome_review",
+          "measures": [
+            "IGF-1",
+            "fasting_glucose",
+            "sleep_quality",
+            "recovery_score"
+          ],
+          "purpose": "Determine continuation, taper, or washout plan."
+        }
+      ]
+    },
+    "_enrichmentVersion": "content_v1",
+    "_syncedAt": "2026-04-26T12:46:28.116Z",
+    "_enrichedAt": "2026-04-26T12:45:55Z",
+    "safety_profile": {
+      "drug_interactions": [
+        "Insulin: GH counterregulatory effect may impair glucose homeostasis - monitor in diabetics",
+        "Glucocorticoids: blunt GH secretagogue response - avoid concurrent use if possible",
+        "Thyroid hormones: hypothyroidism attenuates GH response - ensure euthyroid state at baseline",
+        "SSRIs: no significant interaction at standard doses"
+      ],
+      "monitoring_required": [
+        "IGF-1 at baseline, week 4, week 8, week 12 (target: upper-normal range, not supraphysiologic)",
+        "Fasting glucose and HbA1c at baseline and week 12",
+        "Body composition (DEXA or InBody) at baseline and week 12",
+        "PSQI sleep score at baseline, week 4, week 12",
+        "Blood pressure at each visit"
+      ],
+      "adverse_events_serious": [
+        "No serious adverse events in Phase I/II trials at standard doses",
+        "Theoretical IGF-1 excess risk at supraphysiologic doses - maintain IGF-1 within upper normal range",
+        "Contraindicated in active malignancy - IGF-1 is mitogenic; avoid in cancer history without oncology clearance"
+      ],
+      "adverse_events_common": [
+        "Transient water retention: 10-20% in first 4 weeks, resolves with adaptation",
+        "Mild tingling or numbness in extremities (carpal tunnel-like): 8-12%",
+        "Injection site reactions: 5-10% - mild, rotate sites",
+        "Increased hunger: 15-20% - expected from ghrelin-receptor activity of Ipamorelin"
+      ],
+      "common_side_effects": [
+        "Injection-site redness, itching, or mild swelling (SC injection, ~25–30% of users)",
+        "Water retention and mild peripheral edema, particularly in weeks 2–4 (~20%)",
+        "Transient tingling or paresthesia in extremities (carpal tunnel-like, ~15%)",
+        "Flushing or facial warmth post-injection (~12%)",
+        "Fatigue or somnolence 30–60 minutes after evening injection (~10%)",
+        "Mild headache during initial GH axis stimulation (~8%)",
+        "Increased appetite and food cravings, especially in evening (~15%)",
+        "Transient hypoglycemic-like symptoms (light-headedness, sweating) post-injection (~5%)"
+      ],
+      "contraindication_summary": "Absolute contraindications: active malignancy or history of hormone-sensitive cancer (GH axis stimulation may promote tumor proliferation); pituitary adenoma or active pituitary pathology; uncontrolled diabetes mellitus (GH raises insulin resistance — monitor fasting glucose and HbA1c); untreated severe obstructive sleep apnea (GH pulses worsen OSA); pregnancy or breastfeeding. Relative contraindications: pre-existing carpal tunnel syndrome (fluid retention may exacerbate); active thyroid dysfunction (correct before initiating); concomitant exogenous GH or IGF-1 therapy. Monitor IGF-1 levels at baseline, week 6, and week 12. Physician supervision mandatory throughout."
+    },
+    "updated_at": "2026-05-04T14:35:44.634Z",
+    "protocol_author_organization": "Atlas Health",
+    "recommended_supplements": [
+      "zinc-citrate",
+      "vit-d3",
+      "ashwagandha"
+    ],
+    "primary_goal": "Hormonal Support",
+    "metadata": {
+      "longDescription": "CJC-1295 (a synthetic analogue of growth hormone-releasing hormone, GHRH 1-29, with Drug Affinity Complex modification) extends the half-life of endogenous GHRH from minutes to days by binding covalently to serum albumin, producing sustained elevation of GH and IGF-1 without desensitisation of the GHRH receptor (Teichman SL et al., J Clin Endocrinol Metab 2006). Ipamorelin (Aib-His-D-2Nal-D-Phe-Lys-NH₂) is a selective GH secretagogue receptor (GHSR) agonist (ghrelin mimetic) that stimulates pulsatile GH release with high receptor selectivity, causing minimal elevation of cortisol, prolactin, or ACTH compared to earlier secretagogues (Raun K et al., Eur J Endocrinol 1998). The combination produces synergistic GH release: CJC-1295 raises the baseline amplitude of GH secretion while Ipamorelin drives discrete pulsatile peaks, together approximating the physiological GH secretion pattern of younger adults. Tesamorelin is added during the activation phase for its validated visceral fat reduction in GH-deficient patients (Falutz J et al., NEJM 2007).",
+      "primary_goal": "Hormonal Support",
+      "keywords": [
+        "CJC-1295 Ipamorelin protocol",
+        "GH secretagogue protocol",
+        "GHRH analogue peptide",
+        "growth hormone optimization",
+        "Ipamorelin ghrelin mimetic",
+        "hormonal support peptide protocol"
+      ],
+      "references": [
+        {
+          "pmid": "17018654",
+          "citation": "Teichman SL et al. CJC-1295 sustained GH release. J Clin Endocrinol Metab 2006;91:799-805."
+        },
+        {
+          "pmid": "9625695",
+          "citation": "Raun K et al. Ipamorelin, a new growth hormone releasing peptide. Eur J Endocrinol 1998;139:552-561."
+        },
+        {
+          "pmid": "17715405",
+          "citation": "Falutz J et al. Tesamorelin reduces visceral adiposity in HIV. NEJM 2007;357:2349-2361."
+        }
+      ],
+      "scientificName": "CJC-1295 / Ipamorelin GHRH & Ghrelin-Mimetic GH Secretagogue Optimization Protocol",
+      "description": "12-week GH axis optimization protocol combining CJC-1295 GHRH analogue sustained release with Ipamorelin selective ghrelin-mimetic secretagogue for pulsatile physiological GH restoration."
+    },
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible"
+    ],
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
+    "protocol_title": "CJC-1295 / Ipamorelin GH Optimization Protocol",
+    "category": "Hormonal Support",
+    "syncedAt": "2026-05-16T14:32:32.374Z",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "sex_variant_match",
+        "age_variant_match",
+        "symptom_pattern"
+      ],
+      "profile_notes": [
+        "Use clinician-supervised interpretation if pairing with other endocrine therapies."
+      ],
+      "base_duration_weeks": 12
+    },
+    "_importBundle": "Atlas Health Clinical Protocol Library · Updated 2026-04-26",
+    "phase_blueprints": [
+      {
+        "clinical_events": [
+          {
+            "event_type": "baseline_review",
+            "title": "Baseline hormonal rhythm and symptom review",
+            "week": 1
+          }
+        ],
+        "clinical_purpose": [
+          "hpga_signaling_support",
+          "hormonal_rhythm_support",
+          "tolerance_building"
+        ],
+        "default_duration_weeks": 4,
+        "default_start_week": 1,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_days_default": [
+                "Tuesday",
+                "Thursday"
+              ],
+              "administration_frequency": "2x_week",
+              "dose_unit": "mcg",
+              "timing_hint": "consistent_time",
+              "starting_weekly_dose": 0.5
+            },
+            "product_id": "prd_kisspeptin",
+            "product_title": "Kisspeptin",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_kisspeptin",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          },
+          {
+            "dose_logic": {
+              "activation_condition": "if_clinician_enables_secondary_axis_support",
+              "administration_days_default": [
+                "Friday"
+              ],
+              "administration_frequency": "1x_week",
+              "dose_unit": "mcg",
+              "intensity_label": "optional_low"
+            },
+            "product_id": "prd_gonadorelin",
+            "product_title": "Gonadorelin",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_gonadorelin",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          }
+        ],
+        "phase_key": "axis_activation",
+        "phase_title": "Axis Activation"
+      },
+      {
+        "clinical_events": [
+          {
+            "event_type": "checkpoint",
+            "title": "Axis response reassessment",
+            "week": 8
+          }
+        ],
+        "clinical_purpose": [
+          "hormonal_pattern_support",
+          "symptom_reassessment"
+        ],
+        "default_duration_weeks": 4,
+        "default_start_week": 5,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_days_default": [
+                "Tuesday",
+                "Thursday"
+              ],
+              "administration_frequency": "2x_week",
+              "dose_unit": "mcg",
+              "starting_weekly_dose": 1
+            },
+            "product_id": "prd_kisspeptin",
+            "product_title": "Kisspeptin",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_kisspeptin",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          },
+          {
+            "dose_logic": {
+              "activation_condition": "if_midpoint_axis_support_needed",
+              "administration_days_default": [
+                "Friday"
+              ],
+              "administration_frequency": "1x_week",
+              "dose_unit": "mcg",
+              "intensity_label": "conditional"
+            },
+            "product_id": "prd_gonadorelin",
+            "product_title": "Gonadorelin",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_gonadorelin",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          }
+        ],
+        "phase_key": "regulation",
+        "phase_title": "Regulation"
+      },
+      {
+        "clinical_events": [
+          {
+            "event_type": "outcome_review",
+            "title": "Final hormonal support review",
+            "week": 12
+          }
+        ],
+        "clinical_purpose": [
+          "response_maintenance",
+          "symptom_stability"
+        ],
+        "default_duration_weeks": 4,
+        "default_start_week": 9,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_days_default": [
+                "Thursday"
+              ],
+              "administration_frequency": "1x_week",
+              "dose_unit": "mcg",
+              "starting_weekly_dose": 1
+            },
+            "product_id": "prd_kisspeptin",
+            "product_title": "Kisspeptin",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_kisspeptin",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          }
+        ],
+        "phase_key": "maintenance",
+        "phase_title": "Maintenance"
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.924Z",
+    "synergy_rationale": "This multi-compound protocol is designed to provide synergistic effects, targeting multiple complementary biological pathways simultaneously to achieve hormonal support more effectively than monotherapy.",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "Deep sleep is critical for natural hormone pulses.",
+      "nutrition": "Adequate healthy fats for hormone production. Sufficient protein.",
+      "activity": "Heavy compound lifting to stimulate natural GH/Testosterone.",
+      "hydration": "Standard adequate hydration."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:19.507Z",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Hormonal Activation",
+        "start_week": 1,
+        "end_week": 6,
+        "drugs_used": [
+          {
+            "product_slug": "cjc-1295-ipamorelin",
+            "selected_strength": "10mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 6,
+            "weekly_dose": "7 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 7,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "tesamorelin",
+            "selected_strength": "20mg",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 6,
+            "route": "subcutaneous",
+            "weekly_dose": "14 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 14,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Maintenance",
+        "start_week": 7,
+        "end_week": 12,
+        "drugs_used": [
+          {
+            "product_slug": "cjc-1295-ipamorelin",
+            "selected_strength": "10mg",
+            "dosing_frequency": "5x_week",
+            "vials_required_for_phase": 6,
+            "route": "subcutaneous",
+            "weekly_dose": "7 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 7,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "expected_outcomes": {
+      "0": "Hormonal balance",
+      "1": "Improved body composition",
+      "2": "Enhanced vitality",
+      "qualitative": [
+        "Optimization of endogenous growth hormone pulsatility",
+        "Improved body composition (lean mass preservation, fat reduction)",
+        "Enhanced exercise performance and recovery between sessions",
+        "Improved sleep quality and overnight regenerative processes",
+        "Support for natural hormonal axis regulation without suppression"
+      ]
+    }
+  },
+  {
+    "id": "horm_002",
+    "protocol_duration_weeks": 12,
+    "bundleVersion": "2.0",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_is_physician_authored": false,
+    "seeded_at": "2026-04-25T06:10:36.133Z",
+    "protocol_source_version": "v5.0",
+    "generator_rules": {
+      "profile_notes": [
+        "Prefer conservative tempo in edema-prone or headache-prone profiles."
+      ],
+      "selection_priority": [
+        "goal_match",
+        "sleep_profile",
+        "recovery_pattern",
+        "age_variant_match"
+      ]
+    },
+    "dosing_enrichment": {
+      "titration_note": "Weeks 1-4: Ipamorelin 200 mcg + CJC-1295 100 mcg 2x/day. Week 4: check IGF-1. Weeks 5-8: escalate to 300 mcg Ipamorelin + 200 mcg CJC-1295 3x/day. Weeks 9-16: consider adding Tesamorelin if IGF-1 response is suboptimal or visceral fat is a primary target.",
+      "cycling_recommendation": "16-week active cycle followed by 6-week washout. Pituitary somatotroph desensitization is minimal with GHRP/GHRH cycling; IGF-1 normalization within 4-6 weeks off protocol confirmed. Advanced protocol may use 20-week continuous with pulse-rest schedule.",
+      "maintenance_dose": "Ipamorelin: 300 mcg subcutaneous 3x/day. CJC-1295 no DAC: 200 mcg 3x/day co-administered. Advanced: add Tesamorelin 1-2 mg/day subcutaneous for visceral fat targeting (weeks 5-16 if IGF-1 response confirmed).",
+      "timing_optimization": "Identical to horm_001: fasted state, bedtime dose most important. Tesamorelin (if added) should be administered at bedtime only to capture nocturnal GH surge window. Morning dose 90 min before breakfast."
+    },
+    "complexity_level": "advanced",
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "_schemaVersion": "antigravity_v2",
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_source_reference": "internal_guide",
+    "protocol_slug": "gh-axis-support-12w",
+    "protocol_is_curated": true,
+    "number_of_phases": 3,
+    "risk_class": "moderate",
+    "protocol_review_status": "approved",
+    "protocol_source_type": "curated_library",
+    "active": true,
+    "overview_summary": "Three-phase protocol using tesamorelin with ipamorelin to support GH-axis signaling and body-composition oriented hormonal support.",
+    "protocol_id": "horm_002",
+    "protocol_version": "v6.0",
+    "economics": {
+      "total_protocol_cost_estimate": 1120,
+      "total_vials_required": 20
+    },
+    "protocol_author_title": "Peptide Specialists",
+    "confidence_score": 89,
+    "uploadedAt": "2026-04-20T09:29:12.819Z",
+    "variant_rules": {
+      "tempo_variants": {
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "duration_variants": {
+        "20_weeks": {
+          "mode": "extended_plus",
+          "extra_monitoring": true
+        },
+        "16_weeks": {
+          "mode": "extended",
+          "extra_monitoring": true
+        },
+        "12_weeks": {
+          "mode": "standard",
+          "extra_monitoring": false
+        },
+        "8_weeks": {
+          "mode": "short",
+          "extra_monitoring": false
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "special_notes": [
+            "Use conservative ramping if sensitivity profile is high."
+          ],
+          "recommended_flags": []
+        },
+        "male": {
+          "special_notes": [
+            "Reassess tolerance and response before escalation."
+          ],
+          "recommended_flags": [
+            "sleep_recovery_watch"
+          ]
+        }
+      },
+      "age_variants": {
+        "51-65": {
+          "monitoring_intensity": "enhanced",
+          "default_duration_weeks": 16
+        },
+        "36-50": {
+          "monitoring_intensity": "moderate",
+          "default_duration_weeks": 12
+        },
+        "18-35": {
+          "monitoring_intensity": "standard",
+          "default_duration_weeks": 8
+        },
+        "65+": {
+          "monitoring_intensity": "enhanced",
+          "default_duration_weeks": 16
+        }
+      }
+    },
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode.",
+      "enabled": true
+    },
+    "physician_supervision_required": true,
+    "status": "approved",
+    "_patchedAt": {},
+    "_importedAt": {
+      "_nanoseconds": 171000000,
+      "_seconds": 1777189741
+    },
+    "_patchSchema": "antigravity_v2",
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "Testosterone (Free/Total)",
+          "IGF-1",
+          "Estradiol",
+          "CBC",
+          "PSA (Men)"
+        ]
+      },
+      {
+        "week": 8,
+        "labs": [
+          "IGF-1",
+          "CBC"
+        ]
+      },
+      {
+        "week": 16,
+        "labs": [
+          "Testosterone (Free/Total)",
+          "IGF-1",
+          "Estradiol",
+          "PSA (Men)"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Active malignancy (GH-sensitive)",
+        "Diabetic retinopathy",
+        "Pregnancy",
+        "Active intracranial hypertension"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (15–35%)",
+          "management": "Rotate sites; use proper aseptic technique."
+        },
+        {
+          "effect": "Fluid retention / mild edema",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Reduce dose; monitor blood pressure; salt restriction."
+        },
+        {
+          "effect": "Nausea / GI discomfort",
+          "frequency": "Common (10–25%)",
+          "management": "Dose with food; split doses; titrate slowly."
+        },
+        {
+          "effect": "Elevated fasting glucose",
+          "frequency": "Uncommon (5%)",
+          "management": "Monitor fasting glucose weekly; consult if persistent."
+        },
+        {
+          "effect": "Mood changes / irritability",
+          "frequency": "Rare (<3%)",
+          "management": "Reduce dose; psychological support if needed."
+        }
+      ],
+      "escalation_criteria": [
+        "Severe or worsening edema — STOP, cardiovascular evaluation",
+        "Fasting glucose > 7.0 mmol/L (126 mg/dL) on two occasions — Endocrinology referral",
+        "Allergic reaction — STOP, emergency protocol",
+        "Hypertensive urgency (BP > 180/110) — STOP, immediate medical attention"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+    "clinical_evidence_update_2026": {
+      "evidence_limitations": [
+        "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+        "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+        "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+      ],
+      "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+      "last_updated_at": "2026-04-26T08:05:00.000Z",
+      "latest_clinical_notes": [
+        "Tesamorelin evidence is strongest for HIV-associated lipodystrophy, not general obesity or non-HIV weight loss.",
+        "Strengthen IGF-1, glucose/HbA1c, edema, arthralgia, carpal tunnel symptoms, malignancy history, and pituitary-axis screening.",
+        "CJC-1295 and ipamorelin remain non-approved/research-oriented in many jurisdictions."
+      ],
+      "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+      "regulatory_status": "Tesamorelin (Egrifta SV) is indicated only for reducing excess abdominal fat in HIV-infected adults with lipodystrophy. It is not indicated for general weight loss management, and long-term cardiovascular safety has not been established.",
+      "evidence_update": "Any non-HIV visceral fat, longevity, or body-composition use must be described as off-label and should include risk/benefit review and IGF-1/glucose monitoring.",
+      "updated_at": "2026-04-26T09:05:00+02:00",
+      "source_refs": [
+        {
+          "type": "label",
+          "source": "Egrifta SV prescribing information",
+          "date": "2026-01-04",
+          "note": "Indication limited to excess abdominal fat in HIV lipodystrophy; not for weight loss management; CV safety not established."
+        }
+      ],
+      "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+    },
+    "canonical_enrichment": {
+      "compatibleWith": "antigravity_v2_firebase_import",
+      "auditFieldsCompleted": [
+        "monitoring_plan",
+        "safety_profile",
+        "clinical_evidence_update_2026",
+        "regulatory_status_2026"
+      ],
+      "generatedAt": "2026-04-26T09:05:00+02:00"
+    },
+    "_syncSource": "export/protocols/horm_002.js",
+    "_schemaGapFixed": {
+      "_nanoseconds": 447000000,
+      "_seconds": 1777190719
+    },
+    "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
+    "safety_profile": {
+      "drug_interactions": [
+        "Insulin and antidiabetics: GH counterregulatory - glucose monitoring essential",
+        "Glucocorticoids: attenuate GH response - avoid concurrent use if possible",
+        "Thyroid replacement: hypothyroidism reduces GH response - optimize thyroid status first",
+        "Antiestrogens (men): may further enhance GH response - monitor IGF-1 closely"
+      ],
+      "monitoring_required": [
+        "IGF-1 at baseline, week 4, week 8, week 12, week 16 (target: upper-normal, not supraphysiologic)",
+        "Fasting glucose and HbA1c at baseline and week 12",
+        "DEXA body composition at baseline and week 16",
+        "PSQI sleep score at baseline, week 4, week 12, week 16",
+        "Blood pressure and peripheral edema assessment at each visit"
+      ],
+      "adverse_events_serious": [
+        "IGF-1 excess (>300 ng/mL): acromegaloid features possible at supraphysiologic doses - monitor monthly",
+        "Glucose intolerance: GH counterregulatory effect; monitor HbA1c at baseline and week 12",
+        "Contraindicated in active malignancy - IGF-1 is mitogenic; absolute contraindication",
+        "Tesamorelin: anti-Tesamorelin antibodies in 49% at 26 weeks (no clinical significance identified)"
+      ],
+      "adverse_events_common": [
+        "Water retention: 15-25% in first 4-6 weeks; resolves with dose stability or reduction",
+        "Peripheral edema: 10-15% - dose-dependent, reduce if symptomatic",
+        "Increased appetite: 20-25% - Ipamorelin ghrelin-axis effect",
+        "Injection site reactions: 5-15% - rotate sites; Tesamorelin has higher local reaction rate"
+      ]
+    },
+    "monitoring_plan": {
+      "baseline_required": [
+        "sleep_quality",
+        "recovery_score",
+        "body_composition_baseline",
+        "fatigue_score"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "measures": [
+            "sleep",
+            "recovery",
+            "edema_or_headache_watch"
+          ],
+          "purpose": "Early tolerance and sleep review",
+          "type": "tolerance_review",
+          "week": 4
+        },
+        {
+          "measures": [
+            "recovery",
+            "body_composition_direction",
+            "sleep"
+          ],
+          "purpose": "Midpoint assessment",
+          "type": "axis_reassessment",
+          "week": 8
+        },
+        {
+          "measures": [
+            "overall_recovery",
+            "sleep_quality"
+          ],
+          "purpose": "End-of-cycle evaluation",
+          "type": "final_outcome_review",
+          "week": 12
+        }
+      ]
+    },
+    "_syncedAt": "2026-04-26T12:46:28.640Z",
+    "updated_at": "2026-05-04T14:35:44.635Z",
+    "protocol_author_organization": "Atlas Health",
+    "recommended_supplements": [
+      "zinc-citrate",
+      "vit-d3",
+      "ashwagandha"
+    ],
+    "primary_goal": "Hormonal Support",
+    "_importBundle": "Atlas Health Core Clinical Protocol Library",
+    "metadata": {
+      "longDescription": "Tesamorelin (TransCon hGH; Egrifta) is an FDA-approved synthetic GHRH analogue (GHRH 1-44 with trans-3-hexenoic acid modification) validated in Phase 3 RCTs for reducing visceral adipose tissue (VAT) in HIV-associated lipodystrophy and studied for metabolic benefits in non-HIV populations (Falutz J et al., NEJM 2007; Stanley TL et al., J Clin Endocrinol Metab 2012). Tesamorelin acts on pituitary GHRH receptors to amplify endogenous GH pulse amplitude while preserving the physiological feedback regulation of the GH axis — unlike exogenous GH administration, which suppresses endogenous production. Ipamorelin (selective GHSR agonist; see horm_001) is combined to add discrete pulsatile GH peaks beyond the tonic effect of tesamorelin, enhancing total GH bioavailability while maintaining physiological rhythmicity. This protocol is particularly suited for adults with abdominal adiposity, low IGF-1, age-related GH decline (somatopause), or metabolic syndrome with a visceral fat component.",
+      "primary_goal": "Hormonal Support",
+      "keywords": [
+        "Tesamorelin protocol",
+        "Ipamorelin GH protocol",
+        "visceral fat peptide protocol",
+        "GHRH analogue therapy",
+        "somatopause treatment peptide",
+        "GH axis restoration protocol"
+      ],
+      "references": [
+        {
+          "pmid": "17715405",
+          "citation": "Falutz J et al. Tesamorelin reduces visceral adiposity in HIV. NEJM 2007;357:2349-2361."
+        },
+        {
+          "pmid": "22539587",
+          "citation": "Stanley TL et al. Tesamorelin decreases liver fat and waist circumference. J Clin Endocrinol Metab 2012;97:2212-2221."
+        },
+        {
+          "pmid": "9625695",
+          "citation": "Raun K et al. Ipamorelin, a new GH releasing peptide. Eur J Endocrinol 1998;139:552-561."
+        }
+      ],
+      "scientificName": "Tesamorelin + Ipamorelin GHRH-Axis Visceral Adiposity & GH Restoration Protocol",
+      "description": "12-week GH-axis protocol pairing FDA-approved Tesamorelin GHRH analogue with Ipamorelin ghrelin-mimetic for clinically validated visceral fat reduction and pulsatile GH restoration."
+    },
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible"
+    ],
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
+    "protocol_title": "Tesamorelin + Ipamorelin GH-Axis Protocol",
+    "category": "Hormonal Support",
+    "syncedAt": "2026-05-16T14:32:34.200Z",
+    "phase_blueprints": [
+      {
+        "clinical_events": [
+          {
+            "event_type": "baseline_review",
+            "title": "Baseline recovery, sleep, and body-composition review",
+            "week": 1
+          }
+        ],
+        "clinical_purpose": [
+          "ghrh_support",
+          "sleep_recovery_support",
+          "tolerance_building"
+        ],
+        "default_duration_weeks": 4,
+        "default_start_week": 1,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_days_default": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "administration_frequency": "5x_week",
+              "dose_unit": "mcg",
+              "timing_hint": "evening",
+              "starting_weekly_dose": 0.5
+            },
+            "product_id": "prd_sermorelin",
+            "product_title": "Sermorelin",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_sermorelin",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          },
+          {
+            "dose_logic": {
+              "activation_condition": "if_recovery_support_variant_enabled",
+              "administration_days_default": [
+                "Monday",
+                "Wednesday",
+                "Friday"
+              ],
+              "administration_frequency": "3x_week",
+              "dose_unit": "mcg",
+              "intensity_label": "optional_low"
+            },
+            "product_id": "prd_ipamorelin",
+            "product_title": "Ipamorelin",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_ipamorelin",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          }
+        ],
+        "phase_key": "priming",
+        "phase_title": "Axis Priming"
+      },
+      {
+        "clinical_events": [
+          {
+            "event_type": "checkpoint",
+            "title": "Sleep and recovery reassessment",
+            "week": 8
+          }
+        ],
+        "clinical_purpose": [
+          "gh_axis_support",
+          "recovery_capacity",
+          "body_composition_support"
+        ],
+        "default_duration_weeks": 4,
+        "default_start_week": 5,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_days_default": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "administration_frequency": "5x_week",
+              "dose_unit": "mcg",
+              "timing_hint": "evening",
+              "starting_weekly_dose": 1
+            },
+            "product_id": "prd_sermorelin",
+            "product_title": "Sermorelin",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_sermorelin",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          },
+          {
+            "dose_logic": {
+              "activation_condition": "if_conservative_secretagogue_pairing_approved",
+              "administration_days_default": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "administration_frequency": "5x_week",
+              "dose_unit": "mcg",
+              "intensity_label": "conditional"
+            },
+            "product_id": "prd_ipamorelin",
+            "product_title": "Ipamorelin",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_ipamorelin",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          }
+        ],
+        "phase_key": "optimization",
+        "phase_title": "Recovery Optimization"
+      },
+      {
+        "clinical_events": [
+          {
+            "event_type": "outcome_review",
+            "title": "Final GH-axis support review",
+            "week": 12
+          }
+        ],
+        "clinical_purpose": [
+          "maintenance_of_response",
+          "recovery_stability"
+        ],
+        "default_duration_weeks": 4,
+        "default_start_week": 9,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_days_default": [
+                "Monday",
+                "Wednesday",
+                "Friday"
+              ],
+              "administration_frequency": "3x_week",
+              "dose_unit": "mcg",
+              "timing_hint": "evening",
+              "starting_weekly_dose": 1
+            },
+            "product_id": "prd_sermorelin",
+            "product_title": "Sermorelin",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_sermorelin",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          }
+        ],
+        "phase_key": "maintenance",
+        "phase_title": "Maintenance"
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.924Z",
+    "synergy_rationale": "This multi-compound protocol is designed to provide synergistic effects, targeting multiple complementary biological pathways simultaneously to achieve hormonal support more effectively than monotherapy.",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "Deep sleep is critical for natural hormone pulses.",
+      "nutrition": "Adequate healthy fats for hormone production. Sufficient protein.",
+      "activity": "Heavy compound lifting to stimulate natural GH/Testosterone.",
+      "hydration": "Standard adequate hydration."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:18.948Z",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Priming",
+        "start_week": 1,
+        "end_week": 4,
+        "drugs_used": [
+          {
+            "product_slug": "tesamorelin",
+            "selected_strength": "5mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 4,
+            "faq_ref": "tesamorelin_faq",
+            "pubmed_ref": "tesamorelin_pubmed",
+            "weekly_dose": "14 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 14,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "ipamorelin",
+            "selected_strength": "5mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "5x_week",
+            "vials_required_for_phase": 4,
+            "faq_ref": "ipamorelin_faq",
+            "pubmed_ref": "ipamorelin_pubmed",
+            "weekly_dose": "3.5 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 3.5,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Stimulation",
+        "start_week": 5,
+        "end_week": 8,
+        "drugs_used": [
+          {
+            "product_slug": "tesamorelin",
+            "selected_strength": "10mg",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 4,
+            "route": "subcutaneous",
+            "weekly_dose": "14 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 14,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "ipamorelin",
+            "selected_strength": "5mg",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 4,
+            "route": "subcutaneous",
+            "weekly_dose": "3.5 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 3.5,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 3,
+        "phase_title": "Maintenance",
+        "start_week": 9,
+        "end_week": 12,
+        "drugs_used": [
+          {
+            "product_slug": "ipamorelin",
+            "selected_strength": "5mg",
+            "dosing_frequency": "5x_week",
+            "vials_required_for_phase": 4,
+            "route": "subcutaneous",
+            "weekly_dose": "3.5 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 3.5,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "eligibility_rules": {
+      "contraindications": [
+        "active_malignancy_or_history_of_hormone_sensitive_cancer",
+        "uncontrolled_hypertension",
+        "active_thromboembolic_disease",
+        "pregnancy_or_breastfeeding",
+        "severe_hepatic_impairment"
+      ],
+      "supported_goals": [
+        "gh_axis_support",
+        "sleep_recovery_support",
+        "body_composition_support",
+        "recovery_support"
+      ],
+      "relative_cautions": [],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "patient_demographic",
+        "age_group",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ],
+      "indications": [
+        "Adults with documented or suspected GH deficiency or low IGF-1",
+        "Individuals experiencing age-related hormonal decline",
+        "Athletes seeking recovery support without anabolic steroid use",
+        "Individuals with sleep disturbances related to endocrine imbalance",
+        "Adults seeking optimization of body composition through GH axis support"
+      ]
+    },
+    "expected_outcomes": {
+      "0": "Hormonal balance",
+      "1": "Improved body composition",
+      "2": "Enhanced vitality",
+      "qualitative": [
+        "Optimization of endogenous growth hormone pulsatility",
+        "Improved body composition (lean mass preservation, fat reduction)",
+        "Enhanced exercise performance and recovery between sessions",
+        "Improved sleep quality and overnight regenerative processes",
+        "Support for natural hormonal axis regulation without suppression"
+      ]
+    }
+  },
+  {
+    "id": "immune_001",
+    "protocol_duration_weeks": 8,
+    "bundleVersion": "2.0",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_is_physician_authored": false,
+    "seeded_at": "2026-04-25T06:10:36.132Z",
+    "protocol_source_version": "v5.0",
+    "dosing_enrichment": {
+      "titration_note": "Begin at 1.5 mg SC 2x/week for weeks 1-4 to establish baseline immune activation. Maintain through week 12. In high-burden states, daily dosing at 1.5 mg/day for weeks 1-4 under physician supervision.",
+      "cycling_recommendation": "12-week active protocol followed by 6-8 week off-cycle assessment. Repeat cycle if NK cell counts and immune biomarkers remain suboptimal. Continuous use not advised beyond 16 weeks without biomarker re-evaluation.",
+      "maintenance_dose": "Thymosin Alpha-1: 1.5 mg SC 2x/week (standard). Option for 3x/week in immune-compromised patients or post-infectious recovery.",
+      "timing_optimization": "Administer in the morning, ideally post-fasting. Subcutaneous injection into the abdomen or thigh. Rotate injection sites."
+    },
+    "complexity_level": "moderate",
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "_schemaVersion": "antigravity_v2",
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_source_reference": "internal_guide",
+    "protocol_slug": "immune-modulation-8w",
+    "protocol_is_curated": true,
+    "number_of_phases": 2,
+    "risk_class": "moderate",
+    "protocol_review_status": "approved",
+    "protocol_source_type": "curated_library",
+    "active": true,
+    "overview_summary": "Protocol designed to modulate immune response and support systemic inflammation reduction.",
+    "protocol_id": "immune_001",
+    "economics": {
+      "total_protocol_cost_estimate": 650,
+      "total_vials_required": 12
+    },
+    "protocol_author_title": "Peptide Specialists",
+    "confidence_score": 89,
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "Enhanced protocol preserves legacy fields while supporting canonical blueprint-based loading.",
+      "enabled": true
+    },
+    "physician_supervision_required": true,
+    "status": "approved",
+    "_importedAt": {
+      "_nanoseconds": 647000000,
+      "_seconds": 1777189741
+    },
+    "_patchSchema": "antigravity_v2",
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "CBC",
+          "CMP",
+          "Lipid Panel"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "CBC",
+          "CMP"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Active autoimmune disease flare",
+        "Concurrent immunosuppressive therapy (relative)",
+        "Pregnancy"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (15–35%)",
+          "management": "Rotate sites; use proper aseptic technique."
+        },
+        {
+          "effect": "Fluid retention / mild edema",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Reduce dose; monitor blood pressure; salt restriction."
+        },
+        {
+          "effect": "Nausea / GI discomfort",
+          "frequency": "Common (10–25%)",
+          "management": "Dose with food; split doses; titrate slowly."
+        },
+        {
+          "effect": "Elevated fasting glucose",
+          "frequency": "Uncommon (5%)",
+          "management": "Monitor fasting glucose weekly; consult if persistent."
+        },
+        {
+          "effect": "Mood changes / irritability",
+          "frequency": "Rare (<3%)",
+          "management": "Reduce dose; psychological support if needed."
+        }
+      ],
+      "escalation_criteria": [
+        "Severe or worsening edema — STOP, cardiovascular evaluation",
+        "Fasting glucose > 7.0 mmol/L (126 mg/dL) on two occasions — Endocrinology referral",
+        "Allergic reaction — STOP, emergency protocol",
+        "Hypertensive urgency (BP > 180/110) — STOP, immediate medical attention"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+    "clinical_evidence_update_2026": {
+      "evidence_limitations": [
+        "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+        "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+        "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+      ],
+      "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+      "last_updated_at": "2026-04-26T08:05:00.000Z",
+      "latest_clinical_notes": [
+        "Thymosin alpha-1 has international clinical use in several countries but is not broadly FDA-approved as a US drug product.",
+        "TB-500/thymosin beta-4 use remains investigational; emphasize autoimmune flare and malignancy-history caution.",
+        "Immune protocols should document infection history, autoimmune history, CBC with differential, CRP, and liver function where relevant."
+      ],
+      "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+      "regulatory_status": "Thymosin Alpha-1 has international clinical use/approvals in several countries for immune-related indications but is not FDA-approved in the United States. TB-500, KPV, thymulin and related peptide uses remain investigational/compounded/research depending on jurisdiction.",
+      "evidence_update": "Immune protocols should retain physician supervision and autoimmune/malignancy cautions.",
+      "updated_at": "2026-04-26T09:05:00+02:00",
+      "source_refs": [],
+      "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+    },
+    "_syncSource": "export/protocols/immune_001.js",
+    "monitoring_plan": {
+      "baseline_required": [
+        "CBC_with_differential",
+        "CRP",
+        "ESR",
+        "NK_cell_panel_CD16_CD56",
+        "liver_function_tests",
+        "recent_infection_frequency_log",
+        "autoimmune_history_review"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "labs": [
+            "CBC_with_differential",
+            "CRP",
+            "injection_site_review"
+          ],
+          "purpose": "Assess early tolerability and inflammatory trend.",
+          "type": "early_immune_tolerance_review",
+          "week": 4
+        },
+        {
+          "labs": [
+            "CBC_with_differential",
+            "NK_cell_panel_CD16_CD56",
+            "CRP"
+          ],
+          "purpose": "Evaluate immune activation and response signal.",
+          "type": "immune_response_review",
+          "week": 8
+        },
+        {
+          "labs": [
+            "CBC_with_differential",
+            "CRP",
+            "infection_frequency_log"
+          ],
+          "purpose": "Determine whether repeat cycle or washout is appropriate.",
+          "type": "post_cycle_review",
+          "week": 12
+        }
+      ]
+    },
+    "_schemaGapFixed": {
+      "_nanoseconds": 864000000,
+      "_seconds": 1777190720
+    },
+    "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
+    "safety_profile": {
+      "drug_interactions": [
+        "Avoid concurrent immunosuppressants (corticosteroids, tacrolimus) - antagonistic on T-cell activation",
+        "Synergistic with antivirals in HBV/HCV adjunct protocols",
+        "Potential additive effect with other thymosin-class peptides - avoid stacking without oversight"
+      ],
+      "monitoring_required": [
+        "NK cell panel (CD16+/CD56+) at baseline and week 8",
+        "CBC with differential at weeks 0, 6, 12",
+        "CRP and IL-6 if inflammatory reduction is primary goal",
+        "Liver function tests if used as viral hepatitis adjunct"
+      ],
+      "adverse_events_serious": [
+        "No serious adverse events in published trials at 1.5 mg doses",
+        "Theoretical risk of immune dysregulation in active autoimmune disease"
+      ],
+      "adverse_events_common": [
+        "Mild injection site reactions: redness, swelling (10-15%)",
+        "Transient flu-like symptoms in first 1-2 weeks (5-10%)",
+        "Mild headache during initial immune activation phase"
+      ]
+    },
+    "canonical_enrichment": {
+      "compatibleWith": "antigravity_v2_firebase_import",
+      "generatedAt": "2026-04-26T09:05:00+02:00",
+      "auditFieldsCompleted": [
+        "phase_blueprints_legacy_mapped"
+      ]
+    },
+    "_syncedAt": "2026-04-26T12:46:29.224Z",
+    "updated_at": "2026-05-04T14:35:44.635Z",
+    "protocol_author_organization": "Atlas Health",
+    "recommended_supplements": [
+      "nmn",
+      "resveratrol",
+      "spermidine",
+      "quercetin"
+    ],
+    "primary_goal": "Immune / Inflammation",
+    "_importBundle": "Atlas Health Core Clinical Protocol Library",
+    "metadata": {
+      "longDescription": "Thymosin Alpha-1 (Tα1; Zadaxin) is a 28-amino acid peptide endogenously produced by thymic epithelial cells and the first thymic hormone to be fully sequenced. It promotes T-cell differentiation and maturation, augments NK cell activity, stimulates dendritic cell function, activates Toll-like receptors 2 and 9 (innate immunity), and modulates cytokine balance toward Th1-type responses (Goldstein AL & Goldstein A, Expert Opin Biol Ther 2009; King R & Tuthill C, Prog Mol Biol Transl Sci 2014). Tα1 is clinically approved in 35+ countries for hepatitis B, hepatitis C, and oncology supportive care. TB-500 (synthetic Thymosin β4 fragment) provides complementary immune modulation by suppressing pro-inflammatory cytokines (IL-1β, TNF-α), promoting regulatory T-cell function, and accelerating tissue repair via angiogenesis and actin remodeling (Goldstein AL et al., Ann N Y Acad Sci 2012). The 8-week dual-phase protocol delivers combined immunomodulation in weeks 1–4, transitioning to Tα1 maintenance for sustained immune calibration.",
+      "primary_goal": "Immune / Inflammation",
+      "keywords": [
+        "Thymosin Alpha-1 immune protocol",
+        "TB-500 immunomodulation",
+        "thymic peptide immune support",
+        "T-cell activation peptide",
+        "immune inflammation protocol",
+        "Zadaxin thymosin protocol"
+      ],
+      "references": [
+        {
+          "pmid": "19519282",
+          "citation": "Goldstein AL, Goldstein A. From lab to bedside: emerging clinical applications of thymosin alpha 1. Expert Opin Biol Ther 2009;9:593-608."
+        },
+        {
+          "pmid": "24411673",
+          "citation": "King R, Tuthill C. Immune Modulation with Thymosin Alpha 1 Treatment. Prog Mol Biol Transl Sci 2014;129:179-208."
+        },
+        {
+          "pmid": "22295120",
+          "citation": "Goldstein AL et al. Thymosin β4: A multi-functional regenerative peptide. Ann N Y Acad Sci 2012;1269:1-8."
+        }
+      ],
+      "scientificName": "Thymosin Alpha-1 & Thymosin β4 (TB-500) Thymic T-Cell & Innate Immune Modulation Protocol",
+      "description": "8-week dual-thymosin immunomodulation protocol combining Thymosin Alpha-1 T-cell maturation and toll-like receptor activation with TB-500 anti-inflammatory angiogenesis for comprehensive immune recalibration."
+    },
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "protocol_version": "v6.1",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible"
+    ],
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
+    "protocol_title": "Thymosin Alpha-1 & TB-500 Immune Modulation Protocol",
+    "category": "Immune & Inflammation",
+    "syncedAt": "2026-05-16T14:32:32.730Z",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "recovery_pattern",
+        "stress_load",
+        "age_variant_match"
+      ],
+      "profile_notes": [
+        "Do not treat as a substitute for infection-directed care."
+      ],
+      "allow_acceleration": false,
+      "base_duration_weeks": 8,
+      "notes": "Default generator rules – pending clinical review.",
+      "tempo_variants": [
+        "standard"
+      ],
+      "allow_extension": false
+    },
+    "_patchedAt": {
+      "schema_gap_fix": "2026-04-26T12:37:11Z"
+    },
+    "variant_rules": {
+      "age_variants": {
+        "18-35": {
+          "default_duration_weeks": 8,
+          "monitoring_intensity": "standard"
+        },
+        "36-50": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "moderate"
+        },
+        "51-65": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "enhanced"
+        },
+        "65+": {
+          "default_duration_weeks": 16,
+          "monitoring_intensity": "enhanced"
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "recommended_flags": [],
+          "special_notes": [
+            "Use conservative ramping if sensitivity profile is high."
+          ]
+        },
+        "male": {
+          "recommended_flags": [],
+          "special_notes": [
+            "Reassess tolerance and response before escalation."
+          ]
+        }
+      },
+      "duration_variants": {
+        "8_weeks": {
+          "mode": "short",
+          "extra_monitoring": false
+        },
+        "12_weeks": {
+          "mode": "standard",
+          "extra_monitoring": false
+        },
+        "16_weeks": {
+          "mode": "extended",
+          "extra_monitoring": true
+        },
+        "20_weeks": {
+          "mode": "extended_plus",
+          "extra_monitoring": true
+        }
+      },
+      "tempo_variants": {
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "tempo": {
+        "standard": {
+          "notes": "Standard tempo – no adjustment.",
+          "phase_duration_multiplier": 1
+        },
+        "accelerated": {
+          "notes": "Accelerated tempo – physician review required.",
+          "phase_duration_multiplier": 0.75
+        },
+        "extended": {
+          "notes": "Extended tempo – for slower responders.",
+          "phase_duration_multiplier": 1.33
+        }
+      }
+    },
+    "phase_blueprints": [
+      {
+        "phase_key": "immune_activation",
+        "phase_title": "Immune Activation",
+        "default_start_week": 1,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "legacy_phase_mapping",
+          "protocol_continuity"
+        ],
+        "drugs": [
+          {
+            "product_id": "Thymosin_Alpha1-6mg-vial",
+            "product_title": "Thymosin Alpha 1",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "2x_week",
+              "vials_required_for_phase": 4,
+              "starting_weekly_dose": 10,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "Thymosin_Alpha1-6mg-vial",
+              "route": "subcutaneous"
+            }
+          },
+          {
+            "product_id": "TB-500-5mg-vial",
+            "product_title": "Tb 500",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "weekly",
+              "vials_required_for_phase": 4,
+              "starting_weekly_dose": 5,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "TB-500-5mg-vial",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 1,
+            "event_type": "phase_start",
+            "title": "Start Immune Activation"
+          },
+          {
+            "week": 4,
+            "event_type": "phase_review",
+            "title": "Review Immune Activation"
+          }
+        ]
+      },
+      {
+        "phase_key": "immune_stabilization",
+        "phase_title": "Immune Stabilization",
+        "default_start_week": 5,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "legacy_phase_mapping",
+          "protocol_continuity"
+        ],
+        "drugs": [
+          {
+            "product_id": "Thymosin_Alpha1-6mg-vial",
+            "product_title": "Thymosin Alpha 1",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "weekly",
+              "vials_required_for_phase": 4,
+              "starting_weekly_dose": 10,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "Thymosin_Alpha1-6mg-vial",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 5,
+            "event_type": "phase_start",
+            "title": "Start Immune Stabilization"
+          },
+          {
+            "week": 8,
+            "event_type": "phase_review",
+            "title": "Review Immune Stabilization"
+          }
+        ]
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.925Z",
+    "synergy_rationale": "This multi-compound protocol is designed to provide synergistic effects, targeting multiple complementary biological pathways simultaneously to achieve immune / inflammation more effectively than monotherapy.",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "Strict adherence to circadian rhythms.",
+      "nutrition": "Nutrient-dense, slight caloric restriction or time-restricted eating.",
+      "activity": "Mix of resistance training, Zone 2, and mobility work.",
+      "hydration": "Standard adequate hydration."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:20.332Z",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Immune Activation",
+        "start_week": 1,
+        "end_week": 4,
+        "drugs_used": [
+          {
+            "product_slug": "thymosin-alpha-1",
+            "selected_strength": "10mg",
+            "dosing_frequency": "2x_week",
+            "vials_required_for_phase": 4,
+            "route": "subcutaneous",
+            "weekly_dose": "3.2 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 3.2,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "tb-500",
+            "selected_strength": "5mg",
+            "dosing_frequency": "weekly",
+            "vials_required_for_phase": 4,
+            "route": "subcutaneous",
+            "weekly_dose": "5 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 5,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Immune Stabilization",
+        "start_week": 5,
+        "end_week": 8,
+        "drugs_used": [
+          {
+            "product_slug": "thymosin-alpha-1",
+            "selected_strength": "10mg",
+            "dosing_frequency": "weekly",
+            "vials_required_for_phase": 4,
+            "route": "subcutaneous",
+            "weekly_dose": "3.2 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 3.2,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "eligibility_rules": {
+      "contraindications": [
+        "active_autoimmune_flare",
+        "organ_transplant_on_immunosuppression",
+        "pregnancy_or_breastfeeding",
+        "known_hypersensitivity_to_thymosin_peptides"
+      ],
+      "supported_goals": [
+        "immune_support",
+        "immune_recalibration",
+        "infection_resilience",
+        "inflammation_modulation"
+      ],
+      "relative_cautions": [
+        "history_of_autoimmune_disease",
+        "active_malignancy",
+        "current_high_dose_corticosteroid_use",
+        "uncontrolled_chronic_infection"
+      ],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "infection_history",
+        "autoimmune_history",
+        "baseline_CBC",
+        "age_group",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ],
+      "indications": [
+        "Individuals with recurring infections or immune vulnerability",
+        "Patients with autoimmune conditions seeking immune modulation support",
+        "Adults with elevated chronic inflammation biomarkers (CRP, TNF-α)",
+        "Immunocompromised individuals under physician supervision",
+        "Post-viral recovery requiring immune system rebalancing"
+      ]
+    },
+    "expected_outcomes": {
+      "0": "Improved cellular markers",
+      "1": "Enhanced vitality",
+      "2": "Mitochondrial support",
+      "qualitative": [
+        "Enhanced innate and adaptive immune system responsiveness",
+        "Improved T-cell activity and immune cell maturation",
+        "Reduction in chronic low-grade inflammation markers (CRP, IL-6)",
+        "Greater resilience to environmental and pathogen challenges",
+        "Improved recovery time after immune-stressing events"
+      ]
+    }
+  },
+  {
+    "id": "immune_002",
+    "protocol_duration_weeks": 8,
+    "bundleVersion": "2.0",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_is_physician_authored": false,
+    "seeded_at": "2026-04-25T06:10:36.133Z",
+    "protocol_source_version": "v5.0",
+    "dosing_enrichment": {
+      "titration_note": "Week 1-2: BPC-157 at 250 mcg/day SC. Week 3 onward: increase to 500 mcg/day if well tolerated. Add Thymulin at 20 ng/day from week 2. If mucosal healing is primary goal, BPC-157 alone at 500-750 mcg/day for first 4 weeks before adding Thymulin.",
+      "cycling_recommendation": "10-12 week protocol with 4-6 week washout. BPC-157 can be cycled more frequently (2-3 rounds per year) due to its short half-life and gastric safety profile. Thymulin benefits plateau at 12 weeks; re-evaluate biomarkers before repeat cycle.",
+      "maintenance_dose": "BPC-157: 250-500 mcg/day SC or intranasally. Thymulin: 20-40 ng/day SC (nanoparticle or compounded formulation). Combine in split morning/evening administration.",
+      "timing_optimization": "BPC-157: morning SC injection (fasted or fed, no restriction). Thymulin: evening SC injection to align with thymic circadian release pattern. Avoid co-injection in same site."
+    },
+    "complexity_level": "moderate",
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "_schemaVersion": "antigravity_v2",
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_source_reference": "internal_guide",
+    "protocol_slug": "immune-kpv-thymosin-8w",
+    "protocol_is_curated": true,
+    "number_of_phases": 2,
+    "risk_class": "moderate",
+    "protocol_review_status": "approved",
+    "protocol_source_type": "curated_library",
+    "active": true,
+    "overview_summary": "Immune-support protocol using thymosin alpha 1 as the core immune regulator with KPV added as an anti-inflammatory adjunct.",
+    "protocol_id": "immune_002",
+    "economics": {
+      "total_protocol_cost_estimate": 700,
+      "total_vials_required": 12
+    },
+    "protocol_author_title": "Peptide Specialists",
+    "confidence_score": 88,
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "Enhanced protocol preserves legacy fields while supporting canonical blueprint-based loading.",
+      "enabled": true
+    },
+    "physician_supervision_required": true,
+    "status": "approved",
+    "_importedAt": {
+      "_nanoseconds": 991000000,
+      "_seconds": 1777189741
+    },
+    "_patchSchema": "antigravity_v2",
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "CBC",
+          "CMP",
+          "Lipid Panel"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "CBC",
+          "CMP"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Active autoimmune disease flare",
+        "Concurrent immunosuppressive therapy (relative)",
+        "Pregnancy"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (15–35%)",
+          "management": "Rotate sites; use proper aseptic technique."
+        },
+        {
+          "effect": "Fluid retention / mild edema",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Reduce dose; monitor blood pressure; salt restriction."
+        },
+        {
+          "effect": "Nausea / GI discomfort",
+          "frequency": "Common (10–25%)",
+          "management": "Dose with food; split doses; titrate slowly."
+        },
+        {
+          "effect": "Elevated fasting glucose",
+          "frequency": "Uncommon (5%)",
+          "management": "Monitor fasting glucose weekly; consult if persistent."
+        },
+        {
+          "effect": "Mood changes / irritability",
+          "frequency": "Rare (<3%)",
+          "management": "Reduce dose; psychological support if needed."
+        }
+      ],
+      "escalation_criteria": [
+        "Severe or worsening edema — STOP, cardiovascular evaluation",
+        "Fasting glucose > 7.0 mmol/L (126 mg/dL) on two occasions — Endocrinology referral",
+        "Allergic reaction — STOP, emergency protocol",
+        "Hypertensive urgency (BP > 180/110) — STOP, immediate medical attention"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+    "clinical_evidence_update_2026": {
+      "evidence_limitations": [
+        "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+        "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+        "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+      ],
+      "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+      "last_updated_at": "2026-04-26T08:05:00.000Z",
+      "latest_clinical_notes": [
+        "KPV remains exploratory/translational for gut inflammation and mast-cell modulation; human evidence remains limited.",
+        "Thymosin alpha-1 may be immunomodulatory; screen for autoimmune flare, immunosuppressive therapy, transplant status, malignancy history, and active infection.",
+        "Add stool/gut symptom tracking only as supportive monitoring, not diagnostic replacement."
+      ],
+      "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+      "regulatory_status": "Thymosin Alpha-1 has international clinical use/approvals in several countries for immune-related indications but is not FDA-approved in the United States. TB-500, KPV, thymulin and related peptide uses remain investigational/compounded/research depending on jurisdiction.",
+      "evidence_update": "Immune protocols should retain physician supervision and autoimmune/malignancy cautions.",
+      "updated_at": "2026-04-26T09:05:00+02:00",
+      "source_refs": [],
+      "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+    },
+    "_syncSource": "export/protocols/immune_002.js",
+    "monitoring_plan": {
+      "baseline_required": [
+        "CBC_with_differential",
+        "CRP",
+        "ESR",
+        "gut_symptom_score",
+        "zonulin_if_available",
+        "TNF_alpha_if_available",
+        "IL_1beta_if_available",
+        "autoimmune_history_review"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "labs": [
+            "CRP",
+            "gut_symptom_score",
+            "CBC_with_differential"
+          ],
+          "purpose": "Assess early anti-inflammatory and gut barrier response.",
+          "type": "mucosal_inflammation_review",
+          "week": 4
+        },
+        {
+          "labs": [
+            "CRP",
+            "ESR",
+            "zonulin_if_available"
+          ],
+          "purpose": "Evaluate stabilization of inflammatory and mucosal markers.",
+          "type": "immune_stabilization_review",
+          "week": 8
+        },
+        {
+          "labs": [
+            "CBC_with_differential",
+            "CRP",
+            "symptom_recurrence_log"
+          ],
+          "purpose": "Assess durability of response and suitability for repeat cycle.",
+          "type": "follow_up_review",
+          "week": 12
+        }
+      ]
+    },
+    "_schemaGapFixed": {
+      "_nanoseconds": 86000000,
+      "_seconds": 1777190722
+    },
+    "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
+    "safety_profile": {
+      "drug_interactions": [
+        "BPC-157 may attenuate NSAID-induced GI damage - beneficial interaction but monitor for altered pain perception",
+        "Avoid simultaneous immunosuppressants with Thymulin - antagonistic at T-cell differentiation level",
+        "BPC-157 theoretically potentiates angiogenic growth factors - use caution in cancer history"
+      ],
+      "monitoring_required": [
+        "Zonulin serum levels at baseline and week 8 for gut permeability tracking",
+        "CBC and CRP at weeks 0, 6, 12",
+        "TNF-alpha and IL-1beta if inflammatory recovery is primary endpoint",
+        "Subjective energy and illness frequency log (patient-reported monthly)"
+      ],
+      "adverse_events_serious": [
+        "No serious AEs reported in published BPC-157 rodent and human case literature at standard doses",
+        "Thymulin: insufficient long-term human data at immune-optimization doses - monitor for unexpected immune shifts"
+      ],
+      "adverse_events_common": [
+        "Mild nausea or GI discomfort with BPC-157 oral/SC (5-10%)",
+        "Transient injection site irritation (10-15%)",
+        "Mild dizziness in first 1-2 days at higher BPC-157 doses"
+      ]
+    },
+    "canonical_enrichment": {
+      "compatibleWith": "antigravity_v2_firebase_import",
+      "generatedAt": "2026-04-26T09:05:00+02:00",
+      "auditFieldsCompleted": [
+        "phase_blueprints_legacy_mapped"
+      ]
+    },
+    "_syncedAt": "2026-04-26T12:46:29.477Z",
+    "updated_at": "2026-05-04T14:35:44.635Z",
+    "protocol_author_organization": "Atlas Health",
+    "recommended_supplements": [
+      "nmn",
+      "resveratrol",
+      "spermidine",
+      "quercetin"
+    ],
+    "primary_goal": "Immune / Inflammation",
+    "_importBundle": "Atlas Health Core Clinical Protocol Library",
+    "metadata": {
+      "longDescription": "This protocol pairs Thymosin Alpha-1 (systemic T-cell and innate immune modulation; see immune_001) with KPV (Lys-Pro-Val), a tripeptide derived from the C-terminus of α-melanocyte-stimulating hormone (α-MSH). KPV exerts potent anti-inflammatory effects by inhibiting NF-κB nuclear translocation, reducing production of IL-1β, IL-6, TNF-α, and interferon-γ, and suppressing mast cell degranulation (Dalmasso G et al., Gastroenterology 2008; Catania A et al., Endocr Rev 2004). KPV has demonstrated efficacy in murine models of colitis, intestinal inflammation, and dermatitis, and penetrates epithelial barriers due to its small size, making it especially suitable for gut-associated inflammatory conditions. Combined with Tα1 (which restores Th1/Th2 balance and regulatory T-cell function), this protocol provides both upstream immune calibration and downstream cytokine suppression — a complementary dual strategy for conditions including IBD, systemic inflammation, mast-cell activation syndrome (MCAS), and autoimmune disorders.",
+      "primary_goal": "Immune / Inflammation",
+      "keywords": [
+        "KPV peptide anti-inflammatory",
+        "Thymosin Alpha-1 autoimmune protocol",
+        "NF-kB inhibitor peptide",
+        "alpha-MSH anti-inflammatory peptide",
+        "mast cell peptide protocol",
+        "gut inflammation peptide"
+      ],
+      "references": [
+        {
+          "pmid": "18471516",
+          "citation": "Dalmasso G et al. The peptide KPV inhibits NF-κB in intestinal epithelial cells. Gastroenterology 2008;134:1255-1264."
+        },
+        {
+          "pmid": "15483236",
+          "citation": "Catania A et al. The melanocortin system in control of inflammation. Endocr Rev 2004;25:956-983."
+        },
+        {
+          "pmid": "19519282",
+          "citation": "Goldstein AL, Goldstein A. Thymosin alpha 1 clinical applications. Expert Opin Biol Ther 2009;9:593-608."
+        }
+      ],
+      "scientificName": "Thymosin Alpha-1 & KPV Anti-Inflammatory Mast-Cell & NF-κB Inhibition Protocol",
+      "description": "10-week immune protocol combining Thymosin Alpha-1 T-cell immunomodulation with KPV α-MSH-derived anti-inflammatory NF-κB inhibition for gut inflammation, mast-cell hyperactivation, and autoimmune modulation."
+    },
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "protocol_version": "v6.1",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible"
+    ],
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
+    "protocol_title": "Thymosin Alpha-1 & KPV Anti-Inflammatory Protocol",
+    "category": "Immune & Inflammation",
+    "syncedAt": "2026-05-16T14:32:34.578Z",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "recent_stress_load",
+        "recovery_pattern",
+        "age_variant_match"
+      ],
+      "profile_notes": [
+        "Prefer conservative tempo in highly reactive or recently ill profiles."
+      ],
+      "allow_acceleration": false,
+      "base_duration_weeks": 8,
+      "notes": "Default generator rules – pending clinical review.",
+      "tempo_variants": [
+        "standard"
+      ],
+      "allow_extension": false
+    },
+    "_patchedAt": {
+      "schema_gap_fix": "2026-04-26T12:37:11Z"
+    },
+    "variant_rules": {
+      "age_variants": {
+        "18-35": {
+          "default_duration_weeks": 8,
+          "monitoring_intensity": "standard"
+        },
+        "36-50": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "moderate"
+        },
+        "51-65": {
+          "default_duration_weeks": 16,
+          "monitoring_intensity": "enhanced"
+        },
+        "65+": {
+          "default_duration_weeks": 16,
+          "monitoring_intensity": "enhanced"
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "recommended_flags": [],
+          "special_notes": [
+            "Use conservative ramping if sensitivity profile is high."
+          ]
+        },
+        "male": {
+          "recommended_flags": [],
+          "special_notes": [
+            "Reassess tolerance and response before escalation."
+          ]
+        }
+      },
+      "duration_variants": {
+        "8_weeks": {
+          "mode": "short",
+          "extra_monitoring": false
+        },
+        "12_weeks": {
+          "mode": "standard",
+          "extra_monitoring": false
+        },
+        "16_weeks": {
+          "mode": "extended",
+          "extra_monitoring": true
+        },
+        "20_weeks": {
+          "mode": "extended_plus",
+          "extra_monitoring": true
+        }
+      },
+      "tempo_variants": {
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "tempo": {
+        "standard": {
+          "notes": "Standard tempo – no adjustment.",
+          "phase_duration_multiplier": 1
+        },
+        "accelerated": {
+          "notes": "Accelerated tempo – physician review required.",
+          "phase_duration_multiplier": 0.75
+        },
+        "extended": {
+          "notes": "Extended tempo – for slower responders.",
+          "phase_duration_multiplier": 1.33
+        }
+      }
+    },
+    "phase_blueprints": [
+      {
+        "phase_key": "immune_reset",
+        "phase_title": "Immune Reset",
+        "default_start_week": 1,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "legacy_phase_mapping",
+          "protocol_continuity"
+        ],
+        "drugs": [
+          {
+            "product_id": "Thymosin_Alpha1-6mg-vial",
+            "product_title": "Thymosin Alpha 1",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "2x_week",
+              "vials_required_for_phase": 4,
+              "starting_weekly_dose": 10,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "Thymosin_Alpha1-6mg-vial",
+              "route": "subcutaneous"
+            }
+          },
+          {
+            "product_id": "KPV-5mg-vial",
+            "product_title": "Kpv",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "daily",
+              "vials_required_for_phase": 4,
+              "starting_weekly_dose": 10,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "KPV-5mg-vial",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 1,
+            "event_type": "phase_start",
+            "title": "Start Immune Reset"
+          },
+          {
+            "week": 4,
+            "event_type": "phase_review",
+            "title": "Review Immune Reset"
+          }
+        ]
+      },
+      {
+        "phase_key": "stabilization",
+        "phase_title": "Stabilization",
+        "default_start_week": 5,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "legacy_phase_mapping",
+          "protocol_continuity"
+        ],
+        "drugs": [
+          {
+            "product_id": "Thymosin_Alpha1-6mg-vial",
+            "product_title": "Thymosin Alpha 1",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "weekly",
+              "vials_required_for_phase": 2,
+              "starting_weekly_dose": 10,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "Thymosin_Alpha1-6mg-vial",
+              "route": "subcutaneous"
+            }
+          },
+          {
+            "product_id": "KPV-5mg-vial",
+            "product_title": "Kpv",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "3x_week",
+              "vials_required_for_phase": 2,
+              "starting_weekly_dose": 10,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "KPV-5mg-vial",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 5,
+            "event_type": "phase_start",
+            "title": "Start Stabilization"
+          },
+          {
+            "week": 8,
+            "event_type": "phase_review",
+            "title": "Review Stabilization"
+          }
+        ]
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.926Z",
+    "synergy_rationale": "This multi-compound protocol is designed to provide synergistic effects, targeting multiple complementary biological pathways simultaneously to achieve immune / inflammation more effectively than monotherapy.",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "Strict adherence to circadian rhythms.",
+      "nutrition": "Nutrient-dense, slight caloric restriction or time-restricted eating.",
+      "activity": "Mix of resistance training, Zone 2, and mobility work.",
+      "hydration": "Standard adequate hydration."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:19.908Z",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Immune Reset",
+        "start_week": 1,
+        "end_week": 4,
+        "drugs_used": [
+          {
+            "product_slug": "thymosin-alpha-1",
+            "selected_strength": "10mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "2x_week",
+            "vials_required_for_phase": 4,
+            "faq_ref": "thymosinalpha1_faq",
+            "pubmed_ref": "thymosinalpha1_pubmed",
+            "weekly_dose": "3.2 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 3.2,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "kpv",
+            "selected_strength": "10mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 4,
+            "faq_ref": "kpv_faq",
+            "pubmed_ref": "kpv_pubmed",
+            "weekly_dose": "2.1 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 2.1,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Stabilization",
+        "start_week": 5,
+        "end_week": 8,
+        "drugs_used": [
+          {
+            "product_slug": "thymosin-alpha-1",
+            "selected_strength": "10mg",
+            "dosing_frequency": "weekly",
+            "vials_required_for_phase": 2,
+            "route": "subcutaneous",
+            "weekly_dose": "3.2 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 3.2,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "kpv",
+            "selected_strength": "10mg",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 2,
+            "route": "subcutaneous",
+            "weekly_dose": "2.1 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 2.1,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "eligibility_rules": {
+      "contraindications": [
+        "active_malignancy",
+        "pregnancy_or_breastfeeding",
+        "severe_uncontrolled_autoimmune_disease",
+        "known_hypersensitivity_to_protocol_compounds"
+      ],
+      "supported_goals": [
+        "gut_inflammation_support",
+        "immune_stabilization",
+        "mucosal_repair",
+        "mast_cell_and_cytokine_modulation"
+      ],
+      "relative_cautions": [
+        "history_of_cancer",
+        "active_immunosuppressive_therapy",
+        "severe_GI_bleeding",
+        "MCAS_with_high_sensitivity_profile"
+      ],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "gut_symptom_profile",
+        "inflammatory_history",
+        "autoimmune_history",
+        "age_group",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ],
+      "indications": [
+        "Individuals with recurring infections or immune vulnerability",
+        "Patients with autoimmune conditions seeking immune modulation support",
+        "Adults with elevated chronic inflammation biomarkers (CRP, TNF-α)",
+        "Immunocompromised individuals under physician supervision",
+        "Post-viral recovery requiring immune system rebalancing"
+      ]
+    },
+    "expected_outcomes": {
+      "0": "Improved cellular markers",
+      "1": "Enhanced vitality",
+      "2": "Mitochondrial support",
+      "qualitative": [
+        "Enhanced innate and adaptive immune system responsiveness",
+        "Improved T-cell activity and immune cell maturation",
+        "Reduction in chronic low-grade inflammation markers (CRP, IL-6)",
+        "Greater resilience to environmental and pathogen challenges",
+        "Improved recovery time after immune-stressing events"
+      ]
+    }
+  },
+  {
+    "id": "lon_001",
+    "protocol_duration_weeks": 12,
+    "bundleVersion": "2.0",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_is_physician_authored": false,
+    "seeded_at": "2026-04-25T06:10:36.132Z",
+    "protocol_source_version": "v5.0",
+    "dosing_enrichment": {
+      "titration_note": "Week 1: MOTS-c 5 mg SC 3x/week + Epitalon 10 mg/day SC for days 1-10. Week 2-12: MOTS-c 5-10 mg SC 3x/week + NMN 500 mg daily. Optional week 8 Epitalon re-pulse (10 mg/day x 10 days) for telomere signaling maintenance. Do not exceed MOTS-c 10 mg 3x/week without specialist guidance.",
+      "cycling_recommendation": "12-week active protocol followed by 6-8 week washout. Annual 2-cycle rotation recommended for longevity maintenance. Continuous use of MOTS-c beyond 16 weeks lacks long-term safety data in humans; periodic biomarker review required.",
+      "maintenance_dose": "MOTS-c: 5-10 mg SC 3x/week. Epitalon (adjunct): 10 mg SC daily for 10-day pulse at cycle start (repeat pulse at week 8). NAD+ precursor (NMN 500 mg or NR 300 mg): daily oral supplementation throughout cycle.",
+      "timing_optimization": "MOTS-c: morning injection on exercise or active days (exercise amplifies AMPK signaling and mitochondrial biogenesis synergy). Epitalon 10-day pulse: begin on day 1 of cycle, administer before sleep to align with pineal circadian window. NMN/NR: with morning meal."
+    },
+    "complexity_level": "moderate",
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "_schemaVersion": "antigravity_v2",
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_source_reference": "internal_guide",
+    "protocol_slug": "longevity-foundation-12w",
+    "protocol_is_curated": true,
+    "number_of_phases": 2,
+    "risk_class": "moderate",
+    "protocol_review_status": "approved",
+    "protocol_source_type": "curated_library",
+    "active": true,
+    "overview_summary": "Longevity foundation protocol using MOTS-c-driven mitochondrial signaling to support AMPK activation, metabolic flexibility, exercise capacity, and cellular aging resilience.",
+    "protocol_id": "lon_001",
+    "economics": {
+      "total_protocol_cost_estimate": 1800,
+      "total_vials_required": 30
+    },
+    "protocol_author_title": "Peptide Specialists",
+    "confidence_score": 91,
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "Enhanced protocol preserves legacy fields while supporting canonical blueprint-based loading.",
+      "enabled": true
+    },
+    "physician_supervision_required": true,
+    "status": "approved",
+    "_importedAt": {
+      "_nanoseconds": 365000000,
+      "_seconds": 1777189742
+    },
+    "_patchSchema": "antigravity_v2",
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "CBC",
+          "CMP",
+          "Lipid Panel"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "CBC",
+          "CMP"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Active cancer or history of hormone-sensitive malignancy",
+        "Severe hepatic impairment",
+        "Pregnancy"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (15–35%)",
+          "management": "Rotate sites; use proper aseptic technique."
+        },
+        {
+          "effect": "Fluid retention / mild edema",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Reduce dose; monitor blood pressure; salt restriction."
+        },
+        {
+          "effect": "Nausea / GI discomfort",
+          "frequency": "Common (10–25%)",
+          "management": "Dose with food; split doses; titrate slowly."
+        },
+        {
+          "effect": "Elevated fasting glucose",
+          "frequency": "Uncommon (5%)",
+          "management": "Monitor fasting glucose weekly; consult if persistent."
+        },
+        {
+          "effect": "Mood changes / irritability",
+          "frequency": "Rare (<3%)",
+          "management": "Reduce dose; psychological support if needed."
+        }
+      ],
+      "escalation_criteria": [
+        "Severe or worsening edema — STOP, cardiovascular evaluation",
+        "Fasting glucose > 7.0 mmol/L (126 mg/dL) on two occasions — Endocrinology referral",
+        "Allergic reaction — STOP, emergency protocol",
+        "Hypertensive urgency (BP > 180/110) — STOP, immediate medical attention"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+    "clinical_evidence_update_2026": {
+      "evidence_limitations": [
+        "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+        "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+        "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+      ],
+      "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+      "last_updated_at": "2026-04-26T08:05:00.000Z",
+      "latest_clinical_notes": [
+        "MOTS-c remains investigational with strong mechanistic and preclinical rationale but limited human therapeutic evidence.",
+        "Longevity claims should be framed as mitochondrial/metabolic support, not age reversal.",
+        "Monitor metabolic markers, body composition, fatigue/energy scales, and avoid use in active malignancy or uncontrolled systemic disease."
+      ],
+      "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+      "regulatory_status": "MOTS-c, Epitalon/Epithalon and DSIP are not FDA- or EMA-approved for longevity, circadian support, or anti-aging. Evidence remains mostly preclinical, translational, or region-specific.",
+      "evidence_update": "Keep evidence grade B/C depending on components, include active malignancy and pregnancy contraindications, and preserve washout/cycling recommendations.",
+      "updated_at": "2026-04-26T09:05:00+02:00",
+      "source_refs": [],
+      "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+    },
+    "_syncSource": "export/protocols/lon_001.js",
+    "monitoring_plan": {
+      "baseline_required": [
+        "biological_age_marker_if_available",
+        "fasting_glucose",
+        "HbA1c",
+        "lipid_profile",
+        "CRP",
+        "IL_6_if_available",
+        "body_composition",
+        "VO2max_or_exercise_tolerance",
+        "sleep_quality",
+        "energy_score"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "labs": [
+            "fasting_glucose",
+            "energy_score",
+            "exercise_tolerance"
+          ],
+          "purpose": "Assess early mitochondrial and metabolic response.",
+          "type": "early_longevity_response",
+          "week": 4
+        },
+        {
+          "labs": [
+            "HbA1c",
+            "lipid_profile",
+            "CRP"
+          ],
+          "purpose": "Evaluate metabolic flexibility and inflammatory response.",
+          "type": "metabolic_and_inflammatory_review",
+          "week": 8
+        },
+        {
+          "labs": [
+            "biological_age_marker_if_available",
+            "fasting_glucose",
+            "HbA1c",
+            "CRP",
+            "VO2max_or_exercise_tolerance"
+          ],
+          "purpose": "End-of-cycle longevity and mitochondrial response review.",
+          "type": "cycle_outcome_review",
+          "week": 12
+        }
+      ]
+    },
+    "_schemaGapFixed": {
+      "_nanoseconds": 399000000,
+      "_seconds": 1777190723
+    },
+    "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
+    "safety_profile": {
+      "drug_interactions": [
+        "MOTS-c potentiates metformin's AMPK activation - consider dose reduction if both are used",
+        "NMN/NR may elevate NAD+ beyond target range with concurrent IV NAD+ therapy - avoid stacking",
+        "Epitalon: no known clinically significant drug interactions at immunomodulatory peptide doses"
+      ],
+      "monitoring_required": [
+        "Biological age markers: GlycanAge or TruAge methylation panel at baseline and end of cycle",
+        "Mitochondrial function: CoQ10 serum levels, CBC with differential at weeks 0 and 12",
+        "Metabolic panel: fasting glucose, HbA1c, lipids at weeks 0, 8, 12",
+        "VO2 max assessment or exercise tolerance test at baseline and week 12",
+        "CRP and IL-6 for inflammatory baseline and response tracking"
+      ],
+      "adverse_events_serious": [
+        "MOTS-c: no serious AEs in published animal or human pilot data at 5-10 mg doses",
+        "Epitalon: low-dose peptide with long-term rodent safety data; human long-term data limited to 15-year observational studies (Khavinson 2003)",
+        "Theoretical concern with NAD+ precursors in cancer-proliferating contexts - screen for active malignancy before initiation"
+      ],
+      "adverse_events_common": [
+        "Mild injection site reactions with MOTS-c SC (10-15%)",
+        "Transient fatigue or flu-like symptoms in week 1 (mitochondrial adaptation response, 5-10%)",
+        "Mild GI discomfort with NMN/NR supplementation at higher doses (5-8%)"
+      ]
+    },
+    "canonical_enrichment": {
+      "compatibleWith": "antigravity_v2_firebase_import",
+      "generatedAt": "2026-04-26T09:05:00+02:00",
+      "auditFieldsCompleted": [
+        "phase_blueprints_legacy_mapped"
+      ]
+    },
+    "_syncedAt": "2026-04-26T12:46:30.063Z",
+    "updated_at": "2026-05-04T14:35:44.635Z",
+    "protocol_author_organization": "Atlas Health",
+    "recommended_supplements": [
+      "nmn",
+      "resveratrol",
+      "spermidine",
+      "quercetin"
+    ],
+    "primary_goal": "Longevity",
+    "_importBundle": "Atlas Health Core Clinical Protocol Library",
+    "metadata": {
+      "longDescription": "MOTS-c (mitochondrial open reading frame of the 12S rRNA-c) is an endogenous mitochondria-derived peptide encoded within the mitochondrial genome — the first peptide shown to be transcribed from mitochondrial rRNA rather than nuclear DNA (Lee C et al., Cell Metab 2015). MOTS-c circulates systemically and translocates to the nucleus under metabolic stress, where it activates AMPK (AMP-activated protein kinase), regulates the folate–methionine cycle, and modulates gene expression related to metabolic homeostasis, antioxidant defense, and insulin sensitivity. Circulating MOTS-c levels decline significantly with age, linking its reduction to age-associated metabolic decline (Reynolds JC et al., Nat Aging 2021). This 12-week foundation protocol delivers sustained MOTS-c supplementation across two phases — activation and maintenance — targeting the mitochondrial and metabolic hallmarks of aging as defined by López-Otín et al. (Cell 2023).",
+      "primary_goal": "Longevity",
+      "keywords": [
+        "MOTS-c longevity protocol",
+        "AMPK activator peptide aging",
+        "mitochondria peptide longevity",
+        "cellular aging peptide",
+        "anti-aging mitokine",
+        "longevity peptide protocol"
+      ],
+      "references": [
+        {
+          "pmid": "25738459",
+          "citation": "Lee C et al. The Mitochondrial-Derived Peptide MOTS-c Promotes Metabolic Homeostasis. Cell Metab 2015;21:443-454."
+        },
+        {
+          "pmid": "34282400",
+          "citation": "Reynolds JC et al. MOTS-c is an exercise-induced mitochondrial-encoded regulator of age-dependent physical decline. Nat Aging 2021;1:147-159."
+        },
+        {
+          "pmid": "37832556",
+          "citation": "López-Otín C et al. Hallmarks of aging: An expanding universe. Cell 2023;186:243-278."
+        }
+      ],
+      "scientificName": "MOTS-c Mitokine AMPK-Activating Longevity Foundation Protocol",
+      "description": "12-week longevity protocol using MOTS-c mitochondria-derived peptide to activate AMPK, improve insulin sensitivity, and support cellular hallmarks of healthy aging."
+    },
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "protocol_version": "v6.1",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible"
+    ],
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
+    "protocol_title": "MOTS-c Longevity Foundation Protocol",
+    "category": "Longevity",
+    "syncedAt": "2026-05-16T14:32:32.012Z",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "age_variant_match",
+        "recovery_pattern",
+        "metabolic_profile"
+      ],
+      "profile_notes": [
+        "Frame as healthy-aging support, not disease reversal."
+      ],
+      "allow_acceleration": false,
+      "base_duration_weeks": 12,
+      "notes": "Default generator rules – pending clinical review.",
+      "tempo_variants": [
+        "standard"
+      ],
+      "allow_extension": false
+    },
+    "_patchedAt": {
+      "schema_gap_fix": "2026-04-26T12:37:11Z"
+    },
+    "variant_rules": {
+      "age_variants": {
+        "18-35": {
+          "default_duration_weeks": 8,
+          "monitoring_intensity": "standard"
+        },
+        "36-50": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "moderate"
+        },
+        "51-65": {
+          "default_duration_weeks": 16,
+          "monitoring_intensity": "enhanced"
+        },
+        "65+": {
+          "default_duration_weeks": 20,
+          "monitoring_intensity": "enhanced"
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "recommended_flags": [
+            "hormonal_cyclicity_watch"
+          ],
+          "special_notes": [
+            "Use conservative ramping if sensitivity profile is high."
+          ]
+        },
+        "male": {
+          "recommended_flags": [],
+          "special_notes": [
+            "Reassess tolerance and response before escalation."
+          ]
+        }
+      },
+      "duration_variants": {
+        "8_weeks": {
+          "mode": "short",
+          "extra_monitoring": false
+        },
+        "12_weeks": {
+          "mode": "standard",
+          "extra_monitoring": false
+        },
+        "16_weeks": {
+          "mode": "extended",
+          "extra_monitoring": true
+        },
+        "20_weeks": {
+          "mode": "extended_plus",
+          "extra_monitoring": true
+        }
+      },
+      "tempo_variants": {
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "tempo": {
+        "standard": {
+          "notes": "Standard tempo – no adjustment.",
+          "phase_duration_multiplier": 1
+        },
+        "accelerated": {
+          "notes": "Accelerated tempo – physician review required.",
+          "phase_duration_multiplier": 0.75
+        },
+        "extended": {
+          "notes": "Extended tempo – for slower responders.",
+          "phase_duration_multiplier": 1.33
+        }
+      }
+    },
+    "phase_blueprints": [
+      {
+        "phase_key": "cellular_activation",
+        "phase_title": "Cellular Activation",
+        "default_start_week": 1,
+        "default_duration_weeks": 6,
+        "clinical_purpose": [
+          "legacy_phase_mapping",
+          "protocol_continuity"
+        ],
+        "drugs": [
+          {
+            "product_id": "MOTS-C-10mg-vial",
+            "product_title": "Mots C",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "3x_week",
+              "vials_required_for_phase": 18,
+              "starting_weekly_dose": 5,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "MOTS-C-10mg-vial",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 1,
+            "event_type": "phase_start",
+            "title": "Start Cellular Activation"
+          },
+          {
+            "week": 6,
+            "event_type": "phase_review",
+            "title": "Review Cellular Activation"
+          }
+        ]
+      },
+      {
+        "phase_key": "maintenance",
+        "phase_title": "Maintenance",
+        "default_start_week": 7,
+        "default_duration_weeks": 6,
+        "clinical_purpose": [
+          "legacy_phase_mapping",
+          "protocol_continuity"
+        ],
+        "drugs": [
+          {
+            "product_id": "MOTS-C-10mg-vial",
+            "product_title": "Mots C",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "2x_week",
+              "vials_required_for_phase": 12,
+              "starting_weekly_dose": 5,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "MOTS-C-10mg-vial",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 7,
+            "event_type": "phase_start",
+            "title": "Start Maintenance"
+          },
+          {
+            "week": 12,
+            "event_type": "phase_review",
+            "title": "Review Maintenance"
+          }
+        ]
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.926Z",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "Strict adherence to circadian rhythms.",
+      "nutrition": "Nutrient-dense, slight caloric restriction or time-restricted eating.",
+      "activity": "Mix of resistance training, Zone 2, and mobility work.",
+      "hydration": "Standard adequate hydration."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:21.693Z",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Cellular Activation",
+        "start_week": 1,
+        "end_week": 6,
+        "drugs_used": [
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 18,
+            "route": "subcutaneous",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose": "15 mg",
+            "weekly_dose_amount": 15,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Maintenance",
+        "start_week": 7,
+        "end_week": 12,
+        "drugs_used": [
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "dosing_frequency": "2x_week",
+            "vials_required_for_phase": 12,
+            "route": "subcutaneous",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose": "10 mg",
+            "weekly_dose_amount": 10,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "eligibility_rules": {
+      "contraindications": [
+        "active_malignancy",
+        "pregnancy_or_breastfeeding",
+        "severe_hepatic_or_renal_impairment",
+        "known_hypersensitivity_to_protocol_compounds"
+      ],
+      "supported_goals": [
+        "longevity",
+        "mitochondrial_health",
+        "metabolic_flexibility",
+        "healthy_aging"
+      ],
+      "relative_cautions": [
+        "uncontrolled_diabetes",
+        "active_autoimmune_flare",
+        "recent_major_illness",
+        "frailty_with_low_oral_intake"
+      ],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "age_group",
+        "metabolic_status",
+        "baseline_energy_score",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ],
+      "indications": [
+        "Adults aged 35+ seeking evidence-based healthspan optimization",
+        "Individuals with elevated oxidative stress or mitochondrial dysfunction markers",
+        "Patients with premature cellular aging indicators",
+        "Individuals with compromised skin integrity, fine lines, or reduced collagen",
+        "Patients seeking anti-aging support as part of integrative medicine protocols"
+      ]
+    },
+    "expected_outcomes": {
+      "0": "Improved cellular markers",
+      "1": "Enhanced vitality",
+      "2": "Mitochondrial support",
+      "qualitative": [
+        "Cellular rejuvenation and reduction of biological aging biomarkers",
+        "Improved mitochondrial efficiency and oxidative stress resilience",
+        "Enhanced skin elasticity, hydration, and collagen density",
+        "Support for telomere integrity and reduced epigenetic age",
+        "Improved systemic energy and functional healthspan"
+      ]
+    }
+  },
+  {
+    "id": "lon_002",
+    "protocol_duration_weeks": 12,
+    "bundleVersion": "2.0",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_is_physician_authored": false,
+    "seeded_at": "2026-04-25T06:10:36.133Z",
+    "protocol_source_version": "v5.0",
+    "generator_rules": {
+      "profile_notes": [
+        "Prefer conservative tempo in highly sleep-fragile profiles."
+      ],
+      "selection_priority": [
+        "goal_match",
+        "sleep_profile",
+        "age_variant_match",
+        "stress_load"
+      ]
+    },
+    "dosing_enrichment": {
+      "titration_note": "Weeks 1-4: Epitalon 5x/week evening with optional DSIP 2x/week if sleep initiation support is needed. Weeks 5-8: continue Epitalon 5x/week if tolerated; use DSIP only if fragmentation persists. Weeks 9-12: reduce Epitalon to 3x/week maintenance.",
+      "cycling_recommendation": "12-week circadian longevity cycle followed by 4-8 week reassessment. Epitalon may be used as short evening pulses rather than continuous indefinite use. Repeat cycle may be considered if sleep timing, recovery rhythm, or circadian stability declines.",
+      "maintenance_dose": "Epitalon: 5-10 mg SC or protocol-defined route in evening 3x/week during maintenance phase. DSIP may be used 2x/week only if sleep initiation or fragmentation remains a dominant symptom.",
+      "timing_optimization": "Epitalon should be administered in the evening to align with pineal/circadian signaling. DSIP should be reserved for evening use on sleep-fragile days. Avoid late stimulant exposure and reinforce consistent wake time."
+    },
+    "complexity_level": "moderate",
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "_schemaVersion": "antigravity_v2",
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_source_reference": "internal_guide",
+    "protocol_slug": "longevity-circadian-mitochondrial-12w",
+    "protocol_is_curated": true,
+    "number_of_phases": 2,
+    "risk_class": "low_to_moderate",
+    "protocol_review_status": "approved",
+    "protocol_source_type": "curated_library",
+    "active": true,
+    "overview_summary": "Longevity-oriented protocol combining Epithalon for circadian and aging-related signaling with MOTS-C for mitochondrial and metabolic support.",
+    "protocol_id": "lon_002",
+    "protocol_version": "v6.0",
+    "economics": {
+      "total_protocol_cost_estimate": 1350,
+      "total_vials_required": 33
+    },
+    "protocol_author_title": "Peptide Specialists",
+    "confidence_score": 88,
+    "uploadedAt": "2026-04-20T09:29:12.821Z",
+    "variant_rules": {
+      "tempo_variants": {
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "duration_variants": {
+        "20_weeks": {
+          "mode": "extended_plus",
+          "extra_monitoring": true
+        },
+        "16_weeks": {
+          "mode": "extended",
+          "extra_monitoring": true
+        },
+        "12_weeks": {
+          "mode": "standard",
+          "extra_monitoring": false
+        },
+        "8_weeks": {
+          "mode": "short",
+          "extra_monitoring": false
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "special_notes": [
+            "Use conservative ramping if sensitivity profile is high."
+          ],
+          "recommended_flags": [
+            "hormonal_cyclicity_watch"
+          ]
+        },
+        "male": {
+          "special_notes": [
+            "Reassess tolerance and response before escalation."
+          ],
+          "recommended_flags": [
+            "sleep_recovery_watch"
+          ]
+        }
+      },
+      "age_variants": {
+        "51-65": {
+          "monitoring_intensity": "enhanced",
+          "default_duration_weeks": 12
+        },
+        "36-50": {
+          "monitoring_intensity": "moderate",
+          "default_duration_weeks": 12
+        },
+        "18-35": {
+          "monitoring_intensity": "standard",
+          "default_duration_weeks": 8
+        },
+        "65+": {
+          "monitoring_intensity": "enhanced",
+          "default_duration_weeks": 16
+        }
+      }
+    },
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode.",
+      "enabled": true
+    },
+    "physician_supervision_required": false,
+    "status": "approved",
+    "_patchedAt": {},
+    "_importedAt": {
+      "_nanoseconds": 735000000,
+      "_seconds": 1777189742
+    },
+    "_patchSchema": "antigravity_v2",
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "CBC",
+          "CMP",
+          "Lipid Panel"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "CBC",
+          "CMP"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Active cancer or history of hormone-sensitive malignancy",
+        "Severe hepatic impairment",
+        "Pregnancy"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+    "clinical_evidence_update_2026": {
+      "evidence_limitations": [
+        "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+        "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+        "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+      ],
+      "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+      "last_updated_at": "2026-04-26T08:05:00.000Z",
+      "latest_clinical_notes": [
+        "Epitalon/Epithalon and DSIP evidence remains exploratory and region-specific; clinical claims should be conservative.",
+        "Avoid direct claims of telomere extension or life-span extension in humans outside research context.",
+        "Emphasize circadian rhythm, sleep timing, and recovery tracking rather than anti-aging treatment claims."
+      ],
+      "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+      "regulatory_status": "MOTS-c, Epitalon/Epithalon and DSIP are not FDA- or EMA-approved for longevity, circadian support, or anti-aging. Evidence remains mostly preclinical, translational, or region-specific.",
+      "evidence_update": "Keep evidence grade B/C depending on components, include active malignancy and pregnancy contraindications, and preserve washout/cycling recommendations.",
+      "updated_at": "2026-04-26T09:05:00+02:00",
+      "source_refs": [],
+      "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+    },
+    "canonical_enrichment": {
+      "compatibleWith": "antigravity_v2_firebase_import",
+      "auditFieldsCompleted": [
+        "monitoring_plan",
+        "safety_profile",
+        "clinical_evidence_update_2026",
+        "regulatory_status_2026"
+      ],
+      "generatedAt": "2026-04-26T09:05:00+02:00"
+    },
+    "_syncSource": "export/protocols/lon_002.js",
+    "_schemaGapFixed": {
+      "_nanoseconds": 114000000,
+      "_seconds": 1777190724
+    },
+    "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
+    "safety_profile": {
+      "contraindications": [
+        "active_malignancy",
+        "uncontrolled_autoimmune_disease",
+        "pregnancy_or_breastfeeding",
+        "severe_hepatic_or_renal_impairment"
+      ],
+      "relative_cautions": [],
+      "drug_interactions": [],
+      "monitoring_required": [
+        "sleep_quality",
+        "sleep_timing",
+        "sleep_fragmentation",
+        "daytime_energy",
+        "Week 4: alignment_review",
+        "Week 8: rhythm_reassessment",
+        "Week 12: final_outcome_review"
+      ],
+      "adverse_events_serious": [],
+      "adverse_events_common": []
+    },
+    "monitoring_plan": {
+      "baseline_required": [
+        "sleep_quality",
+        "sleep_timing",
+        "sleep_fragmentation",
+        "daytime_energy"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "measures": [
+            "sleep_latency",
+            "waking_consistency",
+            "daytime_energy"
+          ],
+          "purpose": "Assess alignment response",
+          "type": "alignment_review",
+          "week": 4
+        },
+        {
+          "measures": [
+            "sleep_quality",
+            "sleep_fragmentation"
+          ],
+          "purpose": "Midpoint reassessment",
+          "type": "rhythm_reassessment",
+          "week": 8
+        },
+        {
+          "measures": [
+            "overall_circadian_support",
+            "sleep_consistency"
+          ],
+          "purpose": "End-of-cycle evaluation",
+          "type": "final_outcome_review",
+          "week": 12
+        }
+      ]
+    },
+    "_syncedAt": "2026-04-26T12:46:30.345Z",
+    "updated_at": "2026-05-04T14:35:44.635Z",
+    "protocol_author_organization": "Atlas Health",
+    "recommended_supplements": [
+      "nmn",
+      "resveratrol",
+      "spermidine",
+      "quercetin"
+    ],
+    "primary_goal": "Longevity",
+    "_importBundle": "Atlas Health Core Clinical Protocol Library",
+    "metadata": {
+      "longDescription": "Epithalon (Epitalon; Ala-Glu-Asp-Gly) is a synthetic tetrapeptide bioregulator developed by the St. Petersburg Institute of Bioregulation and Gerontology. It stimulates telomerase (TERT) activity in somatic cells, elongates telomeres in aged cell cultures, and has demonstrated life-extension effects in multiple animal models (Khavinson VKh et al., Bull Exp Biol Med 2003; Anisimov VN et al., Mech Ageing Dev 2003). Epithalon also modulates pineal melatonin secretion and normalises circadian gene expression (BMAL1, CLOCK), improving circadian amplitude — a key driver of healthy aging (Khavinson V et al., Adv Gerontol 2012). Combined with MOTS-c (mitochondrial AMPK activation, metabolic homeostasis, see lon_001), this protocol targets two independent pillars of the hallmarks of aging: replicative senescence/telomere shortening and mitochondrial dysfunction. The dual-phase structure allows maximal combined loading in weeks 1–6, followed by MOTS-c maintenance to sustain metabolic gains through week 12.",
+      "primary_goal": "Longevity",
+      "keywords": [
+        "Epithalon telomerase protocol",
+        "Epitalon longevity peptide",
+        "telomere elongation peptide",
+        "MOTS-c Epithalon protocol",
+        "circadian longevity protocol",
+        "anti-aging bioregulator peptide"
+      ],
+      "references": [
+        {
+          "pmid": "12833276",
+          "citation": "Khavinson VKh et al. Epithalon peptide induces telomerase activity. Bull Exp Biol Med 2003;135:590-592."
+        },
+        {
+          "pmid": "12706490",
+          "citation": "Anisimov VN et al. Effect of Epitalon on life-span extension. Mech Ageing Dev 2003;124:721-731."
+        },
+        {
+          "pmid": "25738459",
+          "citation": "Lee C et al. The Mitochondrial-Derived Peptide MOTS-c Promotes Metabolic Homeostasis. Cell Metab 2015;21:443-454."
+        }
+      ],
+      "scientificName": "Epithalon (Epitalon) + MOTS-c Telomere & Mitokine Circadian Longevity Protocol",
+      "description": "12-week longevity protocol combining Epithalon telomerase activation with MOTS-c mitochondrial AMPK signaling to target telomere attrition and metabolic aging hallmarks simultaneously."
+    },
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible"
+    ],
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
+    "protocol_title": "Epithalon + MOTS-c Circadian Longevity Protocol",
+    "category": "Longevity",
+    "syncedAt": "2026-05-16T14:32:33.820Z",
+    "phase_blueprints": [
+      {
+        "clinical_events": [
+          {
+            "event_type": "baseline_review",
+            "title": "Baseline sleep and circadian rhythm review",
+            "week": 1
+          }
+        ],
+        "clinical_purpose": [
+          "sleep_timing_support",
+          "rhythm_regularization",
+          "tolerance_building"
+        ],
+        "default_duration_weeks": 4,
+        "default_start_week": 1,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_days_default": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "administration_frequency": "5x_week",
+              "dose_unit": "mg",
+              "timing_hint": "evening",
+              "starting_weekly_dose": 0.5
+            },
+            "product_id": "prd_epitalon",
+            "product_title": "Epitalon",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_epitalon",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          },
+          {
+            "dose_logic": {
+              "activation_condition": "if_sleep_initiation_support_needed",
+              "administration_days_default": [
+                "Tuesday",
+                "Thursday"
+              ],
+              "administration_frequency": "2x_week",
+              "dose_unit": "mg",
+              "intensity_label": "optional_low"
+            },
+            "product_id": "prd_dsip",
+            "product_title": "DSIP",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_dsip",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          }
+        ],
+        "phase_key": "alignment",
+        "phase_title": "Circadian Alignment"
+      },
+      {
+        "clinical_events": [
+          {
+            "event_type": "checkpoint",
+            "title": "Sleep architecture reassessment",
+            "week": 8
+          }
+        ],
+        "clinical_purpose": [
+          "recovery_support",
+          "sleep_consistency",
+          "circadian_resilience"
+        ],
+        "default_duration_weeks": 4,
+        "default_start_week": 5,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_days_default": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "administration_frequency": "5x_week",
+              "dose_unit": "mg",
+              "timing_hint": "evening",
+              "starting_weekly_dose": 1
+            },
+            "product_id": "prd_epitalon",
+            "product_title": "Epitalon",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_epitalon",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          },
+          {
+            "dose_logic": {
+              "activation_condition": "if_sleep_fragmentation_persists",
+              "administration_days_default": [
+                "Tuesday",
+                "Thursday"
+              ],
+              "administration_frequency": "2x_week",
+              "dose_unit": "mg",
+              "intensity_label": "conditional"
+            },
+            "product_id": "prd_dsip",
+            "product_title": "DSIP",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_dsip",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          }
+        ],
+        "phase_key": "stabilization",
+        "phase_title": "Rhythm Stabilization"
+      },
+      {
+        "clinical_events": [
+          {
+            "event_type": "outcome_review",
+            "title": "Final circadian support review",
+            "week": 12
+          }
+        ],
+        "clinical_purpose": [
+          "maintenance_of_response",
+          "schedule_stability"
+        ],
+        "default_duration_weeks": 4,
+        "default_start_week": 9,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_days_default": [
+                "Monday",
+                "Wednesday",
+                "Friday"
+              ],
+              "administration_frequency": "3x_week",
+              "dose_unit": "mg",
+              "timing_hint": "evening",
+              "starting_weekly_dose": 1
+            },
+            "product_id": "prd_epitalon",
+            "product_title": "Epitalon",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_epitalon",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          }
+        ],
+        "phase_key": "maintenance",
+        "phase_title": "Maintenance"
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.927Z",
+    "synergy_rationale": "This multi-compound protocol is designed to provide synergistic effects, targeting multiple complementary biological pathways simultaneously to achieve longevity more effectively than monotherapy.",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "Strict adherence to circadian rhythms.",
+      "nutrition": "Nutrient-dense, slight caloric restriction or time-restricted eating.",
+      "activity": "Mix of resistance training, Zone 2, and mobility work.",
+      "hydration": "Standard adequate hydration."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:21.276Z",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Circadian Reset",
+        "start_week": 1,
+        "end_week": 6,
+        "drugs_used": [
+          {
+            "product_slug": "epithalon",
+            "selected_strength": "10mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 6,
+            "faq_ref": "epithalon_faq",
+            "pubmed_ref": "epithalon_pubmed",
+            "weekly_dose": "35 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 35,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "dosing_frequency": "2x_week",
+            "vials_required_for_phase": 12,
+            "faq_ref": "motsc_faq",
+            "pubmed_ref": "motsc_pubmed",
+            "route": "subcutaneous",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose": "15 mg",
+            "weekly_dose_amount": 15,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Maintenance",
+        "start_week": 7,
+        "end_week": 12,
+        "drugs_used": [
+          {
+            "product_slug": "epithalon",
+            "selected_strength": "10mg",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 3,
+            "route": "subcutaneous",
+            "weekly_dose": "35 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 35,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "dosing_frequency": "2x_week",
+            "vials_required_for_phase": 12,
+            "route": "subcutaneous",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose": "15 mg",
+            "weekly_dose_amount": 15,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "eligibility_rules": {
+      "contraindications": [
+        "active_malignancy",
+        "uncontrolled_autoimmune_disease",
+        "pregnancy_or_breastfeeding",
+        "severe_hepatic_or_renal_impairment"
+      ],
+      "supported_goals": [
+        "longevity_circadian",
+        "circadian_support",
+        "sleep_timing_support",
+        "recovery_rhythm_support"
+      ],
+      "relative_cautions": [],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "patient_demographic",
+        "age_group",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ],
+      "indications": [
+        "Adults aged 35+ seeking evidence-based healthspan optimization",
+        "Individuals with elevated oxidative stress or mitochondrial dysfunction markers",
+        "Patients with premature cellular aging indicators",
+        "Individuals with compromised skin integrity, fine lines, or reduced collagen",
+        "Patients seeking anti-aging support as part of integrative medicine protocols"
+      ]
+    },
+    "expected_outcomes": {
+      "0": "Improved cellular markers",
+      "1": "Enhanced vitality",
+      "2": "Mitochondrial support",
+      "qualitative": [
+        "Cellular rejuvenation and reduction of biological aging biomarkers",
+        "Improved mitochondrial efficiency and oxidative stress resilience",
+        "Enhanced skin elasticity, hydration, and collagen density",
+        "Support for telomere integrity and reduced epigenetic age",
+        "Improved systemic energy and functional healthspan"
+      ]
+    }
+  },
+  {
+    "id": "met_001",
+    "protocol_duration_weeks": 10,
+    "bundleVersion": "2.0",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_is_physician_authored": false,
+    "seeded_at": "2026-04-25T06:10:36.131Z",
+    "protocol_source_version": "v5.0",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "metabolic_status",
+        "age_variant_match",
+        "duration_variant_match"
+      ],
+      "tirzepatide_escalation_profiles": {
+        "standard": [
+          2.5,
+          5,
+          7.5,
+          10
+        ],
+        "conservative": [
+          2.5,
+          5,
+          5,
+          7.5
+        ],
+        "moderate": [
+          2.5,
+          5,
+          7.5
+        ]
+      }
+    },
+    "dosing_enrichment": {
+      "titration_note": "Begin AOD-9604 at 150 mcg/day for weeks 1-2 to assess tolerability, then increase to 300 mcg/day weeks 3+. Introduce MOTS-c at 5 mg 3x/week from week 1. Monitor fasting glucose weekly for first 4 weeks.",
+      "cycling_recommendation": "12-week active cycles followed by 4-6 week washout for peptide components (BPC-157, MOTS-c). AOD-9604 may be used continuously. Metformin (if included) continuous use as directed.",
+      "maintenance_dose": "AOD-9604: 300 mcg subcutaneous daily (morning, fasted). MOTS-c: 5 mg subcutaneous 3x/week. BPC-157 (GI support): 250 mcg subcutaneous daily.",
+      "timing_optimization": "AOD-9604 and MOTS-c should be administered in a fasted state (60-90 min pre-meal) to maximize lipolytic and insulin-sensitizing effects. Avoid post-meal administration."
+    },
+    "complexity_level": "moderate",
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "_schemaVersion": "antigravity_v2",
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_source_reference": "internal_guide",
+    "protocol_slug": "metabolic-optimization-10w",
+    "protocol_is_curated": true,
+    "number_of_phases": 2,
+    "risk_class": "moderate",
+    "protocol_review_status": "approved",
+    "protocol_source_type": "curated_library",
+    "active": true,
+    "overview_summary": "10-week MOTS-c & AOD-9604 Metabolic Activation Protocol targeting metabolic health through peptide-mediated metabolic signalling, with structured phase progression, monitoring checkpoints, and conservative titration.",
+    "protocol_id": "met_001",
+    "protocol_version": "v6.0",
+    "economics": {
+      "total_protocol_cost_estimate": 1500,
+      "total_vials_required": 30
+    },
+    "protocol_author_title": "Peptide Specialists",
+    "confidence_score": 90,
+    "uploadedAt": "2026-04-20T09:29:12.821Z",
+    "variant_rules": {
+      "tempo_variants": {
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "duration_variants": {
+        "20_weeks": {
+          "mode": "extended_plus",
+          "extra_monitoring": true
+        },
+        "16_weeks": {
+          "mode": "extended",
+          "extra_monitoring": true
+        },
+        "12_weeks": {
+          "mode": "standard",
+          "extra_monitoring": false
+        },
+        "8_weeks": {
+          "mode": "short",
+          "extra_monitoring": false
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "special_notes": [
+            "Use conservative ramping if sensitivity profile is high."
+          ],
+          "recommended_flags": []
+        },
+        "male": {
+          "special_notes": [
+            "Reassess tolerance and response before escalation."
+          ],
+          "recommended_flags": []
+        }
+      },
+      "age_variants": {
+        "51-65": {
+          "monitoring_intensity": "enhanced",
+          "default_duration_weeks": 16
+        },
+        "36-50": {
+          "monitoring_intensity": "moderate",
+          "default_duration_weeks": 12
+        },
+        "18-35": {
+          "monitoring_intensity": "standard",
+          "default_duration_weeks": 8
+        },
+        "65+": {
+          "monitoring_intensity": "enhanced",
+          "default_duration_weeks": 20
+        }
+      }
+    },
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode.",
+      "enabled": true
+    },
+    "physician_supervision_required": true,
+    "status": "approved",
+    "_patchedAt": {},
+    "_importedAt": {
+      "_nanoseconds": 271000000,
+      "_seconds": 1777189743
+    },
+    "_patchSchema": "antigravity_v2",
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "Fasting Insulin",
+          "HbA1c",
+          "Lipid Panel",
+          "hs-CRP"
+        ]
+      },
+      {
+        "week": 6,
+        "labs": [
+          "Fasting Glucose",
+          "Triglycerides"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "Fasting Insulin",
+          "HbA1c",
+          "Lipid Panel",
+          "hs-CRP"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Type 1 diabetes (insulin-dependent, use with caution)",
+        "Severe renal impairment",
+        "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (15–35%)",
+          "management": "Rotate sites; use proper aseptic technique."
+        },
+        {
+          "effect": "Fluid retention / mild edema",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Reduce dose; monitor blood pressure; salt restriction."
+        },
+        {
+          "effect": "Nausea / GI discomfort",
+          "frequency": "Common (10–25%)",
+          "management": "Dose with food; split doses; titrate slowly."
+        },
+        {
+          "effect": "Elevated fasting glucose",
+          "frequency": "Uncommon (5%)",
+          "management": "Monitor fasting glucose weekly; consult if persistent."
+        },
+        {
+          "effect": "Mood changes / irritability",
+          "frequency": "Rare (<3%)",
+          "management": "Reduce dose; psychological support if needed."
+        }
+      ],
+      "escalation_criteria": [
+        "Severe or worsening edema — STOP, cardiovascular evaluation",
+        "Fasting glucose > 7.0 mmol/L (126 mg/dL) on two occasions — Endocrinology referral",
+        "Allergic reaction — STOP, emergency protocol",
+        "Hypertensive urgency (BP > 180/110) — STOP, immediate medical attention"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+    "clinical_evidence_update_2026": {
+      "evidence_limitations": [
+        "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+        "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+        "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+      ],
+      "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+      "last_updated_at": "2026-04-26T08:05:00.000Z",
+      "latest_clinical_notes": [
+        "AOD-9604 and MOTS-c remain non-approved for obesity/metabolic disease; avoid presenting as substitutes for approved obesity medicines.",
+        "Monitor glucose, HbA1c, lipids, hepatic enzymes, renal function, and body composition.",
+        "Metabolic protocols should include nutrition, resistance training, and medication review for diabetes therapies."
+      ],
+      "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+      "regulatory_status": "",
+      "evidence_update": "",
+      "updated_at": "2026-04-26T09:05:00+02:00",
+      "source_refs": [],
+      "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+    },
+    "canonical_enrichment": {
+      "compatibleWith": "antigravity_v2_firebase_import",
+      "auditFieldsCompleted": [
+        "monitoring_plan",
+        "safety_profile",
+        "clinical_evidence_update_2026",
+        "regulatory_status_2026"
+      ],
+      "generatedAt": "2026-04-26T09:05:00+02:00"
+    },
+    "_syncSource": "export/protocols/met_001.js",
+    "_schemaGapFixed": {
+      "_nanoseconds": 792000000,
+      "_seconds": 1777190725
+    },
+    "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
+    "safety_profile": {
+      "drug_interactions": [
+        "Insulin and insulin secretagogues: additive glucose-lowering - adjust doses carefully",
+        "Metformin (combination use): additive AMPK activation - generally synergistic, monitor for GI side effects",
+        "Thyroid medications: AOD-9604 may affect thyroid axis indirectly - monitor TSH annually"
+      ],
+      "monitoring_required": [
+        "Fasting glucose and fasting insulin (HOMA-IR) at baseline, week 4, week 12",
+        "Waist circumference and body composition (DEXA if available) at baseline and week 12",
+        "Lipid panel at baseline and week 12",
+        "HbA1c at baseline and week 12 (pre-diabetic patients)",
+        "Blood pressure at each visit"
+      ],
+      "adverse_events_serious": [
+        "No serious adverse events reported in AOD-9604 Phase II trials at standard doses",
+        "MOTS-c: no serious adverse events in human Phase I data to date",
+        "Theoretical hypoglycemia risk if combined with insulin or sulfonylureas - monitor"
+      ],
+      "adverse_events_common": [
+        "Injection site reactions: 5-15% - mild erythema/bruising, rotate sites",
+        "Mild hypoglycemia: possible if fasted state prolonged or combined with insulin sensitizers (5-8%)",
+        "Transient fatigue or GI discomfort in first 2 weeks (10%)",
+        "Appetite suppression - usually desired effect but monitor in low-BMI patients"
+      ]
+    },
+    "monitoring_plan": {
+      "baseline_required": [
+        "HbA1c",
+        "fasting_glucose",
+        "lipid_profile",
+        "AST",
+        "ALT",
+        "creatinine",
+        "body_weight",
+        "waist_circumference"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "measures": [
+            "body_weight",
+            "fasting_glucose",
+            "AST",
+            "ALT"
+          ],
+          "purpose": "Early tolerance and safety review",
+          "type": "tolerance_and_safety",
+          "week": 4
+        },
+        {
+          "measures": [
+            "HbA1c",
+            "fasting_glucose",
+            "lipid_profile"
+          ],
+          "purpose": "Midpoint metabolic reassessment",
+          "type": "metabolic_reassessment",
+          "week": 8
+        },
+        {
+          "measures": [
+            "HbA1c",
+            "body_weight",
+            "waist_circumference",
+            "lipid_profile"
+          ],
+          "purpose": "End-of-cycle evaluation",
+          "type": "final_outcome_review",
+          "week": 12
+        }
+      ]
+    },
+    "_syncedAt": "2026-04-26T12:46:30.857Z",
+    "updated_at": "2026-05-04T14:35:44.636Z",
+    "protocol_author_organization": "Atlas Health",
+    "recommended_supplements": [
+      "berberine",
+      "nmn",
+      "resveratrol"
+    ],
+    "primary_goal": "Metabolic Health",
+    "_importBundle": "Atlas Health Core Clinical Protocol Library",
+    "metadata": {
+      "longDescription": "MOTS-c (mitochondrial open reading frame of the 12S rRNA-c) is an endogenous mitochondria-derived peptide that translocates to the nucleus under metabolic stress, activating AMPK and the AICAR pathway to improve insulin sensitivity and glucose homeostasis (Lee C et al., Cell Metab 2015; Reynolds JC et al., Nat Aging 2021). AOD-9604, the C-terminal fragment of human growth hormone (hGH 176–191), promotes lipolysis via β-adrenergic receptor pathways without inducing IGF-1 or insulin resistance (Ng FM et al., Biochem Mol Biol Int 1997). Combined, this 10-week protocol targets adipose reduction and metabolic flexibility in individuals with metabolic syndrome, pre-diabetes, or dyslipidaemia. The two-phase structure begins with full dual-compound activation then transitions to MOTS-c maintenance for sustained mitochondrial benefit.",
+      "primary_goal": "Metabolic Health",
+      "keywords": [
+        "MOTS-c metabolic protocol",
+        "AOD-9604 lipolysis",
+        "AMPK activator peptide",
+        "insulin sensitivity peptide",
+        "metabolic syndrome protocol",
+        "mitochondrial metabolic peptide"
+      ],
+      "references": [
+        {
+          "pmid": "25738459",
+          "citation": "Lee C et al. The Mitochondrial-Derived Peptide MOTS-c Promotes Metabolic Homeostasis. Cell Metab 2015;21:443-454."
+        },
+        {
+          "pmid": "34282400",
+          "citation": "Reynolds JC et al. MOTS-c is an exercise-induced mitochondrial-encoded regulator of age-dependent physical decline. Nat Aging 2021;1:147-159."
+        },
+        {
+          "pmid": "9177022",
+          "citation": "Ng FM et al. Metabolic studies of a synthetic lipolytic domain (AOD9604) of human growth hormone. Biochem Mol Biol Int 1997;43:993-1000."
+        }
+      ],
+      "scientificName": "MOTS-c & AOD-9604 AMPK-Driven Metabolic Activation Protocol",
+      "description": "10-week metabolic health protocol combining MOTS-c mitochondrial AMPK activation with AOD-9604 selective lipolysis to restore insulin sensitivity and reduce adiposity."
+    },
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible"
+    ],
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
+    "protocol_title": "MOTS-c & AOD-9604 Metabolic Activation Protocol",
+    "category": "Metabolic Health",
+    "syncedAt": "2026-05-16T14:32:31.492Z",
+    "phase_blueprints": [
+      {
+        "clinical_events": [
+          {
+            "event_type": "baseline_review",
+            "title": "Baseline metabolic and tolerance review",
+            "week": 1
+          }
+        ],
+        "clinical_purpose": [
+          "appetite_control",
+          "metabolic_activation",
+          "tolerance_building"
+        ],
+        "default_duration_weeks": 4,
+        "default_start_week": 1,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_days_default": [
+                "Monday"
+              ],
+              "administration_frequency": "weekly",
+              "dose_unit": "mg",
+              "starting_weekly_dose": 2.5
+            },
+            "product_id": "prd_tirzepatide",
+            "product_title": "Tirzepatide",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_tirzepatide",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          },
+          {
+            "dose_logic": {
+              "activation_condition": "if_energy_or_metabolic_resilience_support_needed",
+              "administration_days_default": [
+                "Tuesday",
+                "Thursday"
+              ],
+              "administration_frequency": "2x_week",
+              "dose_per_administration": 5,
+              "dose_unit": "mg",
+              "starting_weekly_dose": 10,
+              "intensity_label": "optional_low"
+            },
+            "product_id": "prd_motsc",
+            "product_title": "MOTS-c",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_motsc",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          }
+        ],
+        "phase_key": "initiation",
+        "phase_title": "Initiation"
+      },
+      {
+        "clinical_events": [
+          {
+            "event_type": "metabolic_reassessment",
+            "title": "Mid-course metabolic review",
+            "week": 8
+          }
+        ],
+        "clinical_purpose": [
+          "fat_loss_support",
+          "insulin_sensitivity_support",
+          "recovery_support"
+        ],
+        "default_duration_weeks": 4,
+        "default_start_week": 5,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_days_default": [
+                "Monday"
+              ],
+              "administration_frequency": "weekly",
+              "dose_unit": "mg",
+              "possible_next_step_dose": 7.5,
+              "starting_weekly_dose": 5
+            },
+            "product_id": "prd_tirzepatide",
+            "product_title": "Tirzepatide",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_tirzepatide",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          },
+          {
+            "dose_logic": {
+              "activation_condition": "if_bioenergetic_support_priority",
+              "administration_days_default": [
+                "Monday",
+                "Wednesday",
+                "Friday"
+              ],
+              "administration_frequency": "3x_week",
+              "dose_per_administration": 5,
+              "dose_unit": "mg",
+              "starting_weekly_dose": 15,
+              "intensity_label": "conditional"
+            },
+            "product_id": "prd_motsc",
+            "product_title": "MOTS-c",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_motsc",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          }
+        ],
+        "phase_key": "optimization",
+        "phase_title": "Optimization"
+      },
+      {
+        "clinical_events": [
+          {
+            "event_type": "outcome_review",
+            "title": "Final metabolic outcome review",
+            "week": 12
+          }
+        ],
+        "clinical_purpose": [
+          "maintenance_of_response",
+          "rebound_prevention"
+        ],
+        "default_duration_weeks": 4,
+        "default_start_week": 9,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_days_default": [
+                "Monday"
+              ],
+              "administration_frequency": "weekly",
+              "dose_unit": "mg",
+              "max_weekly_dose": 10,
+              "starting_weekly_dose": 7.5
+            },
+            "product_id": "prd_tirzepatide",
+            "product_title": "Tirzepatide",
+            "route": "subcutaneous",
+            "variantRef": {
+              "productId": "prd_tirzepatide",
+              "route": "subcutaneous",
+              "type": "resolved"
+            }
+          }
+        ],
+        "phase_key": "maintenance",
+        "phase_title": "Maintenance"
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.928Z",
+    "synergy_rationale": "MOTS-c acts centrally and peripherally to activate AMPK and improve insulin sensitivity. AOD-9604 directly targets adipocytes to stimulate lipolysis without affecting blood glucose. Together, they shift the body from fat-storage to fat-oxidation mode.",
+    "clinical_timeline": [
+      {
+        "phase": "Weeks 1-3",
+        "expected": "Increased stamina during exercise. Stabilized blood sugar."
+      },
+      {
+        "phase": "Weeks 4-7",
+        "expected": "Noticeable reduction in stubborn fat areas. Enhanced thermogenesis."
+      },
+      {
+        "phase": "Weeks 8-10",
+        "expected": "Long-term metabolic flexibility improved."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "Consistent sleep schedule to support circadian metabolic rhythms.",
+      "nutrition": "Low glycemic index, Mediterranean style, intermittent fasting (e.g., 16:8) optional.",
+      "activity": "Zone 2 cardio 150 mins/week + HIIT 1x/week.",
+      "hydration": "2.5-3 liters daily."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:22.618Z",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Metabolic Activation",
+        "start_week": 1,
+        "end_week": 5,
+        "drugs_used": [
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 15,
+            "route": "subcutaneous",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose": "15 mg",
+            "weekly_dose_amount": 15,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "aod-9604",
+            "selected_strength": "5mg",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 5,
+            "route": "subcutaneous",
+            "weekly_dose": "1.75 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 1.75,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Metabolic Stabilization",
+        "start_week": 6,
+        "end_week": 10,
+        "drugs_used": [
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "dosing_frequency": "2x_week",
+            "vials_required_for_phase": 10,
+            "route": "subcutaneous",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose": "10 mg",
+            "weekly_dose_amount": 10,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "eligibility_rules": {
+      "contraindications": [
+        "personal_or_family_history_of_medullary_thyroid_carcinoma",
+        "multiple_endocrine_neoplasia_type_2",
+        "severe_gastrointestinal_disease",
+        "pregnancy_or_breastfeeding",
+        "diabetic_ketoacidosis",
+        "severe_renal_impairment"
+      ],
+      "supported_goals": [
+        "metabolic_optimization",
+        "insulin_sensitivity_support",
+        "weight_management",
+        "metabolic_health"
+      ],
+      "relative_cautions": [],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "patient_demographic",
+        "age_group",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ],
+      "indications": [
+        "Overweight or obese individuals (BMI ≥ 27) with metabolic risk factors",
+        "Insulin resistance or pre-diabetic metabolic profile",
+        "Individuals with elevated fasting glucose or dyslipidemia",
+        "Patients seeking physician-supervised weight management research",
+        "Individuals with metabolic syndrome component criteria"
+      ]
+    },
+    "expected_outcomes": {
+      "0": "Enhanced insulin sensitivity",
+      "1": "Targeted fat oxidation",
+      "2": "Improved exercise capacity",
+      "3": "Stabilized energy levels",
+      "qualitative": [
+        "Progressive and sustained reduction in body weight and adipose mass",
+        "Improved metabolic flexibility and insulin sensitivity",
+        "Reduction in visceral fat as assessed by waist circumference or imaging",
+        "Stabilization of fasting glucose and lipid markers",
+        "Improved energy balance and reduced appetite-driven caloric intake"
+      ]
+    }
+  },
+  {
+    "id": "met_002",
+    "protocol_duration_weeks": 12,
+    "bundleVersion": "2.0",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_is_physician_authored": false,
+    "seeded_at": "2026-04-25T06:10:36.133Z",
+    "protocol_source_version": "v5.0",
+    "dosing_enrichment": {
+      "titration_note": "Begin conservatively to minimize GI intolerance. Use phase 1 as tolerability priming, phase 2 for escalation, and phase 3 for metabolic maintenance. Do not escalate if significant nausea, vomiting, dehydration, gallbladder symptoms, or hypoglycemia occur.",
+      "cycling_recommendation": "12-week active metabolic intensification protocol followed by reassessment. Continuation or escalation beyond 12 weeks should depend on tolerability, glycemic response, weight trajectory, and physician review.",
+      "maintenance_dose": "Retatrutide maintenance should be individualized after escalation. MOTS-c may be continued at 5-10 mg 2x/week as metabolic support if tolerated. SS-31 may be reserved for mitochondrial support in the final phase.",
+      "timing_optimization": "Retatrutide should be administered once weekly on the same day. MOTS-c is best administered in a fasted morning or pre-exercise window. SS-31 should be administered consistently, preferably morning or early afternoon."
+    },
+    "complexity_level": "advanced",
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "_schemaVersion": "antigravity_v2",
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_source_reference": "internal_guide",
+    "protocol_slug": "metabolic-retatrutide-motsc-12w",
+    "protocol_is_curated": true,
+    "number_of_phases": 3,
+    "risk_class": "high_complexity",
+    "protocol_review_status": "approved",
+    "protocol_source_type": "curated_library",
+    "active": true,
+    "overview_summary": "Three-phase metabolic protocol built around retatrutide escalation with MOTS-C support for glucose handling, body-composition shift, and mitochondrial signaling.",
+    "protocol_id": "met_002",
+    "protocol_version": "v6.1",
+    "economics": {
+      "total_protocol_cost_estimate": 1550,
+      "total_vials_required": 31
+    },
+    "protocol_author_title": "Peptide Specialists",
+    "confidence_score": 91,
+    "protocol_title": "Retatrutide + MOTS-c Metabolic Intensification Protocol",
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "Enhanced protocol preserves legacy fields while supporting canonical blueprint-based loading.",
+      "enabled": true
+    },
+    "physician_supervision_required": true,
+    "status": "approved",
+    "_importedAt": {
+      "_nanoseconds": 752000000,
+      "_seconds": 1777189743
+    },
+    "_patchSchema": "antigravity_v2",
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "Fasting Insulin",
+          "HbA1c",
+          "Lipid Panel",
+          "hs-CRP"
+        ]
+      },
+      {
+        "week": 6,
+        "labs": [
+          "Fasting Glucose",
+          "Triglycerides"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "Fasting Insulin",
+          "HbA1c",
+          "Lipid Panel",
+          "hs-CRP"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Type 1 diabetes (insulin-dependent, use with caution)",
+        "Severe renal impairment",
+        "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+    "clinical_evidence_update_2026": {
+      "evidence_limitations": [
+        "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+        "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+        "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+      ],
+      "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+      "last_updated_at": "2026-04-26T08:05:00.000Z",
+      "latest_clinical_notes": [
+        "Retatrutide should be classified as investigational-only; do not present as commercially prescribable or routinely compoundable.",
+        "Add stronger safeguards for excessive weight loss, lean-mass loss, malnutrition risk, gallbladder disease, pancreatitis symptoms, dehydration, and psychiatric/reward-system symptoms until full Phase 3 safety data are published.",
+        "Use body composition, protein intake, resistance training, and micronutrient monitoring when large weight-loss trajectories are expected."
+      ],
+      "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+      "regulatory_status": "Retatrutide remains investigational and is not FDA- or EMA-approved for obesity, diabetes, or weight management as of April 2026. Lilly reported positive Phase 3 TRIUMPH-4 topline results in obesity with knee osteoarthritis in December 2025, with additional Phase 3 trials expected to complete in 2026.",
+      "evidence_update": "Protocol should be framed as investigational or physician-supervised research/early-access discussion only; not a marketed treatment protocol.",
+      "updated_at": "2026-04-26T09:05:00+02:00",
+      "source_refs": [
+        {
+          "type": "company_phase3",
+          "source": "Eli Lilly",
+          "date": "2025-12-11",
+          "note": "TRIUMPH-4 topline Phase 3 retatrutide results; seven additional Phase 3 trials expected to complete in 2026."
+        }
+      ],
+      "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+    },
+    "_syncSource": "export/protocols/met_002.js",
+    "monitoring_plan": {
+      "baseline_required": [
+        "HbA1c",
+        "fasting_glucose",
+        "fasting_insulin",
+        "lipid_profile",
+        "AST",
+        "ALT",
+        "creatinine",
+        "body_weight",
+        "waist_circumference",
+        "blood_pressure",
+        "body_composition",
+        "gallbladder_history_review"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "labs": [
+            "fasting_glucose",
+            "body_weight",
+            "blood_pressure",
+            "GI_tolerance_score"
+          ],
+          "purpose": "Assess retatrutide tolerability and early glycemic response.",
+          "type": "tolerance_and_glycemic_review",
+          "week": 4
+        },
+        {
+          "labs": [
+            "HbA1c",
+            "fasting_glucose",
+            "fasting_insulin",
+            "lipid_profile",
+            "AST",
+            "ALT"
+          ],
+          "purpose": "Evaluate metabolic response before maintenance phase.",
+          "type": "metabolic_reassessment",
+          "week": 8
+        },
+        {
+          "labs": [
+            "HbA1c",
+            "lipid_profile",
+            "AST",
+            "ALT",
+            "creatinine",
+            "body_composition"
+          ],
+          "purpose": "End-of-cycle cardiometabolic and safety review.",
+          "type": "final_outcome_review",
+          "week": 12
+        }
+      ]
+    },
+    "_schemaGapFixed": {
+      "_nanoseconds": 576000000,
+      "_seconds": 1777190726
+    },
+    "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
+    "safety_profile": {
+      "contraindications": [
+        "MEN2_syndrome",
+        "medullary_thyroid_carcinoma_history",
+        "active_pancreatitis",
+        "pregnancy",
+        "severe_gastrointestinal_disease"
+      ],
+      "relative_cautions": [
+        "gallbladder_disease",
+        "rapid_weight_loss_history",
+        "advanced_renal_impairment",
+        "uncontrolled_diabetes",
+        "history_of_eating_disorder"
+      ],
+      "drug_interactions": [],
+      "monitoring_required": [
+        "HbA1c",
+        "fasting_glucose",
+        "fasting_insulin",
+        "lipid_profile",
+        "AST",
+        "ALT",
+        "creatinine",
+        "body_weight",
+        "waist_circumference",
+        "blood_pressure",
+        "body_composition",
+        "gallbladder_history_review",
+        "Week 4: tolerance_and_glycemic_review",
+        "Week 8: metabolic_reassessment",
+        "Week 12: final_outcome_review"
+      ],
+      "adverse_events_serious": [],
+      "adverse_events_common": []
+    },
+    "canonical_enrichment": {
+      "compatibleWith": "antigravity_v2_firebase_import",
+      "generatedAt": "2026-04-26T09:05:00+02:00",
+      "auditFieldsCompleted": [
+        "phase_blueprints_legacy_mapped"
+      ]
+    },
+    "_syncedAt": "2026-04-26T12:46:31.143Z",
+    "updated_at": "2026-05-04T14:32:21.536Z",
+    "recommended_supplements": [
+      "nmn",
+      "resveratrol",
+      "berberine"
+    ],
+    "primary_goal": "Metabolic Health",
+    "_importBundle": "Atlas Health Core Clinical Protocol Library",
+    "metadata": {
+      "longDescription": "Retatrutide is a first-in-class triple agonist targeting GLP-1, GIP, and glucagon receptors (GcgR), achieving weight reductions of up to 24% in Phase 2 trials — superior to dual agonists (Jastreboff AM et al., NEJM 2023). The addition of glucagon receptor agonism increases hepatic glucose output acutely but primarily drives energy expenditure through thermogenesis and increased fat oxidation, complementing the appetite suppression of the GLP-1 component. MOTS-c is layered to reinforce peripheral insulin sensitivity, AMPK activation, and mitochondrial biogenesis, offsetting any GcgR-mediated glycaemic variability. This advanced 12-week protocol, structured across three escalating phases, is intended for patients with significant obesity (BMI ≥ 35) or cardiometabolic disease requiring intensive intervention.",
+      "primary_goal": "Metabolic Health",
+      "keywords": [
+        "retatrutide protocol",
+        "triple agonist GLP-1 GIP glucagon",
+        "MOTS-c metabolic intensification",
+        "advanced obesity protocol",
+        "retatrutide weight loss",
+        "triple receptor agonist peptide"
+      ],
+      "references": [
+        {
+          "pmid": "37334676",
+          "citation": "Jastreboff AM et al. Triple-Hormone-Receptor Agonist Retatrutide for Obesity. NEJM 2023;389:514-526."
+        },
+        {
+          "pmid": "25738459",
+          "citation": "Lee C et al. The Mitochondrial-Derived Peptide MOTS-c Promotes Metabolic Homeostasis. Cell Metab 2015;21:443-454."
+        },
+        {
+          "pmid": "34282400",
+          "citation": "Reynolds JC et al. MOTS-c mitochondrial-encoded regulator of physical decline. Nat Aging 2021;1:147-159."
+        }
+      ],
+      "scientificName": "Retatrutide + MOTS-c GLP-1/GIP/Glucagon Triple-Agonist Metabolic Intensification Protocol",
+      "description": "12-week advanced metabolic protocol combining retatrutide triple-receptor agonism with MOTS-c mitokine support for profound body-composition shift and glucose regulation."
+    },
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible"
+    ],
+    "protocol_author_organization": "Atlas Health",
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
+    "category": "Metabolic Health",
+    "syncedAt": "2026-05-16T14:32:33.276Z",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "age_variant_match",
+        "metabolic_severity_match"
+      ],
+      "allow_acceleration": false,
+      "base_duration_weeks": 12,
+      "notes": "Default generator rules – pending clinical review.",
+      "tempo_variants": [
+        "standard"
+      ],
+      "allow_extension": false
+    },
+    "_patchedAt": {
+      "schema_gap_fix": "2026-04-26T12:37:11Z"
+    },
+    "variant_rules": {
+      "age_variants": {
+        "18-35": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "standard"
+        },
+        "36-50": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "moderate"
+        },
+        "51-65": {
+          "default_duration_weeks": 16,
+          "monitoring_intensity": "enhanced"
+        },
+        "65+": {
+          "default_duration_weeks": 16,
+          "monitoring_intensity": "enhanced"
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "special_notes": [
+            "Monitor cycle-related metabolic shifts and appetite fluctuations."
+          ]
+        },
+        "male": {
+          "special_notes": [
+            "Standard monitoring."
+          ]
+        }
+      },
+      "duration_variants": {
+        "12_weeks": {
+          "mode": "standard"
+        },
+        "16_weeks": {
+          "mode": "extended"
+        }
+      },
+      "tempo_variants": {
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "tempo": {
+        "standard": {
+          "notes": "Standard tempo – no adjustment.",
+          "phase_duration_multiplier": 1
+        },
+        "accelerated": {
+          "notes": "Accelerated tempo – physician review required.",
+          "phase_duration_multiplier": 0.75
+        },
+        "extended": {
+          "notes": "Extended tempo – for slower responders.",
+          "phase_duration_multiplier": 1.33
+        }
+      }
+    },
+    "phase_blueprints": [
+      {
+        "phase_key": "metabolic_primer",
+        "phase_title": "Metabolic Primer",
+        "default_start_week": 1,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "legacy_phase_mapping",
+          "protocol_continuity"
+        ],
+        "drugs": [
+          {
+            "product_id": "Retatrutide-10mg-vial",
+            "product_title": "Retatrutide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "weekly",
+              "vials_required_for_phase": 2,
+              "starting_weekly_dose": 2,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "Retatrutide-10mg-vial",
+              "route": "subcutaneous"
+            }
+          },
+          {
+            "product_id": "MOTS-C-10mg-vial",
+            "product_title": "Mots C",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "3x_week",
+              "vials_required_for_phase": 12,
+              "starting_weekly_dose": 5,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "MOTS-C-10mg-vial",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 1,
+            "event_type": "phase_start",
+            "title": "Start Metabolic Primer"
+          },
+          {
+            "week": 4,
+            "event_type": "phase_review",
+            "title": "Review Metabolic Primer"
+          }
+        ]
+      },
+      {
+        "phase_key": "escalation",
+        "phase_title": "Escalation",
+        "default_start_week": 5,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "legacy_phase_mapping",
+          "protocol_continuity"
+        ],
+        "drugs": [
+          {
+            "product_id": "Retatrutide-10mg-vial",
+            "product_title": "Retatrutide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "weekly",
+              "vials_required_for_phase": 2,
+              "starting_weekly_dose": 5,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "Retatrutide-10mg-vial",
+              "route": "subcutaneous"
+            }
+          },
+          {
+            "product_id": "MOTS-C-10mg-vial",
+            "product_title": "Mots C",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "2x_week",
+              "vials_required_for_phase": 8,
+              "starting_weekly_dose": 5,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "MOTS-C-10mg-vial",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 5,
+            "event_type": "phase_start",
+            "title": "Start Escalation"
+          },
+          {
+            "week": 8,
+            "event_type": "phase_review",
+            "title": "Review Escalation"
+          }
+        ]
+      },
+      {
+        "phase_key": "maintenance",
+        "phase_title": "Maintenance",
+        "default_start_week": 9,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "legacy_phase_mapping",
+          "protocol_continuity"
+        ],
+        "drugs": [
+          {
+            "product_id": "Retatrutide-10mg-vial",
+            "product_title": "Retatrutide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "weekly",
+              "vials_required_for_phase": 3,
+              "starting_weekly_dose": 5,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "Retatrutide-10mg-vial",
+              "route": "subcutaneous"
+            }
+          },
+          {
+            "product_id": "SS-31-5mg-vial",
+            "product_title": "Ss 31",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "3x_week",
+              "vials_required_for_phase": 4,
+              "starting_weekly_dose": 10,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "SS-31-5mg-vial",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 9,
+            "event_type": "phase_start",
+            "title": "Start Maintenance"
+          },
+          {
+            "week": 12,
+            "event_type": "phase_review",
+            "title": "Review Maintenance"
+          }
+        ]
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.928Z",
+    "synergy_rationale": "This multi-compound protocol is designed to provide synergistic effects, targeting multiple complementary biological pathways simultaneously to achieve metabolic health more effectively than monotherapy.",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "Consistent sleep schedule to support circadian metabolic rhythms.",
+      "nutrition": "Low glycemic index, Mediterranean style, intermittent fasting (e.g., 16:8) optional.",
+      "activity": "Zone 2 cardio 150 mins/week + HIIT 1x/week.",
+      "hydration": "2.5-3 liters daily."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:23.060Z",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Metabolic Primer",
+        "start_week": 1,
+        "end_week": 4,
+        "drugs_used": [
+          {
+            "product_slug": "retatrutide",
+            "selected_strength": "2mg",
+            "route": "subcutaneous",
+            "weekly_dose": "1 mg",
+            "vials_required_for_phase": 2,
+            "faq_ref": "retatrutide_faq",
+            "pubmed_ref": "retatrutide_pubmed",
+            "dosing_frequency": "weekly",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 1,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 12,
+            "faq_ref": "motsc_faq",
+            "pubmed_ref": "motsc_pubmed",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose": "15 mg",
+            "weekly_dose_amount": 15,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Escalation",
+        "start_week": 5,
+        "end_week": 8,
+        "drugs_used": [
+          {
+            "product_slug": "retatrutide",
+            "selected_strength": "5mg",
+            "weekly_dose": "2 mg",
+            "vials_required_for_phase": 2,
+            "route": "subcutaneous",
+            "dosing_frequency": "weekly",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 2,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "dosing_frequency": "2x_week",
+            "vials_required_for_phase": 8,
+            "route": "subcutaneous",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose": "10 mg",
+            "weekly_dose_amount": 10,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 3,
+        "phase_title": "Maintenance",
+        "start_week": 9,
+        "end_week": 12,
+        "drugs_used": [
+          {
+            "product_slug": "retatrutide",
+            "selected_strength": "5mg",
+            "weekly_dose": "3 mg",
+            "vials_required_for_phase": 3,
+            "route": "subcutaneous",
+            "dosing_frequency": "weekly",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 3,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "ss-31",
+            "selected_strength": "10mg",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 4,
+            "route": "subcutaneous",
+            "weekly_dose": "5 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 5,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "eligibility_rules": {
+      "contraindications": [
+        "MEN2_syndrome",
+        "medullary_thyroid_carcinoma_history",
+        "active_pancreatitis",
+        "pregnancy",
+        "severe_gastrointestinal_disease"
+      ],
+      "supported_goals": [
+        "metabolic_health",
+        "obesity",
+        "insulin_resistance",
+        "body_composition"
+      ],
+      "relative_cautions": [
+        "gallbladder_disease",
+        "rapid_weight_loss_history",
+        "advanced_renal_impairment",
+        "uncontrolled_diabetes",
+        "history_of_eating_disorder"
+      ],
+      "required_patient_inputs": [
+        "baseline_weight",
+        "height",
+        "BMI",
+        "metabolic_status",
+        "HbA1c",
+        "medication_review",
+        "age_group",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ],
+      "indications": [
+        "Overweight or obese individuals (BMI ≥ 27) with metabolic risk factors",
+        "Insulin resistance or pre-diabetic metabolic profile",
+        "Individuals with elevated fasting glucose or dyslipidemia",
+        "Patients seeking physician-supervised weight management research",
+        "Individuals with metabolic syndrome component criteria"
+      ]
+    },
+    "expected_outcomes": {
+      "0": "Improved insulin sensitivity",
+      "1": "Enhanced metabolic flexibility",
+      "2": "Better energy levels",
+      "qualitative": [
+        "Progressive and sustained reduction in body weight and adipose mass",
+        "Improved metabolic flexibility and insulin sensitivity",
+        "Reduction in visceral fat as assessed by waist circumference or imaging",
+        "Stabilization of fasting glucose and lipid markers",
+        "Improved energy balance and reduced appetite-driven caloric intake"
+      ]
+    }
+  },
+  {
+    "id": "neuro_001",
+    "protocol_duration_weeks": 12,
+    "protocol_author_name": "Dr. LXV",
+    "bundleVersion": "2.0",
+    "protocol_source_document": "LXV_Peptide_Dosing_v3.pdf",
+    "protocol_is_physician_authored": true,
+    "seeded_at": "2026-04-25T06:10:36.134Z",
+    "protocol_source_version": "v3",
+    "dosing_enrichment": {
+      "titration_note": "Start with foundational BPC-157 + SS-31 during weeks 1-2 to establish tolerance. Add Pinealon during neuroplasticity support phase if tolerated. Reduce intensity if headache, sleep disruption, agitation, or neurological symptom worsening occurs.",
+      "cycling_recommendation": "12-week neuro-restoration cycle with reassessment at week 12. Repeat cycle only after functional review, neurological stability assessment, and 4-8 week observation period if clinically indicated.",
+      "maintenance_dose": "BPC-157 may be tapered to 250-500 mcg daily or 3x/week depending on response. SS-31 may be reduced to 3-5x/week in maintenance. Pinealon may be used as short daily pulses rather than continuous indefinite use.",
+      "timing_optimization": "SS-31 should be administered consistently during the day for mitochondrial support. BPC-157 may be split twice daily when neuro-gut or peripheral nerve support is desired. Pinealon is preferably used in evening or as defined by bioregulator schedule."
+    },
+    "complexity_level": "advanced",
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "protocol_author_notes": "Imported from physician-authored dosing reference.",
+    "_schemaVersion": "antigravity_v2",
+    "protocol_author_organization": "",
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_source_reference": "LXV Peptide & Bioregulator Dosing Protocol (Updated)",
+    "protocol_slug": "lxv-neuro-restoration-12w",
+    "protocol_is_curated": false,
+    "number_of_phases": 2,
+    "risk_class": "high_complexity",
+    "protocol_review_status": "reviewed",
+    "protocol_source_type": "physician_protocol",
+    "active": true,
+    "overview_summary": "Two-phase physician-authored neuro-restoration protocol focused on mitochondrial support, vagal repair, neuroplasticity, and microcirculation recovery.",
+    "protocol_id": "neuro_001",
+    "protocol_version": "v6.1",
+    "economics": {
+      "total_protocol_cost_estimate": 0,
+      "total_vials_required": 41
+    },
+    "protocol_author_title": "Physician",
+    "confidence_score": 91,
+    "protocol_title": "BPC-157, SS-31 & Pinealon Neuro-Restoration Protocol",
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "Enhanced protocol preserves legacy fields while supporting canonical blueprint-based loading.",
+      "enabled": true
+    },
+    "physician_supervision_required": true,
+    "status": "approved",
+    "_importedAt": {
+      "_nanoseconds": 51000000,
+      "_seconds": 1777189744
+    },
+    "_patchSchema": "antigravity_v2",
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "CBC",
+          "CMP",
+          "Lipid Panel"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "CBC",
+          "CMP"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Active systemic infection",
+        "Uncontrolled coagulopathy",
+        "Known peptide hypersensitivity"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "clinical_disclaimer": "For use by qualified healthcare professionals only. Not a diagnosis, prescription, or substitute for individualized medical judgment, informed consent, and local regulatory compliance.",
+    "clinical_evidence_update_2026": {
+      "evidence_limitations": [
+        "Several peptide uses in this library remain off-label, investigational, exploratory, or based on translational evidence.",
+        "Protocol data should not be interpreted as individualized medical advice or a substitute for prescribing clinician judgment.",
+        "Regulatory status varies by country and must be checked locally before clinical use or commercial distribution."
+      ],
+      "update_scope": "missing clinical/regulatory/safety information added while preserving canonical antigravity_v2 data model",
+      "last_updated_at": "2026-04-26T08:05:00.000Z",
+      "latest_clinical_notes": [
+        "BPC-157 and Pinealon remain investigational for neuro-restoration indications.",
+        "Elamipretide status updated: FDA accelerated approval exists for Barth syndrome only; neuro-restoration use remains off-label/research-oriented.",
+        "Neurologic protocols should require medical review for seizure disorder, recent stroke/TIA, intracranial bleeding risk, uncontrolled hypertension, and CNS polypharmacy."
+      ],
+      "clinical_use_guardrail": "Use under qualified medical supervision where legally permitted; obtain informed consent for off-label or investigational use.",
+      "regulatory_status": "BPC-157, Pinealon and off-label SS-31/elamipretide neuro-restoration use are not approved for neurorecovery; elamipretide approval is limited to Barth syndrome patients ≥30 kg.",
+      "evidence_update": "Neuro-restoration protocols should be presented as physician-supervised and not as a substitute for neurology care after stroke, seizure, intracranial bleeding, traumatic brain injury or neurodegenerative disease.",
+      "updated_at": "2026-04-26T09:05:00+02:00",
+      "source_refs": [
+        {
+          "type": "regulatory",
+          "source": "FDA",
+          "date": "2025-09-19",
+          "note": "Elamipretide approval limited to Barth syndrome, patients ≥30 kg."
+        }
+      ],
+      "clinical_use_note": "This protocol is informational and designed for clinician-supervised review. It is not a standalone prescription, diagnosis, or patient-specific treatment plan."
+    },
+    "_syncSource": "export/protocols/neuro_001.js",
+    "monitoring_plan": {
+      "baseline_required": [
+        "neurological_function_score",
+        "cognitive_screen_MoCA_or_equivalent",
+        "fatigue_score",
+        "sleep_quality",
+        "blood_pressure",
+        "resting_heart_rate",
+        "pain_score_if_neuropathy",
+        "medication_review"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "measures": [
+            "headache",
+            "sleep_quality",
+            "pain_score_if_neuropathy",
+            "adverse_events"
+          ],
+          "purpose": "Assess early tolerability and neurological safety.",
+          "type": "early_neuro_tolerance_review",
+          "week": 2
+        },
+        {
+          "measures": [
+            "neurological_function_score",
+            "cognitive_screen",
+            "fatigue_score"
+          ],
+          "purpose": "Evaluate response during neuroplasticity support phase.",
+          "type": "mid_neurofunctional_review",
+          "week": 6
+        },
+        {
+          "measures": [
+            "neurological_function_score",
+            "cognitive_screen",
+            "pain_score_if_neuropathy",
+            "functional_recovery_score"
+          ],
+          "purpose": "Assess final neuro-restoration and continuation strategy.",
+          "type": "final_neuro_recovery_review",
+          "week": 12
+        }
+      ]
+    },
+    "_schemaGapFixed": {
+      "_nanoseconds": 286000000,
+      "_seconds": 1777190727
+    },
+    "_bundleCreatedAt": "2026-04-26T07:44:38.116666+00:00",
+    "safety_profile": {
+      "contraindications": [
+        "active_intracranial_bleeding",
+        "uncontrolled_seizure_disorder",
+        "active_malignancy",
+        "pregnancy_or_breastfeeding",
+        "severe_hepatic_or_renal_impairment"
+      ],
+      "relative_cautions": [
+        "severe_psychiatric_instability",
+        "uncontrolled_hypertension",
+        "recent_stroke_without_neurology_clearance",
+        "polypharmacy_with_CNS_agents"
+      ],
+      "drug_interactions": [],
+      "monitoring_required": [
+        "neurological_function_score",
+        "cognitive_screen_MoCA_or_equivalent",
+        "fatigue_score",
+        "sleep_quality",
+        "blood_pressure",
+        "resting_heart_rate",
+        "pain_score_if_neuropathy",
+        "medication_review",
+        "Week 2: early_neuro_tolerance_review",
+        "Week 6: mid_neurofunctional_review",
+        "Week 12: final_neuro_recovery_review"
+      ],
+      "adverse_events_serious": [],
+      "adverse_events_common": []
+    },
+    "canonical_enrichment": {
+      "compatibleWith": "antigravity_v2_firebase_import",
+      "generatedAt": "2026-04-26T09:05:00+02:00",
+      "auditFieldsCompleted": [
+        "phase_blueprints_legacy_mapped"
+      ]
+    },
+    "_syncedAt": "2026-04-26T12:46:31.918Z",
+    "updated_at": "2026-05-04T14:32:21.537Z",
+    "recommended_supplements": [
+      "curcumin",
+      "boswellia",
+      "omega-3-forte"
+    ],
+    "primary_goal": "Recovery / Injury",
+    "_importBundle": "Atlas Health Core Clinical Protocol Library",
+    "metadata": {
+      "longDescription": "This protocol targets central and peripheral neurological recovery via three synergistic mechanisms. BPC-157 (pentadecapeptide) exerts neuroprotective and neurotrophic effects through upregulation of VEGF, NO synthesis, and modulation of dopaminergic and serotonergic pathways (Sikiric P et al., Curr Pharm Des 2018). SS-31 (elamipretide, D-Arg-Dmt-Lys-Phe-NH₂) is a mitochondria-targeting peptide that concentrates in the inner mitochondrial membrane via electrostatic interaction with cardiolipin, inhibiting cytochrome c peroxidase activity, reducing reactive oxygen species, and restoring ATP production in damaged neurons (Szeto HH, Biochim Biophys Acta 2014). Pinealon (Glu-Asp-Arg) is a short peptide bioregulator derived from the pineal gland that has demonstrated neuroprotective and epigenetic effects on neuronal gene expression, cognitive function, and circadian regulation in preclinical and Russian clinical studies (Khavinson VKh et al., Neurosci Behav Physiol 2002). Indicated for post-concussion syndrome, neurodegeneration, cognitive decline, and neurorecovery post-stroke.",
+      "primary_goal": "Recovery / Injury",
+      "keywords": [
+        "BPC-157 neurological",
+        "SS-31 elamipretide neuroprotection",
+        "Pinealon peptide bioregulator",
+        "mitochondrial neuroprotection protocol",
+        "CNS recovery peptide protocol",
+        "neuro-restoration peptide stack"
+      ],
+      "references": [
+        {
+          "pmid": "29998482",
+          "citation": "Sikiric P et al. BPC 157 and the brain-gut axis. Curr Pharm Des 2018;24:1821-1832."
+        },
+        {
+          "pmid": "24721741",
+          "citation": "Szeto HH. First-in-class cardiolipin-protective compound as a therapeutic agent to restore mitochondrial bioenergetics. Br J Pharmacol 2014;171:2029-2050."
+        },
+        {
+          "pmid": "12503660",
+          "citation": "Khavinson VKh et al. Peptide regulation of aging. Neurosci Behav Physiol 2002;32:555-558."
+        }
+      ],
+      "scientificName": "BPC-157, SS-31 (Elamipretide) & Pinealon Mitochondrial Neuro-Restoration Protocol",
+      "description": "12-week neuro-restoration protocol combining BPC-157 neuroprotection, SS-31 mitochondrial inner membrane stabilization, and Pinealon epigenetic peptide bioregulation for CNS recovery."
+    },
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible",
+      "expected_outcomes: INJECTED for category \\"Recovery & Neurology\\""
+    ],
+    "_patchBundle": "Atlas Health Protocol Export - Clinical Update 2026-04-26",
+    "category": "Recovery & Neurology",
+    "syncedAt": "2026-05-16T14:32:35.148Z",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "age_variant_match",
+        "neuro_severity_match"
+      ],
+      "allow_acceleration": false,
+      "base_duration_weeks": 12,
+      "notes": "Default generator rules – pending clinical review.",
+      "tempo_variants": [
+        "standard"
+      ],
+      "allow_extension": false
+    },
+    "_patchedAt": {
+      "schema_gap_fix": "2026-04-26T12:37:11Z"
+    },
+    "variant_rules": {
+      "age_variants": {
+        "18-35": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "standard"
+        },
+        "36-50": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "moderate"
+        },
+        "51-65": {
+          "default_duration_weeks": 16,
+          "monitoring_intensity": "enhanced"
+        },
+        "65+": {
+          "default_duration_weeks": 16,
+          "monitoring_intensity": "enhanced"
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "special_notes": [
+            "Monitor cognitive and mood stability during hormonal shifts."
+          ]
+        },
+        "male": {
+          "special_notes": [
+            "Standard monitoring."
+          ]
+        }
+      },
+      "duration_variants": {
+        "12_weeks": {
+          "mode": "standard"
+        },
+        "16_weeks": {
+          "mode": "extended"
+        }
+      },
+      "tempo_variants": {
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "tempo": {
+        "standard": {
+          "notes": "Standard tempo – no adjustment.",
+          "phase_duration_multiplier": 1
+        },
+        "accelerated": {
+          "notes": "Accelerated tempo – physician review required.",
+          "phase_duration_multiplier": 0.75
+        },
+        "extended": {
+          "notes": "Extended tempo – for slower responders.",
+          "phase_duration_multiplier": 1.33
+        }
+      }
+    },
+    "phase_blueprints": [
+      {
+        "phase_key": "foundational_repair",
+        "phase_title": "Foundational Repair",
+        "default_start_week": 1,
+        "default_duration_weeks": 2,
+        "clinical_purpose": [
+          "legacy_phase_mapping",
+          "protocol_continuity"
+        ],
+        "drugs": [
+          {
+            "product_id": "BPC-157-5mg-vial",
+            "product_title": "Bpc 157",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "twice_daily",
+              "vials_required_for_phase": 1,
+              "starting_weekly_dose": 10,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "BPC-157-5mg-vial",
+              "route": "subcutaneous"
+            }
+          },
+          {
+            "product_id": "SS-31-5mg-vial",
+            "product_title": "Ss 31",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "daily",
+              "vials_required_for_phase": 5,
+              "starting_weekly_dose": 10,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "SS-31-5mg-vial",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 1,
+            "event_type": "phase_start",
+            "title": "Start Foundational Repair"
+          },
+          {
+            "week": 2,
+            "event_type": "phase_review",
+            "title": "Review Foundational Repair"
+          }
+        ]
+      },
+      {
+        "phase_key": "neuroplasticity_support",
+        "phase_title": "Neuroplasticity Support",
+        "default_start_week": 3,
+        "default_duration_weeks": 10,
+        "clinical_purpose": [
+          "legacy_phase_mapping",
+          "protocol_continuity"
+        ],
+        "drugs": [
+          {
+            "product_id": "BPC-157-5mg-vial",
+            "product_title": "Bpc 157",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "twice_daily",
+              "vials_required_for_phase": 5,
+              "starting_weekly_dose": 10,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "BPC-157-5mg-vial",
+              "route": "subcutaneous"
+            }
+          },
+          {
+            "product_id": "SS-31-5mg-vial",
+            "product_title": "Ss 31",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "daily",
+              "vials_required_for_phase": 28,
+              "starting_weekly_dose": 10,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "SS-31-5mg-vial",
+              "route": "subcutaneous"
+            }
+          },
+          {
+            "product_id": "Pinealon-10mg-vial",
+            "product_title": "Pinealon",
+            "route": "oral_or_sublingual",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "daily",
+              "vials_required_for_phase": 2,
+              "starting_weekly_dose": 10,
+              "intensity_label": "standard"
+            },
+            "variantRef": {
+              "type": "legacy_mapped",
+              "productId": "Pinealon-10mg-vial",
+              "route": "oral_or_sublingual"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 3,
+            "event_type": "phase_start",
+            "title": "Start Neuroplasticity Support"
+          },
+          {
+            "week": 12,
+            "event_type": "phase_review",
+            "title": "Review Neuroplasticity Support"
+          }
+        ]
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.929Z",
+    "synergy_rationale": "This multi-compound protocol is designed to provide synergistic effects, targeting multiple complementary biological pathways simultaneously to achieve recovery / injury more effectively than monotherapy.",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "8+ hours for optimal GH release and tissue repair.",
+      "nutrition": "Maintenance calories, high protein, anti-inflammatory foods (omega-3s, antioxidants).",
+      "activity": "Physical therapy protocols, active recovery, avoid loading injured tissue.",
+      "hydration": "Adequate hydration to support tissue elasticity."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:22.095Z",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Foundational Repair",
+        "start_week": 1,
+        "end_week": 2,
+        "drugs_used": [
+          {
+            "product_slug": "bpc-157",
+            "selected_strength": "10mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "twice_daily",
+            "vials_required_for_phase": 1,
+            "faq_ref": "bpc157_faq",
+            "pubmed_ref": "bpc157_pubmed",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose": "3.5 mg",
+            "weekly_dose_amount": 3.5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "ss-31",
+            "selected_strength": "10mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 5,
+            "faq_ref": "ss31_faq",
+            "pubmed_ref": "ss31_pubmed",
+            "weekly_dose": "5 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 5,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Neuroplasticity Support",
+        "start_week": 3,
+        "end_week": 12,
+        "drugs_used": [
+          {
+            "product_slug": "bpc-157",
+            "selected_strength": "10mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "twice_daily",
+            "vials_required_for_phase": 5,
+            "reconstitution_volume_ml": 2,
+            "weekly_dose": "3.5 mg",
+            "weekly_dose_amount": 3.5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "ss-31",
+            "selected_strength": "10mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 28,
+            "weekly_dose": "5 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "pinealon",
+            "selected_strength": "10mg",
+            "route": "oral_or_sublingual",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 2,
+            "weekly_dose": "2.1 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 2.1,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "eligibility_rules": {
+      "contraindications": [
+        "active_intracranial_bleeding",
+        "uncontrolled_seizure_disorder",
+        "active_malignancy",
+        "pregnancy_or_breastfeeding",
+        "severe_hepatic_or_renal_impairment"
+      ],
+      "supported_goals": [
+        "neuro_recovery",
+        "cognitive_support",
+        "post_concussion_recovery",
+        "neuropathic_recovery"
+      ],
+      "relative_cautions": [
+        "severe_psychiatric_instability",
+        "uncontrolled_hypertension",
+        "recent_stroke_without_neurology_clearance",
+        "polypharmacy_with_CNS_agents"
+      ],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "neurological_history",
+        "current_medications",
+        "baseline_neuro_score",
+        "age_group",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ],
+      "indications": [
+        "Active soft-tissue injury (tendon, ligament, or muscle)",
+        "Post-surgical recovery requiring accelerated tissue healing",
+        "Chronic musculoskeletal pain or inflammatory joint conditions",
+        "Athletes with repetitive strain or overuse injuries",
+        "Neuropathic pain or peripheral nerve damage"
+      ]
+    },
+    "expected_outcomes": {
+      "0": "Improved energy and awareness",
+      "1": "Progressive cognitive responsiveness",
+      "2": "Support for speech and neurofunctional recovery",
+      "qualitative": [
+        "Accelerated soft-tissue healing and structural repair",
+        "Reduction in post-injury inflammation and pain",
+        "Improved musculoskeletal function and range of motion",
+        "Enhanced angiogenesis and microvascular support at injury sites",
+        "Return to baseline physical performance metrics"
+      ]
+    }
+  },
+  {
+    "id": "rec_001",
+    "active": true,
+    "complexity_level": "standard",
+    "confidence_score": 92,
+    "economics": {
+      "total_protocol_cost_estimate": 950,
+      "total_vials_required": 18
+    },
+    "number_of_phases": 2,
+    "overview_summary": "Eight-week tissue-repair protocol combining BPC-157 and TB-500 to support soft-tissue healing, angiogenesis, inflammation control, and musculoskeletal recovery.",
+    "protocol_author_title": "Peptide Specialists",
+    "protocol_duration_weeks": 8,
+    "protocol_id": "rec_001",
+    "protocol_is_curated": true,
+    "protocol_is_physician_authored": false,
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_review_status": "approved",
+    "protocol_slug": "injury-recovery-8w",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_source_type": "curated_library",
+    "protocol_source_version": "v5.0",
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "protocol_source_reference": "internal_guide",
+    "protocol_title": "BPC-157 & TB-500 Tissue Repair Protocol",
+    "status": "approved",
+    "seeded_at": "2026-04-25T06:10:36.131Z",
+    "bundleVersion": "2.0",
+    "protocol_version": "v6.1",
+    "legacy_compatibility": {
+      "enabled": true,
+      "notes": "Enhanced protocol preserves legacy fields while supporting canonical blueprint-based loading.",
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ]
+    },
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "monitoring_plan": {
+      "baseline_required": [
+        "injury_type",
+        "pain_score",
+        "range_of_motion",
+        "functional_score",
+        "inflammation_score",
+        "wound_status_if_applicable",
+        "current_NSAID_or_steroid_use"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "week": 2,
+          "type": "acute_repair_review",
+          "measures": [
+            "pain_score",
+            "range_of_motion",
+            "swelling",
+            "wound_status_if_applicable"
+          ],
+          "purpose": "Confirm early tissue-repair trajectory and tolerability."
+        },
+        {
+          "week": 4,
+          "type": "transition_review",
+          "measures": [
+            "functional_score",
+            "pain_score",
+            "range_of_motion"
+          ],
+          "purpose": "Determine readiness to transition from acute to regeneration phase."
+        },
+        {
+          "week": 8,
+          "type": "final_recovery_review",
+          "measures": [
+            "functional_score",
+            "pain_score",
+            "range_of_motion",
+            "return_to_activity_status"
+          ],
+          "purpose": "Assess structural recovery and need for additional cycle."
+        }
+      ]
+    },
+    "dosing_enrichment": {
+      "cycling_recommendation": "8-week tissue repair cycle. Repeat after 4-6 week reassessment only if structural symptoms persist or functional recovery remains incomplete.",
+      "maintenance_dose": "BPC-157: 250-500 mcg daily or 3x/week during regeneration/maintenance. TB-500: weekly during acute phase, then discontinue or reduce based on tissue response.",
+      "timing_optimization": "BPC-157 may be administered daily, preferably near the time of rehabilitation work or recovery period. TB-500 can be administered weekly on a consistent day. Combine with graded physical therapy rather than immobilization unless medically required.",
+      "titration_note": "Use stronger combined BPC-157 + TB-500 support in weeks 1-4. Transition to BPC-157-only or lower-frequency dosing in weeks 5-8 once pain and range of motion improve."
+    },
+    "risk_class": "low_to_moderate",
+    "physician_supervision_required": false,
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "CBC",
+          "CMP",
+          "Lipid Panel"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "CBC",
+          "CMP"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Type 1 diabetes (insulin-dependent, use with caution)",
+        "Severe renal impairment",
+        "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "_syncSource": "export/protocols/rec_001.js",
+    "_schemaVersion": "antigravity_v2",
+    "_patchSchema": "antigravity_v2",
+    "safety_profile": {
+      "risk_level": "moderate",
+      "common_side_effects": [],
+      "monitoring_flags": [],
+      "serious_adverse_events": [],
+      "contraindication_summary": "See eligibility_rules.contraindications."
+    },
+    "_syncedAt": "2026-04-26T12:46:32.830Z",
+    "updated_at": "2026-05-04T15:06:50.086Z",
+    "protocol_author_organization": "Atlas Health",
+    "recommended_supplements": [
+      "curcumin",
+      "boswellia",
+      "omega-3-forte",
+      "bromelain"
+    ],
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible",
+      "expected_outcomes: INJECTED for category \\"Recovery & Tissue Repair\\""
+    ],
+    "category": "Recovery & Tissue Repair",
+    "syncedAt": "2026-05-16T14:32:31.663Z",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "age_variant_match",
+        "injury_severity_match"
+      ],
+      "allow_acceleration": false,
+      "base_duration_weeks": 8,
+      "notes": "Default generator rules – pending clinical review.",
+      "tempo_variants": [
+        "standard"
+      ],
+      "allow_extension": false
+    },
+    "primary_goal": "Recovery / Injury",
+    "variant_rules": {
+      "age_variants": {
+        "18-35": {
+          "default_duration_weeks": 8,
+          "monitoring_intensity": "standard"
+        },
+        "36-50": {
+          "default_duration_weeks": 8,
+          "monitoring_intensity": "standard"
+        },
+        "51-65": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "moderate"
+        },
+        "65+": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "enhanced"
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "special_notes": [
+            "Standard monitoring."
+          ]
+        },
+        "male": {
+          "special_notes": [
+            "Standard monitoring."
+          ]
+        }
+      },
+      "duration_variants": {
+        "8_weeks": {
+          "mode": "standard"
+        },
+        "12_weeks": {
+          "mode": "extended"
+        }
+      },
+      "tempo_variants": {
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "tempo": {
+        "standard": {
+          "notes": "Standard tempo – no adjustment.",
+          "phase_duration_multiplier": 1
+        },
+        "accelerated": {
+          "notes": "Accelerated tempo – physician review required.",
+          "phase_duration_multiplier": 0.75
+        },
+        "extended": {
+          "notes": "Extended tempo – for slower responders.",
+          "phase_duration_multiplier": 1.33
+        }
+      }
+    },
+    "metadata": {
+      "longDescription": "Body Protection Compound-157 (BPC-157) is a pentadecapeptide derived from gastric juice that promotes tendon-to-bone healing, muscle and ligament repair, and neurological recovery via upregulation of the nitric oxide (NO) system, VEGF expression, and FAK-paxillin pathway activation (Sikiric P et al., Curr Pharm Des 2018; Chang CH et al., Acta Physiol 2011). TB-500 (a synthetic peptide derived from thymosin beta-4, amino acids 17–23) sequesters G-actin, reduces inflammation, promotes angiogenesis, and facilitates keratinocyte and endothelial cell migration (Goldstein AL et al., Ann N Y Acad Sci 2012). The 8-week dual-phase protocol applies maximal dosing in the acute recovery phase (weeks 1–4) transitioning to BPC-157 maintenance for consolidation of structural repair (weeks 5–8). Suited for musculoskeletal injuries, post-surgical recovery, and overuse conditions.",
+      "primary_goal": "Recovery / Injury",
+      "keywords": [
+        "BPC-157 protocol",
+        "TB-500 tissue repair",
+        "thymosin beta-4 peptide",
+        "tendon healing peptide",
+        "musculoskeletal recovery protocol",
+        "BPC-157 TB-500 combined"
+      ],
+      "references": [
+        {
+          "pmid": "29998482",
+          "citation": "Sikiric P et al. Brain-gut Axis and Pentadecapeptide BPC 157. Curr Pharm Des 2018;24:1821-1832."
+        },
+        {
+          "pmid": "21272094",
+          "citation": "Chang CH et al. The promoting effect of pentadecapeptide BPC 157 on tendon healing. Acta Physiol 2011;201:497-507."
+        },
+        {
+          "pmid": "22295120",
+          "citation": "Goldstein AL et al. Thymosin β4: A multi-functional regenerative peptide. Ann N Y Acad Sci 2012;1269:1-8."
+        }
+      ],
+      "scientificName": "BPC-157 & Thymosin β4 (TB-500) Angiogenic Tissue Repair Protocol",
+      "description": "8-week musculoskeletal recovery protocol combining BPC-157 cytoprotective signaling and TB-500 actin-sequestering angiogenesis for accelerated soft tissue and tendon healing."
+    },
+    "_patchedAt": {
+      "schema_gap_fix": "2026-04-26T12:37:11Z",
+      "phase1_fix": "2026-05-17T08:28:52.937542+00:00"
+    },
+    "_last_synced_at": "2026-05-17T09:24:08.930Z",
+    "phase_blueprints": [
+      {
+        "phase_id": "rec_001_ph1",
+        "phase_name": "Acute Recovery",
+        "duration_weeks": 4,
+        "drugs": [
+          {
+            "product_id": "BPC-157-5mg-vial",
+            "product_title": "BPC-157",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mcg",
+              "administration_frequency": "daily",
+              "starting_daily_dose": 500,
+              "dose_per_administration": 500,
+              "administration_days_default": [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday"
+              ],
+              "timing_hint": "Administer near rehabilitation work or recovery period"
+            }
+          },
+          {
+            "product_id": "TB-500-5mg-vial",
+            "product_title": "TB-500",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "weekly",
+              "starting_weekly_dose": 5,
+              "dose_per_administration": 5,
+              "administration_days_default": [
+                "monday"
+              ],
+              "timing_hint": "Administer consistently on the same day each week"
+            }
+          }
+        ]
+      },
+      {
+        "phase_id": "rec_001_ph2",
+        "phase_name": "Regeneration",
+        "duration_weeks": 4,
+        "drugs": [
+          {
+            "product_id": "BPC-157-5mg-vial",
+            "product_title": "BPC-157",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mcg",
+              "administration_frequency": "3x_week",
+              "starting_weekly_dose": 1500,
+              "dose_per_administration": 500,
+              "administration_days_default": [
+                "monday",
+                "wednesday",
+                "friday"
+              ],
+              "timing_hint": "Reduce frequency once pain and range of motion improve"
+            }
+          }
+        ]
+      }
+    ],
+    "title": "BPC-157 & TB-500 Tissue Repair Protocol",
+    "synergy_rationale": "BPC-157 signals for cellular repair, collagen synthesis, and angiogenesis via FAK-paxillin. TB-500 works synergistically by sequestering actin, which gives cells the flexibility and motility to migrate into the new vessels and tissues created by BPC-157.",
+    "clinical_timeline": [
+      {
+        "phase": "Weeks 1-2",
+        "expected": "Significant reduction in acute pain and inflammation."
+      },
+      {
+        "phase": "Weeks 3-5",
+        "expected": "Improved range of motion. Accelerated healing of the primary site."
+      },
+      {
+        "phase": "Weeks 6-8",
+        "expected": "Tissue remodeling and strengthening. Return to activity."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "8+ hours for optimal GH release and tissue repair.",
+      "nutrition": "Maintenance calories, high protein, anti-inflammatory foods (omega-3s, antioxidants).",
+      "activity": "Physical therapy protocols, active recovery, avoid loading injured tissue.",
+      "hydration": "Adequate hydration to support tissue elasticity."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:20.756Z",
+    "clinical_disclaimer": "This protocol is for educational and informational purposes only. It is not medical advice. Any decision to utilize peptide therapies should be made in consultation with a qualified healthcare professional who can review your full medical history, lab work, and potential contraindications.",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Acute Recovery",
+        "start_week": 1,
+        "end_week": 4,
+        "drugs_used": [
+          {
+            "product_slug": "bpc-157",
+            "selected_strength": "5mg",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 8,
+            "route": "subcutaneous",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose": "3.5 mg",
+            "weekly_dose_amount": 3.5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "tb-500",
+            "selected_strength": "5mg",
+            "dosing_frequency": "weekly",
+            "vials_required_for_phase": 4,
+            "route": "subcutaneous",
+            "weekly_dose": "5 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 5,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Regeneration",
+        "start_week": 5,
+        "end_week": 8,
+        "drugs_used": [
+          {
+            "product_slug": "bpc-157",
+            "selected_strength": "5mg",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 6,
+            "route": "subcutaneous",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose": "1.5 mg",
+            "weekly_dose_amount": 1.5,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "eligibility_rules": {
+      "supported_goals": [
+        "tissue_repair",
+        "injury_recovery",
+        "musculoskeletal_recovery",
+        "post_surgical_recovery"
+      ],
+      "contraindications": [
+        "active_malignancy",
+        "pregnancy_or_breastfeeding",
+        "active_uncontrolled_infection_at_injury_site",
+        "known_hypersensitivity_to_protocol_compounds"
+      ],
+      "relative_cautions": [
+        "recent_surgery_without_surgeon_clearance",
+        "anticoagulant_use",
+        "severe_diabetes_with_poor_wound_healing",
+        "NSAID_or_steroid_dependency"
+      ],
+      "required_patient_inputs": [
+        "injury_type",
+        "injury_date",
+        "pain_score",
+        "functional_limitation",
+        "surgical_status",
+        "age_group",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ],
+      "indications": [
+        "Active soft-tissue injury (tendon, ligament, or muscle)",
+        "Post-surgical recovery requiring accelerated tissue healing",
+        "Chronic musculoskeletal pain or inflammatory joint conditions",
+        "Athletes with repetitive strain or overuse injuries",
+        "Neuropathic pain or peripheral nerve damage"
+      ]
+    },
+    "expected_outcomes": {
+      "0": "Accelerated soft tissue healing",
+      "1": "Reduced systemic inflammation",
+      "2": "Improved joint mobility",
+      "3": "Faster recovery from surgical interventions or injuries",
+      "qualitative": [
+        "Accelerated soft-tissue healing and structural repair",
+        "Reduction in post-injury inflammation and pain",
+        "Improved musculoskeletal function and range of motion",
+        "Enhanced angiogenesis and microvascular support at injury sites",
+        "Return to baseline physical performance metrics"
+      ]
+    }
+  },
+  {
+    "id": "rec_002",
+    "active": true,
+    "complexity_level": "advanced",
+    "confidence_score": 90,
+    "number_of_phases": 2,
+    "protocol_author_title": "Peptide Specialists",
+    "protocol_duration_weeks": 8,
+    "protocol_id": "rec_002",
+    "protocol_is_curated": true,
+    "protocol_is_physician_authored": false,
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_review_status": "approved",
+    "protocol_slug": "neuro-musculoskeletal-repair-8w",
+    "protocol_source_type": "curated_library",
+    "economics": {
+      "total_protocol_cost_estimate": 1180,
+      "total_vials_required": 20
+    },
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_source_reference": "internal_guide",
+    "overview_summary": "Two-phase recovery protocol combining BPC-157 and TB-500 with ARA-290 support where tissue repair and neuropathic recovery overlap.",
+    "protocol_title": "BPC-157, TB-500 & ARA-290 Neuro-Musculoskeletal Protocol",
+    "protocol_source_version": "v5.0",
+    "status": "approved",
+    "seeded_at": "2026-04-25T06:10:36.133Z",
+    "bundleVersion": "2.0",
+    "protocol_version": "v6.1",
+    "legacy_compatibility": {
+      "enabled": true,
+      "notes": "Enhanced protocol preserves legacy fields while supporting canonical blueprint-based loading.",
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ]
+    },
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "monitoring_plan": {
+      "baseline_required": [
+        "injury_type",
+        "pain_score",
+        "neuropathic_pain_score",
+        "range_of_motion",
+        "functional_score",
+        "wound_status_if_applicable",
+        "vascular_status_if_relevant",
+        "medication_review"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "week": 2,
+          "type": "acute_neuro_repair_review",
+          "measures": [
+            "pain_score",
+            "neuropathic_pain_score",
+            "swelling",
+            "wound_status_if_applicable"
+          ],
+          "purpose": "Assess early combined tissue and nerve-repair signal."
+        },
+        {
+          "week": 4,
+          "type": "repair_transition_review",
+          "measures": [
+            "functional_score",
+            "range_of_motion",
+            "neuropathic_pain_score"
+          ],
+          "purpose": "Determine response before consolidation phase."
+        },
+        {
+          "week": 8,
+          "type": "final_neuro_musculoskeletal_review",
+          "measures": [
+            "functional_score",
+            "pain_score",
+            "neuropathic_pain_score",
+            "return_to_activity_status"
+          ],
+          "purpose": "Assess recovery of structural and neural compartments."
+        }
+      ]
+    },
+    "dosing_enrichment": {
+      "cycling_recommendation": "8-week neuro-musculoskeletal repair cycle. Consider 4-8 week pause and reassessment before repeating, especially when neuropathic pain or post-surgical recovery is the main indication.",
+      "maintenance_dose": "BPC-157: 250-500 mcg 3x/week during consolidation. ARA-290: reduce to 2x/week if neuropathic symptoms improve. TB-500 generally reserved for acute repair phase.",
+      "timing_optimization": "BPC-157 may be dosed daily in early repair and reduced later. ARA-290 is best administered consistently on non-consecutive days. TB-500 should remain weekly during acute repair.",
+      "titration_note": "Weeks 1-4 should prioritize combined structural and neural support. Weeks 5-8 should reduce complexity and continue only BPC-157 + ARA-290 if neural symptoms or functional deficits persist."
+    },
+    "risk_class": "moderate_to_high",
+    "physician_supervision_required": true,
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "CBC",
+          "CMP",
+          "Lipid Panel"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "CBC",
+          "CMP"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Type 1 diabetes (insulin-dependent, use with caution)",
+        "Severe renal impairment",
+        "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "_syncSource": "export/protocols/rec_002.js",
+    "_schemaVersion": "antigravity_v2",
+    "_patchSchema": "antigravity_v2",
+    "safety_profile": {
+      "risk_level": "moderate",
+      "common_side_effects": [],
+      "monitoring_flags": [],
+      "serious_adverse_events": [],
+      "contraindication_summary": "See eligibility_rules.contraindications."
+    },
+    "_syncedAt": "2026-04-26T12:46:33.076Z",
+    "updated_at": "2026-05-04T15:06:50.087Z",
+    "protocol_author_organization": "Atlas Health",
+    "recommended_supplements": [
+      "curcumin",
+      "boswellia",
+      "omega-3-forte"
+    ],
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible",
+      "expected_outcomes: INJECTED for category \\"Recovery & Neurology\\""
+    ],
+    "category": "Recovery & Neurology",
+    "syncedAt": "2026-05-16T14:32:33.450Z",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "age_variant_match",
+        "neural_injury_match"
+      ],
+      "allow_acceleration": false,
+      "base_duration_weeks": 8,
+      "notes": "Default generator rules – pending clinical review.",
+      "tempo_variants": [
+        "standard"
+      ],
+      "allow_extension": false
+    },
+    "primary_goal": "Recovery / Injury",
+    "variant_rules": {
+      "age_variants": {
+        "18-35": {
+          "default_duration_weeks": 8,
+          "monitoring_intensity": "standard"
+        },
+        "36-50": {
+          "default_duration_weeks": 8,
+          "monitoring_intensity": "moderate"
+        },
+        "51-65": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "enhanced"
+        },
+        "65+": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "enhanced"
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "special_notes": [
+            "Monitor for peripheral neural changes and tolerability."
+          ]
+        },
+        "male": {
+          "special_notes": [
+            "Standard monitoring."
+          ]
+        }
+      },
+      "duration_variants": {
+        "8_weeks": {
+          "mode": "standard"
+        },
+        "12_weeks": {
+          "mode": "extended"
+        }
+      },
+      "tempo_variants": {
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "tempo": {
+        "standard": {
+          "notes": "Standard tempo – no adjustment.",
+          "phase_duration_multiplier": 1
+        },
+        "accelerated": {
+          "notes": "Accelerated tempo – physician review required.",
+          "phase_duration_multiplier": 0.75
+        },
+        "extended": {
+          "notes": "Extended tempo – for slower responders.",
+          "phase_duration_multiplier": 1.33
+        }
+      }
+    },
+    "metadata": {
+      "longDescription": "This advanced protocol expands the BPC-157 / TB-500 tissue-repair backbone with ARA-290, a cyclic helix B surface peptide derived from the non-erythropoietic region of erythropoietin (EPO). ARA-290 activates the innate repair receptor (IRR/β common receptor complex) to promote peripheral nerve regeneration, reduce neuropathic pain, and suppress chronic neuroinflammation without the haematopoietic side effects of full EPO (Brines M & Cerami A, Nat Rev Drug Discov 2008; Pulman KG et al., Handb Exp Pharmacol 2019). When combined with BPC-157 (structural tissue healing) and TB-500 (angiogenesis and actin remodeling), the three-compound regimen addresses soft tissue, vascular, and neural compartments simultaneously. Particularly suited for complex injury presentations involving neuropathic pain, nerve damage, or post-surgical peripheral neuropathy.",
+      "primary_goal": "Recovery / Injury",
+      "keywords": [
+        "BPC-157 TB-500 ARA-290",
+        "neuropathic pain peptide",
+        "peripheral nerve regeneration protocol",
+        "erythropoietin mimetic peptide",
+        "neuro-musculoskeletal protocol",
+        "advanced recovery peptide stack"
+      ],
+      "references": [
+        {
+          "pmid": "18552849",
+          "citation": "Brines M, Cerami A. Erythropoietin-mediated tissue protection. Nat Rev Drug Discov 2008;7:784-791."
+        },
+        {
+          "pmid": "29998482",
+          "citation": "Sikiric P et al. BPC 157 and the CNS. Curr Pharm Des 2018;24:1821-1832."
+        },
+        {
+          "pmid": "22295120",
+          "citation": "Goldstein AL et al. Thymosin β4: A multi-functional regenerative peptide. Ann N Y Acad Sci 2012;1269:1-8."
+        }
+      ],
+      "scientificName": "BPC-157, Thymosin β4 & ARA-290 Neuro-Musculoskeletal Regeneration Protocol",
+      "description": "Advanced 12-week neuro-musculoskeletal protocol adding ARA-290 erythropoietin-mimetic neuroprotection to BPC-157 and TB-500 tissue repair for nerve and structural healing."
+    },
+    "_patchedAt": {
+      "schema_gap_fix": "2026-04-26T12:37:11Z",
+      "phase1_fix": "2026-05-17T08:28:52.937542+00:00"
+    },
+    "_last_synced_at": "2026-05-17T09:24:08.930Z",
+    "phase_blueprints": [
+      {
+        "phase_id": "rec_002_ph1",
+        "phase_name": "Acute Repair",
+        "duration_weeks": 4,
+        "drugs": [
+          {
+            "product_id": "BPC-157-5mg-vial",
+            "product_title": "BPC-157",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mcg",
+              "administration_frequency": "daily",
+              "starting_daily_dose": 500,
+              "dose_per_administration": 500,
+              "administration_days_default": [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday"
+              ],
+              "timing_hint": "Administer daily in early repair phase"
+            }
+          },
+          {
+            "product_id": "TB-500-5mg-vial",
+            "product_title": "TB-500",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "weekly",
+              "starting_weekly_dose": 5,
+              "dose_per_administration": 5,
+              "administration_days_default": [
+                "monday"
+              ],
+              "timing_hint": "Remain weekly during acute repair phase"
+            }
+          },
+          {
+            "product_id": "ARA-290-16mg-vial",
+            "product_title": "ARA-290",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "3x_week",
+              "starting_weekly_dose": 4.8,
+              "dose_per_administration": 1.6,
+              "administration_days_default": [
+                "monday",
+                "wednesday",
+                "friday"
+              ],
+              "timing_hint": "Administer on non-consecutive days for neural support"
+            }
+          }
+        ]
+      },
+      {
+        "phase_id": "rec_002_ph2",
+        "phase_name": "Consolidation",
+        "duration_weeks": 4,
+        "drugs": [
+          {
+            "product_id": "BPC-157-5mg-vial",
+            "product_title": "BPC-157",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mcg",
+              "administration_frequency": "3x_week",
+              "starting_weekly_dose": 1500,
+              "dose_per_administration": 500,
+              "administration_days_default": [
+                "monday",
+                "wednesday",
+                "friday"
+              ],
+              "timing_hint": "Continue if nerve or functional deficits persist"
+            }
+          },
+          {
+            "product_id": "ARA-290-16mg-vial",
+            "product_title": "ARA-290",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "2x_week",
+              "starting_weekly_dose": 3.2,
+              "dose_per_administration": 1.6,
+              "administration_days_default": [
+                "tuesday",
+                "friday"
+              ],
+              "timing_hint": "Reduce if neuropathic symptoms improve"
+            }
+          }
+        ]
+      }
+    ],
+    "title": "BPC-157, TB-500 & ARA-290 Neuro-Musculoskeletal Protocol",
+    "synergy_rationale": "This multi-compound protocol is designed to provide synergistic effects, targeting multiple complementary biological pathways simultaneously to achieve recovery / injury more effectively than monotherapy.",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "8+ hours for optimal GH release and tissue repair.",
+      "nutrition": "Maintenance calories, high protein, anti-inflammatory foods (omega-3s, antioxidants).",
+      "activity": "Physical therapy protocols, active recovery, avoid loading injured tissue.",
+      "hydration": "Adequate hydration to support tissue elasticity."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:24.446Z",
+    "clinical_disclaimer": "This protocol is for educational and informational purposes only. It is not medical advice. Any decision to utilize peptide therapies should be made in consultation with a qualified healthcare professional who can review your full medical history, lab work, and potential contraindications.",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Acute Repair",
+        "start_week": 1,
+        "end_week": 4,
+        "drugs_used": [
+          {
+            "product_slug": "bpc-157",
+            "selected_strength": "10mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 4,
+            "faq_ref": "bpc157_faq",
+            "pubmed_ref": "bpc157_pubmed",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose": "3.5 mg",
+            "weekly_dose_amount": 3.5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "tb-500",
+            "selected_strength": "5mg",
+            "dosing_frequency": "weekly",
+            "vials_required_for_phase": 4,
+            "faq_ref": "tb500_faq",
+            "pubmed_ref": "tb500_pubmed",
+            "route": "subcutaneous",
+            "weekly_dose": "5 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "ara-290",
+            "selected_strength": "10mg",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 4,
+            "faq_ref": "ara290_faq",
+            "pubmed_ref": "ara290_pubmed",
+            "route": "subcutaneous",
+            "weekly_dose": "6 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 6,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Consolidation",
+        "start_week": 5,
+        "end_week": 8,
+        "drugs_used": [
+          {
+            "product_slug": "bpc-157",
+            "selected_strength": "5mg",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 6,
+            "route": "subcutaneous",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose": "1.5 mg",
+            "weekly_dose_amount": 1.5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "ara-290",
+            "selected_strength": "10mg",
+            "dosing_frequency": "2x_week",
+            "vials_required_for_phase": 2,
+            "route": "subcutaneous",
+            "weekly_dose": "6 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 6,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "eligibility_rules": {
+      "supported_goals": [
+        "neuro_musculoskeletal_recovery",
+        "nerve_repair_support",
+        "post_surgical_recovery",
+        "neuropathic_pain_support"
+      ],
+      "contraindications": [
+        "active_malignancy",
+        "pregnancy_or_breastfeeding",
+        "active_uncontrolled_infection_at_injury_site",
+        "known_hypersensitivity_to_protocol_compounds"
+      ],
+      "relative_cautions": [
+        "polyneuropathy_of_unknown_origin",
+        "severe_vascular_insufficiency",
+        "anticoagulant_use",
+        "recent_surgery_without_surgeon_clearance"
+      ],
+      "required_patient_inputs": [
+        "injury_type",
+        "neuropathic_symptom_profile",
+        "pain_score",
+        "functional_limitation",
+        "surgical_status",
+        "age_group",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ],
+      "indications": [
+        "Active soft-tissue injury (tendon, ligament, or muscle)",
+        "Post-surgical recovery requiring accelerated tissue healing",
+        "Chronic musculoskeletal pain or inflammatory joint conditions",
+        "Athletes with repetitive strain or overuse injuries",
+        "Neuropathic pain or peripheral nerve damage"
+      ]
+    },
+    "expected_outcomes": {
+      "0": "Reduced pain",
+      "1": "Accelerated healing",
+      "2": "Decreased inflammation",
+      "qualitative": [
+        "Accelerated soft-tissue healing and structural repair",
+        "Reduction in post-injury inflammation and pain",
+        "Improved musculoskeletal function and range of motion",
+        "Enhanced angiogenesis and microvascular support at injury sites",
+        "Return to baseline physical performance metrics"
+      ]
+    }
+  },
+  {
+    "id": "sa_001",
+    "protocol_id": "sa_001",
+    "protocol_version": "v6.1",
+    "bundleVersion": "2.0",
+    "active": true,
+    "uploadedAt": "2026-04-20T09:29:12.821Z",
+    "protocol_title": "Structured Skin & Aesthetics Protocol",
+    "protocol_slug": "skin-aesthetics-ghkcu-structured",
+    "monitoring_plan": {
+      "baseline_required": [
+        "standardized_photography",
+        "skin_barrier_score",
+        "erythema_irritation_score",
+        "skin_texture_score",
+        "procedure_history_review"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "week": 4,
+          "type": "barrier_review",
+          "measures": [
+            "skin_barrier_score",
+            "irritation_score",
+            "photography"
+          ],
+          "purpose": "Assess tolerance, irritation, and early barrier response."
+        },
+        {
+          "week": 8,
+          "type": "remodeling_review",
+          "measures": [
+            "skin_texture_score",
+            "elasticity_subjective_score",
+            "photography"
+          ],
+          "purpose": "Evaluate dermal remodeling response and need for optional localized support."
+        },
+        {
+          "week": 12,
+          "type": "final_review",
+          "measures": [
+            "photography",
+            "skin_texture_score",
+            "patient_satisfaction_score"
+          ],
+          "purpose": "Document aesthetic response and define maintenance frequency."
+        }
+      ]
+    },
+    "status": "approved",
+    "protocol_review_status": "approved",
+    "protocol_is_curated": true,
+    "protocol_is_physician_authored": false,
+    "protocol_source_type": "curated_library",
+    "protocol_source_version": "v5.0",
+    "protocol_last_reviewed_at": "2026-04-25",
+    "seeded_at": "2026-04-25T13:21:19Z",
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "legacy_compatibility": {
+      "enabled": true,
+      "notes": "Legacy simplified fields are preserved for backward compatibility while canonical phase_blueprints are used for generation.",
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ]
+    },
+    "risk_class": "low_to_moderate",
+    "physician_supervision_required": false,
+    "overview_summary": "12-week skin and aesthetics protocol using staged GHK-Cu barrier priming, active remodeling, and maintenance, with optional localized BPC-157 support when tissue repair is clinically relevant.",
+    "dosing_enrichment": {
+      "cycling_recommendation": "12-week aesthetic skin cycle followed by reassessment. GHK-Cu topical maintenance may continue 3-5x/week if well tolerated; localized injectable support should remain cyclic and clinician-supervised.",
+      "maintenance_dose": "GHK-Cu topical: once daily during loading, then 3-5x/week maintenance. BPC-157 localized support, if used: low-dose SC/localized 3x/week for 4 weeks only when tissue repair or procedure recovery is the target.",
+      "timing_optimization": "Apply topical GHK-Cu in the evening after cleansing and before occlusive moisturizers. Avoid simultaneous use with strong acids or retinoids if irritation occurs. Localized BPC-157 should be separated from topical actives and rotated by site.",
+      "titration_note": "Begin with nightly GHK-Cu for 2 weeks. If tolerated, continue daily through week 8. Reduce to 5x/week in weeks 9-12. Introduce localized BPC-157 only if there is procedure-related repair need, barrier compromise, or delayed recovery."
+    },
+    "safety_profile": {
+      "adverse_events_common": [],
+      "adverse_events_serious": [],
+      "drug_interactions": [],
+      "monitoring_required": []
+    },
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "label": "Baseline Assessment",
+        "tests": [
+          "Full blood count (CBC)",
+          "Comprehensive metabolic panel (CMP)",
+          "Vitals & weight"
+        ],
+        "notes": "Establish baseline before starting protocol."
+      },
+      {
+        "week": 4,
+        "label": "Mid-Protocol Check-In",
+        "tests": [
+          "Symptom review",
+          "Subjective wellbeing score (1–10)",
+          "Side-effect screening",
+          "Fasting glucose",
+          "Insulin",
+          "HOMA-IR",
+          "Lipid panel"
+        ],
+        "notes": "Assess tolerability and early response."
+      },
+      {
+        "week": 8,
+        "label": "End-of-Protocol Evaluation",
+        "tests": [
+          "Repeat CBC & CMP",
+          "Outcome questionnaire",
+          "Physician review",
+          "HbA1c",
+          "Full lipid panel",
+          "Body composition (DEXA or impedance)"
+        ],
+        "notes": "Full outcome assessment and decision on continuation or cycling."
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Type 1 diabetes (insulin-dependent, use with caution)",
+        "Severe renal impairment",
+        "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "_syncSource": "export/protocols/sa_001.js",
+    "generator_rules": {
+      "allow_acceleration": false,
+      "base_duration_weeks": null,
+      "notes": "Default generator rules – pending clinical review.",
+      "tempo_variants": [
+        "standard"
+      ],
+      "allow_extension": false
+    },
+    "economics": {
+      "total_protocol_cost_estimate": null,
+      "total_vials_required": null
+    },
+    "complexity_level": "standard",
+    "confidence_score": 75,
+    "_schemaVersion": "antigravity_v2",
+    "_patchSchema": "antigravity_v2",
+    "variant_rules": {
+      "tempo": {
+        "standard": {
+          "notes": "Standard tempo – no adjustment.",
+          "phase_duration_multiplier": 1
+        },
+        "accelerated": {
+          "notes": "Accelerated tempo – physician review required.",
+          "phase_duration_multiplier": 0.75
+        },
+        "extended": {
+          "notes": "Extended tempo – for slower responders.",
+          "phase_duration_multiplier": 1.33
+        }
+      }
+    },
+    "number_of_phases": 3,
+    "_syncedAt": "2026-04-26T12:46:33.843Z",
+    "updated_at": "2026-05-04T14:32:21.539Z",
+    "_enrichment_notes": [
+      "phases: INJECTED from phase_blueprints (3 phases)",
+      "expected_outcomes: INJECTED for category \\"Sexual Health & Anti-Aging\\""
+    ],
+    "category": "Sexual Health & Anti-Aging",
+    "syncedAt": "2026-05-17T07:29:19.970824+00:00",
+    "primary_goal": "Skin / Anti-Aging",
+    "protocol_duration_weeks": 12,
+    "metadata": {
+      "complexity_level": "standard",
+      "visibility": "public",
+      "longDescription": "This structured skin and aesthetics protocol centers on GHK-Cu, an endogenous copper-binding tripeptide involved in extracellular matrix remodeling, collagen synthesis, antioxidant defense, and wound repair. The protocol uses a staged approach: barrier priming, active dermal remodeling, and consolidation. Optional localized BPC-157 support may be used in the remodeling phase when tissue repair, post-procedure recovery, or localized barrier compromise is present. The protocol is designed to improve dermal quality, skin texture, elasticity, and recovery capacity without positioning optional injectable support as mandatory for all aesthetic users.",
+      "short_description": "A skin and aesthetic regeneration protocol using GHK-Cu and Epithalon to stimulate collagen synthesis, improve dermal density, and support cellular repair in skin tissue.",
+      "keywords": [
+        "GHK-Cu",
+        "copper peptide",
+        "skin barrier",
+        "ECM remodeling",
+        "collagen support",
+        "aesthetic peptide",
+        "BPC-157 skin repair",
+        "dermal regeneration"
+      ],
+      "references": [
+        {
+          "citation": "Pickart L, Margolina A. Regenerative and Protective Actions of the GHK-Cu Peptide. Biomedicines 2018;6:77.",
+          "pmid": "29990473"
+        },
+        {
+          "citation": "Pickart L et al. GHK Peptide as a Natural Modulator of Multiple Cellular Pathways. J Aging Sci 2015;3:132.",
+          "pmid": "25984600"
+        },
+        {
+          "citation": "Sikiric P et al. Brain-gut Axis and Pentadecapeptide BPC 157. Curr Pharm Des 2018;24:1821-1832.",
+          "pmid": "29998482"
+        }
+      ],
+      "scientificName": "GHK-Cu Copper Peptide ECM Remodeling & Optional BPC-157 Localized Tissue Support Protocol",
+      "author": {
+        "organization": "Atlas Health",
+        "name": "Atlas Health Clinical Team",
+        "title": "Peptide Specialists"
+      },
+      "description": "12-week staged skin and aesthetics protocol using GHK-Cu for barrier support and dermal matrix remodeling, with optional localized BPC-157 for tissue repair support.",
+      "primary_condition": "skin_aging_barrier_support_ecm_repair",
+      "source_type": "curated_library",
+      "version": "1.0",
+      "source_reference": "internal_guide",
+      "schema_version": "antigravity_v2",
+      "review": {
+        "last_reviewed_at": "2026-04-25",
+        "review_status": "approved"
+      },
+      "abbreviatedName": "GHK-Cu + BPC-157 · ECM Repair",
+      "primary_goal": "Skin / Anti-Aging",
+      "shortCode": "SKN-001",
+      "duration_weeks": 12
+    },
+    "_patchedAt": {
+      "schema_gap_fix": "2026-04-26T12:37:11Z",
+      "phase2_fix": "2026-05-17T08:37:46.587405+00:00"
+    },
+    "_last_synced_at": "2026-05-17T09:24:08.931Z",
+    "phase_blueprints": [
+      {
+        "phase_id": "sa_001_ph1",
+        "phase_name": "Foundation",
+        "duration_weeks": 4,
+        "drugs": [
+          {
+            "product_id": "prd_ghkcu",
+            "product_title": "GHK-Cu",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "daily",
+              "starting_daily_dose": 0.5,
+              "starting_weekly_dose": 3.5,
+              "dose_per_administration": 0.5,
+              "administration_days_default": [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday"
+              ],
+              "timing_hint": "Administer in the morning for collagen stimulation"
+            }
+          }
+        ]
+      },
+      {
+        "phase_id": "sa_001_ph2",
+        "phase_name": "Escalation",
+        "duration_weeks": 4,
+        "drugs": [
+          {
+            "product_id": "prd_ghkcu",
+            "product_title": "GHK-Cu",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "daily",
+              "starting_daily_dose": 1,
+              "starting_weekly_dose": 7,
+              "dose_per_administration": 1,
+              "administration_days_default": [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday"
+              ],
+              "timing_hint": "Escalated dose for peak collagen and elastin stimulation"
+            }
+          },
+          {
+            "product_id": "prd_bpc157",
+            "product_title": "BPC-157",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mcg",
+              "administration_frequency": "3x_week",
+              "starting_weekly_dose": 1500,
+              "dose_per_administration": 500,
+              "administration_days_default": [
+                "monday",
+                "wednesday",
+                "friday"
+              ],
+              "timing_hint": "Supports dermal tissue remodelling and angiogenesis alongside GHK-Cu"
+            }
+          }
+        ]
+      },
+      {
+        "phase_id": "sa_001_ph3",
+        "phase_name": "Maintenance",
+        "duration_weeks": 4,
+        "drugs": [
+          {
+            "product_id": "prd_ghkcu",
+            "product_title": "GHK-Cu",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "5x_week",
+              "starting_weekly_dose": 1,
+              "dose_per_administration": 0.2,
+              "administration_days_default": [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday"
+              ],
+              "timing_hint": "Step-down maintenance dose; continue indefinitely or cycle off for 4 weeks"
+            }
+          }
+        ]
+      }
+    ],
+    "clinical_disclaimer": "This protocol is for educational and informational purposes only. It is not medical advice. Any decision to utilize peptide therapies should be made in consultation with a qualified healthcare professional who can review your full medical history, lab work, and potential contraindications.",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Barrier Priming",
+        "end_week": 4,
+        "objectives": [],
+        "_injected_from": "phase_blueprints",
+        "phase_key": "barrier_priming",
+        "clinical_purpose": [],
+        "drugs_used": [
+          {
+            "product_title": "GHK-Cu",
+            "weekly_dose": "1.5 mg",
+            "route": "topical",
+            "dosing_frequency": "daily",
+            "product_slug": "prd_ghkcu",
+            "weekly_dose_amount": 1.5,
+            "weekly_dose_unit": "mg"
+          }
+        ],
+        "start_week": 1
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Active Remodeling",
+        "end_week": 8,
+        "objectives": [],
+        "_injected_from": "phase_blueprints",
+        "phase_key": "remodeling",
+        "clinical_purpose": [],
+        "drugs_used": [
+          {
+            "product_title": "GHK-Cu",
+            "weekly_dose": "1.5 mg",
+            "route": "topical",
+            "dosing_frequency": "daily",
+            "product_slug": "prd_ghkcu",
+            "weekly_dose_amount": 1.5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_title": "BPC-157",
+            "weekly_dose": "1.5 mg",
+            "route": "localized_optional",
+            "dosing_frequency": "3x_week",
+            "product_slug": "prd_bpc157",
+            "weekly_dose_amount": 1.5,
+            "weekly_dose_unit": "mg"
+          }
+        ],
+        "start_week": 5
+      },
+      {
+        "phase_number": 3,
+        "phase_title": "Consolidation & Maintenance",
+        "end_week": 12,
+        "objectives": [],
+        "_injected_from": "phase_blueprints",
+        "phase_key": "consolidation",
+        "clinical_purpose": [],
+        "drugs_used": [
+          {
+            "product_title": "GHK-Cu",
+            "weekly_dose": "1.5 mg",
+            "route": "topical",
+            "dosing_frequency": "5x_week",
+            "product_slug": "prd_ghkcu",
+            "weekly_dose_amount": 1.5,
+            "weekly_dose_unit": "mg"
+          }
+        ],
+        "start_week": 9
+      }
+    ],
+    "recommended_supplements": [
+      {
+        "dosage": "1 g",
+        "name": "Vitamin C",
+        "rationale": "Essential collagen synthesis cofactor amplifying GHK-Cu collagen stimulation",
+        "dosage_amount": 1,
+        "dosage_unit": "g"
+      },
+      {
+        "dosage": "10 g",
+        "name": "Collagen Peptides",
+        "rationale": "Provides hydroxyproline substrate for GHK-Cu driven dermal matrix repair",
+        "dosage_amount": 10,
+        "dosage_unit": "g"
+      },
+      {
+        "dosage": "2 g",
+        "name": "Omega-3 Fatty Acids",
+        "rationale": "Skin barrier lipid support and anti-inflammatory prostaglandin modulation",
+        "dosage_amount": 2,
+        "dosage_unit": "g"
+      },
+      {
+        "dosage": "30 mg",
+        "name": "Zinc",
+        "rationale": "Metalloenzyme cofactor for collagen crosslinking and skin wound repair",
+        "dosage_amount": 30,
+        "dosage_unit": "mg"
+      }
+    ],
+    "eligibility_rules": {
+      "supported_goals": [
+        "skin_rejuvenation",
+        "barrier_support",
+        "aesthetic_repair",
+        "post_procedure_support"
+      ],
+      "contraindications": [
+        "active_inflammatory_skin_disease_at_application_or_injection_site",
+        "systemic_retinoid_therapy",
+        "pregnancy_or_breastfeeding",
+        "known_hypersensitivity_to_copper_peptides",
+        "active_malignant_skin_lesion"
+      ],
+      "relative_cautions": [
+        "rosacea_flare",
+        "active_acne_flare",
+        "recent_laser_or_peel_without_clearance",
+        "copper_sensitivity"
+      ],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "skin_type",
+        "recent_procedures",
+        "sensitivity_profile",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ],
+      "indications": [
+        "Adults aged 35+ seeking evidence-based healthspan optimization",
+        "Individuals with elevated oxidative stress or mitochondrial dysfunction markers",
+        "Patients with premature cellular aging indicators",
+        "Individuals with compromised skin integrity, fine lines, or reduced collagen",
+        "Patients seeking anti-aging support as part of integrative medicine protocols"
+      ]
+    },
+    "expected_outcomes": {
+      "0": "Improved skin elasticity and hydration",
+      "1": "Reduction in fine lines and wrinkles",
+      "2": "Enhanced collagen production",
+      "3": "Improved skin texture and overall radiance",
+      "qualitative": [
+        "Cellular rejuvenation and reduction of biological aging biomarkers",
+        "Improved mitochondrial efficiency and oxidative stress resilience",
+        "Enhanced skin elasticity, hydration, and collagen density",
+        "Support for telomere integrity and reduced epigenetic age",
+        "Improved systemic energy and functional healthspan"
+      ]
+    }
+  },
+  {
+    "id": "skin_001",
+    "protocol_id": "skin_001",
+    "active": true,
+    "complexity_level": "moderate",
+    "confidence_score": 91,
+    "economics": {
+      "total_protocol_cost_estimate": 800,
+      "total_vials_required": 4
+    },
+    "number_of_phases": 2,
+    "protocol_author_title": "Peptide Specialists",
+    "protocol_duration_weeks": 12,
+    "protocol_is_curated": true,
+    "protocol_is_physician_authored": false,
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_review_status": "approved",
+    "protocol_slug": "skin-rejuvenation-12w",
+    "protocol_source_type": "curated_library",
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_source_reference": "internal_guide",
+    "overview_summary": "Protocol focused on collagen activation and skin tissue rejuvenation.",
+    "protocol_title": "GHK-Cu Collagen Rejuvenation Protocol",
+    "protocol_source_version": "v5.0",
+    "status": "approved",
+    "seeded_at": "2026-04-25T06:10:36.132Z",
+    "bundleVersion": "2.0",
+    "protocol_version": "v6.1",
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "legacy_compatibility": {
+      "enabled": true,
+      "notes": "Legacy simplified fields are preserved for backward compatibility while canonical phase_blueprints are used for generation.",
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ]
+    },
+    "risk_class": "low",
+    "physician_supervision_required": false,
+    "monitoring_plan": {
+      "baseline_required": [
+        "standardized_photography",
+        "skin_texture_score",
+        "skin_elasticity_score",
+        "irritation_score",
+        "skin_sensitivity_profile"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "week": 6,
+          "type": "collagen_activation_review",
+          "measures": [
+            "photography",
+            "skin_texture_score",
+            "irritation_score"
+          ],
+          "purpose": "Assess collagen-response signal and topical tolerance."
+        },
+        {
+          "week": 12,
+          "type": "maintenance_review",
+          "measures": [
+            "photography",
+            "skin_elasticity_score",
+            "patient_satisfaction_score"
+          ],
+          "purpose": "Document aesthetic outcome and maintenance plan."
+        }
+      ]
+    },
+    "safety_profile": {
+      "adverse_events_common": [],
+      "adverse_events_serious": [],
+      "drug_interactions": [],
+      "monitoring_required": []
+    },
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "CBC",
+          "CMP",
+          "Lipid Panel"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "CBC",
+          "CMP"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Type 1 diabetes (insulin-dependent, use with caution)",
+        "Severe renal impairment",
+        "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "_syncSource": "export/protocols/skin_001.js",
+    "_patchedAt": {
+      "schema_gap_fix": "2026-04-26T12:37:11Z"
+    },
+    "_schemaVersion": "antigravity_v2",
+    "_patchSchema": "antigravity_v2",
+    "_syncedAt": "2026-04-26T12:46:35.020Z",
+    "updated_at": "2026-05-04T14:32:21.539Z",
+    "recommended_supplements": [
+      "hyaluronic-acid",
+      "resveratrol",
+      "quercetin"
+    ],
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible",
+      "expected_outcomes: INJECTED for category \\"Skin & Aesthetics\\""
+    ],
+    "protocol_author_organization": "Atlas Health",
+    "category": "Skin & Aesthetics",
+    "syncedAt": "2026-05-16T14:32:32.558Z",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "age_variant_match",
+        "skin_type_match"
+      ],
+      "allow_acceleration": false,
+      "base_duration_weeks": 12,
+      "notes": "Default generator rules – pending clinical review.",
+      "tempo_variants": [
+        "standard"
+      ],
+      "allow_extension": false
+    },
+    "primary_goal": "Skin / Anti-Aging",
+    "metadata": {
+      "longDescription": "GHK-Cu (glycyl-L-histidyl-L-lysine copper complex) is an endogenous tripeptide-copper complex that circulates at high levels in young adults (200 ng/mL at age 20) and declines with age. It was discovered in 1973 by Loren Pickart and extensively characterised for its role in wound healing and tissue remodeling (Pickart L & Margolina A, Biomedicines 2018). GHK-Cu activates fibroblast proliferation, upregulates collagen I, III, and VI synthesis, stimulates elastin and glycosaminoglycan production, and inhibits matrix metalloproteinases (MMP-1, MMP-2, MMP-3). Transcriptomic studies show GHK-Cu modulates over 4,000 human genes, significantly affecting pathways of collagen metabolism, antioxidant defense (SOD, catalase upregulation), and anti-inflammatory signaling (Pickart L et al., J Aging Sci 2015). This 12-week protocol delivers daily loading (collagen activation phase, weeks 1–6) transitioning to 3× weekly maintenance (weeks 7–12) for dermal matrix consolidation.",
+      "primary_goal": "Skin / Anti-Aging",
+      "keywords": [
+        "GHK-Cu collagen protocol",
+        "copper peptide skin rejuvenation",
+        "collagen stimulation peptide",
+        "anti-aging skin peptide",
+        "GHK-Cu protocol",
+        "dermal repair peptide protocol"
+      ],
+      "references": [
+        {
+          "pmid": "29990473",
+          "citation": "Pickart L, Margolina A. Regenerative and Protective Actions of the GHK-Cu Peptide. Biomedicines 2018;6:77."
+        },
+        {
+          "pmid": "25984600",
+          "citation": "Pickart L et al. GHK Peptide as a Natural Modulator of Multiple Cellular Pathways. J Aging Sci 2015;3:132."
+        },
+        {
+          "pmid": "4583463",
+          "citation": "Pickart L. The biological effects of the tripeptide-copper complex GHK-Cu. Biochem Biophys Res Commun 1973."
+        }
+      ],
+      "scientificName": "GHK-Cu Copper-Peptide Collagen Induction & Skin Rejuvenation Protocol",
+      "description": "12-week skin rejuvenation protocol using GHK-Cu copper tripeptide to stimulate collagen and elastin synthesis, upregulate antioxidant gene expression, and reverse dermal aging markers."
+    },
+    "variant_rules": {
+      "age_variants": {
+        "18-35": {
+          "default_duration_weeks": 8,
+          "monitoring_intensity": "standard"
+        },
+        "36-50": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "standard"
+        },
+        "51-65": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "moderate"
+        },
+        "65+": {
+          "default_duration_weeks": 16,
+          "monitoring_intensity": "enhanced"
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "special_notes": [
+            "Consider cycle-phase sensitivity if topical irritation occurs."
+          ]
+        },
+        "male": {
+          "special_notes": [
+            "Assess beard area for localized absorption differences if applied to face."
+          ]
+        }
+      },
+      "duration_variants": {
+        "8_weeks": {
+          "mode": "short"
+        },
+        "12_weeks": {
+          "mode": "standard"
+        },
+        "16_weeks": {
+          "mode": "extended"
+        }
+      },
+      "tempo_variants": {
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "tempo": {
+        "standard": {
+          "notes": "Standard tempo – no adjustment.",
+          "phase_duration_multiplier": 1
+        },
+        "accelerated": {
+          "notes": "Accelerated tempo – physician review required.",
+          "phase_duration_multiplier": 0.75
+        },
+        "extended": {
+          "notes": "Extended tempo – for slower responders.",
+          "phase_duration_multiplier": 1.33
+        }
+      }
+    },
+    "phase_blueprints": [
+      {
+        "phase_key": "collagen_activation",
+        "phase_title": "Collagen Activation",
+        "default_start_week": 1,
+        "default_duration_weeks": 6,
+        "clinical_purpose": [],
+        "drugs": [
+          {
+            "product_id": "prd_ghk_cu",
+            "product_title": "Ghk Cu",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "daily",
+              "starting_weekly_dose": 50
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_ghk_cu",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 1,
+            "event_type": "phase_start",
+            "title": "Collagen Activation"
+          }
+        ]
+      },
+      {
+        "phase_key": "maintenance",
+        "phase_title": "Maintenance",
+        "default_start_week": 7,
+        "default_duration_weeks": 6,
+        "clinical_purpose": [],
+        "drugs": [
+          {
+            "product_id": "prd_ghk_cu",
+            "product_title": "Ghk Cu",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "3x_week",
+              "starting_weekly_dose": 50
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_ghk_cu",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 7,
+            "event_type": "phase_start",
+            "title": "Maintenance"
+          }
+        ]
+      }
+    ],
+    "dosing_enrichment": {
+      "cycling_recommendation": "12-week collagen activation cycle followed by 4-week reassessment. Maintenance may continue 3x/week if skin tolerance is good.",
+      "maintenance_dose": "GHK-Cu 50 mg subcutaneous 3x/week (Mon/Wed/Fri) during maintenance phase (weeks 7–12). Loading phase (weeks 1–6): GHK-Cu 50 mg SC daily. Subcutaneous route delivers systemic GHK-Cu for dermal repair; clinician supervision required for injection administration.",
+      "timing_optimization": "Evening use is preferred for topical GHK-Cu. Avoid layering with strong acids, high-strength retinoids, or exfoliating agents in the same application window if irritation occurs.",
+      "titration_note": "Start daily for weeks 1-2 if tolerated, continue loading through week 6, then reduce to 3x/week maintenance in weeks 7-12."
+    },
+    "_last_synced_at": "2026-05-17T09:24:08.932Z",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "Adequate sleep for tissue regeneration ('beauty sleep').",
+      "nutrition": "High antioxidants, Vitamin C, collagen peptides, high water content foods.",
+      "activity": "Regular exercise to improve dermal blood flow.",
+      "hydration": "High hydration is critical for skin turgor."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:25.274Z",
+    "clinical_disclaimer": "This protocol is for educational and informational purposes only. It is not medical advice. Any decision to utilize peptide therapies should be made in consultation with a qualified healthcare professional who can review your full medical history, lab work, and potential contraindications.",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Collagen Activation",
+        "start_week": 1,
+        "end_week": 6,
+        "drugs_used": [
+          {
+            "product_slug": "ghk-cu",
+            "selected_strength": "50mg",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 2,
+            "route": "subcutaneous",
+            "weekly_dose": "1.5 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 1.5,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Maintenance",
+        "start_week": 7,
+        "end_week": 12,
+        "drugs_used": [
+          {
+            "product_slug": "ghk-cu",
+            "selected_strength": "50mg",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 2,
+            "route": "subcutaneous",
+            "weekly_dose": "1.5 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 1.5,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "eligibility_rules": {
+      "supported_goals": [
+        "skin_rejuvenation",
+        "collagen_support",
+        "dermal_repair",
+        "anti_aging_skin_support"
+      ],
+      "contraindications": [
+        "known_hypersensitivity_to_copper_peptides",
+        "active_malignant_skin_lesion",
+        "active_infection_at_application_site",
+        "pregnancy_or_breastfeeding"
+      ],
+      "relative_cautions": [
+        "rosacea",
+        "active_acne",
+        "recent_deep_peel_or_laser",
+        "very_sensitive_skin"
+      ],
+      "required_patient_inputs": [
+        "skin_type",
+        "primary_clinical_focus",
+        "sensitivity_profile",
+        "recent_procedure_history",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ],
+      "indications": [
+        "Adults aged 35+ seeking evidence-based healthspan optimization",
+        "Individuals with elevated oxidative stress or mitochondrial dysfunction markers",
+        "Patients with premature cellular aging indicators",
+        "Individuals with compromised skin integrity, fine lines, or reduced collagen",
+        "Patients seeking anti-aging support as part of integrative medicine protocols"
+      ]
+    },
+    "expected_outcomes": {
+      "0": "Improved skin elasticity",
+      "1": "Reduced fine lines",
+      "2": "Enhanced tissue repair",
+      "qualitative": [
+        "Cellular rejuvenation and reduction of biological aging biomarkers",
+        "Improved mitochondrial efficiency and oxidative stress resilience",
+        "Enhanced skin elasticity, hydration, and collagen density",
+        "Support for telomere integrity and reduced epigenetic age",
+        "Improved systemic energy and functional healthspan"
+      ]
+    }
+  },
+  {
+    "id": "skin_002",
+    "protocol_id": "skin_002",
+    "active": true,
+    "complexity_level": "moderate",
+    "confidence_score": 90,
+    "economics": {
+      "total_protocol_cost_estimate": 420,
+      "total_vials_required": 7
+    },
+    "number_of_phases": 2,
+    "overview_summary": "Ten-week skin-focused protocol using GHK-Cu as the repair anchor and Epithalon as an adjunctive anti-aging support layer.",
+    "protocol_author_title": "Peptide Specialists",
+    "protocol_duration_weeks": 10,
+    "protocol_is_curated": true,
+    "protocol_is_physician_authored": false,
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_review_status": "approved",
+    "protocol_slug": "skin-repair-aging-10w",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_source_reference": "internal_guide",
+    "protocol_source_type": "curated_library",
+    "protocol_source_version": "v5.0",
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "protocol_title": "GHK-Cu & Epithalon Cellular Repair Protocol",
+    "status": "approved",
+    "seeded_at": "2026-04-25T06:10:36.133Z",
+    "bundleVersion": "2.0",
+    "protocol_version": "v6.1",
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "legacy_compatibility": {
+      "enabled": true,
+      "notes": "Legacy simplified fields are preserved for backward compatibility while canonical phase_blueprints are used for generation.",
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ]
+    },
+    "risk_class": "low_to_moderate",
+    "physician_supervision_required": true,
+    "dosing_enrichment": {
+      "cycling_recommendation": "10-week skin repair and cellular aging cycle. Epithalon should remain pulsed rather than continuous; repeat cycles should be separated by at least 6-8 weeks.",
+      "maintenance_dose": "GHK-Cu 3x/week during maintenance. Epithalon is used as an evening pulse during the remodeling phase only unless a clinician extends the circadian-longevity component.",
+      "timing_optimization": "GHK-Cu is best used in the evening or separated from strong exfoliating actives. Epithalon is preferably administered in the evening to align with pineal/circadian biology.",
+      "titration_note": "Begin GHK-Cu daily during weeks 1-5 with Epithalon evening pulse. Weeks 6-10 continue GHK-Cu 3x/week; reassess before repeating Epithalon."
+    },
+    "monitoring_plan": {
+      "baseline_required": [
+        "standardized_photography",
+        "skin_texture_score",
+        "skin_elasticity_score",
+        "sleep_quality_if_epithalon_used",
+        "irritation_score"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "week": 5,
+          "type": "remodeling_review",
+          "measures": [
+            "photography",
+            "skin_texture_score",
+            "sleep_quality"
+          ],
+          "purpose": "Assess combined structural and cellular-aging response."
+        },
+        {
+          "week": 10,
+          "type": "maintenance_review",
+          "measures": [
+            "photography",
+            "skin_elasticity_score",
+            "patient_satisfaction_score"
+          ],
+          "purpose": "Document outcome and determine maintenance or washout."
+        }
+      ]
+    },
+    "safety_profile": {
+      "adverse_events_common": [],
+      "adverse_events_serious": [],
+      "drug_interactions": [],
+      "monitoring_required": []
+    },
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "CBC",
+          "CMP",
+          "Lipid Panel"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "CBC",
+          "CMP"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Type 1 diabetes (insulin-dependent, use with caution)",
+        "Severe renal impairment",
+        "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "_syncSource": "export/protocols/skin_002.js",
+    "_patchedAt": {
+      "schema_gap_fix": "2026-04-26T12:37:11Z"
+    },
+    "_schemaVersion": "antigravity_v2",
+    "_patchSchema": "antigravity_v2",
+    "_syncedAt": "2026-04-26T12:46:35.268Z",
+    "updated_at": "2026-05-04T14:32:21.539Z",
+    "recommended_supplements": [
+      "hyaluronic-acid",
+      "resveratrol",
+      "quercetin"
+    ],
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible",
+      "expected_outcomes: INJECTED for category \\"Skin & Aesthetics\\""
+    ],
+    "protocol_author_organization": "Atlas Health",
+    "category": "Skin & Aesthetics",
+    "syncedAt": "2026-05-16T14:32:34.376Z",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "age_variant_match",
+        "telomere_concern"
+      ],
+      "allow_acceleration": false,
+      "base_duration_weeks": 10,
+      "notes": "Default generator rules – pending clinical review.",
+      "tempo_variants": [
+        "standard"
+      ],
+      "allow_extension": false
+    },
+    "primary_goal": "Skin / Anti-Aging",
+    "metadata": {
+      "longDescription": "This protocol adds Epithalon (Ala-Glu-Asp-Gly) to the GHK-Cu backbone to create a dual-mechanism cellular skin repair strategy. GHK-Cu drives structural dermal matrix remodeling (collagen, elastin, glycosaminoglycans; see skin_001) while Epithalon acts at the epigenetic and telomeric level — stimulating telomerase in fibroblasts, reducing chromosomal instability, and modulating age-related changes in skin stem cell behaviour (Khavinson VKh et al., Bull Exp Biol Med 2003; Anisimov VN et al., Mech Ageing Dev 2003). Telomere shortening in dermal fibroblasts is a key driver of skin aging, leading to senescent fibroblast accumulation that impairs collagen synthesis and promotes MMP upregulation. Epithalon’s telomerase-activating and pineal-modulating effects complement GHK-Cu’s structural repair activity. Together, this protocol targets both the structural (ECM, collagen network) and biological (cellular senescence, telomere integrity) dimensions of skin aging. Suited for patients seeking comprehensive anti-aging skin therapy.",
+      "primary_goal": "Skin / Anti-Aging",
+      "keywords": [
+        "GHK-Cu Epithalon skin protocol",
+        "telomere skin aging peptide",
+        "epigenetic skin repair",
+        "advanced anti-aging peptide",
+        "skin longevity protocol",
+        "fibroblast senescence peptide"
+      ],
+      "references": [
+        {
+          "pmid": "29990473",
+          "citation": "Pickart L, Margolina A. Regenerative Actions of GHK-Cu. Biomedicines 2018;6:77."
+        },
+        {
+          "pmid": "12833276",
+          "citation": "Khavinson VKh et al. Epithalon peptide induces telomerase activity. Bull Exp Biol Med 2003;135:590-592."
+        },
+        {
+          "pmid": "12706490",
+          "citation": "Anisimov VN et al. Effect of Epitalon on life-span extension. Mech Ageing Dev 2003;124:721-731."
+        }
+      ],
+      "scientificName": "GHK-Cu & Epithalon Collagen–Epigenetic Cellular Skin Repair Protocol",
+      "description": "12-week advanced skin repair protocol combining GHK-Cu collagen induction and antioxidant gene activation with Epithalon telomere protection and pineal anti-aging epigenetic bioregulation."
+    },
+    "variant_rules": {
+      "age_variants": {
+        "18-35": {
+          "default_duration_weeks": 10,
+          "monitoring_intensity": "standard"
+        },
+        "36-50": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "standard"
+        },
+        "51-65": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "moderate"
+        },
+        "65+": {
+          "default_duration_weeks": 16,
+          "monitoring_intensity": "enhanced"
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "special_notes": [
+            "Epithalon may influence circadian rhythms; monitor sleep quality."
+          ]
+        },
+        "male": {
+          "special_notes": [
+            "Standard monitoring."
+          ]
+        }
+      },
+      "duration_variants": {
+        "10_weeks": {
+          "mode": "short"
+        },
+        "12_weeks": {
+          "mode": "standard"
+        },
+        "16_weeks": {
+          "mode": "extended"
+        }
+      },
+      "tempo_variants": {
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "tempo": {
+        "standard": {
+          "notes": "Standard tempo – no adjustment.",
+          "phase_duration_multiplier": 1
+        },
+        "accelerated": {
+          "notes": "Accelerated tempo – physician review required.",
+          "phase_duration_multiplier": 0.75
+        },
+        "extended": {
+          "notes": "Extended tempo – for slower responders.",
+          "phase_duration_multiplier": 1.33
+        }
+      }
+    },
+    "phase_blueprints": [
+      {
+        "phase_key": "remodeling",
+        "phase_title": "Remodeling",
+        "default_start_week": 1,
+        "default_duration_weeks": 5,
+        "clinical_purpose": [],
+        "drugs": [
+          {
+            "product_id": "prd_ghk_cu",
+            "product_title": "Ghk Cu",
+            "route": "topical_or_subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "daily",
+              "starting_weekly_dose": 50
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_ghk_cu",
+              "route": "topical_or_subcutaneous"
+            }
+          },
+          {
+            "product_id": "prd_epithalon",
+            "product_title": "Epithalon",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "daily_evening",
+              "starting_weekly_dose": 10
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_epithalon",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 1,
+            "event_type": "phase_start",
+            "title": "Remodeling"
+          }
+        ]
+      },
+      {
+        "phase_key": "maintenance",
+        "phase_title": "Maintenance",
+        "default_start_week": 6,
+        "default_duration_weeks": 5,
+        "clinical_purpose": [],
+        "drugs": [
+          {
+            "product_id": "prd_ghk_cu",
+            "product_title": "Ghk Cu",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "3x_week",
+              "starting_weekly_dose": 50
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_ghk_cu",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 6,
+            "event_type": "phase_start",
+            "title": "Maintenance"
+          }
+        ]
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.932Z",
+    "synergy_rationale": "This multi-compound protocol is designed to provide synergistic effects, targeting multiple complementary biological pathways simultaneously to achieve skin / anti-aging more effectively than monotherapy.",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "Adequate sleep for tissue regeneration ('beauty sleep').",
+      "nutrition": "High antioxidants, Vitamin C, collagen peptides, high water content foods.",
+      "activity": "Regular exercise to improve dermal blood flow.",
+      "hydration": "High hydration is critical for skin turgor."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:25.657Z",
+    "clinical_disclaimer": "This protocol is for educational and informational purposes only. It is not medical advice. Any decision to utilize peptide therapies should be made in consultation with a qualified healthcare professional who can review your full medical history, lab work, and potential contraindications.",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Remodeling",
+        "start_week": 1,
+        "end_week": 5,
+        "drugs_used": [
+          {
+            "product_slug": "ghk-cu",
+            "selected_strength": "50mg",
+            "route": "topical_or_subcutaneous",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 2,
+            "faq_ref": "ghkcu_faq",
+            "pubmed_ref": "ghkcu_pubmed",
+            "weekly_dose": "1.5 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 1.5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "epithalon",
+            "selected_strength": "10mg",
+            "dosing_frequency": "daily_evening",
+            "vials_required_for_phase": 3,
+            "faq_ref": "epithalon_faq",
+            "pubmed_ref": "epithalon_pubmed",
+            "route": "subcutaneous",
+            "weekly_dose": "35 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 35,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Maintenance",
+        "start_week": 6,
+        "end_week": 10,
+        "drugs_used": [
+          {
+            "product_slug": "ghk-cu",
+            "selected_strength": "50mg",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 2,
+            "route": "subcutaneous",
+            "weekly_dose": "1.5 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 1.5,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "eligibility_rules": {
+      "supported_goals": [
+        "skin_repair",
+        "skin_anti_aging",
+        "collagen_support",
+        "cellular_skin_longevity"
+      ],
+      "contraindications": [
+        "active_malignant_skin_lesion",
+        "pregnancy_or_breastfeeding",
+        "known_hypersensitivity_to_copper_peptides",
+        "active_infection_at_application_or_injection_site"
+      ],
+      "relative_cautions": [
+        "uncontrolled_autoimmune_skin_disease",
+        "recent_aggressive_resurfacing",
+        "sleep_disruption_sensitive_to_evening_peptides"
+      ],
+      "required_patient_inputs": [
+        "skin_type",
+        "primary_clinical_focus",
+        "recent_procedure_history",
+        "sensitivity_profile",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ],
+      "indications": [
+        "Adults aged 35+ seeking evidence-based healthspan optimization",
+        "Individuals with elevated oxidative stress or mitochondrial dysfunction markers",
+        "Patients with premature cellular aging indicators",
+        "Individuals with compromised skin integrity, fine lines, or reduced collagen",
+        "Patients seeking anti-aging support as part of integrative medicine protocols"
+      ]
+    },
+    "expected_outcomes": {
+      "0": "Improved skin elasticity",
+      "1": "Reduced fine lines",
+      "2": "Enhanced tissue repair",
+      "qualitative": [
+        "Cellular rejuvenation and reduction of biological aging biomarkers",
+        "Improved mitochondrial efficiency and oxidative stress resilience",
+        "Enhanced skin elasticity, hydration, and collagen density",
+        "Support for telomere integrity and reduced epigenetic age",
+        "Improved systemic energy and functional healthspan"
+      ]
+    }
+  },
+  {
+    "id": "skin_003",
+    "dose_unit_standard": "mg",
+    "number_of_phases": 2,
+    "protocol_is_physician_authored": false,
+    "protocol_author_title": "Peptide Specialists",
+    "_bundleCreatedAt": "2026-04-29T07:26:00+02:00",
+    "protocol_version": "v1.1",
+    "_patchSchema": "antigravity_v2",
+    "physician_supervision_required": true,
+    "canonical_enrichment": {
+      "generatedAt": "2026-04-29T07:26:00+02:00",
+      "compatibleWith": "antigravity_v2_firebase_import",
+      "auditFieldsCompleted": [
+        "eligibility_rules.indications",
+        "metadata.evidence_grade",
+        "metadata.clinical_summary",
+        "washout_recommended_weeks",
+        "expected_outcomes.qualitative",
+        "phase_blueprints",
+        "physician_supervision_required",
+        "safety_profile",
+        "monitoring_plan",
+        "dosing_enrichment"
+      ]
+    },
+    "protocol_last_reviewed_at": "2026-04-28",
+    "protocol_source_type": "curated_library",
+    "protocol_duration_weeks": 12,
+    "protocol_author_organization": "ReGen PEPT",
+    "_syncSource": "export/protocols/skin_003.js",
+    "_importBundle": "ReGen PEPT Protocol Export - Clinical Update 2026-04-29",
+    "_syncedAt": "2026-04-29T07:26:00+02:00",
+    "generated_protocol_template": {
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_timeline": [],
+      "resolved_monitoring": [],
+      "resolved_costs": {},
+      "resolved_phases": [],
+      "patient_context": {
+        "tolerance_profile": "standard",
+        "primary_clinical_focus": null,
+        "height_cm": null,
+        "duration_weeks": null,
+        "procedure_history": null,
+        "bmi": null,
+        "physician_supervision_required": true,
+        "tempo_preference": "standard",
+        "sex": null,
+        "age_group": null,
+        "skin_quality_baseline": null,
+        "metabolic_status": null,
+        "protocol_id": "skin_003",
+        "baseline_weight": null,
+        "start_date": null,
+        "patient_demographic": null,
+        "current_dermatologic_condition": null
+      },
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "tempo_variant": "standard",
+        "duration_variant": null
+      }
+    },
+    "seeded_at": "2026-04-29T07:26:00+02:00",
+    "protocol_slug": "ghkcu-bpc157-tb500-skin-regeneration",
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "overview_summary": "Two-phase dermal regeneration protocol combining GHK-Cu, BPC-157, and TB-500 to support skin texture, hydration, elasticity, collagen remodeling, microvascular repair, and post-procedure recovery.",
+    "protocol_is_curated": true,
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "phase_blueprints should be treated as the canonical source. All doses are standardized internally in mg.",
+      "enabled": true
+    },
+    "status": "requires_clinician_review",
+    "clinical_disclaimer": "For professional research and clinician review only. Not intended as individualized medical advice, diagnosis, prescription, or substitute for local regulatory compliance and physician supervision.",
+    "protocol_id": "skin_003",
+    "_schemaVersion": "antigravity_v2",
+    "protocol_source_reference": "internal_guide",
+    "complexity_level": "moderate",
+    "bundleVersion": "2.0",
+    "protocol_title": "GHK-Cu + BPC-157 + TB-500 Skin Regeneration Protocol",
+    "protocol_author_name": "ReGen PEPT Clinical Team",
+    "confidence_score": 84,
+    "active": true,
+    "washout_recommended_weeks": 4,
+    "risk_class": "moderate",
+    "protocol_source_document": "protocols.1-2.pdf",
+    "protocol_review_status": "requires_clinician_review",
+    "eligibility_rules": {
+      "contraindications": [
+        "pregnancy_or_breastfeeding",
+        "active_malignancy",
+        "active_systemic_infection",
+        "known_hypersensitivity_to_protocol_compounds",
+        "uncontrolled_autoimmune_disease",
+        "severe_bleeding_disorder",
+        "active_dermatologic_infection_at_injection_site"
+      ],
+      "indications": [
+        "skin_texture_decline",
+        "reduced_dermal_elasticity",
+        "photoaging_support",
+        "dermal_quality_optimization",
+        "post_aesthetic_procedure_recovery_support",
+        "slow_soft_tissue_recovery",
+        "collagen_support"
+      ],
+      "relative_cautions": [
+        "history_of_malignancy",
+        "immunosuppressive_medication_use",
+        "poor_wound_healing_history",
+        "recent_major_surgery",
+        "anticoagulant_or_antiplatelet_therapy",
+        "history_of_keloid_or_hypertrophic_scarring"
+      ],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "patient_demographic",
+        "age_group",
+        "start_date",
+        "skin_quality_baseline",
+        "procedure_history",
+        "current_dermatologic_condition",
+        "tolerance_profile",
+        "duration_weeks"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_goals": [
+        "skin_regeneration",
+        "dermal_quality",
+        "collagen_support",
+        "post_procedure_recovery",
+        "skin_elasticity",
+        "microvascular_support",
+        "aesthetic_recovery"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ]
+    },
+    "monitoring_plan": {
+      "baseline_required": [
+        "standardized_skin_quality_photographs",
+        "procedure_history_review",
+        "medication_review",
+        "allergy_history",
+        "infection_screen_if_indicated",
+        "pregnancy_status_if_relevant",
+        "dermatologic_condition_review",
+        "injection_site_risk_review"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "measures": [
+            "injection_site_response",
+            "skin_texture_score",
+            "hydration_score",
+            "procedure_recovery_status"
+          ],
+          "purpose": "Assess early tolerability and visible dermal response.",
+          "type": "early_tolerance_review",
+          "week": 4
+        },
+        {
+          "measures": [
+            "skin_elasticity_score",
+            "dermal_tone_score",
+            "patient_reported_skin_quality",
+            "adverse_event_screen"
+          ],
+          "purpose": "Evaluate dermal response and suitability for completion.",
+          "type": "mid_protocol_review",
+          "week": 8
+        },
+        {
+          "measures": [
+            "standardized_photographs",
+            "skin_quality_score",
+            "hydration_score",
+            "elasticity_score",
+            "patient_reported_outcome"
+          ],
+          "purpose": "Assess final dermal quality outcome and decide on washout or repeat cycle.",
+          "type": "final_outcome_review",
+          "week": 12
+        }
+      ]
+    },
+    "safety_profile": {
+      "common_side_effects": [
+        "mild_injection_site_redness_or_irritation",
+        "transient_skin_flushing",
+        "mild_bruising_at_injection_site",
+        "transient_mild_fatigue"
+      ],
+      "monitoring_triggers": [
+        "persistent_injection_site_erythema_beyond_72h",
+        "signs_of_systemic_allergic_reaction",
+        "unexpected_rapid_skin_changes",
+        "signs_of_local_infection"
+      ],
+      "serious_adverse_events": [
+        "anaphylaxis_rare",
+        "systemic_infection_risk_if_sterile_technique_not_maintained",
+        "keloid_or_hypertrophic_scarring_in_predisposed_individuals"
+      ],
+      "stopping_criteria": [
+        "confirmed_hypersensitivity_reaction",
+        "active_infection_at_or_near_injection_site",
+        "patient_request_to_discontinue",
+        "clinician_determined_unsuitability"
+      ]
+    },
+    "updated_at": "2026-05-04T14:33:04.067Z",
+    "category": "Longevity & Anti-Aging",
+    "phase_blueprints": [
+      {
+        "clinical_events": [
+          {
+            "event_type": "baseline_review",
+            "title": "Baseline skin quality and safety review",
+            "week": 1
+          },
+          {
+            "event_type": "early_response_review",
+            "title": "Early dermal response and injection-site tolerance review",
+            "week": 4
+          },
+          {
+            "event_type": "phase_transition_review",
+            "title": "Transition to dermal stabilization phase",
+            "week": 6
+          }
+        ],
+        "clinical_purpose": [
+          "activate_dermal_regeneration_pathways",
+          "support_collagen_and_elastin_remodeling",
+          "support_microvascular_repair",
+          "support_cellular_migration_and_tissue_remodeling",
+          "optimize_post_procedure_recovery_window"
+        ],
+        "default_duration_weeks": 6,
+        "default_start_week": 1,
+        "drugs": [
+          {
+            "product_id": "prd_ghkcu",
+            "product_title": "GHK-Cu",
+            "route": "subcutaneous_or_protocol_defined",
+            "frequency": "3x_week",
+            "injections_per_week": 3,
+            "dose_per_injection": 1,
+            "dose_unit": "mg",
+            "weekly_dose": 3,
+            "administration_days": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "timing_hint": "consistent_time"
+          },
+          {
+            "product_id": "prd_bpc157",
+            "product_title": "BPC-157",
+            "route": "subcutaneous",
+            "frequency": "daily",
+            "injections_per_week": 7,
+            "dose_per_injection": 0.5,
+            "dose_unit": "mg",
+            "weekly_dose": 3.5,
+            "administration_days": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "timing_hint": "consistent_daily_use"
+          },
+          {
+            "product_id": "prd_tb500",
+            "product_title": "TB-500",
+            "route": "subcutaneous",
+            "frequency": "2x_week",
+            "injections_per_week": 2,
+            "dose_per_injection": 2.5,
+            "dose_unit": "mg",
+            "weekly_dose": 5,
+            "administration_days": [
+              "Tuesday",
+              "Friday"
+            ],
+            "timing_hint": "consistent_time"
+          }
+        ],
+        "phase_key": "dermal_activation",
+        "phase_title": "Dermal Activation Phase"
+      },
+      {
+        "clinical_events": [
+          {
+            "event_type": "mid_stabilization_review",
+            "title": "Dermal quality and tolerance review",
+            "week": 8
+          },
+          {
+            "event_type": "outcome_review",
+            "title": "Final dermal quality outcome review",
+            "week": 12
+          }
+        ],
+        "clinical_purpose": [
+          "maintain_collagen_support",
+          "support_long_term_dermal_integrity",
+          "preserve_hydration_and_elasticity",
+          "reinforce_structural_tissue_repair",
+          "consolidate_visible_skin_quality_response"
+        ],
+        "default_duration_weeks": 6,
+        "default_start_week": 7,
+        "drugs": [
+          {
+            "product_id": "prd_ghkcu",
+            "product_title": "GHK-Cu",
+            "route": "subcutaneous_or_protocol_defined",
+            "frequency": "2x_week",
+            "injections_per_week": 2,
+            "dose_per_injection": 1,
+            "dose_unit": "mg",
+            "weekly_dose": 2,
+            "administration_days": [
+              "Monday",
+              "Thursday"
+            ],
+            "timing_hint": "consistent_time"
+          },
+          {
+            "product_id": "prd_bpc157",
+            "product_title": "BPC-157",
+            "route": "subcutaneous",
+            "frequency": "3x_week",
+            "injections_per_week": 3,
+            "dose_per_injection": 0.5,
+            "dose_unit": "mg",
+            "weekly_dose": 1.5,
+            "administration_days": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "timing_hint": "consistent_time"
+          },
+          {
+            "product_id": "prd_tb500",
+            "product_title": "TB-500",
+            "route": "subcutaneous",
+            "frequency": "1x_week",
+            "injections_per_week": 1,
+            "dose_per_injection": 2,
+            "dose_unit": "mg",
+            "weekly_dose": 2,
+            "administration_days": [
+              "Wednesday"
+            ],
+            "timing_hint": "consistent_weekly_use"
+          }
+        ],
+        "phase_key": "dermal_stabilization",
+        "phase_title": "Dermal Stabilization Phase"
+      }
+    ],
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Dermal Activation Phase",
+        "start_week": 1,
+        "end_week": 6,
+        "drugs_used": [
+          {
+            "product_slug": "ghk-cu",
+            "selected_strength": "50mg",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 2,
+            "route": "subcutaneous_or_protocol_defined",
+            "weekly_dose": "3 mg",
+            "weekly_dose_amount": 3,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "bpc-157",
+            "selected_strength": "5mg",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 5,
+            "route": "subcutaneous",
+            "weekly_dose": "3.5 mg",
+            "weekly_dose_amount": 3.5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "tb-500",
+            "selected_strength": "5mg",
+            "dosing_frequency": "2x_week",
+            "vials_required_for_phase": 2,
+            "route": "subcutaneous",
+            "weekly_dose": "5 mg",
+            "weekly_dose_amount": 5,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Dermal Stabilization Phase",
+        "start_week": 7,
+        "end_week": 12,
+        "drugs_used": [
+          {
+            "product_slug": "ghk-cu",
+            "selected_strength": "50mg",
+            "dosing_frequency": "2x_week",
+            "vials_required_for_phase": 2,
+            "route": "subcutaneous_or_protocol_defined",
+            "weekly_dose": "2 mg",
+            "weekly_dose_amount": 2,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "bpc-157",
+            "selected_strength": "5mg",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 2,
+            "route": "subcutaneous",
+            "weekly_dose": "1.5 mg",
+            "weekly_dose_amount": 1.5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "tb-500",
+            "selected_strength": "5mg",
+            "dosing_frequency": "1x_week",
+            "vials_required_for_phase": 1,
+            "route": "subcutaneous",
+            "weekly_dose": "2 mg",
+            "weekly_dose_amount": 2,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "recommended_supplements": [
+      {
+        "dosage": "1 g",
+        "name": "Vitamin C",
+        "rationale": "Collagen hydroxylation cofactor essential for GHK-Cu + BPC-157 skin matrix rebuild",
+        "dosage_amount": 1,
+        "dosage_unit": "g"
+      },
+      {
+        "dosage": "10 g",
+        "name": "Collagen Peptides",
+        "rationale": "Structural substrate for triple peptide skin regeneration stack",
+        "dosage_amount": 10,
+        "dosage_unit": "g"
+      },
+      {
+        "dosage": "30 mg",
+        "name": "Zinc",
+        "rationale": "Metalloprotein cofactor for fibroblast activation and wound repair",
+        "dosage_amount": 30,
+        "dosage_unit": "mg"
+      },
+      {
+        "dosage": "2 g",
+        "name": "Omega-3 Fatty Acids",
+        "rationale": "Anti-inflammatory support for skin barrier restoration and sebum balance",
+        "dosage_amount": 2,
+        "dosage_unit": "g"
+      }
+    ],
+    "primary_goal": "Skin / Anti-Aging",
+    "metadata": {
+      "scientificName": "GHK-Cu + BPC-157 + TB-500 Dermal Collagen & Microvascular Regeneration Protocol",
+      "primary_goal": "Skin / Anti-Aging"
+    },
+    "expected_outcomes": {
+      "0": "Improved skin texture, tone, and radiance",
+      "1": "Increased dermal elasticity and collagen density",
+      "2": "Improved hydration score and moisture barrier",
+      "3": "Accelerated post-procedure recovery and healing",
+      "4": "Reduced visibility of fine lines and wrinkles",
+      "qualitative": [
+        "Cellular rejuvenation and reduction of biological aging biomarkers",
+        "Improved mitochondrial efficiency and oxidative stress resilience",
+        "Enhanced skin elasticity, hydration, and collagen density",
+        "Support for telomere integrity and reduced epigenetic age",
+        "Improved systemic energy and functional healthspan"
+      ]
+    },
+    "dosing_enrichment": {
+      "timing_optimization": "Administer GHK-Cu topically or subcutaneously in the evening to align with nocturnal skin repair cycles. Administer BPC-157 and TB-500 in the morning to optimize systemic microvascular support and anti-inflammatory pathways throughout the day.",
+      "cycling_recommendation": "8 weeks active cycle followed by 4 weeks washout to prevent potential receptor downregulation and allow for assessment of dermal remodeling progress.",
+      "washout_guidance": "Minimum 4-week washout before repeat cycle. Clinical reassessment required before reinitiation.",
+      "total_protocol_duration_weeks": 12,
+      "dose_rationale": "GHK-Cu dosing targets dermal copper-dependent signaling for collagen and elastin upregulation. BPC-157 supports angiogenesis and tissue repair via growth factor modulation. TB-500 promotes cell migration and structural repair via actin-binding mechanisms.",
+      "dose_adjustment_notes": "Reduce GHK-Cu to 0.5mg if injection-site irritation persists. BPC-157 daily dose may be reduced to alternate-day in sensitive individuals. TB-500 dose may be maintained or tapered based on clinical response."
+    },
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "CBC with differential",
+          "CMP",
+          "CRP-hs",
+          "ESR",
+          "IGF-1",
+          "Dermatological baseline imaging"
+        ]
+      },
+      {
+        "week": 8,
+        "labs": [
+          "CBC with differential",
+          "CMP",
+          "CRP-hs",
+          "IGF-1",
+          "Dermatological follow-up imaging"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Active malignancy or history of aggressive cancers",
+        "Known hypersensitivity to synthetic peptides",
+        "Uncontrolled hypertension",
+        "Pregnancy or breastfeeding",
+        "Autoimmune conditions currently in an active flare",
+        "Recent history of organ transplant due to potential immune modulation"
+      ]
+    }
+  },
+  {
+    "id": "sleep_001",
+    "protocol_id": "sleep_001",
+    "active": true,
+    "confidence_score": 88,
+    "number_of_phases": 2,
+    "protocol_author_title": "Peptide Specialists",
+    "protocol_duration_weeks": 8,
+    "protocol_is_curated": true,
+    "protocol_is_physician_authored": false,
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_review_status": "approved",
+    "protocol_slug": "sleep-restoration-8w",
+    "protocol_source_type": "curated_library",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "overview_summary": "Protocol designed to improve sleep architecture, reduce stress activation, and support circadian recovery.",
+    "protocol_source_version": "v5.0",
+    "economics": {
+      "total_protocol_cost_estimate": 450,
+      "total_vials_required": 8
+    },
+    "complexity_level": "moderate",
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "protocol_source_reference": "internal_guide",
+    "protocol_title": "DSIP & Selank Sleep Restoration Protocol",
+    "status": "approved",
+    "seeded_at": "2026-04-25T06:10:36.132Z",
+    "bundleVersion": "2.0",
+    "protocol_version": "v6.1",
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "legacy_compatibility": {
+      "enabled": true,
+      "notes": "Legacy simplified fields are preserved for backward compatibility while canonical phase_blueprints are used for generation.",
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ]
+    },
+    "risk_class": "low_to_moderate",
+    "physician_supervision_required": false,
+    "dosing_enrichment": {
+      "cycling_recommendation": "8-week sleep restoration cycle followed by reassessment. Avoid continuous DSIP use beyond 8-10 weeks without sleep-quality review.",
+      "maintenance_dose": "DSIP 3x/week evening during stabilization. Selank may be tapered or reserved for stress-driven sleep onset issues.",
+      "timing_optimization": "DSIP should be administered in the evening, ideally 30-60 minutes before intended sleep time. Selank is best used earlier in the evening or late afternoon if anxiety-driven sleep onset is present.",
+      "titration_note": "Weeks 1-2: introduce DSIP evening dosing and assess morning grogginess. Weeks 3-4: continue if sleep latency improves. Weeks 5-8: reduce DSIP to 3x/week stabilization."
+    },
+    "monitoring_plan": {
+      "baseline_required": [
+        "sleep_latency",
+        "total_sleep_time",
+        "sleep_fragmentation",
+        "daytime_sleepiness_score",
+        "GAD-7_or_stress_score"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "week": 4,
+          "type": "sleep_initiation_review",
+          "measures": [
+            "sleep_latency",
+            "sleep_quality",
+            "daytime_sleepiness"
+          ],
+          "purpose": "Assess early sleep initiation and tolerance."
+        },
+        {
+          "week": 8,
+          "type": "sleep_stabilization_review",
+          "measures": [
+            "sleep_fragmentation",
+            "total_sleep_time",
+            "daytime_energy"
+          ],
+          "purpose": "Evaluate sustained sleep architecture and stabilization response."
+        }
+      ]
+    },
+    "safety_profile": {
+      "adverse_events_common": [],
+      "adverse_events_serious": [],
+      "drug_interactions": [],
+      "monitoring_required": []
+    },
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "CBC",
+          "CMP",
+          "Lipid Panel"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "CBC",
+          "CMP"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Type 1 diabetes (insulin-dependent, use with caution)",
+        "Severe renal impairment",
+        "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "_syncSource": "export/protocols/sleep_001.js",
+    "_patchedAt": {
+      "schema_gap_fix": "2026-04-26T12:37:11Z"
+    },
+    "_schemaVersion": "antigravity_v2",
+    "_patchSchema": "antigravity_v2",
+    "_syncedAt": "2026-04-26T12:46:36.931Z",
+    "updated_at": "2026-05-04T15:06:50.088Z",
+    "protocol_author_organization": "Atlas Health",
+    "recommended_supplements": [
+      "magnesium-threonate",
+      "ashwagandha",
+      "melatonin"
+    ],
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible",
+      "expected_outcomes: INJECTED for category \\"Sleep & Recovery\\""
+    ],
+    "category": "Sleep & Recovery",
+    "syncedAt": "2026-05-16T14:32:32.192Z",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "sleep_score_match",
+        "stress_level_match"
+      ],
+      "allow_acceleration": false,
+      "base_duration_weeks": 8,
+      "notes": "Default generator rules – pending clinical review.",
+      "tempo_variants": [
+        "standard"
+      ],
+      "allow_extension": false
+    },
+    "primary_goal": "Sleep Support",
+    "metadata": {
+      "longDescription": "DSIP (Delta Sleep-Inducing Peptide; Trp-Ala-Gly-Gly-Asp-Ala-Ser-Gly-Glu) is a nonapeptide first isolated from rabbit cerebral venous blood in 1977. It promotes delta (slow-wave) sleep by modulating hypothalamic-pituitary signaling, inhibiting somatostatin release, and modulating the GABA/glutamate balance in thalamic and cortical circuits (Schoenenberger GA & Monnier M, PNAS 1977; Seifritz E et al., Neuropsychopharmacology 1995). DSIP also exhibits anti-stress, antioxidant, and adaptogenic properties, normalising circadian ACTH and cortisol rhythms disrupted in chronic insomnia. Selank (tuftsin analogue) potentiates GABAergic inhibition and reduces CRF-mediated HPA hyperactivation — the dominant driver of sleep-onset insomnia and cortisol-mediated early waking (Semenova TP et al., Bull Exp Biol Med 2010). The 8-week protocol delivers dual-compound induction (weeks 1–4) followed by DSIP-only stabilisation (weeks 5–8), targeting sleep architecture normalisation rather than pharmacological sedation.",
+      "primary_goal": "Sleep Support",
+      "keywords": [
+        "DSIP sleep peptide protocol",
+        "Selank anxiolytic sleep",
+        "delta wave sleep peptide",
+        "cortisol insomnia protocol",
+        "sleep architecture restoration",
+        "peptide insomnia treatment"
+      ],
+      "references": [
+        {
+          "pmid": "267943",
+          "citation": "Schoenenberger GA, Monnier M. Characterization of DSIP. PNAS 1977;74:1282-1286."
+        },
+        {
+          "pmid": "8529972",
+          "citation": "Seifritz E et al. DSIP effects on nocturnal cortisol. Neuropsychopharmacology 1995;13:327-335."
+        },
+        {
+          "pmid": "20737030",
+          "citation": "Semenova TP et al. Selank anxiolytic effects. Bull Exp Biol Med 2010;150:65-67."
+        }
+      ],
+      "scientificName": "DSIP & Selank Delta-Sleep-Inducing & GABAergic Anxiolytic Sleep Restoration Protocol",
+      "description": "8-week sleep restoration protocol combining DSIP delta-wave sleep induction with Selank GABAergic anxiolysis to rebuild healthy sleep architecture and reduce cortisol-driven insomnia."
+    },
+    "variant_rules": {
+      "age_variants": {
+        "18-35": {
+          "default_duration_weeks": 8,
+          "monitoring_intensity": "standard"
+        },
+        "36-50": {
+          "default_duration_weeks": 8,
+          "monitoring_intensity": "standard"
+        },
+        "51-65": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "moderate"
+        },
+        "65+": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "enhanced"
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "special_notes": [
+            "Assess potential influence on hormonal cycle and morning alertness."
+          ]
+        },
+        "male": {
+          "special_notes": [
+            "Standard sleep architecture assessment."
+          ]
+        }
+      },
+      "duration_variants": {
+        "8_weeks": {
+          "mode": "standard"
+        },
+        "12_weeks": {
+          "mode": "extended"
+        }
+      },
+      "tempo_variants": {
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "tempo": {
+        "standard": {
+          "notes": "Standard tempo – no adjustment.",
+          "phase_duration_multiplier": 1
+        },
+        "accelerated": {
+          "notes": "Accelerated tempo – physician review required.",
+          "phase_duration_multiplier": 0.75
+        },
+        "extended": {
+          "notes": "Extended tempo – for slower responders.",
+          "phase_duration_multiplier": 1.33
+        }
+      }
+    },
+    "phase_blueprints": [
+      {
+        "phase_key": "sleep_initiation_phase",
+        "phase_title": "Sleep Initiation Phase",
+        "default_start_week": 1,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [],
+        "drugs": [
+          {
+            "product_id": "prd_dsip",
+            "product_title": "Dsip",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "daily_evening",
+              "starting_weekly_dose": 5
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_dsip",
+              "route": "subcutaneous"
+            }
+          },
+          {
+            "product_id": "prd_selank",
+            "product_title": "Selank",
+            "route": "intranasal",
+            "dose_logic": {
+              "dose_unit": "mcg",
+              "administration_frequency": "daily"
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_selank",
+              "route": "intranasal"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 1,
+            "event_type": "phase_start",
+            "title": "Sleep Initiation Phase"
+          }
+        ]
+      },
+      {
+        "phase_key": "sleep_stabilization",
+        "phase_title": "Sleep Stabilization",
+        "default_start_week": 5,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [],
+        "drugs": [
+          {
+            "product_id": "prd_dsip",
+            "product_title": "Dsip",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "3x_week",
+              "starting_weekly_dose": 5
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_dsip",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 5,
+            "event_type": "phase_start",
+            "title": "Sleep Stabilization"
+          }
+        ]
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.933Z",
+    "synergy_rationale": "DSIP induces deep, restorative delta-wave sleep. However, high cortisol can prevent sleep onset. Selank is used concurrently to lower CRF-driven HPA hyperactivation (cortisol), allowing DSIP to effectively initiate and maintain deep sleep.",
+    "clinical_timeline": [
+      {
+        "phase": "Weeks 1-2",
+        "expected": "Easier transition to sleep. Reduction in racing thoughts at night."
+      },
+      {
+        "phase": "Weeks 3-5",
+        "expected": "Fewer awakenings. Feeling more rested upon waking."
+      },
+      {
+        "phase": "Weeks 6-8",
+        "expected": "Normalized circadian rhythm. Deep sleep architecture restored."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "Cold room (18°C), blackout curtains, no blue light 1 hour prior.",
+      "nutrition": "Avoid heavy meals 3 hours before bed. Limit evening carbohydrates.",
+      "activity": "Morning sunlight exposure. Avoid intense workouts late evening.",
+      "hydration": "Limit fluids 2 hours before bed."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:26.547Z",
+    "clinical_disclaimer": "This protocol is for educational and informational purposes only. It is not medical advice. Any decision to utilize peptide therapies should be made in consultation with a qualified healthcare professional who can review your full medical history, lab work, and potential contraindications.",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Sleep Initiation Phase",
+        "start_week": 1,
+        "end_week": 4,
+        "drugs_used": [
+          {
+            "product_slug": "dsip",
+            "selected_strength": "5mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "daily_evening",
+            "vials_required_for_phase": 4,
+            "faq_ref": "dsip_faq",
+            "pubmed_ref": "dsip_pubmed",
+            "weekly_dose": "2.1 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 2.1,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "selank",
+            "selected_strength": "nasal",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 2,
+            "route": "intranasal",
+            "weekly_dose": "1750 mcg",
+            "weekly_dose_amount": 1750,
+            "weekly_dose_unit": "mcg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Sleep Stabilization",
+        "start_week": 5,
+        "end_week": 8,
+        "drugs_used": [
+          {
+            "product_slug": "dsip",
+            "selected_strength": "5mg",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 2,
+            "route": "subcutaneous",
+            "weekly_dose": "2.1 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 2.1,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "eligibility_rules": {
+      "supported_goals": [
+        "sleep_support",
+        "sleep_architecture",
+        "stress_related_sleep_disruption",
+        "sleep_onset_support"
+      ],
+      "contraindications": [
+        "untreated_sleep_apnea",
+        "severe_respiratory_insufficiency",
+        "pregnancy_or_breastfeeding",
+        "active_substance_use_disorder",
+        "known_hypersensitivity_to_protocol_compounds"
+      ],
+      "relative_cautions": [
+        "sedative_hypnotic_use",
+        "shift_work_schedule",
+        "severe_depression",
+        "bipolar_disorder",
+        "morning_sedation_sensitivity"
+      ],
+      "required_patient_inputs": [
+        "sleep_problem_type",
+        "sleep_schedule",
+        "current_sleep_medications",
+        "stress_load",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ],
+      "indications": [
+        "Adults with insomnia, difficulty falling asleep, or poor sleep quality",
+        "Individuals with circadian rhythm disorders (shift work, jet lag)",
+        "Patients with high cortisol or chronic stress impacting sleep architecture",
+        "Adults experiencing non-restorative sleep with daytime fatigue",
+        "Individuals with HPA axis dysregulation affecting nocturnal recovery"
+      ]
+    },
+    "expected_outcomes": {
+      "0": "Faster sleep onset",
+      "1": "Increased duration of deep (delta) sleep",
+      "2": "Reduced nighttime awakenings",
+      "3": "Lowered evening cortisol levels",
+      "qualitative": [
+        "Improved sleep onset latency and total sleep duration",
+        "Enhancement of deep (slow-wave) sleep phases",
+        "Reduction in nocturnal cortisol and improved HPA axis balance",
+        "Normalized circadian rhythm and consistent sleep architecture",
+        "Reduced daytime fatigue and improved morning cognitive readiness"
+      ]
+    }
+  },
+  {
+    "id": "sleep_002",
+    "protocol_id": "sleep_002",
+    "active": true,
+    "economics": {
+      "total_protocol_cost_estimate": 290,
+      "total_vials_required": 8
+    },
+    "number_of_phases": 2,
+    "protocol_author_title": "Peptide Specialists",
+    "protocol_duration_weeks": 6,
+    "protocol_is_curated": true,
+    "protocol_is_physician_authored": false,
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_review_status": "approved",
+    "protocol_slug": "sleep-circadian-6w",
+    "protocol_source_type": "curated_library",
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "overview_summary": "Six-week sleep-support protocol centered on DSIP with Epithalon added to reinforce circadian and nocturnal rhythm support.",
+    "protocol_source_version": "v5.0",
+    "complexity_level": "simple",
+    "confidence_score": 86,
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "protocol_source_reference": "internal_guide",
+    "protocol_title": "DSIP & Epithalon Circadian Sleep Protocol",
+    "status": "approved",
+    "seeded_at": "2026-04-25T06:10:36.133Z",
+    "bundleVersion": "2.0",
+    "protocol_version": "v6.1",
+    "generated_protocol_template": {
+      "patient_context": {
+        "primary_clinical_focus": null,
+        "tempo_preference": "standard",
+        "age_group": null,
+        "patient_demographic": null,
+        "duration_weeks": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "legacy_compatibility": {
+      "enabled": true,
+      "notes": "Legacy simplified fields are preserved for backward compatibility while canonical phase_blueprints are used for generation.",
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ]
+    },
+    "risk_class": "low_to_moderate",
+    "physician_supervision_required": false,
+    "dosing_enrichment": {
+      "cycling_recommendation": "6-week circadian reset cycle. Epithalon is best used as a short evening pulse; repeat only after 6-8 week reassessment.",
+      "maintenance_dose": "DSIP 3x/week evening in weeks 4-6. Epithalon is generally discontinued after the reset phase unless circadian misalignment persists under clinician guidance.",
+      "timing_optimization": "DSIP and Epithalon should be administered in the evening. Pair with fixed wake time, morning light exposure, and reduced late-night blue light for best effect.",
+      "titration_note": "Weeks 1-3: DSIP + Epithalon evening reset. Weeks 4-6: DSIP 3x/week consolidation while maintaining behavioral circadian anchors."
+    },
+    "monitoring_plan": {
+      "baseline_required": [
+        "sleep_latency",
+        "wake_time_consistency",
+        "sleep_timing",
+        "sleep_fragmentation",
+        "morning_energy_score"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "week": 3,
+          "type": "circadian_reset_review",
+          "measures": [
+            "sleep_latency",
+            "wake_time_consistency",
+            "morning_energy"
+          ],
+          "purpose": "Assess early circadian alignment response."
+        },
+        {
+          "week": 6,
+          "type": "consolidation_review",
+          "measures": [
+            "sleep_timing",
+            "sleep_quality",
+            "daytime_energy"
+          ],
+          "purpose": "Determine if circadian support should stop, repeat later, or transition to maintenance."
+        }
+      ]
+    },
+    "safety_profile": {
+      "adverse_events_common": [],
+      "adverse_events_serious": [],
+      "drug_interactions": [],
+      "monitoring_required": []
+    },
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "CBC",
+          "CMP",
+          "Lipid Panel"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "CBC",
+          "CMP"
+        ]
+      }
+    ],
+    "riskManagement": {
+      "contraindications": [
+        "Type 1 diabetes (insulin-dependent, use with caution)",
+        "Severe renal impairment",
+        "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ]
+    },
+    "_syncSource": "export/protocols/sleep_002.js",
+    "_patchedAt": {
+      "schema_gap_fix": "2026-04-26T12:37:11Z"
+    },
+    "_schemaVersion": "antigravity_v2",
+    "_patchSchema": "antigravity_v2",
+    "_syncedAt": "2026-04-26T12:46:37.159Z",
+    "updated_at": "2026-05-04T15:06:50.088Z",
+    "protocol_author_organization": "Atlas Health",
+    "recommended_supplements": [
+      "magnesium-threonate",
+      "l-theanine",
+      "ashwagandha"
+    ],
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible",
+      "expected_outcomes: INJECTED for category \\"Sleep & Recovery\\""
+    ],
+    "category": "Sleep & Recovery",
+    "syncedAt": "2026-05-16T14:32:33.996Z",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "age_variant_match",
+        "circadian_rhythm_match"
+      ],
+      "allow_acceleration": false,
+      "base_duration_weeks": 6,
+      "notes": "Default generator rules – pending clinical review.",
+      "tempo_variants": [
+        "standard"
+      ],
+      "allow_extension": false
+    },
+    "primary_goal": "Sleep Support",
+    "metadata": {
+      "longDescription": "This protocol combines DSIP (delta-wave sleep promotion and cortisol normalisation; see sleep_001) with Epithalon (Ala-Glu-Asp-Gly), a tetrapeptide bioregulator with documented effects on pineal melatonin synthesis and circadian gene expression. Epithalon stimulates melatonin secretion by the pineal gland and upregulates BMAL1 and CLOCK circadian transcription factors, which decline with age and are the primary molecular drivers of circadian amplitude loss and age-associated sleep disruption (Khavinson V et al., Adv Gerontol 2012; Anisimov VN et al., Mech Ageing Dev 2003). The combination targets both the neurotransmitter (GABA, delta-sleep) and the chronobiological (melatonin, circadian gene) dimensions of sleep regulation. Suited for age-related sleep disruption, shift workers, and patients with circadian misalignment. The 10-week structure allows Epithalon to produce progressive circadian recalibration while DSIP addresses acute sleep quality.",
+      "primary_goal": "Sleep Support",
+      "keywords": [
+        "DSIP Epithalon sleep protocol",
+        "circadian rhythm restoration peptide",
+        "melatonin peptide protocol",
+        "BMAL1 circadian peptide",
+        "sleep longevity protocol",
+        "Epithalon sleep support"
+      ],
+      "references": [
+        {
+          "pmid": "22497573",
+          "citation": "Khavinson V et al. Epithalon and melatonin in circadian regulation. Adv Gerontol 2012;25:27-33."
+        },
+        {
+          "pmid": "12706490",
+          "citation": "Anisimov VN et al. Effect of Epitalon on biomarkers of aging. Mech Ageing Dev 2003;124:721-731."
+        },
+        {
+          "pmid": "267943",
+          "citation": "Schoenenberger GA, Monnier M. Characterization of DSIP. PNAS 1977;74:1282-1286."
+        }
+      ],
+      "scientificName": "DSIP & Epithalon Circadian Rhythm & Telomere-Protective Sleep Protocol",
+      "description": "10-week circadian sleep protocol combining DSIP delta-wave induction with Epithalon pineal-melatonin and BMAL1 circadian gene restoration for sleep quality and longevity-oriented benefits."
+    },
+    "variant_rules": {
+      "age_variants": {
+        "18-35": {
+          "default_duration_weeks": 6,
+          "monitoring_intensity": "standard"
+        },
+        "36-50": {
+          "default_duration_weeks": 8,
+          "monitoring_intensity": "standard"
+        },
+        "51-65": {
+          "default_duration_weeks": 10,
+          "monitoring_intensity": "moderate"
+        },
+        "65+": {
+          "default_duration_weeks": 12,
+          "monitoring_intensity": "enhanced"
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "special_notes": [
+            "Monitor melatonin sensitivity and circadian shift."
+          ]
+        },
+        "male": {
+          "special_notes": [
+            "Standard circadian assessment."
+          ]
+        }
+      },
+      "duration_variants": {
+        "6_weeks": {
+          "mode": "short"
+        },
+        "8_weeks": {
+          "mode": "standard"
+        },
+        "10_weeks": {
+          "mode": "extended"
+        }
+      },
+      "tempo_variants": {
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "tempo": {
+        "standard": {
+          "notes": "Standard tempo – no adjustment.",
+          "phase_duration_multiplier": 1
+        },
+        "accelerated": {
+          "notes": "Accelerated tempo – physician review required.",
+          "phase_duration_multiplier": 0.75
+        },
+        "extended": {
+          "notes": "Extended tempo – for slower responders.",
+          "phase_duration_multiplier": 1.33
+        }
+      }
+    },
+    "phase_blueprints": [
+      {
+        "phase_key": "sleep_reset",
+        "phase_title": "Sleep Reset",
+        "default_start_week": 1,
+        "default_duration_weeks": 3,
+        "clinical_purpose": [],
+        "drugs": [
+          {
+            "product_id": "prd_dsip",
+            "product_title": "Dsip",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "daily_evening",
+              "starting_weekly_dose": 5
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_dsip",
+              "route": "subcutaneous"
+            }
+          },
+          {
+            "product_id": "prd_epithalon",
+            "product_title": "Epithalon",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "daily_evening",
+              "starting_weekly_dose": 10
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_epithalon",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 1,
+            "event_type": "phase_start",
+            "title": "Sleep Reset"
+          }
+        ]
+      },
+      {
+        "phase_key": "sleep_consolidation",
+        "phase_title": "Sleep Consolidation",
+        "default_start_week": 4,
+        "default_duration_weeks": 3,
+        "clinical_purpose": [],
+        "drugs": [
+          {
+            "product_id": "prd_dsip",
+            "product_title": "Dsip",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "3x_week_evening",
+              "starting_weekly_dose": 5
+            },
+            "variantRef": {
+              "type": "resolved",
+              "productId": "prd_dsip",
+              "route": "subcutaneous"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 4,
+            "event_type": "phase_start",
+            "title": "Sleep Consolidation"
+          }
+        ]
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.933Z",
+    "synergy_rationale": "This multi-compound protocol is designed to provide synergistic effects, targeting multiple complementary biological pathways simultaneously to achieve sleep support more effectively than monotherapy.",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "Cold room (18°C), blackout curtains, no blue light 1 hour prior.",
+      "nutrition": "Avoid heavy meals 3 hours before bed. Limit evening carbohydrates.",
+      "activity": "Morning sunlight exposure. Avoid intense workouts late evening.",
+      "hydration": "Limit fluids 2 hours before bed."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:26.042Z",
+    "clinical_disclaimer": "This protocol is for educational and informational purposes only. It is not medical advice. Any decision to utilize peptide therapies should be made in consultation with a qualified healthcare professional who can review your full medical history, lab work, and potential contraindications.",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Sleep Reset",
+        "start_week": 1,
+        "end_week": 3,
+        "drugs_used": [
+          {
+            "product_slug": "dsip",
+            "selected_strength": "5mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "daily_evening",
+            "vials_required_for_phase": 3,
+            "faq_ref": "dsip_faq",
+            "pubmed_ref": "dsip_pubmed",
+            "weekly_dose": "2.1 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 2.1,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "epithalon",
+            "selected_strength": "10mg",
+            "dosing_frequency": "daily_evening",
+            "vials_required_for_phase": 3,
+            "faq_ref": "epithalon_faq",
+            "pubmed_ref": "epithalon_pubmed",
+            "route": "subcutaneous",
+            "weekly_dose": "35 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 35,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Sleep Consolidation",
+        "start_week": 4,
+        "end_week": 6,
+        "drugs_used": [
+          {
+            "product_slug": "dsip",
+            "selected_strength": "5mg",
+            "dosing_frequency": "3x_week_evening",
+            "vials_required_for_phase": 2,
+            "route": "subcutaneous",
+            "weekly_dose": "2.1 mg",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 2.1,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "eligibility_rules": {
+      "supported_goals": [
+        "circadian_support",
+        "sleep_timing_support",
+        "sleep_quality",
+        "recovery_rhythm_support"
+      ],
+      "contraindications": [
+        "untreated_sleep_apnea",
+        "pregnancy_or_breastfeeding",
+        "active_malignancy",
+        "severe_hepatic_or_renal_impairment",
+        "known_hypersensitivity_to_protocol_compounds"
+      ],
+      "relative_cautions": [
+        "bipolar_disorder",
+        "shift_work_instability",
+        "sedative_hypnotic_use",
+        "severe_depression"
+      ],
+      "required_patient_inputs": [
+        "sleep_schedule",
+        "wake_time_target",
+        "light_exposure_pattern",
+        "current_sleep_medications",
+        "start_date"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ],
+      "indications": [
+        "Adults with insomnia, difficulty falling asleep, or poor sleep quality",
+        "Individuals with circadian rhythm disorders (shift work, jet lag)",
+        "Patients with high cortisol or chronic stress impacting sleep architecture",
+        "Adults experiencing non-restorative sleep with daytime fatigue",
+        "Individuals with HPA axis dysregulation affecting nocturnal recovery"
+      ]
+    },
+    "expected_outcomes": {
+      "0": "Improved sleep architecture",
+      "1": "Faster sleep onset",
+      "2": "Better recovery",
+      "qualitative": [
+        "Improved sleep onset latency and total sleep duration",
+        "Enhancement of deep (slow-wave) sleep phases",
+        "Reduction in nocturnal cortisol and improved HPA axis balance",
+        "Normalized circadian rhythm and consistent sleep architecture",
+        "Reduced daytime fatigue and improved morning cognitive readiness"
+      ]
+    }
+  },
+  {
+    "id": "wm_001",
+    "active": true,
+    "bundleVersion": "2.0",
+    "number_of_phases": 3,
+    "physician_supervision_required": true,
+    "protocol_duration_weeks": 12,
+    "protocol_id": "wm_001",
+    "protocol_is_curated": true,
+    "washout_recommended_weeks": 4,
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_is_physician_authored": false,
+    "seeded_at": "2026-04-25T06:10:36.124Z",
+    "protocol_source_version": "v5.0",
+    "schema_version": "antigravity_v2",
+    "generator_rules": {
+      "tolerance_profiles": {
+        "average": {
+          "max_intensity": "standard"
+        },
+        "sensitive": {
+          "max_intensity": "conservative"
+        },
+        "good": {
+          "max_intensity": "aggressive"
+        }
+      },
+      "selection_priority": [
+        "goal_match",
+        "age_variant_match",
+        "sex_variant_match",
+        "duration_variant_match",
+        "contraindication_screen",
+        "tolerance_profile"
+      ]
+    },
+    "dosing_enrichment": {
+      "titration_note": "Start at 0.25 mg/week subcutaneous for weeks 1-4. Increase to 0.5 mg/week weeks 5-8; 1.0 mg/week weeks 9-12; 1.7 mg/week weeks 13-16; 2.4 mg/week from week 17. Slow titration minimizes GI adverse events.",
+      "cycling_recommendation": "Semaglutide is intended for continuous use, not cycling. Discontinuation leads to weight regain (~6.9% over 1 year per STEP 4). Maintenance dose should be sustained indefinitely if tolerated.",
+      "maintenance_dose": "2.4 mg subcutaneous once weekly (target dose). Compounded versions may use equivalent weekly dose via subcutaneous or oral routes.",
+      "timing_optimization": "Administer once weekly on same day each week. May be taken at any time of day. Morning administration preferred for consistency. No food requirement."
+    },
+    "complexity_level": "standard",
+    "normalizedAt": "2026-04-26T11:19:08.124Z",
+    "generated_protocol_template": {
+      "patient_context": {
+        "age_group": null,
+        "baseline_weight": null,
+        "duration_weeks": null,
+        "height_cm": null,
+        "metabolic_status": null,
+        "patient_demographic": null,
+        "physician_supervision_required": true,
+        "primary_clinical_focus": null,
+        "protocol_id": "wm_001",
+        "sex": null,
+        "tempo_preference": "standard",
+        "tolerance_profile": "average",
+        "bmi": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_group": "adult",
+        "duration_weeks": 12,
+        "intensity": "standard",
+        "sex": "universal",
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "validated_at": null,
+        "validated_by": null,
+        "validation_notes": "Auto-generated template. Pending clinical review.",
+        "validation_status": "NOT_EVALUATED",
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_source_reference": "internal_guide",
+    "riskManagement": {
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "contraindications": [
+        "Type 1 diabetes (insulin-dependent, use with caution)",
+        "Severe renal impairment",
+        "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ]
+    },
+    "protocol_review_status": "approved",
+    "protocol_source_type": "curated_library",
+    "monitoring_plan": {
+      "baseline_required": [
+        "HbA1c",
+        "fasting_glucose",
+        "insulin",
+        "lipid_profile",
+        "AST",
+        "ALT",
+        "creatinine",
+        "blood_pressure",
+        "body_weight",
+        "waist_circumference",
+        "body_composition"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "week": 4,
+          "type": "tolerance_and_safety",
+          "labs": [
+            "fasting_glucose",
+            "AST",
+            "ALT",
+            "body_weight",
+            "blood_pressure"
+          ],
+          "purpose": "early tolerance and metabolic response review"
+        },
+        {
+          "week": 8,
+          "type": "metabolic_reassessment",
+          "labs": [
+            "HbA1c",
+            "fasting_glucose",
+            "insulin",
+            "lipid_profile"
+          ],
+          "purpose": "mid-course metabolic reassessment"
+        },
+        {
+          "week": 12,
+          "type": "outcome_and_safety_review",
+          "labs": [
+            "HbA1c",
+            "lipid_profile",
+            "AST",
+            "ALT",
+            "creatinine"
+          ],
+          "purpose": "end-of-cycle review"
+        }
+      ]
+    },
+    "economics": {
+      "total_protocol_cost_estimate": 4370,
+      "total_vials_required": 55
+    },
+    "protocol_author_title": "Peptide Specialists",
+    "uploadedAt": "2026-04-20T09:29:12.822Z",
+    "variant_rules": {
+      "tempo_variants": {
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up",
+          "restricted_to": [
+            "18-35",
+            "36-50"
+          ]
+        }
+      },
+      "duration_variants": {
+        "20_weeks": {
+          "mode": "extended_metabolic",
+          "maintenance_phase": true,
+          "extra_monitoring": true
+        },
+        "16_weeks": {
+          "mode": "extended",
+          "maintenance_phase": true,
+          "extra_monitoring": true
+        },
+        "12_weeks": {
+          "mode": "standard",
+          "maintenance_phase": true,
+          "extra_monitoring": false
+        },
+        "8_weeks": {
+          "mode": "short",
+          "maintenance_phase": false,
+          "extra_monitoring": false
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "special_flags": [
+            "cycle_variability",
+            "fluid_retention"
+          ],
+          "recommended_baseline_labs": [
+            "ferritin",
+            "TSH",
+            "free_T4"
+          ]
+        },
+        "male": {
+          "special_flags": [
+            "androgen_status"
+          ],
+          "recommended_baseline_labs": [
+            "total_testosterone",
+            "SHBG",
+            "estradiol"
+          ]
+        }
+      },
+      "age_variants": {
+        "51-65": {
+          "monitoring_intensity": "enhanced",
+          "default_duration_weeks": 16,
+          "escalation_profile": "conservative"
+        },
+        "36-50": {
+          "monitoring_intensity": "moderate",
+          "default_duration_weeks": 12,
+          "escalation_profile": "moderate"
+        },
+        "18-35": {
+          "monitoring_intensity": "standard",
+          "default_duration_weeks": 12,
+          "escalation_profile": "standard"
+        },
+        "65+": {
+          "monitoring_intensity": "enhanced",
+          "default_duration_weeks": 16,
+          "escalation_profile": "conservative"
+        }
+      }
+    },
+    "safety_profile": {
+      "drug_interactions": [
+        "Delays gastric emptying - alters absorption of oral narrow therapeutic index drugs",
+        "Insulin or sulfonylureas: increased hypoglycemia risk - dose reduction may be needed",
+        "Warfarin: monitor INR - absorption timing changes possible",
+        "Oral contraceptives: take 1 hour before or 4 hours after semaglutide"
+      ],
+      "monitoring_required": [
+        "Body weight and BMI at baseline, week 4, 8, 12, 16",
+        "Fasting glucose and HbA1c at baseline and week 12",
+        "Lipid panel (LDL, HDL, TG) at baseline and week 16",
+        "Serum amylase/lipase if abdominal pain occurs",
+        "TSH at baseline if clinically indicated",
+        "Blood pressure and resting heart rate at each visit"
+      ],
+      "adverse_events_serious": [
+        "Acute pancreatitis: rare (<0.5%); stop if severe abdominal pain occurs",
+        "Gallbladder disease (cholelithiasis): ~2.6x increased risk vs placebo (STEP 1)",
+        "Thyroid C-cell hyperplasia: rodent signal; contraindicated with MTC or MEN2 history",
+        "Resting heart rate increase: ~3 bpm average; monitor in cardiac patients"
+      ],
+      "washout_recommended_weeks": 4,
+      "adverse_events_common": [
+        "Nausea: 44% (most common; transient weeks 1-8, resolves with titration)",
+        "Vomiting: 24% - dose-dependent, mitigated by slow titration",
+        "Diarrhea: 30% - typically mild and self-limiting",
+        "Constipation: 24% - increase hydration and fiber",
+        "Injection site reactions: 5-10% - mild, rotate sites"
+      ]
+    },
+    "legacy_compatibility": {
+      "notes": "Legacy simplified fields can be generated downstream if needed.",
+      "legacy_aliases": {
+        "primary_goal": "Weight Management / Obesity",
+        "protocol_duration_weeks": 12,
+        "author": "system"
+      },
+      "enabled": true
+    },
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "HbA1c",
+          "Fasting Glucose",
+          "Lipid Panel",
+          "CMP",
+          "TFTs"
+        ]
+      },
+      {
+        "week": 4,
+        "labs": [
+          "Fasting Glucose",
+          "Blood Pressure"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "HbA1c",
+          "Lipid Panel",
+          "CMP"
+        ]
+      }
+    ],
+    "status": "approved",
+    "_syncSource": "export/protocols/wm_001.js",
+    "_schemaVersion": "antigravity_v2",
+    "_syncedAt": "2026-04-26T12:46:38.050Z",
+    "updated_at": "2026-05-04T14:32:21.540Z",
+    "recommended_supplements": [
+      "berberine",
+      "magnesium-glycinate",
+      "b-complex"
+    ],
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible",
+      "expected_outcomes: INJECTED for category \\"Weight Management\\""
+    ],
+    "protocol_author_organization": "Atlas Health",
+    "category": "Weight Management",
+    "syncedAt": "2026-05-16T14:32:31.302Z",
+    "clinical_disclaimer": "For use by qualified healthcare professionals only. Requires clinical evaluation, monitoring, and adherence to local regulatory standards.",
+    "primary_goal": "Weight Management / Obesity",
+    "risk_class": "moderate",
+    "metadata": {
+      "longDescription": "This 12-week protocol integrates tirzepatide (a glucose-dependent insulinotropic polypeptide [GIP] and glucagon-like peptide-1 [GLP-1] receptor dual agonist) with MOTS-c (a mitochondrial open reading frame of the 12S rRNA-c peptide). Tirzepatide achieves dose-dependent reductions in HbA1c and body weight via hypothalamic satiety signaling and enhanced insulin secretion (Frias et al., NEJM 2021; Jastreboff et al., NEJM 2022). MOTS-c, an endogenous mitochondria-derived peptide, activates AMPK and the folate-methionine cycle to improve exercise capacity and metabolic flexibility (Lee et al., Cell Metab 2015). The protocol progresses through escalation and maintenance sub-phases to minimise GI adverse events while maximising adipose reduction.",
+      "primary_goal": "Weight Management / Obesity",
+      "keywords": [
+        "tirzepatide protocol",
+        "MOTS-c peptide",
+        "GLP-1 GIP dual agonist",
+        "weight loss protocol",
+        "metabolic peptide therapy",
+        "fat loss protocol"
+      ],
+      "references": [
+        {
+          "pmid": "34170647",
+          "citation": "Frias JP et al. Tirzepatide versus Semaglutide. NEJM 2021;385:503-515."
+        },
+        {
+          "pmid": "36205685",
+          "citation": "Jastreboff AM et al. Tirzepatide Once Weekly for the Treatment of Obesity. NEJM 2022;387:205-216."
+        },
+        {
+          "pmid": "25738459",
+          "citation": "Lee C et al. The Mitochondrial-Derived Peptide MOTS-c Promotes Metabolic Homeostasis. Cell Metab 2015;21:443-454."
+        }
+      ],
+      "scientificName": "Tirzepatide + MOTS-c GLP-1/GIP Dual-Agonist & Mitokine Protocol",
+      "description": "12-week structured metabolic protocol combining tirzepatide GLP-1/GIP dual agonism with MOTS-c mitochondrial signaling for progressive fat loss and insulin sensitivity."
+    },
+    "overview_summary": "Three-phase structured metabolic weight reduction protocol using GLP-based support and mitochondrial optimization.",
+    "protocol_version": "v7.0",
+    "eligibility_rules": {
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ],
+      "indications": [
+        "overweight_or_obesity",
+        "metabolic_syndrome",
+        "insulin_resistance",
+        "visceral_adiposity",
+        "difficulty_achieving_weight_loss",
+        "weight_regain_after_dieting",
+        "prediabetes",
+        "metabolic_flexibility_impairment"
+      ],
+      "contraindications": [
+        "history_of_pancreatitis",
+        "active_gallbladder_disease",
+        "pregnancy_or_breastfeeding",
+        "MEN2_syndrome",
+        "medullary_thyroid_carcinoma_history",
+        "severe_gastrointestinal_disorder"
+      ],
+      "supported_goals": [
+        "weight_management",
+        "fat_loss",
+        "metabolic_health",
+        "insulin_sensitivity",
+        "body_composition_optimization"
+      ],
+      "relative_cautions": [
+        "frailty",
+        "advanced_renal_impairment",
+        "rapid_weight_loss_history",
+        "poor_nutritional_intake",
+        "history_of_severe_gastrointestinal_intolerance"
+      ],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "patient_demographic",
+        "age_group",
+        "start_date",
+        "baseline_weight",
+        "height_cm",
+        "bmi",
+        "metabolic_status",
+        "tolerance_profile",
+        "duration_weeks"
+      ]
+    },
+    "confidence_score": 93,
+    "protocol_title": "Tirzepatide + MOTS-c Metabolic Protocol",
+    "phase_blueprints": [
+      {
+        "phase_key": "initiation",
+        "phase_title": "Initiation Phase",
+        "default_start_week": 1,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "tolerance_building",
+          "early_appetite_control",
+          "mitochondrial_activation",
+          "metabolic_priming"
+        ],
+        "drugs": [
+          {
+            "product_id": "prd_tirzepatide",
+            "product_title": "Tirzepatide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "starting_weekly_dose": 2.5,
+              "administration_frequency": "weekly",
+              "administration_days_default": [
+                "Monday"
+              ]
+            }
+          },
+          {
+            "product_id": "prd_mots-c",
+            "product_title": "MOTS-C",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "dose_per_administration": 10,
+              "administration_frequency": "3x_week",
+              "timing_hint": "morning_fasting",
+              "role": "metabolic_adjunct"
+            }
+          }
+        ]
+      },
+      {
+        "phase_key": "escalation",
+        "phase_title": "Escalation Phase",
+        "default_start_week": 5,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "dose_optimization",
+          "fat_loss_acceleration",
+          "metabolic_response_assessment"
+        ],
+        "drugs": [
+          {
+            "product_id": "prd_tirzepatide",
+            "product_title": "Tirzepatide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "possible_next_step_dose": 7.5,
+              "administration_frequency": "weekly",
+              "starting_weekly_dose": 5
+            }
+          },
+          {
+            "product_id": "prd_aod-9604",
+            "product_title": "AOD-9604",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "dose_per_administration": 2,
+              "administration_frequency": "daily",
+              "timing_hint": "morning_fasting"
+            }
+          }
+        ]
+      },
+      {
+        "phase_key": "maintenance",
+        "phase_title": "Maintenance Phase",
+        "default_start_week": 9,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "metabolic_stabilization",
+          "habit_consolidation",
+          "weight_loss_maintenance"
+        ],
+        "drugs": [
+          {
+            "product_id": "prd_tirzepatide",
+            "product_title": "Tirzepatide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "max_weekly_dose": 10,
+              "administration_frequency": "weekly",
+              "starting_weekly_dose": 7.5
+            }
+          },
+          {
+            "product_id": "prd_mots-c",
+            "product_title": "MOTS-C",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "dose_per_administration": 10,
+              "administration_frequency": "2x_week",
+              "timing_hint": "morning_fasting"
+            }
+          }
+        ]
+      }
+    ],
+    "protocol_slug": "weight-management-structured-12w",
+    "_last_synced_at": "2026-05-17T09:24:08.934Z",
+    "synergy_rationale": "Tirzepatide powerfully suppresses appetite and improves glycemic control via GLP-1/GIP. However, rapid weight loss can slow metabolism. MOTS-c is added to activate AMPK and preserve mitochondrial metabolic rate, counteracting the metabolic adaptation often seen with incretins alone.",
+    "clinical_timeline": [
+      {
+        "phase": "Weeks 1-4",
+        "expected": "Appetite suppression begins. Water weight drops. Mild GI adaptation."
+      },
+      {
+        "phase": "Weeks 5-8",
+        "expected": "Accelerated fat loss. Improved fasting glucose. Energy levels stabilize."
+      },
+      {
+        "phase": "Weeks 9-12",
+        "expected": "Significant body composition shifts. Visceral fat reduction measurable."
+      }
+    ],
+    "contraindications": [
+      "Personal or family history of Medullary Thyroid Carcinoma (MTC)",
+      "Multiple Endocrine Neoplasia syndrome type 2 (MEN 2)",
+      "Prior history of pancreatitis",
+      "Severe gastrointestinal disease (e.g., gastroparesis)"
+    ],
+    "safety_notes": "Monitor for symptoms of pancreatitis (severe abdominal pain) and gallbladder disease. Adjust escalation if GI intolerance persists.",
+    "lifestyle": {
+      "sleep": "7-8 hours to minimize cortisol-driven insulin resistance.",
+      "nutrition": "High protein (>1.5g/kg body weight), caloric deficit (15-20%), high fiber.",
+      "activity": "Resistance training 3-4x weekly to preserve lean mass. 8,000+ daily steps.",
+      "hydration": "Minimum 3 liters of water daily with electrolytes."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:27.338Z",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Initiation",
+        "start_week": 1,
+        "end_week": 4,
+        "drugs_used": [
+          {
+            "product_slug": "tirzepatide",
+            "selected_strength": "20mg",
+            "route": "subcutaneous",
+            "weekly_dose": "2.5 mg",
+            "vials_required_for_phase": 1,
+            "faq_ref": "tirzepatide_faq",
+            "pubmed_ref": "tirzepatide_pubmed",
+            "dosing_frequency": "weekly",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 2.5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 12,
+            "faq_ref": "motsc_faq",
+            "pubmed_ref": "motsc_pubmed",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose": "15 mg",
+            "weekly_dose_amount": 15,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Escalation",
+        "start_week": 5,
+        "end_week": 8,
+        "drugs_used": [
+          {
+            "product_slug": "tirzepatide",
+            "selected_strength": "20mg",
+            "weekly_dose": "7.5 mg",
+            "vials_required_for_phase": 4,
+            "route": "subcutaneous",
+            "dosing_frequency": "weekly",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 7.5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 24,
+            "route": "subcutaneous",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose": "15 mg",
+            "weekly_dose_amount": 15,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "aod-9604",
+            "selected_strength": "5mg",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 4,
+            "route": "subcutaneous",
+            "weekly_dose": "1.75 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 1.75,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 3,
+        "phase_title": "Maintenance",
+        "start_week": 9,
+        "end_week": 12,
+        "drugs_used": [
+          {
+            "product_slug": "tirzepatide",
+            "selected_strength": "20mg",
+            "weekly_dose": "10 mg",
+            "vials_required_for_phase": 2,
+            "route": "subcutaneous",
+            "dosing_frequency": "weekly",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 10,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "dosing_frequency": "2x_week",
+            "vials_required_for_phase": 8,
+            "route": "subcutaneous",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose": "10 mg",
+            "weekly_dose_amount": 10,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "expected_outcomes": {
+      "0": "Reduced appetite and food noise",
+      "1": "Progressive visceral and subcutaneous fat loss",
+      "2": "Improved metabolic efficiency",
+      "3": "Preservation of metabolic rate during deficit",
+      "qualitative": [
+        "Progressive and sustained reduction in body weight and adipose mass",
+        "Improved metabolic flexibility and insulin sensitivity",
+        "Reduction in visceral fat as assessed by waist circumference or imaging",
+        "Stabilization of fasting glucose and lipid markers",
+        "Improved energy balance and reduced appetite-driven caloric intake"
+      ]
+    }
+  },
+  {
+    "id": "wm_002",
+    "active": true,
+    "bundleVersion": "2.0",
+    "number_of_phases": 3,
+    "physician_supervision_required": true,
+    "protocol_duration_weeks": 12,
+    "protocol_id": "wm_002",
+    "protocol_is_curated": true,
+    "protocol_version": "v6.0",
+    "washout_recommended_weeks": 4,
+    "protocol_source_document": "Atlas Health_Clinical_Guidelines_2026.pdf",
+    "protocol_is_physician_authored": false,
+    "seeded_at": "2026-04-25T06:10:36.133Z",
+    "protocol_source_version": "v5.0",
+    "schema_version": "antigravity_v2",
+    "dosing_enrichment": {
+      "titration_note": "Weeks 1-2: AOD-9604 at 150 mcg/day SC to assess tolerability. Weeks 3-8: increase to 300 mcg/day. Weeks 9-16: maintain 300 mcg/day with caloric deficit protocol. 5-Amino-1MQ can be added from week 3 at 50 mg 2x/day to boost NNMT inhibition and adipocyte metabolic rate.",
+      "cycling_recommendation": "16-week active protocol (divided as 8-week primary + 8-week consolidation). 4-6 week washout before repeat cycle. AOD-9604 receptor sensitivity maintained with cycling; continuous use beyond 20 weeks not recommended.",
+      "maintenance_dose": "AOD-9604: 300 mcg/day SC (pre-breakfast, fasted). 5-Amino-1MQ (if included): 50-100 mg orally 2x/day. Fragment 176-191 (if used): 500 mcg/day SC on training days.",
+      "timing_optimization": "AOD-9604: administer 30 minutes before breakfast in fasted state for maximal lipolytic effect via GHSR-independent beta-3 adrenergic activation. Avoid carbohydrate intake within 30 minutes post-injection to preserve insulin-independent fat mobilization."
+    },
+    "complexity_level": "advanced",
+    "normalizedAt": "2026-04-26T11:19:09.485Z",
+    "protocol_author_notes": "Official curated protocol for general clinical use.",
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_source_reference": "internal_guide",
+    "protocol_slug": "weight-management-cagrisem-12w",
+    "riskManagement": {
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "contraindications": [
+        "Type 1 diabetes (insulin-dependent, use with caution)",
+        "Severe renal impairment",
+        "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ]
+    },
+    "risk_class": "low_to_moderate",
+    "protocol_review_status": "approved",
+    "protocol_source_type": "curated_library",
+    "overview_summary": "Three-phase weight management protocol combining semaglutide-based escalation with cagrilintide support to intensify appetite and weight-control signaling.",
+    "monitoring_plan": {
+      "baseline_required": [
+        "HbA1c",
+        "fasting_glucose",
+        "fasting_insulin",
+        "lipid_profile",
+        "AST",
+        "ALT",
+        "creatinine",
+        "body_weight",
+        "waist_circumference",
+        "body_composition",
+        "blood_pressure"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "week": 4,
+          "type": "tolerance_review",
+          "labs": [
+            "fasting_glucose",
+            "body_weight",
+            "blood_pressure"
+          ],
+          "purpose": "Assess GI tolerance and early response"
+        },
+        {
+          "week": 8,
+          "type": "metabolic_reassessment",
+          "labs": [
+            "HbA1c",
+            "fasting_glucose",
+            "lipid_profile"
+          ],
+          "purpose": "Evaluate metabolic improvements"
+        },
+        {
+          "week": 12,
+          "type": "final_outcome_review",
+          "labs": [
+            "HbA1c",
+            "lipid_profile",
+            "AST",
+            "ALT",
+            "creatinine"
+          ],
+          "purpose": "Final metabolic and safety evaluation"
+        }
+      ]
+    },
+    "protocol_author_title": "Peptide Specialists",
+    "confidence_score": 92,
+    "protocol_title": "Semaglutide + Cagrilintide Dual-Agonist Protocol",
+    "safety_profile": {
+      "drug_interactions": [
+        "AOD-9604 does not stimulate GH axis - safe to co-administer with GH-releasing peptides",
+        "Avoid high carbohydrate meals within 30 min of AOD-9604 injection (insulin antagonizes lipolytic effect)",
+        "5-Amino-1MQ may interact with methylation-pathway medications - caution with folate antagonists"
+      ],
+      "monitoring_required": [
+        "Body composition (DXA or BIA) at baseline and week 8/16",
+        "Fasting glucose, HbA1c, fasting insulin at weeks 0 and 8",
+        "Lipid panel at weeks 0 and 12",
+        "Weight and waist circumference monthly"
+      ],
+      "adverse_events_serious": [
+        "No serious adverse events in AOD-9604 Phase II/III trials (Heffernan 2001, Baker 2009)",
+        "5-Amino-1MQ: insufficient long-term human safety data - use with informed consent"
+      ],
+      "washout_recommended_weeks": 4,
+      "adverse_events_common": [
+        "Mild injection site reactions with AOD-9604 SC (10-15%)",
+        "Transient nausea in first 1-2 weeks at higher doses (5-10%)",
+        "Mild hypoglycemia risk if combined with insulin sensitizers - monitor glucose"
+      ]
+    },
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "HbA1c",
+          "Fasting Glucose",
+          "Lipid Panel",
+          "CMP",
+          "TFTs"
+        ]
+      },
+      {
+        "week": 4,
+        "labs": [
+          "Fasting Glucose",
+          "Blood Pressure"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "HbA1c",
+          "Lipid Panel",
+          "CMP",
+          "Fasting Insulin"
+        ]
+      }
+    ],
+    "_syncSource": "export/protocols/wm_002.js",
+    "_patchedAt": {
+      "schema_gap_fix": "2026-04-26T12:37:11Z"
+    },
+    "_schemaVersion": "antigravity_v2",
+    "_patchSchema": "antigravity_v2",
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "Legacy fields retained for backward compatibility; phase_blueprints are preferred when present.",
+      "enabled": true
+    },
+    "_syncedAt": "2026-04-26T12:46:38.765Z",
+    "updated_at": "2026-05-04T14:35:44.637Z",
+    "protocol_author_organization": "Atlas Health",
+    "recommended_supplements": [
+      "berberine",
+      "magnesium-glycinate"
+    ],
+    "economics": {
+      "total_protocol_cost_estimate": 520,
+      "total_vials_required": 9
+    },
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "_enrichment_notes": [
+      "phases.drugs.weekly_dose: CALCULATED where possible"
+    ],
+    "category": "Weight Management",
+    "syncedAt": "2026-05-16T14:32:33.101Z",
+    "status": "approved",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "age_variant_match",
+        "sex_variant_match",
+        "duration_variant_match",
+        "contraindication_screen",
+        "tolerance_profile"
+      ],
+      "tolerance_profiles": {
+        "good": {
+          "max_intensity": "aggressive"
+        },
+        "average": {
+          "max_intensity": "standard"
+        },
+        "sensitive": {
+          "max_intensity": "conservative"
+        }
+      },
+      "allow_acceleration": false,
+      "base_duration_weeks": 12,
+      "notes": "Default generator rules – pending clinical review.",
+      "tempo_variants": [
+        "standard"
+      ],
+      "allow_extension": false
+    },
+    "primary_goal": "Weight Management / Obesity",
+    "metadata": {
+      "longDescription": "This protocol pairs semaglutide (a GLP-1 receptor agonist approved for chronic weight management) with cagrilintide (a long-acting amylin analogue). Semaglutide reduces energy intake via hypothalamic GLP-1R activation and slows gastric emptying (Wilding et al., NEJM 2021). Cagrilintide targets amylin receptors in the hypothalamus and area postrema, providing complementary satiety signalling beyond GLP-1 pathways (Enebo et al., Lancet 2021). The REDEFINE-1 trial of the fixed-dose combination (CagriSema) demonstrated superior weight reduction vs. either monotherapy (Knop et al., Lancet 2023). AOD-9604 is added in the escalation phase to enhance lipolysis via truncated GH fragment activity without promoting insulin resistance.",
+      "primary_goal": "Weight Management / Obesity",
+      "keywords": [
+        "semaglutide protocol",
+        "cagrilintide amylin",
+        "CagriSema weight loss",
+        "dual hormone protocol",
+        "GLP-1 amylin combination",
+        "obesity peptide protocol"
+      ],
+      "references": [
+        {
+          "pmid": "33567185",
+          "citation": "Wilding JPH et al. Once-Weekly Semaglutide in Adults with Overweight or Obesity. NEJM 2021;384:989-1002."
+        },
+        {
+          "pmid": "34126063",
+          "citation": "Enebo LB et al. Safety, tolerability, pharmacokinetics, and pharmacodynamics of cagrilintide. Lancet 2021;397:2351-2363."
+        },
+        {
+          "pmid": "38161985",
+          "citation": "Knop FK et al. Semaglutide and Cagrilintide (CagriSema). Lancet 2023;402:2395-2407."
+        }
+      ],
+      "scientificName": "Semaglutide + Cagrilintide GLP-1 & Long-Acting Amylin Dual-Hormone Protocol",
+      "description": "12-week dual-hormone weight-loss protocol pairing semaglutide GLP-1 agonism with cagrilintide amylin receptor activation for sustained appetite suppression and adiposity reduction."
+    },
+    "generated_protocol_template": {
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_group": "adult",
+        "duration_weeks": 12,
+        "intensity": "standard",
+        "sex": "universal",
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "validated_at": null,
+        "validated_by": null,
+        "validation_notes": "Auto-generated template. Pending clinical review.",
+        "validation_status": "NOT_EVALUATED",
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": [],
+      "patient_context": {
+        "age_group": null,
+        "baseline_weight": null,
+        "duration_weeks": null,
+        "height_cm": null,
+        "metabolic_status": null,
+        "patient_demographic": null,
+        "physician_supervision_required": true,
+        "primary_clinical_focus": null,
+        "protocol_id": "wm_002",
+        "sex": null,
+        "tempo_preference": "standard",
+        "bmi": null,
+        "start_date": null,
+        "tolerance_profile": "average"
+      }
+    },
+    "variant_rules": {
+      "age_variants": {
+        "18-35": {
+          "default_duration_weeks": 12,
+          "escalation_profile": "standard",
+          "monitoring_intensity": "standard"
+        },
+        "36-50": {
+          "default_duration_weeks": 12,
+          "escalation_profile": "moderate",
+          "monitoring_intensity": "moderate"
+        },
+        "51-65": {
+          "default_duration_weeks": 16,
+          "escalation_profile": "conservative",
+          "monitoring_intensity": "enhanced"
+        },
+        "65+": {
+          "default_duration_weeks": 16,
+          "escalation_profile": "conservative",
+          "monitoring_intensity": "enhanced"
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "recommended_baseline_labs": [
+            "ferritin",
+            "TSH",
+            "free_T4"
+          ],
+          "special_flags": [
+            "cycle_variability",
+            "fluid_retention"
+          ]
+        },
+        "male": {
+          "recommended_baseline_labs": [
+            "total_testosterone",
+            "SHBG",
+            "estradiol"
+          ],
+          "special_flags": [
+            "androgen_status"
+          ]
+        }
+      },
+      "duration_variants": {
+        "8_weeks": {
+          "mode": "short",
+          "maintenance_phase": false,
+          "extra_monitoring": false
+        },
+        "12_weeks": {
+          "mode": "standard",
+          "maintenance_phase": true,
+          "extra_monitoring": false
+        },
+        "16_weeks": {
+          "mode": "extended",
+          "maintenance_phase": true,
+          "extra_monitoring": true
+        },
+        "20_weeks": {
+          "mode": "extended_metabolic",
+          "maintenance_phase": true,
+          "extra_monitoring": true
+        }
+      },
+      "tempo_variants": {
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up",
+          "restricted_to": [
+            "18-35",
+            "36-50"
+          ]
+        }
+      },
+      "tempo": {
+        "standard": {
+          "notes": "Standard tempo – no adjustment.",
+          "phase_duration_multiplier": 1
+        },
+        "accelerated": {
+          "notes": "Accelerated tempo – physician review required.",
+          "phase_duration_multiplier": 0.75
+        },
+        "extended": {
+          "notes": "Extended tempo – for slower responders.",
+          "phase_duration_multiplier": 1.33
+        }
+      }
+    },
+    "phase_blueprints": [
+      {
+        "phase_key": "initiation",
+        "phase_title": "Initiation",
+        "default_start_week": 1,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "tolerance_building",
+          "early_satiety_induction"
+        ],
+        "drugs": [
+          {
+            "product_id": "prd_semaglutide",
+            "product_title": "Semaglutide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "starting_weekly_dose": 0.25,
+              "administration_frequency": "weekly",
+              "administration_days_default": [
+                "Monday"
+              ]
+            }
+          },
+          {
+            "product_id": "prd_cagrilintide",
+            "product_title": "Cagrilintide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "starting_weekly_dose": 0.3,
+              "administration_frequency": "weekly",
+              "administration_days_default": [
+                "Monday"
+              ]
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 1,
+            "event_type": "baseline_review",
+            "title": "Baseline metabolic review"
+          },
+          {
+            "week": 4,
+            "event_type": "outcome_review",
+            "title": "Phase outcome and safety review"
+          }
+        ]
+      },
+      {
+        "phase_key": "escalation",
+        "phase_title": "Escalation",
+        "default_start_week": 5,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "dose_escalation",
+          "fat_loss_acceleration"
+        ],
+        "drugs": [
+          {
+            "product_id": "prd_semaglutide",
+            "product_title": "Semaglutide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "possible_next_step_dose": 1,
+              "administration_frequency": "weekly",
+              "administration_days_default": [
+                "Monday"
+              ],
+              "starting_weekly_dose": 0.5
+            }
+          },
+          {
+            "product_id": "prd_cagrilintide",
+            "product_title": "Cagrilintide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "possible_next_step_dose": 1.2,
+              "administration_frequency": "weekly",
+              "starting_weekly_dose": 0.6
+            }
+          },
+          {
+            "product_id": "prd_aod-9604",
+            "product_title": "AOD-9604",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mcg",
+              "dose_per_administration": 300,
+              "administration_frequency": "daily",
+              "timing_hint": "morning_fasting"
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 5,
+            "event_type": "baseline_review",
+            "title": "Baseline metabolic review"
+          },
+          {
+            "week": 8,
+            "event_type": "outcome_review",
+            "title": "Phase outcome and safety review"
+          }
+        ]
+      },
+      {
+        "phase_key": "maintenance",
+        "phase_title": "Maintenance",
+        "default_start_week": 9,
+        "default_duration_weeks": 4,
+        "clinical_purpose": [
+          "weight_stabilization",
+          "habit_consolidation"
+        ],
+        "drugs": [
+          {
+            "product_id": "prd_semaglutide",
+            "product_title": "Semaglutide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "max_weekly_dose": 2.4,
+              "administration_frequency": "weekly",
+              "starting_weekly_dose": 1
+            }
+          },
+          {
+            "product_id": "prd_cagrilintide",
+            "product_title": "Cagrilintide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "weekly",
+              "starting_weekly_dose": 1.2
+            }
+          }
+        ],
+        "clinical_events": [
+          {
+            "week": 9,
+            "event_type": "baseline_review",
+            "title": "Baseline metabolic review"
+          },
+          {
+            "week": 12,
+            "event_type": "outcome_review",
+            "title": "Phase outcome and safety review"
+          }
+        ]
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.934Z",
+    "synergy_rationale": "This multi-compound protocol is designed to provide synergistic effects, targeting multiple complementary biological pathways simultaneously to achieve weight management / obesity more effectively than monotherapy.",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "7-8 hours to minimize cortisol-driven insulin resistance.",
+      "nutrition": "High protein (>1.5g/kg body weight), caloric deficit (15-20%), high fiber.",
+      "activity": "Resistance training 3-4x weekly to preserve lean mass. 8,000+ daily steps.",
+      "hydration": "Minimum 3 liters of water daily with electrolytes."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:26.943Z",
+    "clinical_disclaimer": "This protocol is for educational and informational purposes only. It is not medical advice. Any decision to utilize peptide therapies should be made in consultation with a qualified healthcare professional who can review your full medical history, lab work, and potential contraindications.",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Initiation",
+        "start_week": 1,
+        "end_week": 4,
+        "drugs_used": [
+          {
+            "product_slug": "semaglutide",
+            "selected_strength": "5mg",
+            "route": "subcutaneous",
+            "weekly_dose": "0.25 mg",
+            "vials_required_for_phase": 1,
+            "faq_ref": "semaglutide_faq",
+            "pubmed_ref": "semaglutide_pubmed",
+            "dosing_frequency": "weekly",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 0.25,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "cagrilintide",
+            "selected_strength": "5mg",
+            "route": "subcutaneous",
+            "weekly_dose": "0.3 mg",
+            "vials_required_for_phase": 1,
+            "faq_ref": "cagrilintide_faq",
+            "pubmed_ref": "cagrilintide_pubmed",
+            "dosing_frequency": "weekly",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 0.3,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Escalation",
+        "start_week": 5,
+        "end_week": 8,
+        "drugs_used": [
+          {
+            "product_slug": "semaglutide",
+            "selected_strength": "5mg",
+            "weekly_dose": "0.5 mg",
+            "vials_required_for_phase": 1,
+            "route": "subcutaneous",
+            "dosing_frequency": "weekly",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 0.5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "cagrilintide",
+            "selected_strength": "5mg",
+            "weekly_dose": "0.6 mg",
+            "vials_required_for_phase": 1,
+            "route": "subcutaneous",
+            "dosing_frequency": "weekly",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 0.6,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "aod-9604",
+            "selected_strength": "5mg",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 4,
+            "route": "subcutaneous",
+            "weekly_dose": "1.75 mg",
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 1.75,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 3,
+        "phase_title": "Maintenance",
+        "start_week": 9,
+        "end_week": 12,
+        "drugs_used": [
+          {
+            "product_slug": "semaglutide",
+            "selected_strength": "10mg",
+            "weekly_dose": "1 mg",
+            "vials_required_for_phase": 1,
+            "route": "subcutaneous",
+            "dosing_frequency": "weekly",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 1,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "cagrilintide",
+            "selected_strength": "10mg",
+            "weekly_dose": "1.2 mg",
+            "vials_required_for_phase": 1,
+            "route": "subcutaneous",
+            "dosing_frequency": "weekly",
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 1.2,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "eligibility_rules": {
+      "contraindications": [
+        "history_of_pancreatitis",
+        "MEN2_syndrome",
+        "medullary_thyroid_carcinoma_history",
+        "pregnancy",
+        "severe_gi_disorder"
+      ],
+      "supported_goals": [
+        "weight_management",
+        "obesity",
+        "metabolic_health"
+      ],
+      "relative_cautions": [
+        "gallbladder_disease",
+        "rapid_weight_loss_history",
+        "advanced_renal_impairment"
+      ],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "patient_demographic",
+        "age_group",
+        "start_date",
+        "baseline_weight",
+        "height_cm",
+        "bmi",
+        "metabolic_status",
+        "tolerance_profile",
+        "duration_weeks"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ],
+      "indications": [
+        "Overweight or obese individuals (BMI ≥ 27) with metabolic risk factors",
+        "Insulin resistance or pre-diabetic metabolic profile",
+        "Individuals with elevated fasting glucose or dyslipidemia",
+        "Patients seeking physician-supervised weight management research",
+        "Individuals with metabolic syndrome component criteria"
+      ]
+    },
+    "expected_outcomes": {
+      "0": "Weight reduction",
+      "1": "Appetite control",
+      "2": "Improved metabolic markers",
+      "qualitative": [
+        "Progressive and sustained reduction in body weight and adipose mass",
+        "Improved metabolic flexibility and insulin sensitivity",
+        "Reduction in visceral fat as assessed by waist circumference or imaging",
+        "Stabilization of fasting glucose and lipid markers",
+        "Improved energy balance and reduced appetite-driven caloric intake"
+      ]
+    }
+  },
+  {
+    "id": "wm_003",
+    "active": true,
+    "physician_supervision_required": true,
+    "protocol_duration_weeks": 16,
+    "protocol_id": "wm_003",
+    "protocol_is_curated": true,
+    "protocol_is_physician_authored": true,
+    "protocol_review_status": "reviewed",
+    "protocol_version": "v6.0",
+    "washout_recommended_weeks": 4,
+    "protocol_author_name": "Clinical Longevity Protocol Team",
+    "seeded_at": "2026-04-25T06:10:36.134Z",
+    "protocol_source_version": "1.0",
+    "schema_version": "antigravity_v2",
+    "dosing_enrichment": {
+      "titration_note": "Weeks 1-2: Ipamorelin 100 mcg SC 3x/day. Weeks 3-8: increase to 200-300 mcg 3x/day. CJC-1295 DAC 1 mg/week from week 2, increase to 2 mg/week by week 4. Add AOD-9604 300 mcg/day from week 9 for lipolytic phase intensification.",
+      "cycling_recommendation": "16-week body recomposition cycle: 8 weeks anabolic emphasis (Ipamorelin + CJC-1295), then 8 weeks lipolytic emphasis (AOD-9604 + MK-677 taper). 6-week washout required. Maximum 2 cycles per year.",
+      "maintenance_dose": "Ipamorelin: 200-300 mcg SC 3x/day (pre-meal + pre-sleep). CJC-1295 DAC: 2 mg SC 1x/week. AOD-9604: 250-300 mcg/day SC fasted (added at week 8 in lipolytic phase).",
+      "timing_optimization": "Ipamorelin: pre-meal injections leverage GH pulse amplification during insulin-independent windows. Pre-sleep dose maximizes nocturnal GH surge for anabolic recovery. CJC-1295 DAC weekly injection on rest days to avoid blunting acute GH peaks."
+    },
+    "complexity_level": "moderate",
+    "eligibility_rules": {
+      "indications": [
+        "Obesity with metabolic syndrome",
+        "Insulin resistance",
+        "Visceral adiposity",
+        "Failure of single-agent weight-loss therapy"
+      ],
+      "contraindications": [
+        "Active malignancy",
+        "Pregnancy or breastfeeding",
+        "Uncontrolled diabetes (HbA1c > 9%)",
+        "Severe hepatic impairment",
+        "History of pancreatitis"
+      ],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "patient_demographic",
+        "age_group",
+        "start_date",
+        "baseline_weight",
+        "height_cm",
+        "bmi",
+        "metabolic_status",
+        "tolerance_profile",
+        "duration_weeks"
+      ],
+      "baseline_requirements": [
+        "Fasting glucose",
+        "HbA1c",
+        "IGF-1",
+        "Lipid panel",
+        "Thyroid profile",
+        "Body composition (DXA or BIA)"
+      ]
+    },
+    "normalizedAt": "2026-04-26T11:19:09.774Z",
+    "generated_protocol_template": {
+      "patient_context": {
+        "age_group": null,
+        "baseline_weight": null,
+        "duration_weeks": null,
+        "height_cm": null,
+        "metabolic_status": null,
+        "patient_demographic": null,
+        "physician_supervision_required": true,
+        "primary_clinical_focus": null,
+        "protocol_id": "wm_003",
+        "sex": null,
+        "tempo_preference": "standard",
+        "tolerance_profile": "average",
+        "bmi": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_group": "adult",
+        "duration_weeks": 16,
+        "intensity": "standard",
+        "sex": "universal",
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "validated_at": null,
+        "validated_by": null,
+        "validation_notes": "Auto-generated template. Pending clinical review.",
+        "validation_status": "NOT_EVALUATED",
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "protocol_author_organization": "ReGen Clinical",
+    "protocol_last_reviewed_at": "2026-03-29",
+    "protocol_source_reference": "Advanced Metabolic & Longevity Protocol — 16 Week Clinical Program",
+    "protocol_slug": "advanced-metabolic-longevity-16w",
+    "metadata.shortCode": "WMT-003",
+    "number_of_phases": 3,
+    "riskManagement": {
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "contraindications": [
+        "Type 1 diabetes (insulin-dependent, use with caution)",
+        "Severe renal impairment",
+        "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ]
+    },
+    "metadata.scientificName": "Integrated GLP-1 & Mitokine Metabolic–Longevity Protocol",
+    "metadata.visibility": "restricted_research",
+    "protocol_source_type": "clinical_program",
+    "metadata.primary_goal": "Weight Management / Obesity",
+    "overview_summary": "Intensive 16-week metabolic optimization and fat loss program focusing on visceral fat reduction and mitochondrial priming.",
+    "monitoring_plan": {
+      "week_16": [
+        "Full metabolic panel",
+        "Body composition",
+        "HbA1c",
+        "IGF-1"
+      ],
+      "week_8": [
+        "IGF-1",
+        "Fasting glucose",
+        "Body composition",
+        "Blood pressure"
+      ],
+      "monthly": [
+        "Weight",
+        "Waist circumference",
+        "Blood pressure"
+      ],
+      "baseline": [
+        "Weight",
+        "Waist circumference",
+        "Fasting glucose",
+        "HbA1c",
+        "IGF-1",
+        "Lipid panel"
+      ]
+    },
+    "metadata.schema_version": "antigravity_v2",
+    "protocol_author_title": "Clinic Lead",
+    "confidence_score": 95,
+    "safety_profile": {
+      "drug_interactions": [
+        "Avoid concurrent GH replacement therapy - additive effect may cause IGF-1 supraphysiological elevation",
+        "Corticosteroids blunt GH secretagogue response - avoid concurrent use",
+        "AOD-9604 is GH-axis-independent and safe to stack with Ipamorelin/CJC-1295"
+      ],
+      "monitoring_required": [
+        "IGF-1 serum at baseline, week 8, and week 16",
+        "Fasting glucose and HbA1c at weeks 0, 8, 16",
+        "DXA or BIA body composition at baseline and week 8/16",
+        "Blood pressure and resting heart rate monthly",
+        "Thyroid function (TSH) at baseline and end of cycle"
+      ],
+      "adverse_events_serious": [
+        "Elevated IGF-1 beyond 350 ng/mL - dose reduction required; monitor for acromegalic features",
+        "Insulin resistance worsening possible with prolonged high-dose GH stimulation - monitor fasting glucose"
+      ],
+      "washout_recommended_weeks": 4,
+      "adverse_events_common": [
+        "Transient water retention in first 2-4 weeks (15-20%)",
+        "Mild injection site reactions (10-15%)",
+        "Transient headache or flushing post-Ipamorelin injection (5-10%)",
+        "Mild cortisol blunting effect - monitor energy and stress resilience"
+      ]
+    },
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "HbA1c",
+          "Fasting Glucose",
+          "Lipid Panel",
+          "CMP",
+          "TFTs"
+        ]
+      },
+      {
+        "week": 4,
+        "labs": [
+          "Fasting Glucose",
+          "Blood Pressure"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "HbA1c",
+          "Lipid Panel",
+          "CMP",
+          "Fasting Insulin"
+        ]
+      }
+    ],
+    "_syncSource": "export/protocols/wm_003.js",
+    "risk_class": "moderate",
+    "_schemaVersion": "antigravity_v2",
+    "_patchSchema": "antigravity_v2",
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "Legacy fields retained for backward compatibility; phase_blueprints are preferred when present.",
+      "enabled": true
+    },
+    "_syncedAt": "2026-04-26T12:46:39.587Z",
+    "updated_at": "2026-05-04T15:06:50.088Z",
+    "recommended_supplements": [
+      "berberine",
+      "magnesium-glycinate"
+    ],
+    "_enrichment_notes": [
+      "expected_outcomes: INJECTED for category \\"Weight Management\\""
+    ],
+    "protocol_title": "Advanced Metabolic & Longevity Protocol",
+    "category": "Weight Management",
+    "syncedAt": "2026-05-16T14:32:35.327Z",
+    "status": "approved",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "age_variant_match",
+        "sex_variant_match",
+        "duration_variant_match",
+        "contraindication_screen",
+        "tolerance_profile"
+      ],
+      "tolerance_profiles": {
+        "good": {
+          "max_intensity": "aggressive"
+        },
+        "average": {
+          "max_intensity": "standard"
+        },
+        "sensitive": {
+          "max_intensity": "conservative"
+        }
+      },
+      "allow_acceleration": false,
+      "base_duration_weeks": 16,
+      "notes": "Default generator rules – pending clinical review.",
+      "tempo_variants": [
+        "standard"
+      ],
+      "allow_extension": false
+    },
+    "primary_goal": "Weight Management / Obesity",
+    "economics": {
+      "estimated_total_cost": 1800,
+      "estimated_weekly_cost": 113,
+      "currency": "USD",
+      "total_protocol_cost_estimate": null,
+      "total_vials_required": null
+    },
+    "bundleVersion": "2.0",
+    "variant_rules": {
+      "age_variants": {
+        "18-35": {
+          "default_duration_weeks": 16,
+          "escalation_profile": "standard",
+          "monitoring_intensity": "standard"
+        },
+        "36-50": {
+          "default_duration_weeks": 16,
+          "escalation_profile": "moderate",
+          "monitoring_intensity": "moderate"
+        },
+        "51-65": {
+          "default_duration_weeks": 16,
+          "escalation_profile": "conservative",
+          "monitoring_intensity": "enhanced"
+        },
+        "65+": {
+          "default_duration_weeks": 16,
+          "escalation_profile": "conservative",
+          "monitoring_intensity": "enhanced"
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "recommended_baseline_labs": [
+            "ferritin",
+            "TSH",
+            "free_T4"
+          ],
+          "special_flags": [
+            "cycle_variability",
+            "fluid_retention"
+          ]
+        },
+        "male": {
+          "recommended_baseline_labs": [
+            "total_testosterone",
+            "SHBG",
+            "estradiol"
+          ],
+          "special_flags": [
+            "androgen_status"
+          ]
+        }
+      },
+      "duration_variants": {
+        "8_weeks": {
+          "mode": "short",
+          "maintenance_phase": false,
+          "extra_monitoring": false
+        },
+        "12_weeks": {
+          "mode": "standard",
+          "maintenance_phase": true,
+          "extra_monitoring": false
+        },
+        "16_weeks": {
+          "mode": "extended",
+          "maintenance_phase": true,
+          "extra_monitoring": true
+        },
+        "20_weeks": {
+          "mode": "extended_metabolic",
+          "maintenance_phase": true,
+          "extra_monitoring": true
+        }
+      },
+      "tempo_variants": {
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up",
+          "restricted_to": [
+            "18-35",
+            "36-50"
+          ]
+        }
+      },
+      "tempo": {
+        "standard": {
+          "notes": "Standard tempo – no adjustment.",
+          "phase_duration_multiplier": 1
+        },
+        "accelerated": {
+          "notes": "Accelerated tempo – physician review required.",
+          "phase_duration_multiplier": 0.75
+        },
+        "extended": {
+          "notes": "Extended tempo – for slower responders.",
+          "phase_duration_multiplier": 1.33
+        }
+      }
+    },
+    "metadata": {
+      "longDescription": "This advanced protocol bridges metabolic weight management with longevity biology by combining GLP-1 receptor agonism (appetite and insulin regulation) with mitochondrial peptides (MOTS-c) that activate AMPK, improve insulin sensitivity, and modulate the folate cycle. The compound selection targets the intersection of metabolic syndrome and accelerated cellular aging: excess adiposity promotes senescence, systemic inflammation, and mitochondrial dysfunction. By addressing these pathways concurrently, the protocol aims for body-composition remodeling alongside hallmarks-of-aging improvements (López-Otín et al., Cell 2023). Appropriate for patients with metabolic syndrome who have failed monotherapy approaches.",
+      "primary_goal": "Weight Management / Obesity",
+      "keywords": [
+        "advanced weight management protocol",
+        "metabolic longevity peptides",
+        "MOTS-c GLP-1 combined protocol",
+        "body composition remodeling",
+        "metabolic syndrome peptide",
+        "anti-aging weight loss"
+      ],
+      "references": [
+        {
+          "pmid": "37832556",
+          "citation": "López-Otín C et al. Hallmarks of aging: An expanding universe. Cell 2023;186:243-278."
+        },
+        {
+          "pmid": "25738459",
+          "citation": "Lee C et al. The Mitochondrial-Derived Peptide MOTS-c Promotes Metabolic Homeostasis. Cell Metab 2015;21:443-454."
+        },
+        {
+          "pmid": "36205685",
+          "citation": "Jastreboff AM et al. Tirzepatide Once Weekly for the Treatment of Obesity. NEJM 2022;387:205-216."
+        }
+      ],
+      "scientificName": "Integrated GLP-1 & Mitokine Metabolic–Longevity Protocol",
+      "description": "Advanced multi-compound weight and longevity protocol combining GLP-1-class agonism with mitochondrial peptides for body-composition remodeling and cellular rejuvenation."
+    },
+    "_patchedAt": {
+      "schema_gap_fix": "2026-04-26T12:37:11Z",
+      "phase1_fix": "2026-05-17T08:28:52.937542+00:00"
+    },
+    "_last_synced_at": "2026-05-17T09:24:08.935Z",
+    "phase_blueprints": [
+      {
+        "phase_id": "wm_003_ph1",
+        "phase_name": "Metabolic Priming",
+        "duration_weeks": 4,
+        "drugs": [
+          {
+            "product_id": "Retatrutide-10mg-vial",
+            "product_title": "Retatrutide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "weekly",
+              "starting_weekly_dose": 2,
+              "dose_per_administration": 2,
+              "administration_days_default": [
+                "monday"
+              ],
+              "timing_hint": "Administer once weekly on a consistent day"
+            }
+          },
+          {
+            "product_id": "MOTS-C-10mg-vial",
+            "product_title": "MOTS-c",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "3x_week",
+              "starting_weekly_dose": 15,
+              "dose_per_administration": 5,
+              "administration_days_default": [
+                "monday",
+                "wednesday",
+                "friday"
+              ],
+              "timing_hint": "Administer on training days for metabolic priming"
+            }
+          },
+          {
+            "product_id": "Tesamorelin-2mg-vial",
+            "product_title": "Tesamorelin",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "5x_week",
+              "starting_weekly_dose": 5,
+              "dose_per_administration": 1,
+              "administration_days_default": [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday"
+              ],
+              "timing_hint": "Administer before bed to align with GH pulse"
+            }
+          },
+          {
+            "product_id": "SS-31-10mg-vial",
+            "product_title": "SS-31 (Elamipretide)",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "2x_week",
+              "starting_weekly_dose": 10,
+              "dose_per_administration": 5,
+              "administration_days_default": [
+                "tuesday",
+                "friday"
+              ],
+              "timing_hint": "Administer on non-training days for mitochondrial support"
+            }
+          },
+          {
+            "product_id": "GHK-Cu_(Copper_Peptide)-5mg-vial",
+            "product_title": "GHK-Cu",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "daily",
+              "starting_daily_dose": 1,
+              "dose_per_administration": 1,
+              "administration_days_default": [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday"
+              ],
+              "timing_hint": "Administer in the morning for anti-aging support"
+            }
+          }
+        ]
+      },
+      {
+        "phase_id": "wm_003_ph2",
+        "phase_name": "Active Fat Loss",
+        "duration_weeks": 8,
+        "drugs": [
+          {
+            "product_id": "Retatrutide-10mg-vial",
+            "product_title": "Retatrutide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "weekly",
+              "starting_weekly_dose": 6,
+              "dose_per_administration": 6,
+              "administration_days_default": [
+                "monday"
+              ],
+              "timing_hint": "Escalated dose for active fat loss phase"
+            }
+          },
+          {
+            "product_id": "AOD-9604-5mg-vial",
+            "product_title": "AOD-9604",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mcg",
+              "administration_frequency": "daily",
+              "starting_daily_dose": 300,
+              "dose_per_administration": 300,
+              "administration_days_default": [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday"
+              ],
+              "timing_hint": "Administer in the morning, fasted for best lipolytic effect"
+            }
+          },
+          {
+            "product_id": "MOTS-C-10mg-vial",
+            "product_title": "MOTS-c",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "3x_week",
+              "starting_weekly_dose": 15,
+              "dose_per_administration": 5,
+              "administration_days_default": [
+                "monday",
+                "wednesday",
+                "friday"
+              ],
+              "timing_hint": "Maintain metabolic signaling alongside GLP-1 agonist"
+            }
+          },
+          {
+            "product_id": "GHK-Cu_(Copper_Peptide)-5mg-vial",
+            "product_title": "GHK-Cu",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "3x_week",
+              "starting_weekly_dose": 3.5,
+              "dose_per_administration": 1.17,
+              "administration_days_default": [
+                "tuesday",
+                "thursday",
+                "saturday"
+              ],
+              "timing_hint": "Skin and anti-aging support during fat loss phase"
+            }
+          },
+          {
+            "product_id": "NAD-Plus-vial",
+            "product_title": "NAD+",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "2x_week",
+              "starting_weekly_dose": 100,
+              "dose_per_administration": 50,
+              "administration_days_default": [
+                "wednesday",
+                "saturday"
+              ],
+              "timing_hint": "Supports cellular energy and mitochondrial function"
+            }
+          }
+        ]
+      },
+      {
+        "phase_id": "wm_003_ph3",
+        "phase_name": "Metabolic Stabilization",
+        "duration_weeks": 4,
+        "drugs": [
+          {
+            "product_id": "Retatrutide-10mg-vial",
+            "product_title": "Retatrutide",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "weekly",
+              "starting_weekly_dose": 4,
+              "dose_per_administration": 4,
+              "administration_days_default": [
+                "monday"
+              ],
+              "timing_hint": "Maintenance dose for weight stabilization"
+            }
+          },
+          {
+            "product_id": "MOTS-C-10mg-vial",
+            "product_title": "MOTS-c",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "2x_week",
+              "starting_weekly_dose": 10,
+              "dose_per_administration": 5,
+              "administration_days_default": [
+                "monday",
+                "thursday"
+              ],
+              "timing_hint": "Reduced frequency for metabolic maintenance"
+            }
+          },
+          {
+            "product_id": "GHK-Cu_(Copper_Peptide)-5mg-vial",
+            "product_title": "GHK-Cu",
+            "route": "subcutaneous",
+            "dose_logic": {
+              "dose_unit": "mg",
+              "administration_frequency": "2x_week",
+              "starting_weekly_dose": 2,
+              "dose_per_administration": 1,
+              "administration_days_default": [
+                "tuesday",
+                "friday"
+              ],
+              "timing_hint": "Continue skin and longevity support during stabilization"
+            }
+          }
+        ]
+      }
+    ],
+    "title": "Advanced Metabolic & Longevity Protocol",
+    "synergy_rationale": "This multi-compound protocol is designed to provide synergistic effects, targeting multiple complementary biological pathways simultaneously to achieve weight management / obesity more effectively than monotherapy.",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "7-8 hours to minimize cortisol-driven insulin resistance.",
+      "nutrition": "High protein (>1.5g/kg body weight), caloric deficit (15-20%), high fiber.",
+      "activity": "Resistance training 3-4x weekly to preserve lean mass. 8,000+ daily steps.",
+      "hydration": "Minimum 3 liters of water daily with electrolytes."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:17.354Z",
+    "clinical_disclaimer": "This protocol is for educational and informational purposes only. It is not medical advice. Any decision to utilize peptide therapies should be made in consultation with a qualified healthcare professional who can review your full medical history, lab work, and potential contraindications.",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Metabolic Priming",
+        "start_week": 1,
+        "end_week": 4,
+        "drugs_used": [
+          {
+            "product_slug": "retatrutide",
+            "selected_strength": "5mg",
+            "weekly_dose": "2 mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "weekly",
+            "vials_required_for_phase": 2,
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 2,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "weekly_dose": "15 mg",
+            "per_administration_dose": "5 mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 12,
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 15,
+            "weekly_dose_unit": "mg",
+            "per_administration_dose_amount": 5,
+            "per_administration_dose_unit": "mg"
+          },
+          {
+            "product_slug": "tesamorelin",
+            "selected_strength": "10mg",
+            "weekly_dose": "5 mg",
+            "per_administration_dose": "1 mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "5x_week",
+            "vials_required_for_phase": 4,
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 5,
+            "weekly_dose_unit": "mg",
+            "per_administration_dose_amount": 1,
+            "per_administration_dose_unit": "mg"
+          },
+          {
+            "product_slug": "ss-31",
+            "selected_strength": "10mg",
+            "weekly_dose": "10 mg",
+            "per_administration_dose": "5 mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "2x_week",
+            "vials_required_for_phase": 4,
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 10,
+            "weekly_dose_unit": "mg",
+            "per_administration_dose_amount": 5,
+            "per_administration_dose_unit": "mg"
+          },
+          {
+            "product_slug": "ghk-cu",
+            "selected_strength": "10mg",
+            "weekly_dose": "7 mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 3,
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 7,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Active Fat Loss",
+        "start_week": 5,
+        "end_week": 12,
+        "drugs_used": [
+          {
+            "product_slug": "retatrutide",
+            "selected_strength": "5mg",
+            "weekly_dose": "6 mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "weekly",
+            "vials_required_for_phase": 10,
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 6,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "aod-9604",
+            "selected_strength": "5mg",
+            "weekly_dose": "2.1 mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 8,
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 2.1,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "weekly_dose": "15 mg",
+            "per_administration_dose": "5 mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 24,
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 15,
+            "weekly_dose_unit": "mg",
+            "per_administration_dose_amount": 5,
+            "per_administration_dose_unit": "mg"
+          },
+          {
+            "product_slug": "ghk-cu",
+            "selected_strength": "10mg",
+            "weekly_dose": "3.5 mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 3,
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 3.5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "nad",
+            "selected_strength": "500mg",
+            "weekly_dose": "500 mg",
+            "route": "intravenous",
+            "dosing_frequency": "2x_week",
+            "vials_required_for_phase": 2,
+            "weekly_dose_amount": 500,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 3,
+        "phase_title": "Metabolic Stabilization",
+        "start_week": 13,
+        "end_week": 16,
+        "drugs_used": [
+          {
+            "product_slug": "retatrutide",
+            "selected_strength": "5mg",
+            "weekly_dose": "4 mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "weekly",
+            "vials_required_for_phase": 4,
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 4,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "weekly_dose": "10 mg",
+            "per_administration_dose": "5 mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "2x_week",
+            "vials_required_for_phase": 8,
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 10,
+            "weekly_dose_unit": "mg",
+            "per_administration_dose_amount": 5,
+            "per_administration_dose_unit": "mg"
+          },
+          {
+            "product_slug": "ghk-cu",
+            "selected_strength": "10mg",
+            "weekly_dose": "2 mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "2x_week",
+            "vials_required_for_phase": 1,
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 2,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "expected_outcomes": {
+      "0": "Significant visceral fat reduction",
+      "1": "Enhanced insulin sensitivity",
+      "2": "Cellular energy optimization",
+      "3": "Metabolic stabilization",
+      "qualitative": [
+        "Progressive and sustained reduction in body weight and adipose mass",
+        "Improved metabolic flexibility and insulin sensitivity",
+        "Reduction in visceral fat as assessed by waist circumference or imaging",
+        "Stabilization of fasting glucose and lipid markers",
+        "Improved energy balance and reduced appetite-driven caloric intake"
+      ]
+    }
+  },
+  {
+    "id": "wm_004",
+    "active": true,
+    "physician_supervision_required": true,
+    "protocol_author_title": "Specialist",
+    "protocol_id": "wm_004",
+    "protocol_is_curated": true,
+    "protocol_is_physician_authored": true,
+    "protocol_review_status": "reviewed",
+    "protocol_source_type": "clinical_program",
+    "protocol_source_version": "1.0",
+    "washout_recommended_weeks": 6,
+    "protocol_duration_weeks": 12,
+    "schema_version": "antigravity_v2",
+    "complexity_level": "moderate",
+    "eligibility_rules": {
+      "indications": [
+        "Weight maintenance after active fat-loss phase",
+        "Metabolic stabilization",
+        "Prevention of rebound weight gain"
+      ],
+      "contraindications": [
+        "History of medullary thyroid carcinoma",
+        "MEN2 syndrome",
+        "Pregnancy",
+        "Active pancreatitis"
+      ],
+      "supported_goals": [
+        "weight_management",
+        "metabolic_health",
+        "fat_loss"
+      ],
+      "relative_cautions": [
+        "gallbladder_disease",
+        "thyroid_disorders",
+        "rapid_weight_loss_history"
+      ],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "patient_demographic",
+        "age_group",
+        "start_date",
+        "baseline_weight",
+        "height_cm",
+        "bmi",
+        "metabolic_status",
+        "tolerance_profile",
+        "duration_weeks"
+      ],
+      "baseline_requirements": [
+        "Weight",
+        "Waist circumference",
+        "Fasting glucose",
+        "Insulin",
+        "Lipid panel"
+      ],
+      "supported_age_groups": [
+        "18-35",
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ]
+    },
+    "normalizedAt": "2026-04-26T11:19:10.276Z",
+    "generated_protocol_template": {
+      "patient_context": {
+        "age_group": null,
+        "baseline_weight": null,
+        "duration_weeks": null,
+        "height_cm": null,
+        "metabolic_status": null,
+        "patient_demographic": null,
+        "physician_supervision_required": true,
+        "primary_clinical_focus": null,
+        "protocol_id": "wm_004",
+        "sex": null,
+        "tempo_preference": "standard",
+        "tolerance_profile": "average",
+        "bmi": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_group": "adult",
+        "duration_weeks": 20,
+        "intensity": "standard",
+        "sex": "universal",
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "validated_at": null,
+        "validated_by": null,
+        "validation_notes": "Auto-generated template. Pending clinical review.",
+        "validation_status": "NOT_EVALUATED",
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "metadata.shortCode": "WMT-004",
+    "riskManagement": {
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "contraindications": [
+        "Type 1 diabetes (insulin-dependent, use with caution)",
+        "Severe renal impairment",
+        "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ]
+    },
+    "metadata.scientificName": "Tirzepatide + AOD-9604 + MOTS-c Maintenance Protocol",
+    "risk_class": "moderate_complexity",
+    "metadata.visibility": "public",
+    "metadata.primary_goal": "Weight Maintenance",
+    "overview_summary": "Twelve-week intensive personalized weight loss protocol focusing on metabolic flexibility through dual-action GLP-1/GIP and mitochondrial support.",
+    "monitoring_plan": {
+      "if_symptoms": [
+        "Amylase",
+        "Lipase"
+      ],
+      "monthly": [
+        "Weight",
+        "Waist circumference",
+        "Blood pressure"
+      ],
+      "baseline_required": [
+        "HbA1c",
+        "fasting_glucose",
+        "fasting_insulin",
+        "lipid_profile",
+        "AST",
+        "ALT",
+        "creatinine",
+        "body_weight",
+        "waist_circumference",
+        "body_composition",
+        "blood_pressure"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "labs": [
+            "HbA1c",
+            "fasting_glucose",
+            "body_weight"
+          ],
+          "purpose": "Evaluate metabolic response and tolerance to tirzepatide escalation.",
+          "type": "mid_protocol_review",
+          "week": 6
+        },
+        {
+          "labs": [
+            "HbA1c",
+            "lipid_profile",
+            "AST",
+            "ALT",
+            "creatinine"
+          ],
+          "purpose": "Confirm metabolic response and safety closure.",
+          "type": "final_outcome_review",
+          "week": 12
+        }
+      ],
+      "every_12_weeks": [
+        "Fasting glucose",
+        "Insulin",
+        "HbA1c"
+      ],
+      "every_6_months": [
+        "Lipid panel"
+      ]
+    },
+    "metadata.schema_version": "antigravity_v2",
+    "confidence_score": 92,
+    "safety_profile": {
+      "washout_recommended_weeks": 6
+    },
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "labs": [
+          "HbA1c",
+          "Fasting Glucose",
+          "Lipid Panel",
+          "CMP",
+          "TFTs"
+        ]
+      },
+      {
+        "week": 4,
+        "labs": [
+          "Fasting Glucose",
+          "Blood Pressure"
+        ]
+      },
+      {
+        "week": 12,
+        "labs": [
+          "HbA1c",
+          "Lipid Panel",
+          "CMP",
+          "Fasting Insulin"
+        ]
+      }
+    ],
+    "status": "approved",
+    "_syncSource": "export/protocols/wm_004.js",
+    "dosing_enrichment": {
+      "titration_note": "Titration details pending clinical review.",
+      "cycling_recommendation": "Pending clinical review.",
+      "maintenance_dose": "Per phase blueprint dosing guidance.",
+      "timing_optimization": "Administer per phase blueprint timing."
+    },
+    "_patchedAt": {
+      "schema_gap_fix": "2026-04-26T12:37:11Z"
+    },
+    "_schemaVersion": "antigravity_v2",
+    "_patchSchema": "antigravity_v2",
+    "protocol_slug": "personalized-metabolic-weight-loss-12w",
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "Legacy fields retained for backward compatibility; phase_blueprints are preferred when present.",
+      "enabled": true
+    },
+    "number_of_phases": 2,
+    "_syncedAt": "2026-04-26T12:46:39.848Z",
+    "updated_at": "2026-05-04T14:35:44.637Z",
+    "protocol_author_organization": "ReGen Clinical",
+    "recommended_supplements": [
+      "berberine",
+      "magnesium-glycinate"
+    ],
+    "protocol_version": "v2.0",
+    "_enrichment_notes": [
+      "phases: INJECTED from phase_blueprints (3 phases)",
+      "expected_outcomes: INJECTED for category \\"Weight Management\\""
+    ],
+    "protocol_title": "Tirzepatide + AOD-9604 & MOTS-c Metabolic Protocol",
+    "category": "Weight Management",
+    "syncedAt": "2026-05-16T14:32:35.502Z",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "age_variant_match",
+        "sex_variant_match",
+        "duration_variant_match",
+        "contraindication_screen",
+        "tolerance_profile"
+      ],
+      "tolerance_profiles": {
+        "good": {
+          "max_intensity": "aggressive"
+        },
+        "average": {
+          "max_intensity": "standard"
+        },
+        "sensitive": {
+          "max_intensity": "conservative"
+        }
+      },
+      "allow_acceleration": false,
+      "base_duration_weeks": 12,
+      "notes": "Default generator rules – pending clinical review.",
+      "tempo_variants": [
+        "standard"
+      ],
+      "allow_extension": false
+    },
+    "primary_goal": "Weight Management / Obesity",
+    "metadata": {
+      "longDescription": "This protocol adds AOD-9604 (a synthetic peptide fragment of human growth hormone amino acids 176-191) to the tirzepatide and MOTS-c backbone. AOD-9604 selectively stimulates lipolysis and inhibits lipogenesis via β3-adrenergic receptor activation without the diabetogenic effects of full-length GH (Ng FM et al., Biochem Mol Biol Int 1997; Heffernan MA et al., J Endocrinol 2001). The three-compound combination covers complementary fat-reduction pathways: (1) central appetite suppression and insulin sensitisation via tirzepatide; (2) peripheral adipocyte lipolysis via AOD-9604; (3) mitochondrial metabolic efficiency via MOTS-c AMPK activation. Designed for patients seeking accelerated body-composition changes with a 12-week structured escalation.",
+      "primary_goal": "Weight Management / Obesity",
+      "keywords": [
+        "tirzepatide AOD-9604 protocol",
+        "lipolytic peptide protocol",
+        "fat loss triple compound",
+        "MOTS-c tirzepatide",
+        "AOD-9604 weight loss",
+        "accelerated fat loss protocol"
+      ],
+      "references": [
+        {
+          "pmid": "34170647",
+          "citation": "Frias JP et al. Tirzepatide versus Semaglutide. NEJM 2021;385:503-515."
+        },
+        {
+          "pmid": "9177022",
+          "citation": "Ng FM et al. Metabolic studies of a synthetic lipolytic domain (AOD9604) of human growth hormone. Biochem Mol Biol Int 1997;43:993-1000."
+        },
+        {
+          "pmid": "25738459",
+          "citation": "Lee C et al. The Mitochondrial-Derived Peptide MOTS-c Promotes Metabolic Homeostasis. Cell Metab 2015;21:443-454."
+        }
+      ],
+      "scientificName": "Tirzepatide + AOD-9604 + MOTS-c Triple-Action Lipolytic Protocol",
+      "description": "12-week triple-compound metabolic protocol using tirzepatide dual-agonism, AOD-9604 lipolysis, and MOTS-c mitochondrial optimization for accelerated fat loss and metabolic remodeling."
+    },
+    "economics": {
+      "total_protocol_cost_estimate": 1450,
+      "total_vials_required": 33
+    },
+    "protocol_author_name": "ReGen Clinical Team",
+    "bundleVersion": "2.0",
+    "variant_rules": {
+      "age_variants": {
+        "18-35": {
+          "default_duration_weeks": 12,
+          "escalation_profile": "standard",
+          "monitoring_intensity": "standard"
+        },
+        "36-50": {
+          "default_duration_weeks": 12,
+          "escalation_profile": "moderate",
+          "monitoring_intensity": "moderate"
+        },
+        "51-65": {
+          "default_duration_weeks": 16,
+          "escalation_profile": "conservative",
+          "monitoring_intensity": "enhanced"
+        },
+        "65+": {
+          "default_duration_weeks": 16,
+          "escalation_profile": "conservative",
+          "monitoring_intensity": "enhanced"
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "recommended_baseline_labs": [
+            "ferritin",
+            "TSH",
+            "free_T4"
+          ],
+          "special_flags": [
+            "cycle_variability",
+            "fluid_retention"
+          ]
+        },
+        "male": {
+          "recommended_baseline_labs": [
+            "total_testosterone",
+            "SHBG",
+            "estradiol"
+          ],
+          "special_flags": [
+            "androgen_status"
+          ]
+        }
+      },
+      "duration_variants": {
+        "8_weeks": {
+          "mode": "short",
+          "maintenance_phase": false,
+          "extra_monitoring": false
+        },
+        "12_weeks": {
+          "mode": "standard",
+          "maintenance_phase": true,
+          "extra_monitoring": false
+        },
+        "16_weeks": {
+          "mode": "extended",
+          "maintenance_phase": true,
+          "extra_monitoring": true
+        },
+        "20_weeks": {
+          "mode": "extended_metabolic",
+          "maintenance_phase": true,
+          "extra_monitoring": true
+        }
+      },
+      "tempo_variants": {
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up",
+          "restricted_to": [
+            "18-35",
+            "36-50"
+          ]
+        }
+      },
+      "tempo": {
+        "standard": {
+          "notes": "Standard tempo – no adjustment.",
+          "phase_duration_multiplier": 1
+        },
+        "accelerated": {
+          "notes": "Accelerated tempo – physician review required.",
+          "phase_duration_multiplier": 0.75
+        },
+        "extended": {
+          "notes": "Extended tempo – for slower responders.",
+          "phase_duration_multiplier": 1.33
+        }
+      }
+    },
+    "phase_blueprints": [
+      {
+        "clinical_purpose": [
+          "appetite_control",
+          "metabolic_activation"
+        ],
+        "default_duration_weeks": 4,
+        "default_start_week": 1,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_frequency": "weekly",
+              "dose_unit": "mg",
+              "starting_weekly_dose": 2.5
+            },
+            "product_id": "tirzepatide",
+            "product_title": "Tirzepatide",
+            "route": "subcutaneous"
+          },
+          {
+            "dose_logic": {
+              "administration_frequency": "daily",
+              "dose_per_administration": 500,
+              "dose_unit": "mcg",
+              "support_role": true
+            },
+            "product_id": "bpc-157",
+            "product_title": "BPC-157",
+            "route": "subcutaneous"
+          }
+        ],
+        "phase_key": "metabolic_induction",
+        "phase_title": "Metabolic Induction",
+        "clinical_events": [
+          {
+            "week": 1,
+            "event_type": "baseline_review",
+            "title": "Baseline metabolic review"
+          },
+          {
+            "week": 4,
+            "event_type": "outcome_review",
+            "title": "Phase outcome and safety review"
+          }
+        ]
+      },
+      {
+        "clinical_purpose": [
+          "fat_loss_acceleration",
+          "lipolysis_activation"
+        ],
+        "default_duration_weeks": 6,
+        "default_start_week": 5,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_frequency": "weekly",
+              "dose_unit": "mg",
+              "starting_weekly_dose": 5
+            },
+            "product_id": "tirzepatide",
+            "product_title": "Tirzepatide",
+            "route": "subcutaneous"
+          },
+          {
+            "dose_logic": {
+              "administration_frequency": "daily",
+              "dose_per_administration": 300,
+              "dose_unit": "mcg",
+              "timing_hint": "morning_fasting"
+            },
+            "product_id": "aod-9604",
+            "product_title": "AOD-9604",
+            "route": "subcutaneous"
+          },
+          {
+            "dose_logic": {
+              "administration_frequency": "3x_week",
+              "dose_per_administration": 5,
+              "dose_unit": "mg"
+            },
+            "product_id": "mots-c",
+            "product_title": "MOTS-c",
+            "route": "subcutaneous"
+          }
+        ],
+        "phase_key": "metabolic_acceleration",
+        "phase_title": "Metabolic Acceleration",
+        "clinical_events": [
+          {
+            "week": 5,
+            "event_type": "baseline_review",
+            "title": "Baseline metabolic review"
+          },
+          {
+            "week": 8,
+            "event_type": "progress_review",
+            "title": "Mid-phase progress review"
+          },
+          {
+            "week": 10,
+            "event_type": "outcome_review",
+            "title": "Phase outcome and safety review"
+          }
+        ]
+      },
+      {
+        "clinical_purpose": [
+          "weight_stabilization",
+          "metabolic_balance"
+        ],
+        "default_duration_weeks": 2,
+        "default_start_week": 11,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_frequency": "weekly",
+              "dose_unit": "mg",
+              "starting_weekly_dose": 5
+            },
+            "product_id": "tirzepatide",
+            "product_title": "Tirzepatide",
+            "route": "subcutaneous"
+          },
+          {
+            "dose_logic": {
+              "administration_frequency": "2x_week",
+              "dose_per_administration": 5,
+              "dose_unit": "mg"
+            },
+            "product_id": "mots-c",
+            "product_title": "MOTS-c",
+            "route": "subcutaneous"
+          }
+        ],
+        "phase_key": "metabolic_stabilization",
+        "phase_title": "Metabolic Stabilization",
+        "clinical_events": [
+          {
+            "week": 11,
+            "event_type": "baseline_review",
+            "title": "Baseline metabolic review"
+          },
+          {
+            "week": 12,
+            "event_type": "outcome_review",
+            "title": "Phase outcome and safety review"
+          }
+        ]
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.936Z",
+    "synergy_rationale": "This multi-compound protocol is designed to provide synergistic effects, targeting multiple complementary biological pathways simultaneously to achieve weight management / obesity more effectively than monotherapy.",
+    "protocol_last_reviewed_at": "2026-03-29",
+    "clinical_timeline": [
+      {
+        "phase": "Phase 1 (Initiation)",
+        "expected": "Cellular adaptation and initial biomarker shifts. Minor adjustment symptoms may occur."
+      },
+      {
+        "phase": "Phase 2 (Active/Maintenance)",
+        "expected": "Primary clinical outcomes become measurable. Sustained biological modulation."
+      }
+    ],
+    "lifestyle": {
+      "sleep": "7-8 hours to minimize cortisol-driven insulin resistance.",
+      "nutrition": "High protein (>1.5g/kg body weight), caloric deficit (15-20%), high fiber.",
+      "activity": "Resistance training 3-4x weekly to preserve lean mass. 8,000+ daily steps.",
+      "hydration": "Minimum 3 liters of water daily with electrolytes."
+    },
+    "_last_cleaned_at": "2026-05-17T10:50:24.868Z",
+    "clinical_disclaimer": "This protocol is for educational and informational purposes only. It is not medical advice. Any decision to utilize peptide therapies should be made in consultation with a qualified healthcare professional who can review your full medical history, lab work, and potential contraindications.",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Metabolic Induction",
+        "start_week": 1,
+        "end_week": 4,
+        "drugs_used": [
+          {
+            "product_slug": "tirzepatide",
+            "selected_strength": "10mg",
+            "weekly_dose": "2.5 mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "weekly",
+            "vials_required_for_phase": 1,
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 2.5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "bpc-157",
+            "selected_strength": "5mg",
+            "weekly_dose": "3.5 mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 3,
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 3.5,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Metabolic Acceleration",
+        "start_week": 5,
+        "end_week": 12,
+        "drugs_used": [
+          {
+            "product_slug": "tirzepatide",
+            "selected_strength": "10mg",
+            "weekly_dose": "5 mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "weekly",
+            "vials_required_for_phase": 4,
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "aod-9604",
+            "selected_strength": "5mg",
+            "weekly_dose": "2.1 mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "daily",
+            "vials_required_for_phase": 4,
+            "reconstitution_volume_ml": 2,
+            "weekly_dose_amount": 2.1,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "product_slug": "mots-c",
+            "selected_strength": "5mg",
+            "weekly_dose": "15 mg",
+            "route": "subcutaneous",
+            "dosing_frequency": "3x_week",
+            "vials_required_for_phase": 24,
+            "reconstitution_volume_ml": 1,
+            "weekly_dose_amount": 15,
+            "weekly_dose_unit": "mg"
+          }
+        ]
+      }
+    ],
+    "expected_outcomes": {
+      "0": "Sustainable fat loss",
+      "1": "Improved metabolic rate",
+      "2": "Cellular rejuvenation",
+      "3": "Body composition optimization",
+      "qualitative": [
+        "Progressive and sustained reduction in body weight and adipose mass",
+        "Improved metabolic flexibility and insulin sensitivity",
+        "Reduction in visceral fat as assessed by waist circumference or imaging",
+        "Stabilization of fasting glucose and lipid markers",
+        "Improved energy balance and reduced appetite-driven caloric intake"
+      ]
+    }
+  },
+  {
+    "id": "wm_005",
+    "active": true,
+    "physician_supervision_required": true,
+    "protocol_author_title": "MD, Anti-Aging & Metabolic Medicine",
+    "protocol_duration_weeks": 24,
+    "protocol_id": "wm_005",
+    "protocol_is_curated": true,
+    "protocol_is_physician_authored": true,
+    "protocol_review_status": "reviewed",
+    "protocol_source_type": "clinical_protocol",
+    "protocol_source_version": "v6.0",
+    "washout_recommended_weeks": 6,
+    "risk_class": "moderate_complexity",
+    "overview_summary": "Six-month structured multi-compound peptide protocol targeting visceral fat, GH-axis activation, mitochondrial efficiency, and metabolic resilience through three progressive 8-week phases.",
+    "monitoring_plan": {
+      "every_8_weeks": [
+        "Fasting glucose",
+        "Insulin",
+        "IGF-1"
+      ],
+      "monthly": [
+        "Weight",
+        "Waist circumference",
+        "Blood pressure"
+      ],
+      "baseline_required": [
+        "HbA1c",
+        "fasting_glucose",
+        "fasting_insulin",
+        "lipid_profile",
+        "IGF-1",
+        "AST",
+        "ALT",
+        "creatinine",
+        "body_weight",
+        "waist_circumference",
+        "body_composition",
+        "blood_pressure"
+      ],
+      "scheduled_checkpoints": [
+        {
+          "labs": [
+            "fasting_glucose",
+            "body_weight",
+            "waist_circumference"
+          ],
+          "purpose": "Evaluate tolerance and early metabolic response at end of Initiation Phase.",
+          "type": "end_of_phase_review",
+          "week": 8
+        },
+        {
+          "labs": [
+            "IGF-1",
+            "fasting_glucose",
+            "fasting_insulin",
+            "HbA1c",
+            "body_composition"
+          ],
+          "purpose": "Assess GH-axis response and lipolytic progress at end of Activation Phase.",
+          "type": "mid_protocol_review",
+          "week": 16
+        },
+        {
+          "labs": [
+            "HbA1c",
+            "lipid_profile",
+            "IGF-1",
+            "AST",
+            "ALT",
+            "creatinine",
+            "body_composition",
+            "waist_circumference"
+          ],
+          "purpose": "Final metabolic outcome review and washout decision.",
+          "type": "final_outcome_review",
+          "week": 24
+        }
+      ]
+    },
+    "schema_version": "antigravity_v2",
+    "protocol_version": "v1.0",
+    "complexity_level": "advanced",
+    "eligibility_rules": {
+      "indications": [
+        "Central adiposity",
+        "Age-related metabolic decline",
+        "Weight loss resistance",
+        "Reduced mitochondrial efficiency",
+        "Fatigue associated with metabolic dysfunction",
+        "Insulin resistance patterns",
+        "Visceral fat accumulation",
+        "Recovery impairment",
+        "Suboptimal metabolic flexibility"
+      ],
+      "contraindications": [
+        "Active malignancy",
+        "Pregnancy or breastfeeding",
+        "Uncontrolled diabetes mellitus",
+        "Severe cardiovascular instability",
+        "Known hypersensitivity to peptide compounds",
+        "Severe renal or hepatic impairment"
+      ],
+      "supported_goals": [
+        "weight_management",
+        "metabolic_health",
+        "fat_loss",
+        "mitochondrial_support",
+        "longevity"
+      ],
+      "relative_cautions": [
+        "hypothyroidism_uncontrolled",
+        "history_of_pituitary_disorders",
+        "fluid_retention_history"
+      ],
+      "required_patient_inputs": [
+        "primary_clinical_focus",
+        "patient_demographic",
+        "age_group",
+        "start_date",
+        "baseline_weight",
+        "height_cm",
+        "bmi",
+        "metabolic_status",
+        "tolerance_profile",
+        "duration_weeks"
+      ],
+      "baseline_requirements": [
+        "Body weight",
+        "Waist circumference",
+        "Fasting glucose",
+        "Fasting insulin",
+        "HbA1c",
+        "Lipid panel",
+        "IGF-1",
+        "Body composition (DEXA or BIA)"
+      ],
+      "supported_age_groups": [
+        "36-50",
+        "51-65",
+        "65+"
+      ],
+      "supported_sex": [
+        "female",
+        "male"
+      ]
+    },
+    "normalizedAt": "2026-04-26T11:19:10.543Z",
+    "confidence_score": 87,
+    "generated_protocol_template": {
+      "patient_context": {
+        "age_group": null,
+        "baseline_weight": null,
+        "duration_weeks": null,
+        "height_cm": null,
+        "metabolic_status": null,
+        "patient_demographic": null,
+        "physician_supervision_required": true,
+        "primary_clinical_focus": null,
+        "protocol_id": "wm_005",
+        "sex": null,
+        "tolerance_profile": "good",
+        "tempo_preference": "standard",
+        "bmi": null,
+        "start_date": null
+      },
+      "resolved_costs": {},
+      "applied_variants": {
+        "age_group": "adult",
+        "duration_weeks": 24,
+        "intensity": "aggressive",
+        "sex": "universal",
+        "age_variant": null,
+        "sex_variant": null,
+        "duration_variant": null,
+        "tempo_variant": "standard"
+      },
+      "resolved_phases": [],
+      "resolved_timeline": [],
+      "validation": {
+        "validated_at": null,
+        "validated_by": null,
+        "validation_notes": "Auto-generated template. Pending clinical review.",
+        "validation_status": "NOT_EVALUATED",
+        "state": "NOT_EVALUATED",
+        "modules": []
+      },
+      "resolved_monitoring": []
+    },
+    "protocol_title": "Advanced Weight Management & Metabolic Longevity Protocol",
+    "safety_profile": {
+      "reconstitution": {
+        "solvent": "Bacteriostatic Water",
+        "dilution_volume_ml": 2
+      },
+      "notes": [
+        "Store reconstituted vials at 2–8°C",
+        "Rotate injection sites regularly",
+        "Use sterile injection technique",
+        "Monitor metabolic parameters periodically",
+        "Follow physician supervision"
+      ],
+      "washout_recommended_weeks": 4,
+      "accessories": [
+        "Bacteriostatic Water 10 mL",
+        "Insulin Syringes 1 mL",
+        "Alcohol Prep Pads"
+      ]
+    },
+    "monitoringSchedule": [
+      {
+        "week": 0,
+        "label": "Baseline Assessment",
+        "tests": [
+          "Full blood count (CBC)",
+          "Comprehensive metabolic panel (CMP)",
+          "Vitals & weight"
+        ],
+        "notes": "Establish baseline before starting protocol."
+      },
+      {
+        "week": 12,
+        "label": "Mid-Protocol Check-In",
+        "tests": [
+          "Symptom review",
+          "Subjective wellbeing score (1–10)",
+          "Side-effect screening",
+          "Fasting glucose",
+          "Insulin",
+          "HOMA-IR",
+          "Lipid panel"
+        ],
+        "notes": "Assess tolerability and early response."
+      },
+      {
+        "week": 24,
+        "label": "End-of-Protocol Evaluation",
+        "tests": [
+          "Repeat CBC & CMP",
+          "Outcome questionnaire",
+          "Physician review",
+          "HbA1c",
+          "Full lipid panel",
+          "Body composition (DEXA or impedance)"
+        ],
+        "notes": "Full outcome assessment and decision on continuation or cycling."
+      }
+    ],
+    "status": "approved",
+    "riskManagement": {
+      "patient_education": [
+        "Demonstrate subcutaneous injection technique before starting.",
+        "Provide written dosing schedule and injection site rotation map.",
+        "Instruct patient to report any unusual symptoms within 24h.",
+        "Advise on proper sharps disposal.",
+        "Provide emergency contact number for out-of-hours concerns."
+      ],
+      "side_effects": [
+        {
+          "effect": "Injection site reactions",
+          "frequency": "Common (10–30%)",
+          "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
+        },
+        {
+          "effect": "Mild nausea (first 1–2 weeks)",
+          "frequency": "Uncommon (5–15%)",
+          "management": "Administer with food; reduce dose temporarily if persistent."
+        },
+        {
+          "effect": "Fatigue or somnolence",
+          "frequency": "Rare (<5%)",
+          "management": "Adjust injection timing; evaluate sleep hygiene."
+        },
+        {
+          "effect": "Headache",
+          "frequency": "Uncommon (5–10%)",
+          "management": "Hydration; paracetamol as needed; review dosing."
+        }
+      ],
+      "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
+      "contraindications": [
+        "Type 1 diabetes (insulin-dependent, use with caution)",
+        "Severe renal impairment",
+        "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
+      ],
+      "escalation_criteria": [
+        "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
+        "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
+        "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
+        "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
+      ]
+    },
+    "_syncSource": "export/protocols/wm_005.js",
+    "dosing_enrichment": {
+      "titration_note": "Titration details pending clinical review.",
+      "cycling_recommendation": "Pending clinical review.",
+      "maintenance_dose": "Per phase blueprint dosing guidance.",
+      "timing_optimization": "Administer per phase blueprint timing."
+    },
+    "economics": {
+      "total_protocol_cost_estimate": null,
+      "total_vials_required": null
+    },
+    "_patchedAt": {
+      "schema_gap_fix": "2026-04-26T12:37:11Z"
+    },
+    "_schemaVersion": "antigravity_v2",
+    "_patchSchema": "antigravity_v2",
+    "protocol_slug": "wm-005",
+    "legacy_compatibility": {
+      "deprecated_fields": [
+        "phases",
+        "computedTimeline",
+        "computedCost"
+      ],
+      "notes": "Legacy fields retained for backward compatibility; phase_blueprints are preferred when present.",
+      "enabled": true
+    },
+    "number_of_phases": 3,
+    "_syncedAt": "2026-04-26T12:46:40.505Z",
+    "recommended_supplements": [
+      {
+        "dosage": "500mg daily",
+        "name": "NMN (Nicotinamide Mononucleotide)",
+        "rationale": "NAD+ precursor supporting mitochondrial biogenesis and metabolic longevity, synergizing with advanced peptide stack for optimal cellular energy",
+        "timing": "Morning with breakfast"
+      },
+      {
+        "dosage": "500mg 2x/day",
+        "name": "Berberine",
+        "rationale": "AMPK activator that amplifies GLP-1 receptor signalling and improves insulin sensitivity, complementing the advanced weight management peptide protocol",
+        "timing": "With meals"
+      },
+      {
+        "dosage": "400mg daily",
+        "name": "Magnesium Glycinate",
+        "rationale": "Supports insulin signalling, reduces cortisol-driven fat storage, and improves sleep quality — critical for advanced metabolic protocols",
+        "timing": "Evening before sleep"
+      },
+      {
+        "dosage": "2-4g EPA/DHA daily",
+        "name": "Omega-3 Fish Oil",
+        "rationale": "Reduces systemic inflammation that impairs metabolic efficiency, supports lean mass preservation during advanced caloric restriction phases",
+        "timing": "With meals"
+      },
+      {
+        "dosage": "5000 IU D3 + 100mcg K2",
+        "name": "Vitamin D3 + K2",
+        "rationale": "Optimizes hormone signalling, calcium metabolism, and immune function — foundational for advanced longevity-focused metabolic protocols",
+        "timing": "Morning with fat-containing meal"
+      },
+      {
+        "dosage": "200-400mg daily",
+        "name": "Coenzyme Q10 (Ubiquinol)",
+        "rationale": "Supports mitochondrial function and cardiac health during intensive peptide-assisted weight loss; particularly important at advanced protocol levels",
+        "timing": "With largest meal of day"
+      }
+    ],
+    "_enrichment_notes": [
+      "phases: INJECTED from phase_blueprints (3 phases)"
+    ],
+    "category": "Weight Management",
+    "syncedAt": "2026-05-17T07:29:19.970824+00:00",
+    "generator_rules": {
+      "selection_priority": [
+        "goal_match",
+        "age_variant_match",
+        "metabolic_severity_match"
+      ],
+      "allow_acceleration": false,
+      "base_duration_weeks": 24,
+      "notes": "Default generator rules – pending clinical review.",
+      "tempo_variants": [
+        "standard"
+      ],
+      "allow_extension": false
+    },
+    "primary_goal": "Weight Management / Metabolic Longevity",
+    "protocol_author_name": "Atlas Health Clinical Team",
+    "bundleVersion": "2.0",
+    "protocol_author_organization": "Atlas Health",
+    "variant_rules": {
+      "age_variants": {
+        "18-35": {
+          "default_duration_weeks": 24,
+          "monitoring_intensity": "standard"
+        },
+        "36-50": {
+          "default_duration_weeks": 24,
+          "monitoring_intensity": "standard"
+        },
+        "51-65": {
+          "default_duration_weeks": 24,
+          "monitoring_intensity": "moderate"
+        },
+        "65+": {
+          "default_duration_weeks": 24,
+          "monitoring_intensity": "enhanced"
+        }
+      },
+      "sex_variants": {
+        "female": {
+          "special_notes": [
+            "Monitor cycle influence on metabolism."
+          ]
+        },
+        "male": {
+          "special_notes": [
+            "Standard monitoring."
+          ]
+        }
+      },
+      "duration_variants": {
+        "24_weeks": {
+          "mode": "standard"
+        }
+      },
+      "tempo_variants": {
+        "conservative": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "up"
+        },
+        "standard": {
+          "dose_step_interval_weeks": 4,
+          "monitoring_intensity_modifier": "none"
+        },
+        "aggressive": {
+          "dose_step_interval_weeks": 2,
+          "monitoring_intensity_modifier": "up"
+        }
+      },
+      "tempo": {
+        "standard": {
+          "notes": "Standard tempo – no adjustment.",
+          "phase_duration_multiplier": 1
+        },
+        "accelerated": {
+          "notes": "Accelerated tempo – physician review required.",
+          "phase_duration_multiplier": 0.75
+        },
+        "extended": {
+          "notes": "Extended tempo – for slower responders.",
+          "phase_duration_multiplier": 1.33
+        }
+      }
+    },
+    "phase_blueprints": [
+      {
+        "clinical_purpose": [
+          "metabolic_activation",
+          "tissue_repair",
+          "gh_axis_initiation",
+          "neuro_stabilization"
+        ],
+        "default_duration_weeks": 8,
+        "default_start_week": 1,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_frequency": "daily",
+              "dose_per_administration": 250,
+              "dose_unit": "mcg",
+              "timing_hint": "morning_intranasal"
+            },
+            "product_id": "selank",
+            "product_title": "Selank",
+            "route": "intranasal"
+          },
+          {
+            "dose_logic": {
+              "administration_frequency": "daily",
+              "dose_per_administration": 500,
+              "dose_unit": "mcg",
+              "timing_hint": "morning_subcutaneous"
+            },
+            "product_id": "bpc-157",
+            "product_title": "BPC-157",
+            "route": "subcutaneous"
+          },
+          {
+            "dose_logic": {
+              "administration_frequency": "daily",
+              "dose_per_administration": 50,
+              "dose_unit": "mg",
+              "timing_hint": "morning_oral"
+            },
+            "product_id": "5-amino-1mq",
+            "product_title": "5-Amino-1MQ",
+            "route": "oral"
+          },
+          {
+            "dose_logic": {
+              "administration_frequency": "5x_week",
+              "dose_per_administration": 1,
+              "dose_unit": "mg",
+              "timing_hint": "night_subcutaneous"
+            },
+            "product_id": "tesamorelin",
+            "product_title": "Tesamorelin",
+            "route": "subcutaneous"
+          },
+          {
+            "dose_logic": {
+              "administration_frequency": "5x_week",
+              "dose_per_administration": 200,
+              "dose_unit": "mcg",
+              "timing_hint": "night_subcutaneous"
+            },
+            "product_id": "ipamorelin",
+            "product_title": "Ipamorelin",
+            "route": "subcutaneous"
+          }
+        ],
+        "objectives": [
+          "Initiate metabolic activation",
+          "Enhance tissue repair",
+          "Begin GH-axis stimulation",
+          "Establish metabolic baseline"
+        ],
+        "phase_key": "initiation_phase",
+        "phase_title": "Initiation Phase",
+        "clinical_events": [
+          {
+            "week": 1,
+            "event_type": "baseline_review",
+            "title": "Baseline metabolic review"
+          },
+          {
+            "week": 5,
+            "event_type": "progress_review",
+            "title": "Mid-phase progress review"
+          },
+          {
+            "week": 8,
+            "event_type": "outcome_review",
+            "title": "Phase outcome and safety review"
+          }
+        ]
+      },
+      {
+        "clinical_purpose": [
+          "lipolysis_enhancement",
+          "metabolic_turnover",
+          "neuro_support_maintenance"
+        ],
+        "default_duration_weeks": 8,
+        "default_start_week": 9,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_frequency": "daily",
+              "dose_per_administration": 250,
+              "dose_unit": "mcg",
+              "timing_hint": "morning_intranasal"
+            },
+            "product_id": "selank",
+            "product_title": "Selank",
+            "route": "intranasal"
+          },
+          {
+            "dose_logic": {
+              "administration_frequency": "daily",
+              "dose_per_administration": 50,
+              "dose_unit": "mg",
+              "timing_hint": "morning_oral"
+            },
+            "product_id": "5-amino-1mq",
+            "product_title": "5-Amino-1MQ",
+            "route": "oral"
+          },
+          {
+            "dose_logic": {
+              "administration_frequency": "5x_week",
+              "dose_per_administration": 2,
+              "dose_unit": "mg",
+              "timing_hint": "night_subcutaneous"
+            },
+            "product_id": "tesamorelin",
+            "product_title": "Tesamorelin",
+            "route": "subcutaneous"
+          }
+        ],
+        "objectives": [
+          "Enhance lipolysis",
+          "Support metabolic turnover",
+          "Maintain neuro-support"
+        ],
+        "phase_key": "activation_phase",
+        "phase_title": "Activation Phase",
+        "clinical_events": [
+          {
+            "week": 9,
+            "event_type": "baseline_review",
+            "title": "Baseline metabolic review"
+          },
+          {
+            "week": 13,
+            "event_type": "progress_review",
+            "title": "Mid-phase progress review"
+          },
+          {
+            "week": 16,
+            "event_type": "outcome_review",
+            "title": "Phase outcome and safety review"
+          }
+        ]
+      },
+      {
+        "clinical_purpose": [
+          "metabolic_stabilization",
+          "tissue_regeneration",
+          "weight_management_consolidation",
+          "mitochondrial_activation"
+        ],
+        "default_duration_weeks": 8,
+        "default_start_week": 17,
+        "drugs": [
+          {
+            "dose_logic": {
+              "administration_frequency": "daily",
+              "dose_per_administration": 500,
+              "dose_unit": "mcg",
+              "timing_hint": "morning_subcutaneous"
+            },
+            "product_id": "bpc-157",
+            "product_title": "BPC-157",
+            "route": "subcutaneous"
+          },
+          {
+            "dose_logic": {
+              "administration_frequency": "daily",
+              "dose_per_administration": 50,
+              "dose_unit": "mg",
+              "timing_hint": "morning_oral"
+            },
+            "product_id": "5-amino-1mq",
+            "product_title": "5-Amino-1MQ",
+            "route": "oral"
+          },
+          {
+            "dose_logic": {
+              "administration_frequency": "once_weekly",
+              "dose_per_administration": 5,
+              "dose_unit": "mg",
+              "timing_hint": "morning_subcutaneous",
+              "note": "Active during Month 5 (weeks 17–21)"
+            },
+            "product_id": "mots-c",
+            "product_title": "MOTS-C",
+            "route": "subcutaneous"
+          }
+        ],
+        "objectives": [
+          "Stabilize metabolic improvements",
+          "Support tissue regeneration",
+          "Consolidate weight-management gains",
+          "Activate mitochondrial pathways"
+        ],
+        "phase_key": "optimization_phase",
+        "phase_title": "Optimization Phase",
+        "clinical_events": [
+          {
+            "week": 17,
+            "event_type": "baseline_review",
+            "title": "Baseline metabolic review"
+          },
+          {
+            "week": 21,
+            "event_type": "progress_review",
+            "title": "Mid-phase progress review"
+          },
+          {
+            "week": 24,
+            "event_type": "outcome_review",
+            "title": "Phase outcome and safety review"
+          }
+        ]
+      }
+    ],
+    "_last_synced_at": "2026-05-17T09:24:08.936Z",
+    "clinical_disclaimer": "This protocol is for educational and informational purposes only. It is not medical advice. Any decision to utilize peptide therapies should be made in consultation with a qualified healthcare professional who can review your full medical history, lab work, and potential contraindications.",
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_title": "Initiation Phase",
+        "end_week": 8,
+        "objectives": [
+          "Initiate metabolic activation",
+          "Enhance tissue repair",
+          "Begin GH-axis stimulation",
+          "Establish metabolic baseline"
+        ],
+        "_injected_from": "phase_blueprints",
+        "phase_key": "initiation_phase",
+        "clinical_purpose": [
+          "metabolic_activation",
+          "tissue_repair",
+          "gh_axis_initiation",
+          "neuro_stabilization"
+        ],
+        "drugs_used": [
+          {
+            "dose_per_administration": 250,
+            "weekly_dose": "1750 mcg",
+            "dose_unit": "mcg",
+            "product_title": "Selank",
+            "timing_hint": "morning_intranasal",
+            "route": "intranasal",
+            "dosing_frequency": "daily",
+            "product_slug": "selank",
+            "weekly_dose_amount": 1750,
+            "weekly_dose_unit": "mcg"
+          },
+          {
+            "dose_per_administration": 500,
+            "weekly_dose": "3500 mcg",
+            "dose_unit": "mcg",
+            "product_title": "BPC-157",
+            "timing_hint": "morning_subcutaneous",
+            "route": "subcutaneous",
+            "dosing_frequency": "daily",
+            "product_slug": "bpc-157",
+            "weekly_dose_amount": 3500,
+            "weekly_dose_unit": "mcg"
+          },
+          {
+            "dose_per_administration": 50,
+            "weekly_dose": "350 mg",
+            "dose_unit": "mg",
+            "product_title": "5-Amino-1MQ",
+            "timing_hint": "morning_oral",
+            "route": "oral",
+            "dosing_frequency": "daily",
+            "product_slug": "5-amino-1mq",
+            "weekly_dose_amount": 350,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "dose_per_administration": 1,
+            "weekly_dose": "5 mg",
+            "dose_unit": "mg",
+            "product_title": "Tesamorelin",
+            "timing_hint": "night_subcutaneous",
+            "route": "subcutaneous",
+            "dosing_frequency": "5x_week",
+            "product_slug": "tesamorelin",
+            "weekly_dose_amount": 5,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "dose_per_administration": 200,
+            "weekly_dose": "1000 mcg",
+            "dose_unit": "mcg",
+            "product_title": "Ipamorelin",
+            "timing_hint": "night_subcutaneous",
+            "route": "subcutaneous",
+            "dosing_frequency": "5x_week",
+            "product_slug": "ipamorelin",
+            "weekly_dose_amount": 1000,
+            "weekly_dose_unit": "mcg"
+          }
+        ],
+        "start_week": 1
+      },
+      {
+        "phase_number": 2,
+        "phase_title": "Activation Phase",
+        "end_week": 16,
+        "objectives": [
+          "Enhance lipolysis",
+          "Support metabolic turnover",
+          "Maintain neuro-support"
+        ],
+        "_injected_from": "phase_blueprints",
+        "phase_key": "activation_phase",
+        "clinical_purpose": [
+          "lipolysis_enhancement",
+          "metabolic_turnover",
+          "neuro_support_maintenance"
+        ],
+        "drugs_used": [
+          {
+            "dose_per_administration": 250,
+            "weekly_dose": "1750 mcg",
+            "dose_unit": "mcg",
+            "product_title": "Selank",
+            "timing_hint": "morning_intranasal",
+            "route": "intranasal",
+            "dosing_frequency": "daily",
+            "product_slug": "selank",
+            "weekly_dose_amount": 1750,
+            "weekly_dose_unit": "mcg"
+          },
+          {
+            "dose_per_administration": 50,
+            "weekly_dose": "350 mg",
+            "dose_unit": "mg",
+            "product_title": "5-Amino-1MQ",
+            "timing_hint": "morning_oral",
+            "route": "oral",
+            "dosing_frequency": "daily",
+            "product_slug": "5-amino-1mq",
+            "weekly_dose_amount": 350,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "dose_per_administration": 2,
+            "weekly_dose": "10 mg",
+            "dose_unit": "mg",
+            "product_title": "Tesamorelin",
+            "timing_hint": "night_subcutaneous",
+            "route": "subcutaneous",
+            "dosing_frequency": "5x_week",
+            "product_slug": "tesamorelin",
+            "weekly_dose_amount": 10,
+            "weekly_dose_unit": "mg"
+          }
+        ],
+        "start_week": 9
+      },
+      {
+        "phase_number": 3,
+        "phase_title": "Optimization Phase",
+        "end_week": 24,
+        "objectives": [
+          "Stabilize metabolic improvements",
+          "Support tissue regeneration",
+          "Consolidate weight-management gains",
+          "Activate mitochondrial pathways"
+        ],
+        "_injected_from": "phase_blueprints",
+        "phase_key": "optimization_phase",
+        "clinical_purpose": [
+          "metabolic_stabilization",
+          "tissue_regeneration",
+          "weight_management_consolidation",
+          "mitochondrial_activation"
+        ],
+        "drugs_used": [
+          {
+            "dose_per_administration": 500,
+            "weekly_dose": "3500 mcg",
+            "dose_unit": "mcg",
+            "product_title": "BPC-157",
+            "timing_hint": "morning_subcutaneous",
+            "route": "subcutaneous",
+            "dosing_frequency": "daily",
+            "product_slug": "bpc-157",
+            "weekly_dose_amount": 3500,
+            "weekly_dose_unit": "mcg"
+          },
+          {
+            "dose_per_administration": 50,
+            "weekly_dose": "350 mg",
+            "dose_unit": "mg",
+            "product_title": "5-Amino-1MQ",
+            "timing_hint": "morning_oral",
+            "route": "oral",
+            "dosing_frequency": "daily",
+            "product_slug": "5-amino-1mq",
+            "weekly_dose_amount": 350,
+            "weekly_dose_unit": "mg"
+          },
+          {
+            "dose_per_administration": 5,
+            "weekly_dose": "5 mg",
+            "dose_unit": "mg",
+            "product_title": "MOTS-C",
+            "timing_hint": "morning_subcutaneous",
+            "route": "subcutaneous",
+            "dosing_frequency": "once_weekly",
+            "product_slug": "mots-c",
+            "weekly_dose_amount": 5,
+            "weekly_dose_unit": "mg"
+          }
+        ],
+        "start_week": 17
+      }
+    ],
+    "metadata": {
+      "schema_version": "antigravity_v2",
+      "keywords": [
+        "selank",
+        "BPC-157",
+        "5-Amino-1MQ",
+        "tesamorelin",
+        "ipamorelin",
+        "MOTS-C",
+        "visceral fat",
+        "metabolic longevity",
+        "GH axis",
+        "mitochondrial peptide"
+      ],
+      "references": [
+        {
+          "citation": "Falutz J et al. Tesamorelin and visceral adiposity in HIV-associated lipodystrophy. NEJM 2007.",
+          "pmid": "17989384"
+        },
+        {
+          "citation": "Sikiric P et al. BPC-157: a review of central and peripheral healing effects. Curr Pharm Des 2018.",
+          "pmid": "29591529"
+        },
+        {
+          "citation": "Lee C et al. MOTS-c: a mitochondrial-derived peptide regulating muscle and fat metabolism. Cell Metabolism 2015.",
+          "pmid": "25738459"
+        },
+        {
+          "citation": "Neelapu BC et al. 5-Amino-1MQ as NNMT inhibitor in metabolic disease models. J Med Chem 2019.",
+          "pmid": "31026175"
+        },
+        {
+          "citation": "Smirnova EN et al. Selank anxiolytic and neuroprotective effects. Zh Vyssh Nerv Deiat Im I P Pavlova 2015."
+        }
+      ],
+      "visibility": "public",
+      "description": "Six-month advanced weight management protocol combining neuropeptide stress modulation (Selank), tissue repair (BPC-157), NNMT inhibition for fat metabolism (5-Amino-1MQ), visceral fat reduction via GHRH stimulation (Tesamorelin), GH pulse augmentation (Ipamorelin), and mitochondrial activation (MOTS-C). Structured in three progressive 8-week phases.",
+      "primary_condition": "obesity_metabolic_dysfunction",
+      "abbreviatedName": "Selank + BPC-157 + 5-Amino-1MQ + Tesamorelin",
+      "shortCode": "WML-005",
+      "clinical_summary": "A structured six-month multi-phase peptide protocol designed to support fat metabolism, mitochondrial efficiency, recovery, and metabolic resilience. The protocol integrates neuro-support, GH-axis stimulation, metabolic enhancers, and mitochondrial peptides to promote progressive weight-management support and metabolic optimization in aging populations.",
+      "evidence_grade": "B",
+      "scientificName": "Selank + BPC-157 + 5-Amino-1MQ + Tesamorelin + Ipamorelin + MOTS-C Metabolic Protocol",
+      "primary_goal": "Weight Management / Metabolic Longevity"
+    },
+    "expected_outcomes": {
+      "0": "Improved energy levels and physical resilience",
+      "1": "Enhanced recovery capacity",
+      "2": "Reduced visceral fat and waist circumference",
+      "3": "Improved metabolic flexibility and lipid profile",
+      "4": "Improved fasting glucose and insulin sensitivity",
+      "5": "Optimized body composition and muscle preservation",
+      "qualitative": [
+        "Progressive and sustained reduction in body weight and adipose mass",
+        "Improved metabolic flexibility and insulin sensitivity",
+        "Reduction in visceral fat as assessed by waist circumference or imaging",
+        "Stabilization of fasting glucose and lipid markers",
+        "Improved energy balance and reduced appetite-driven caloric intake"
+      ]
+    }
+  }
+]`);

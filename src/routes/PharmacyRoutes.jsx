@@ -6,9 +6,9 @@ import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import PharmacyHome, { PharmacyDashboardTab, PlaceholderTab } from '../templates/PharmacyHome';
 import UserSettings from '../templates/UserSettings';
 
-const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
-const ClinicalAIWidget = React.lazy(() => import('../components/admin/ClinicalAIWidget'));
-const OrdersTab = React.lazy(() => import('../components/admin/OrdersTab'));
+import MessagingWidget from '../components/messaging/MessagingWidget';
+import ClinicalAIWidget from '../components/admin/ClinicalAIWidget';
+import OrdersTab from '../components/admin/OrdersTab';
 
 const TabSkeleton = () => (
   <div style={{ padding: '2rem' }}>

@@ -1,5 +1,8 @@
+import Check from "lucide-react/dist/esm/icons/check";
+import Minus from "lucide-react/dist/esm/icons/minus";
 import React from 'react';
-import { Check, Minus } from 'lucide-react';
+
+
 
 export default function PermissionMatrixView({ roles, permissionCategories }) {
   // permissionCategories could be an array of objects like:
@@ -45,7 +48,6 @@ export default function PermissionMatrixView({ roles, permissionCategories }) {
                   {category.module}
                 </td>
               </tr>
-              
               {/* Permissions Rows */}
               {category.permissions.map(perm => (
                 <tr key={perm.key} style={{ borderBottom: '1px solid var(--border)' }}>

@@ -1,6 +1,29 @@
+import Package from "lucide-react/dist/esm/icons/package";
+import Syringe from "lucide-react/dist/esm/icons/syringe";
+import Droplets from "lucide-react/dist/esm/icons/droplets";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import Info from "lucide-react/dist/esm/icons/info";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import History from "lucide-react/dist/esm/icons/history";
 /* eslint-disable no-undef, no-unused-vars */
 import React, { useMemo, useState, useCallback } from 'react';
-import { Package, Syringe, Droplets, CheckCircle2, ChevronRight, AlertTriangle, ShoppingCart, Info, Activity, FlaskConical, Zap, History } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
 import { getPeptidePK } from '../../data/peptidePharmacokinetics';
 import BottomSheet from '../shared/BottomSheet';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -1374,7 +1397,6 @@ const ProtocolSupplyEngine = React.memo(function ProtocolSupplyEngine({
       `}</style>
 
       <div className="pse-body">
-        
         {/* ── Interactive Duration Slider ── */}
         <div className="pse-duration-slider-container" style={{ padding: '0.5rem 0 1.5rem 0', borderBottom: '1px solid var(--color-border)', marginBottom: '1rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
@@ -1403,7 +1425,6 @@ const ProtocolSupplyEngine = React.memo(function ProtocolSupplyEngine({
             <Package size={10} />
             {tier === 'clinic' ? 'Clinic Pricing' : tier === 'wholesale' ? 'Wholesale' : 'Retail Pricing'}
           </span>
-          
           {/* Duration Controls */}
           <div style={{
             display: 'flex',

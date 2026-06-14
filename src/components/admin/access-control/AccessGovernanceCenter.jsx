@@ -1,10 +1,23 @@
+import List from "lucide-react/dist/esm/icons/list";
+import Grid from "lucide-react/dist/esm/icons/grid";
+import Search from "lucide-react/dist/esm/icons/search";
+import Filter from "lucide-react/dist/esm/icons/filter";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Copy from "lucide-react/dist/esm/icons/copy";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import React, { useState } from 'react';
 import ExecutiveSummary from './ExecutiveSummary';
 import RoleCardsView from './RoleCardsView';
 import PermissionMatrixView from './PermissionMatrixView';
 import RoleEditorModal from './RoleEditorModal';
 
-import { List, Grid, Search, Filter, Plus, Copy, RefreshCw } from 'lucide-react';
+
+
+
+
+
+
+
 
 const DUMMY_ROLES = [
   { id: 'admin', name: 'Admin', description: 'Full System Control & Settings', userCount: 4, accessPercentage: 100, territories: 'All', pricingLevel: 'All', aiAccess: 'Full', lastModified: 'Today', color: 'var(--color-danger)' },
@@ -40,7 +53,6 @@ const DUMMY_CATEGORIES = [
 export default function AccessGovernanceCenter() {
   const [viewMode, setViewMode] = useState('cards'); // 'cards' | 'matrix'
   const [editingRole, setEditingRole] = useState(null);
-  
   const handleEditRole = (roleId) => {
     const role = DUMMY_ROLES.find(r => r.id === roleId);
     setEditingRole(role);
@@ -53,14 +65,12 @@ export default function AccessGovernanceCenter() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '4rem' }}>
-      
       {/* Header Actions */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <div>
           <h2 style={{ margin: 0, fontSize: '1.5rem', color: 'var(--text-main)' }}>Access Governance Center</h2>
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>Manage Identity, Security, and RBAC matrix across all modules and regions.</p>
         </div>
-        
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <button className="gcp-btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
             <Copy size={16} />
@@ -99,7 +109,6 @@ export default function AccessGovernanceCenter() {
             <Search size={14} color="var(--text-muted)" />
             <input type="text" placeholder="Search roles or permissions..." style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: '0.85rem', width: '200px' }} />
           </div>
-          
           <button style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.4rem 0.8rem', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-main)' }}>
             <Filter size={14} />
             Filters

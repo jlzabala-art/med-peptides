@@ -1,6 +1,20 @@
- 
+import Lock from "lucide-react/dist/esm/icons/lock";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Scale from "lucide-react/dist/esm/icons/scale";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import X from "lucide-react/dist/esm/icons/x";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 import { memo, useState } from 'react';
-import { Lock, Shield, FileText, Scale, ExternalLink, AlertTriangle, X, ChevronRight } from 'lucide-react';
+
+
+
+
+
+
+
+
 import { useNavigate } from 'react-router-dom';
 import { useTenant } from '../context/TenantContext';
 
@@ -174,7 +188,6 @@ function Footer() {
               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: '320px' }}>
                 Global distribution network for advanced research compounds and validated clinical protocols. Ensuring data integrity since 2018.
               </p>
-              
               <div className="footer-badges-container" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '0.5rem' }}>
                 <span style={S.badge}>
                   <Lock size={12} strokeWidth={2.5} />

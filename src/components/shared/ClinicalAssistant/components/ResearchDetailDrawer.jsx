@@ -1,7 +1,18 @@
+import X from "lucide-react/dist/esm/icons/x";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import Book from "lucide-react/dist/esm/icons/book";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import FileText from "lucide-react/dist/esm/icons/file-text";
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ExternalLink, Book, Shield, Beaker, FileText } from 'lucide-react';
+
+
+
+
+
+
 
 export default function ResearchDetailDrawer({ 
   isOpen, 
@@ -67,7 +78,6 @@ export default function ResearchDetailDrawer({
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                
                 {/* Compound Summary */}
                 <section>
                   <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Compound Overview</div>

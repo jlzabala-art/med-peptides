@@ -1,6 +1,14 @@
- 
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import Pill from "lucide-react/dist/esm/icons/pill";
+import Microscope from "lucide-react/dist/esm/icons/microscope";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import React from 'react';
-import { Building2, Pill, Microscope, ArrowRight, ShieldCheck } from 'lucide-react';
+
+
+
+
+
 
 export default function InstitutionalSolutions({ isProfessional, onSelectCategory }) {
   if (!isProfessional) return null;
@@ -104,7 +112,6 @@ export default function InstitutionalSolutions({ isProfessional, onSelectCategor
               }}>
                 {solution.icon}
               </div>
-              
               <h3 style={{ 
                 fontSize: '1.85rem', 
                 color: '#0f172a', 
@@ -114,7 +121,6 @@ export default function InstitutionalSolutions({ isProfessional, onSelectCategor
               }}>
                 {solution.title}
               </h3>
-              
               <p style={{ 
                 fontSize: '1.15rem', 
                 color: 'var(--color-text-secondary)', 
@@ -158,7 +164,6 @@ export default function InstitutionalSolutions({ isProfessional, onSelectCategor
           ))}
         </div>
       </div>
-      
       <style dangerouslySetInnerHTML={{ __html: `
         .solution-card:hover {
           transform: translateY(-12px);

@@ -1,6 +1,8 @@
- 
+import X from "lucide-react/dist/esm/icons/x";
+import ZoomIn from "lucide-react/dist/esm/icons/zoom-in";
 import React, { useEffect } from 'react';
-import { X, ZoomIn } from 'lucide-react';
+
+
 import { lockScroll, unlockScroll } from '../utils/scrollLock';
 
 export default function ImageModal({ isOpen, onClose, imageSrc, altText }) {
@@ -67,7 +69,6 @@ export default function ImageModal({ isOpen, onClose, imageSrc, altText }) {
           }
         }
       `}</style>
-      
       <button 
         onClick={onClose}
         aria-label="Cerrar"
@@ -94,7 +95,6 @@ export default function ImageModal({ isOpen, onClose, imageSrc, altText }) {
       >
         <X size={22} strokeWidth={2.5} />
       </button>
-      
       <div 
         className="zoom-image-container"
         onClick={(e) => {

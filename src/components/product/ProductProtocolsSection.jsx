@@ -1,4 +1,5 @@
- 
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 /**
  * ProductProtocolsSection.jsx
  * Displays protocols that feature the current peptide.
@@ -7,7 +8,8 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, ArrowRight } from 'lucide-react';
+
+
 import { RelatedCard } from '../protocol/RelatedProtocolsSection';
 
 export default function ProductProtocolsSection({ protocols, peptideName }) {

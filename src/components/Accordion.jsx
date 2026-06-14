@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 
 export function AccordionItem({ 
   id, 

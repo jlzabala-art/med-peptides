@@ -1,6 +1,27 @@
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Target from "lucide-react/dist/esm/icons/target";
+import Package from "lucide-react/dist/esm/icons/package";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import User from "lucide-react/dist/esm/icons/user";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import React, { useState } from 'react';
 import { calculateDetailedAIScore } from './LeadUtils';
-import { Mail, Phone, Calendar, ArrowUpRight, DollarSign, Target, Package, Clock, ShieldAlert, User, MapPin } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
 
 const STAGES = [
   { id: 'new', label: 'New', color: '#3b82f6', bg: '#eff6ff' },
@@ -110,12 +131,10 @@ export default function LeadKanbanBoard({ leads, onLeadClick, onStatusChange }) 
               const aiDetails = calculateDetailedAIScore(lead);
               const isRFQ = lead.type === 'rfq';
               const itemsCount = lead.originalData?.items?.length || 0;
-              
               // Calculate opportunity value
               const value = isRFQ 
                 ? (lead.originalData?.items || []).reduce((sum, item) => sum + ((item.clientUnitPrice || 250) * (item.quantity || 1)), 0)
                 : 500;
-              
               const daysOpen = Math.max(0, Math.floor((new Date() - new Date(lead.createdAt)) / (1000 * 60 * 60 * 24)));
               const owner = lead.assignedOwner || 'Jose';
               const country = lead.country || (isRFQ ? 'Spain' : 'UAE');
@@ -251,7 +270,6 @@ export default function LeadKanbanBoard({ leads, onLeadClick, onStatusChange }) 
                       </div>
                       <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>{owner}</span>
                     </div>
-                    
                     {/* Next Action Indicator */}
                     <span style={{ 
                       fontSize: '0.65rem', 

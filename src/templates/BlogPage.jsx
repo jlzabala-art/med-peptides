@@ -1,7 +1,7 @@
- 
+import Search from "lucide-react/dist/esm/icons/search";
 import React, { useState, useMemo } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';
-import { Search } from 'lucide-react';
+
 import { useBlogPosts } from '../hooks/useBlogPosts';
 import BlogCard from '../components/blog/BlogCard';
 import blogHeroImg from '../assets/images/blog_hero_knowledge.png';
@@ -28,7 +28,6 @@ export default function BlogPage() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
-  
   const { posts: blogPosts } = useBlogPosts();
 
   const filteredPosts = useMemo(() => {
@@ -47,7 +46,6 @@ export default function BlogPage() {
       {/* --- Hero Section --- */}
       <header className="blog-hero">
         <div className="blog-hero__container">
-          
           <div className="blog-hero__content">
             <div className="blog-hero__badge">Atlas Health Knowledge Hub</div>
             <h1 className="blog-hero__title">
@@ -56,7 +54,6 @@ export default function BlogPage() {
             <p className="blog-hero__desc">
               Peer-reviewed insights on performance, recovery, metabolism, brain health, and cellular biology — written for practitioners and curious minds alike.
             </p>
-            
             {/* Glassmorphic Search Bar */}
             <div className="blog-hero__search-wrapper">
               <Search className="blog-hero__search-icon" size={18} />
@@ -144,7 +141,6 @@ export default function BlogPage() {
             pointerEvents: 'none',
             zIndex: 1
           }} />
-          
           <div style={{ flex: '1 1 500px', zIndex: 2 }}>
             <span style={{
               display: 'inline-block',
@@ -168,7 +164,6 @@ export default function BlogPage() {
               Ask questions about peptide structures, clinical trials, dosages, or longevity biomarkers. ClinicAI compiles real-time, peer-reviewed medical data instantly.
             </p>
           </div>
-          
           <div style={{ zIndex: 2 }}>
             <button 
               onClick={() => {

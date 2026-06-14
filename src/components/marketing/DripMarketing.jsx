@@ -1,5 +1,16 @@
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Play from "lucide-react/dist/esm/icons/play";
+import Pause from "lucide-react/dist/esm/icons/pause";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Users from "lucide-react/dist/esm/icons/users";
 import React from 'react';
-import { Mail, Play, Pause, Plus, Clock, Users } from 'lucide-react';
+
+
+
+
+
+
 
 const DripMarketing = () => {
   return (

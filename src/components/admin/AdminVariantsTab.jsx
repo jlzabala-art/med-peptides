@@ -1,3 +1,13 @@
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import EyeOff from "lucide-react/dist/esm/icons/eye-off";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import Package from "lucide-react/dist/esm/icons/package";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Hash from "lucide-react/dist/esm/icons/hash";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Check from "lucide-react/dist/esm/icons/check";
+import Save from "lucide-react/dist/esm/icons/save";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 /**
  * AdminVariantsTab.jsx
@@ -12,7 +22,16 @@ import { collection, getDocs, doc, updateDoc, query, orderBy } from 'firebase/fi
 import AppFilterBar from '../ui/AppFilterBar';
 import DataTable from '../ui/DataTable';
 import { db } from '../../firebase';
-import { RefreshCw, EyeOff, Eye, Package, DollarSign, Hash, AlertTriangle, Check, Save, Sparkles } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 import { useToast } from '../../hooks/useToast';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ProductContextSwitcher from './ProductContextSwitcher';
@@ -308,7 +327,6 @@ export default function AdminVariantsTab() {
             <Sparkles size={13} style={{ marginRight: '4px' }} />
             <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>Atlas</span>
           </button>
-          
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -676,11 +694,9 @@ export default function AdminVariantsTab() {
           );
         }}
       />
-    
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: AdminVariantsTab | Props: none
       </div>
-    
 </div>
   );
 }

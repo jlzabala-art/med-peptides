@@ -1,3 +1,10 @@
+import Receipt from "lucide-react/dist/esm/icons/receipt";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import X from "lucide-react/dist/esm/icons/x";
+import Save from "lucide-react/dist/esm/icons/save";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import LinkIcon from "lucide-react/dist/esm/icons/link";
 /**
  * BillsWidget – Reusable Supplier Bills widget.
  * Can be embedded in any portal.
@@ -12,7 +19,13 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../firebase';
-import { Receipt, Plus, X, Save, Trash2, CheckCircle, Link as LinkIcon } from 'lucide-react';
+
+
+
+
+
+
+
 
 const STATUS_OPTIONS = ['unpaid', 'paid', 'void'];
 const STATUS_STYLE = {

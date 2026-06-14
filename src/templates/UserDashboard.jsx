@@ -1,18 +1,63 @@
+import Package from "lucide-react/dist/esm/icons/package";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Info from "lucide-react/dist/esm/icons/info";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Download from "lucide-react/dist/esm/icons/download";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import Bell from "lucide-react/dist/esm/icons/bell";
+import Check from "lucide-react/dist/esm/icons/check";
+import X from "lucide-react/dist/esm/icons/x";
+import UserPlus from "lucide-react/dist/esm/icons/user-plus";
+import BrainCircuit from "lucide-react/dist/esm/icons/brain-circuit";
+import Send from "lucide-react/dist/esm/icons/send";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { ROUTE } from '../constants/productEnums';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
 import { collection, query, where, orderBy, onSnapshot, getDoc, doc, getDocs, limit, updateDoc, arrayUnion, addDoc } from 'firebase/firestore';
-import {
-  Package, Clock, CheckCircle2, Truck, ExternalLink,
-  ShieldCheck, ArrowLeft, ClipboardList, Info,
-  FileText, MessageSquare, Download, Loader2, FlaskConical,
-  Stethoscope, Bell, Check, X, UserPlus, BrainCircuit, Send, Sparkles
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { generateClinicalPDF } from '../services/pdfService';
 import ExitProfessionalMode from '../components/auth/ExitProfessionalMode';
 import PatientOrdersTab from '../components/patient/PatientOrdersTab';
+import BloodTestAnalyzerWidget from '../components/patient/BloodTestAnalyzerWidget';
+
+// Nuevos Componentes de Widgets
+import DraggableDashboard from '../components/widgets/core/DraggableDashboard';
+import OrderTrackingWidget from '../components/widgets/logistics/OrderTrackingWidget';
+import BillingInvoicesWidget from '../components/widgets/finance/BillingInvoicesWidget';
+import ClinicalHistoryWidget from '../components/widgets/clinical/ClinicalHistoryWidget';
 
 
 // ─── Status Configuration ────────────────────────────────────────────────────
@@ -177,6 +222,19 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
   const { user, isProfessional, activeRole } = useAuth();
   const [activeTab, setActiveTab] = useState('orders');
 
+  const AVAILABLE_WIDGETS = useMemo(() => ({
+    OrderTracking: OrderTrackingWidget,
+    BillingInvoices: BillingInvoicesWidget,
+    ClinicalHistory: ClinicalHistoryWidget,
+  }), []);
+
+  const initialWidgetLayout = useMemo(() => [
+    { id: 'widget-1', type: 'ClinicalHistory', props: { role: 'patient' } },
+    { id: 'widget-2', type: 'OrderTracking', props: { role: 'patient', userId: user?.uid } },
+    { id: 'widget-3', type: 'BillingInvoices', props: { role: 'patient' } },
+  ], [user]);
+
+
   const allowedTabs = useMemo(() => {
     return TABS.filter(tab => {
       if ((tab.id === 'my-supervisor' || tab.id === 'recommendations') && activeRole !== 'patient') {
@@ -267,7 +325,6 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
       await updateDoc(doctorRef, {
         assignedPatientIds: arrayUnion(user.uid)
       });
-      
       // 4. Refresh supervisor and invitations
       const docSnap = await getDoc(doctorRef);
       if (docSnap.exists()) setSupervisor({ id: doctorId, ...docSnap.data() });
@@ -712,13 +769,11 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
                   My Active Prescriptions
                 </h2>
               </div>
-              
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
                 {sortedOrders.filter(o => o.prescription).map((order) => {
                   const rx = order.prescription;
                   const orderDate = order.createdAt?.toDate ? order.createdAt.toDate() : new Date();
                   const remainingDays = Math.max(0, 60 - Math.floor((new Date() - orderDate) / (1000 * 60 * 60 * 24)));
-                  
                   return (
                     <div key={order.id} style={{
                       padding: '1.25rem',
@@ -739,11 +794,9 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
                             {rx.fileName}
                           </span>
                         </div>
-                        
                         <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0f172a', margin: '0.75rem 0 0.5rem 0' }}>
                           {rx.match || 'Compounding Formula'}
                         </h3>
-                        
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.78rem', color: 'var(--color-text-secondary)' }}>
                           <div>Dosage: <strong style={{ color: 'var(--color-text-primary)' }}>{rx.dosage}</strong></div>
                           <div>Frequency: <strong style={{ color: 'var(--color-text-primary)', textTransform: 'capitalize' }}>{rx.frequency}</strong></div>
@@ -789,9 +842,30 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
             </div>
           )}
 
-                    {/* Orders Card (Refactored to PatientOrdersTab) */}
+          {/* Orders Card (Refactored to PatientOrdersTab) */}
           {activeTab === 'orders' && (
-            <PatientOrdersTab userId={user.uid} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              <BloodTestAnalyzerWidget onRecommendationClick={(res) => window.location.href='/catalog'} />
+              
+              <div className="bg-black/40 border border-white/10 rounded-3xl p-6 shadow-2xl">
+                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                  <Package className="text-[#C0A062]" />
+                  Mi Panel de Control (Arrastrable)
+                </h3>
+                <p className="text-gray-400 text-sm mb-6">Personaliza tu vista arrastrando los widgets al orden que prefieras.</p>
+                <DraggableDashboard 
+                  availableWidgets={AVAILABLE_WIDGETS}
+                  initialLayout={initialWidgetLayout}
+                  onLayoutChange={(layout) => console.log('Nuevo layout paciente guardado:', layout)}
+                />
+              </div>
+
+              {/* Mantenemos el componente original para no romper el layout existente temporalmente */}
+              <div className="mt-8 border-t border-white/10 pt-8">
+                <h3 className="text-lg font-bold text-white mb-4">Historial Tradicional de Pedidos</h3>
+                <PatientOrdersTab userId={user.uid} />
+              </div>
+            </div>
           )}
 
                     {/* ── My Supervisor Tab (Refactored) ── */}

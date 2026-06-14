@@ -1,9 +1,43 @@
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import Edit3 from "lucide-react/dist/esm/icons/edit-3";
+import Copy from "lucide-react/dist/esm/icons/copy";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import BarChart2 from "lucide-react/dist/esm/icons/bar-chart-2";
+import Users from "lucide-react/dist/esm/icons/users";
+import FileDown from "lucide-react/dist/esm/icons/file-down";
+import Search from "lucide-react/dist/esm/icons/search";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import Send from "lucide-react/dist/esm/icons/send";
+import Check from "lucide-react/dist/esm/icons/check";
+import X from "lucide-react/dist/esm/icons/x";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Lock from "lucide-react/dist/esm/icons/lock";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
 import React, { useState, useEffect } from 'react';
 import { catalogRepository } from '../../repositories/catalogRepository';
-import { 
-  FileText, Plus, Eye, Edit3, Copy, Trash2, ExternalLink, 
-  BarChart2, Users, FileDown, Search, ArrowLeft, Send, Check, X, Globe, Lock, ChevronDown, ChevronUp
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { getProtocolTemplates } from '../../repositories/protocolRepository';
 import { getDocs, collection } from 'firebase/firestore';
 import { db } from '../../firebase';
@@ -32,14 +66,11 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
       } else {
         ownedList = await catalogRepository.getCatalogsByOwner(ownerId);
       }
-      
       const publicList = await catalogRepository.getPublicCatalogs();
-      
       // Merge and deduplicate by id
       const mergedMap = new Map();
       publicList.forEach(c => mergedMap.set(c.id, c));
       ownedList.forEach(c => mergedMap.set(c.id, c)); // Owned ones override if there's overlap
-      
       setCatalogs(Array.from(mergedMap.values()));
     } catch (e) {
       console.error('Error loading catalogs:', e);

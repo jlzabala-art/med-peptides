@@ -1,9 +1,18 @@
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import Truck from "lucide-react/dist/esm/icons/truck";
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Card } from '../ui';
-import { Loader2, CheckCircle, ShieldCheck, XCircle, Truck } from 'lucide-react';
+
+
+
+
+
 import { useTranslation } from 'react-i18next';
 
 export default function PublicClientQuote() {
@@ -53,7 +62,6 @@ export default function PublicClientQuote() {
   };
 
   if (loading) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Loader2 className="spin" /></div>;
-  
   if (error) return (
     <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
       <Card style={{ padding: '3rem', textAlign: 'center', maxWidth: '500px' }}>
@@ -68,7 +76,6 @@ export default function PublicClientQuote() {
   return (
     <div style={{ minHeight: '100vh', background: '#f0fdf4', padding: '3rem 1rem' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', justifyContent: 'center', color: '#166534' }}>
           <ShieldCheck size={20} />
           <span style={{ fontSize: '0.9rem', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>{t('quote.portalTitle', "Client Quote Portal")}</span>
@@ -117,7 +124,6 @@ export default function PublicClientQuote() {
                 </div>
               </div>
             </div>
-            
             {(rfq.status === 'SHIPPED' || rfq.status === 'DELIVERED') && rfq.shippingData && (
               <div style={{ marginTop: '2rem', padding: '1.5rem', background: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: '#1d4ed8' }}>
@@ -140,7 +146,6 @@ export default function PublicClientQuote() {
                 </div>
               </div>
             )}
-            
           </div>
 
           {!status && (

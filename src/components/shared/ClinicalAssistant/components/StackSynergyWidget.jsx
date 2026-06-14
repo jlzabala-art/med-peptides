@@ -1,7 +1,10 @@
+import Share2 from "lucide-react/dist/esm/icons/share-2";
+import Zap from "lucide-react/dist/esm/icons/zap";
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Share2, Zap } from 'lucide-react';
+
+
 
 export default function StackSynergyWidget({ synergyScore = 85, compounds = [] }) {
   const getLevelColor = (score) => {
@@ -68,7 +71,6 @@ export default function StackSynergyWidget({ synergyScore = 85, compounds = [] }
           </div>
         ))}
       </div>
-      
       <p style={{ fontSize: '0.62rem', color: 'var(--color-text-secondary)', marginTop: '0.8rem', fontStyle: 'italic', lineHeight: 1.4 }}>
         This score represents the theoretical research synergy between the identified compounds for the specified goal.
       </p>

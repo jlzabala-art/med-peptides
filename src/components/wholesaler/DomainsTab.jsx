@@ -1,8 +1,21 @@
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import Check from "lucide-react/dist/esm/icons/check";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Server from "lucide-react/dist/esm/icons/server";
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
-import { Globe, Shield, RefreshCw, Check, AlertTriangle, ArrowRight, Server } from 'lucide-react';
+
+
+
+
+
+
+
 
 export default function DomainsTab() {
   const { userProfile } = useAuth();
@@ -213,7 +226,6 @@ export default function DomainsTab() {
             <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.8125rem', marginBottom: '1rem' }}>
               To complete domain verification and allow our edge network to generate your SSL certificate, please log in to your DNS provider and add the following CNAME record:
             </p>
-            
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8125rem', background: 'var(--color-bg-app)', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
               <thead>
                 <tr style={{ textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>

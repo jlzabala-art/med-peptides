@@ -1,8 +1,13 @@
+import UserPlus from "lucide-react/dist/esm/icons/user-plus";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import LinkIcon from "lucide-react/dist/esm/icons/link";
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
-import { UserPlus, Mail, Link as LinkIcon } from 'lucide-react';
+
+
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Spinner from '../ui/Spinner';
 import Card from '../ui/Card';
@@ -12,7 +17,6 @@ import StatusChip from '../ui/StatusChip';
 export default function ManagerInvitationsTab() {
   const { currentUser } = useAuth();
   const queryClient = useQueryClient();
-  
   // Form State
   const [inviteeName, setInviteeName] = useState('');
   const [inviteeEmail, setInviteeEmail] = useState('');
@@ -27,9 +31,7 @@ export default function ManagerInvitationsTab() {
       const invRef = collection(db, 'invitations');
       const q = query(invRef, where('createdBy', '==', currentUser.uid));
       const snap = await getDocs(q);
-      
       const invList = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      
       return invList.sort((a, b) => {
         const dateA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
         const dateB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
@@ -62,7 +64,6 @@ export default function ManagerInvitationsTab() {
   const handleCreateInvite = (e) => {
     e.preventDefault();
     if (!inviteeName || !inviteeRole) return;
-    
     createInviteMutation.mutate({
       name: inviteeName,
       email: inviteeEmail || null,
@@ -84,7 +85,6 @@ export default function ManagerInvitationsTab() {
       alert("No email address provided for this invitation.");
       return;
     }
-    
     try {
       const link = `${window.location.origin}/login?invite=${invite.id}`;
       await addDoc(collection(db, 'mail'), {
@@ -160,7 +160,6 @@ export default function ManagerInvitationsTab() {
               >
                 <LinkIcon size={16} />
               </button>
-              
               {row.email && (
                 <button 
                   onClick={() => sendEmail(row)}
@@ -197,13 +196,11 @@ export default function ManagerInvitationsTab() {
       </div>
 
       <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'flex-start' }}>
-        
         {/* Create Form */}
         <Card style={{ flex: '1 1 300px' }}>
           <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <UserPlus size={20} color="var(--color-primary)" /> Create New Invite
           </h2>
-          
           <form onSubmit={handleCreateInvite} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>User Role</label>
@@ -217,7 +214,6 @@ export default function ManagerInvitationsTab() {
                 <option value="staff">Staff / Nurse</option>
               </select>
             </div>
-            
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>Full Name</label>
               <input 
@@ -229,7 +225,6 @@ export default function ManagerInvitationsTab() {
                 style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none' }}
               />
             </div>
-            
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>Email Address (Optional)</label>
               <input 

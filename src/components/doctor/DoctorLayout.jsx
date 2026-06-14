@@ -1,5 +1,24 @@
+import Menu from "lucide-react/dist/esm/icons/menu";
+import X from "lucide-react/dist/esm/icons/x";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import BrainCircuit from "lucide-react/dist/esm/icons/brain-circuit";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Package from "lucide-react/dist/esm/icons/package";
 import React, { useState, useEffect, useCallback } from 'react';
-import { Menu, X, ArrowLeft, Stethoscope, Bot, Zap, ChevronRight, BrainCircuit, FlaskConical, Package } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 

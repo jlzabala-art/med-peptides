@@ -1,11 +1,52 @@
+import Receipt from "lucide-react/dist/esm/icons/receipt";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import X from "lucide-react/dist/esm/icons/x";
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Download from "lucide-react/dist/esm/icons/download";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Check from "lucide-react/dist/esm/icons/check";
+import Grid from "lucide-react/dist/esm/icons/grid";
+import Database from "lucide-react/dist/esm/icons/database";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
+import Search from "lucide-react/dist/esm/icons/search";
 import React, { useState, useEffect, useMemo } from 'react';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, addDoc, serverTimestamp, arrayUnion, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { 
-  Receipt, Plus, X, Building2, Calendar, DollarSign, FileText, CheckCircle, 
-  AlertCircle, ExternalLink, Clock, Sparkles, Download, RefreshCw, 
-  AlertTriangle, TrendingUp, Check, Grid, Database, Eye, ShieldAlert, BarChart3
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import { StatusChip } from '../../components/ui';
 import ZohoPaperPreview from '../../components/admin/ZohoPaperPreview';
@@ -123,11 +164,9 @@ function BillDetail({ bill, onClose, onStatusChange }) {
 
       {/* Workspace content */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem' }}>
-        
         {/* OVERVIEW */}
         {detailTab === 'overview' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            
             {/* Status Workflow */}
             <div style={{ padding: '1rem', backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: '8px' }}>
               <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Accounts Payable Lifecycle</span>
@@ -260,7 +299,6 @@ function BillDetail({ bill, onClose, onStatusChange }) {
               <div><span style={{ color: 'var(--text-muted)' }}>Scheduled Date:</span> <strong>{fmt(bill.dueDate)}</strong></div>
               <div><span style={{ color: 'var(--text-muted)' }}>Approval Status:</span> <strong style={{ color: '#16a34a' }}>Approved by Finance Director</strong></div>
             </div>
-            
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button onClick={() => triggerAction('Schedule')} className="btn btn-outline" style={{ fontSize: '0.75rem' }}>Schedule</button>
               <button onClick={() => triggerAction('Execute Payment')} className="btn btn-primary" style={{ fontSize: '0.75rem' }}>Execute Payment</button>
@@ -373,7 +411,6 @@ export default function BillList() {
   const [selectedBill, setSelectedBill] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [refreshToken, setRefreshToken] = useState(0);
-  
   // Custom states
   const [activeKpiFilter, setActiveKpiFilter] = useState('all');
   const [currentSubTab, setCurrentSubTab] = useState('directory'); // directory, calendar, outflows
@@ -487,7 +524,6 @@ export default function BillList() {
       if (activeKpiFilter === 'approved' && statusUpper !== 'APPROVED') return false;
       if (activeKpiFilter === 'scheduled' && statusUpper !== 'SCHEDULED') return false;
       if (activeKpiFilter === 'paid' && statusUpper !== 'PAID') return false;
-      
       const dueDays = r.dueDate ? Math.floor((new Date(r.dueDate) - new Date()) / (1000 * 60 * 60 * 24)) : 99;
       if (activeKpiFilter === 'thisweek' && (dueDays > 7 || statusUpper === 'PAID')) return false;
       if (activeKpiFilter === 'overdue' && (dueDays >= 0 || statusUpper === 'PAID')) return false;
@@ -506,7 +542,6 @@ export default function BillList() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1280px', margin: '0 auto', paddingBottom: '3rem' }}>
-      
       {/* Page Header */}
       <AdminPageHeader
         title="Supplier Bills (Accounts Payable)"
@@ -563,7 +598,6 @@ export default function BillList() {
 
       {/* Outflows Forecast widget */}
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.5fr 1fr', gap: '1.25rem' }}>
-        
         {/* Outflow bar chart */}
         <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -652,7 +686,6 @@ export default function BillList() {
 
       {/* Main Switchboard */}
       <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'flex-start' }}>
-        
         {/* Left List Pane */}
         {currentSubTab === 'directory' && (
           <div style={{ 
@@ -676,7 +709,6 @@ export default function BillList() {
               filteredBills.map(b => {
                 const isSelected = selectedBill?.id === b.id;
                 const totalVal = b.totalAmount || b.amount || 0;
-                
                 // Priority calculations
                 const prio = b.priority || (totalVal > 1000 ? 'Critical' : 'Medium');
                 const pColor = prio === 'Critical' ? '#dc2626' : prio === 'High' ? '#ea580c' : '#f59e0b';

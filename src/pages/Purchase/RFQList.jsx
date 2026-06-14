@@ -1,12 +1,64 @@
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import X from "lucide-react/dist/esm/icons/x";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import Package from "lucide-react/dist/esm/icons/package";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import LinkIcon from "lucide-react/dist/esm/icons/link";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Search from "lucide-react/dist/esm/icons/search";
+import Filter from "lucide-react/dist/esm/icons/filter";
+import Grid from "lucide-react/dist/esm/icons/grid";
+import Check from "lucide-react/dist/esm/icons/check";
+import Download from "lucide-react/dist/esm/icons/download";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import Star from "lucide-react/dist/esm/icons/star";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Users from "lucide-react/dist/esm/icons/users";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import FileUp from "lucide-react/dist/esm/icons/file-up";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import BarChart4 from "lucide-react/dist/esm/icons/bar-chart-4";
+import Layers from "lucide-react/dist/esm/icons/layers";
 import React, { useState, useEffect, useMemo } from 'react';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, addDoc, serverTimestamp, arrayUnion } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { 
-  FileText, Plus, X, CheckCircle, Sparkles, Building2, Package, Calendar, 
-  ShoppingCart, ExternalLink, Link as LinkIcon, AlertTriangle, TrendingUp,
-  MapPin, Clock, Search, Filter, Grid, Check, Download, RefreshCw, Star,
-  ArrowRight, Users, ChevronRight, FileUp, ShieldAlert, BarChart4, Layers
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import { StatusChip, Tabs } from '../../components/ui';
 import ERPActivityTimeline from '../../components/shared/ERPActivityTimeline';
@@ -136,11 +188,9 @@ function RFQDetail({ rfq, onClose, onStatusChange, onEdit }) {
 
       {/* Tab content */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem' }}>
-        
         {/* OVERVIEW TAB */}
         {detailTab === 'overview' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            
             {/* Status Progress Flow */}
             <div style={{ padding: '1rem', backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: '8px' }}>
               <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Sourcing Lifecycle</span>
@@ -150,7 +200,6 @@ function RFQDetail({ rfq, onClose, onStatusChange, onEdit }) {
                   const stageUpper = stage.toUpperCase();
                   const rfqStatusUpper = (rfq.status || 'DRAFT').toUpperCase();
                   const isPassed = idx <= ['DRAFT', 'SENT', 'VIEWED', 'PRICING_SUBMITTED', 'NEGOTIATION', 'APPROVED', 'CONVERTED_TO_PO'].indexOf(rfqStatusUpper);
-                  
                   return (
                     <div key={stage} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2, flex: 1 }}>
                       <div style={{ 
@@ -332,14 +381,12 @@ function RFQDetail({ rfq, onClose, onStatusChange, onEdit }) {
 export default function RFQList() {
   const [rfqs, setRfqs] = useState([]);
   const [loading, setLoading] = useState(true);
-  
   // States for workspace redesign
   const [activeKpiFilter, setActiveKpiFilter] = useState('all');
   const [activeTabPanel, setActiveTabPanel] = useState('directory'); // directory, pipeline, analytics, parse
   const [selectedRfq, setSelectedRfq] = useState(null);
   const [selectedRfqIds, setSelectedRfqIds] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  
   // Parser specific states
   const [parseProgress, setParseProgress] = useState('idle'); // idle, uploaded, complete
   const [showWizard, setShowWizard] = useState(false);
@@ -458,7 +505,6 @@ export default function RFQList() {
     const readyApproval = rfqs.filter(r => r.status?.toUpperCase() === 'APPROVED').length || 1;
     const converted = rfqs.filter(r => r.status?.toUpperCase() === 'CONVERTED_TO_PO').length || 42;
     const totalValue = 1200000; // Mock AED 1.2M
-    
     return { total, awaitingSupplier, pricingSubmitted, readyApproval, converted, totalValue };
   }, [rfqs]);
 
@@ -502,7 +548,6 @@ export default function RFQList() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1280px', margin: '0 auto', paddingBottom: '3rem' }}>
-      
       {/* Page Header */}
       <AdminPageHeader
         title="Supplier Sourcing Hub (RFQ)"
@@ -619,11 +664,9 @@ export default function RFQList() {
 
       {/* Main workspace Switchboard */}
       <div style={{ flex: 1, minHeight: 0 }}>
-        
         {/* DIRECTORY SPLIT PANEL */}
         {activeTabPanel === 'directory' && (
           <div style={{ display: 'flex', gap: '1.25rem', height: '100%', alignItems: 'flex-start' }}>
-            
             {/* Left RFQ List Cards */}
             <div style={{ 
               flex: selectedRfq && !isMobile ? '0 0 35%' : '1', 
@@ -648,7 +691,6 @@ export default function RFQList() {
                   const isSelected = selectedRfq?.id === r.id;
                   const status = r.status || 'DRAFT';
                   const expectedDelivery = 'Jun 15';
-                  
                   return (
                     <div
                       key={r.id}
@@ -762,7 +804,6 @@ export default function RFQList() {
         {/* 8. SOURCING ANALYTICS PANEL */}
         {activeTabPanel === 'analytics' && (
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.5fr 1fr', gap: '1.25rem' }}>
-            
             {/* Conversion line Recharts */}
             <div className="glass-card-premium" style={{ padding: '1.5rem', border: '1px solid var(--border)' }}>
               <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 800 }}>Requested Procurement Totals YTD</h3>
@@ -810,7 +851,6 @@ export default function RFQList() {
 
             <div style={{ border: '2px dashed #cbd5e1', padding: '3rem', textAlign: 'center', borderRadius: '8px', backgroundColor: '#f8fafc' }}>
               <FileUp size={48} color="#94a3b8" style={{ margin: '0 auto 1rem' }} />
-              
               {parseProgress === 'idle' ? (
                 <div>
                   <button 
@@ -857,7 +897,6 @@ export default function RFQList() {
       {showWizard && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ backgroundColor: 'var(--surface)', borderRadius: '12px', width: '500px', display: 'flex', flexDirection: 'column', border: '1px solid var(--border)' }}>
-            
             {/* Header */}
             <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>New Supplier Sourcing Wizard (Step {wizardStep} of 4)</strong>
@@ -866,7 +905,6 @@ export default function RFQList() {
 
             {/* Step Content */}
             <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              
               {wizardStep === 1 && (
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Step 1: Choose Supplier</label>

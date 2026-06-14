@@ -1,16 +1,26 @@
+import PackagePlus from "lucide-react/dist/esm/icons/package-plus";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import X from "lucide-react/dist/esm/icons/x";
+import Save from "lucide-react/dist/esm/icons/save";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import React, { useState, useEffect } from 'react';
-import { PackagePlus, Beaker, Plus, X, Save, AlertTriangle } from 'lucide-react';
+
+
+
+
+
+
 import { db } from '../../firebase';
 import { collection, getDocs, addDoc } from 'firebase/firestore';
+import notifier from '../../services/NotificationService';
 
 export default function CustomProtocolBuilder({ onSaved, onClose }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  
   const [protocolName, setProtocolName] = useState('');
   const [patientName, setPatientName] = useState('');
   const [selectedItems, setSelectedItems] = useState([]);
-  
   const [search, setSearch] = useState('');
 
   useEffect(() => {
@@ -48,7 +58,6 @@ export default function CustomProtocolBuilder({ onSaved, onClose }) {
 
   const handleSave = async () => {
     if (!protocolName || selectedItems.length === 0) return;
-    
     // We create a custom protocol with 1 phase that holds all items
     const customProtocol = {
       protocol_name: `${protocolName} (Custom Kit)`,
@@ -75,7 +84,7 @@ export default function CustomProtocolBuilder({ onSaved, onClose }) {
       if (onSaved) onSaved();
     } catch (err) {
       console.error(err);
-      alert('Error saving custom protocol');
+      notifier.info('Error saving custom protocol');
     }
   };
 
@@ -84,7 +93,6 @@ export default function CustomProtocolBuilder({ onSaved, onClose }) {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(4px)' }}>
       <div style={{ backgroundColor: 'white', borderRadius: '16px', width: '90%', maxWidth: '600px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
-        
         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <PackagePlus size={20} color="var(--primary)" /> Build Custom Protocol Kit
@@ -120,7 +128,6 @@ export default function CustomProtocolBuilder({ onSaved, onClose }) {
             <h4 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem' }}>
               <Beaker size={16} /> Selected Components
             </h4>
-            
             {selectedItems.length === 0 ? (
               <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed var(--border)', borderRadius: '8px' }}>
                 No peptides added yet. Search below to add items.
@@ -174,7 +181,6 @@ export default function CustomProtocolBuilder({ onSaved, onClose }) {
               </div>
             )}
           </div>
-          
           <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '8px', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
             <AlertTriangle size={20} style={{ color: 'var(--warning)', flexShrink: 0 }} />
             <div style={{ fontSize: '0.85rem', color: 'var(--warning)', fontWeight: 600, lineHeight: 1.4 }}>

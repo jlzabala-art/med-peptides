@@ -1,6 +1,16 @@
- 
+import X from "lucide-react/dist/esm/icons/x";
+import Star from "lucide-react/dist/esm/icons/star";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal";
 import React, { useEffect, useRef } from 'react';
-import { X, Star, CheckCircle2, AlertTriangle, XCircle, SlidersHorizontal } from 'lucide-react';
+
+
+
+
+
+
 
 /**
  * FilterDrawer — Bottom Sheet en móvil, sidebar en desktop (no usado en desktop).

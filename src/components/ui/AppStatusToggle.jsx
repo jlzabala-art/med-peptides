@@ -1,10 +1,12 @@
+import Eye from "lucide-react/dist/esm/icons/eye";
+import EyeOff from "lucide-react/dist/esm/icons/eye-off";
 import React from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+
+
 
 export default function AppStatusToggle({ isActive, isLocked = false, onToggle, activeLabel = 'Active', inactiveLabel = 'Hidden', lockedLabel = 'Disabled' }) {
   // If isActive is strictly false, it's hidden. Otherwise (true or undefined), it's active.
   const isHidden = isActive === false;
-  
   return (
     <button 
       onClick={(e) => { 

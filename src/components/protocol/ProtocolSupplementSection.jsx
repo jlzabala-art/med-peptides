@@ -1,6 +1,17 @@
+import Pill from "lucide-react/dist/esm/icons/pill";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
 /* eslint-disable no-unused-vars */
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
-import { Pill, Plus, CheckCircle2, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
+
+
+
+
+
+
 import { getActiveSupplements } from '../../repositories/supplementRepository';
 import { trackEvent } from '../../hooks/useAnalytics';
 import { resolveProductPrice } from '../../utils/resolveProductPrice';

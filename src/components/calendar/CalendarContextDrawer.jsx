@@ -1,5 +1,18 @@
+import User from "lucide-react/dist/esm/icons/user";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import CalendarIcon from "lucide-react/dist/esm/icons/calendar";
+import FileText from "lucide-react/dist/esm/icons/file-text";
 import React from 'react';
-import { User, Activity, ShoppingBag, ClipboardList, Clock, Calendar as CalendarIcon, FileText } from 'lucide-react';
+
+
+
+
+
+
+
 import './CalendarCloud.css';
 
 export default function CalendarContextDrawer({ event, isOpen, onClose }) {
@@ -7,7 +20,6 @@ export default function CalendarContextDrawer({ event, isOpen, onClose }) {
 
   const patientName = event.extendedProps?.patientName || event.title.split('-')[0].trim() || 'John Doe';
   const eventType = event.extendedProps?.type || 'prescription';
-  
   return (
     <>
       {/* Drawer Overlay */}
@@ -20,7 +32,6 @@ export default function CalendarContextDrawer({ event, isOpen, onClose }) {
           transition: 'opacity 0.3s'
         }}
       />
-      
       {/* Drawer Panel */}
       <div 
         className="cal-drawer-panel"
@@ -45,7 +56,6 @@ export default function CalendarContextDrawer({ event, isOpen, onClose }) {
         </div>
 
         <div style={{ padding: '1.5rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
           {/* Selected Event Context */}
           <div style={{ backgroundColor: 'var(--cal-bg-panel)', padding: '1rem', borderRadius: 'var(--cal-radius-sm)', border: '1px solid var(--cal-border)' }}>
             <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', color: 'var(--cal-color-text-secondary)', textTransform: 'uppercase' }}>Selected Event</h4>
@@ -117,7 +127,6 @@ export default function CalendarContextDrawer({ event, isOpen, onClose }) {
           </button>
         </div>
       </div>
-      
       <style>{`
         @keyframes slideInRight {
           from { transform: translateX(100%); }

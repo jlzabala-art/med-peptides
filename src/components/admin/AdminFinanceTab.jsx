@@ -1,3 +1,9 @@
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import PlusCircle from "lucide-react/dist/esm/icons/plus-circle";
+import FileUp from "lucide-react/dist/esm/icons/file-up";
+import Settings2 from "lucide-react/dist/esm/icons/settings-2";
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useAIContext } from '../../context/AIContext';
@@ -9,7 +15,12 @@ import FinanceApprovals from './finance/FinanceApprovals';
 import FinanceEconomics from './finance/FinanceEconomics';
 import FinanceReporting from './finance/FinanceReporting';
 import UploadInvoiceModal from './finance/UploadInvoiceModal';
-import { RefreshCw, TrendingUp, Calendar, PlusCircle, FileUp, Settings2 } from 'lucide-react';
+
+
+
+
+
+
 import SkeletonLoader from '../ui/SkeletonLoader';
 
 export default function AdminFinanceTab({ activeSubTab }) {
@@ -29,11 +40,9 @@ export default function AdminFinanceTab({ activeSubTab }) {
   useEffect(() => {
     if (loading) return;
     const mrr = activeSubs * 299;
-    
     // Inject unpaid invoices context for AI
     const unpaidInvoices = dashboardData?.pendingInvoices || [];
     const topUnpaid = unpaidInvoices.slice(0, 5).map(inv => `${inv.customer_name} (${inv.balance} AED due ${inv.due_date})`);
-    
     let currentPrompts = [];
     if (activeTab === 'reporting') {
       currentPrompts = [
@@ -87,7 +96,6 @@ export default function AdminFinanceTab({ activeSubTab }) {
         </div>
       );
     }
-    
     if (error && !data) {
       return <div className="p-8 text-center text-red-500 font-medium">Failed to load CFO Dashboard. Please refresh.</div>;
     }
@@ -105,7 +113,6 @@ export default function AdminFinanceTab({ activeSubTab }) {
 
   return (
     <div className="admin-finance-root anim-fade-up">
-      
       {/* Premium Glassmorphism Header */}
       <div className="glass-card-premium" style={{ marginBottom: '1.5rem', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
@@ -132,7 +139,6 @@ export default function AdminFinanceTab({ activeSubTab }) {
                 Zoho Books Synced
               </div>
             </div>
-            
             <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface-raised)', borderRadius: '8px', padding: '0.25rem 0.5rem', border: '1px solid var(--border)' }}>
               <Calendar style={{ width: '16px', height: '16px', color: 'var(--text-muted)', marginRight: '0.5rem' }} />
               <select 

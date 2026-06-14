@@ -1,3 +1,20 @@
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import User from "lucide-react/dist/esm/icons/user";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import Users from "lucide-react/dist/esm/icons/users";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Crown from "lucide-react/dist/esm/icons/crown";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Search from "lucide-react/dist/esm/icons/search";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Link2 from "lucide-react/dist/esm/icons/link-2";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   doc,
@@ -11,25 +28,23 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { db, auth } from '../../../firebase';
-import {
-  Building2,
-  User,
-  Phone,
-  Mail,
-  MapPin,
-  RefreshCw,
-  Users,
-  DollarSign,
-  Crown,
-  ChevronDown,
-  ChevronUp,
-  ChevronRight,
-  AlertCircle,
-  Search,
-  CheckCircle2,
-  Link2,
-  ExternalLink,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ── Endpoints ───────────────────────────────────────────────────────────────
 const CRM_CF_URL =
@@ -485,7 +500,7 @@ export default function AdminZohoCRMWidget({
         throw new Error(`Search failed: ${res.status}`);
       }
 
-      const result = await res.json();
+      const result = await res.js();
       if (result.found) {
         setSearchResult(result);
       } else {

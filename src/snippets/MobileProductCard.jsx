@@ -1,7 +1,24 @@
- 
- 
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import Check from "lucide-react/dist/esm/icons/check";
+import Bot from "lucide-react/dist/esm/icons/bot";
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { HelpCircle, BookOpen, ChevronRight, Activity, Beaker, Zap, Sparkles, ShoppingCart, Check, Bot } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 import { getFAQForProduct } from '../utils/discoveryEngine';
 import FAQModal from '../components/discovery/FAQModal';
 import PubMedPreviewPanel from '../components/discovery/PubMedPreviewPanel';
@@ -284,7 +301,6 @@ const MobileProductCard = React.memo(function MobileProductCard({
 
         {/* Actions */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: 'auto' }}>
-          
           {/* Add to order (if applicable) */}
           {canAddToCart && (
             <button

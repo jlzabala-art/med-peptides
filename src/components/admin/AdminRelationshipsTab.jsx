@@ -1,8 +1,14 @@
+import Layers from "lucide-react/dist/esm/icons/layers";
+import Search from "lucide-react/dist/esm/icons/search";
+import Filter from "lucide-react/dist/esm/icons/filter";
 import React, { useState, useEffect, useMemo } from 'react';
 import { collection, query, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Layers, Search, Filter } from 'lucide-react';
+
+
+
 import DataTable from '../ui/DataTable';
+import notifier from '../../services/NotificationService';
 
 const CATEGORIES = [
   'Healing & Recovery',
@@ -56,7 +62,7 @@ export default function AdminRelationshipsTab({ readOnly = false }) {
       setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
     } catch (err) {
       console.error('Error updating product:', err);
-      alert('Failed to update product.');
+      notifier.info('Failed to update product.');
     } finally {
       setSavingProduct(null);
     }
@@ -246,11 +252,9 @@ export default function AdminRelationshipsTab({ readOnly = false }) {
           renderCustomFilters={renderCustomFilters}
         />
       </div>
-    
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: AdminRelationshipsTab | Props: none
       </div>
-    
 </div>
   );
 }

@@ -1,6 +1,9 @@
+import Printer from "lucide-react/dist/esm/icons/printer";
+import X from "lucide-react/dist/esm/icons/x";
 /* eslint-disable no-unused-vars */
 import { useRef } from 'react';
-import { Printer, X } from 'lucide-react';
+
+
 
 /**
  * VialLabelPrinter

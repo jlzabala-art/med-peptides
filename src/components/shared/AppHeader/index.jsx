@@ -1,5 +1,24 @@
+import Search from "lucide-react/dist/esm/icons/search";
+import Bell from "lucide-react/dist/esm/icons/bell";
+import User from "lucide-react/dist/esm/icons/user";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import Menu from "lucide-react/dist/esm/icons/menu";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import Sun from "lucide-react/dist/esm/icons/sun";
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, User, ChevronDown, ShoppingCart, Menu, Sparkles, Globe, Moon, Sun } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 import { useAuth } from '../../../context/AuthContext';
 import { useHeaderContext } from '../../../context/HeaderContext';
 import { useTheme } from '../../../context/ThemeContext';
@@ -23,7 +42,6 @@ export default function AppHeader({
   const [isNotifOpen, setIsNotifOpen] = useState(false);
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  
   const { theme, toggleTheme } = useTheme();
   const { unreadCount } = useNotifications();
   const { t, i18n } = useTranslation();
@@ -40,7 +58,6 @@ export default function AppHeader({
     document.addEventListener('toggle-global-search', handleToggle);
     return () => document.removeEventListener('toggle-global-search', handleToggle);
   }, []);
-  
   // Try to get initials from the profile or user email
   const getInitials = () => {
     if (userProfile?.firstName) {
@@ -125,7 +142,6 @@ export default function AppHeader({
             )}
           </button>
         )}
-        
         {showDesktopAIToggle && (
           <button 
             className="app-header-action ai-toggle-btn" 
@@ -136,7 +152,6 @@ export default function AppHeader({
             <Sparkles size={20} strokeWidth={2} className={isDesktopAIOpen ? 'pulse-icon' : ''} />
           </button>
         )}
-        
         <button 
           className="app-header-action" 
           aria-label="Toggle Theme"
@@ -149,7 +164,6 @@ export default function AppHeader({
         <GlobalPreferencesDropdown />
 
 
-        
         <button 
           className="app-header-action" 
           aria-label="Notifications"
@@ -160,7 +174,6 @@ export default function AppHeader({
           {unreadCount > 0 && (
             <div className="app-header-badge cart-badge">{unreadCount > 99 ? '99+' : unreadCount}</div>
           )}
-          
           {isNotifOpen && (
             <NotificationsPanel onClose={() => setIsNotifOpen(false)} />
           )}
@@ -191,7 +204,6 @@ export default function AppHeader({
             <span className="app-header-user-role">{activeRole || 'User'}</span>
           </div>
           <ChevronDown size={14} color="var(--color-text-secondary)" style={{ marginLeft: '4px' }} />
-          
           {isUserMenuOpen && (
             <UserDropdown 
               user={user}
@@ -206,7 +218,6 @@ export default function AppHeader({
           )}
         </div>
       </div>
-      
       {/* Global Search Command Palette */}
       <GlobalSearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </header>

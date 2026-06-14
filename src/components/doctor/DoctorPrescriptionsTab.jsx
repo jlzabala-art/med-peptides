@@ -1,12 +1,30 @@
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import User from "lucide-react/dist/esm/icons/user";
+import Building from "lucide-react/dist/esm/icons/building";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Copy from "lucide-react/dist/esm/icons/copy";
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { collection, query, where, getDocs, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
-import {
-  ClipboardList, Plus, User, Building, XCircle, Clock, CheckCircle2,
-  Activity, Truck, FileText, Copy
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
 import { RX_STATUS_META, RX_TYPE, DELIVERY_METHOD, RX_STATUS, rxEvent } from '../../config/prescriptionConfig';
 import DoctorPrescriptionBuilder from './DoctorPrescriptionBuilder';
 import { useTranslation } from 'react-i18next';
@@ -227,7 +245,6 @@ export default function DoctorPrescriptionsTab({ doctorId, doctorMeta, patients 
                 )}
               </div>
             </div>
-            
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', overflowX: 'auto', paddingBottom: '1rem' }}>
               <div style={{ position: 'absolute', top: '16px', left: '30px', right: '30px', height: '2px', background: 'var(--color-border)', zIndex: 1 }} />
               {(() => {

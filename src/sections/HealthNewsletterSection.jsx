@@ -1,3 +1,12 @@
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Check from "lucide-react/dist/esm/icons/check";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 /* eslint-disable no-unused-vars */
 /**
  * HealthNewsletterSection.jsx
@@ -14,7 +23,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Sparkles, Check, ChevronRight, Brain, Zap, FlaskConical, Moon, RefreshCw } from 'lucide-react';
+
+
+
+
+
+
+
+
+
 import useGuestPreferences, { GOAL_META } from '../hooks/useGuestPreferences';
 
 // ── Cloud Function URL ────────────────────────────────────────────────────────
@@ -79,7 +96,7 @@ export default function HealthNewsletterSection() {
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
+        const data = await res.js().catch(() => ({}));
         if (res.status === 409) {
           setStatus('success'); // Already subscribed — still show success
           return;

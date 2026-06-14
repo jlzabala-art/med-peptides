@@ -1,15 +1,49 @@
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import HeartPulse from "lucide-react/dist/esm/icons/heart-pulse";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import UserPlus from "lucide-react/dist/esm/icons/user-plus";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import Users from "lucide-react/dist/esm/icons/users";
+import LogOut from "lucide-react/dist/esm/icons/log-out";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Brain from "lucide-react/dist/esm/icons/brain";
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
-import { Stethoscope, Activity, FileText, Bot, HeartPulse, ChevronRight, CheckCircle2, UserPlus, RefreshCw, Zap, ArrowRight, FlaskConical, Calendar, LayoutDashboard, Users, LogOut } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { Card, MetricCard, Button } from '../components/ui';
 import AppPortalLayout from '../layout/AppPortalLayout';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
-import { MessageSquare, Brain } from 'lucide-react';
 
-const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
-const ClinicalAIWidget = React.lazy(() => import('../components/admin/ClinicalAIWidget'));
+
+
+import MessagingWidget from '../components/messaging/MessagingWidget';
+import ClinicalAIWidget from '../components/admin/ClinicalAIWidget';
 
 // ── Agents relevant to doctors ───────────────────────────────────────────────
 const CLINICAL_AGENTS = [
@@ -266,7 +300,6 @@ export default function DoctorHome() {
               Your clinical intelligence hub. AI Agents ready to assist you.
             </p>
           </div>
-          
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             {/* Time Filter */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

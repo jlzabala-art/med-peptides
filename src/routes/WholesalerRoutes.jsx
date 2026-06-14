@@ -21,16 +21,16 @@ const TabSkeleton = () => (
   </div>
 );
 
-const AdminMetricsDashboard = React.lazy(() => import('../components/admin/AdminMetricsDashboard'));
-const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
-const ClinicalAIWidget = React.lazy(() => import('../components/admin/ClinicalAIWidget'));
-const GeographyAreasTab = React.lazy(() => import('../components/wholesaler/GeographyAreasTab'));
-const BrandingTab = React.lazy(() => import('../components/wholesaler/BrandingTab'));
-const DomainsTab = React.lazy(() => import('../components/wholesaler/DomainsTab'));
-const ClientsTab = React.lazy(() => import('../components/wholesaler/ClientsTab'));
-const CatalogList = React.lazy(() => import('../components/wholesaler/CatalogList'));
-const CatalogCreatorFlow = React.lazy(() => import('../components/wholesaler/CatalogCreatorFlow'));
-const EmailCampaignBuilder = React.lazy(() => import('../components/wholesaler/EmailCampaignBuilder'));
+import AdminMetricsDashboard from '../components/admin/AdminMetricsDashboard';
+import MessagingWidget from '../components/messaging/MessagingWidget';
+import ClinicalAIWidget from '../components/admin/ClinicalAIWidget';
+import GeographyAreasTab from '../components/wholesaler/GeographyAreasTab';
+import BrandingTab from '../components/wholesaler/BrandingTab';
+import DomainsTab from '../components/wholesaler/DomainsTab';
+import ClientsTab from '../components/wholesaler/ClientsTab';
+import CatalogList from '../components/wholesaler/CatalogList';
+import CatalogCreatorFlow from '../components/wholesaler/CatalogCreatorFlow';
+import EmailCampaignBuilder from '../components/wholesaler/EmailCampaignBuilder';
 
 export default function WholesalerRoutes() {
   const { user } = useAuth();

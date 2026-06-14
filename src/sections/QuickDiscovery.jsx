@@ -1,6 +1,14 @@
- 
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React from 'react';
-import { FlaskConical, Layers, BookOpen, Beaker, ArrowRight } from 'lucide-react';
+
+
+
+
+
 import { useNavigate } from 'react-router-dom';
 
 const DISCOVERY_CARDS = [

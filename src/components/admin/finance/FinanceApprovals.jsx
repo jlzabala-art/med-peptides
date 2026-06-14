@@ -1,14 +1,39 @@
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import BellRing from "lucide-react/dist/esm/icons/bell-ring";
+import Receipt from "lucide-react/dist/esm/icons/receipt";
+import Download from "lucide-react/dist/esm/icons/download";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Search from "lucide-react/dist/esm/icons/search";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Check from "lucide-react/dist/esm/icons/check";
 import React, { useState, useMemo } from 'react';
 import AdminApprovalsWidget from '../gadgets/AdminApprovalsWidget';
 import AtlasAIFinanceInsights from './AtlasAIFinanceInsights';
-import { FileText, ClipboardList, Clock, BellRing, Receipt, Download, ExternalLink, ArrowRight, ChevronLeft, ChevronRight, Search, CheckCircle, Check } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { exportToCSV } from '../../../utils/exportUtils';
 import { usePreferences } from '../../../context/PreferencesContext';
+import notifier from '../../../services/NotificationService';
 
 export default function FinanceApprovals({ dashboardData }) {
   const pendingInvoices = dashboardData?.pendingInvoices || [];
   const { formatCurrency } = usePreferences();
-  
   // State for filtering and pagination
   const [dateFilter, setDateFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -31,7 +56,7 @@ export default function FinanceApprovals({ dashboardData }) {
   const handleSendReminder = (invoiceId) => {
     setProcessingId(`remind-${invoiceId}`);
     setTimeout(() => {
-      alert('Reminder sent via Email/SMS!');
+      notifier.success('Reminder sent via Email/SMS!');
       setProcessingId(null);
     }, 800);
   };
@@ -39,7 +64,7 @@ export default function FinanceApprovals({ dashboardData }) {
   const handleMarkAsPaid = (invoiceId) => {
     setProcessingId(`paid-${invoiceId}`);
     setTimeout(() => {
-      alert('Payment recorded locally and synced to Zoho.');
+      notifier.success('Payment recorded locally and synced to Zoho.');
       setProcessingId(null);
     }, 1200);
   };
@@ -49,10 +74,8 @@ export default function FinanceApprovals({ dashboardData }) {
       setCurrentPage(newPage);
     }
   };
-  
   return (
     <div className="anim-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      
       {/* Top: Approvals Widget */}
       <div>
         <AdminApprovalsWidget />
@@ -100,7 +123,6 @@ export default function FinanceApprovals({ dashboardData }) {
             </button>
           </div>
         </div>
-        
         <div style={{ padding: '0', background: 'var(--surface)', overflowX: 'auto' }}>
           {filteredInvoices.length === 0 ? (
             <div style={{ padding: '4rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyItems: 'center', textAlign: 'center', opacity: 0.5 }}>
@@ -205,7 +227,6 @@ export default function FinanceApprovals({ dashboardData }) {
           )}
         </div>
       </div>
-      
       {/* Bottom: Compliance Audit Log */}
       <div className="glass-card-premium" style={{ padding: '1.5rem', background: 'var(--surface-raised)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', overflow: 'hidden' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
@@ -221,7 +242,6 @@ export default function FinanceApprovals({ dashboardData }) {
           View History <ArrowRight style={{ width: '16px', height: '16px' }} />
         </button>
       </div>
-      
     </div>
   );
 }

@@ -1,9 +1,22 @@
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Copy from "lucide-react/dist/esm/icons/copy";
+import Lock from "lucide-react/dist/esm/icons/lock";
+import User from "lucide-react/dist/esm/icons/user";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React, { useState, useEffect } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import Card from '../ui/Card';
 import Spinner from '../ui/Spinner';
-import { FlaskConical, Plus, Copy, Lock, User, CheckCircle, ArrowRight } from 'lucide-react';
+
+
+
+
+
+
+
 import { getPaginatedProtocols } from '../../services/protocolStorage';
 import CustomProtocolBuilder from '../admin/CustomProtocolBuilder';
 
@@ -59,7 +72,6 @@ export default function DoctorProtocolsTab({ doctorId }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1rem 0' }}>
-      
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <button 
@@ -149,7 +161,6 @@ export default function DoctorProtocolsTab({ doctorId }) {
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                   {p.phases?.length || 0} Phase(s)
                 </span>
-                
                 {activeTab === 'public' && (
                   <button 
                     onClick={() => handleClone(p)}

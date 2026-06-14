@@ -1,7 +1,18 @@
+import Search from "lucide-react/dist/esm/icons/search";
+import Microscope from "lucide-react/dist/esm/icons/microscope";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Grid3X3 from "lucide-react/dist/esm/icons/grid-3-x-3";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Leaf from "lucide-react/dist/esm/icons/leaf";
 /* eslint-disable no-unused-vars */
 import React, { lazy, Suspense, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Microscope, FlaskConical, Grid3X3, ArrowRight, Leaf } from 'lucide-react';
+
+
+
+
+
+
 import { usePageMeta } from '../hooks/usePageMeta';
 // import FeaturedProtocols from '../sections/FeaturedProtocols'; // TODO: re-enable when optimized
 

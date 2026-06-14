@@ -1,3 +1,11 @@
+import Users from "lucide-react/dist/esm/icons/users";
+import UserPlus from "lucide-react/dist/esm/icons/user-plus";
+import Check from "lucide-react/dist/esm/icons/check";
+import X from "lucide-react/dist/esm/icons/x";
+import BrainCircuit from "lucide-react/dist/esm/icons/brain-circuit";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -9,13 +17,20 @@ import Card from '../ui/Card';
 import DataTable from '../ui/DataTable';
 import StatusChip from '../ui/StatusChip';
 import Spinner from '../ui/Spinner';
-import { Users, UserPlus, Check, X, BrainCircuit, Activity, FileText, Loader2 } from 'lucide-react';
+import AISoapGeneratorWidget from './AISoapGeneratorWidget';
+
+
+
+
+
+
+
+
 
 export default function DoctorPatientsTab({ doctorId, doctorMeta, onCountResolved, onPatientsLoaded }) {
   const { activePermissions } = useAuth();
   const queryClient = useQueryClient();
   const clinicalLogs = activePermissions?.clinicalLogs ?? true;
-  
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedIds, setSelectedIds] = useState([]);
@@ -36,14 +51,12 @@ export default function DoctorPatientsTab({ doctorId, doctorMeta, onCountResolve
       if (!doctorId) return [];
       const relQ = query(collection(db, 'doctor_patient_relationships'), where('doctorId', '==', doctorId));
       const relSnap = await getDocs(relQ);
-      
       const results = await Promise.all(
         relSnap.docs.map(async (relDoc) => {
           const rel = relDoc.data();
           if (rel.status === 'revoked' || rel.status === 'rejected') return null;
           const patientId = rel.patientId;
           let profile = {};
-          
           if (!rel.patientName && patientId) {
             try {
               const fetchPromise = getDoc(doc(db, 'users', patientId));
@@ -74,7 +87,6 @@ export default function DoctorPatientsTab({ doctorId, doctorMeta, onCountResolve
           };
         })
       );
-      
       const validResults = results.filter(Boolean);
       return validResults;
     },
@@ -269,6 +281,11 @@ export default function DoctorPatientsTab({ doctorId, doctorMeta, onCountResolve
             </div>
           )}
         </div>
+        
+        {/* NEW AI SOAP GENERATOR */}
+        <div style={{ gridColumn: '1 / -1' }}>
+          <AISoapGeneratorWidget patientName={fullName} />
+        </div>
       </div>
     );
   };
@@ -327,7 +344,6 @@ export default function DoctorPatientsTab({ doctorId, doctorMeta, onCountResolve
             <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--color-text-primary)', margin: '0 0 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><UserPlus size={20} color="var(--primary)" /> Invite New Patient</h3>
             {inviteError && <div style={{ background: '#fee2e2', color: '#b91c1c', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '1rem' }}>{inviteError}</div>}
             {inviteSuccess && <div style={{ background: '#dcfce7', color: 'var(--color-success)', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '1rem' }}>Invitation sent successfully!</div>}
-            
             <form onSubmit={handleInviteSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>Patient Email Address</label>

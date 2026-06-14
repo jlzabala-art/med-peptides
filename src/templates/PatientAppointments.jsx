@@ -1,20 +1,29 @@
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Chrome from "lucide-react/dist/esm/icons/chrome";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import CalendarDays from "lucide-react/dist/esm/icons/calendar-days";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Info from "lucide-react/dist/esm/icons/info";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import X from "lucide-react/dist/esm/icons/x";
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
-import { 
-  Calendar, 
-  Clock, 
-  Chrome, 
-  CheckCircle2, 
-  CalendarDays, 
-  ArrowRight,
-  Info,
-  Beaker,
-  AlertTriangle,
-  RefreshCw,
-  X 
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
 
 export default function PatientAppointments() {
   const { user } = useAuth();
@@ -23,7 +32,6 @@ export default function PatientAppointments() {
   // State
   const [refills, setRefills] = useState([]);
   const [loading, setLoading] = useState(true);
-  
   // Google sync state
   const [calendarConnected, setCalendarConnected] = useState(() => {
     return localStorage.getItem(`gcal_connected_patient_${uid}`) === 'true';

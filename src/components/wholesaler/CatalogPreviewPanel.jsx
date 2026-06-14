@@ -1,5 +1,24 @@
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import MessageCircle from "lucide-react/dist/esm/icons/message-circle";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Check from "lucide-react/dist/esm/icons/check";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Search from "lucide-react/dist/esm/icons/search";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
 import React, { useState } from 'react';
-import { Mail, Phone, MessageCircle, FileText, Check, HelpCircle, Shield, AlertTriangle, Search, Calendar } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 
 export default function CatalogPreviewPanel({ catalog, products = [], protocols = [], recipientName = '', clinicName = '', onAdd }) {
   const [activeFaq, setActiveFaq] = useState(null);
@@ -228,7 +247,6 @@ export default function CatalogPreviewPanel({ catalog, products = [], protocols 
                           </div>
                         )}
                       </div>
-                      
                       <div style={{ textAlign: 'right' }}>
                         <div style={{ color: '#137333', fontSize: '1.1rem', fontWeight: 800 }}>
                           {prod.defaultVariant?.pricing?.retailPrice?.base?.kitUSD 
@@ -389,7 +407,6 @@ export default function CatalogPreviewPanel({ catalog, products = [], protocols 
                         {catalog.annotations[protoId]}
                       </div>
                     )}
-                    
                     {onAdd && (
                       <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
                         <button

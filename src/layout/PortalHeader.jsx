@@ -1,7 +1,10 @@
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Menu from "lucide-react/dist/esm/icons/menu";
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { FiSearch, FiBell, FiCpu } from 'react-icons/fi';
-import { Globe, Menu } from 'lucide-react';
+
+
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -158,7 +161,6 @@ export default function PortalHeader({ onToggleAI, onToggleSidebar }) {
           align-items: center;
           gap: 1rem;
         }
-        
         .mobile-menu-btn {
           display: none;
           background: none;
@@ -301,7 +303,6 @@ export default function PortalHeader({ onToggleAI, onToggleSidebar }) {
           transform-origin: top center;
           display: inline-block;
         }
-        
         @media (max-width: 1024px) {
           .mobile-menu-btn { display: flex; }
           .hide-on-mobile { display: none; }

@@ -1,5 +1,14 @@
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import X from "lucide-react/dist/esm/icons/x";
+import FileDown from "lucide-react/dist/esm/icons/file-down";
+import PanelLeft from "lucide-react/dist/esm/icons/panel-left";
+import Zap from "lucide-react/dist/esm/icons/zap";
 import React from 'react';
-import { Trash2, X, FileDown, PanelLeft, Zap } from 'lucide-react';
+
+
+
+
+
 import { generateClinicalBriefPDF } from '../utils/PDFGenerator';
 
 export default function ChatHeader({ 
@@ -68,7 +77,6 @@ export default function ChatHeader({
           <PanelLeft size={16} />
         </span>
       </button>
-      
       <div style={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         {contextMode !== 'admin' && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', overflow: 'hidden' }}>
@@ -146,7 +154,6 @@ export default function ChatHeader({
           )}
         </div>
       </div>
-      
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
         {messagesCount > 1 && (
           <>
@@ -169,14 +176,12 @@ export default function ChatHeader({
             >
               <Zap size={16} />
             </button>
-            
             <div style={{ 
               width: '1px', 
               height: '20px', 
               backgroundColor: 'var(--color-border)', 
               margin: '0 0.1rem' 
             }} />
-            
             <button
               onClick={() => generateClinicalBriefPDF(messages)}
               title="Exportar chat a PDF"

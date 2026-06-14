@@ -7,14 +7,14 @@ import SupplierHome, { SupplierDashboardTab, PlaceholderTab } from '../templates
 import UserSettings from '../templates/UserSettings';
 
 // ── All tab components lazy-loaded for optimal code splitting ──────────────────
-const OrdersTab = React.lazy(() => import('../components/admin/OrdersTab'));
-const AdminMetricsDashboard = React.lazy(() => import('../components/admin/AdminMetricsDashboard'));
-const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
-const ClinicalAIWidget = React.lazy(() => import('../components/admin/ClinicalAIWidget'));
-const AdminClientsTab = React.lazy(() => import('../components/admin/AdminClientsTab'));
-const AdminProductsTab = React.lazy(() => import('../components/admin/AdminProductsTab'));
-const AdminAccountManagersTab = React.lazy(() => import('../components/admin/AdminAccountManagersTab'));
-const ShippingTrackerTab = React.lazy(() => import('../components/supplier/ShippingTrackerTab'));
+import OrdersTab from '../components/admin/OrdersTab';
+import AdminMetricsDashboard from '../components/admin/AdminMetricsDashboard';
+import MessagingWidget from '../components/messaging/MessagingWidget';
+import ClinicalAIWidget from '../components/admin/ClinicalAIWidget';
+import AdminClientsTab from '../components/admin/AdminClientsTab';
+import CatalogIntelligenceHub from '../components/admin/catalog/CatalogIntelligenceHub';
+import AdminAccountManagersTab from '../components/admin/AdminAccountManagersTab';
+import ShippingTrackerTab from '../components/supplier/ShippingTrackerTab';
 
 // ── Premium loading skeleton ──────────────────────────────────────────────────
 const TabSkeleton = () => (
@@ -48,7 +48,7 @@ export default function SupplierRoutes() {
         } />
         <Route path="catalog" element={
           <AdminTabErrorBoundary tabId="catalog" tabLabel="Mass Catalog / APIs">
-            <AdminProductsTab readOnly={false} ownerId={uid} ownerType="supplier" />
+            <CatalogIntelligenceHub readOnly={false} ownerId={uid} ownerType="supplier" />
           </AdminTabErrorBoundary>
         } />
         <Route path="shipments" element={

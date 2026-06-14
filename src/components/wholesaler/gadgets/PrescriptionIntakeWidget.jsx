@@ -1,23 +1,34 @@
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
+import Clipboard from "lucide-react/dist/esm/icons/clipboard";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import Send from "lucide-react/dist/esm/icons/send";
+import Database from "lucide-react/dist/esm/icons/database";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import FileCheck from "lucide-react/dist/esm/icons/file-check";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { getCatalog } from '../../../repositories/productRepository';
-import { 
-  FileText, 
-  UploadCloud, 
-  Clipboard, 
-  CheckCircle, 
-  AlertCircle, 
-  ArrowLeft, 
-  Send, 
-  Database, 
-  Sparkles, 
-  Plus, 
-  Trash2,
-  Activity,
-  FileCheck
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export default function PrescriptionIntakeWidget() {
   const { user } = useAuth();
@@ -35,7 +46,6 @@ export default function PrescriptionIntakeWidget() {
     }
     loadCatalog();
   }, []);
-  
   // States: 'select', 'type', 'upload', 'result'
   const [mode, setMode] = useState('select');
   const [inputText, setInputText] = useState('');
@@ -47,7 +57,6 @@ export default function PrescriptionIntakeWidget() {
   const [shippingAddress, setShippingAddress] = useState('');
   const [deliveryDate, setDeliveryDate] = useState('');
   const [notes, setNotes] = useState('');
-  
   // Compounded RFQ Form state
   const [customFormulas, setCustomFormulas] = useState([]);
 
@@ -61,12 +70,10 @@ export default function PrescriptionIntakeWidget() {
   // Real-time analysis of typed text
   useEffect(() => {
     if (mode !== 'type') return;
-    
     const lines = inputText.split('\n').map(l => l.trim()).filter(l => l.length > 2);
     const matches = lines.map(line => {
       // Basic normalization for matching
       const cleanLine = line.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      
       // Try exact or partial match in catalog
       const matchedProd = dbCatalog.find(p => {
         const prodName = (p.name || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -98,10 +105,8 @@ export default function PrescriptionIntakeWidget() {
     // Regexes to extract strengths or quantities
     const strengthMatch = line.match(/(\d+(?:\.\d+)?\s*(?:mg|mcg|ml|g|iu|%))/i);
     const qtyMatch = line.match(/\b(?:qty|x|cant|cantidad)?\s*(\d+)\s*(?:capsules|vials|ml|caps|tablets|tabs|viales)\b/i);
-    
     const strength = strengthMatch ? strengthMatch[1] : 'N/A';
     const quantity = qtyMatch ? qtyMatch[1] : '30';
-    
     // Clean name of formula
     let name = line;
     if (strengthMatch) name = name.replace(strengthMatch[0], '');
@@ -136,8 +141,7 @@ export default function PrescriptionIntakeWidget() {
         throw new Error(`Server returned ${response.status}`);
       }
 
-      const data = await response.json();
-      
+      const data = await response.js();
       // Match the catalog items from backend response with frontend catalog details to get slugs etc.
       const enrichedCatalogItems = (data.catalog || []).map(item => {
         const matchedProd = dbCatalog.find(p => p.slug === item.product?.id || p.id === item.product?.id || p.name === item.name || p.displayName === item.name);
@@ -155,11 +159,9 @@ export default function PrescriptionIntakeWidget() {
       console.error("Error calling Prescription Ingestion Agent:", err);
       // Fallback if backend fails
       setWarnings(["Hubo un error al conectar con el servidor de IA. Mostrando resultados aproximados."]);
-      
       const lines = prescriptionText.split('\n').map(l => l.trim()).filter(l => l.length > 2);
       const catalogMatch = [];
       const compoundingMatch = [];
-      
       lines.forEach(line => {
         const cleanLine = line.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const matchedProd = dbCatalog.find(p => {
@@ -199,7 +201,6 @@ export default function PrescriptionIntakeWidget() {
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
     setUploadedFile(file);
     setMode('upload');
     setUploadProgress(10);
@@ -220,7 +221,7 @@ export default function PrescriptionIntakeWidget() {
       }, 600);
     };
 
-    if (file.type.startsWith('text/') || file.name.endsWith('.txt') || file.name.endsWith('.csv') || file.name.endsWith('.json') || file.name.endsWith('.md')) {
+    if (file.type.startsWith('text/') || file.name.endsWith('.txt') || file.name.endsWith('.csv') || file.name.endsWith('.js') || file.name.endsWith('.md')) {
       reader.readAsText(file);
     } else {
       // Simulate reading/OCR extraction for PDFs/Images
@@ -305,7 +306,6 @@ export default function PrescriptionIntakeWidget() {
       position: 'relative',
       overflow: 'hidden'
     }}>
-      
       {/* Background Accent Decorator */}
       <div style={{
         position: 'absolute',
@@ -345,14 +345,12 @@ export default function PrescriptionIntakeWidget() {
       </div>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', zIndex: 1 }}>
-        
         {/* SELECT MODE STATE */}
         {mode === 'select' && (
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%', gap: '1.5rem', flex: 1 }}>
             <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-secondary)', lineHeight: '1.5', textAlign: 'center' }}>
               Process medical prescriptions in real time. The AI will classify compounds available in the commercial catalog or send them to the compounding lab.
             </p>
-            
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.5rem' }}>
               <div 
                 onClick={() => setMode('type')}
@@ -457,12 +455,10 @@ export default function PrescriptionIntakeWidget() {
                   outline: 'none'
                 }}
               />
-              
               <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', background: 'var(--color-bg-app)', padding: '1rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   <Activity size={12} style={{ marginRight: '0.3rem' }} /> Real-time Verification
                 </span>
-                
                 {realtimeMatches.length === 0 ? (
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-tertiary)', fontSize: '0.8rem', textAlign: 'center' }}>
                     Start typing to see real‑time clinical recognition from the database...
@@ -473,7 +469,6 @@ export default function PrescriptionIntakeWidget() {
                       <div style={{ fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '0.2rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {match.originalLine}
                       </div>
-                      
                       {match.status === 'catalog' ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--color-success)', fontWeight: 700, fontSize: '0.75rem' }}>
                           <CheckCircle size={12} /> Catalog: {match.product.displayName || match.product.name}
@@ -545,7 +540,6 @@ export default function PrescriptionIntakeWidget() {
         {/* RESULTS & RFQ STATE */}
         {mode === 'result' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
-            
             {rfqSubmitted ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: '1rem', padding: '2rem 0', color: 'var(--color-success)' }}>
                 <CheckCircle size={48} />

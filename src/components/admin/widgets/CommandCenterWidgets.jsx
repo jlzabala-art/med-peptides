@@ -1,17 +1,26 @@
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Briefcase from "lucide-react/dist/esm/icons/briefcase";
+import Server from "lucide-react/dist/esm/icons/server";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Users from "lucide-react/dist/esm/icons/users";
+import Send from "lucide-react/dist/esm/icons/send";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import MoreHorizontal from "lucide-react/dist/esm/icons/more-horizontal";
 import React, { useState } from 'react';
-import {
-  TrendingUp,
-  ArrowRight,
-  Sparkles,
-  AlertTriangle,
-  Briefcase,
-  Server,
-  DollarSign,
-  Users,
-  Send,
-  RefreshCw,
-  MoreHorizontal
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
 import {
   AreaChart,
   Area,
@@ -64,7 +73,6 @@ export function WidgetStyles() {
       .cc-dot-green { background-color: #10b981; box-shadow: 0 0 8px #10b981; }
       .cc-dot-yellow { background-color: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
       .cc-dot-red { background-color: #ef4444; box-shadow: 0 0 8px #ef4444; }
-      
       .cc-tab-btn {
         padding: 0.4rem 0.8rem;
         font-size: 0.78rem;
@@ -212,7 +220,6 @@ export function FinanceTasksHub({ onAction }) {
         <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           <Briefcase size={16} color="#0ea5e9" /> Financial Tasks Hub
         </h3>
-        
         <div style={{ display: 'flex', gap: '0.25rem' }}>
           {['commissions', 'bills', 'approvals', 'payroll'].map(tab => (
             <button
@@ -430,7 +437,6 @@ export function AiCommandConsole({ onAskQuestion }) {
         <Sparkles size={18} color="#0284c7" />
         <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>Ask Atlas AI Command Console</h2>
       </div>
-      
       <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '0.5rem' }}>
         <input
           type="text"

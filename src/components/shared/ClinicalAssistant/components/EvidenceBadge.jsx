@@ -1,6 +1,12 @@
- 
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Info from "lucide-react/dist/esm/icons/info";
 import React from 'react';
-import { ShieldCheck, Beaker, FileText, Info } from 'lucide-react';
+
+
+
+
 
 const EVIDENCE_LEVELS = {
   HIGH: {

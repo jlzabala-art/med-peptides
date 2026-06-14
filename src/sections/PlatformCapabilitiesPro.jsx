@@ -1,6 +1,18 @@
- 
+import Layers from "lucide-react/dist/esm/icons/layers";
+import Search from "lucide-react/dist/esm/icons/search";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import FileBarChart from "lucide-react/dist/esm/icons/file-bar-chart";
+import PiggyBank from "lucide-react/dist/esm/icons/piggy-bank";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React from 'react';
-import { Layers, Search, FileText, FileBarChart, PiggyBank, ShieldCheck, ArrowRight } from 'lucide-react';
+
+
+
+
+
+
+
 
 const capabilities = [
   {

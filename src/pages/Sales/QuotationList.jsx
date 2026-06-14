@@ -1,7 +1,30 @@
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import X from "lucide-react/dist/esm/icons/x";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import User from "lucide-react/dist/esm/icons/user";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import PlusCircle from "lucide-react/dist/esm/icons/plus-circle";
+import Save from "lucide-react/dist/esm/icons/save";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, addDoc, serverTimestamp, arrayUnion, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { FileText, Plus, X, CheckCircle, Sparkles, Building2, Calendar, User, Mail, PlusCircle, Save, ExternalLink } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import ERPListDetailLayout from '../../components/shared/ERPListDetailLayout';
 import { StatusChip, Checkbox, TextField } from '../../components/ui';
@@ -77,7 +100,6 @@ function QuotationDetail({ quote, onClose, onStatusChange, onEdit }) {
     setConverting(true);
     try {
       const soNum = `SO-${Math.floor(1000 + Math.random() * 9000)}`;
-      
       // Create Sales Order
       const soRef = await addDoc(collection(db, 'b2b_sales_orders'), {
         documentNumber: soNum,
@@ -313,7 +335,6 @@ function QuotationFormModal({ quote, onClose, onSave }) {
   const handleSave = async () => {
     if (!customerName || items.length === 0) return alert("Falta cliente o artículos");
     setSaving(true);
-    
     const subTotal = items.reduce((acc, item) => acc + ((parseFloat(item.rate) || 0) * (parseInt(item.quantity) || 0)), 0);
     const taxTotal = subTotal * 0.21;
     const grandTotal = subTotal + taxTotal;
@@ -491,7 +512,6 @@ export default function QuotationList() {
     const q = query(collection(db, 'b2b_quotations'), orderBy('createdAt', 'desc'));
     const unsub = onSnapshot(q, async (snap) => {
       const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      
       if (data.length === 0 && !isSeeding) {
         isSeeding = true;
         try {
@@ -519,7 +539,6 @@ export default function QuotationList() {
               { status: 'ACCEPTED', changedAt: new Date().toISOString(), changedBy: 'Cliente' }
             ]
           };
-          
           const sample2 = {
             documentNumber: "EST-2026-002",
             customerName: "Instituto Antienvejecimiento Barcelona",
@@ -541,7 +560,6 @@ export default function QuotationList() {
               { status: 'DRAFT', changedAt: new Date().toISOString(), changedBy: 'Admin' }
             ]
           };
-          
           await addDoc(collection(db, 'b2b_quotations'), sample1);
           await addDoc(collection(db, 'b2b_quotations'), sample2);
         } catch (err) {
@@ -550,7 +568,6 @@ export default function QuotationList() {
           isSeeding = false;
         }
       }
-      
       setQuotes(data);
       setLoading(false);
     });

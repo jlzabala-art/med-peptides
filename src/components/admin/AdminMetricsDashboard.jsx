@@ -1,3 +1,42 @@
+import Users from "lucide-react/dist/esm/icons/users";
+import UserPlus from "lucide-react/dist/esm/icons/user-plus";
+import PackageSearch from "lucide-react/dist/esm/icons/package-search";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Server from "lucide-react/dist/esm/icons/server";
+import Cpu from "lucide-react/dist/esm/icons/cpu";
+import Database from "lucide-react/dist/esm/icons/database";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import Settings from "lucide-react/dist/esm/icons/settings";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import EyeOff from "lucide-react/dist/esm/icons/eye-off";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import Link2 from "lucide-react/dist/esm/icons/link-2";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import X from "lucide-react/dist/esm/icons/x";
+import Send from "lucide-react/dist/esm/icons/send";
+import Sliders from "lucide-react/dist/esm/icons/sliders";
+import Play from "lucide-react/dist/esm/icons/play";
+import Check from "lucide-react/dist/esm/icons/check";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import UserCheck from "lucide-react/dist/esm/icons/user-check";
+import CreditCard from "lucide-react/dist/esm/icons/credit-card";
+import Briefcase from "lucide-react/dist/esm/icons/briefcase";
+import Layers3 from "lucide-react/dist/esm/icons/layers-3";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Home from "lucide-react/dist/esm/icons/home";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import MoreHorizontal from "lucide-react/dist/esm/icons/more-horizontal";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import {
@@ -15,47 +54,45 @@ import {
 import { db } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import {
-  Users,
-  UserPlus,
-  PackageSearch,
-  Activity,
-  ArrowUpRight,
-  ShieldCheck,
-  RefreshCw,
-  CheckCircle2,
-  Server,
-  Cpu,
-  Database,
-  Layers,
-  Sparkles,
-  ArrowRight,
-  ChevronUp,
-  ChevronDown,
-  Settings,
-  DollarSign,
-  Eye,
-  EyeOff,
-  Globe,
-  Building2,
-  Link2,
-  AlertTriangle,
-  TrendingUp,
-  X,
-  Send,
-  Sliders,
-  Play,
-  Check,
-  FileText,
-  UserCheck,
-  CreditCard,
-  Briefcase,
-  Layers3,
-  Calendar,
-  Home,
-  MessageSquare,
-  MoreHorizontal
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import {
   ExecutiveSummaryStrip,
@@ -68,6 +105,8 @@ import {
   AiCommandConsole,
   GlobalActivityFeed
 } from './widgets/CommandCenterWidgets';
+import notifier from '../../services/NotificationService';
+import styles from './AdminMetricsDashboard.module.css';
 
 // Roles-based dashboard configurations preset layout
 const ROLE_PRESETS = {
@@ -102,7 +141,6 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
   const isAdmin = userProfile?.role === 'admin' || userProfile?.roles?.includes('admin');
-  
   // Customizer State
   const [currentRolePreset, setCurrentRolePreset] = useState('CEO');
   const [visibleKPIs, setVisibleKPIs] = useState(ROLE_PRESETS.CEO.visibleKPIs);
@@ -116,7 +154,6 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
   const [aiConsumption, setAiConsumption] = useState(1.42);
   const [activeUsersCount, setActiveUsersCount] = useState(4);
   const [recentRegistrations, setRecentRegistrations] = useState([]);
-  
   // Metrics values (live simulation and DB mappings)
   const [metrics, setMetrics] = useState({
     revenue: 456000,
@@ -200,7 +237,6 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
           .sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0))
           .slice(0, 5);
         setRecentRegistrations(recentRegs);
-        
         setLoading(false);
       } catch (err) {
         console.warn('Using fallback mock data for command center', err);
@@ -245,128 +281,12 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
   ];
 
   return (
-    <div className="atlas-command-center" style={{ animation: 'fadeIn 0.4s ease-out', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
-      
+    <div className={styles.atlasCommandCenter} >
       {/* Dynamic Embedded CSS Styles */}
-      <style>{`
-        .atlas-command-center {
-          --glass-bg: rgba(255, 255, 255, 0.75);
-          --glass-border: rgba(226, 232, 240, 0.8);
-          --glass-blur: blur(12px);
-          font-family: 'Inter', -apple-system, sans-serif;
-          padding: 1.5rem 2rem 5rem;
-        }
-
-        .glass-card {
-          background: var(--glass-bg);
-          border: 1px solid var(--glass-border);
-          backdrop-filter: var(--glass-blur);
-          -webkit-backdrop-filter: var(--glass-blur);
-          border-radius: 16px;
-          box-shadow: 0 4px 20px -2px rgba(148, 163, 184, 0.08);
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .glass-card:hover {
-          box-shadow: 0 10px 25px -4px rgba(148, 163, 184, 0.15);
-          border-color: rgba(203, 213, 225, 0.9);
-        }
-
-        .kpi-strip {
-          display: flex;
-          gap: 0.75rem;
-          margin-bottom: 1.5rem;
-          flex-wrap: nowrap;
-          overflow-x: auto;
-          padding-bottom: 0.5rem;
-        }
-
-        /* Custom scrollbars */
-        ::-webkit-scrollbar {
-          width: 6px;
-          height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: #cbd5e1;
-          border-radius: 3px;
-        }
-
-        /* Responsive Columns Grid */
-        .main-portal-grid {
-          display: grid;
-          grid-template-columns: 2.2fr 0.8fr;
-          gap: 1.5rem;
-          margin-top: 1.5rem;
-        }
-
-        .widgets-col {
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-        }
-
-        .side-col {
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-        }
-
-        /* Mobile bottom navigation */
-        .mobile-nav-bar {
-          display: none;
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          height: 60px;
-          background: #ffffff;
-          border-top: 1px solid #e2e8f0;
-          z-index: 1000;
-          grid-template-columns: repeat(6, 1fr);
-          align-items: center;
-          justify-items: center;
-          box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
-        }
-
-        .mobile-nav-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          font-size: 0.65rem;
-          color: #64748b;
-          gap: 2px;
-          cursor: pointer;
-          text-decoration: none;
-        }
-        .mobile-nav-item.active {
-          color: #0284c7;
-        }
-
-        /* Media Queries */
-        @media (max-width: 1024px) {
-          .main-portal-grid {
-            grid-template-columns: 1fr;
-          }
-          .atlas-command-center {
-            padding: 1rem 1rem 5rem;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .desktop-only-widget {
-            display: none !important;
-          }
-          .mobile-nav-bar {
-            display: grid;
-          }
-        }
-      `}</style>
+      
 
       {/* ── COMMAND CENTER HEADER & PRESET CUSTOMIZER ────────────────── */}
-      <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+      <div className={styles.glassCard} style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
@@ -435,7 +355,6 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
         {isCustomizing && (
           <div style={{ marginTop: '1.25rem', padding: '1.25rem', borderRadius: '12px', backgroundColor: '#f8fafc', border: '1px dashed #cbd5e1', animation: 'slideDown 0.2s ease-out' }}>
             <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '0.9rem', fontWeight: 600, color: '#0f172a' }}>Configure Active Widgets & Metrics</h3>
-            
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2rem' }}>
               {/* KPIs */}
               <div>
@@ -514,11 +433,9 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
       />
 
       {/* ── MAIN WORKSPACE CONTENT GRID (2 COLUMNS) ────────────────────── */}
-      <div className="main-portal-grid">
-        
+      <div className={styles.mainPortalGrid}>
         {/* LEFT COLUMN: PRIMARY WORKSPACE WIDGETS */}
-        <div className="widgets-col">
-          
+        <div className={styles.widgetsCol}>
           {/* AI COMMAND CENTER (ASK ATLAS) */}
           <AiCommandConsole onAskQuestion={handleAiAsk} />
 
@@ -539,7 +456,7 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
           {visibleWidgets.includes('financeTasks') && (
             <FinanceTasksHub
               onAction={(type, detail) => {
-                alert(`Redirecting to financial reconciliation for ${type}: ${detail}`);
+                notifier.info(`Redirecting to financial reconciliation for ${type}: ${detail}`);
               }}
             />
           )}
@@ -569,12 +486,11 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
 
           {/* ── 8. AI WORKSPACE (SYNC & INSIGHTS HUB) ───────────────────── */}
           {visibleWidgets.includes('aiWorkspace') && (
-            <div className="glass-card" style={{ padding: '1.25rem' }}>
+            <div className={styles.glassCard} style={{ padding: '1.25rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.5rem' }}>
                 <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <Sparkles size={16} color="#0ea5e9" /> Atlas AI Sourcing Hub
                 </h3>
-                
                 {/* Tabs */}
                 <div style={{ display: 'flex', gap: '0.25rem' }}>
                   {['insights', 'predictions', 'recommendations', 'agents'].map(tab => (
@@ -627,8 +543,7 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
         </div>
 
         {/* RIGHT COLUMN: SIDEBAR METRICS & INFRASTRUCTURE */}
-        <div className="side-col">
-          
+        <div className={styles.sideCol}>
           {/* ── 9. GLOBAL ACTIVITY FEED ────────────────────────────────── */}
           {visibleWidgets.includes('activityFeed') && (
             <GlobalActivityFeed logs={activityFeed} />
@@ -636,7 +551,7 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
 
           {/* ── 10. INFRASTRUCTURE & TECH STATUS ───────────────────────── */}
           {visibleWidgets.includes('systemStatus') && (
-            <div className="glass-card" style={{ padding: '1.25rem' }}>
+            <div className={styles.glassCard} style={{ padding: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
                 <Server size={16} color="#64748b" />
                 <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>Infrastructure Specs</h3>
@@ -671,33 +586,32 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
       </div>
 
       {/* ── 13. MOBILE UX BOTTOM NAVIGATION BAR ─────────────────────── */}
-      <div className="mobile-nav-bar">
-        <a onClick={() => setMobileTab('home')} className={`mobile-nav-item ${mobileTab === 'home' ? 'active' : ''}`}>
+      <div className={styles.mobileNavBar}>
+        <a onClick={() => setMobileTab('home')} className={`${styles.mobileNavItem} ${mobileTab === "home" ? styles.active : ""}`}>
           <Home size={20} />
           <span>Home</span>
         </a>
-        <a onClick={() => setMobileTab('tasks')} className={`mobile-nav-item ${mobileTab === 'tasks' ? 'active' : ''}`}>
+        <a onClick={() => setMobileTab('tasks')} className={`${styles.mobileNavItem} ${mobileTab === "tasks" ? styles.active : ""}`}>
           <CheckCircle2 size={20} />
           <span>Tasks</span>
         </a>
-        <a onClick={() => setMobileTab('finance')} className={`mobile-nav-item ${mobileTab === 'finance' ? 'active' : ''}`}>
+        <a onClick={() => setMobileTab('finance')} className={`${styles.mobileNavItem} ${mobileTab === "finance" ? styles.active : ""}`}>
           <DollarSign size={20} />
           <span>Finance</span>
         </a>
-        <a onClick={() => setMobileTab('crm')} className={`mobile-nav-item ${mobileTab === 'crm' ? 'active' : ''}`}>
+        <a onClick={() => setMobileTab('crm')} className={`${styles.mobileNavItem} ${mobileTab === "crm" ? styles.active : ""}`}>
           <Users size={20} />
           <span>CRM</span>
         </a>
-        <a onClick={() => setMobileTab('ai')} className={`mobile-nav-item ${mobileTab === 'ai' ? 'active' : ''}`}>
+        <a onClick={() => setMobileTab('ai')} className={`${styles.mobileNavItem} ${mobileTab === "ai" ? styles.active : ""}`}>
           <Sparkles size={20} />
           <span>AI</span>
         </a>
-        <a onClick={() => setMobileTab('more')} className={`mobile-nav-item ${mobileTab === 'more' ? 'active' : ''}`}>
+        <a onClick={() => setMobileTab('more')} className={`${styles.mobileNavItem} ${mobileTab === "more" ? styles.active : ""}`}>
           <MoreHorizontal size={20} />
           <span>More</span>
         </a>
       </div>
-      
     </div>
   );
 }

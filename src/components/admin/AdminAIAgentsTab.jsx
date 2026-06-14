@@ -1,20 +1,18 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect, useCallback } from 'react';
-import {
-  RefreshCw,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Zap,
-  Globe,
-  AlertTriangle,
-  ExternalLink,
-  ToggleLeft,
-  ToggleRight,
-  ChevronDown,
-  ChevronUp,
-  Sparkles,
-} from 'lucide-react';
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import ToggleLeft from "lucide-react/dist/esm/icons/toggle-left";
+import ToggleRight from "lucide-react/dist/esm/icons/toggle-right";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 

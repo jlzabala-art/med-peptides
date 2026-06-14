@@ -1,6 +1,25 @@
+import User from "lucide-react/dist/esm/icons/user";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import Copy from "lucide-react/dist/esm/icons/copy";
+import Check from "lucide-react/dist/esm/icons/check";
+import Volume2 from "lucide-react/dist/esm/icons/volume-2";
+import VolumeX from "lucide-react/dist/esm/icons/volume-x";
+import ThumbsUp from "lucide-react/dist/esm/icons/thumbs-up";
+import ThumbsDown from "lucide-react/dist/esm/icons/thumbs-down";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import Coins from "lucide-react/dist/esm/icons/coins";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { User, Bot, Copy, Check, Volume2, VolumeX, ThumbsUp, ThumbsDown, ExternalLink, Coins } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 import { renderAIMarkdown, processMarkdown } from '../utils/markdownRenderer';
 import EvidenceBadge from './EvidenceBadge';
 import StackSynergyWidget from './StackSynergyWidget';
@@ -18,7 +37,6 @@ export default function ChatMessageItem({ msg, idx, onProductClick, InstantResul
   const [isSpeaking, setIsSpeaking] = useState(false);
   const isAssistant = msg.role === 'assistant';
   const { html, metadata } = isAssistant ? processMarkdown(msg.content) : { html: null, metadata: {} };
-  
   const isSpecialMode = contextMode === 'admin' || contextMode === 'doctor';
   const themeAccent = contextMode === 'admin' ? '#1a73e8' : contextMode === 'doctor' ? '#0f9d58' : '#4285f4';
   const senderBot = contextMode === 'admin' ? 'AdminAI' : contextMode === 'doctor' ? 'ClinicalAI' : 'ResearchAI';
@@ -30,7 +48,6 @@ export default function ChatMessageItem({ msg, idx, onProductClick, InstantResul
       setIsSpeaking(false);
       return;
     }
-    
     // Clean text for speech (strip markdown links, formatting, emojis)
     const speechText = msg.content
       .replace(/\[.*?\]/g, '')
@@ -38,17 +55,13 @@ export default function ChatMessageItem({ msg, idx, onProductClick, InstantResul
       .replace(/#+/g, '')
       .replace(/`{3}[\s\S]*?`{3}/g, '') // remove code blocks
       .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, ''); // remove emojis
-      
     const utterance = new SpeechSynthesisUtterance(speechText);
-    
     // Dynamically detect Spanish vs English - forced to false per user request
     const isSpanish = false;
     utterance.lang = isSpanish ? 'es-ES' : 'en-US';
-    
     // Set a premium, slightly slower pacing rate for optimal medical research reading
     utterance.rate = 0.95;
     utterance.pitch = 1.0;
-    
     // Try to pick a premium voice if available
     if (typeof window !== 'undefined' && window.speechSynthesis) {
       const voices = window.speechSynthesis.getVoices();
@@ -64,10 +77,8 @@ export default function ChatMessageItem({ msg, idx, onProductClick, InstantResul
         }
       }
     }
-    
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
-    
     setIsSpeaking(true);
     window.speechSynthesis.speak(utterance);
   };
@@ -195,7 +206,6 @@ export default function ChatMessageItem({ msg, idx, onProductClick, InstantResul
               )}
             </button>
           )}
-          
           {isAssistant && (
             <div style={{ 
               display: 'flex', 

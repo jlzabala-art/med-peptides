@@ -1,17 +1,53 @@
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Users from "lucide-react/dist/esm/icons/users";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Send from "lucide-react/dist/esm/icons/send";
+import Package from "lucide-react/dist/esm/icons/package";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Pill from "lucide-react/dist/esm/icons/pill";
+import Building from "lucide-react/dist/esm/icons/building";
+import User from "lucide-react/dist/esm/icons/user";
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
-import {
-  ClipboardList, Plus, Users, Clock, CheckCircle2,
-  AlertCircle, Send, Package, TrendingUp, ArrowRight,
-  Pill, Building, User
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { RX_STATUS_META } from '../../config/prescriptionConfig';
 import DoctorPrescriptionBuilder from './DoctorPrescriptionBuilder';
+import ClinicalCopilotWidget from './ClinicalCopilotWidget';
 import { Card, MetricCard } from '../ui';
 import Spinner from '../ui/Spinner';
 import { useTranslation } from 'react-i18next';
+
+// Nuevos Componentes de Widgets
+import DraggableDashboard from '../widgets/core/DraggableDashboard';
+import OrderTrackingWidget from '../widgets/logistics/OrderTrackingWidget';
+import BillingInvoicesWidget from '../widgets/finance/BillingInvoicesWidget';
+import PatientRosterWidget from '../widgets/clinical/PatientRosterWidget';
+import ClinicalHistoryWidget from '../widgets/clinical/ClinicalHistoryWidget';
+
+const AVAILABLE_WIDGETS = {
+  OrderTracking: OrderTrackingWidget,
+  BillingInvoices: BillingInvoicesWidget,
+  PatientRoster: PatientRosterWidget,
+  ClinicalHistory: ClinicalHistoryWidget,
+};
 
 const PIPELINE_STEPS = [
   { key: 'draft',                    label: 'Draft',       color: '#f59e0b', bg: '#fef9c3' },
@@ -26,7 +62,6 @@ function RxRow({ rx }) {
   const meta = RX_STATUS_META[rx.status] || RX_STATUS_META.draft;
   const isCorp = rx.type === 'clinic_supply';
   const date = rx.createdAt?.toDate ? rx.createdAt.toDate().toLocaleDateString() : '—';
-  
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', borderBottom: '1px solid #e2e8f0', background: 'var(--color-bg-surface)' }}>
       <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: isCorp ? '#e0f2fe' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -93,6 +128,13 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
   const fulfilled = prescriptions.filter(r => r.status === 'fulfilled').length;
   const recent = prescriptions.slice(0, 5);
 
+  const initialWidgetLayout = [
+    { id: 'widget-1', type: 'PatientRoster', props: { role: 'doctor' } },
+    { id: 'widget-2', type: 'ClinicalHistory', props: { role: 'doctor' } },
+    { id: 'widget-3', type: 'OrderTracking', props: { role: 'doctor', userId: doctorId } },
+    { id: 'widget-4', type: 'BillingInvoices', props: { role: 'doctor' } }
+  ];
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingBottom: '2rem' }}>
 
@@ -111,7 +153,6 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
       </div>
 
       <div className="overview-content" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        
         {drafts > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.5rem', borderRadius: '8px', background: 'var(--color-warning-bg)', border: '1px solid #fcd34d' }}>
             <AlertCircle size={20} color="var(--color-warning)" />
@@ -133,6 +174,8 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
           <MetricCard title={t('doctor.overview.stats_fulfilled')} value={isLoading ? '…' : fulfilled} subtitle={t('doctor.overview.stats_fulfilled_sub')} icon={CheckCircle2} color="var(--color-success)" onClick={() => onNavigate?.('prescriptions')} />
           <MetricCard title={t('doctor.overview.stats_patients')} value={patientCount || '—'} subtitle={t('doctor.overview.stats_patients_sub')} icon={Users} color="#8b5cf6" onClick={() => onNavigate?.('patients')} />
         </div>
+
+        <ClinicalCopilotWidget onDraftGenerated={(draft) => { setShowBuilder(true); window.dispatchEvent(new CustomEvent('nav:ai-draft', { detail: draft })); }} />
 
         <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
           <Card style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -174,53 +217,18 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
           </Card>
         )}
 
-        <Card noPadding>
-          <div style={{ padding: '1.25rem', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <TrendingUp size={20} color="var(--primary)" />
-              <div>
-                <div style={{ fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>{t('doctor.overview.rx_status')}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
-                  {t('doctor.overview.rx_status_sub', { count: prescriptions.length, active: active })}
-                </div>
-              </div>
-            </div>
-            <button onClick={() => onNavigate?.('prescriptions')} className="btn" style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              {t('doctor.overview.view_all')} <ArrowRight size={14} />
-            </button>
-          </div>
-
-          <div style={{ padding: '1.25rem', borderBottom: '1px solid #e2e8f0', background: 'var(--color-bg-app)' }}>
-            {prescriptions.length > 0 ? (
-              <>
-                <PipelineBar prescriptions={prescriptions} />
-                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '0.75rem' }}>
-                  {PIPELINE_STEPS.map(s => {
-                    const count = prescriptions.filter(rx => rx.status === s.key).length;
-                    return count > 0 ? (
-                      <span key={s.key} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', fontWeight: 600, color: s.color }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: s.color }} />
-                        {s.label} ({count})
-                      </span>
-                    ) : null;
-                  })}
-                </div>
-              </>
-            ) : <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>{t('doctor.overview.no_data_bar')}</div>}
-          </div>
-
-          {isLoading ? (
-            <Spinner text={t('doctor.overview.loading_recent')} />
-          ) : prescriptions.length === 0 ? (
-            <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
-              {t('doctor.overview.no_recent')}
-            </div>
-          ) : (
-            <div>
-              {recent.map(rx => <RxRow key={rx.id} rx={rx} />)}
-            </div>
-          )}
-        </Card>
+        <div className="mt-8">
+          <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <ClipboardList className="text-[#C0A062]" />
+            Mi Dashboard Dinámico
+          </h3>
+          <p className="text-gray-400 text-sm mb-6">Puedes arrastrar y soltar estos widgets para personalizar tu área de trabajo.</p>
+          <DraggableDashboard 
+            availableWidgets={AVAILABLE_WIDGETS}
+            initialLayout={initialWidgetLayout}
+            onLayoutChange={(layout) => console.log('Nuevo layout guardado:', layout)}
+          />
+        </div>
 
       </div>
     </div>

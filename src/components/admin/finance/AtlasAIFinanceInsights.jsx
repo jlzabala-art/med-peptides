@@ -1,5 +1,20 @@
+import Bot from "lucide-react/dist/esm/icons/bot";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Send from "lucide-react/dist/esm/icons/send";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
 import React, { useState, useMemo } from 'react';
-import { Bot, AlertTriangle, Send, TrendingUp, RefreshCw, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
+
+
+
+
+
+
+
+
 import { usePreferences } from '../../../context/PreferencesContext';
 
 export default function AtlasAIFinanceInsights({ pendingInvoices = [] }) {
@@ -80,7 +95,6 @@ export default function AtlasAIFinanceInsights({ pendingInvoices = [] }) {
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Identify high-risk unpaid invoices</div>
           </div>
         </button>
-        
         <button onClick={() => simulateAILoading('reminders')} className="gcp-btn-secondary" style={{ flex: 1, minWidth: '200px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '1.25rem', gap: '0.5rem', background: activeInsight === 'reminders' ? 'var(--surface-raised)' : 'transparent', border: activeInsight === 'reminders' ? '1px solid var(--primary)' : '1px solid var(--border)' }}>
           <Send size={20} color="#3b82f6" />
           <div style={{ textAlign: 'left' }}>
@@ -139,7 +153,6 @@ export default function AtlasAIFinanceInsights({ pendingInvoices = [] }) {
           <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
             Atlas AI has drafted personalized, polite reminder emails for the top 5 overdue accounts. The tone is optimized for medical B2B collections to preserve clinic relationships while accelerating payment.
           </p>
-          
           <div style={{ padding: '1rem', background: 'var(--surface)', borderRadius: '8px', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Example Draft (To: Regenerative Med Spa)</div>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontStyle: 'italic', lineHeight: 1.5 }}>

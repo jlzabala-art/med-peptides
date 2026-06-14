@@ -1,0 +1,39 @@
+name: Bundle Size Guard
+
+on:
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  bundle-size:
+    name: Check Chunk Sizes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Application
+        run: npm run build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+
+      - name: Enforce 1MB chunk limit
+        run: |
+          echo "Verificando que ningún chunk JS supere 1MB para proteger el LCP..."
+          # Find all js files larger than 1024 kilobytes
+          OVERSIZED_CHUNKS=$(find dist/assets -type f -name "*.js" -size +1024k)
+          
+          if [ -n "$OVERSIZED_CHUNKS" ]; then
+            echo "::error::🚨 Se encontraron chunks que superan el límite de 1MB:"
+            echo "$OVERSIZED_CHUNKS"
+            echo "Por favor, usa importaciones dinámicas (React.lazy) para separar estos módulos."
+            exit 1
+          else
+            echo "✅ Todos los chunks están dentro del presupuesto de rendimiento."
+          fi

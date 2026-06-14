@@ -1,17 +1,26 @@
+import Settings from "lucide-react/dist/esm/icons/settings";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import Users from "lucide-react/dist/esm/icons/users";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import ArrowRightLeft from "lucide-react/dist/esm/icons/arrow-right-left";
+import Database from "lucide-react/dist/esm/icons/database";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Check from "lucide-react/dist/esm/icons/check";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Layers from "lucide-react/dist/esm/icons/layers";
 import React, { useState } from 'react';
-import {
-  Settings,
-  DollarSign,
-  RefreshCw,
-  Users,
-  Shield,
-  ArrowRightLeft,
-  Database,
-  Globe,
-  Check,
-  AlertTriangle,
-  Layers,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
 import DataTable from '../ui/DataTable';
 import AppFilterBar from '../ui/AppFilterBar';
 import AppEntityCell from '../ui/AppEntityCell';
@@ -26,8 +35,8 @@ export default function AdminGadgetRepositoryTab() {
   const [loading, setLoading] = useState(true);
 
   React.useEffect(() => {
-    fetch('/gadgets-catalog.json')
-      .then(res => res.json())
+    fetch('/gadgets-catalog.js')
+      .then(res => res.js())
       .then(data => {
         setGadgets(data);
         setLoading(false);
@@ -187,11 +196,9 @@ export default function AdminGadgetRepositoryTab() {
           scoped derivatives across professional and patient portals.
         </span>
       </div>
-    
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: AdminGadgetRepositoryTab | Props: none
       </div>
-    
 </div>
   );
 }

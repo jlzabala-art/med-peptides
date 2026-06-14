@@ -1,6 +1,25 @@
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import Info from "lucide-react/dist/esm/icons/info";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Bot from "lucide-react/dist/esm/icons/bot";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo } from 'react';
-import { ArrowLeft, Info, FlaskConical, Beaker, Zap, Activity, HelpCircle, BookOpen, ChevronRight, Bot } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 import MobileProductCard from '../snippets/MobileProductCard';
 import FAQModal from '../components/discovery/FAQModal';
 import PubMedPreviewPanel from '../components/discovery/PubMedPreviewPanel';
@@ -27,7 +46,6 @@ export default function CategoryDetailView({
   }, [category]);
 
   const categorySlug = (category || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-  
   const structuredData = useMemo(() => ({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

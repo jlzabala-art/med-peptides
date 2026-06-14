@@ -1,10 +1,63 @@
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import Check from "lucide-react/dist/esm/icons/check";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Target from "lucide-react/dist/esm/icons/target";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Minus from "lucide-react/dist/esm/icons/minus";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import Maximize2 from "lucide-react/dist/esm/icons/maximize-2";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Microscope from "lucide-react/dist/esm/icons/microscope";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import Lock from "lucide-react/dist/esm/icons/lock";
+import UserCheck from "lucide-react/dist/esm/icons/user-check";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Thermometer from "lucide-react/dist/esm/icons/thermometer";
+import Scale from "lucide-react/dist/esm/icons/scale";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import X from "lucide-react/dist/esm/icons/x";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 /* eslint-disable react-hooks/set-state-in-effect, no-undef, no-unused-vars */
 import { useState, useEffect, useMemo } from 'react';
 import { trackPeptideView, trackPurchaseIntent } from '../hooks/useAnalytics';
 import { trackRecentView } from '../utils/recentViews';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, Check, FlaskConical, Beaker, FileText, ShieldCheck, Target, Layers, Plus, Minus, ChevronDown, ChevronUp, Maximize2, ExternalLink, Activity, Microscope, Truck, Lock, UserCheck, BookOpen, Zap, Thermometer, Scale, Bot, X, Sparkles } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import ImageModal from '../snippets/ImageModal';
 import OptimizedImage from '../snippets/OptimizedImage';
 import FAQAccordion from '../components/discovery/FAQAccordion';
@@ -652,7 +705,6 @@ export default function ProductDetail({
           animation: slideUpCta 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
         .pd-mobile-cta { display: none; }
-        
         .pd-floating-price {
           font-family: 'Outfit', sans-serif;
           font-size: 1.75rem;
@@ -975,7 +1027,6 @@ export default function ProductDetail({
                     const currentStrengthFormatted = formatDose(selectedVariant.dosage || selectedVariant.strength, activeProduct.name, activeProduct.category);
                     const currentStrengthData = uniqueStrengths.find(s => s.formatted === currentStrengthFormatted);
                     const availableVariants = currentStrengthData?.variants || [];
-                    
                     if (availableVariants.length > 1) {
                       const suppliers = availableVariants.map(v => v.supplier || 'Lotusland');
                       const uniqueSuppliers = [...new Set(suppliers)];
@@ -1182,7 +1233,6 @@ export default function ProductDetail({
                   const target = selectedVariant
                     ? { ...selectedVariant, name: activeProduct.name }
                     : activeProduct;
-                  
                   trackPurchaseIntent({
                     peptide_name: activeProduct.name,
                     protocol_id: null
@@ -1588,7 +1638,6 @@ export default function ProductDetail({
               >
                 {/* Decorative glow */}
                 <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: 'var(--secondary)', opacity: 0.05, filter: 'blur(20px)', borderRadius: '50%' }} />
-                
                 <div style={{ 
                   backgroundColor: 'var(--section-alt, #EEF4FA)', 
                   padding: '1rem', 
@@ -1627,7 +1676,6 @@ export default function ProductDetail({
               }}>
                 {/* Ambient background glow */}
                 <div style={{ position: 'absolute', top: '-10%', right: '-10%', width: '250px', height: '250px', background: 'radial-gradient(circle, rgba(0, 163, 224, 0.15) 0%, transparent 70%)', pointerEvents: 'none', borderRadius: '50%' }} />
-                
                 <div className="pd-ai-widget-header" style={{ display: 'flex', alignItems: 'flex-start', gap: '1.25rem', flexDirection: 'row', flexWrap: 'wrap' }}>
                   <div style={{
                     width: '56px',
@@ -1821,7 +1869,6 @@ export default function ProductDetail({
                   const dosage = typeof rawDosage === 'object' && rawDosage !== null
                     ? `${rawDosage.min ?? ''}${rawDosage.max ? `–${rawDosage.max}` : ''} ${rawDosage.unit ?? ''} ${rawDosage.frequency ? `(${rawDosage.frequency.replace(/_/g, ' ')})` : ''}`.trim()
                     : rawDosage;
-                  
                   if (!hasPK && !dosage) return null;
 
                   const pk = activeProduct.pharmacokinetics || {};
@@ -2028,7 +2075,6 @@ export default function ProductDetail({
               </span>
             </div>
           </div>
-          
           <button
             disabled={!priceDisplay || priceDisplay === 'unavailable' || authLoading}
             onClick={() => {

@@ -1,3 +1,66 @@
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import Settings from "lucide-react/dist/esm/icons/settings";
+import Users from "lucide-react/dist/esm/icons/users";
+import Database from "lucide-react/dist/esm/icons/database";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import PackageSearch from "lucide-react/dist/esm/icons/package-search";
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import Link2 from "lucide-react/dist/esm/icons/link-2";
+import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Wrench from "lucide-react/dist/esm/icons/wrench";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import Receipt from "lucide-react/dist/esm/icons/receipt";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Box from "lucide-react/dist/esm/icons/box";
+import Tag from "lucide-react/dist/esm/icons/tag";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import EyeOff from "lucide-react/dist/esm/icons/eye-off";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import Cpu from "lucide-react/dist/esm/icons/cpu";
+import LogOut from "lucide-react/dist/esm/icons/log-out";
+import Menu from "lucide-react/dist/esm/icons/menu";
+import X from "lucide-react/dist/esm/icons/x";
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import Search from "lucide-react/dist/esm/icons/search";
+import Building from "lucide-react/dist/esm/icons/building";
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import HeartPulse from "lucide-react/dist/esm/icons/heart-pulse";
+import UserPlus from "lucide-react/dist/esm/icons/user-plus";
+import Lock from "lucide-react/dist/esm/icons/lock";
+import Briefcase from "lucide-react/dist/esm/icons/briefcase";
+import LayoutTemplate from "lucide-react/dist/esm/icons/layout-template";
+import Network from "lucide-react/dist/esm/icons/network";
+import ScrollText from "lucide-react/dist/esm/icons/scroll-text";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
+import Settings2 from "lucide-react/dist/esm/icons/settings-2";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import PieChart from "lucide-react/dist/esm/icons/pie-chart";
+import CreditCard from "lucide-react/dist/esm/icons/credit-card";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import Pill from "lucide-react/dist/esm/icons/pill";
+import FilePlus from "lucide-react/dist/esm/icons/file-plus";
+import ArrowLeftRight from "lucide-react/dist/esm/icons/arrow-left-right";
+import UserCog from "lucide-react/dist/esm/icons/user-cog";
+import BarChart4 from "lucide-react/dist/esm/icons/bar-chart-4";
+import Workflow from "lucide-react/dist/esm/icons/workflow";
+import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
+import PackageOpen from "lucide-react/dist/esm/icons/package-open";
+import Package from "lucide-react/dist/esm/icons/package";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
@@ -6,67 +69,131 @@ import { db } from '../firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
-import {
-  ShieldCheck, ArrowLeft, Settings, Users, Database, Layers,
-  PackageSearch, LayoutDashboard, Bot, Link2, BarChart3,
-  ChevronRight, ChevronDown, ClipboardList, Zap, Globe, Wrench, ShoppingCart, Receipt,
-  FlaskConical, Box, Tag, DollarSign, FileText, Eye, EyeOff, Mail,
-  Activity, BookOpen, Cpu, LogOut, Menu, X, Building2, TrendingUp, Truck,
-  Building, Stethoscope, HeartPulse, UserPlus, Lock, Briefcase, LayoutTemplate, Network, ScrollText, MessageSquare, Calendar, UploadCloud, Settings2, CheckCircle, PieChart, CreditCard, ShieldAlert, Pill, FilePlus, ArrowLeftRight, UserCog, BarChart4, Workflow, GraduationCap, PackageOpen, Package
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import PortalLayout from '../components/ui/PortalLayout';
 import PageTransition from '../components/PageTransition';
+import Omnibar from '../components/admin/Omnibar';
+
+import GlobalNotificationCenter from '../components/shared/widgets/GlobalNotificationCenter';
+import MarketIntelligenceHub from '../components/admin/market/MarketIntelligenceHub';
 
 // ── Lazy tab components ────────────────────────────────────────────────────────
-const AdminUsersTab        = React.lazy(() => import('../components/admin/AdminUsersTab'));
-const AdminWholesellersTab = React.lazy(() => import('../components/admin/AdminWholesellersTab'));
-const AdminAccountManagersTab = React.lazy(() => import('../components/admin/AdminAccountManagersTab'));
-const AdminWorkflowsTab = React.lazy(() => import('../components/admin/AdminWorkflowsTab'));
-const AdminLogisticsTab = React.lazy(() => import('../components/admin/AdminLogisticsTab'));
-const ImportCatalogsTab = React.lazy(() => import('../components/admin/imports/ImportCatalogsTab'));
-const ImportPriceListsTab = React.lazy(() => import('../components/admin/imports/ImportPriceListsTab'));
-const ImportCoATab = React.lazy(() => import('../components/admin/imports/ImportCoATab'));
-const ImportRFQTab = React.lazy(() => import('../components/admin/imports/ImportRFQTab'));
-const AdminImportHistoryTab = React.lazy(() => import('../components/admin/imports/AdminImportHistoryTab'));
-const AdminProductsTab     = React.lazy(() => import('../components/admin/AdminProductsTab'));
-const AdminCompetitorsTab  = React.lazy(() => import('../components/admin/AdminCompetitorsTab'));
-const AdminSettingsTab     = React.lazy(() => import('../components/admin/AdminSettingsTab'));
-const AdminInvitationsTab  = React.lazy(() => import('../components/admin/AdminInvitationsTab'));
-const AdminCostsTab        = React.lazy(() => import('../components/admin/AdminCostsTab'));
-const AdminRelationshipsTab= React.lazy(() => import('../components/admin/AdminRelationshipsTab'));
-const AdminSemanticTab     = React.lazy(() => import('../components/admin/AdminSemanticTab'));
-const AdminPricesTab       = React.lazy(() => import('../components/admin/AdminPricesTab'));
-const AdminViewsConfigTab  = React.lazy(() => import('../components/admin/AdminViewsConfigTab'));
-const AdminVariantsTab     = React.lazy(() => import('../components/admin/AdminVariantsTab'));
-const AdminProtocolsTab    = React.lazy(() => import('../components/admin/AdminProtocolsTab'));
-const AdminMetricsDashboard= React.lazy(() => import('../components/admin/AdminMetricsDashboard'));
-const OrdersTab            = React.lazy(() => import('../components/admin/OrdersTab'));
-const AdminAccessLevelsTab = React.lazy(() => import('../components/admin/AdminAccessLevelsTab'));
-const ClinicalAIWidget     = React.lazy(() => import('../components/admin/ClinicalAIWidget'));
-const AdminAnalyticsTab    = React.lazy(() => import('../components/admin/AdminAnalyticsTab'));
-const AdminClinicalLogsTab = React.lazy(() => import('../components/admin/AdminClinicalLogsTab'));
-const AdminHomeLayoutTab   = React.lazy(() => import('../components/admin/AdminHomeLayoutTab'));
-const AdminPlaceholderTab  = React.lazy(() => import('../components/admin/AdminPlaceholderTab'));
-const AdminAIAgentsTab     = React.lazy(() => import('../components/admin/AdminAIAgentsTab'));
-const AdminAuditLogsTab    = React.lazy(() => import('../components/admin/AdminAuditLogsTab'));
-const AdminStorageTab      = React.lazy(() => import('../components/admin/AdminStorageTab'));
-const AdminAIToolsTab      = React.lazy(() => import('../components/admin/AdminAIToolsTab'));
-const AdminSkuMappingTab   = React.lazy(() => import('../components/admin/SkuMappingTab/AdminSkuMappingTab'));
-const AdminZohoCRMWidget   = React.lazy(() => import('../components/admin/gadgets/AdminZohoCRMWidget'));
-const AdminBulkOrdersTab   = React.lazy(() => import('../components/admin/AdminBulkOrdersTab'));
-const AdminFinanceWidget   = React.lazy(() => import('../components/admin/gadgets/AdminFinanceWidget'));
-const AdminEmailTemplatesTab = React.lazy(() => import('../components/admin/AdminEmailTemplatesTab'));
-const AdminProductSyncWidget = React.lazy(() => import('../components/admin/gadgets/AdminProductSyncWidget'));
-const AdminGadgetRepositoryTab = React.lazy(() => import('../components/admin/AdminGadgetRepositoryTab'));
-const CatalogList = React.lazy(() => import('../components/wholesaler/CatalogList'));
-const CatalogCreatorFlow = React.lazy(() => import('../components/wholesaler/CatalogCreatorFlow'));
-const EmailCampaignBuilder = React.lazy(() => import('../components/wholesaler/EmailCampaignBuilder'));
-const AdminFinanceTab = React.lazy(() => import('../components/admin/AdminFinanceTab'));
-const AdminRFQTab = React.lazy(() => import('../components/admin/AdminRFQTab'));
-const AdminPOTab = React.lazy(() => import('../components/admin/AdminPOTab'));
-const AdminBillsTab = React.lazy(() => import('../components/admin/AdminBillsTab'));
-const AdminPaymentsMadeTab = React.lazy(() => import('../components/admin/AdminPaymentsMadeTab'));
-const AdminPaymentsReceivedTab = React.lazy(() => import('../components/admin/AdminPaymentsReceivedTab'));
+import AdminUsersTab from '../components/admin/AdminUsersTab';
+import AdminPhysiciansTab from '../components/admin/physicians/AdminPhysiciansTab';
+import AtlasCommandCenter from '../components/admin/geography/AtlasCommandCenter';
+import AdminWholesellersTab from '../components/admin/AdminWholesellersTab';
+import AdminAccountManagersTab from '../components/admin/AdminAccountManagersTab';
+import AdminWorkflowsTab from '../components/admin/AdminWorkflowsTab';
+import AdminLogisticsTab from '../components/admin/AdminLogisticsTab';
+import ImportCatalogsTab from '../components/admin/imports/ImportCatalogsTab';
+import ImportPriceListsTab from '../components/admin/imports/ImportPriceListsTab';
+import ImportCoATab from '../components/admin/imports/ImportCoATab';
+import ImportRFQTab from '../components/admin/imports/ImportRFQTab';
+import AdminImportHistoryTab from '../components/admin/imports/AdminImportHistoryTab';
+import CatalogIntelligenceHub from '../components/admin/catalog/CatalogIntelligenceHub';
+import AdminCompetitorsTab from '../components/admin/AdminCompetitorsTab';
+import AdminSettingsTab from '../components/admin/AdminSettingsTab';
+import AdminInvitationsTab from '../components/admin/AdminInvitationsTab';
+import AdminCostsTab from '../components/admin/AdminCostsTab';
+import AdminRelationshipsTab from '../components/admin/AdminRelationshipsTab';
+import AdminSemanticTab from '../components/admin/AdminSemanticTab';
+const B2BQuotationsHub = lazy(() => import('../features/quotations/B2BQuotationsHub'));
+const InvoiceIntelligenceHub = lazy(() => import('../features/invoices/InvoiceIntelligenceHub'));
+import AdminPricesTab from '../components/admin/AdminPricesTab';
+import AdminViewsConfigTab from '../components/admin/AdminViewsConfigTab';
+import AdminVariantsTab from '../components/admin/AdminVariantsTab';
+import AdminProtocolsTab from '../components/admin/AdminProtocolsTab';
+import AdminProgramsTab from '../components/admin/AdminProgramsTab';
+import AdminMetricsDashboard from '../components/admin/AdminMetricsDashboard';
+import OrdersTab from '../components/admin/OrdersTab';
+import AdminAccessLevelsTab from '../components/admin/AdminAccessLevelsTab';
+import ClinicalAIWidget from '../components/admin/ClinicalAIWidget';
+import AdminAnalyticsTab from '../components/admin/AdminAnalyticsTab';
+import AdminClinicalLogsTab from '../components/admin/AdminClinicalLogsTab';
+import AdminHomeLayoutTab from '../components/admin/AdminHomeLayoutTab';
+import AdminPlaceholderTab from '../components/admin/AdminPlaceholderTab';
+import AdminAIAgentsTab from '../components/admin/AdminAIAgentsTab';
+import AdminAuditLogsTab from '../components/admin/AdminAuditLogsTab';
+import AdminStorageTab from '../components/admin/AdminStorageTab';
+import AdminAIToolsTab from '../components/admin/AdminAIToolsTab';
+import AdminSkuMappingTab from '../components/admin/SkuMappingTab/AdminSkuMappingTab';
+import AdminZohoCRMWidget from '../components/admin/gadgets/AdminZohoCRMWidget';
+import AdminBulkOrdersTab from '../components/admin/AdminBulkOrdersTab';
+import AdminFinanceWidget from '../components/admin/gadgets/AdminFinanceWidget';
+import AdminEmailTemplatesTab from '../components/admin/AdminEmailTemplatesTab';
+import AdminProductSyncWidget from '../components/admin/gadgets/AdminProductSyncWidget';
+import AdminGadgetRepositoryTab from '../components/admin/AdminGadgetRepositoryTab';
+import CatalogList from '../components/wholesaler/CatalogList';
+import CatalogCreatorFlow from '../components/wholesaler/CatalogCreatorFlow';
+import EmailCampaignBuilder from '../components/wholesaler/EmailCampaignBuilder';
+import AdminFinanceTab from '../components/admin/AdminFinanceTab';
+import AdminRFQTab from '../components/admin/AdminRFQTab';
+import AdminPOTab from '../components/admin/AdminPOTab';
+import AdminBillsTab from '../components/admin/AdminBillsTab';
+import AdminPaymentsMadeTab from '../components/admin/AdminPaymentsMadeTab';
+import AdminPaymentsReceivedTab from '../components/admin/AdminPaymentsReceivedTab';
 
 // icon alias (lucide doesn't export MailPlus2 — must be before NAV_GROUPS)
 function MailPlus2(props) { return <UserPlus {...props} />; }
@@ -85,13 +212,11 @@ function useUnreadMessagesCount() {
 
   useEffect(() => {
     if (!user) return;
-    
     const effectiveRole = userRole;
     const effectiveId = user.uid;
     const q = (effectiveRole === 'admin' || isAdmin)
       ? query(collection(db, 'conversations'))
       : query(collection(db, 'conversations'), where('participants', 'array-contains', effectiveId));
-      
     const unsub = onSnapshot(q, (snap) => {
       let count = 0;
       snap.forEach(doc => {
@@ -110,6 +235,16 @@ function useUnreadMessagesCount() {
 
 // ── Intent-based navigation groups ────────────────────────────────────────────
 const NAV_GROUPS = [
+  {
+    id: 'core-workspace',
+    label: 'Workspace',
+    icon: LayoutDashboard,
+    items: [
+      { id: 'dashboard',        label: 'Dashboard',           icon: Activity },
+      { id: 'messages',         label: 'Messages',            icon: MessageSquare },
+      { id: 'calendar',         label: 'Calendar',            icon: Calendar },
+    ],
+  },
   {
     id: 'sales-operations',
     label: 'Sales (O2C)',
@@ -164,7 +299,7 @@ const NAV_GROUPS = [
       { id: 'doctors',          label: 'Doctors',             icon: Stethoscope },
       { id: 'patients',         label: 'Patients',            icon: HeartPulse },
       { id: 'account-managers', label: 'Account Managers',    icon: ShieldCheck },
-      { id: 'geography-areas',  label: 'Geography Areas',     icon: Globe },
+      { id: 'command-center',   label: 'Command Center',      icon: Activity },
       { id: 'territory-rules',  label: 'Territory Rules',     icon: ShieldCheck },
       { id: 'access-levels',    label: 'Access Levels',       icon: Lock },
       { id: 'invitations',      label: 'Invitations',         icon: UserPlus },
@@ -269,6 +404,8 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
       {tab === 'dashboard' && (
         <AdminMetricsDashboard />
       )}
+      {tab === 'quotations' && <B2BQuotationsHub />}
+      {tab === 'invoices' && <InvoiceIntelligenceHub />}
       {tab === 'workflows' && <AdminWorkflowsTab />}
       {tab === 'logistics' && <AdminLogisticsTab />}
       {tab === 'import-catalogs' && <ImportCatalogsTab />}
@@ -281,12 +418,12 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
       {tab === 'wholesellers'  && <AdminWholesellersTab />}
       {tab === 'account-managers' && <AdminAccountManagersTab />}
       {tab === 'clinics'       && <AdminPlaceholderTab title="Clinics" description="Manage physical clinic locations and metadata." tags={['Network', 'Clinics']} color="var(--color-primary)" />}
-      {tab === 'doctors'       && <AdminUsersTab defaultRole="doctor" readOnly={false} canApprove={true} />}
+      {tab === 'doctors'       && <AdminPhysiciansTab />}
       {tab === 'patients'      && <AdminUsersTab defaultRole="patient" readOnly={false} canApprove={true} />}
       {tab === 'users'         && <AdminUsersTab readOnly={false} canApprove={true} />}
-      { tab === 'products'      && <AdminProductsTab readOnly={false} hideCosts={false} allowedCategories={['All']} />}
-      { tab === 'competitors'   && <AdminCompetitorsTab /> }
-      { tab === 'costs'         && <AdminCostsTab readOnly={false} />}
+      {tab === 'products'      && <CatalogIntelligenceHub />}
+      {tab === 'competitors'   && <MarketIntelligenceHub />}
+      {tab === 'costs'         && <AdminCostsTab readOnly={false} />}
       {tab === 'prices'        && <AdminPricesTab />}
       {tab === 'relationships' && <AdminRelationshipsTab readOnly={false} />}
       {tab === 'semantic'      && <AdminSemanticTab readOnly={false} />}
@@ -306,13 +443,14 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
       {tab === 'analytics'     && <AdminAnalyticsTab /> }
       {tab === 'ai-logs'       && <AdminClinicalLogsTab /> }
       {tab === 'audit-logs'    && <AdminAuditLogsTab /> }
-      {tab === 'geography-areas'    && <AdminPlaceholderTab title="Geography Areas" description="Manage international deployment areas and borders." tags={['Regions', 'Geography']} color="var(--color-primary)" />}
+      {tab === 'command-center'     && <AtlasCommandCenter />}
       {tab === 'territory-rules'    && <AdminPlaceholderTab title="Territory Rules" description="Configure exclusivity rules and protected categories." tags={['Rules', 'Protection']} color="var(--color-primary)" />}
       {tab === 'branding'           && <AdminPlaceholderTab title="Wholeseller Branding" description="Configure white-label subdomains and assets." tags={['Brand', 'White-label']} color="var(--color-primary)" />}
       {tab === 'pricing-visibility' && <AdminPlaceholderTab title="Pricing Visibility" description="Configure regional pricing walls and product visibility." tags={['Pricing', 'Access']} color="var(--color-primary)" />}
       {tab === 'leads'              && <AdminPlaceholderTab title="Lead Management" description="Global B2B/B2C lead routing and ownership rules." tags={['Sales', 'Leads']} color="var(--color-primary)" />}
       {tab === 'home-layout'   && <AdminHomeLayoutTab />}
       {tab === 'protocols'     && <AdminProtocolsTab />}
+      {tab === 'programs'      && <AdminProgramsTab />}
       {tab === 'stock'         && <AdminVariantsTab />}
       {tab === 'lab-tests'     && <AdminPlaceholderTab title="Lab Tests & COAs" description="Manage quality control, third-party tests, and Certificates of Analysis for your stock batches." tags={['Quality', 'Testing']} color="var(--color-primary)" />}
       {tab === 'catalogs'         && <CatalogList ownerId="admin" ownerType="admin" onOpenBuilder={() => { setCatalogToEdit(null); setActiveTab('catalog-builder'); }} onSelectCatalogToEdit={(cat) => { setCatalogToEdit(cat); setActiveTab('catalog-builder'); }} />}
@@ -347,6 +485,18 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const unreadMessages = useUnreadMessagesCount();
+  const [isOmnibarOpen, setIsOmnibarOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsOmnibarOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const dynamicPinnedItems = React.useMemo(() => {
     return PINNED_ITEMS.map(item => {
@@ -381,7 +531,6 @@ export default function AdminDashboard() {
 
   React.useEffect(() => {
     if (isAdmin || userProfile?.role === 'admin') return; // Admins bypass restrictions
-    
     if (userProfile?.allowedAdminTabs && userProfile.allowedAdminTabs.length > 0) {
       if (!userProfile.allowedAdminTabs.includes(activeTab) && activeTab !== 'dashboard' && activeTab !== 'my-profile') {
         // Not allowed to access this tab
@@ -417,13 +566,15 @@ export default function AdminDashboard() {
         group: currentGroup?.label || 'Overview'
       }}
       headerActions={
-        <button 
-          onClick={handleLogout} 
-          style={{ background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-          title="Logout"
-        >
-          <LogOut size={18} color="var(--color-text-secondary)" />
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <button 
+            onClick={handleLogout} 
+            style={{ background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', marginLeft: '4px' }}
+            title="Logout"
+          >
+            <LogOut size={18} color="var(--color-text-secondary)" />
+          </button>
+        </div>
       }
     >
       <div style={{ padding: '1rem' }}>
@@ -433,6 +584,7 @@ export default function AdminDashboard() {
           </PageTransition>
         </React.Suspense>
       </div>
+      <Omnibar isOpen={isOmnibarOpen} onClose={() => setIsOmnibarOpen(false)} />
     </PortalLayout>
   );
 }

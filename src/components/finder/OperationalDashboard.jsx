@@ -1,11 +1,50 @@
- 
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import Clipboard from "lucide-react/dist/esm/icons/clipboard";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Info from "lucide-react/dist/esm/icons/info";
+import User from "lucide-react/dist/esm/icons/user";
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Download from "lucide-react/dist/esm/icons/download";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Pause from "lucide-react/dist/esm/icons/pause";
+import RotateCcw from "lucide-react/dist/esm/icons/rotate-ccw";
+import Edit3 from "lucide-react/dist/esm/icons/edit-3";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import FileJson from "lucide-react/dist/esm/icons/file-json";
 import React, { useState } from 'react';
-import { 
-  CheckCircle2, AlertTriangle, Activity, Calendar, ShieldAlert, 
-  Beaker, Clipboard, Zap, TrendingUp, Clock, Info, User, 
-  Stethoscope, FileText, Download, Eye, AlertCircle,
-  Pause, RotateCcw, Edit3, Trash2, ChevronRight, FileJson
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { ArtifactPreviewOverlay, generateTimelineEvents } from './ProtocolArtifacts';
 import { generatePatientGuide, generateClinicalPDF, generateDosageGuide } from '../../services/pdfService';
 import { generateProtocolICS } from '../../services/calendarService';
@@ -33,16 +72,14 @@ export default function OperationalDashboard({ protocolData, formData, onReset, 
     { name: 'Patient_Administration_Guide.pdf', size: '1.2 MB', type: 'patient', icon: <FileText size={16} /> },
     { name: 'Physician_Monitoring_Checklist.pdf', size: '0.8 MB', type: 'physician', icon: <FileText size={16} /> },
     { name: 'Dosage_Administration_Schedule.pdf', size: '~1.5 MB', type: 'dosage', icon: <FileText size={16} /> },
-    { name: 'Clinical_Pathway_Definition.json', size: '42 KB', type: 'json', icon: <FileJson size={16} /> },
+    { name: 'Clinical_Pathway_Definition.js', size: '42 KB', type: 'json', icon: <FileJson size={16} /> },
     { name: 'Dosing_Schedule_Cal_Export.ics', size: '12 KB', type: 'ics', icon: <Calendar size={16} /> }
   ];
 
   return (
     <div className="animate-fade-in" style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 350px', gap: '2rem' }}>
-      
       {/* MAIN DASHBOARD COLUMN */}
       <div style={{ display: 'grid', gap: '2rem' }}>
-        
         {/* OVERVIEW SECTION */}
         <div className="clinical-card-v5" style={{ padding: '2rem', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
           <div>
@@ -136,7 +173,6 @@ export default function OperationalDashboard({ protocolData, formData, onReset, 
                const hasInjection = dayEvents.some(e => e.category === 'Injections');
                const hasMonitoring = dayEvents.some(e => e.category === 'Monitoring');
                const hasMilestone = dayEvents.some(e => e.category === 'Milestones');
-               
                return (
                  <div key={day} style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--color-text-tertiary)', marginBottom: '0.75rem' }}>{day.substring(0, 3)}</div>
@@ -167,7 +203,6 @@ export default function OperationalDashboard({ protocolData, formData, onReset, 
 
       {/* SIDEBAR COLUMN */}
       <div style={{ display: 'grid', gap: '2rem', height: 'fit-content' }}>
-        
         {/* SAFETY STATUS */}
         <div className="clinical-card-v5" style={{ padding: '1.5rem', background: 'var(--color-success-bg)', border: '1px solid #bbf7d0' }}>
            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
@@ -216,7 +251,7 @@ export default function OperationalDashboard({ protocolData, formData, onReset, 
                                      const url = URL.createObjectURL(blob);
                                      const a = document.createElement('a');
                                      a.href = url;
-                                     a.download = `Clinical_Pathway_${protocolData.protocol_id || 'EXPORT'}.json`;
+                                     a.download = `Clinical_Pathway_${protocolData.protocol_id || 'EXPORT'}.js`;
                                      a.click();
                                      URL.revokeObjectURL(url);
                                   }

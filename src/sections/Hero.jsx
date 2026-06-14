@@ -1,8 +1,21 @@
+import Search from "lucide-react/dist/esm/icons/search";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Lock from "lucide-react/dist/esm/icons/lock";
+import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Shield from "lucide-react/dist/esm/icons/shield";
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useResponsive } from '../hooks/useResponsive';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bot, FileText, Lock, UploadCloud, ArrowRight, Shield } from 'lucide-react';
+
+
+
+
+
+
+
 import { useTranslation } from 'react-i18next';
 import '../styles/hero.css';
 
@@ -64,7 +77,6 @@ export default function Hero({ onOpenSearch, onOpenAI }) {
       <div className="hero-section__bg-glow" aria-hidden="true" />
 
       <div className="hero-container">
-        
         {/* HEADER */}
         <header className="hero-header">
           <span className="hero-tagline">{t('hero.badge', 'Google Cloud Agent Platform')}</span>
@@ -80,7 +92,6 @@ export default function Hero({ onOpenSearch, onOpenAI }) {
 
         {/* PRIMARY ACTIONS (ROW 1: FIND & ASK) & ROW 2: PROFESSIONAL TOOLS */}
         <div className="hero-grid">
-          
           {/* FIND CARD */}
           <div className="hero-card card-find">
             <div className="card-header-row">
@@ -90,7 +101,6 @@ export default function Hero({ onOpenSearch, onOpenAI }) {
             {!isMobile && (
               <p className="card-desc">{t('hero.find.desc', 'Search goals, compounds and protocol pathways.')}</p>
             )}
-            
             <div className="card-form">
               <input
                 className="card-input"
@@ -132,7 +142,6 @@ export default function Hero({ onOpenSearch, onOpenAI }) {
             {!isMobile && (
               <p className="card-desc">{t('hero.ask.desc', 'Talk with ClinicAI to discover relevant pathways.')}</p>
             )}
-            
             <div className="card-form">
               <input
                 className="card-input"

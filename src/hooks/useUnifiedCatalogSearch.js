@@ -1,9 +1,10 @@
 import { useState, useCallback, useRef } from 'react';
 import { collection, query, limit, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
-import { products as localProducts } from '../data/products';
+import { useStaticData } from '../hooks/useStaticData';
 
 export function useUnifiedCatalogSearch() {
+  const { products: localProducts } = useStaticData();
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const debounce = useRef(null);

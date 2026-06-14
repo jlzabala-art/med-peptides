@@ -1,14 +1,36 @@
+import Mail from "lucide-react/dist/esm/icons/mail";
+import UserIcon from "lucide-react/dist/esm/icons/user";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import Lock from "lucide-react/dist/esm/icons/lock";
+import Save from "lucide-react/dist/esm/icons/save";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Camera from "lucide-react/dist/esm/icons/camera";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import Briefcase from "lucide-react/dist/esm/icons/briefcase";
+import BellRing from "lucide-react/dist/esm/icons/bell-ring";
 import React, { useState, useRef } from 'react';
 import { Checkbox } from '../../components/ui';
 import { useAuth } from '../../context/AuthContext';
-import { Mail, User as UserIcon, Phone, Lock, Save, AlertCircle, CheckCircle2, Camera, Globe, MapPin, Briefcase, BellRing } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
 import { getAuth, updatePassword, updateProfile } from 'firebase/auth';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../firebase';
 
 export default function UserProfileTab() {
   const { user, userProfile, updateProfileData } = useAuth();
-  
   const [formData, setFormData] = useState({
     firstName: userProfile?.firstName || '',
     lastName: userProfile?.lastName || '',
@@ -95,10 +117,8 @@ export default function UserProfileTab() {
     if (passwordData.newPassword.length < 6) {
       return setStatus({ type: 'error', message: 'Password must be at least 6 characters.' });
     }
-    
     setLoading(true);
     setStatus({ type: '', message: '' });
-    
     try {
       const auth = getAuth();
       if (auth.currentUser) {
@@ -123,7 +143,6 @@ export default function UserProfileTab() {
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
     // Validate image
     if (!file.type.startsWith('image/')) {
       setStatus({ type: 'error', message: 'Please select a valid image file.' });
@@ -135,7 +154,6 @@ export default function UserProfileTab() {
     try {
       const storageRef = ref(storage, `avatars/${user.uid}/${Date.now()}_${file.name}`);
       const uploadTask = uploadBytesResumable(storageRef, file);
-      
       uploadTask.on('state_changed', 
         null,
         (error) => {
@@ -146,12 +164,10 @@ export default function UserProfileTab() {
         async () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           await updateProfileData({ photoURL: downloadURL });
-          
           // Also update Firebase Auth profile
           if (user) {
             await updateProfile(user, { photoURL: downloadURL });
           }
-          
           setUploadingAvatar(false);
           setStatus({ type: 'success', message: 'Profile photo updated successfully.' });
         }
@@ -184,7 +200,6 @@ export default function UserProfileTab() {
         <h3 style={{ fontSize: '1.2rem', fontWeight: 500, marginBottom: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>
           Administrative Details
         </h3>
-        
         {/* Avatar Selection */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem' }}>
           <div 
@@ -357,7 +372,6 @@ export default function UserProfileTab() {
         <h3 style={{ fontSize: '1.2rem', fontWeight: 500, marginBottom: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>
           Change Password
         </h3>
-        
         <form onSubmit={handleUpdatePassword} style={{ display: 'grid', gap: '1rem' }}>
           <div>
             <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', color: '#666' }}>New Password</label>

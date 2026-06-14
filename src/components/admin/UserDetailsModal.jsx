@@ -1,3 +1,16 @@
+import X from "lucide-react/dist/esm/icons/x";
+import User from "lucide-react/dist/esm/icons/user";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import LinkIcon from "lucide-react/dist/esm/icons/link";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import React, { useState, useEffect } from 'react';
 import StandardDrawer from '../ui/StandardDrawer';
 import {
@@ -17,22 +30,21 @@ import {
   createRelationship,
   updateRelationshipStatus,
 } from '../../services/assignmentService';
-import {
-  X,
-  User,
-  ShoppingBag,
-  MessageSquare,
-  Link as LinkIcon,
-  ShieldCheck,
-  Mail,
-  Calendar,
-  Activity,
-  CheckCircle2,
-  XCircle,
-  Trash2,
-  ChevronDown,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { logAction } from '../../services/auditLogger';
+import notifier from '../../services/NotificationService';
 
 export default function UserDetailsModal({ isOpen, onClose, user, onUserUpdate }) {
   const [expandedSections, setExpandedSections] = useState({
@@ -213,30 +225,31 @@ export default function UserDetailsModal({ isOpen, onClose, user, onUserUpdate }
       if (sendEmail) {
         // Here you would hook into emailjs to notify them
         console.log('Email notification triggered for assignment.');
-        alert('Relationship created and email notification sent.');
+        notifier.info('Relationship created and email notification sent.');
       } else {
-        alert('Relationship created silently.');
+        notifier.info('Relationship created silently.');
       }
 
       setAssignTarget('');
       fetchRelationships();
     } catch (err) {
       console.error(err);
-      alert(err.message || 'Failed to create relationship.');
+      notifier.info(err.message || 'Failed to create relationship.');
     } finally {
       setAssigning(false);
     }
   };
 
   const handleRevokeRelationship = async (relId) => {
-    if (!window.confirm('Are you sure you want to revoke this assignment?')) return;
-    try {
-      await updateRelationshipStatus(relId, 'revoked');
-      fetchRelationships();
-    } catch (err) {
-      console.error(err);
-      alert('Failed to revoke relationship.');
-    }
+    notifier.confirmCritical('Are you sure you want to revoke this assignment?', async () => {
+      try {
+        await updateRelationshipStatus(relId, 'revoked');
+        fetchRelationships();
+      } catch (err) {
+        console.error(err);
+        notifier.info('Failed to revoke relationship.');
+      }
+    });
   };
 
   if (!isOpen || !user) return null;

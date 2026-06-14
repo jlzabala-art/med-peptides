@@ -1,9 +1,18 @@
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
+import FileText from "lucide-react/dist/esm/icons/file-text";
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Card } from '../ui';
-import { Loader2, ShieldCheck, CheckCircle, UploadCloud, FileText } from 'lucide-react';
+
+
+
+
+
 import ZohoPaperPreview from '../admin/ZohoPaperPreview';
 
 export default function B2BSupplierPOView() {
@@ -58,7 +67,6 @@ export default function B2BSupplierPOView() {
   };
 
   if (loading) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Loader2 className="spin" /></div>;
-  
   if (error || !po) return (
     <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
       <Card style={{ padding: '3rem', textAlign: 'center', maxWidth: '500px' }}>
@@ -75,7 +83,6 @@ export default function B2BSupplierPOView() {
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>Portal de Proveedor</h1>
           <p style={{ color: '#64748b', margin: '0.2rem 0 0 0', fontSize: '0.9rem' }}>Orden de Compra: {po.poNumber}</p>
         </div>
-        
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           {po.status === 'billed' ? (
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#16a34a', fontWeight: 700, padding: '0.5rem 1rem', background: '#f0fdf4', borderRadius: '8px' }}>
@@ -107,7 +114,6 @@ export default function B2BSupplierPOView() {
             <h3 style={{ margin: '0 0 1rem', fontSize: '1.2rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FileText size={20} color="#3b82f6" /> Subir Factura (Bill)
             </h3>
-            
             {po.status === 'billed' ? (
               <div style={{ textAlign: 'center', padding: '2rem 0' }}>
                 <CheckCircle size={48} color="#10b981" style={{ margin: '0 auto 1rem' }} />
@@ -125,7 +131,6 @@ export default function B2BSupplierPOView() {
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Importe Total</label>
                   <input type="number" value={billAmount} onChange={e => setBillAmount(e.target.value)} placeholder="0.00" style={{ width: '100%', padding: '0.6rem', border: '1px solid #cbd5e1', borderRadius: '6px' }} />
                 </div>
-                
                 <button 
                   onClick={handleSubmitBill}
                   disabled={actionLoading}

@@ -1,5 +1,9 @@
 import React from 'react';
-import { Twitter, Instagram, Linkedin, Mail, Globe } from 'lucide-react';
+import Twitter from "lucide-react/dist/esm/icons/twitter";
+import Instagram from "lucide-react/dist/esm/icons/instagram";
+import Linkedin from "lucide-react/dist/esm/icons/linkedin";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Globe from "lucide-react/dist/esm/icons/globe";
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 

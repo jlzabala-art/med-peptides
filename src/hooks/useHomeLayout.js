@@ -42,13 +42,13 @@ import {
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { HOME_SECTIONS } from '../config/homeLayoutRegistry';
-import { version as APP_VERSION } from '../../package.json';
+import { version as APP_VERSION } from "../../package.json";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const VALID_VISIBILITY = new Set(['all', 'desktop', 'mobile']);
 
-// Cache key derived from app version (package.json).
+// Cache key derived from app version (package.js).
 // Bumping the version on any deploy automatically invalidates all users' caches
 // so hero / layout changes are reflected immediately — no manual key bump needed.
 const CACHE_KEY = `rp_homeLayout_v${APP_VERSION.replace(/\./g, '_')}`;

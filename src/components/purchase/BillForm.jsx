@@ -1,7 +1,18 @@
+import X from "lucide-react/dist/esm/icons/x";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Save from "lucide-react/dist/esm/icons/save";
+import LinkIcon from "lucide-react/dist/esm/icons/link";
 import React, { useState } from 'react';
 import { addDoc, updateDoc, doc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { X, Plus, Trash2, CheckCircle, Save, Link as LinkIcon } from 'lucide-react';
+
+
+
+
+
+
 import { Card } from '../ui';
 import ProductAutocomplete from '../shared/ProductAutocomplete';
 
@@ -17,9 +28,7 @@ export default function BillForm({ bill, onClose }) {
   const handleSave = async () => {
     if (!supplierName) return alert('Supplier Name is required');
     setIsSaving(true);
-    
     const totalAmount = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-    
     const billData = {
       supplierName,
       billNumber,
@@ -46,19 +55,15 @@ export default function BillForm({ bill, onClose }) {
   };
 
   const addItem = () => setItems([...items, { itemName: '', quantity: 1, unit: 'vial', unitPrice: 0 }]);
-  
   const updateItem = (index, field, value) => {
     const newItems = [...items];
     newItems[index][field] = value;
-    
     // Rapid entry: add a new empty line if the last row is being typed into
     if (index === items.length - 1 && field === 'itemName' && value.length > 0) {
       newItems.push({ itemName: '', quantity: 1, unit: 'vial', unitPrice: 0 });
     }
-    
     setItems(newItems);
   };
-  
   const removeItem = (index) => {
     setItems(items.filter((_, i) => i !== index));
   };
@@ -78,7 +83,6 @@ export default function BillForm({ bill, onClose }) {
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <Card style={{ width: '900px', maxHeight: '90vh', overflowY: 'auto', padding: 0, display: 'flex', flexDirection: 'column' }}>
-        
         {/* Header */}
         <div style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
           <div>

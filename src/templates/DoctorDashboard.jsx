@@ -1,10 +1,41 @@
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import Users from "lucide-react/dist/esm/icons/users";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Settings from "lucide-react/dist/esm/icons/settings";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import Pill from "lucide-react/dist/esm/icons/pill";
+import LogOut from "lucide-react/dist/esm/icons/log-out";
+import Bell from "lucide-react/dist/esm/icons/bell";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Laptop from "lucide-react/dist/esm/icons/laptop";
+import History from "lucide-react/dist/esm/icons/history";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Blocks from "lucide-react/dist/esm/icons/blocks";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import {
-  LayoutDashboard, Users, ClipboardList, FlaskConical,
-  Settings, ShoppingBag, Pill, LogOut, Bell, ChevronRight, Laptop, History, Plus,
-  MessageSquare, Blocks, FileText, Calendar, Beaker
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import DoctorOverviewTab         from '../components/doctor/DoctorOverviewTab';
 import PhysicianPatientsTab      from '../components/doctor/DoctorPatientsTab';
@@ -90,7 +121,6 @@ export default function DoctorDashboard() {
   const { user, userProfile, baseRole } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  
   // Derive active tab from URL (e.g. /doctor/patients -> patients)
   const pathParts = location.pathname.split('/').filter(Boolean);
   // Default to 'overview' if exactly /doctor
@@ -101,7 +131,6 @@ export default function DoctorDashboard() {
   const [doctorsList, setDoctorsList] = useState([]);
   const [selectedDoctorId, setSelectedDoctorId] = useState(() => sessionStorage.getItem('impersonatedDoctorId') || '');
   const [selectedDoctorProfile, setSelectedDoctorProfile] = useState(null);
-  
   // Staff doctor profile fetching
   const [staffDoctorProfile, setStaffDoctorProfile] = useState(null);
   const isStaffUser = baseRole === 'staff';
@@ -131,7 +160,6 @@ export default function DoctorDashboard() {
         const snap = await getDocs(q);
         const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         setDoctorsList(docs);
-        
         // Load stored impersonated doctor profile
         const storedId = sessionStorage.getItem('impersonatedDoctorId');
         if (storedId) {
@@ -149,15 +177,12 @@ export default function DoctorDashboard() {
   const activeDoctorProfile = isAdmin && selectedDoctorProfile 
     ? selectedDoctorProfile 
     : (isStaffUser ? staffDoctorProfile : userProfile);
-    
   const doctorId = isAdmin && selectedDoctorId 
     ? selectedDoctorId 
     : (isStaffUser ? staffDoctorId : user?.uid);
-    
   const doctorName = activeDoctorProfile?.firstName
     ? `Dr. ${activeDoctorProfile.firstName} ${activeDoctorProfile.lastName || ''}`.trim()
     : (isStaffUser && activeDoctorProfile ? `Equipo de Dr. ${activeDoctorProfile.lastName || ''}` : (user?.displayName || 'Physician'));
-    
   const doctorMeta = { doctorName, specialty: activeDoctorProfile?.specialty || '' };
 
   const currentTab = ALL_TABS.find(t => t.id === activeTab);

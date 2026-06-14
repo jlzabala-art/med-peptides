@@ -1,5 +1,24 @@
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Inbox from "lucide-react/dist/esm/icons/inbox";
+import ArrowUp from "lucide-react/dist/esm/icons/arrow-up";
+import ArrowDown from "lucide-react/dist/esm/icons/arrow-down";
+import Search from "lucide-react/dist/esm/icons/search";
+import X from "lucide-react/dist/esm/icons/x";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
 import React, { useState, useMemo } from 'react';
-import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Inbox, ArrowUp, ArrowDown, Search, X, Calendar } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 
 import Skeleton from './Skeleton';
 
@@ -8,17 +27,14 @@ export default function DataTable({
   data = [], 
   keyField = 'id',
   isLoading = false,
-  
   // Selection
   selectedIds = [],
   onSelectionChange, // receives array of selected ids
-  
   // Pagination
   currentPage = 1,
   totalPages = 1,
   totalItems = 0,
   onPageChange,
-  
   // GCP Style Pagination
   rowsPerPage,
   onRowsPerPageChange,
@@ -27,17 +43,13 @@ export default function DataTable({
   onNextPage,
   onPrevPage,
   paginationText,
-  
   // Batch Actions
   renderBatchActions,
-  
   // Expansion
   expandableRender,
-  
   // Custom Interaction
   onRowClick,
   renderHoverActions,
-  
   // Empty State
   emptyTitle = "No data found",
   emptyDescription = "There are no records to display.",
@@ -62,11 +74,9 @@ export default function DataTable({
   const sortedData = useMemo(() => {
     const safeData = data || [];
     if (!sortConfig.key) return safeData;
-    
     let sortableItems = [...safeData];
     sortableItems.sort((a, b) => {
       const col = columns.find(c => c.key === sortConfig.key);
-      
       let aVal = col && col.sortValue ? col.sortValue(a) : a[sortConfig.key];
       let bVal = col && col.sortValue ? col.sortValue(b) : b[sortConfig.key];
 
@@ -154,7 +164,6 @@ export default function DataTable({
                 />
               </div>
             )}
-            
             {onDateRangeChange && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Calendar size={16} color="var(--text-muted)" />
@@ -241,12 +250,10 @@ export default function DataTable({
                   />
                 </th>
               )}
-              
               {/* We no longer render batch actions in the table header. It's a floating bar now. */}
               {!(someSelected || allSelected) || !renderBatchActions ? (
                 <React.Fragment>
                   {expandableRender && <th style={{ width: '48px', minWidth: '48px', whiteSpace: 'nowrap', padding: '0', borderBottom: '1px solid var(--color-border)', textAlign: 'center' }}></th>}
-                  
                   {columns.map((col, idx) => {
                     const isSortable = col.key && col.sortable !== false;
                     return (
@@ -342,7 +349,6 @@ export default function DataTable({
               const rowKey = (row && row[keyField] !== undefined && row[keyField] !== null) ? row[keyField] : `fallback-key-${rowIndex}`;
               const isExpanded = expandedId === rowKey;
               const isSelected = selectedIds.includes(rowKey);
-              
               return (
                 <React.Fragment key={rowKey}>
                   <tr 
@@ -394,7 +400,6 @@ export default function DataTable({
                     )}
                     {columns.map((col, idx) => {
                       let cellValue = col.render ? col.render(row) : row[col.key];
-                      
                       const isProductColumn = col.key === 'name' || col.header === 'Product Name' || col.label === 'Product Name';
                       const cellStyle = {
                         padding: '12px 16px', 

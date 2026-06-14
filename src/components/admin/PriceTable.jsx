@@ -5,6 +5,7 @@ import { db } from '../../firebase';
 import EditablePriceCell from './EditablePriceCell';
 import BulkPriceAdjust from './BulkPriceAdjust';
 import './PriceTable.module.css';
+import notifier from '../../services/NotificationService';
 
 /**
  * PriceTable – displays products with editable retail, wholesale and clinic prices.
@@ -38,7 +39,7 @@ export default function PriceTable({ products, onRefresh }) {
       onRefresh && onRefresh();
     } catch (err) {
       console.error('Price update error:', err);
-      alert('Failed to update price.');
+      notifier.info('Failed to update price.');
     }
   };
 

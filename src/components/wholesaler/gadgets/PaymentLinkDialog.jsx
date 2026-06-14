@@ -1,5 +1,14 @@
+import X from "lucide-react/dist/esm/icons/x";
+import Link2 from "lucide-react/dist/esm/icons/link-2";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import React, { useState } from 'react';
-import { X, Link2, Mail, AlertTriangle, CheckCircle2 } from 'lucide-react';
+
+
+
+
+
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../../../firebase';
 import Spinner from '../../ui/Spinner';
@@ -25,9 +34,7 @@ export default function PaymentLinkDialog({ order, onClose }) {
         currency,
         sendEmail
       });
-      
       setSuccessLink(result.data.url);
-      
       // Invalidate the orders query so the list updates
       queryClient.invalidateQueries({ queryKey: ['managerOrders'] });
     } catch (err) {
@@ -62,7 +69,6 @@ export default function PaymentLinkDialog({ order, onClose }) {
           <Link2 size={20} color="var(--color-primary)" />
           {successLink ? 'Payment Link Ready' : 'Generate Payment Link'}
         </h3>
-        
         {/* Test Mode Warning */}
         <div style={{ backgroundColor: 'var(--color-warning-bg)', border: '1px solid #fef3c7', borderRadius: '8px', padding: '0.75rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', color: 'var(--color-warning)', fontSize: '0.85rem' }}>
           <AlertTriangle size={16} style={{ flexShrink: 0 }} />

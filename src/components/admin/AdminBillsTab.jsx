@@ -1,5 +1,6 @@
+import Receipt from "lucide-react/dist/esm/icons/receipt";
 import React from 'react';
-import { Receipt } from 'lucide-react';
+
 import AdminPageHeader from './AdminPageHeader';
 import BillsWidget from '../widgets/purchase/BillsWidget';
 

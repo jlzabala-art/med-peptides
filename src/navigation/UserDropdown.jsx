@@ -1,15 +1,67 @@
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import User from "lucide-react/dist/esm/icons/user";
+import Bookmark from "lucide-react/dist/esm/icons/bookmark";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Settings from "lucide-react/dist/esm/icons/settings";
+import LogOut from "lucide-react/dist/esm/icons/log-out";
+import LogIn from "lucide-react/dist/esm/icons/log-in";
+import UserPlus from "lucide-react/dist/esm/icons/user-plus";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Users from "lucide-react/dist/esm/icons/users";
+import Package from "lucide-react/dist/esm/icons/package";
+import LayoutGrid from "lucide-react/dist/esm/icons/layout-grid";
+import BarChart2 from "lucide-react/dist/esm/icons/bar-chart-2";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
+import HardDrive from "lucide-react/dist/esm/icons/hard-drive";
+import Search from "lucide-react/dist/esm/icons/search";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import MailPlus from "lucide-react/dist/esm/icons/mail-plus";
+import History from "lucide-react/dist/esm/icons/history";
+import GitMerge from "lucide-react/dist/esm/icons/git-merge";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import Tag from "lucide-react/dist/esm/icons/tag";
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import {
-  LayoutDashboard, ShieldCheck, User, Bookmark, ClipboardList,
-  Settings, LogOut, LogIn, UserPlus, FlaskConical, Users,
-  Package, LayoutGrid, BarChart2, Layers, BookOpen, ChevronDown,
-  Globe, ArrowUpRight, HardDrive, Search, CheckCircle2,
-  MessageSquare, Zap, MailPlus, History, GitMerge,
-  Activity, Brain, Tag
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { USER_MENU, VISITOR_MENU } from './navConfig';
 import '../styles/header.css';
 
@@ -127,7 +179,6 @@ export default function UserDropdown({ user, userProfile: propUserProfile, isPro
   // ── Authenticated ──────────────────────────────────────────────────────────
   const isImpersonating = activeRole !== baseRole;
   const menuRoleKey = activeRole === 'admin' ? 'admin' : ['clinic', 'doctor', 'wholesaler', 'compounding_pharmacy', 'supplier', 'staff'].includes(activeRole) ? 'professional' : 'guest';
-  
   const rawItems    = USER_MENU[menuRoleKey] ?? USER_MENU.guest;
   const items = rawItems.map(item => {
     if (item.path === '/settings') {

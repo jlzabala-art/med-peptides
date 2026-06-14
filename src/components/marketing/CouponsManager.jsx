@@ -1,12 +1,24 @@
+import Tag from "lucide-react/dist/esm/icons/tag";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Search from "lucide-react/dist/esm/icons/search";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Edit2 from "lucide-react/dist/esm/icons/edit-2";
+import Copy from "lucide-react/dist/esm/icons/copy";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import React, { useState } from 'react';
-import { Tag, Plus, Search, Trash2, Edit2, Copy, CheckCircle } from 'lucide-react';
+
+
+
+
+
+
+
 
 export default function CouponsManager({ ownerId, ownerType }) {
   const [coupons, setCoupons] = useState([
     { id: '1', code: 'DRGARCIA20', discount: '20%', type: 'percentage', usageCount: 5, maxUses: 100, active: true },
     { id: '2', code: 'WELCOME50', discount: '$50', type: 'fixed', usageCount: 12, maxUses: 50, active: false }
   ]);
-  
   const [searchTerm, setSearchTerm] = useState('');
   const [copiedCode, setCopiedCode] = useState(null);
 

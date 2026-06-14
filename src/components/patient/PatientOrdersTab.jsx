@@ -1,3 +1,8 @@
+import Package from "lucide-react/dist/esm/icons/package";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
@@ -6,7 +11,11 @@ import Card from '../ui/Card';
 import DataTable from '../ui/DataTable';
 import StatusChip from '../ui/StatusChip';
 import Spinner from '../ui/Spinner';
-import { Package, Clock, Truck, CheckCircle2, Sparkles } from 'lucide-react';
+
+
+
+
+
 
 const getStatusConfig = (status) => {
   const s = status?.toLowerCase();

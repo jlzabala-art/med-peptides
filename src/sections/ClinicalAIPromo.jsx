@@ -1,7 +1,22 @@
+import Bot from "lucide-react/dist/esm/icons/bot";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Calculator from "lucide-react/dist/esm/icons/calculator";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import BrainCircuit from "lucide-react/dist/esm/icons/brain-circuit";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Bot, Sparkles, Zap, Calculator, ChevronRight, BrainCircuit, Globe, ShieldCheck } from 'lucide-react';
+
+
+
+
+
+
+
+
 
 export default function ClinicalAIPromo() {
   const openAI = () => {
@@ -29,7 +44,6 @@ export default function ClinicalAIPromo() {
         background: 'radial-gradient(circle, rgba(129, 140, 248, 0.08) 0%, transparent 70%)',
         filter: 'blur(100px)', pointerEvents: 'none', zIndex: 1
       }} />
-      
       <div className="container" style={{ position: 'relative', zIndex: 2 }}>
         <div style={{ 
           display: 'grid', 

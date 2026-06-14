@@ -1,6 +1,23 @@
+import X from "lucide-react/dist/esm/icons/x";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import Activity from "lucide-react/dist/esm/icons/activity";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, ExternalLink, BookOpen, Clock, Loader2, AlertCircle, ChevronDown, ChevronUp, Activity } from 'lucide-react';
+
+
+
+
+
+
+
+
+
 import { getPubMedLiterature } from '../../services/pubmedService';
 import { lockScroll, unlockScroll } from '../../utils/scrollLock';
 
@@ -100,7 +117,6 @@ export default function PubMedPreviewPanel({ isOpen, onClose, product }) {
         </div>
 
         <div style={{ padding: '2rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-          
           {/* Improved Panel Header Summary */}
           <div style={{ marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(0,163,224,0.1)' }}>
             <p style={{ color: 'var(--text-main)', margin: '0 0 0.75rem 0', fontSize: '0.9rem', lineHeight: 1.5 }}>
@@ -136,7 +152,6 @@ export default function PubMedPreviewPanel({ isOpen, onClose, product }) {
               {articles.map((article, idx) => {
                 const isExpanded = expandedAbstracts[article.pmid];
                 const hasAbstract = article.abstract && article.abstract.trim().length > 0;
-                
                 return (
                   <div key={article.pmid || idx} style={{ 
                     padding: '1.25rem', 
@@ -160,7 +175,6 @@ export default function PubMedPreviewPanel({ isOpen, onClose, product }) {
                         </span>
                       )}
                     </div>
-                    
                     {/* Main Title - Compact */}
                     <h3 style={{ fontSize: '1.05rem', color: 'var(--primary)', margin: '0 0 1rem 0', lineHeight: 1.4, fontWeight: 700 }}>
                       {article.title}

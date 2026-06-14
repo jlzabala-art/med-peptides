@@ -1,7 +1,28 @@
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import Save from "lucide-react/dist/esm/icons/save";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import Cloud from "lucide-react/dist/esm/icons/cloud";
+import CloudOff from "lucide-react/dist/esm/icons/cloud-off";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import React, { useState, Suspense, lazy } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Save, FlaskConical, Beaker, FileText, Activity, TrendingUp, Layers, Cloud, CloudOff, CheckCircle2 } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
 import PhaseEditor from './PhaseEditor';
 import { useShop } from '../../context/ShopProvider';
 
@@ -90,7 +111,6 @@ export default function ProtocolEditorWidget({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '1rem', borderBottom: '1px solid #e2e8f0' }}>
         <h2 style={{ margin: 0, fontSize: '1.25rem' }}>{initialData?.protocol_name ? 'Edit Protocol' : 'New Protocol'}</h2>
-        
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           {/* Autosave Indicator */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#64748b' }}>
@@ -199,7 +219,6 @@ export default function ProtocolEditorWidget({
               </Suspense>
             </div>
           </div>
-          
           <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
              <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Loading Gantt...</div>}>
                 <ProtocolGanttChart phases={formData.phases} durationScale={1} />

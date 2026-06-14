@@ -1,3 +1,8 @@
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Download from "lucide-react/dist/esm/icons/download";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 /* eslint-disable no-unused-vars */
 import { useState, useMemo, useCallback, memo, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -8,13 +13,11 @@ import VialVisualizer from '../components/VialVisualizer';
 import { jsPDF } from 'jspdf';
 import { motion } from 'framer-motion';
 import { trackToolUsage } from '../hooks/useAnalytics';
-import {
-  FlaskConical,
-  Download,
-  BookOpen,
-  ChevronRight,
-  AlertCircle,
-} from 'lucide-react';
+
+
+
+
+
 
 /* ─── Math engine ─────────────────────────────────────────────────────────── */
 function calcUnits(mg, ml, dose) {
@@ -365,7 +368,6 @@ export default function Calculator() {
                     <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', marginBottom: '1rem' }}>Step 1: Reconstitute</div>
                     <VialVisualizer waterAmount={bacWater} />
                   </div>
-                  
                   <motion.div 
                     animate={{ x: [0, 5, 0] }} 
                     transition={{ repeat: Infinity, duration: 2 }}

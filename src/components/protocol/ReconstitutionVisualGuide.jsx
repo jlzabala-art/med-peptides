@@ -1,3 +1,15 @@
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Droplet from "lucide-react/dist/esm/icons/droplet";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Info from "lucide-react/dist/esm/icons/info";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Sliders from "lucide-react/dist/esm/icons/sliders";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Syringe from "lucide-react/dist/esm/icons/syringe";
 /* eslint-disable react-hooks/set-state-in-effect */
 /**
  * ReconstitutionVisualGuide — State-of-the-Art Interactive Edition
@@ -9,20 +21,18 @@
  * and high-fidelity mathematical calculations.
  */
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  FlaskConical,
-  Droplet,
-  Activity,
-  Sparkles,
-  Info,
-  ChevronRight,
-  ShieldCheck,
-  Sliders,
-  BookOpen,
-  AlertTriangle,
-  CheckCircle2,
-  Syringe
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
 import SyringeVisualizer from '../SyringeVisualizer';
 
 // Helper parsers for robust handling of standard databases strings
@@ -54,7 +64,6 @@ export default function ReconstitutionVisualGuide({ compounds = [] }) {
     return compounds.filter(c => c.compound && (c.strength || c.water));
   }, [compounds]);
 
-  
 
   // Active compound tab index
   const [activeIdx, setActiveIdx] = useState(0);
@@ -122,7 +131,6 @@ export default function ReconstitutionVisualGuide({ compounds = [] }) {
   // Quick preset handlers
   const strengthPresets = [2, 5, 10, 15, 20];
   const waterPresets = [1, 2, 3, 5];
-  
   // Custom smart presets for target dose based on current compound/strength
   const dosePresets = useMemo(() => {
     if (currentStrength >= 10) {
@@ -187,7 +195,6 @@ export default function ReconstitutionVisualGuide({ compounds = [] }) {
 
       {/* ── Main Dashboard Layout ── */}
       <div style={styles.dashboardGrid}>
-        
         {/* ── Left Column: Configurator Panel ── */}
         <div style={styles.panelLeft}>
           <div style={styles.panelHeader}>
@@ -327,7 +334,6 @@ export default function ReconstitutionVisualGuide({ compounds = [] }) {
             </div>
           )}
         </div>
-        
         {/* ── Right Column: Syringe & Readout ── */}
         <div style={styles.panelRight}>
           {/* Scientific Readout Header */}
@@ -335,7 +341,6 @@ export default function ReconstitutionVisualGuide({ compounds = [] }) {
             <div style={styles.readoutHeader}>
               <span style={styles.readoutTitle}>Extracción Calculada de la Jeringa</span>
             </div>
-            
             <div style={styles.digitsRow}>
               <div style={styles.digitBlock}>
                 <span style={styles.digitVal}>{computedUnits.toFixed(1)}</span>
@@ -422,7 +427,6 @@ export default function ReconstitutionVisualGuide({ compounds = [] }) {
           <Syringe size={16} color="#7c3aed" />
           <h4 style={styles.visualGuideTitle}>Instrucciones Visuales Paso a Paso</h4>
         </div>
-        
         <div style={styles.stepsGrid}>
           {/* Step 1 */}
           <div className="step-card-premium" style={styles.stepCard}>
@@ -430,7 +434,6 @@ export default function ReconstitutionVisualGuide({ compounds = [] }) {
               <div style={styles.stepNumber}>1</div>
               <span style={styles.stepCardTitle}>Sanitización</span>
             </div>
-            
             {/* SVG Illustration */}
             <div style={styles.stepIllustrationContainer}>
               <svg width="100%" height="90" viewBox="0 0 160 90" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -439,11 +442,9 @@ export default function ReconstitutionVisualGuide({ compounds = [] }) {
                 <rect x="68" y="24" width="24" height="8" rx="2" fill="#7c3aed" />
                 <line x1="68" y1="32" x2="92" y2="32" stroke="var(--color-text-secondary)" strokeWidth="2" />
                 <rect x="73" y="21" width="14" height="3" rx="1" fill="var(--color-text-secondary)" />
-                
                 {/* Alcohol Swab */}
                 <rect x="35" y="12" width="22" height="22" rx="4" fill="#38bdf8" fillOpacity="0.2" stroke="#0284c7" strokeWidth="1.5" transform="rotate(-15 35 12)" />
                 <path d="M 39,18 L 49,28 M 44,16 L 54,26" stroke="#0284c7" strokeWidth="1.5" strokeLinecap="round" />
-                
                 {/* Swipe Line & Sparkles */}
                 <path d="M 38,22 C 58,16 75,16 85,20" stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="3 3" strokeLinecap="round" />
                 {/* Sparkles */}
@@ -472,7 +473,6 @@ export default function ReconstitutionVisualGuide({ compounds = [] }) {
                 <rect x="38" y="30" width="18" height="8" fill="#38bdf8" />
                 <rect x="41" y="26" width="12" height="4" fill="#0ea5e9" />
                 <rect x="37" y="55" width="20" height="23" rx="2" fill="#0ea5e9" fillOpacity="0.25" />
-                
                 {/* Syringe pulling water */}
                 <g transform="translate(68, 5) rotate(25)">
                   <line x1="10" y1="62" x2="10" y2="40" stroke="var(--color-text-tertiary)" strokeWidth="1.2" />
@@ -482,7 +482,6 @@ export default function ReconstitutionVisualGuide({ compounds = [] }) {
                   <rect x="6" y="20" width="8" height="4" fill="var(--color-text-secondary)" />
                   <rect x="6" y="24" width="8" height="15" fill="#38bdf8" fillOpacity="0.4" />
                 </g>
-                
                 {/* Upward Arrows */}
                 <path d="M 115,22 L 115,10 M 115,10 L 112,13 M 115,10 L 118,13" stroke="#0ea5e9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -509,16 +508,13 @@ export default function ReconstitutionVisualGuide({ compounds = [] }) {
                 <line x1="68" y1="32" x2="92" y2="32" stroke="var(--color-text-secondary)" strokeWidth="2" />
                 {/* Powder at bottom */}
                 <path d="M 67,68 C 70,66 75,65 80,67 C 85,69 90,68 93,69 L 93,75 L 67,75 Z" fill="var(--color-border)" />
-                
                 {/* Syringe needle inserting at angle */}
                 <g transform="translate(58, 0) rotate(-22)">
                   <line x1="15" y1="42" x2="15" y2="28" stroke="var(--color-text-tertiary)" strokeWidth="1" />
                   <rect x="12" y="8" width="6" height="20" fill="var(--color-bg-app)" stroke="var(--color-text-secondary)" strokeWidth="1.2" />
                 </g>
-                
                 {/* Water stream sliding down glass wall */}
                 <path d="M 68,34 C 68,34 70,40 70,48 C 70,56 68,62 69,67" stroke="#38bdf8" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="3 3" />
-                
                 {/* Swirling Arrow */}
                 <path d="M 45,72 C 45,78 115,78 115,72" stroke="#a78bfa" strokeWidth="1.5" strokeLinecap="round" />
                 <path d="M 111,75 L 115,72 L 112,69" stroke="#a78bfa" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -547,7 +543,6 @@ export default function ReconstitutionVisualGuide({ compounds = [] }) {
                   <line x1="3" y1="0" x2="27" y2="0" stroke="var(--color-text-secondary)" strokeWidth="2" />
                   <rect x="2" y="8" width="26" height="32" rx="3" fill="#a78bfa" fillOpacity="0.25" />
                 </g>
-                
                 {/* Syringe inserted from below */}
                 <g transform="translate(75, 40)">
                   <line x1="5" y1="0" x2="5" y2="-18" stroke="var(--color-text-tertiary)" strokeWidth="1.2" />
@@ -557,7 +552,6 @@ export default function ReconstitutionVisualGuide({ compounds = [] }) {
                   <rect x="2" y="40" width="6" height="2" fill="var(--color-text-secondary)" />
                   <rect x="2" y="0" width="6" height="12" fill="#a78bfa" fillOpacity="0.6" />
                 </g>
-                
                 {/* Target marker bubble */}
                 <circle cx="95" cy="45" r="3.5" fill="var(--color-success)" />
                 <line x1="83" y1="45" x2="92" y2="45" stroke="var(--color-success)" strokeWidth="1" strokeDasharray="2 2" />
@@ -598,11 +592,9 @@ export default function ReconstitutionVisualGuide({ compounds = [] }) {
                   <line x1="5" y1="12" x2="5" y2="32" stroke="var(--color-text-tertiary)" strokeWidth="1.5" />
                   <rect x="2" y="12" width="6" height="3" fill="var(--color-text-secondary)" />
                 </g>
-                
                 {/* Dotted angle arc */}
                 <path d="M 68,55 C 68,36 53,41 45,44" stroke="#7c3aed" strokeWidth="1" strokeDasharray="2 2" strokeLinecap="round" />
                 <text x="35" y="32" fill="#7c3aed" fontSize="8" fontWeight="bold">45° - 90°</text>
-                
                 {/* Subcutaneous text block */}
                 <rect x="95" y="10" width="55" height="15" rx="3.5" fill="#7c3aed" fillOpacity="0.1" />
                 <text x="122" y="20" fill="#7c3aed" fontSize="7" fontWeight="bold" textAnchor="middle">SUBCUTÁNEO</text>
@@ -627,7 +619,6 @@ const styles = {
     gap: '1.25rem',
     width: '100%',
   },
-  
   headerRow: {
     display: 'flex',
     justifyContent: 'space-between',

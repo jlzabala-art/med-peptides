@@ -1,5 +1,11 @@
- 
-import { Home, FlaskConical, Search, ShoppingCart } from 'lucide-react';
+import Home from "lucide-react/dist/esm/icons/home";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Search from "lucide-react/dist/esm/icons/search";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+
+
+
+
 import { useLocation } from 'react-router-dom';
 import '../styles/bottom-nav.css';
 

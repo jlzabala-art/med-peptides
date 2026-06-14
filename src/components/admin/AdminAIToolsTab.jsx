@@ -1,23 +1,37 @@
+import Wrench from "lucide-react/dist/esm/icons/wrench";
+import Database from "lucide-react/dist/esm/icons/database";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Search from "lucide-react/dist/esm/icons/search";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import User from "lucide-react/dist/esm/icons/user";
+import Save from "lucide-react/dist/esm/icons/save";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import ImageIcon from "lucide-react/dist/esm/icons/image";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import GitMerge from "lucide-react/dist/esm/icons/git-merge";
+import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import FileOutput from "lucide-react/dist/esm/icons/file-output";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
-import {
-  Wrench,
-  Database,
-  FileText,
-  Search,
-  Truck,
-  DollarSign,
-  ShoppingCart,
-  User,
-  Save,
-  CheckCircle2,
-  Image as ImageIcon,
-  ClipboardList,
-  GitMerge,
-  GraduationCap,
-  ShieldAlert,
-  FileOutput,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import DataTable from '../ui/DataTable';
 import AppFilterBar from '../ui/AppFilterBar';
 import AppActionGroup from '../ui/AppActionGroup';

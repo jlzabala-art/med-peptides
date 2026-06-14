@@ -1,9 +1,12 @@
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-import { Stethoscope, MessageSquare } from 'lucide-react';
+
+
 
 export default function MyMedicalTeamWidget() {
   const { user } = useAuth();
@@ -26,7 +29,6 @@ export default function MyMedicalTeamWidget() {
       <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <Stethoscope size={18} color="var(--primary)" /> {t('patient.medical_team.title')}
       </h3>
-      
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
         {team.length === 0 ? (
           <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>{t('patient.medical_team.empty')}</p>

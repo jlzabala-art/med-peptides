@@ -1,9 +1,16 @@
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Smile from "lucide-react/dist/esm/icons/smile";
+import Frown from "lucide-react/dist/esm/icons/frown";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-import { Activity, Smile, Frown, CheckCircle2 } from 'lucide-react';
+
+
+
+
 
 export default function DailyCheckinWidget() {
   const { user } = useAuth();
@@ -12,7 +19,6 @@ export default function DailyCheckinWidget() {
   const [sleepQuality, setSleepQuality] = useState(3);
   const [energyLevel, setEnergyLevel] = useState(3);
   const [notes, setNotes] = useState('');
-  
   const [loading, setLoading] = useState(false);
   const [hasCheckedIn, setHasCheckedIn] = useState(false);
   const [checkLoading, setCheckLoading] = useState(true);
@@ -23,7 +29,6 @@ export default function DailyCheckinWidget() {
       try {
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
-        
         const q = query(
           collection(db, 'daily_checkins'), 
           where('patientId', '==', user.uid),
@@ -82,7 +87,6 @@ export default function DailyCheckinWidget() {
       <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <Activity size={20} color="var(--primary)" /> {t('patient.daily_checkin.title')}
       </h3>
-      
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', flex: 1 }}>
         <div>
           <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 800, color: 'var(--color-text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>

@@ -1,6 +1,19 @@
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Flame from "lucide-react/dist/esm/icons/flame";
+import Star from "lucide-react/dist/esm/icons/star";
+import Syringe from "lucide-react/dist/esm/icons/syringe";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Bot from "lucide-react/dist/esm/icons/bot";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo } from 'react';
-import { FlaskConical, ChevronRight, Flame, Star, Syringe, Activity, Bot } from 'lucide-react';
+
+
+
+
+
+
+
 import { useNavigate } from 'react-router-dom';
 import { getCatalog } from '../repositories/productRepository';
 import { trackPeptideView } from '../hooks/useAnalytics';
@@ -374,7 +387,6 @@ export default function FeaturedPeptides({ excludeSlugs }) {
   return (
     <section className="peptides-section">
       <div className="peptides-container">
-        
         <div className="peptides-header">
           <p className="peptides-badge">
             Reference Catalog

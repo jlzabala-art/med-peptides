@@ -1,6 +1,6 @@
- 
+import X from "lucide-react/dist/esm/icons/x";
 import React, { useEffect } from 'react';
-import { X } from 'lucide-react';
+
 
 /**
  * Mobile responsive drawer for filters.
@@ -37,7 +37,6 @@ export default function FilterDrawer({
           {children}
         </div>
       </div>
-      
       <style>{`
         .col-drawer-overlay {
           position: fixed;

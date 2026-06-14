@@ -1,5 +1,15 @@
- 
-import { Beaker, ArrowRight, Activity, ShieldCheck, DollarSign, FileText } from 'lucide-react';
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+
+
+
+
+
+
 import { useNavigate } from 'react-router-dom';
 
 export default function ProtocolHighlight() {
@@ -33,7 +43,6 @@ export default function ProtocolHighlight() {
           <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '1.15rem', lineHeight: 1.6, marginBottom: '2.5rem', maxWidth: '550px' }}>
             Transform clinical objectives into structured, multi-phase titration schedules with automated safety validation and real-time economic forecasting.
           </p>
-          
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
@@ -103,7 +112,6 @@ export default function ProtocolHighlight() {
                 <div style={{ width: '90%', height: '10px', background: 'rgba(255,255,255,0.07)', borderRadius: '4px', marginBottom: '0.5rem' }} />
                 <div style={{ width: '75%', height: '10px', background: 'rgba(255,255,255,0.07)', borderRadius: '4px' }} />
               </div>
-              
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
                  <div style={{ height: '60px', background: 'rgba(0,163,224,0.12)', borderRadius: '16px', border: '1px solid rgba(0,163,224,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ width: '50%', height: '8px', background: 'rgba(0,163,224,0.4)', borderRadius: '4px' }} />

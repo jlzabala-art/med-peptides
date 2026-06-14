@@ -1,5 +1,12 @@
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Lock from "lucide-react/dist/esm/icons/lock";
+import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React from 'react';
-import { FileText, Lock, UploadCloud, ArrowRight } from 'lucide-react';
+
+
+
+
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';

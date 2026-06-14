@@ -1,7 +1,12 @@
+import GripVertical from "lucide-react/dist/esm/icons/grip-vertical";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Plus from "lucide-react/dist/esm/icons/plus";
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GripVertical, Trash2, Plus } from 'lucide-react';
+
+
+
 
 const PhaseEditor = React.memo(({ phases, products: catalogProducts, onChange }) => {
   const navigate = useNavigate();

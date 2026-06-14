@@ -1,5 +1,10 @@
+import Bot from "lucide-react/dist/esm/icons/bot";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import React, { useState } from 'react';
-import { Bot, RefreshCw, AlertCircle } from 'lucide-react';
+
+
+
 import { useAuth } from '../../../context/AuthContext';
 import { API_ENDPOINT } from './constants';
 
@@ -33,7 +38,7 @@ export default function AIContextSummary({ entityType, entityId }) {
       });
 
       if (!resp.ok) throw new Error('Failed to fetch AI summary');
-      const data = await resp.json();
+      const data = await resp.js();
       setSummary(data.reply);
     } catch (err) {
       console.error(err);

@@ -1,5 +1,18 @@
+import FileUp from "lucide-react/dist/esm/icons/file-up";
+import X from "lucide-react/dist/esm/icons/x";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import React from 'react';
-import { FileUp, X, CheckCircle, Loader2, AlertTriangle, FileText, Sparkles } from 'lucide-react';
+
+
+
+
+
+
+
 import { useInvoiceUpload } from '../../../hooks/useInvoiceUpload';
 import { useAuth } from '../../../context/AuthContext';
 
@@ -13,7 +26,6 @@ export default function UploadInvoiceModal({ onClose, onComplete }) {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', padding: '1rem' }}>
       <div style={{ backgroundColor: 'var(--color-surface)', borderRadius: '1rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', width: '100%', maxWidth: '42rem', border: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', overflow: 'hidden', animation: 'zoom-in 0.2s ease-out' }}>
-        
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', borderBottom: '1px solid var(--color-border)' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
@@ -75,7 +87,6 @@ export default function UploadInvoiceModal({ onClose, onComplete }) {
                   accept="application/pdf,image/*" 
                   onChange={handleFileChange}
                 />
-                
                 {file ? (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                     <FileText style={{ width: '3rem', height: '3rem', color: 'var(--color-primary)', marginBottom: '0.5rem' }} />

@@ -1,5 +1,20 @@
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Copy from "lucide-react/dist/esm/icons/copy";
+import Check from "lucide-react/dist/esm/icons/check";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import Tag from "lucide-react/dist/esm/icons/tag";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import FileCode from "lucide-react/dist/esm/icons/file-code";
+import Filter from "lucide-react/dist/esm/icons/filter";
 import React, { useState, useMemo } from 'react';
-import { Mail, Copy, Check, Eye, Tag, Zap, FileCode, Filter } from 'lucide-react';
+
+
+
+
+
+
+
+
 import { EMAIL_TEMPLATE_REGISTRY } from '../../data/emailTemplateRegistry';
 
 const TAG_COLORS = {
@@ -112,7 +127,6 @@ export default function AdminEmailTemplatesTab() {
             Preview Template
           </h2>
         </div>
-        
         {/* Preview content here */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {/* Meta card */}
@@ -507,11 +521,9 @@ export default function AdminEmailTemplatesTab() {
           </tbody>
         </table>
       </div>
-    
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: AdminEmailTemplatesTab | Props: none
       </div>
-    
 </div>
   );
 }

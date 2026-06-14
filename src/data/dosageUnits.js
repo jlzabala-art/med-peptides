@@ -10,7 +10,7 @@
  *   3. DEFAULT_UNIT       — global fallback
  *
  * When adding a new product with a non-mg unit:
- *   - Add the product name (as it appears in wholesale_parsed.json) to PRODUCT_UNIT_MAP.
+ *   - Add the product name (as it appears in wholesale_parsed.js) to PRODUCT_UNIT_MAP.
  *   - Or add a new category entry to CATEGORY_UNIT_MAP if the whole category shares the unit.
  */
 
@@ -31,7 +31,7 @@ export const UNITS = {
 export const DEFAULT_UNIT = UNITS.MG;
 
 // ---------------------------------------------------------------------------
-// Per-product overrides  (key = product name as stored in wholesale_parsed.json)
+// Per-product overrides  (key = product name as stored in wholesale_parsed.js)
 // ---------------------------------------------------------------------------
 export const PRODUCT_UNIT_MAP = {
   // Gonadotropins / Hormones — IU

@@ -1,6 +1,7 @@
+import ActivitySquare from "lucide-react/dist/esm/icons/activity-square";
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { ActivitySquare } from 'lucide-react';
+
 
 export default function ProtocolAdherenceWidget() {
   const data = [
@@ -14,7 +15,6 @@ export default function ProtocolAdherenceWidget() {
       <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <ActivitySquare size={18} color="var(--color-success)" /> Protocol Adherence
       </h3>
-      
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '150px', position: 'relative' }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>

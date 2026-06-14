@@ -1,5 +1,8 @@
+import Edit3 from "lucide-react/dist/esm/icons/edit-3";
+import Save from "lucide-react/dist/esm/icons/save";
 import React, { useState } from 'react';
-import { Edit3, Save } from 'lucide-react';
+
+
 
 export default function ClinicalScratchpad() {
   const [note, setNote] = useState('');
@@ -23,7 +26,6 @@ export default function ClinicalScratchpad() {
           <Save size={16} /> {saved ? 'Saved' : 'Save'}
         </button>
       </div>
-      
       <textarea 
         value={note}
         onChange={(e) => setNote(e.target.value)}

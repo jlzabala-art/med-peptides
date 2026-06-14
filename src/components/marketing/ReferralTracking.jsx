@@ -1,5 +1,18 @@
+import Link from "lucide-react/dist/esm/icons/link";
+import Users from "lucide-react/dist/esm/icons/users";
+import Share2 from "lucide-react/dist/esm/icons/share-2";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Copy from "lucide-react/dist/esm/icons/copy";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import React, { useState } from 'react';
-import { Link, Users, Share2, DollarSign, TrendingUp, Copy, CheckCircle } from 'lucide-react';
+
+
+
+
+
+
+
 
 export default function ReferralTracking({ ownerId, ownerType }) {
   const [copiedLink, setCopiedLink] = useState(null);
@@ -74,7 +87,6 @@ export default function ReferralTracking({ ownerId, ownerType }) {
         boxShadow: 'var(--shadow-sm)'
       }}>
         <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: 'var(--text-main)' }}>Your Active Links</h3>
-        
         <div style={{
           display: 'flex',
           flexDirection: 'column',
@@ -100,7 +112,6 @@ export default function ReferralTracking({ ownerId, ownerType }) {
                   {link.url}
                 </div>
               </div>
-              
               <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Clicks</div>

@@ -1,34 +1,27 @@
-import { GoogleGenAI } from '@google/genai';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../firebase';
 
 /**
  * Atlas AI Service for data extraction
+ *
+ * MIGRATED: Now securely calls the Firebase Cloud Function
+ * 'parsePriceListImage' to avoid exposing the GEMINI_API_KEY on the frontend.
  */
-
-// We will expect the API key to be injected via environment variables in Vite.
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-
-let aiClient = null;
-
-if (apiKey) {
-    aiClient = new GoogleGenAI({ apiKey });
-}
 
 /**
- * Converts a JS File object (e.g. from an <input type="file" />) into the inlineData
- * format required by the Google Gen AI SDK.
+ * Converts a JS File object into a base64 string
  * @param {File} file 
- * @returns {Promise<Object>}
+ * @returns {Promise<{imageBase64: string, mimeType: string}>}
  */
-const fileToGenerativePart = async (file) => {
+const fileToBase64 = async (file) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
-            const base64Data = reader.result.split(',')[1];
+            // result is like "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
+            const base64Data = reader.result;
             resolve({
-                inlineData: {
-                    data: base64Data,
-                    mimeType: file.type
-                }
+                imageBase64: base64Data,
+                mimeType: file.type
             });
         };
         reader.onerror = reject;
@@ -37,52 +30,41 @@ const fileToGenerativePart = async (file) => {
 };
 
 /**
- * Extracts API Peptides (Name and Price/g) from an image table.
+ * Extracts API Peptides (Name and Price/g) from an image table securely via backend.
  * @param {File} imageFile 
- * @returns {Promise<Array>} Array of { peptideName, pricePerGram }
+ * @param {string} [instructions] Optional custom instructions
+ * @returns {Promise<Array>} Array of { peptideName, pricePerGram } and other items
  */
-export const extractApiPeptidesFromImage = async (imageFile) => {
-    if (!aiClient) {
-        throw new Error("Atlas AI is not configured. Missing VITE_GEMINI_API_KEY in environment variables.");
-    }
-
+export const extractApiPeptidesFromImage = async (imageFile, instructions = '') => {
     try {
-        const imagePart = await fileToGenerativePart(imageFile);
+        const { imageBase64, mimeType } = await fileToBase64(imageFile);
 
-        const prompt = `You are a highly accurate OCR and data extraction AI named Atlas AI.
-The user has provided an image of a price list for API Peptides.
-Extract the tabular data from the image. 
-Return ONLY a valid JSON array of objects. Do not include markdown formatting or backticks around the JSON.
-Each object must strictly match this schema:
-{
-  "peptideName": "string (the name of the peptide/product)",
-  "pricePerGram": "number (the price per gram in USD, without symbols. Convert 1.280,91 to 1280.91 etc. Handle commas/dots correctly based on standard European or US formatting depending on context. If it says 2.750,00 that is 2750.00)"
-}
-
-CRITICAL: Ignore the "Quantity (g)" and "Total (USD)" columns entirely. We only want the base price per gram.
-Ensure the JSON is perfectly valid.`;
-
-        const response = await aiClient.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: [
-                prompt,
-                imagePart
-            ],
-            config: {
-                temperature: 0.1,
-                // Using responseMimeType to enforce JSON output
-                responseMimeType: "application/json",
-            }
+        const parsePriceListImage = httpsCallable(functions, 'parsePriceListImage');
+        
+        const response = await parsePriceListImage({
+            imageBase64,
+            mimeType,
+            instructions: instructions || "Focus on extracting API Peptides with their base price per gram. Ignore quantity/total columns."
         });
 
-        const textResponse = response.text;
-        
-        // Ensure it's parsed correctly
-        const parsedData = JSON.parse(textResponse);
-        return parsedData;
+        const data = response.data;
+        if (!data.success) {
+            throw new Error(data.error || 'Backend extraction failed');
+        }
+
+        // The Cloud Function returns: { success: true, global_discount_percentage, items: [...] }
+        // We map it to the expected structure if needed, or just return the items.
+        // For backwards compatibility with older usages of this service:
+        const mappedData = (data.items || []).map(item => ({
+            peptideName: item.peptide_name || item.original_text || 'Unknown',
+            pricePerGram: item.unit_price || 0,
+            originalItem: item
+        }));
+
+        return mappedData;
 
     } catch (error) {
-        console.error("Atlas AI Extraction failed:", error);
-        throw new Error("Failed to process image with Atlas AI. Ensure the image is clear and the API key is valid.");
+        console.error("Atlas AI Backend Extraction failed:", error);
+        throw new Error("Failed to process image with Atlas AI on the backend. Ensure the image is clear.");
     }
 };

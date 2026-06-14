@@ -1,6 +1,6 @@
- 
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
 import { useState, useEffect } from 'react';
-import { ChevronUp } from 'lucide-react';
+
 
 export default function BackToTop() {
   const [visible, setVisible] = useState(false);
@@ -40,7 +40,6 @@ export default function BackToTop() {
           /* Posicionamiento dinámico */
           right: 20px;
           bottom: calc(85px + env(safe-area-inset-bottom)); 
-          
           width: 50px;
           height: 50px;
           border-radius: 16px; /* Diseño más moderno/app-like que el círculo perfecto */
@@ -55,7 +54,6 @@ export default function BackToTop() {
           z-index: 900;
           transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
           animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-          
           /* Evita que el zoom del sistema interfiera */
           touch-action: manipulation;
         }

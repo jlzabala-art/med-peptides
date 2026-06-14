@@ -1,9 +1,14 @@
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
 import React, { useState } from 'react';
 import { db } from '../../../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, CheckCircle2, ShieldAlert } from 'lucide-react';
+
+
+
 
 export default function AdverseEventLoggerWidget() {
   const { user, userProfile } = useAuth();
@@ -16,7 +21,6 @@ export default function AdverseEventLoggerWidget() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!symptoms.trim()) return;
-    
     setLoading(true);
     try {
       await addDoc(collection(db, 'adverse_events'), {

@@ -1,6 +1,22 @@
- 
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Info from "lucide-react/dist/esm/icons/info";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import X from "lucide-react/dist/esm/icons/x";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
 import React, { useState, useMemo } from 'react';
-import { ShieldCheck, AlertTriangle, Info, CheckCircle2, XCircle, X, ChevronRight, AlertCircle, ExternalLink } from 'lucide-react';
+
+
+
+
+
+
+
+
+
 
 const CLINICAL_EXPLANATIONS = {
   'Completeness Check': {
@@ -181,7 +197,6 @@ export default function ValidationSummary({ validation, onFix, formData }) {
           const config = CLINICAL_EXPLANATIONS[badge.label] || getGenericExplanation(badge.label);
           const isCompleteness = badge.label === 'Completeness Check';
           const hasIssues = !badge.passed;
-          
           return (
             <div key={idx} style={{ 
               backgroundColor: 'white', 
@@ -279,7 +294,6 @@ export default function ValidationSummary({ validation, onFix, formData }) {
                           </div>
                         </div>
                       )}
-                      
                       {allAlerts?.filter(a => a.toLowerCase().includes(badge.label.split(' ')[0].toLowerCase())).map((alert, i) => (
                         <div key={i} style={{ fontSize: '0.8rem', fontWeight: 700, color: '#b91c1c', display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <AlertCircle size={14} /> {alert}
@@ -344,7 +358,6 @@ export default function ValidationSummary({ validation, onFix, formData }) {
               </div>
               <button onClick={() => setActivePopup(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', color: 'var(--color-text-secondary)' }}><X size={20} /></button>
             </div>
-            
             <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <div>
                 <h5 style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Logic Explanation</h5>

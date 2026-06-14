@@ -1,6 +1,17 @@
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import User from "lucide-react/dist/esm/icons/user";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Activity, FileText, AlertCircle, CheckCircle2 } from 'lucide-react';
+
+
+
+
+
+
 
 export default function PatientDetailAdmin() {
   const { id } = useParams();
@@ -59,7 +70,6 @@ export default function PatientDetailAdmin() {
       </div>
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
-        
         {/* Pending Actions Alert Panel */}
         {patient.pendingActions.length > 0 && (
           <div style={{
@@ -98,10 +108,8 @@ export default function PatientDetailAdmin() {
         )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2rem' }}>
-          
           {/* Main Content Area */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            
             {/* Overview Card */}
             <div style={{ backgroundColor: 'var(--color-bg-surface)', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
               <div style={{ borderBottom: '1px solid #e2e8f0', padding: '1rem 1.5rem', backgroundColor: 'var(--color-bg-app)' }}>
@@ -169,7 +177,6 @@ export default function PatientDetailAdmin() {
               </div>
             </div>
           </div>
-          
         </div>
       </div>
     </div>

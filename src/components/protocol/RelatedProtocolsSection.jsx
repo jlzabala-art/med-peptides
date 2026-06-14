@@ -1,3 +1,18 @@
+import Activity from "lucide-react/dist/esm/icons/activity";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Dna from "lucide-react/dist/esm/icons/dna";
+import Flame from "lucide-react/dist/esm/icons/flame";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Heart from "lucide-react/dist/esm/icons/heart";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import Leaf from "lucide-react/dist/esm/icons/leaf";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import GitCompare from "lucide-react/dist/esm/icons/git-compare";
 /* eslint-disable no-unused-vars */
 /**
  * RelatedProtocolsSection.jsx
@@ -7,11 +22,21 @@
 
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Activity, ArrowRight, Brain, Clock, Dna, Flame,
-  FlaskConical, Heart, Layers, Leaf, Moon, Shield,
-  Sparkles, Zap, GitCompare,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { getRelatedProtocols, getMatchReason } from '../../utils/ProtocolMatchingEngine';
 import { PROTOCOL_BLUEPRINTS } from '../../data/protocolBlueprints';
 

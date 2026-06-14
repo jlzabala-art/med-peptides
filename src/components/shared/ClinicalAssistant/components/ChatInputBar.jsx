@@ -1,6 +1,27 @@
+import Send from "lucide-react/dist/esm/icons/send";
+import Mic from "lucide-react/dist/esm/icons/mic";
+import MicOff from "lucide-react/dist/esm/icons/mic-off";
+import Search from "lucide-react/dist/esm/icons/search";
+import Paperclip from "lucide-react/dist/esm/icons/paperclip";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import X from "lucide-react/dist/esm/icons/x";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 /* eslint-disable no-unused-vars */
 import React, { useState, useRef } from 'react';
-import { Send, Mic, MicOff, Search, Paperclip, FileText, CheckCircle, AlertCircle, X, ClipboardList, Sparkles } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../../../context/AuthContext';
 
@@ -97,11 +118,9 @@ const scanCatalogProducts = (text, productsList = []) => {
   productsList.forEach(prod => {
     if (!prod || !prod.name) return;
     const nameLower = prod.name.toLowerCase();
-    
     // Look for exact word match or standard contains to prevent false positives on very short names
     const isShort = nameLower.length <= 3;
     let matches = false;
-    
     if (isShort) {
       const rx = new RegExp(`\\b${nameLower}\\b`, 'i');
       matches = rx.test(textLower);
@@ -355,7 +374,6 @@ export default function ChatInputBar({
 
   const handleAskAI = () => {
     if (!extractedText) return;
-    
     const prompt = `[DOC_ANALYSIS] I have uploaded a research document named "${fileName}". Here is the extracted text from it:
 
 ${extractedText.slice(0, 3000)}
@@ -364,7 +382,6 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
 1. Identifying which of these compounds are in our current catalog (${matchedProducts.map(p => p.name).join(', ') || 'none'}).
 2. Detailing the standard scientific research protocols, dosages, and mechanisms of action for the identified compounds.
 3. Suggesting complementary stacks or secondary goals (e.g. recovery, longevity) from our catalog.`;
-    
     onSend(prompt);
     handleClearAnalysis();
   };
@@ -424,7 +441,6 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
           </motion.div>
         )}
       </AnimatePresence>
- 
       {/* Hidden File Input */}
       <input 
         type="file" 
@@ -457,7 +473,6 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
         accept=".pdf,.csv,.xlsx,.xls"
         style={{ display: 'none' }}
       />
- 
       {/* File Analysis Preview Card */}
       <AnimatePresence>
         {(isAnalyzing || fileName) && (
@@ -498,14 +513,12 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
             >
               <X size={14} />
             </button>
- 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
               <FileText size={16} color="var(--primary)" />
               <span style={{ fontSize: '0.78rem', fontWeight: 750, color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '85%' }}>
                 {fileName}
               </span>
             </div>
- 
             {isAnalyzing ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.2rem 0' }}>
                 <div className="spinner-small" style={{
@@ -565,7 +578,6 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                       placeholder="Enter dose..."
                     />
                   </div>
-                  
                   <div style={{
                     flex: 1,
                     backgroundColor: 'white',
@@ -599,7 +611,6 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                     />
                   </div>
                 </div>
- 
                 <div style={{ fontSize: '0.72rem', color: 'var(--color-text-secondary)', marginBottom: '0.4rem', fontWeight: 700 }}>
                   {matchedProducts.length > 0 ? (
                     <span style={{ color: 'var(--color-success)' }}>
@@ -609,7 +620,6 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                     "No direct catalog matches detected. You can still consult the Clinical AI."
                   )}
                 </div>
- 
                 {matchedProducts.length > 0 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.85rem' }}>
                     {matchedProducts.map((p, idx) => {
@@ -617,7 +627,6 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                       const selectedVarId = selectedVariants[p.id || p.name] || (vars[0]?.variantId || vars[0]?.id);
                       const activeVar = vars.find(v => (v.variantId || v.id) === selectedVarId) || vars[0] || p;
                       const activePrice = getVariantDisplayPrice(p, activeVar);
-                      
                       return (
                         <div key={idx} style={{
                           display: 'flex',
@@ -668,7 +677,6 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                               </span>
                             )}
                           </div>
-                          
                           <button 
                             onClick={() => {
                               const addDose = activeVar.dosage || activeVar.strength || activeVar.size || null;
@@ -701,7 +709,6 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                     })}
                   </div>
                 )}
- 
                 {/* Essential Accessories section */}
                 {matchedProducts.length > 0 && (
                   <div style={{
@@ -763,7 +770,6 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                     </div>
                   </div>
                 )}
- 
                 {matchedProducts.length > 0 && (
                   <button
                     onClick={() => {
@@ -772,7 +778,6 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                         const selectedVarId = selectedVariants[p.id || p.name] || (vars[0]?.variantId || vars[0]?.id);
                         const activeVar = vars.find(v => (v.variantId || v.id) === selectedVarId) || vars[0] || p;
                         const addDose = activeVar.dosage || activeVar.strength || activeVar.size || null;
-                        
                         window.dispatchEvent(new CustomEvent('add-to-cart-direct', { 
                           detail: { 
                             product: {
@@ -823,7 +828,6 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                     🛒 Add Entire Prescription Bundle to Cart
                   </button>
                 )}
- 
                 <button
                   onClick={handleAskAI}
                   disabled={isLoading}
@@ -865,7 +869,6 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
           </motion.div>
         )}
       </AnimatePresence>
- 
       {/* Smart Quick Prompts / Contextual Suggestions Bar */}
       {!showAutocomplete && !fileName && !(isLoading || isTyping) && (
         <div style={{ position: 'relative', width: '100%' }}>
@@ -982,7 +985,6 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
           </div>
         </div>
       )}
- 
       <div className="ca-input-bar-row" style={{ 
         display: 'flex', 
         alignItems: 'flex-end', 
@@ -1086,7 +1088,6 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
             minWidth: 0
           }}
         />
-        
         <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
           <button 
             onClick={() => onSend()}

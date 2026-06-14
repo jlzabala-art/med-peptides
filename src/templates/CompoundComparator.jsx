@@ -1,11 +1,23 @@
+import ArrowRightLeft from "lucide-react/dist/esm/icons/arrow-right-left";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Target from "lucide-react/dist/esm/icons/target";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 /* eslint-disable no-unused-vars */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';
-import { products } from '../data/products';
-import { ArrowRightLeft, ShieldCheck, Zap, Target, BookOpen, AlertCircle } from 'lucide-react';
+import { useStaticData } from '../hooks/useStaticData';
+
+
+
+
+
+
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function CompoundComparator() {
+  const { products } = useStaticData();
   const structuredData = useMemo(() => ({
     "@context": "https://schema.org",
     "@type": "ProductGroup",
@@ -32,6 +44,13 @@ export default function CompoundComparator() {
 
   const [p1, setP1] = useState(uniquePeptides[0]);
   const [p2, setP2] = useState(uniquePeptides[1]);
+
+  useEffect(() => {
+    if (uniquePeptides.length > 1 && !p1 && !p2) {
+      setP1(uniquePeptides[0]);
+      setP2(uniquePeptides[1]);
+    }
+  }, [uniquePeptides, p1, p2]);
 
   const ComparisonRow = ({ label, icon: Icon, val1, val2, type = 'text' }) => (
     <div style={s.row}>
@@ -102,7 +121,6 @@ export default function CompoundComparator() {
           <ComparisonRow label="Research Goals" icon={BookOpen} val1={p1?.goals} val2={p2?.goals} />
           {/* Phase 8: canonical read path — typeData.peptide.mechanismOfAction first, then legacy field */}
           <ComparisonRow label="Signaling Summary" icon={BookOpen} val1={p1?.typeData?.peptide?.mechanismOfAction?.summary ?? p1?.mechanismOfAction?.summary} val2={p2?.typeData?.peptide?.mechanismOfAction?.summary ?? p2?.mechanismOfAction?.summary} />
-          
           <div style={s.row}>
             <div style={s.rowLabel}>
               <AlertCircle size={16} />

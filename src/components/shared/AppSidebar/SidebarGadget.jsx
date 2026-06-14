@@ -1,9 +1,16 @@
+import Settings from "lucide-react/dist/esm/icons/settings";
+import Save from "lucide-react/dist/esm/icons/save";
+import X from "lucide-react/dist/esm/icons/x";
+import ListOrdered from "lucide-react/dist/esm/icons/list-ordered";
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { useAuth } from '../../../context/AuthContext';
 import AppSidebar from './index';
-import { Settings, Save, X, ListOrdered } from 'lucide-react';
+
+
+
+
 import SidebarOrderModal from './SidebarOrderModal';
 
 export default function SidebarGadget(props) {
@@ -11,7 +18,6 @@ export default function SidebarGadget(props) {
   const [isEditing, setIsEditing] = useState(false);
   const [sidebarGroups, setSidebarGroups] = useState(props.groups || []);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
-  
   // Storage key for user preferences
   const storageKey = props.prefsKey || 'sidebar_groups_prefs';
   const prefsDocRef = user ? doc(db, 'users', user.uid, 'preferences', storageKey) : null;
@@ -30,7 +36,6 @@ export default function SidebarGadget(props) {
       .filter(savedGroup => savedGroup.id !== 'favorites' && savedGroup.id !== 'admin_favorites')
       .map(savedGroup => {
       const origGroup = originalGroups.find(g => g.id === savedGroup.id) || savedGroup;
-      
       const hydratedItems = (savedGroup.items || [])
         .map(savedItem => {
           const item = allItems.get(savedItem.id) || null;
@@ -75,7 +80,6 @@ export default function SidebarGadget(props) {
     async function loadPreferences() {
       const currentPrefsDocRef = user ? doc(db, 'users', user.uid, 'preferences', storageKey) : null;
       const localPrefs = localStorage.getItem(storageKey);
-      
       if (localPrefs) {
         try {
           const parsed = JSON.parse(localPrefs);
@@ -87,7 +91,6 @@ export default function SidebarGadget(props) {
         if (!localPrefs) injectFavoritesGroup(props.groups);
         return;
       }
-      
       try {
         const snap = await getDoc(currentPrefsDocRef);
         if (snap.exists() && snap.data().groups) {
@@ -130,7 +133,6 @@ export default function SidebarGadget(props) {
         console.error("Failed to save sidebar preferences", e);
       }
     }
-    
     if (exitEditMode) setIsEditing(false);
   };
 
@@ -144,7 +146,6 @@ export default function SidebarGadget(props) {
       e.stopPropagation();
       e.preventDefault();
     }
-    
     let targetItem = null;
     for (const g of props.groups) {
       if (g.items) {
@@ -155,22 +156,18 @@ export default function SidebarGadget(props) {
         }
       }
     }
-    
     if (!targetItem) return;
 
     setSidebarGroups(prev => {
       const newGroups = prev.map(g => ({ ...g, items: [...(g.items || [])] }));
       const favGroup = newGroups.find(g => g.id === 'favorites');
-      
       if (!favGroup) return prev;
-      
       const isFav = favGroup.items.some(i => i.id === itemId);
       if (isFav) {
         favGroup.items = favGroup.items.filter(i => i.id !== itemId);
       } else {
         favGroup.items.push(targetItem);
       }
-      
       setTimeout(() => savePreferences(newGroups, false), 0);
       return newGroups;
     });

@@ -1,10 +1,21 @@
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import UserPlus from "lucide-react/dist/esm/icons/user-plus";
+import Check from "lucide-react/dist/esm/icons/check";
+import X from "lucide-react/dist/esm/icons/x";
+import Send from "lucide-react/dist/esm/icons/send";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import Card from '../ui/Card';
 import Spinner from '../ui/Spinner';
-import { Stethoscope, UserPlus, Check, X, Send, Loader2 } from 'lucide-react';
+
+
+
+
+
+
 
 export default function PatientSupervisorTab({ userId }) {
   const queryClient = useQueryClient();
@@ -55,7 +66,6 @@ export default function PatientSupervisorTab({ userId }) {
     mutationFn: async ({ doctorId, notes }) => {
       const docObj = doctors.find(d => d.id === doctorId);
       const docName = docObj ? (docObj.displayName || `${docObj.firstName || ''} ${docObj.lastName || ''}`.trim()) : 'Doctor';
-      
       await addDoc(collection(db, 'doctor_patient_relationships'), {
         patientId: userId,
         doctorId,

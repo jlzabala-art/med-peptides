@@ -1,3 +1,9 @@
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import X from "lucide-react/dist/esm/icons/x";
+import Dna from "lucide-react/dist/esm/icons/dna";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 /* eslint-disable no-unused-vars */
 /**
  * GuestIntroTeaser
@@ -18,7 +24,12 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, ArrowRight, X, Dna, Zap, ShieldCheck } from 'lucide-react';
+
+
+
+
+
+
 import './GuestIntroTeaser.css';
 
 const HIGHLIGHTS = [

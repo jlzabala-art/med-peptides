@@ -1,7 +1,13 @@
- 
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+import MessageCircle from "lucide-react/dist/esm/icons/message-circle";
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Bot, HelpCircle, MessageCircle } from 'lucide-react';
+
+
+
+
 
 /**
  * NotSureWhereToStart — Phase 10 of Rules 5.0

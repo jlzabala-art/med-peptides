@@ -1,5 +1,10 @@
+import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Minus from "lucide-react/dist/esm/icons/minus";
 import React, { useMemo } from 'react';
-import { TrendingDown, TrendingUp, Minus } from 'lucide-react';
+
+
+
 
 export default function CompetitorAnalysisWidget({ matchData, selectedTier = 'retail', myPPMs }) {
   if (!matchData || matchData.length === 0) {
@@ -64,7 +69,6 @@ export default function CompetitorAnalysisWidget({ matchData, selectedTier = 're
             <div style={{ fontWeight: 600, color: '#0f172a', marginBottom: '0.5rem' }}>
               {comp.product_name}
             </div>
-            
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '1rem' }}>
               <div>
                 <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a' }}>
@@ -74,7 +78,6 @@ export default function CompetitorAnalysisWidget({ matchData, selectedTier = 're
                   {comp.dosage_mg ? `${comp.dosage_mg}mg` : 'Dosis desc.'}
                 </div>
               </div>
-              
               {compPPM && myPPM && (
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '0.85rem', fontWeight: 600, color: isCheaper ? '#10b981' : isExpensive ? '#ef4444' : '#64748b' }}>
@@ -86,7 +89,6 @@ export default function CompetitorAnalysisWidget({ matchData, selectedTier = 're
                 </div>
               )}
             </div>
-            
           </div>
         );
       })}

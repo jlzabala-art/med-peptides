@@ -1,7 +1,13 @@
- 
+import Home from "lucide-react/dist/esm/icons/home";
+import Search from "lucide-react/dist/esm/icons/search";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Search, ArrowLeft, FlaskConical } from 'lucide-react';
+
+
+
+
 import { track404 } from '../../hooks/useAnalytics';
 
 const NotFound = ({ onBack }) => {

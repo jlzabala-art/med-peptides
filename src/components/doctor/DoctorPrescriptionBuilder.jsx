@@ -1,3 +1,23 @@
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Send from "lucide-react/dist/esm/icons/send";
+import Save from "lucide-react/dist/esm/icons/save";
+import Search from "lucide-react/dist/esm/icons/search";
+import User from "lucide-react/dist/esm/icons/user";
+import Building from "lucide-react/dist/esm/icons/building";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import PackageSearch from "lucide-react/dist/esm/icons/package-search";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import X from "lucide-react/dist/esm/icons/x";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
 /**
  * DoctorPrescriptionBuilder.jsx
  *
@@ -22,17 +42,34 @@ import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { logAction } from '../../services/auditLogger';
-import {
-  ClipboardList, Plus, Trash2, Send, Save, Search, User, Building,
-  ChevronDown, FlaskConical, PackageSearch, AlertCircle, CheckCircle2,
-  Clock, X, ArrowRight, Loader2, Stethoscope, ShoppingBag, UploadCloud
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import {
   RX_TYPE, DELIVERY_METHOD, RX_STATUS, newRxDraft,
   ITEM_UNITS, FREQUENCIES, DURATIONS, RX_STATUS_META, rxEvent
 } from '../../config/prescriptionConfig';
 import { apiCatalog } from '../../data/apis';
 import CatalogPreviewPanel from '../wholesaler/CatalogPreviewPanel';
+import PharmacokineticsSimulator from './PharmacokineticsSimulator';
+import DrugInteractionChecker from './DrugInteractionChecker';
 
 
 // ── Mini status badge ─────────────────────────────────────────────────────────
@@ -131,7 +168,6 @@ function PrescriptionItemRow({ item, index, onChange, onRemove, onAddTest, catal
       {open && (
         <div style={{ padding: '0 1rem 1rem', borderTop: '1px solid #f1f5f9',
           display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.6rem', paddingTop: '0.75rem' }}>
-          
           {/* Compounding Ingredients list if compounded */}
           {isCompounded && (
             <div style={{ gridColumn: '1 / -1', background: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: '8px', padding: '0.65rem 0.85rem', marginBottom: '0.4rem' }}>
@@ -167,7 +203,6 @@ function PrescriptionItemRow({ item, index, onChange, onRemove, onAddTest, catal
               const patientVal = resolveVariantPrice({ pricing: item.pricing }, { tier: 'retail' });
               const clinicFmt = clinicVal?.perUnit != null ? formatPrice(clinicVal.perUnit, clinicVal.currency) : '—';
               const patientFmt = patientVal?.perUnit != null ? formatPrice(patientVal.perUnit, patientVal.currency) : '—';
-              
               // Calculate default margin/markup
               let defaultMarginText = '—';
               if (clinicVal?.perUnit && patientVal?.perUnit) {
@@ -236,7 +271,6 @@ function PrescriptionItemRow({ item, index, onChange, onRemove, onAddTest, catal
                     {item.recommended_tests.map(testId => {
                       const match = catalogProducts?.find(p => p.id === testId);
                       if (!match) return null;
-                      
                       return (
                         <div key={testId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--color-bg-app)', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.45rem 0.6rem' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
@@ -466,7 +500,6 @@ import { SUPPLEMENT_APIS, FORMATS, VEHICLES } from '../../data/supplementApis';
 const calculateCompoundPricing = (ingredients, servings, formatId, marginPct) => {
   const format = FORMATS.find(f => f.id === formatId) || FORMATS[0];
   const baseFee = format.baseFee;
-  
   let ingredientCost = 0;
   ingredients.forEach(ing => {
     const api = SUPPLEMENT_APIS.find(a => a.id === ing.apiId);
@@ -690,19 +723,16 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
     setCreatingPatientLoading(true);
     try {
       const emailClean = newPatientEmail.trim().toLowerCase();
-      
       // Check existing patient
       const qExist = query(collection(db, 'users'), where('email', '==', emailClean));
       const existSnap = await getDocs(qExist);
       let patientUid = '';
       let patientFullName = `${newPatientFirstName} ${newPatientLastName}`.trim();
-      
       if (!existSnap.empty) {
         const existingUser = existSnap.docs[0];
         patientUid = existingUser.id;
         const existData = existingUser.data();
         patientFullName = `${existData.firstName || ''} ${existData.lastName || ''}`.trim() || patientFullName;
-        
         await updateDoc(doc(db, 'users', patientUid), {
           assignedDoctorIds: arrayUnion(doctorId)
         });
@@ -749,12 +779,10 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
 
       showToast(t('doctor.builder.create_success'));
       setIsCreatingPatient(false);
-      
       setNewPatientFirstName('');
       setNewPatientLastName('');
       setNewPatientEmail('');
       setNewPatientPhone('');
-      
     } catch (err) {
       console.error('Error creating patient:', err);
       showToast(t('doctor.builder.create_error'), false);
@@ -1096,12 +1124,9 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
       )}
 
       {/* ── DIRECCIÓN DE ENVÍO Y DELEGACIÓN LOGÍSTICA ── */}
-      
 <div className="gcp-card">
         <div className="gcp-header">📦 Envío y Delegación Logística</div>
-        
         <div className="form-grid-2col" style={{ gap: '0.75rem' }}>
-          
           {/* Shipping Address Type */}
           <label className="gcp-label">
             Destinatario de Envío
@@ -1319,7 +1344,6 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
             {showHistoryPanel ? t('doctor.builder.hide_history') : t('doctor.builder.show_history')}
           </button>
         </div>
-        
         {showHistoryPanel && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {loadingRecentRx ? (
@@ -1494,7 +1518,6 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                 ))}
               </div>
             </div>
-            
             <div className="compounding-grid">
               <label className="gcp-label">
                 Nombre de la Fórmula
@@ -1505,7 +1528,6 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                   style={{ ...fieldInput, borderColor: '#5eead4' }} 
                 />
               </label>
-              
               <label className="gcp-label">
                 Formato
                 <select 
@@ -1525,7 +1547,6 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                   ))}
                 </select>
               </label>
-              
               <label className="gcp-label">
                 Excipiente / Vehículo
                 <select 
@@ -1538,7 +1559,6 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                   ))}
                 </select>
               </label>
-              
               <label className="gcp-label">
                 Cantidad ({compoundFormat === 'capsules' ? 'Cápsulas' : 'Tomas'})
                 <input 
@@ -1806,7 +1826,6 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                 )}
               </div>
             )}
-          
 {rx.items.length === 0 ? (
           <div style={{ textAlign: 'center', color: '#5f6368', fontSize: '0.78rem',
             padding: '1.5rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
@@ -1827,8 +1846,10 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
         )}
       </>
     )}
+    
+    <PharmacokineticsSimulator selectedItems={rx.items} />
+    <DrugInteractionChecker rxItems={rx.items} />
   </div>
-      
       {currentStep === 4 && (
       <>
 {/* ── LIVE PRICING ESTIMATION PANEL ── */}
@@ -1839,7 +1860,6 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
             let totalClinic = 0;
             let hasPricing = false;
             let hasCompounding = false;
-            
             rx.items.forEach(item => {
               if (item.type === 'supplement_compounding') {
                 hasCompounding = true;
@@ -1852,7 +1872,6 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                 }
               }
             });
-            
             if (!hasPricing && !hasCompounding) {
               return (
                 <div style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)', fontStyle: 'italic', textAlign: 'center' }}>
@@ -1873,7 +1892,6 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
             const markupVal = totalClinic * (Number(markupMargin) / 100);
             const totalPatient = totalClinic + markupVal;
             const currency = rx.items.find(i => i.pricing)?.pricing?.clinic?.currency || 'EUR';
-            
             return (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                 {hasCompounding && (
@@ -1962,7 +1980,6 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
         </div>
       </div>
 
-      
       </>
       )}
 {/* ── Navigation Buttons ── */}
@@ -2051,7 +2068,6 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
                   {(() => {
                     let totalClinic = 0;
                     let hasPricing = false;
-                    
                     rx.items.forEach(item => {
                       if (item.pricing) {
                         const clinicVal = resolveVariantPrice({ pricing: item.pricing }, { tier: 'clinic' });
@@ -2107,7 +2123,6 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
         @keyframes rxSpin    { to { transform: rotate(360deg); } }
         @keyframes rxFadeIn  { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
         @keyframes rxSlideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-        
         .form-grid-2col {
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -2133,7 +2148,6 @@ export default function DoctorPrescriptionBuilder({ doctorId, doctorMeta, patien
           background: #f1f5f9 !important;
           border-color: #cbd5e1 !important;
         }
-        
         @media (max-width: 768px) {
           .form-grid-2col {
             grid-template-columns: 1fr !important;

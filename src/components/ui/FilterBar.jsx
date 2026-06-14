@@ -1,5 +1,8 @@
+import X from "lucide-react/dist/esm/icons/x";
+import Filter from "lucide-react/dist/esm/icons/filter";
 import React from 'react';
-import { X, Filter } from 'lucide-react';
+
+
 
 export default function FilterBar({ filters = [], onRemoveFilter, onClearAll, children }) {
   if (filters.length === 0 && !children) return null;
@@ -18,7 +21,6 @@ export default function FilterBar({ filters = [], onRemoveFilter, onClearAll, ch
         <Filter size={16} />
         <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Filters:</span>
       </div>
-      
       {/* Pills */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', flex: 1 }}>
         {filters.map((filter, idx) => (
@@ -58,7 +60,6 @@ export default function FilterBar({ filters = [], onRemoveFilter, onClearAll, ch
             </button>
           </div>
         ))}
-        
         {filters.length > 0 && onClearAll && (
           <button
             onClick={onClearAll}

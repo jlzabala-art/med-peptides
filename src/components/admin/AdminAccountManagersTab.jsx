@@ -1,3 +1,25 @@
+import Users from "lucide-react/dist/esm/icons/users";
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import UserCircle from "lucide-react/dist/esm/icons/user-circle";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Edit3 from "lucide-react/dist/esm/icons/edit-3";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Search from "lucide-react/dist/esm/icons/search";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Filter from "lucide-react/dist/esm/icons/filter";
+import Download from "lucide-react/dist/esm/icons/download";
+import MoreVertical from "lucide-react/dist/esm/icons/more-vertical";
+import Map from "lucide-react/dist/esm/icons/map";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
@@ -6,11 +28,33 @@ import { StatusChip } from '../ui';
 import TooltipWrapper from '../ui/TooltipWrapper';
 import AppEntityCell from '../ui/AppEntityCell';
 import AppFilterBar from '../ui/AppFilterBar';
-import { Users, Building2, UserCircle, MapPin, Mail, Phone, Plus, AlertCircle, Edit3, Eye, Trash2, Shield, Search, TrendingUp, Sparkles, Filter, Download, MoreVertical, Map, Clock, FileText, CheckCircle2 } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import AccountManagerWizard from './AccountManagerWizard';
 import AccountManagerDrawer from './AccountManagerDrawer';
 import toast from 'react-hot-toast';
 import { useResponsive } from '../../hooks/useResponsive';
+import notifier from '../../services/NotificationService';
 
 const RowActions = ({ row, setSelectedManager, handleDelete }) => {
   const [showMenu, setShowMenu] = useState(false);
@@ -55,13 +99,10 @@ export default function AdminAccountManagersTab() {
   const [managers, setManagers] = useState([]);
   const [wholesellers, setWholesellers] = useState({});
   const [loading, setLoading] = useState(true);
-  
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [selectedManager, setSelectedManager] = useState(null);
-  
   // Selection state for bulk actions
   const [selectedRows, setSelectedRows] = useState([]);
 
@@ -71,7 +112,6 @@ export default function AdminAccountManagersTab() {
       const q = query(collection(db, 'users'), where('role', '==', 'account_manager'));
       const snap = await getDocs(q);
       const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      
       const enhancedList = list.map(m => ({
         ...m,
         assignedClinics: m.assignedClinics ?? Math.floor(Math.random() * 20),
@@ -111,15 +151,16 @@ export default function AdminAccountManagersTab() {
   }
 
   async function handleDelete(id) {
-    if (!window.confirm('Are you sure you want to delete this manager?')) return;
-    try {
-      await deleteDoc(doc(db, 'users', id));
-      setManagers(prev => prev.filter(m => m.id !== id));
-      toast.success('Manager deleted');
-    } catch (err) {
-      console.error('Delete failed', err);
-      toast.error('Delete failed');
-    }
+    notifier.confirmCritical('Are you sure you want to delete this manager?', async () => {
+      try {
+        await deleteDoc(doc(db, 'users', id));
+        setManagers(prev => prev.filter(m => m.id !== id));
+        toast.success('Manager deleted');
+      } catch (err) {
+        console.error('Delete failed', err);
+        toast.error('Delete failed');
+      }
+    });
   }
 
   const filtered = managers.filter((m) => {
@@ -229,7 +270,6 @@ export default function AdminAccountManagersTab() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', height: '100%', position: 'relative' }}>
-      
       {/* SECTION 1 & 2: Header + KPI Strip */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -399,7 +439,6 @@ export default function AdminAccountManagersTab() {
                   </div>
                   <StatusChip status={row.disabled ? 'inactive' : 'active'} label={row.disabled ? 'Suspended' : 'Active'} />
                 </div>
-                
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
                     <MapPin size={14} color="var(--text-muted)" />

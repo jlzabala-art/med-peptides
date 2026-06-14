@@ -1,18 +1,33 @@
+import Globe from "lucide-react/dist/esm/icons/globe";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Share2 from "lucide-react/dist/esm/icons/share-2";
+import Search from "lucide-react/dist/esm/icons/search";
+import Edit2 from "lucide-react/dist/esm/icons/edit-2";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Globe, FileText, CheckCircle, AlertCircle, Share2, Search, Edit2, Trash2 } from 'lucide-react';
+
+
+
+
+
+
+
+
 import DataTable from '../ui/DataTable';
 import AppEntityCell from '../ui/AppEntityCell';
 import AppStatusToggle from '../ui/AppStatusToggle';
 import AppActionGroup from '../ui/AppActionGroup';
+import notifier from '../../services/NotificationService';
 
 export default function AdminMarketingTab() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterText, setFilterText] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
-  
   // LinkedIn Auth Status
   const [linkedInStatus, setLinkedInStatus] = useState({ connected: false, expiresAt: null, urn: null });
 
@@ -20,24 +35,22 @@ export default function AdminMarketingTab() {
     // 1. Check if we just returned from LinkedIn OAuth
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
-    
     if (code) {
       setAuthLoading(true);
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
-      
       // Send code to backend
       fetch('https://us-central1-med-peptides-app.cloudfunctions.net/handleLinkedinAuthCallback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code })
       })
-      .then(res => res.json())
+      .then(res => res.js())
       .then(data => {
         if(data.success) {
-          alert('LinkedIn conectado correctamente!');
+          notifier.info('LinkedIn conectado correctamente!');
         } else {
-          alert('Error conectando LinkedIn: ' + data.error);
+          notifier.info('Error conectando LinkedIn: ' + data.error);
         }
         setAuthLoading(false);
       })
@@ -54,14 +67,12 @@ export default function AdminMarketingTab() {
           const data = docSnap.data();
           let expiresAtDate = null;
           let updatedAtDate = null;
-          
           if (data.expiresAt) {
             expiresAtDate = typeof data.expiresAt.toDate === 'function' ? data.expiresAt.toDate() : new Date(data.expiresAt);
           }
           if (data.updatedAt) {
             updatedAtDate = typeof data.updatedAt.toDate === 'function' ? data.updatedAt.toDate() : new Date(data.updatedAt);
           }
-          
           setLinkedInStatus({ 
             connected: true, 
             expiresAt: expiresAtDate,
@@ -97,24 +108,24 @@ export default function AdminMarketingTab() {
     setAuthLoading(true);
     try {
       const res = await fetch('https://us-central1-med-peptides-app.cloudfunctions.net/generateLinkedinAuthUrl');
-      const data = await res.json();
+      const data = await res.js();
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert('Error: No URL received');
+        notifier.info('Error: No URL received');
         setAuthLoading(false);
       }
     } catch (e) {
       console.error(e);
-      alert('Error contactando con el servidor');
+      notifier.info('Error contactando con el servidor');
       setAuthLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this blog post?')) {
+    notifier.confirmCritical('Are you sure you want to delete this blog post?', async () => {
       await deleteDoc(doc(db, 'blogPosts', id));
-    }
+    });
   };
 
   const handleToggleStatus = async (id, willBeActive) => {
@@ -248,7 +259,6 @@ export default function AdminMarketingTab() {
             Manage blog articles and social media automation parameters.
           </p>
         </div>
-        
         {/* LinkedIn Connection Widget */}
         <div style={{ 
           padding: '1.25rem', 
@@ -342,7 +352,6 @@ export default function AdminMarketingTab() {
             />
           </div>
         </div>
-        
         {loading ? (
           <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading blogs...</div>
         ) : (

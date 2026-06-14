@@ -1,7 +1,8 @@
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen } from 'lucide-react';
+
 
 export default function GlossaryTooltip({ term, definition }) {
   const [isVisible, setIsVisible] = useState(false);
@@ -23,7 +24,6 @@ export default function GlossaryTooltip({ term, definition }) {
       }}>
         {term}
       </span>
-      
       <AnimatePresence>
         {isVisible && (
           <motion.div

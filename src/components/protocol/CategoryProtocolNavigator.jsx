@@ -1,7 +1,10 @@
+import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+
 import { getTemplatesByObjective } from '../../repositories/protocolRepository';
 
 const CategoryProtocolNavigator = memo(function CategoryProtocolNavigator({

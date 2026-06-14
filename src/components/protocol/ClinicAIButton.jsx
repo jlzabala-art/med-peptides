@@ -1,6 +1,10 @@
- 
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import X from "lucide-react/dist/esm/icons/x";
 import React, { useState } from 'react';
-import { Sparkles, MessageSquare, X } from 'lucide-react';
+
+
+
 import './ClinicAIButton.css';
 import BlogCard from '../blog/BlogCard';
 import { useBlogPosts } from '../../hooks/useBlogPosts';
@@ -94,5 +98,4 @@ export default function ClinicAIButton({ protocol, variant = 'sidebar', style = 
     </>
   );
 }
-
 

@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useOutletContext, Navigate } from 'react-router-dom';
 
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
@@ -6,14 +6,14 @@ import DoctorDashboard from '../templates/DoctorDashboard';
 import UserSettings from '../templates/UserSettings';
 
 // ── Eager imports (small, always used) ───────────────────────────────────────
-import DoctorOverviewTab           from '../components/doctor/DoctorOverviewTab';
-import PhysicianPatientsTab        from '../components/doctor/DoctorPatientsTab';
+import DoctorOverviewTab from '../components/doctor/DoctorOverviewTab';
+import PhysicianPatientsTab from '../components/doctor/DoctorPatientsTab';
 import PhysicianRecommendationsTab from '../components/doctor/DoctorRecommendationsTab';
-import PhysicianOrdersTab          from '../components/doctor/DoctorOrdersTab';
-import PhysicianProtocolsTab       from '../components/doctor/DoctorProtocolsTab';
-import DoctorPrescriptionsTab      from '../components/doctor/DoctorPrescriptionsTab';
-import PhysicianAssistantsTab      from '../components/doctor/DoctorAssistantsTab';
-import DoctorMessagesTab           from '../components/doctor/DoctorMessagesTab';
+import PhysicianOrdersTab from '../components/doctor/DoctorOrdersTab';
+import PhysicianProtocolsTab from '../components/doctor/DoctorProtocolsTab';
+import DoctorPrescriptionsTab from '../components/doctor/DoctorPrescriptionsTab';
+import PhysicianAssistantsTab from '../components/doctor/DoctorAssistantsTab';
+import DoctorMessagesTab from '../components/doctor/DoctorMessagesTab';
 
 // ── Additional Templates ─────────────────────────────────────────────────────
 import DoctorAppointments from '../templates/DoctorAppointments';
@@ -21,8 +21,8 @@ import DoctorLabResults from '../templates/DoctorLabResults';
 import DoctorResearch from '../templates/DoctorResearch';
 
 // ── Lazy ─────────────────────────────────────────────────────────────────────
-const CatalogCreatorFlow = React.lazy(() => import('../components/wholesaler/CatalogCreatorFlow'));
-const UserProfileTab = React.lazy(() => import('../components/shared/UserProfileTab'));
+const CatalogCreatorFlow = lazy(() => import('../components/wholesaler/CatalogCreatorFlow'));
+import UserProfileTab from '../components/shared/UserProfileTab';
 
 const TabSkeleton = () => (
   <div style={{ padding: '2rem' }}>

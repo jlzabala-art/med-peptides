@@ -1,8 +1,35 @@
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Lock from "lucide-react/dist/esm/icons/lock";
+import User from "lucide-react/dist/esm/icons/user";
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Microscope from "lucide-react/dist/esm/icons/microscope";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import EyeOff from "lucide-react/dist/esm/icons/eye-off";
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth, ADMIN_EMAILS } from '../context/AuthContext';
-import { Mail, Lock, User, Building2, ArrowLeft, ShieldCheck, Clock, CheckCircle, Microscope, ChevronDown, ChevronUp, GraduationCap, Eye, EyeOff } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { motion, AnimatePresence } from 'framer-motion';
 import useGuestPreferences, { GOAL_META, LEVEL_META } from '../hooks/useGuestPreferences';
 export default function AuthPage({ onBack }) {
@@ -17,7 +44,6 @@ export default function AuthPage({ onBack }) {
     : null;
   const { user, userProfile, isProfessional, isProfessionalPending, isPhysician, isAdmin, activeRole, login, register, logout, resetPassword, loginWithGoogle, loading } = useAuth();
   const { prefs, hasCompleted } = useGuestPreferences();
-  
   // Detect admin from email hardlist (in case profile hasn't loaded yet)
   const isAdminByEmail = ADMIN_EMAILS.includes(user?.email?.toLowerCase());
   const [tab, setTab] = useState(() => {
@@ -25,7 +51,6 @@ export default function AuthPage({ onBack }) {
     const type = searchParams.get('type');
     return (t === 'register' || type === 'register' || searchParams.has('invite')) ? 'register' : 'login';
   });
-  
   const inviteId = searchParams.get('invite');
   // accountType: '' = not chosen yet, 'customer', 'professional'
   const [accountType, setAccountType] = useState(() => {
@@ -57,7 +82,6 @@ export default function AuthPage({ onBack }) {
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [mobileBenefitsOpen, setMobileBenefitsOpen] = useState(false);
-  
   // Pre-fill selectedGoals if guest preference matches
   const [selectedGoals, setSelectedGoals] = useState(() => {
     if (prefs?.goal && !['explore', 'explore-not-sure'].includes(prefs.goal)) {
@@ -102,7 +126,6 @@ export default function AuthPage({ onBack }) {
       const isPhysicianUser = role === 'doctor';
 
       const redirectable = isAdminUser || isPhysicianUser || role === 'wholesaler' || role === 'patient';
-      
       if (redirectable) {
         if (redirectTo) {
           navigate(redirectTo, { replace: true });
@@ -231,7 +254,6 @@ export default function AuthPage({ onBack }) {
     try {
       const { cred, profile } = await loginWithGoogle();
       setSuccess('Logged in with Google successfully!');
-      
       const role = (profile?.role || 'guest').toLowerCase();
       const isAdminUser = role === 'admin' || ADMIN_EMAILS.includes(cred.user.email?.toLowerCase());
       const isPhysicianUser = role === 'doctor';
@@ -267,7 +289,6 @@ export default function AuthPage({ onBack }) {
       navigate(target, { replace: true });
       return null;
     }
-    
     if (loading) {
       return (
         <div className="template-root" style={{ paddingTop: 'clamp(2rem, 8vw, 6rem)', minHeight: '100vh', backgroundColor: 'var(--surface)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -484,7 +505,6 @@ export default function AuthPage({ onBack }) {
           width: 100%;
           max-width: 450px;
         }
-        
         /* Segmented Control */
         .gcp-segment-bg {
           display: flex;
@@ -520,7 +540,6 @@ export default function AuthPage({ onBack }) {
           z-index: 1;
         }
       `}</style>
-      
       {/* CENTERED GOOGLE CLOUD CARD */}
       <div className="gcp-auth-card">
         <div style={{ width: '100%', textAlign: 'center', marginBottom: '1.5rem' }}>
@@ -529,7 +548,6 @@ export default function AuthPage({ onBack }) {
           </div>
         </div>
         <div style={{ width: '100%' }}>
-          
           <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
             <h2 style={{ fontSize: '1.5rem', color: '#202124', marginBottom: '0.5rem', lineHeight: 1.2, fontWeight: 500, fontFamily: 'var(--font-heading)' }}>
               {tab === 'login' ? 'Sign in' : 'Create an account'}
@@ -681,7 +699,6 @@ export default function AuthPage({ onBack }) {
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-                
                 <div style={{ textAlign: 'right', marginTop: '-0.5rem' }}>
                   <button 
                     type="button" 
@@ -695,7 +712,6 @@ export default function AuthPage({ onBack }) {
                     Forgot Password?
                   </button>
                 </div>
-                
                 <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.9rem' }} disabled={submitting}>
                   {submitting ? 'Authenticating...' : 'Secure Sign In'}
                 </button>
@@ -834,7 +850,6 @@ export default function AuthPage({ onBack }) {
                     onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
                   />
                 </div>
-                
                 {/* NEW USER TYPE SELECTOR */}
                 <div style={{ position: 'relative' }}>
                   <div style={iconWrapStyle}><GraduationCap size={18} /></div>
@@ -876,7 +891,6 @@ export default function AuthPage({ onBack }) {
                     onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
                   />
                 </div>
-                
                 <div style={{ position: 'relative' }}>
                   <div style={iconWrapStyle}><Lock size={18} /></div>
                   <input 
@@ -941,7 +955,6 @@ export default function AuthPage({ onBack }) {
             }}>
               <Lock size={14} /> 256-bit encrypted secure authentication
             </div>
-            
             </motion.div>
           </AnimatePresence>
           {onBack && (

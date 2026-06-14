@@ -1,8 +1,17 @@
+import Users from "lucide-react/dist/esm/icons/users";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import UserCheck from "lucide-react/dist/esm/icons/user-check";
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Users, Mail, Phone, Calendar, UserCheck } from 'lucide-react';
+
+
+
+
+
 import { useQuery } from '@tanstack/react-query';
 import DataTable from '../ui/DataTable';
 
@@ -18,7 +27,6 @@ export default function ManagerClientsTab() {
       const usersRef = collection(db, 'users');
       const qUsers = query(usersRef, where('assignedAccountManagerId', '==', currentUser.uid));
       const usersSnap = await getDocs(qUsers);
-      
       return usersSnap.docs.map(doc => ({
         id: doc.id,
         ...doc.data()

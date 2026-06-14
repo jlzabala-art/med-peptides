@@ -100,3 +100,59 @@ exports.syncProtocolToAlgolia = onDocumentWritten("protocols/{protocolId}", asyn
         console.error("Error syncing protocol to Algolia:", error);
     }
 });
+
+// --- Phase 4: Healthcare Graph Indices ---
+
+const patientsIndex = client ? client.initIndex("atlas_patients") : null;
+exports.syncPatientToAlgolia = onDocumentWritten("patients/{patientId}", async (event) => {
+    if (!client) return;
+    const snapshot = event.data;
+    const patientId = event.params.patientId;
+    
+    if (!snapshot.after.exists) {
+        await patientsIndex.deleteObject(patientId);
+        return;
+    }
+    
+    const data = snapshot.after.data();
+    await patientsIndex.saveObject({
+        objectID: patientId,
+        ...data
+    });
+});
+
+const clinicsIndex = client ? client.initIndex("atlas_clinics") : null;
+exports.syncClinicToAlgolia = onDocumentWritten("clinics/{clinicId}", async (event) => {
+    if (!client) return;
+    const snapshot = event.data;
+    const clinicId = event.params.clinicId;
+    
+    if (!snapshot.after.exists) {
+        await clinicsIndex.deleteObject(clinicId);
+        return;
+    }
+    
+    const data = snapshot.after.data();
+    await clinicsIndex.saveObject({
+        objectID: clinicId,
+        ...data
+    });
+});
+
+const physiciansIndex = client ? client.initIndex("atlas_physicians") : null;
+exports.syncPhysicianToAlgolia = onDocumentWritten("physicians/{physicianId}", async (event) => {
+    if (!client) return;
+    const snapshot = event.data;
+    const physicianId = event.params.physicianId;
+    
+    if (!snapshot.after.exists) {
+        await physiciansIndex.deleteObject(physicianId);
+        return;
+    }
+    
+    const data = snapshot.after.data();
+    await physiciansIndex.saveObject({
+        objectID: physicianId,
+        ...data
+    });
+});

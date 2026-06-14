@@ -1,7 +1,16 @@
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import X from "lucide-react/dist/esm/icons/x";
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, Trash2, Plus, Clock, X } from 'lucide-react';
+
+
+
+
+
 
 export default function SessionHistoryDrawer({ 
   isOpen, 

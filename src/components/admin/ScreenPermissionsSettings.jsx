@@ -1,7 +1,14 @@
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Save from "lucide-react/dist/esm/icons/save";
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { ShieldCheck, RefreshCw, AlertCircle, Save } from 'lucide-react';
+
+
+
+
 
 const AVAILABLE_ROLES = ['admin', 'clinic', 'doctor', 'wholeseller', 'sales_agent', 'staff', 'patient', 'guest', 'support', 'agency', 'logistics'];
 
@@ -46,7 +53,6 @@ export default function ScreenPermissionsSettings() {
   const handleRoleToggle = (tabId, role) => {
     setPermissions(prev => {
       const tabRoles = prev[tabId] || [];
-      
       // If turning ON role, add it
       if (!tabRoles.includes(role)) {
         return { ...prev, [tabId]: [...tabRoles, role].filter(r => r !== '*') }; // if adding specific, remove wildcard
@@ -149,7 +155,6 @@ export default function ScreenPermissionsSettings() {
             {Object.keys(permissions).sort().map(tabId => {
               const roles = permissions[tabId] || [];
               const isAll = roles.includes('*');
-              
               return (
                 <tr key={tabId} style={{ borderBottom: '1px solid var(--border)' }}>
                   <td style={{ padding: '0.75rem', fontWeight: 600 }}>{tabId}</td>

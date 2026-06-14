@@ -1,18 +1,27 @@
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import Download from "lucide-react/dist/esm/icons/download";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Droplets from "lucide-react/dist/esm/icons/droplets";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import X from "lucide-react/dist/esm/icons/x";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
 /* eslint-disable no-unused-vars */
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import {
-  AlertCircle,
-  AlertTriangle,
-  Calendar,
-  CheckCircle2,
-  ChevronDown,
-  Download,
-  DollarSign,
-  Droplets,
-  ShieldCheck,
-  X,
-  XCircle,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
 import { SectionAccordion } from './SectionAccordion';
 import { resolveVariantPrice } from '../../utils/resolvePrice';
 import InjectionDoseChart from './InjectionDoseChart';
@@ -94,7 +103,6 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
         const compoundName = d.product_title || d.name ||
           (d.product_slug || '').split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Compound';
         const strength = d.strength || d.vial_strength_used || d.selected_strength || '';
-        
         payloadItems.push({
           id: d.id || d.product_slug || `item-${phIdx}-${Math.random()}`,
           label: strength ? `${compoundName} (${strength})` : compoundName,
@@ -1281,5 +1289,4 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
     </div>
   );
 }
-
 

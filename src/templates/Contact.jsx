@@ -1,7 +1,36 @@
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import User from "lucide-react/dist/esm/icons/user";
+import Send from "lucide-react/dist/esm/icons/send";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Users from "lucide-react/dist/esm/icons/users";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import CloudUpload from "lucide-react/dist/esm/icons/cloud-upload";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Mail, Phone, User, Send, ChevronDown, ArrowLeft, CheckCircle2, Globe, FileText, Users, Clock, MessageSquare, Calendar, CloudUpload, ShieldCheck } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { COUNTRIES } from '../data/countries';
 import { useAuth } from '../context/AuthContext';
 import { usePageMeta } from '../hooks/usePageMeta';
@@ -173,7 +202,6 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
       if (userProfile?.userType || userProfile?.role) {
         const role = (userProfile?.userType || userProfile?.role).toLowerCase();
         let detectedType = null;
-        
         if (role.includes('clinic')) detectedType = USER_TYPES.find(t => t.id === 'clinics');
         else if (role.includes('pharmacy')) detectedType = USER_TYPES.find(t => t.id === 'pharmacies');
         else if (role.includes('researcher')) detectedType = USER_TYPES.find(t => t.id === 'researchers');
@@ -196,7 +224,6 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
     // Mark all as touched to show errors
     const allTouched = { name: true, email: true, phone: true, message: true, topic: true };
     setTouched(allTouched);
@@ -205,7 +232,6 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
 
     const form = e.target;
     const formDataObj = new FormData(form);
-    
     // Add metadata
     formDataObj.append('source_page', 'institutional_inquiry');
     formDataObj.append('selected_inquiry_card', userType || 'none');
@@ -224,7 +250,7 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
         },
         body: formDataObj
     })
-    .then(response => response.json())
+    .then(response => response.js())
     .then(data => {
         trackFormEngagement('institutional_inquiry', 'success');
 
@@ -234,7 +260,6 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
         setUserType(null);
         setErrors({});
         setTouched({});
-        
         if (pendingQuote) {
           if (pendingQuote.type === 'WhatsApp') {
             const text = encodeURIComponent(`Hello, I have submitted my details via the form. I would like to request an official quote for: ${pendingQuote.summary}`);
@@ -415,7 +440,6 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
                 Please finalize your contact details to receive your official {pendingQuote.type} Quote.
               </div>
             )}
-            
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
               <h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Institutional Inquiry</h3>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
@@ -440,7 +464,6 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
             ) : (
               <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
                 <input type="hidden" name="_subject" value={`New Inquiry (${topic}) from Atlas Health Website`} />
-                
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.9rem' }}>Full Name *</label>
                   <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Required for professional follow-up.</p>

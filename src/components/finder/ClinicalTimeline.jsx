@@ -1,6 +1,25 @@
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
+import PlusCircle from "lucide-react/dist/esm/icons/plus-circle";
+import MinusCircle from "lucide-react/dist/esm/icons/minus-circle";
+import Filter from "lucide-react/dist/esm/icons/filter";
+import Copy from "lucide-react/dist/esm/icons/copy";
+import Check from "lucide-react/dist/esm/icons/check";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
 /* eslint-disable no-unused-vars */
 import React, { useMemo, useState } from 'react';
-import { ArrowRight, AlertTriangle, TrendingUp, TrendingDown, PlusCircle, MinusCircle, Filter, Copy, Check, DollarSign } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 
 // Helper for compact date format
 const formatCompactDateRange = (dateLabel) => {

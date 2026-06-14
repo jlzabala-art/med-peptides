@@ -1,6 +1,18 @@
- 
+import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import MonitorPlay from "lucide-react/dist/esm/icons/monitor-play";
+import Award from "lucide-react/dist/esm/icons/award";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React from 'react';
-import { ChevronLeft, CheckCircle2, Calendar, Clock, MonitorPlay, Award, ArrowRight } from 'lucide-react';
+
+
+
+
+
+
+
 import { useAuth } from '../context/AuthContext';
 
 export default function CourseDetailView({ onBack }) {
@@ -18,7 +30,6 @@ export default function CourseDetailView({ onBack }) {
 
   return (
     <div style={{ paddingTop: '100px', paddingBottom: '4rem', backgroundColor: 'var(--background)', minHeight: '100vh' }}>
-      
       {/* Back Navigation */}
       <div className="container" style={{ marginBottom: '2rem' }}>
         <button 
@@ -36,7 +47,6 @@ export default function CourseDetailView({ onBack }) {
       </div>
 
       <div className="container" style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '3rem', alignItems: 'start' }}>
-        
         {/* Main Content */}
         <div>
           <span style={{ color: 'var(--secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.9rem' }}>
@@ -80,7 +90,6 @@ export default function CourseDetailView({ onBack }) {
 
           <div style={{ backgroundColor: 'white', padding: '2.5rem', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border)' }}>
             <h2 style={{ fontSize: '1.5rem', color: 'var(--primary)', marginBottom: '2rem' }}>Learn from International Medical Leaders</h2>
-            
             <div style={{ display: 'grid', gap: '2rem' }}>
               {/* Speaker 1 */}
               <div style={{ display: 'flex', gap: '1.5rem' }}>
@@ -93,7 +102,6 @@ export default function CourseDetailView({ onBack }) {
                   <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>Over 30 years of experience and international recognition in regenerative and functional gynecology. He developed the vaginal and urethral laser technique for treating genitourinary syndrome of menopause.</p>
                 </div>
               </div>
-              
               {/* Speaker 2 */}
               <div style={{ display: 'flex', gap: '1.5rem' }}>
                 <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: 'var(--background)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
@@ -158,7 +166,6 @@ export default function CourseDetailView({ onBack }) {
               <span style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.8, display: 'block', marginBottom: '0.5rem' }}>Global Lecture Series</span>
               <h3 style={{ fontSize: '1.5rem', margin: 0 }}>Renewal Master Protocols</h3>
             </div>
-            
             <div style={{ padding: '2rem' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -227,7 +234,6 @@ export default function CourseDetailView({ onBack }) {
               >
                 Register Now <ArrowRight size={18} />
               </a>
-              
               <p style={{ textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '1rem', fontStyle: 'italic' }}>
                 Seats are limited to ensure real-time interaction and clinical discussion.
               </p>

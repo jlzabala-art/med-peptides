@@ -1,7 +1,26 @@
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+import Lock from "lucide-react/dist/esm/icons/lock";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Search from "lucide-react/dist/esm/icons/search";
+import Info from "lucide-react/dist/esm/icons/info";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import X from "lucide-react/dist/esm/icons/x";
 /* eslint-disable no-unused-vars */
 import { useState, useEffect, useMemo } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';
-import { HelpCircle, Lock, BookOpen, GraduationCap, Sparkles, ChevronRight, Search, Info, MessageSquare, X } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 import { db } from '../firebase';
 import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
@@ -188,11 +207,9 @@ export default function FAQDiscoveryView({ onBack, onSelectProduct, products = [
           getDocs(collection(db, 'faq_landing_config')),
         ]);
         if (cancelled) return;
-        
         // Merge Firestore FAQs with Legacy defaults if not already present
         const dbFaqs = faqSnap.docs.map((d) => ({ ...d.data(), faqId: d.id }));
         const mergedFaqs = [...dbFaqs];
-        
         LEGACY_FAQS.forEach(legacy => {
           if (!mergedFaqs.some(f => f.question.toLowerCase() === legacy.question.toLowerCase())) {
             mergedFaqs.push({ ...legacy, faqId: `legacy_${legacy.categoryId}_${Math.random().toString(36).substr(2, 5)}` });
@@ -243,7 +260,6 @@ export default function FAQDiscoveryView({ onBack, onSelectProduct, products = [
           console.error('Error logging inquiry:', err);
         }
       };
-      
       const timer = setTimeout(logInquiry, 1000); // Debounce logging
       return () => clearTimeout(timer);
     }
@@ -281,7 +297,6 @@ export default function FAQDiscoveryView({ onBack, onSelectProduct, products = [
       }}>
         <div style={{ position: 'absolute', top: '-10%', left: '-5%', width: '30%', height: '50%', background: 'radial-gradient(circle, rgba(0,150,204,0.15) 0%, transparent 70%)', filter: 'blur(40px)' }} />
         <div style={{ position: 'absolute', bottom: '-10%', right: '-5%', width: '40%', height: '60%', background: 'radial-gradient(circle, rgba(0,150,204,0.15) 0%, transparent 70%)', filter: 'blur(60px)' }} />
-        
         <div style={{ maxWidth: '800px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div style={{ 
             display: 'inline-flex', 
@@ -310,7 +325,6 @@ export default function FAQDiscoveryView({ onBack, onSelectProduct, products = [
       </div>
 
       <div className="container" style={{ maxWidth: '1100px', margin: '-2rem auto 0', position: 'relative', zIndex: 2 }}>
-        
         {/* Quick Navigation Cards */}
         {!searchQuery && !activeCategory && (
           <div className="faq-learning-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '2.5rem' }}>
@@ -369,7 +383,6 @@ export default function FAQDiscoveryView({ onBack, onSelectProduct, products = [
         </div>
 
         <div className="faq-layout">
-          
           <div style={{ minWidth: 0 }}>
             {/* Category Breadcrumb/Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>

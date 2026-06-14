@@ -1,20 +1,31 @@
+import Search from "lucide-react/dist/esm/icons/search";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Microscope from "lucide-react/dist/esm/icons/microscope";
+import Scale from "lucide-react/dist/esm/icons/scale";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import ZapIcon from "lucide-react/dist/esm/icons/zap-icon";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 /* eslint-disable no-unused-vars */
 import React, { useState, useRef } from 'react';
-import { 
-  Search, 
-  ShieldCheck, 
-  BookOpen, 
-  Zap,
-  Activity,
-  Microscope,
-  Scale,
-  Moon,
-  FlaskConical,
-  ZapIcon,
-  ArrowRight,
-  Globe,
-  Sparkles
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import { useResponsive } from '../hooks/useResponsive';
 import { useNavigate } from 'react-router-dom';
@@ -133,7 +144,6 @@ export default function HeroSearch({ onOpenSearch, searchQuery = '', setSearchQu
             Ready for Research
           </span>
         </h1>
-        
         <p className="hero-search__subtitle">
           Find protocols, compounds, and research evidence instantly with our advanced search system.
         </p>

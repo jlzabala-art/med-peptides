@@ -1,8 +1,17 @@
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import FileWarning from "lucide-react/dist/esm/icons/file-warning";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import CreditCard from "lucide-react/dist/esm/icons/credit-card";
+import Download from "lucide-react/dist/esm/icons/download";
 import React, { useState, useEffect } from 'react';
 import PayoutManagerWidget from '../gadgets/PayoutManagerWidget';
 import { db } from '../../../firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
-import { ShieldAlert, FileWarning, CheckCircle, CreditCard, Download } from 'lucide-react';
+
+
+
+
+
 import { usePreferences } from '../../../context/PreferencesContext';
 import { exportToCSV } from '../../../utils/exportUtils';
 import SkeletonLoader from '../../ui/SkeletonLoader';
@@ -58,7 +67,6 @@ export default function FinancePayables({ dashboardData }) {
 
   return (
     <div className="anim-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      
       {/* Compliance Audit Section */}
       <div className="glass-card-premium" style={{ borderTop: '4px solid var(--error)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ padding: '1.5rem' }}>
@@ -66,7 +74,6 @@ export default function FinancePayables({ dashboardData }) {
             <ShieldAlert style={{ width: '24px', height: '24px', color: 'var(--error)' }} />
             Automated Tax & Compliance Auditing
           </h3>
-          
           {complianceAlerts.length === 0 ? (
             <div className="finance-alert-box">
               <div style={{ background: 'rgba(30, 142, 62, 0.1)', padding: '0.5rem', borderRadius: '50%' }}>
@@ -112,7 +119,6 @@ export default function FinancePayables({ dashboardData }) {
         <div style={{ minWidth: 0 }}>
           <PayoutManagerWidget />
         </div>
-        
         <div className="admin-table-container" style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)', background: 'var(--surface-raised)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
@@ -143,7 +149,6 @@ export default function FinancePayables({ dashboardData }) {
               </button>
             </div>
           </div>
-          
           <div style={{ padding: '0', flex: 1 }}>
             {!dashboardData ? (
               <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>

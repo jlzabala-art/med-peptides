@@ -1,8 +1,11 @@
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { signInWithCustomToken, signOut } from 'firebase/auth';
 import { auth } from '../firebase';
-import { ShieldAlert, Loader2 } from 'lucide-react';
+
+
 
 export default function ImpersonateCallback() {
   const [searchParams] = useSearchParams();
@@ -12,7 +15,6 @@ export default function ImpersonateCallback() {
 
   useEffect(() => {
     const token = searchParams.get('token');
-    
     if (!token) {
       setError('Invalid or missing impersonation token.');
       return;
@@ -22,23 +24,17 @@ export default function ImpersonateCallback() {
       try {
         // Ensure we sign out from any current session in this window context
         await signOut(auth);
-        
         setStatus('Authenticating as user...');
-        
         // Set a flag in localStorage for this specific window/tab
         // so we can display a banner indicating we are impersonating.
         sessionStorage.setItem('isImpersonating', 'true');
-        
         // Sign in with the custom token
         await signInWithCustomToken(auth, token);
-        
         setStatus('Success! Redirecting...');
-        
         // Redirect to root, the router will automatically handle role-based redirection
         setTimeout(() => {
           navigate('/', { replace: true });
         }, 1000);
-        
       } catch (err) {
         console.error('Impersonation error:', err);
         setError(err.message || 'Failed to authenticate with the provided token.');

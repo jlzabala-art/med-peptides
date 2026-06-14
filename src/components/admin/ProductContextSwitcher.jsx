@@ -1,10 +1,16 @@
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Package from "lucide-react/dist/esm/icons/package";
+import X from "lucide-react/dist/esm/icons/x";
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, DollarSign, Package, X } from 'lucide-react';
+
+
+
+
 
 export default function ProductContextSwitcher({ searchTerm, productId, currentTab, onClear }) {
   const navigate = useNavigate();
-  
   // If there's no specific search or product focus, don't show the switcher
   if (!searchTerm && !productId) return null;
 
@@ -50,7 +56,6 @@ export default function ProductContextSwitcher({ searchTerm, productId, currentT
           </button>
         )}
       </div>
-      
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
         <button
           onClick={() => navigate(`/admin/products?search=${encodeURIComponent(displayTerm)}`)}
@@ -67,7 +72,6 @@ export default function ProductContextSwitcher({ searchTerm, productId, currentT
         >
           <BookOpen size={14} /> Clinical Profile
         </button>
-        
         <button
           onClick={() => navigate(`/admin/prices?sku=${encodeURIComponent(displayTerm)}`)}
           style={{
@@ -83,7 +87,6 @@ export default function ProductContextSwitcher({ searchTerm, productId, currentT
         >
           <DollarSign size={14} /> Prices Matrix
         </button>
-        
         <button
           onClick={() => navigate(`/admin/stock?search=${encodeURIComponent(displayTerm)}`)}
           style={{

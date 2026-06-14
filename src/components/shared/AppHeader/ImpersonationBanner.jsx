@@ -1,5 +1,8 @@
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import LogOut from "lucide-react/dist/esm/icons/log-out";
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle, LogOut } from 'lucide-react';
+
+
 import { signOut } from 'firebase/auth';
 import { auth } from '../../../firebase';
 import { useAuth } from '../../../context/AuthContext';

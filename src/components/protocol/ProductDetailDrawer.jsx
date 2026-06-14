@@ -1,6 +1,10 @@
- 
+import X from "lucide-react/dist/esm/icons/x";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import Info from "lucide-react/dist/esm/icons/info";
 import React, { useEffect } from 'react';
-import { X, ExternalLink, Info } from 'lucide-react';
+
+
+
 import { Link } from 'react-router-dom';
 import './ProductDetailDrawer.css';
 
@@ -20,7 +24,6 @@ export default function ProductDetailDrawer({ product, onClose }) {
     <>
       {/* Backdrop */}
       <div className="product-drawer-backdrop" onClick={onClose} />
-      
       {/* Drawer */}
       <div className="product-drawer">
         <div className="product-drawer__header">
@@ -61,7 +64,6 @@ export default function ProductDetailDrawer({ product, onClose }) {
               </div>
             </div>
           </div>
-          
           <div className="product-drawer__info-box">
             <Info size={16} className="product-drawer__info-icon" />
             <p>

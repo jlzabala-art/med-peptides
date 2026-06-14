@@ -1,23 +1,36 @@
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import Check from "lucide-react/dist/esm/icons/check";
+import X from "lucide-react/dist/esm/icons/x";
+import Database from "lucide-react/dist/esm/icons/database";
+import Info from "lucide-react/dist/esm/icons/info";
+import Search from "lucide-react/dist/esm/icons/search";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import { useLocation } from 'react-router-dom';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../../context/AuthContext';
-import {
-  CheckCircle2,
-  XCircle,
-  HelpCircle,
-  RefreshCw,
-  AlertTriangle,
-  ChevronRight,
-  ChevronDown,
-  ExternalLink,
-  Check,
-  X,
-  Database,
-  Info,
-  Search,
-  ArrowRight,
-  ArrowLeft,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
  * AdminSkuMappingTab.jsx
@@ -97,7 +110,7 @@ async function callAgent(mode, extra = {}, token) {
     body: JSON.stringify({ mode, ...extra }),
   });
   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-  return resp.json();
+  return resp.js();
 }
 
 export default function AdminSkuMappingTab() {
@@ -179,7 +192,6 @@ export default function AdminSkuMappingTab() {
   const handleCopyField = (mappingId, m, sourcePrefix, targetPrefix, field) => {
     const sourceField = `${sourcePrefix}_${field}`;
     const targetField = `${targetPrefix}_${field}`;
-    
     let val = edits[mappingId]?.[sourceField];
     if (val === undefined) {
       if (sourceField === 'firebase_category' && field === 'category') val = m.category || '';
@@ -344,7 +356,6 @@ export default function AdminSkuMappingTab() {
   const baseFiltered = filter === 'all' 
     ? mappings 
     : mappings.filter((m) => m.status === filter);
-        
   const filtered = baseFiltered.filter(m => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
@@ -448,7 +459,6 @@ export default function AdminSkuMappingTab() {
 
       {/* Compact Filters / Actions Bar */}
       <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
-        
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: '13px', fontWeight: 600, color: '#3c4043' }}>Filter View:</span>
           <select 
@@ -478,7 +488,6 @@ export default function AdminSkuMappingTab() {
         </div>
 
         <div style={{ width: '1px', height: '24px', backgroundColor: '#dadce0', margin: '0 8px' }}></div>
-        
         <div style={{ position: 'relative', flex: 1, minWidth: 250, maxWidth: 400 }}>
           <Search size={16} style={{ position: 'absolute', left: 12, top: 10, color: '#5f6368' }} />
           <input 
@@ -568,7 +577,6 @@ export default function AdminSkuMappingTab() {
               {paginatedItems.map((m) => {
                 const isZohoOnly = m.status === 'zoho_only';
                 const isFirebaseOnly = m.status === 'firebase_only';
-                
                 let meta;
                 if (isZohoOnly) meta = { icon: Database, color: '#5f6368', label: 'In Zoho Only' };
                 else if (isFirebaseOnly) meta = { icon: Database, color: '#fbbc04', label: 'In Firebase Only' };
@@ -1002,7 +1010,6 @@ export default function AdminSkuMappingTab() {
                                   <p style={styles.detailReasoning}>{m.match_reasoning}</p>
                                 </div>
                               )}
-                              
                               {/* Category Mismatch Warning */}
                               {(() => {
                                 const fbCat = (edits[m.id]?.firebase_category !== undefined ? edits[m.id].firebase_category : (m.category || '')).trim().toLowerCase();
@@ -1243,7 +1250,6 @@ function ResolveFamilyModal({ firebaseProductId, onClose, getToken, agentBody, a
         {/* Content */}
         <div style={modalStyles.content}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', height: '100%', overflow: 'hidden' }}>
-            
             {/* Left Column: Firebase Variants */}
             <div style={modalStyles.column}>
               <h4 style={modalStyles.columnTitle}>Firebase Variants ({firebaseVariants.length})</h4>

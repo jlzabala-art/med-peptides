@@ -1,3 +1,14 @@
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Check from "lucide-react/dist/esm/icons/check";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Award from "lucide-react/dist/esm/icons/award";
+import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
+import Binary from "lucide-react/dist/esm/icons/binary";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
 import React, { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePageMeta } from '../hooks/usePageMeta';
@@ -5,7 +16,17 @@ import { getSupplementWithVariants, getActiveSupplements } from '../repositories
 import { trackRecentView } from '../utils/recentViews';
 import { resolveAndFormatPrice } from '../utils/resolvePrice';
 import { usePricingTier } from '../hooks/usePricingTier';
-import { ShieldCheck, Bot, ShoppingCart, ArrowRight, Check, Activity, Award, BarChart3, Binary, ChevronRight, HelpCircle } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
 import { DetailSkeleton } from '../components/shared/SkeletonLoader';
 import ProtocolTOC from '../components/protocol/ProtocolTOC';
 
@@ -108,7 +129,6 @@ export default function TestingDetailPage({ onAddToCart, region }) {
 
   return (
     <div className="sdp-main-wrapper" style={{ minHeight: '100vh', background: '#F8FAFC', fontFamily: "'Inter', sans-serif", color: '#0F172A' }}>
-      
       {/* ── HERO SECTION ── */}
       <div style={{ background: heroGradient, color: 'white', position: 'relative', overflow: 'hidden', padding: '3.5rem 0' }}>
         {/* Glow shapes */}
@@ -116,7 +136,6 @@ export default function TestingDetailPage({ onAddToCart, region }) {
         <div style={{ position: 'absolute', bottom: '-50px', left: '10%', width: '250px', height: '250px', borderRadius: '50%', background: '#005fcc', opacity: 0.08, filter: 'blur(60px)' }} />
 
         <div className="sdp-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem' }}>
-          
           {/* Breadcrumbs */}
           <nav style={{ fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.45)', display: 'flex', gap: '0.4rem', alignItems: 'center', marginBottom: '2rem', fontWeight: 600 }}>
             <span style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>Home</span>
@@ -165,7 +184,6 @@ export default function TestingDetailPage({ onAddToCart, region }) {
 
       {/* ── MAIN CONTENT GRID ── */}
       <div className="sdp-container" style={{ maxWidth: '1200px', margin: '2.5rem auto', padding: '0 1.5rem', display: 'grid', gridTemplateColumns: '260px 1fr', gap: '4rem', alignItems: 'start' }}>
-        
         {/* LEFT TOC */}
         <div style={{ position: 'sticky', top: '100px', display: 'block' }} className="tdp-toc-container">
           <ProtocolTOC
@@ -180,7 +198,6 @@ export default function TestingDetailPage({ onAddToCart, region }) {
 
         {/* RIGHT COLUMN: INFORMATION & WORKFLOW */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          
           {/* 1. BIOMARKERS SECTION */}
           <div id="biomarkers" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: '24px', padding: '2rem', boxShadow: '0 4px 20px rgba(0,0,0,0.015)' }}>
@@ -235,7 +252,6 @@ export default function TestingDetailPage({ onAddToCart, region }) {
             <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.25rem', fontWeight: 800, color: '#0F172A' }}>
               Interactive Workflow Pipeline
             </h3>
-            
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative' }}>
               {/* Steps line */}
               <div style={{ position: 'absolute', left: '17px', top: '10px', bottom: '10px', width: '2px', background: '#E2E8F0', zIndex: 0 }} />
@@ -306,7 +322,6 @@ export default function TestingDetailPage({ onAddToCart, region }) {
             boxShadow: '0 10px 30px rgba(15,23,42,0.15)',
           }}>
             <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '180px', height: '180px', borderRadius: '50%', background: '#6366f1', opacity: 0.15, filter: 'blur(35px)' }} />
-            
             <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'flex-start' }}>
               <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#818cf8', flexShrink: 0 }}>
                 <Bot size={24} />
@@ -347,7 +362,6 @@ export default function TestingDetailPage({ onAddToCart, region }) {
             </span>
           </div>
         </div>
-        
         <button
           disabled={!priceDisplay.perUnit}
           onClick={handleAddToCart}

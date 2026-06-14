@@ -8,11 +8,11 @@ import PatientHome from '../templates/PatientHome';
 import PatientAppointments from '../templates/PatientAppointments';
 import UserSettings from '../templates/UserSettings';
 
-const MessagingWidget = React.lazy(() => import('../components/messaging/MessagingWidget'));
-const ClinicalAIWidget = React.lazy(() => import('../components/admin/ClinicalAIWidget'));
-const PatientPrescriptionPanel = React.lazy(() => import('../components/patient/PatientPrescriptionPanel'));
-const OrdersTab = React.lazy(() => import('../components/admin/OrdersTab'));
-const UserProfileTab = React.lazy(() => import('../components/shared/UserProfileTab'));
+import MessagingWidget from '../components/messaging/MessagingWidget';
+import ClinicalAIWidget from '../components/admin/ClinicalAIWidget';
+import PatientPrescriptionPanel from '../components/patient/PatientPrescriptionPanel';
+import OrdersTab from '../components/admin/OrdersTab';
+import UserProfileTab from '../components/shared/UserProfileTab';
 
 const TabSkeleton = () => (
   <div style={{ padding: '2rem' }}>

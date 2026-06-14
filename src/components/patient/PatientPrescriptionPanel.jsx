@@ -1,3 +1,15 @@
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import User from "lucide-react/dist/esm/icons/user";
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import PackageSearch from "lucide-react/dist/esm/icons/package-search";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 /**
  * PatientPrescriptionPanel.jsx
  *
@@ -15,10 +27,18 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
-import {
-  ClipboardList, ShoppingCart, ChevronDown, ChevronUp, Clock,
-  User, Stethoscope, CheckCircle2, FlaskConical, PackageSearch, ArrowRight, Sparkles
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
 import { RX_STATUS, RX_STATUS_META } from '../../config/prescriptionConfig';
 
 // ── Mini status badge ─────────────────────────────────────────────────────────

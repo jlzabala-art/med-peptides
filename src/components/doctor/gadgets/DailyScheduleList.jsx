@@ -1,10 +1,16 @@
+import CalendarDays from "lucide-react/dist/esm/icons/calendar-days";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import User from "lucide-react/dist/esm/icons/user";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React from 'react';
-import { CalendarDays, Clock, User, ArrowRight } from 'lucide-react';
+
+
+
+
 import { useNavigate } from 'react-router-dom';
 
 export default function DailyScheduleList({ appointments }) {
   const navigate = useNavigate();
-  
   // Dummy data if none provided
   const schedule = appointments || [
     { id: 'a1', time: '09:00 AM', patient: 'Robert M.', type: 'Initial Consultation', duration: '45m' },
@@ -31,7 +37,6 @@ export default function DailyScheduleList({ appointments }) {
             padding: '0.75rem', borderRadius: '12px', border: '1px solid #f1f5f9',
             transition: 'background 0.2s', cursor: 'pointer'
           }} onMouseOver={(e) => e.currentTarget.style.background = 'var(--color-bg-app)'} onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}>
-            
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 0.5rem', borderRight: '1px solid #e2e8f0', minWidth: '70px' }}>
               <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>{appt.time.split(' ')[0]}</span>
               <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>{appt.time.split(' ')[1]}</span>

@@ -1,7 +1,12 @@
+import X from "lucide-react/dist/esm/icons/x";
+import Search from "lucide-react/dist/esm/icons/search";
+import Package from "lucide-react/dist/esm/icons/package";
 import React, { useState, useEffect, useRef } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { X, Search, Package } from 'lucide-react';
+
+
+
 
 export default function ProductAutocomplete({ value, onChange, onSelect, placeholder = "Search product..." }) {
   const [query, setQuery] = useState(value || '');
@@ -22,7 +27,6 @@ export default function ProductAutocomplete({ value, onChange, onSelect, placeho
       snap.docs.forEach(docSnap => {
         const p = docSnap.data();
         if (p.isActive === false) return; // skip inactive
-        
         if (p.isGroup && p.variants && p.variants.length > 0) {
           p.variants.forEach(v => {
             flattened.push({

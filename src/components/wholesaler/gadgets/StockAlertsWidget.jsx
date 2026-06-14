@@ -1,8 +1,11 @@
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
-import { AlertTriangle, ArrowRight } from 'lucide-react';
+
+
 
 export default function StockAlertsWidget() {
   const { user } = useAuth();
@@ -11,7 +14,6 @@ export default function StockAlertsWidget() {
   useEffect(() => {
     if (!user?.uid) return;
     const q = query(collection(db, 'wholesaler_inventory'), where('wholesalerId', '==', user.uid));
-    
     const unsub = onSnapshot(q, (snap) => {
       const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       const lowStock = items.filter(i => i.quantity <= (i.threshold || 5));
@@ -26,7 +28,6 @@ export default function StockAlertsWidget() {
       <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.15rem', color: '#7f1d1d', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <AlertTriangle size={18} color="var(--color-danger)" /> Alerts de Inventario
       </h3>
-      
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, overflowY: 'auto' }}>
         {alerts.length === 0 ? (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-secondary)', fontSize: '0.9rem', textAlign: 'center' }}>

@@ -1,5 +1,18 @@
+import Send from "lucide-react/dist/esm/icons/send";
+import Paperclip from "lucide-react/dist/esm/icons/paperclip";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import ImageIcon from "lucide-react/dist/esm/icons/image";
+import LinkIcon from "lucide-react/dist/esm/icons/link";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Paperclip, FileText, Image as ImageIcon, Link as LinkIcon, DollarSign, Sparkles } from 'lucide-react';
+
+
+
+
+
+
+
 import { messagingService } from '../../../services/messagingService';
 import RichMessageCard from './RichMessageCard';
 import ChatAIAssistant from './ChatAIAssistant';
@@ -55,7 +68,6 @@ export default function ChatWindow({ conversation, currentUserId, currentUserRol
   const handleSendRich = async (type) => {
     let referenceId = '';
     let text = '';
-    
     if (type === 'payment_link') {
       referenceId = prompt("Enter the payment URL (e.g., Stripe Payment Link):");
       if (!referenceId) return;
@@ -116,7 +128,6 @@ export default function ChatWindow({ conversation, currentUserId, currentUserRol
             {conversation.type === 'direct' && <span className="chat-header-status">● Online</span>}
           </div>
         </div>
-        
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div className="chat-header-tags" style={{ display: 'flex', gap: '0.5rem' }}>
              {conversation.priority === 'urgent' && <span style={{ background: '#fef2f2', color: '#ef4444', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>Urgent</span>}
@@ -144,7 +155,6 @@ export default function ChatWindow({ conversation, currentUserId, currentUserRol
         {messages.map((msg, idx) => {
           const isSent = msg.senderId === currentUserId;
           const isRich = ['link_product', 'link_order', 'payment_link'].includes(msg.type);
-          
           // Filter internal notes if the current user is not part of the internal team.
           // Assuming 'admin' and 'account_manager' are internal roles.
           if (msg.isInternal && currentUserRole !== 'admin' && currentUserRole !== 'account_manager') {
@@ -153,7 +163,6 @@ export default function ChatWindow({ conversation, currentUserId, currentUserRol
 
           return (
             <div key={msg.id || idx} className={`message-bubble ${isSent ? 'sent' : 'received'} ${msg.isInternal ? 'internal-note' : ''}`}>
-              
               {msg.isInternal && (
                 <div style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#b45309', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   🔒 Internal Note
@@ -208,7 +217,6 @@ export default function ChatWindow({ conversation, currentUserId, currentUserRol
 
       {/* Input Area */}
       <div className="chat-input-area" style={{ position: 'relative' }}>
-        
         <input 
           type="file" 
           id="chat-file-upload" 
@@ -272,7 +280,6 @@ export default function ChatWindow({ conversation, currentUserId, currentUserRol
             </div>
           )}
         </div>
-        
         <button className={`chat-send-btn ${isInternal ? 'internal-btn' : ''}`} onClick={handleSend} disabled={sending || (!newMessage.trim() && !file)}>
           {sending ? <div className="spinner" style={{ width: 16, height: 16, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} /> : <Send size={18} />}
         </button>

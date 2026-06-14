@@ -1,3 +1,7 @@
+import Check from "lucide-react/dist/esm/icons/check";
+import X from "lucide-react/dist/esm/icons/x";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { collection, query, where, orderBy, getDocs, doc, updateDoc } from 'firebase/firestore';
@@ -6,7 +10,10 @@ import Card from '../ui/Card';
 import DataTable from '../ui/DataTable';
 import StatusChip from '../ui/StatusChip';
 import Spinner from '../ui/Spinner';
-import { Check, X, FileText, Sparkles } from 'lucide-react';
+
+
+
+
 
 export default function PatientRecommendationsTab({ userId, acceptRecommendation }) {
   const queryClient = useQueryClient();

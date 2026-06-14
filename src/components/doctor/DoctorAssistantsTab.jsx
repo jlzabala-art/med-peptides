@@ -1,14 +1,26 @@
+import Users from "lucide-react/dist/esm/icons/users";
+import UserPlus from "lucide-react/dist/esm/icons/user-plus";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { db } from '../../firebase';
 import { collection, query, where, getDocs, addDoc, doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
-import { Users, UserPlus, Trash2, Mail, ShieldAlert, CheckCircle2, Loader2 } from 'lucide-react';
+
+
+
+
+
+
+
 import Card from '../ui/Card';
 import Spinner from '../ui/Spinner';
 
 export default function DoctorAssistantsTab({ doctorId }) {
   const queryClient = useQueryClient();
-  
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -36,7 +48,6 @@ export default function DoctorAssistantsTab({ doctorId }) {
       const cleanEmail = formData.email.trim().toLowerCase();
       const qExist = query(collection(db, 'users'), where('email', '==', cleanEmail));
       const existSnap = await getDocs(qExist);
-      
       if (!existSnap.empty) {
         const userDoc = existSnap.docs[0];
         await updateDoc(doc(db, 'users', userDoc.id), {
@@ -101,7 +112,6 @@ export default function DoctorAssistantsTab({ doctorId }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '2rem 0' }}>
-      
       {toast && (
         <div style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 9999, padding: '1rem 1.5rem', borderRadius: '8px', background: toast.ok ? '#0f172a' : 'var(--color-danger)', color: 'var(--color-bg-surface)', fontSize: '0.9rem', fontWeight: 600, boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {toast.ok ? <CheckCircle2 size={16} /> : <ShieldAlert size={16} />}
@@ -117,7 +127,6 @@ export default function DoctorAssistantsTab({ doctorId }) {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '1.5rem', alignItems: 'start' }}>
-        
         <Card>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>Registered Assistants</h3>
@@ -163,7 +172,6 @@ export default function DoctorAssistantsTab({ doctorId }) {
           <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-text-primary)', margin: '0 0 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <UserPlus size={18} color="var(--primary)" /> Register Assistant
           </h3>
-          
           <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>First Name *</label>

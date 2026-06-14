@@ -1,10 +1,35 @@
+import X from "lucide-react/dist/esm/icons/x";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Check from "lucide-react/dist/esm/icons/check";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Dumbbell from "lucide-react/dist/esm/icons/dumbbell";
+import Scale from "lucide-react/dist/esm/icons/scale";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Award from "lucide-react/dist/esm/icons/award";
+import Compass from "lucide-react/dist/esm/icons/compass";
+import Edit2 from "lucide-react/dist/esm/icons/edit-2";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  X, ChevronRight, Check, Sparkles, Brain, Moon, Zap, 
-  Dumbbell, Scale, FlaskConical, Award, Compass, Edit2,
-  Bot, ArrowRight
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import useGuestPreferences, { 
   GOAL_META, LEVEL_META, PREFERENCE_OPTIONS, CONTEXT_QUICK_CHIPS, GOAL_DRAWER_DETAILS, CLINICAL_AI_CONTEXTS
 } from '../../hooks/useGuestPreferences';
@@ -96,21 +121,17 @@ function GoalCard({ id, meta, selected, onSelect }) {
 export default function ResearchDrawer({ onComplete, onOpenAI }) {
   const { prefs, savePrefs, hasCompleted, isLoaded } = useGuestPreferences();
   const navigate = useNavigate();
-  
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [isClosing, setIsClosing] = useState(false);
-  
   // Custom Mode State
   const [mode, setMode] = useState('personalization'); // 'personalization' | 'goal-detail'
   const [detailGoal, setDetailGoal] = useState(null);
-  
   // Form State (initialized from prefs if available)
   const [goal, setGoal] = useState(null);
   const [context, setContext] = useState('');
   const [experienceLevel, setExperienceLevel] = useState(null);
   const [preferences, setPreferences] = useState([]);
-  
   const totalSteps = 4;
   const inputRef = useRef(null);
   const scrollRef = useRef(null);
@@ -196,10 +217,8 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
   const handleNext = () => {
     if (step === 1 && !goal) return;
     if (step === 3 && !experienceLevel) return;
-    
     // Autosave progress
     savePrefs({ goal, context, experienceLevel, preferences });
-    
     if (step < 5) {
       if (step === 1 && goal === 'explore') {
         // Skip context and experience if explore
@@ -388,7 +407,6 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
             <Edit2 size={12} /> Edit
           </button>
         </div>
-        
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {goal && (
             <div style={{ display: 'flex', gap: '1rem' }}>
@@ -424,7 +442,6 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
   const renderGoalDetail = () => {
     if (!detailGoal) return null;
     const details = GOAL_DRAWER_DETAILS[detailGoal.id] || {};
-    
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem', animation: 'fadeIn 0.3s ease', paddingBottom: '1rem' }}>
         <div>
@@ -490,7 +507,6 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
           to { opacity: 1; }
         }
       `}</style>
-      
       {/* Backdrop */}
       <div 
         style={{

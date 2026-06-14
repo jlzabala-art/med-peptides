@@ -1,6 +1,8 @@
- 
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Scale from "lucide-react/dist/esm/icons/scale";
 import React, { useState } from 'react';
-import { FlaskConical, Scale } from 'lucide-react';
+
+
 
 export default function InstantResultsTabs({ preRankedProducts = [], preRankedProtocols = [], navigate, setIsOpen, onCompare }) {
   const [activeTab, setActiveTab] = useState('compounds');
@@ -63,7 +65,6 @@ export default function InstantResultsTabs({ preRankedProducts = [], preRankedPr
                   <div style={{ fontSize: '0.8rem', fontWeight: 700 }}>{baseName}</div>
                   <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{product.shortDescription || 'Research Peptide'}</div>
                 </div>
-                
                 {onCompare && (
                   <button
                     onClick={(e) => {

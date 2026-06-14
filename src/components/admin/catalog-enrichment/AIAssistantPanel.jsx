@@ -1,5 +1,10 @@
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Zap from "lucide-react/dist/esm/icons/zap";
 import React from 'react';
-import { Sparkles, ArrowRight, Zap } from 'lucide-react';
+
+
+
 import { Card } from '../../ui';
 
 export default function AIAssistantPanel() {
@@ -12,7 +17,6 @@ export default function AIAssistantPanel() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '300px', flexShrink: 0 }}>
-      
       <button 
         className="gcp-btn-primary" 
         style={{ 
@@ -70,7 +74,6 @@ export default function AIAssistantPanel() {
           ))}
         </div>
       </Card>
-      
     </div>
   );
 }

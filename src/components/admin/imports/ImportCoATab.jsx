@@ -1,8 +1,9 @@
+import Download from "lucide-react/dist/esm/icons/download";
 import React from 'react';
 import { Checkbox } from '../../../components/ui';
 import BaseImportTab from './BaseImportTab';
 import { getStatusColor } from './utils';
-import { Download } from 'lucide-react';
+
 import * as XLSX from 'xlsx';
 
 export default function ImportCoATab() {
@@ -14,7 +15,7 @@ export default function ImportCoATab() {
   const renderDiffTable = ({ parsedData, selectedRows, toggleRow, toggleAll, updateRow }) => {
     const exportErrors = () => {
       const errors = parsedData.filter(item => parseFloat(item.purity_percentage) < 98);
-      const worksheet = XLSX.utils.json_to_sheet(errors);
+      const worksheet = XLSX.utils.js_to_sheet(errors);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Quarantined");
       XLSX.writeFile(workbook, "Quarantined_Batches.xlsx");

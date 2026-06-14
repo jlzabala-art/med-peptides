@@ -1,6 +1,9 @@
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import X from "lucide-react/dist/esm/icons/x";
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, X } from 'lucide-react';
+
+
 
 export default function UrgentAlertsBanner({ alerts }) {
   const [visible, setVisible] = useState(true);

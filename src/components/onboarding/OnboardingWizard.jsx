@@ -1,9 +1,16 @@
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import User from "lucide-react/dist/esm/icons/user";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Settings from "lucide-react/dist/esm/icons/settings";
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { db } from '../../config/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
-import { CheckCircle2, User, FileText, Settings } from 'lucide-react';
+
+
+
+
 import './OnboardingWizard.css';
 
 export default function OnboardingWizard({ onClose }) {

@@ -1,0 +1,28 @@
+name: E2E Checkout Testing
+
+on:
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Cypress E2E Tests
+        # We use a public action to run cypress
+        uses: cypress-io/github-action@v6
+        with:
+          build: npm run build
+          start: npm run preview
+          wait-on: 'http://localhost:4173'
+          # This specifies the exact spec file to run
+          spec: cypress/e2e/checkout.cy.js

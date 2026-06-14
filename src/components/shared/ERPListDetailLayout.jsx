@@ -1,5 +1,10 @@
+import X from "lucide-react/dist/esm/icons/x";
+import Search from "lucide-react/dist/esm/icons/search";
+import Eye from "lucide-react/dist/esm/icons/eye";
 import React, { useState, useEffect } from 'react';
-import { X, Search, Eye } from 'lucide-react';
+
+
+
 
 /**
  * ERPListDetailLayout
@@ -238,7 +243,6 @@ export default function ERPListDetailLayout({
                   </button>
                 )}
               </div>
-              
               {/* Record matching summary */}
               <div style={{ 
                 display: 'flex', 
@@ -365,7 +369,6 @@ export default function ERPListDetailLayout({
               margin: '0.75rem auto 0.25rem auto',
               flexShrink: 0
             }} />
-            
             <div className="erp-scroll" style={{ flex: 1, overflowY: 'auto' }}>
               {renderDetail(selectedItem, handleClose)}
             </div>

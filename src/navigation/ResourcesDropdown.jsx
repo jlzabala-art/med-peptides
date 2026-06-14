@@ -1,6 +1,14 @@
- 
+import Info from "lucide-react/dist/esm/icons/info";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Scale from "lucide-react/dist/esm/icons/scale";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import FileText from "lucide-react/dist/esm/icons/file-text";
 import { Link } from 'react-router-dom';
-import { Info, Mail, Scale, ShieldCheck, FileText } from 'lucide-react';
+
+
+
+
+
 import { RESOURCES_MENU } from './navConfig';
 import '../styles/header.css';
 

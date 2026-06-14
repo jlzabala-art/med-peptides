@@ -1,3 +1,22 @@
+import PackageOpen from "lucide-react/dist/esm/icons/package-open";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Minus from "lucide-react/dist/esm/icons/minus";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Send from "lucide-react/dist/esm/icons/send";
+import Save from "lucide-react/dist/esm/icons/save";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import User from "lucide-react/dist/esm/icons/user";
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import Building from "lucide-react/dist/esm/icons/building";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import Layers from "lucide-react/dist/esm/icons/layers";
 /**
  * WholesalerBulkOrderBuilder.jsx
  *
@@ -21,11 +40,25 @@ import {
 import { auth, db } from '../../firebase';
 import { logAction } from '../../services/auditLogger';
 import { useAuth } from '../../context/AuthContext';
-import {
-  PackageOpen, ClipboardList, Plus, Minus, Trash2, Send, Save,
-  ChevronDown, ChevronUp, ShoppingBag, User, Stethoscope, Building,
-  CheckCircle2, AlertCircle, Loader2, RefreshCw, Eye, Layers
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import {
   BULK_STATUS, BULK_STATUS_META, RX_STATUS_META, RX_STATUS, aggregatePrescriptionItems
 } from '../../config/prescriptionConfig';
@@ -249,7 +282,6 @@ export default function WholesalerBulkOrderBuilder() {
       const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       const validDocs = docs.filter(d => [RX_STATUS.SENT, RX_STATUS.ASSIGNED_TO_WS].includes(d.status));
       console.log('WholesalerBulkOrderBuilder primary query yielded:', validDocs.length, 'docs. Docs:', validDocs);
-      
       validDocs.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
       setPrescriptions(validDocs);
       setLoadingData(false);
@@ -366,7 +398,7 @@ export default function WholesalerBulkOrderBuilder() {
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ bulkOrderId: bulkId, notes }),
       });
-      const json = await res.json();
+      const json = await res.js();
       if (!res.ok) throw new Error(json.error || 'Submit failed');
       setDone(true);
       showToast(`✅ Bulk order enviado al admin. ${json.aggregated_items?.length || 0} líneas, ${json.totalItems || 0} unidades totales.`);

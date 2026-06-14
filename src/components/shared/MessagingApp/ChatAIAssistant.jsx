@@ -1,5 +1,14 @@
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import X from "lucide-react/dist/esm/icons/x";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import CheckSquare from "lucide-react/dist/esm/icons/check-square";
+import FileText from "lucide-react/dist/esm/icons/file-text";
 import React, { useState } from 'react';
-import { Sparkles, X, ChevronRight, CheckSquare, FileText } from 'lucide-react';
+
+
+
+
+
 import './MessagingApp.css';
 
 export default function ChatAIAssistant({ conversation, onClose }) {

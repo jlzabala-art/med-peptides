@@ -1,9 +1,17 @@
+import Edit from "lucide-react/dist/esm/icons/edit";
+import Send from "lucide-react/dist/esm/icons/send";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Package from "lucide-react/dist/esm/icons/package";
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, orderBy, limit, onSnapshot, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../../firebase';
 import B2BDocumentsLayout from './B2BDocumentsLayout';
 import ZohoPaperPreview from './ZohoPaperPreview';
-import { Edit, Send, CheckCircle, Package } from 'lucide-react';
+
+
+
+
+import notifier from '../../services/NotificationService';
 
 export default function SalesOrdersModule() {
   const [documents, setDocuments] = useState([]);
@@ -28,7 +36,7 @@ export default function SalesOrdersModule() {
     if (!selectedDoc) return;
     try {
       await updateDoc(doc(db, 'b2b_sales_orders', selectedDoc.id), { status: 'Closed' });
-      alert("Pedido marcado como Cerrado");
+      notifier.info("Pedido marcado como Cerrado");
     } catch (e) {
       console.error(e);
     }
@@ -59,7 +67,6 @@ export default function SalesOrdersModule() {
         for (const item of selectedDoc.items) {
           const itemName = item.name || item.itemName;
           if (!itemName) continue;
-          
           const q = query(collection(db, 'products'), where('name', '==', itemName));
           const snap = await getDocs(q);
           if (!snap.empty) {
@@ -71,10 +78,10 @@ export default function SalesOrdersModule() {
         }
       }
 
-      alert(selectedDoc.isDropship ? "Factura generada con éxito (Stock no modificado por ser Dropship)." : "Factura generada con éxito y stock actualizado.");
+      notifier.info(selectedDoc.isDropship ? "Factura generada con éxito (Stock no modificado por ser Dropship)." : "Factura generada con éxito y stock actualizado.");
     } catch (e) {
       console.error(e);
-      alert("Error al generar Factura");
+      notifier.info("Error al generar Factura");
     }
   };
 
@@ -82,7 +89,6 @@ export default function SalesOrdersModule() {
     if (!selectedDoc) return;
     const supplier = window.prompt("Introduce el nombre del proveedor para este pedido Dropship:");
     if (!supplier) return;
-    
     try {
       const items = selectedDoc.items.map(i => ({
         itemName: i.name || i.itemName,
@@ -102,13 +108,12 @@ export default function SalesOrdersModule() {
         linkedSalesOrderId: selectedDoc.id,
         notes: `Envío Directo a Cliente: ${selectedDoc.customerName}`
       };
-      
       await addDoc(collection(db, 'purchaseOrders'), payload);
       await updateDoc(doc(db, 'b2b_sales_orders', selectedDoc.id), { poGenerated: true });
-      alert("Purchase Order (Dropship) generado con éxito.");
+      notifier.info("Purchase Order (Dropship) generado con éxito.");
     } catch (e) {
       console.error(e);
-      alert("Error al generar PO.");
+      notifier.info("Error al generar PO.");
     }
   };
 
@@ -118,7 +123,6 @@ export default function SalesOrdersModule() {
       'Invoiced': '#10b981',
       'Closed': '#64748b'
     };
-    
     return (
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
@@ -187,7 +191,6 @@ export default function SalesOrdersModule() {
             )}
           </div>
         </div>
-        
         {/* A4 Document Wrapper */}
         <ZohoPaperPreview 
           docType="SALES ORDER" 
@@ -206,7 +209,7 @@ export default function SalesOrdersModule() {
       documents={documents}
       selectedDoc={selectedDoc}
       onSelectDoc={setSelectedDoc}
-      onCreateNew={() => alert("Los Sales Orders se generan automáticamente convirtiendo un Presupuesto (Quotation) aceptado.")}
+      onCreateNew={() => notifier.info("Los Sales Orders se generan automáticamente convirtiendo un Presupuesto (Quotation) aceptado.")}
       renderContent={renderContent}
       renderSidebarItem={renderSidebarItem}
       loading={loading}

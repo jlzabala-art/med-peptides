@@ -1,10 +1,24 @@
+import Eye from "lucide-react/dist/esm/icons/eye";
+import Save from "lucide-react/dist/esm/icons/save";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Settings from "lucide-react/dist/esm/icons/settings";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Eye, Save, Plus, Trash2, Settings, ShieldCheck } from 'lucide-react';
-import { productCategories } from '../../data/products';
+import notifier from '../../services/NotificationService';
+
+
+
+
+
+
+import { useStaticData } from '../../hooks/useStaticData';
+import styles from './AdminViewsConfigTab.module.css';
 
 export default function AdminViewsConfigTab() {
+  const { productCategories } = useStaticData();
   const [configs, setConfigs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
@@ -60,7 +74,7 @@ export default function AdminViewsConfigTab() {
 
   async function handleSave() {
     if (!editForm.name || !editForm.roleKey) {
-      alert('Name and Role Key are required.');
+      notifier.info('Name and Role Key are required.');
       return;
     }
 
@@ -74,23 +88,24 @@ export default function AdminViewsConfigTab() {
         updatedAt: new Date().toISOString(),
       });
 
-      alert('View Configuration Saved!');
+      notifier.info('View Configuration Saved!');
       setEditingId(null);
       fetchConfigs();
     } catch (err) {
       console.error('Error saving config:', err);
-      alert('Failed to save configuration.');
+      notifier.info('Failed to save configuration.');
     }
   };
 
   async function handleDelete(id) {
-    if (!window.confirm('Are you sure you want to delete this view configuration?')) return;
-    try {
-      await deleteDoc(doc(db, 'viewConfigs', id));
-      fetchConfigs();
-    } catch (err) {
-      console.error('Error deleting config:', err);
-    }
+    notifier.confirmCritical('Are you sure you want to delete this view configuration?', async () => {
+      try {
+        await deleteDoc(doc(db, 'viewConfigs', id));
+        fetchConfigs();
+      } catch (err) {
+        console.error('Error deleting config:', err);
+      }
+    });
   };
 
   const toggleTab = (tabId) => {
@@ -139,7 +154,7 @@ export default function AdminViewsConfigTab() {
   }
 
   return (
-    <div className="view-container anim-fade-in" style={{ animation: 'fadeIn 0.4s ease-out' }}>
+    <div className={`${styles.container} anim-fade-in`}>
       {/* Title Header */}
       <div
         style={{
@@ -885,11 +900,9 @@ export default function AdminViewsConfigTab() {
           )}
         </div>
       )}
-    
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: AdminViewsConfigTab | Props: none
       </div>
-    
 </div>
   );
 }

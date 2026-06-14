@@ -1,11 +1,44 @@
+import Pill from "lucide-react/dist/esm/icons/pill";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import CalendarClock from "lucide-react/dist/esm/icons/calendar-clock";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import FileSignature from "lucide-react/dist/esm/icons/file-signature";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import Save from "lucide-react/dist/esm/icons/save";
+import FilePlus from "lucide-react/dist/esm/icons/file-plus";
+import Copy from "lucide-react/dist/esm/icons/copy";
+import Info from "lucide-react/dist/esm/icons/info";
+import Target from "lucide-react/dist/esm/icons/target";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Clipboard from "lucide-react/dist/esm/icons/clipboard";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from 'react';
 import ClinicalTimeline from './ClinicalTimeline';
-import { 
-  Pill, Activity, ShieldAlert, CalendarClock, Beaker, FileSignature, 
-  CheckCircle2, AlertTriangle, AlertCircle, Loader2, ChevronDown, ChevronUp, 
-  Save, FilePlus, Copy, Info, Target, Zap, Clipboard
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { generatePatientGuide, generateClinicalPDF } from '../../services/pdfService';
 import { ArtifactPreviewOverlay } from './ProtocolArtifacts';
 
@@ -113,11 +146,9 @@ export default function ProtocolDashboard({ protocolData, onRegenerate }) {
       document.documentElement.scrollTop = 0;
       if (dosingContainerRef.current) dosingContainerRef.current.scrollTop = 0;
     };
-    
     resetScroll();
     const rafId = requestAnimationFrame(resetScroll);
     const timer = setTimeout(resetScroll, 150);
-    
     return () => {
       cancelAnimationFrame(rafId);
       clearTimeout(timer);
@@ -131,7 +162,6 @@ export default function ProtocolDashboard({ protocolData, onRegenerate }) {
   const cost = normalized._cost;
   const duration = cost.totalWeeks;
   const currentWeekData = timeline.find(w => w.week === activeWeek);
-  
   const status = protocolData.status || 'draft';
   const version = protocolData.version_number || 1;
   const history = protocolData.history || [];
@@ -145,7 +175,6 @@ export default function ProtocolDashboard({ protocolData, onRegenerate }) {
       }
   };
   const statusStyle = getStatusStyle(status);
-  
   // Mobile check
   const isMobile = window.innerWidth <= 768;
 
@@ -166,13 +195,11 @@ export default function ProtocolDashboard({ protocolData, onRegenerate }) {
     try {
         // Small delay to allow UI to render status
         await new Promise(r => setTimeout(r, 100));
-        
         if (type === 'patient') {
             await generatePatientGuide(protocolData, protocolData.patientContext);
         } else {
             await generateClinicalPDF(protocolData, protocolData.patientContext);
         }
-        
         setExportStatus({ message: `${label} generated successfully.`, type: 'success' });
     } catch (err) {
         console.error("Export failure:", err);
@@ -203,11 +230,9 @@ export default function ProtocolDashboard({ protocolData, onRegenerate }) {
           const isEscalation = pName.includes('escalation');
           const isInitiation = pName.includes('initiation');
           const isMaintenance = pName.includes('maintenance');
-          
           // Semantic color system: Blue(Active/Init), Amber(Esc), Green(Logistics/Main)
           const phaseColor = isEscalation ? '#f59e0b' : (isInitiation ? 'var(--primary)' : 'var(--color-success)');
           const activeAccent = 'var(--primary)'; // Blue for selection focus
-          
           const totalInjections = wk.medications.reduce((acc, med) => {
               const freqMap = { 'Daily': 7, '3x weekly': 3, '2x weekly': 2, 'Weekly': 1 };
               const freqVal = freqMap[med.frequency] || (Array.isArray(med.days) ? med.days.length : 1);
@@ -395,13 +420,11 @@ export default function ProtocolDashboard({ protocolData, onRegenerate }) {
   const renderMonitoringTab = () => {
     const schedule = protocolData.monitoringSchedule || [];
     if (schedule.length === 0) return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No specific labs required for this protocol.</div>;
-    
     return (
       <div className="anim-fade-in">
         <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Activity size={20} color="#0284c7" /> Required Lab Monitoring
         </h3>
-        
         {schedule.map((mon, idx) => (
           <div key={idx} style={{ padding: '1.5rem', border: '1px solid #bae6fd', backgroundColor: '#f0f9ff', borderRadius: '12px', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
@@ -424,7 +447,6 @@ export default function ProtocolDashboard({ protocolData, onRegenerate }) {
     const validation = normalized._validation;
     const score = (validation && validation.confidence_score !== null) ? validation.confidence_score : 0;
     const vState = validation?.state || 'NOT_EVALUATED';
-    
     const isOptimal = score >= 90;
     const isReview = vState === 'REVIEW_REQUIRED' || score < 80;
 
@@ -441,7 +463,6 @@ export default function ProtocolDashboard({ protocolData, onRegenerate }) {
         <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <ShieldAlert size={20} color={isReview ? "var(--color-danger)" : "#ea580c"} /> Safety & Clinical Validation
         </h3>
-        
         {/* Overall Confidence & Score Breakdown */}
         <div style={{ padding: '1.5rem', backgroundColor: 'var(--color-bg-app)', borderRadius: '16px', border: `1px solid ${isReview ? '#fee2e2' : 'var(--border)'}`, marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
@@ -483,7 +504,6 @@ export default function ProtocolDashboard({ protocolData, onRegenerate }) {
                       <Info size={14} />
                     </div>
                   </div>
-                  
                   {/* Tooltip Popup */}
                   {hoveredDomain === domain && (
                     <div style={{
@@ -550,7 +570,6 @@ export default function ProtocolDashboard({ protocolData, onRegenerate }) {
               </div>
               {isImproveScoreExpanded ? <ChevronUp size={20} color="var(--primary)" /> : <ChevronDown size={20} color="var(--primary)" />}
             </button>
-            
             {isImproveScoreExpanded && (
               <div style={{ padding: '1rem', backgroundColor: 'white', border: '1px solid var(--border)', borderTop: 'none', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -602,7 +621,6 @@ export default function ProtocolDashboard({ protocolData, onRegenerate }) {
                       {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                     </div>
                   </div>
-                  
                   {isExpanded && (
                     <div style={{ padding: '0 1rem 1rem 1rem', borderTop: '1px dashed var(--border)', paddingTop: '1rem' }}>
                       <div style={{ display: 'grid', gap: '1rem' }}>
@@ -651,7 +669,6 @@ export default function ProtocolDashboard({ protocolData, onRegenerate }) {
     return (
       <div className="anim-fade-in">
         <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1.5rem' }}>Economic & Supply Summary</h3>
-        
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
           <div style={{ padding: '1.25rem', backgroundColor: 'var(--color-bg-app)', borderRadius: '12px', textAlign: 'center', border: '1px solid var(--border)' }}>
             <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '0.05em' }}>Avg Weekly</div>
@@ -740,7 +757,6 @@ export default function ProtocolDashboard({ protocolData, onRegenerate }) {
             </div>
           ))}
         </div>
-        
         {previewType && (
           <ArtifactPreviewOverlay 
             type={previewType} 
@@ -834,7 +850,6 @@ export default function ProtocolDashboard({ protocolData, onRegenerate }) {
             </select>
           </div>
         </div>
-        
         <div style={{ padding: '1rem', overflowY: 'auto', maxHeight: isMobile ? '300px' : '650px' }}>
           <ClinicalTimeline 
             timeline={timeline} 
@@ -849,7 +864,6 @@ export default function ProtocolDashboard({ protocolData, onRegenerate }) {
 
       {/* RIGHT PANEL - Details */}
       <div style={{ display: 'flex', flexDirection: 'column' }}>
-        
         {/* Tabs */}
         <div style={{ 
           display: 'flex', 
@@ -997,7 +1011,6 @@ export default function ProtocolDashboard({ protocolData, onRegenerate }) {
               >
                 Back to Safety
               </button>
-              
               <button 
                 onClick={() => onRegenerate && onRegenerate('next')} 
                 className="btn" 

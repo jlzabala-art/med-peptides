@@ -1,3 +1,4 @@
+import Lightbulb from "lucide-react/dist/esm/icons/lightbulb";
 /* eslint-disable no-unused-vars */
 /**
  * SmartEmptyState — Phase 8
@@ -5,7 +6,7 @@
  * Makes the dashboard feel strategic rather than empty.
  */
 
-import { Lightbulb } from 'lucide-react';
+
 
 export default function SmartEmptyState({ message, hint, icon: Icon = Lightbulb }) {
   return (

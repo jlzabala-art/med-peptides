@@ -1,6 +1,19 @@
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import CloudOff from "lucide-react/dist/esm/icons/cloud-off";
+import Database from "lucide-react/dist/esm/icons/database";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Star from "lucide-react/dist/esm/icons/star";
 import React from 'react';
 import { Card } from '../../ui';
-import { CheckCircle, XCircle, AlertTriangle, CloudOff, Database, Activity, Star } from 'lucide-react';
+
+
+
+
+
+
+
 
 export default function TopKPIBar({ auditResults }) {
   const matched = auditResults.filter(r => r.confidence >= 90).length;
@@ -25,7 +38,6 @@ export default function TopKPIBar({ auditResults }) {
 
   return (
     <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-      
       {/* KPI Cards */}
       <div style={{ 
         display: 'grid', 

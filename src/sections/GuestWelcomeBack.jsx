@@ -1,3 +1,7 @@
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Bot from "lucide-react/dist/esm/icons/bot";
 /* eslint-disable no-unused-vars */
 /**
  * GuestWelcomeBack.jsx
@@ -14,7 +18,10 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, RefreshCw, ChevronRight, Bot } from 'lucide-react';
+
+
+
+
 import useGuestPreferences, { GOAL_META, LEVEL_META, PREFERENCE_OPTIONS } from '../hooks/useGuestPreferences';
 
 export default function GuestWelcomeBack() {

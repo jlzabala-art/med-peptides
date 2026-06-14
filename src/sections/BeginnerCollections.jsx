@@ -1,7 +1,16 @@
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import GitCompare from "lucide-react/dist/esm/icons/git-compare";
+import Bot from "lucide-react/dist/esm/icons/bot";
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, BookOpen, Sparkles, GitCompare, Bot } from 'lucide-react';
+
+
+
+
+
 
 /**
  * BeginnerCollections — Phase 2/4 of Rules 5.0
@@ -157,7 +166,6 @@ const CLINICAL_COMPOUND_PROMPTS = {
     '*   ⚖️ **Safety & Guidelines**: Side effects, storage best practices, and precaution protocols.\n' +
     '*   🤝 **Synergistic Pairings**: Explore how pairing BPC-157 with [TB-500](/product/tb-500) creates high-performance tissue recovery synergy.\n\n' +
     'Keep the tone encouraging, supportive, and very simple at the beginning!',
-    
   'TB-500':
     'I want to research TB-500 (Thymosin Beta-4 fraction). ' +
     'Please act as a very warm, friendly, and welcoming clinical assistant. ' +
@@ -168,7 +176,6 @@ const CLINICAL_COMPOUND_PROMPTS = {
     '*   ⚖️ **Safety & Guidelines**: Side effects, storage best practices, and precaution protocols.\n' +
     '*   🤝 **Synergistic Pairings**: Explore how pairing TB-500 with [BPC-157](/product/bpc-157) creates high-performance tissue recovery synergy.\n\n' +
     'Keep the tone encouraging, supportive, and very simple at the beginning!',
-    
   'GHK-Cu':
     'I want to research GHK-Cu (Copper Peptide). ' +
     'Please act as a very warm, friendly, and welcoming clinical assistant. ' +
@@ -179,7 +186,6 @@ const CLINICAL_COMPOUND_PROMPTS = {
     '*   ⚖️ **Safety & Guidelines**: Side effects, storage best practices, and precaution protocols.\n' +
     '*   🌟 **Beauty & Skin Sinergies**: Explore how pairing GHK-Cu with topical creams or supplements like [NMN](/supplements/nmn) enhances tissue quality.\n\n' +
     'Keep the tone encouraging, supportive, and very simple at the beginning!',
-    
   'Epithalon':
     'I want to research Epithalon (Epitalon). ' +
     'Please act as a very warm, friendly, and welcoming clinical assistant. ' +
@@ -190,7 +196,6 @@ const CLINICAL_COMPOUND_PROMPTS = {
     '*   ⚖️ **Safety & Guidelines**: Side effects, storage best practices, and precaution protocols.\n' +
     '*   🌟 **Longevity Sinergies**: Explore how pairing Epithalon with secretagogues like [Sermorelin](/product/sermorelin) supports healthy aging.\n\n' +
     'Keep the tone encouraging, supportive, and very simple at the beginning!',
-    
   'NMN':
     'I want to research NMN (Nicotinamide Mononucleotide). ' +
     'Please act as a very warm, friendly, and welcoming clinical assistant. ' +
@@ -200,7 +205,6 @@ const CLINICAL_COMPOUND_PROMPTS = {
     '*   ⚖️ **Safety & Guidelines**: Side effects, storage best practices, and precaution protocols.\n' +
     '*   🤝 **Synergistic Pairings**: Explore how pairing NMN with longevity activators like [Resveratrol](/supplements/resveratrol) or [Berberina](/supplements/berberine) accelerates cellular defense.\n\n' +
     'Keep the tone encouraging, supportive, and very simple at the beginning!',
-    
   'Sermorelin':
     'I want to research Sermorelin. ' +
     'Please act as a very warm, friendly, and welcoming clinical assistant. ' +
@@ -211,7 +215,6 @@ const CLINICAL_COMPOUND_PROMPTS = {
     '*   ⚖️ **Safety & Guidelines**: Side effects, storage best practices, and precaution protocols.\n' +
     '*   🤝 **Synergistic Pairings**: Explore how pairing Sermorelin with secretagogues like [Ipamorelin](/product/ipamorelin) elevates growth hormone pathways naturally.\n\n' +
     'Keep the tone encouraging, supportive, and very simple at the beginning!',
-    
   'Semax':
     'I want to research Semax. ' +
     'Please act as a very warm, friendly, and welcoming clinical assistant. ' +
@@ -222,7 +225,6 @@ const CLINICAL_COMPOUND_PROMPTS = {
     '*   ⚖️ **Safety & Guidelines**: Side effects, storage best practices, and precaution protocols.\n' +
     '*   🤝 **Synergistic Pairings**: Explore how pairing Semax with [Selank](/product/selank) creates high-performance cognitive and focus balance.\n\n' +
     'Keep the tone encouraging, supportive, and very simple at the beginning!',
-    
   'Selank':
     'I want to research Selank. ' +
     'Please act as a very warm, friendly, and welcoming clinical assistant. ' +
@@ -233,7 +235,6 @@ const CLINICAL_COMPOUND_PROMPTS = {
     '*   ⚖️ **Safety & Guidelines**: Side effects, storage best practices, and precaution protocols.\n' +
     '*   🤝 **Synergistic Pairings**: Explore how pairing Selank with [Semax](/product/semax) creates high-performance cognitive and focus balance.\n\n' +
     'Keep the tone encouraging, supportive, and very simple at the beginning!',
-    
   'Dihexa':
     'I want to research Dihexa. ' +
     'Please act as a very warm, friendly, and welcoming clinical assistant. ' +
@@ -243,7 +244,6 @@ const CLINICAL_COMPOUND_PROMPTS = {
     '*   📋 **Suggested Research Protocols**: Common duration, cycle lengths, and administration standards in literature.\n' +
     '*   ⚖️ **Safety & Guidelines**: Side effects, storage best practices, and precaution protocols.\n\n' +
     'Keep the tone encouraging, supportive, and very simple at the beginning!',
-    
   'Semaglutide':
     'I want to research Semaglutide. ' +
     'Please act as a very warm, friendly, and welcoming clinical assistant. ' +
@@ -254,7 +254,6 @@ const CLINICAL_COMPOUND_PROMPTS = {
     '*   ⚖️ **Safety & Guidelines**: Side effects, storage best practices, and precaution protocols.\n' +
     '*   🤝 **Synergistic Pairings**: Explore how comparing Semaglutide with [Tirzepatide](/product/tirzepatide) reveals different metabolic dynamics.\n\n' +
     'Keep the tone encouraging, supportive, and very simple at the beginning!',
-    
   'Tirzepatide':
     'I want to research Tirzepatide. ' +
     'Please act as a very warm, friendly, and welcoming clinical assistant. ' +
@@ -265,7 +264,6 @@ const CLINICAL_COMPOUND_PROMPTS = {
     '*   ⚖️ **Safety & Guidelines**: Side effects, storage best practices, and precaution protocols.\n' +
     '*   🤝 **Synergistic Pairings**: Explore how comparing Tirzepatide with [Semaglutide](/product/semaglutide) reveals different metabolic dynamics.\n\n' +
     'Keep the tone encouraging, supportive, and very simple at the beginning!',
-    
   'Berberine':
     'I want to research Berberine. ' +
     'Please act as a very warm, friendly, and welcoming clinical assistant. ' +
@@ -568,4 +566,3 @@ export default function BeginnerCollections({ onItemClick, onSeedSearch, onOpenS
     </>
   );
 }
-

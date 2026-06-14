@@ -1,3 +1,21 @@
+import LayoutGrid from "lucide-react/dist/esm/icons/layout-grid";
+import List from "lucide-react/dist/esm/icons/list";
+import Search from "lucide-react/dist/esm/icons/search";
+import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import X from "lucide-react/dist/esm/icons/x";
+import Check from "lucide-react/dist/esm/icons/check";
+import Tag from "lucide-react/dist/esm/icons/tag";
+import Leaf from "lucide-react/dist/esm/icons/leaf";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Droplets from "lucide-react/dist/esm/icons/droplets";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Dumbbell from "lucide-react/dist/esm/icons/dumbbell";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 /**
  * SupplementCollectionPage — Phase 1: shell + imports
@@ -7,11 +25,24 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePageMeta } from '../hooks/usePageMeta';
-import {
-  LayoutGrid, List, Search, SlidersHorizontal, ArrowRight,
-  X, Check, Tag, Leaf, Zap, Moon, Brain, Shield, Activity,
-  Sparkles, Droplets, FlaskConical, Dumbbell,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getActiveSupplements } from '../repositories/supplementRepository';
 import '../styles/collection_shared.css';
@@ -111,7 +142,6 @@ function normalizeProduct(s, index) {
 
   const cleanGoals = rawGoals.map(g => GOALS_MAP[g] || g);
   const primaryGoal = cleanGoals.length > 0 ? cleanGoals[0] : (s.category || 'Other');
-  
   const color = getCategoryColor(primaryGoal);
 
   const rawTags = Array.isArray(s.tags) && s.tags.length ? s.tags : [];
@@ -366,7 +396,6 @@ export default function SupplementCollectionPage({ onNavigate, onBack, toggleCom
               ))}
             </SidebarSection>
           )}
-          
           {hasActiveFilters && (
             <button className="pc-clear-link" onClick={clearAllFilters} style={{ marginTop: '1rem' }}>
               Clear all filters
@@ -376,7 +405,6 @@ export default function SupplementCollectionPage({ onNavigate, onBack, toggleCom
 
         {/* MAIN CONTENT */}
         <main className="col-main">
-          
           {/* Active filter pills */}
           {hasActiveFilters && (
             <div className="pc-active-filters" style={{ marginBottom: '2rem' }}>
@@ -584,5 +612,4 @@ export default function SupplementCollectionPage({ onNavigate, onBack, toggleCom
     </div>
   );
 }
-
 

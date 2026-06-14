@@ -1,6 +1,13 @@
+import Users from "lucide-react/dist/esm/icons/users";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Microscope from "lucide-react/dist/esm/icons/microscope";
+import Activity from "lucide-react/dist/esm/icons/activity";
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Users, Calendar, Microscope, Activity } from 'lucide-react';
+
+
+
+
 
 const MetricCard = motion.create(React.forwardRef(({ title, value, trend, icon: Icon, color, bgColor, alert = false }, ref) => {
   return (
@@ -11,7 +18,6 @@ const MetricCard = motion.create(React.forwardRef(({ title, value, trend, icon: 
       transition: 'transform 0.2s, box-shadow 0.2s'
     }} onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.05)'; }}
        onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.03)'; }}>
-      
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ width: '48px', height: '48px', borderRadius: '14px', backgroundColor: bgColor, color: color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Icon size={24} strokeWidth={2.5} />
@@ -22,7 +28,6 @@ const MetricCard = motion.create(React.forwardRef(({ title, value, trend, icon: 
           </span>
         )}
       </div>
-      
       <div>
         <h4 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>{title}</h4>
         <div style={{ fontSize: '2rem', fontWeight: 900, color: '#0f172a', marginTop: '0.2rem', letterSpacing: '-0.03em' }}>

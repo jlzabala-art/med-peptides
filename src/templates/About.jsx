@@ -1,37 +1,61 @@
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Microscope from "lucide-react/dist/esm/icons/microscope";
+import SearchCheck from "lucide-react/dist/esm/icons/search-check";
+import FileCheck from "lucide-react/dist/esm/icons/file-check";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Target from "lucide-react/dist/esm/icons/target";
+import Award from "lucide-react/dist/esm/icons/award";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Users from "lucide-react/dist/esm/icons/users";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Lock from "lucide-react/dist/esm/icons/lock";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Dna from "lucide-react/dist/esm/icons/dna";
+import Scale from "lucide-react/dist/esm/icons/scale";
+import History from "lucide-react/dist/esm/icons/history";
+import ClipboardCheck from "lucide-react/dist/esm/icons/clipboard-check";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Database from "lucide-react/dist/esm/icons/database";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import Headset from "lucide-react/dist/esm/icons/headset";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import MessageCircle from "lucide-react/dist/esm/icons/message-circle";
 /* eslint-disable no-unused-vars */
 import React, { useEffect } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import '../styles/about.css';
-import { 
-  ShieldCheck, 
-  Microscope, 
-  SearchCheck, 
-  FileCheck, 
-  Activity, 
-  Target, 
-  Award, 
-  CheckCircle2,
-  Users,
-  Zap,
-  Lock,
-  FlaskConical,
-  Dna,
-  Scale,
-  History,
-  ClipboardCheck,
-  ChevronRight,
-  Sparkles,
-  Database,
-  ArrowRight,
-  Globe,
-  Beaker,
-  ShieldAlert,
-  Headset,
-  Mail,
-  MessageCircle
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const SectionContainer = ({ children, className = "", id = "" }) => (
   <section id={id} className={`about-section ${className}`}>
@@ -103,7 +127,6 @@ const About = () => {
 
   return (
     <div className="about-page min-h-screen pt-20 selection:bg-accent-blue/30 selection:text-white overflow-hidden">
-      
       {/* 1. HERO SECTION: The Institutional Gateway */}
       <section id="hero" className="about-hero">
         <div className="about-hero__mesh" aria-hidden="true" />
@@ -362,7 +385,6 @@ const About = () => {
           title="Selection & Verification"
           subtitle="Our sourcing strategy is built on two fundamental pillars: specialized supplier selection and structured batch documentation."
         />
-        
         <div className="about-supplier__grid">
           {[
             { icon: Microscope, title: "Specialist Sourcing", desc: "We avoid generalist manufacturers, focusing exclusively on facilities with proven specialization in peptide synthesis." },

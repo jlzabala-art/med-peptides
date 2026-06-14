@@ -1,3 +1,18 @@
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Package from "lucide-react/dist/esm/icons/package";
+import Link2 from "lucide-react/dist/esm/icons/link-2";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import ThumbsUp from "lucide-react/dist/esm/icons/thumbs-up";
+import ThumbsDown from "lucide-react/dist/esm/icons/thumbs-down";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import Box from "lucide-react/dist/esm/icons/box";
 /**
  * AdminProductSyncWidget.jsx
  *
@@ -22,23 +37,21 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { db, auth } from '../../../firebase';
-import {
-  RefreshCw,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-  Package,
-  Link2,
-  ChevronDown,
-  ChevronUp,
-  Zap,
-  Clock,
-  Eye,
-  ThumbsUp,
-  ThumbsDown,
-  Loader2,
-  Box,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { Card, CardHeader, CardContent } from '../../ui/Card';
 import Button from '../../ui/Button';
 
@@ -482,7 +495,7 @@ export default function AdminProductSyncWidget() {
         body: JSON.stringify({ action: 'full_sync', dryRun: false }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
+      const json = await res.js();
       setSyncResults(json);
     } catch (err) {
       console.error('[AdminProductSyncWidget]', err);

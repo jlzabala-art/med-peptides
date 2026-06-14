@@ -1,3 +1,18 @@
+import LayoutGrid from "lucide-react/dist/esm/icons/layout-grid";
+import List from "lucide-react/dist/esm/icons/list";
+import Search from "lucide-react/dist/esm/icons/search";
+import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import X from "lucide-react/dist/esm/icons/x";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Droplets from "lucide-react/dist/esm/icons/droplets";
+import Tag from "lucide-react/dist/esm/icons/tag";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 /**
  * ProtocolCollectionPage — /collection/protocols
@@ -12,12 +27,21 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  LayoutGrid, List, Search, SlidersHorizontal,
-  ArrowRight, FlaskConical, X,
-  Brain, Moon, Activity, Shield,
-  Zap, Sparkles, Droplets, Tag,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../styles/collection_shared.css';
 import CollectionHeader from '../components/collection/CollectionHeader';
@@ -247,11 +271,9 @@ function extractDuration(doc) {
  */
 function extractTags(doc) {
   if (Array.isArray(doc.tags) && doc.tags.length) return doc.tags;
-  
   const goals = Array.isArray(doc.eligibility_rules?.supported_goals) 
     ? doc.eligibility_rules.supported_goals 
     : [];
-  
   const conditions = Array.isArray(doc.eligibility_rules?.conditions)
     ? doc.eligibility_rules.conditions
     : [];
@@ -298,9 +320,7 @@ export function normalizeProtocolCard(doc, source = 'firestore') {
   // ── Strict Goal Normalization ──
   // We map any "dirty" or legacy goal string to one of our 7 canonical keys.
   const canonicalGoals = Object.keys(GOAL_LABEL); // metabolic_weight, etc.
-  
   let goal = 'metabolic_weight'; // fallback default
-  
   // Try exact match
   if (canonicalGoals.includes(rawGoal)) {
     goal = rawGoal;
@@ -339,7 +359,6 @@ export function normalizeProtocolCard(doc, source = 'firestore') {
 
   let complexity = (meta.complexity_level || doc.complexity_level || 'standard').toLowerCase();
   if (complexity === 'simple' || complexity === 'minimal') complexity = 'moderate';
-  
   const color = getGoalColor(goal);
 
 
@@ -752,7 +771,6 @@ export default function ProtocolCollectionPage({ onNavigate, onBack }) {
               ))}
             </SidebarSection>
           )}
-          
           {hasActiveFilters && (
             <button className="pc-clear-link" onClick={clearAllFilters} style={{ marginTop: '1rem' }}>
               Clear all filters
@@ -762,7 +780,6 @@ export default function ProtocolCollectionPage({ onNavigate, onBack }) {
 
         {/* MAIN CONTENT */}
         <main className="col-main">
-          
 
           {/* ── Goal Focus Panel ── */}
           <AnimatePresence mode="wait">
@@ -1147,4 +1164,3 @@ function FilterSidebar({
     </div>
   );
 }
-

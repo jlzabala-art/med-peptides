@@ -1,9 +1,24 @@
+import X from "lucide-react/dist/esm/icons/x";
+import Save from "lucide-react/dist/esm/icons/save";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Users from "lucide-react/dist/esm/icons/users";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Cpu from "lucide-react/dist/esm/icons/cpu";
+import Layers from "lucide-react/dist/esm/icons/layers";
 import React, { useState } from 'react';
-import { X, Save, AlertTriangle, Users, Globe, DollarSign, Cpu, Layers } from 'lucide-react';
+
+
+
+
+
+
+
+
+import notifier from '../../../services/NotificationService';
 
 export default function RoleEditorModal({ role, onClose, onSave }) {
   const [activeTab, setActiveTab] = useState('modules');
-  
   // Dummy local state for editing
   const [editedRole, setEditedRole] = useState({ ...role });
 
@@ -17,9 +32,9 @@ export default function RoleEditorModal({ role, onClose, onSave }) {
 
   const handleSave = () => {
     // Show impact analysis before actually saving
-    if (window.confirm(`This change affects:\n\n- ${role.userCount || 0} users\n- 120 products visibility\n\nProceed to save?`)) {
+    notifier.confirmCritical(`This change affects:\n\n- ${role.userCount || 0} users\n- 120 products visibility\n\nProceed to save?`, async () => {
       onSave(editedRole);
-    }
+    });
   };
 
   return (
@@ -48,7 +63,6 @@ export default function RoleEditorModal({ role, onClose, onSave }) {
             to { transform: translateX(0); }
           }
         `}</style>
-        
         {/* Header */}
         <div style={{
           padding: '1.5rem',
@@ -74,7 +88,6 @@ export default function RoleEditorModal({ role, onClose, onSave }) {
 
         {/* Content Area */}
         <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-          
           {/* Sidebar Tabs */}
           <div style={{ width: '250px', borderRight: '1px solid var(--border)', backgroundColor: 'rgba(0,0,0,0.02)', padding: '1rem' }}>
             {tabs.map(tab => (
@@ -111,7 +124,6 @@ export default function RoleEditorModal({ role, onClose, onSave }) {
               <div>
                 <h3 style={{ fontSize: '1rem', marginTop: 0, marginBottom: '1.5rem', color: 'var(--text-main)' }}>Module Access</h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '2rem' }}>Define granular access for each system module.</p>
-                
                 {['Inventory', 'Sales', 'CRM', 'Finance'].map(mod => (
                   <div key={mod} style={{ marginBottom: '1.5rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
                     <div style={{ fontWeight: 600, marginBottom: '1rem', fontSize: '0.9rem' }}>{mod}</div>
@@ -127,7 +139,6 @@ export default function RoleEditorModal({ role, onClose, onSave }) {
                 ))}
               </div>
             )}
-            
             {activeTab === 'territories' && (
               <div>
                 <h3 style={{ fontSize: '1rem', marginTop: 0, marginBottom: '1.5rem', color: 'var(--text-main)' }}>Territory Access</h3>
@@ -208,7 +219,6 @@ export default function RoleEditorModal({ role, onClose, onSave }) {
               <span style={{ fontWeight: 600 }}>Impact Analysis:</span> This change will affect <strong>{role.userCount || 0} users</strong> immediately upon saving.
             </div>
           </div>
-          
           <div style={{ display: 'flex', gap: '1rem' }}>
             <button onClick={onClose} className="gcp-btn-secondary" style={{ padding: '0.6rem 1.25rem', fontSize: '0.85rem' }}>
               Cancel
@@ -219,7 +229,6 @@ export default function RoleEditorModal({ role, onClose, onSave }) {
             </button>
           </div>
         </div>
-        
       </div>
     </div>
   );

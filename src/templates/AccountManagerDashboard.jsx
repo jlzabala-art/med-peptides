@@ -1,9 +1,35 @@
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import Users from "lucide-react/dist/esm/icons/users";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Blocks from "lucide-react/dist/esm/icons/blocks";
+import Settings from "lucide-react/dist/esm/icons/settings";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import UserPlus from "lucide-react/dist/esm/icons/user-plus";
+import LogOut from "lucide-react/dist/esm/icons/log-out";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Tag from "lucide-react/dist/esm/icons/tag";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Share2 from "lucide-react/dist/esm/icons/share-2";
 import React from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, Users, ShoppingBag, MessageSquare, Blocks, Settings, Activity, UserPlus, LogOut, Bot,
-  Mail, Tag, Eye, Zap, Share2
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import EmailCampaignBuilder from '../components/wholesaler/EmailCampaignBuilder';
 import CouponsManager from '../components/marketing/CouponsManager';
 import ReferralTracking from '../components/marketing/ReferralTracking';
@@ -61,7 +87,6 @@ export default function AccountManagerDashboard() {
   // Determine active tab from URL path
   const currentPath = location.pathname.split('/').pop();
   const activeTab = NAV_GROUPS.flatMap(g => g.items).some(item => item.id === currentPath) ? currentPath : 'overview';
-  
   if (!user) {
     return <Navigate to="/login" replace />;
   }
@@ -75,13 +100,11 @@ export default function AccountManagerDashboard() {
       <div className={styles.dashboardContent}>
         <Routes>
           <Route path="/" element={<Navigate to="overview" replace />} />
-          
           <Route path="overview" element={<AdminTabErrorBoundary tabId="overview"><ManagerOverviewTab /></AdminTabErrorBoundary>} />
           <Route path="messages" element={<AdminTabErrorBoundary tabId="messages"><ManagerMessagesTab /></AdminTabErrorBoundary>} />
           <Route path="clients" element={<AdminTabErrorBoundary tabId="clients"><ManagerClientsTab /></AdminTabErrorBoundary>} />
           <Route path="invitations" element={<AdminTabErrorBoundary tabId="invitations"><ManagerInvitationsTab /></AdminTabErrorBoundary>} />
           <Route path="orders" element={<AdminTabErrorBoundary tabId="orders"><ManagerOrdersTab /></AdminTabErrorBoundary>} />
-          
           <Route path="catalog-builder" element={
             <AdminTabErrorBoundary tabId="catalog-builder">
               <div className={styles.catalogWrapper}>
@@ -95,7 +118,6 @@ export default function AccountManagerDashboard() {
               <EmailCampaignBuilder ownerId={user.uid} ownerType="wholesaler" onBack={() => navigate('/account-manager/overview')} />
             </AdminTabErrorBoundary>
           } />
-          
           <Route path="drip-marketing" element={<AdminTabErrorBoundary tabId="drip-marketing"><DripMarketing ownerId={user.uid} ownerType="wholesaler" /></AdminTabErrorBoundary>} />
           <Route path="coupons" element={<AdminTabErrorBoundary tabId="coupons"><CouponsManager ownerId={user.uid} ownerType="wholesaler" /></AdminTabErrorBoundary>} />
           <Route path="referrals" element={<AdminTabErrorBoundary tabId="referrals"><ReferralTracking ownerId={user.uid} ownerType="wholesaler" /></AdminTabErrorBoundary>} />

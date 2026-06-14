@@ -1,10 +1,18 @@
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import Search from "lucide-react/dist/esm/icons/search";
+import Lightbulb from "lucide-react/dist/esm/icons/lightbulb";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
 /* eslint-disable no-unused-vars */
-import { FlaskConical, BookOpen, Search, Lightbulb, TrendingUp } from 'lucide-react';
+
+
+
+
+
 
 /* ─────────────────────────────────────────────────────────────────────────
    PHASE 4 — Discovery Insights
    Answers: "What content creates curiosity? What should we improve first?"
-   
    Data: tops.peptides, tops.protocols, tops.searches (all existing)
    Adds: contextual interpretation of what the data *means*
 ───────────────────────────────────────────────────────────────────────── */

@@ -1,3 +1,15 @@
+import Database from "lucide-react/dist/esm/icons/database";
+import Folder from "lucide-react/dist/esm/icons/folder";
+import FileIcon from "lucide-react/dist/esm/icons/file";
+import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
+import FolderPlus from "lucide-react/dist/esm/icons/folder-plus";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import HardDrive from "lucide-react/dist/esm/icons/hard-drive";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Download from "lucide-react/dist/esm/icons/download";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import X from "lucide-react/dist/esm/icons/x";
 import React, { useState, useEffect, useRef } from 'react';
 import { storage } from '../../firebase';
 import {
@@ -8,20 +20,18 @@ import {
   deleteObject,
   uploadString,
 } from 'firebase/storage';
-import {
-  Database,
-  Folder,
-  File as FileIcon,
-  UploadCloud,
-  FolderPlus,
-  Trash2,
-  ChevronRight,
-  HardDrive,
-  FileText,
-  Download,
-  AlertTriangle,
-  X,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
 
 const ROOT_FOLDER = 'knowledge_base';
 
@@ -736,11 +746,9 @@ export default function AdminStorageTab() {
           to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
-    
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: AdminStorageTab | Props: none
       </div>
-    
 </div>
   );
 }

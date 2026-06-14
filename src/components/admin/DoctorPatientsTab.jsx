@@ -1,8 +1,17 @@
+import Users from "lucide-react/dist/esm/icons/users";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Search from "lucide-react/dist/esm/icons/search";
+import PlusCircle from "lucide-react/dist/esm/icons/plus-circle";
+import Activity from "lucide-react/dist/esm/icons/activity";
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Users, FileText, Search, PlusCircle, Activity } from 'lucide-react';
+
+
+
+
+
 
 export default function PhysicianPatientsTab({ doctorId }) {
   const [patients, setPatients] = useState([]);
@@ -261,11 +270,9 @@ export default function PhysicianPatientsTab({ doctorId }) {
           ))}
         </div>
       )}
-    
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: DoctorPatientsTab | Props: none
       </div>
-    
 </div>
   );
 }

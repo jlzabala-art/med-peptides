@@ -1,6 +1,16 @@
- 
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Play from "lucide-react/dist/esm/icons/play";
+import Video from "lucide-react/dist/esm/icons/video";
+import Target from "lucide-react/dist/esm/icons/target";
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDown, ChevronUp, ArrowRight, Play, Video, Target } from 'lucide-react';
+
+
+
+
+
+
 import { useHeaderHeight } from '../../hooks/useHeaderHeight';
 import { highlightMatch } from '../../utils/textUtils';
 

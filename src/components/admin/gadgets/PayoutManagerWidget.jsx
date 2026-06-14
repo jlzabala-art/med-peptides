@@ -1,8 +1,9 @@
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, orderBy, getDocs, addDoc } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
-import { DollarSign } from 'lucide-react';
+
 import { Card, CardHeader, CardContent } from '../../ui/Card';
 import Button from '../../ui/Button';
 import Badge from '../../ui/Badge';
@@ -101,7 +102,6 @@ export default function PayoutManagerWidget({ ownerId = 'admin', activeRoleProp 
         title="Practitioner Payouts"
         subtitle="Payout and commission management."
       />
-      
       <CardContent style={{ flex: 1, overflowY: 'auto', padding: '0 24px' }}>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-secondary)' }}>

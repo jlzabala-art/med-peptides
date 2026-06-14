@@ -1,6 +1,20 @@
- 
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import Target from "lucide-react/dist/esm/icons/target";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import React, { useRef, useEffect, useState } from 'react';
-import { ArrowRight, Activity, Zap, Sparkles, Brain, Moon, Target, ShieldCheck } from 'lucide-react';
+
+
+
+
+
+
+
+
 
 const featuredCategories = [
   {
@@ -396,7 +410,6 @@ export default function FeaturedCategories({ onSelectCategory, onOpenSearch }) {
 
           @media (max-width: 640px) {
             .fc-section { padding: 3rem 0 1rem; }
-            
             .fc-container {
               padding: 0 0 1rem 1.25rem !important;
               margin-top: 1rem !important;

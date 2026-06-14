@@ -1,10 +1,21 @@
+import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import Save from "lucide-react/dist/esm/icons/save";
+import X from "lucide-react/dist/esm/icons/x";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import React, { useState, useEffect } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { functions, db, storage } from '../../../firebase';
 import { ref, uploadBytes } from 'firebase/storage';
 import { useAuth } from '../../../context/AuthContext';
-import { UploadCloud, FileText, Loader2, Save, X, CheckCircle } from 'lucide-react';
+
+
+
+
+
+
 import { Card } from '../../ui';
 import * as XLSX from 'xlsx';
 
@@ -50,7 +61,6 @@ export default function BaseImportTab({ title, description, context, renderDiffT
       setPreviewUrl(null);
     }
   }, [files]);
-  
   const handleDragOver = (e) => e.preventDefault();
   const handleDrop = (e) => {
     e.preventDefault();
@@ -67,7 +77,6 @@ export default function BaseImportTab({ title, description, context, renderDiffT
       const csvContent = text.split('\n').map(row => 
         row.split('\t').map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')
       ).join('\n');
-      
       const pastedFile = new File([csvContent], "pasted-data.csv", { type: 'text/csv' });
       setFiles([pastedFile]);
     }
@@ -76,7 +85,7 @@ export default function BaseImportTab({ title, description, context, renderDiffT
   const exportToExcel = () => {
     if (!parsedData) return;
     const finalData = parsedData.filter((_, idx) => selectedRows.has(idx));
-    const worksheet = XLSX.utils.json_to_sheet(finalData);
+    const worksheet = XLSX.utils.js_to_sheet(finalData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "ExtractedData");
     XLSX.writeFile(workbook, `Extracted_${context}_${new Date().toISOString().split('T')[0]}.xlsx`);
@@ -88,7 +97,6 @@ export default function BaseImportTab({ title, description, context, renderDiffT
     setLogs([]);
     setStatus({ type: 'info', message: 'Starting read process...' });
     addLog('Initialization started.');
-    
     try {
       let allItems = [];
       const parseUniversal = httpsCallable(functions, 'parseUniversalDocument', { timeout: 300000 }); // 5 minutes timeout for large documents
@@ -96,7 +104,6 @@ export default function BaseImportTab({ title, description, context, renderDiffT
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         addLog(`Preparing file ${i + 1} of ${files.length}: ${file.name}`);
-        
         let mimeType = file.type;
         let fileToUpload = file;
 
@@ -112,10 +119,8 @@ export default function BaseImportTab({ title, description, context, renderDiffT
           const rows = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
           const validRows = rows.filter(r => Object.values(r).some(v => v !== null && v !== undefined && v.toString().trim() !== ''));
           addLog(`Extracted ${validRows.length} rows of raw data from Excel.`);
-          
-          const cleanWorksheet = XLSX.utils.json_to_sheet(validRows);
+          const cleanWorksheet = XLSX.utils.js_to_sheet(validRows);
           const csvContent = XLSX.utils.sheet_to_csv(cleanWorksheet);
-          
           addLog(`Encoding data safely for AI Engine...`);
           fileToUpload = new File([csvContent], file.name.replace(/\\.[^/.]+$/, ".csv"), { type: 'text/csv' });
           mimeType = 'text/csv';
@@ -123,13 +128,11 @@ export default function BaseImportTab({ title, description, context, renderDiffT
 
         const storagePath = `temp_imports/${user.uid}/${Date.now()}_${fileToUpload.name}`;
         const fileRef = ref(storage, storagePath);
-        
         addLog(`Uploading Document securely...`);
         await uploadBytes(fileRef, fileToUpload);
 
         addLog(`Sending data to Gemini AI Engine. This may take up to 5 minutes...`);
         const response = await parseUniversal({ storagePath, mimeType, context, instructions: aiInstructions });
-        
         if (response.data.success) {
           addLog(`Success: AI extracted ${response.data.items.length} items from ${file.name}.`);
           const items = response.data.items.map(item => ({
@@ -143,17 +146,14 @@ export default function BaseImportTab({ title, description, context, renderDiffT
           throw new Error(`AI could not process ${file.name} correctly.`);
         }
       }
-      
       setParsedData(allItems);
       setSelectedRows(new Set(allItems.map((_, i) => i)));
       setStatus({ type: 'success', message: `Analysis complete! Found ${allItems.length} total items.` });
       addLog(`Extraction completely finished.`);
-      
     } catch (err) {
       console.error(err);
       setStatus({ type: 'error', message: "Error processing documents: " + err.message });
     }
-    
     setIsParsing(false);
   };
 
@@ -239,7 +239,6 @@ export default function BaseImportTab({ title, description, context, renderDiffT
         <Card style={{ padding: '2rem' }}>
           <div style={{ maxWidth: '900px', margin: '0 auto' }}>
             <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', textAlign: 'center' }}>Upload Document</h3>
-            
             <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
               <div style={{ flex: 1 }}>
                 <div 
@@ -260,7 +259,6 @@ export default function BaseImportTab({ title, description, context, renderDiffT
                     style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }}
                     disabled={isParsing}
                   />
-                  
                   {isParsing ? (
                 <div style={{ textAlign: 'left', margin: '0 auto', maxWidth: '80%', padding: '1rem', backgroundColor: '#f1f5f9', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
                   <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
@@ -287,7 +285,6 @@ export default function BaseImportTab({ title, description, context, renderDiffT
                     </div>
                   )}
                 </div>
-                
                 <div style={{ marginTop: '1rem' }}>
                   <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.25rem' }}>
                     Import Profile
@@ -320,7 +317,6 @@ export default function BaseImportTab({ title, description, context, renderDiffT
                     disabled={isParsing}
                   />
                 </div>
-                
                 <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-start' }}>
                   <button 
                     onClick={processFile} 
@@ -346,7 +342,6 @@ export default function BaseImportTab({ title, description, context, renderDiffT
                       {showDocumentPreview ? 'Hide Preview' : 'Show Preview'}
                     </button>
                   </div>
-                  
                   {showDocumentPreview ? (
                     <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {previewUrl ? (
@@ -398,7 +393,6 @@ export default function BaseImportTab({ title, description, context, renderDiffT
               </button>
             </div>
           </div>
-          
           <div style={{ display: 'flex', gap: '1rem', padding: '1rem' }}>
             <div style={{ flex: 1, overflowX: 'auto' }}>
               {renderDiffTable({
@@ -476,5 +470,4 @@ export default function BaseImportTab({ title, description, context, renderDiffT
     </div>
   );
 }
-
 

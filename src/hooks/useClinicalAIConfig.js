@@ -15,7 +15,7 @@
  *   graceful degradation (code-side defaults are always present in clinicalAIRules.js).
  *
  * HOW TO UPDATE BACKEND RULES WITHOUT A REDEPLOY:
- *   1. Edit /AI Prompts/clinicalAI_rules.json (single source of truth)
+ *   1. Edit /AI Prompts/clinicalAI_rules.js (single source of truth)
  *   2. Run: node scripts/sync-clinicalai-rules.mjs
  *   3. Done — the backend picks up the new rules on the next user session.
  * ─────────────────────────────────────────────────────────────────────────────

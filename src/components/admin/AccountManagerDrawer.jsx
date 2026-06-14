@@ -1,6 +1,27 @@
 import React, { useState } from 'react';
 import { Tabs, Toggle, TextField, StatusChip } from '../ui';
-import { X, Briefcase, Map, Users, TrendingUp, Shield, Activity, Phone, Mail, Building2, Calendar, MapPin, CheckCircle2, AlertCircle, Clock, Search, MoreVertical, DollarSign, Target, UserCircle, Plus, Eye } from 'lucide-react';
+import X from "lucide-react/dist/esm/icons/x";
+import Briefcase from "lucide-react/dist/esm/icons/briefcase";
+import Map from "lucide-react/dist/esm/icons/map";
+import Users from "lucide-react/dist/esm/icons/users";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Search from "lucide-react/dist/esm/icons/search";
+import MoreVertical from "lucide-react/dist/esm/icons/more-vertical";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Target from "lucide-react/dist/esm/icons/target";
+import UserCircle from "lucide-react/dist/esm/icons/user-circle";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Eye from "lucide-react/dist/esm/icons/eye";
 import { useResponsive } from '../../hooks/useResponsive';
 
 export default function AccountManagerDrawer({ manager, wholesellers, onUpdate, onClose }) {

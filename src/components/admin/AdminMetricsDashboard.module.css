@@ -1,0 +1,148 @@
+.atlasCommandCenter {
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(226, 232, 240, 0.8);
+  --glass-blur: blur(12px);
+  font-family: 'Inter', -apple-system, sans-serif;
+  padding: 1.5rem 2rem 5rem;
+  animation: fadeIn 0.4s ease-out;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.glassCard {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px -2px rgba(148, 163, 184, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glassCard:hover {
+  box-shadow: 0 10px 25px -4px rgba(148, 163, 184, 0.15);
+  border-color: rgba(203, 213, 225, 0.9);
+}
+
+.kpiStrip {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.mainPortalGrid {
+  display: grid;
+  grid-template-columns: 2.2fr 0.8fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.widgetsCol {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.sideCol {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.mobileNavBar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  z-index: 1000;
+  grid-template-columns: repeat(6, 1fr);
+  align-items: center;
+  justify-items: center;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+}
+
+.mobileNavItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.65rem;
+  color: #64748b;
+  gap: 2px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.mobileNavItem.active {
+  color: #0284c7;
+}
+
+.headerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.liveBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.liveDot {
+  display: inline-flex;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.liveText {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #10b981;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dashboardTitle {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.dashboardSubtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+@media (max-width: 1024px) {
+  .mainPortalGrid {
+    grid-template-columns: 1fr;
+  }
+  .atlasCommandCenter {
+    padding: 1rem 1rem 5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .desktopOnlyWidget {
+    display: none !important;
+  }
+  .mobileNavBar {
+    display: grid;
+  }
+}

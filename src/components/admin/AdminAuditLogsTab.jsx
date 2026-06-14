@@ -1,7 +1,18 @@
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Filter from "lucide-react/dist/esm/icons/filter";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import Search from "lucide-react/dist/esm/icons/search";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
-import { ShieldAlert, Activity, Filter, RefreshCw, Search, ShieldCheck } from 'lucide-react';
+
+
+
+
+
+
 
 const fmt = (date) => new Intl.DateTimeFormat('en-GB', {
   day: 'short', month: 'short', year: 'numeric',
@@ -86,7 +97,6 @@ export default function AdminAuditLogsTab() {
       </div>
 
       <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
-        
         {/* Toolbar */}
         <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc', display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
@@ -136,7 +146,6 @@ export default function AdminAuditLogsTab() {
                 filteredLogs.map(log => {
                   const date = log.executed_at?.toDate ? log.executed_at.toDate() : new Date(log.executed_at);
                   const isDateValid = !isNaN(date.getTime());
-                  
                   return (
                     <tr key={log.id} style={{ borderBottom: '1px solid #e2e8f0', transition: 'background-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                       <td style={{ padding: '1rem 1.5rem', color: '#64748b', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>

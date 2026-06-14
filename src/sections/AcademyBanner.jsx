@@ -1,6 +1,14 @@
- 
+import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import Users from "lucide-react/dist/esm/icons/users";
+import Award from "lucide-react/dist/esm/icons/award";
 import React from 'react';
-import { GraduationCap, ArrowRight, BookOpen, Users, Award } from 'lucide-react';
+
+
+
+
+
 
 const AcademyBanner = ({ compact = false, onNavigate }) => {
   if (compact) {

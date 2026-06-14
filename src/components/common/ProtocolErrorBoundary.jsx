@@ -1,6 +1,10 @@
- 
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import React from 'react';
-import { AlertTriangle, RefreshCw, ArrowLeft } from 'lucide-react';
+
+
+
 
 /**
  * ProtocolErrorBoundary — FASE 3.3

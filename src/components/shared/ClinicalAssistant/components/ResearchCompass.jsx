@@ -1,7 +1,18 @@
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Heart from "lucide-react/dist/esm/icons/heart";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Target from "lucide-react/dist/esm/icons/target";
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Zap, Heart, Brain, Clock, Shield, Target } from 'lucide-react';
+
+
+
+
+
+
 
 const RESEARCH_PATHS = [
   { id: 'recovery', label: 'Injury & Recovery', icon: <Zap size={15} />, color: '#f59e0b', prompt: 'I want to research peptides for injury recovery and tissue repair.' },
@@ -29,7 +40,6 @@ export default function ResearchCompass({ onSelect }) {
         <div style={{ width: '10px', height: '1.5px', background: 'var(--primary)' }} />
         Select Research Compass Path
       </div>
-      
       {/* Main Research Paths */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem' }}>
         {RESEARCH_PATHS.map((path, i) => (

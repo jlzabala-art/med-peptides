@@ -1,5 +1,12 @@
+import Smartphone from "lucide-react/dist/esm/icons/smartphone";
+import Monitor from "lucide-react/dist/esm/icons/monitor";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import Sun from "lucide-react/dist/esm/icons/sun";
 import React, { useState, useEffect, useRef } from 'react';
-import { Smartphone, Monitor, Moon, Sun } from 'lucide-react';
+
+
+
+
 
 export default function EmailPreviewPanel({ htmlContent }) {
   const [previewMode, setPreviewMode] = useState('desktop'); // 'desktop' | 'mobile'

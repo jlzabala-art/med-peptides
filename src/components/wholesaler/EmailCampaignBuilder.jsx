@@ -1,3 +1,19 @@
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Save from "lucide-react/dist/esm/icons/save";
+import Bot from "lucide-react/dist/esm/icons/bot";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Check from "lucide-react/dist/esm/icons/check";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Users from "lucide-react/dist/esm/icons/users";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import BarChart2 from "lucide-react/dist/esm/icons/bar-chart-2";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import Copy from "lucide-react/dist/esm/icons/copy";
+import Send from "lucide-react/dist/esm/icons/send";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
 import React, { useState, useEffect } from 'react';
 import { emailCampaignRepository } from '../../repositories/emailCampaignRepository';
 import { catalogRepository } from '../../repositories/catalogRepository';
@@ -5,11 +21,22 @@ import { askCatalogAssistant } from '../../services/catalogAIService';
 import { emptyCampaign, CAMPAIGN_STATUS } from '../../schemas/emailCampaignSchema';
 import { renderCatalogEmailHtml } from '../../utils/emailHtmlRenderer';
 import EmailPreviewPanel from './EmailPreviewPanel';
-import { 
-  ArrowLeft, ArrowRight, Save, Bot, Sparkles, Check, 
-  Trash2, Plus, Mail, Users, ExternalLink, BarChart2, Eye,
-  Copy, Send, MessageSquare
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export default function EmailCampaignBuilder({ ownerId, ownerType, onBack }) {
   const [view, setView] = useState('list'); // 'list' | 'builder'
@@ -132,14 +159,12 @@ Do NOT wrap in markdown code blocks. Output raw JSON.`;
       };
 
       await emailCampaignRepository.saveCampaign(finalCampaign);
-      
       // If sent, write mock open/click events in next 10 seconds for demo tracking
       if (sendNow) {
         alert('Email campaign sent successfully to queue!');
       } else {
         alert('Campaign saved as draft.');
       }
-      
       setView('list');
       loadData();
     } catch (e) {
@@ -212,7 +237,6 @@ Do NOT wrap in markdown code blocks. Output raw JSON.`;
       (c.recipient?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (c.recipient?.clinic || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (c.subject || '').toLowerCase().includes(searchTerm.toLowerCase());
-    
     const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
     return matchesSearch && matchesStatus;
   });

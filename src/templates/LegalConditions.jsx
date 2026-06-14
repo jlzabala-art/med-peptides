@@ -1,6 +1,23 @@
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Lock from "lucide-react/dist/esm/icons/lock";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Scale from "lucide-react/dist/esm/icons/scale";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Gavel from "lucide-react/dist/esm/icons/gavel";
+import FileCheck from "lucide-react/dist/esm/icons/file-check";
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from 'react';
-import { Shield, Lock, Truck, AlertCircle, Scale, ChevronRight, Mail, Gavel, FileCheck } from 'lucide-react';
+
+
+
+
+
+
+
+
+
 
 const LegalConditions = ({ onBack }) => {
   const [activeSection, setActiveSection] = useState(0);
@@ -65,7 +82,6 @@ const LegalConditions = ({ onBack }) => {
       const offset = 120;
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - offset;
-      
       window.scrollTo({
         top: offsetPosition,
         behavior: 'smooth'

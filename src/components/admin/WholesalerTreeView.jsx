@@ -1,17 +1,25 @@
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Settings from "lucide-react/dist/esm/icons/settings";
+import GripVertical from "lucide-react/dist/esm/icons/grip-vertical";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import X from "lucide-react/dist/esm/icons/x";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
 import React, { useState } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import {
-  Building2,
-  ChevronDown,
-  ChevronRight,
-  Settings,
-  GripVertical,
-  HelpCircle,
-  ArrowRight,
-  X,
-  ShieldAlert,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+import notifier from '../../services/NotificationService';
 
 export default function WholesalerTreeView({ wholesalers = [], onUpdate }) {
   const [expandedNodes, setExpandedNodes] = useState({});
@@ -65,7 +73,7 @@ export default function WholesalerTreeView({ wholesalers = [], onUpdate }) {
 
     if (!draggedNodeId || draggedNodeId === targetParentId) return;
     if (targetParentId && isDescendant(draggedNodeId, targetParentId)) {
-      alert('Error: Cannot place a parent wholesaler under its own sub-wholesaler.');
+      notifier.info('Error: Cannot place a parent wholesaler under its own sub-wholesaler.');
       return;
     }
 
@@ -77,7 +85,7 @@ export default function WholesalerTreeView({ wholesalers = [], onUpdate }) {
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Failed to update wholesaler hierarchy:', err);
-      alert('Error updating database.');
+      notifier.info('Error updating database.');
     }
   };
 
@@ -98,7 +106,7 @@ export default function WholesalerTreeView({ wholesalers = [], onUpdate }) {
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Failed to update margin rules:', err);
-      alert('Failed to update margin rules.');
+      notifier.info('Failed to update margin rules.');
     } finally {
       setSavingMargin(false);
     }

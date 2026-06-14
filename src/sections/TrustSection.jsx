@@ -1,5 +1,11 @@
- 
-import { CheckCircle, Shield, Truck, Zap } from 'lucide-react';
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import Zap from "lucide-react/dist/esm/icons/zap";
+
+
+
+
 
 export default function TrustSection() {
   const stats = [
@@ -111,7 +117,6 @@ export default function TrustSection() {
         .icon-purple { color: #8b5cf6; }
         .icon-green { color: #10b981; }
         .icon-orange { color: #f59e0b; }
-        
         .stat-value {
           font-size: 2rem;
           font-weight: 800;

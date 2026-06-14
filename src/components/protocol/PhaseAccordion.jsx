@@ -1,6 +1,17 @@
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Activity from "lucide-react/dist/esm/icons/activity";
 import React, { useState, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, ChevronDown, ChevronUp, FlaskConical, Activity } from 'lucide-react';
+
+
+
+
+
+
 
 export const PhaseAccordion = memo(function PhaseAccordion({ phase, index, weekRange, clinicalGoal }) {
   const [open, setOpen] = useState(index === 0);
@@ -116,7 +127,6 @@ export const PhaseAccordion = memo(function PhaseAccordion({ phase, index, weekR
                 <Activity size={12} />
                 {showDetails ? 'Hide Monitoring Details' : 'Show Monitoring & Notes'}
               </button>
-              
               <AnimatePresence initial={false}>
               {showDetails && (
                 <motion.div

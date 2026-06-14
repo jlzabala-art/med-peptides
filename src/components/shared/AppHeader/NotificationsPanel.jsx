@@ -1,92 +1,168 @@
-import React from 'react';
-import { Bell, Package, AlertCircle, ShieldAlert, CheckCircle2, FlaskConical } from 'lucide-react';
+import Bell from "lucide-react/dist/esm/icons/bell";
+import Package from "lucide-react/dist/esm/icons/package";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Check from "lucide-react/dist/esm/icons/check";
+import X from "lucide-react/dist/esm/icons/x";
+import React, { useState } from 'react';
+
+
+
+
+
+
+
+
+
 import { useAuth } from '../../../context/AuthContext';
-import '../../../styles/header.css'; // Reuses existing dropdown-panel styles
+import { useNotifications } from '../../../context/NotificationContext';
+import '../../../styles/header.css'; 
+
+function formatTimeAgo(date) {
+  if (!date) return 'Just now';
+  const timestamp = date?.toDate ? date.toDate() : new Date(date);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - timestamp) / 1000);
+
+  if (diffInSeconds < 60) return 'Just now';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} min ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hrs ago`;
+  return `${Math.floor(diffInSeconds / 86400)} days ago`;
+}
+
+const getIconForType = (type) => {
+  switch (type) {
+    case 'alert':
+    case 'error': return <AlertCircle size={16} color="var(--color-danger)" />;
+    case 'warning': return <ShieldAlert size={16} color="#f59e0b" />;
+    case 'order': return <Package size={16} color="var(--color-success)" />;
+    case 'lab': return <FlaskConical size={16} color="#06b6d4" />;
+    case 'system': return <CheckCircle2 size={16} color="var(--color-success)" />;
+    case 'document': return <FileText size={16} color="var(--color-primary)" />;
+    default: return <Bell size={16} color="var(--color-primary)" />;
+  }
+};
 
 export default function NotificationsPanel({ onClose }) {
-  const { activeRole } = useAuth();
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const [activeTab, setActiveTab] = useState('all');
 
-  // Mock notifications tailored to the active role
-  const getNotifications = () => {
-    switch (activeRole) {
-      case 'admin':
-        return [
-          { id: 1, type: 'alert', title: 'Low Stock Alert', desc: 'BPC-157 inventory is below 15 units.', time: '10 min ago', icon: <AlertCircle size={16} color="var(--color-danger)" /> },
-          { id: 2, type: 'auth', title: 'Pending Approval', desc: 'Dr. Sarah Jenkins submitted verification documents.', time: '1 hour ago', icon: <ShieldAlert size={16} color="#f59e0b" /> },
-          { id: 3, type: 'order', title: 'New Wholesale Order', desc: 'Order #WO-492 needs review.', time: '2 hours ago', icon: <Package size={16} color="var(--color-success)" /> }
-        ];
-      case 'doctor':
-      case 'clinic':
-        return [
-          { id: 1, type: 'lab', title: 'Lab Results Ready', desc: 'New bloodwork panel for patient J. Doe.', time: '30 min ago', icon: <FlaskConical size={16} color="#06b6d4" /> },
-          { id: 2, type: 'system', title: 'Protocol Updated', desc: 'The Longevity Protocol V2 has been published.', time: '1 day ago', icon: <CheckCircle2 size={16} color="var(--color-success)" /> }
-        ];
-      case 'patient':
-        return [
-          { id: 1, type: 'order', title: 'Order Shipped', desc: 'Your recent order #RP-1002 is on the way.', time: '2 hours ago', icon: <Package size={16} color="var(--color-primary)" /> },
-          { id: 2, type: 'system', title: 'Refill Reminder', desc: 'Time to request a refill for your protocol.', time: '1 day ago', icon: <Bell size={16} color="#f59e0b" /> }
-        ];
-      default:
-        return [
-          { id: 1, type: 'system', title: 'Welcome to Atlas Health', desc: 'Explore our catalog of peptides and protocols.', time: 'Just now', icon: <Bell size={16} color="var(--color-primary)" /> }
-        ];
-    }
-  };
-
-  const notifications = getNotifications();
+  const filteredNotifications = notifications.filter(n => {
+    if (activeTab === 'unread') return !n.read;
+    if (activeTab === 'alerts') return n.type === 'alert' || n.type === 'warning' || n.priority === 'high';
+    return true;
+  });
 
   return (
     <>
       <div className="dropdown-overlay" aria-hidden="true" onClick={onClose} />
-      
       <div 
         role="dialog" 
         className="dropdown-panel" 
-        style={{ right: '-10px', width: '320px', padding: 0 }}
+        style={{ right: '-10px', width: '340px', padding: 0 }}
         onClick={(e) => e.stopPropagation()}
       >
         <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>Notifications</h3>
-          <span style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: 600, cursor: 'pointer' }}>Mark all read</span>
+          <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-main)' }}>
+            Notifications {unreadCount > 0 && <span style={{ backgroundColor: 'var(--color-danger)', color: 'white', padding: '2px 6px', borderRadius: '10px', fontSize: '0.65rem', marginLeft: '0.5rem' }}>{unreadCount}</span>}
+          </h3>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            {unreadCount > 0 && (
+              <button onClick={markAllAsRead} style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: 600, cursor: 'pointer', background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                <Check size={12} /> Mark all read
+              </button>
+            )}
+            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+              <X size={16} />
+            </button>
+          </div>
         </div>
-        
-        <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
-          {notifications.map(notif => (
-            <div key={notif.id} style={{ 
-              padding: '1rem', 
-              borderBottom: '1px solid var(--border-light)',
-              display: 'flex',
-              gap: '0.75rem',
-              cursor: 'pointer',
-              transition: 'background 0.15s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--accent-soft)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-light)', padding: '0 1rem', gap: '1rem' }}>
+          {['all', 'unread', 'alerts'].map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '0.75rem 0',
+                fontSize: '0.75rem',
+                fontWeight: activeTab === tab ? 700 : 500,
+                color: activeTab === tab ? 'var(--primary)' : 'var(--text-muted)',
+                borderBottom: activeTab === tab ? '2px solid var(--primary)' : '2px solid transparent',
+                cursor: 'pointer',
+                textTransform: 'capitalize'
+              }}
             >
-              <div style={{ 
-                width: '32px', height: '32px', borderRadius: '8px', 
-                backgroundColor: 'rgba(0, 113, 189, 0.05)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 
-              }}>
-                {notif.icon}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {notif.title}
-                  </span>
-                  <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{notif.time}</span>
-                </div>
-                <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
-                  {notif.desc}
-                </p>
-              </div>
-            </div>
+              {tab}
+            </button>
           ))}
         </div>
-        
+        <div style={{ maxHeight: '380px', overflowY: 'auto' }}>
+          {filteredNotifications.length === 0 ? (
+            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+              <Bell size={24} style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+              <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>No notifications</div>
+              <div style={{ fontSize: '0.7rem' }}>You're all caught up!</div>
+            </div>
+          ) : (
+            filteredNotifications.map(notif => (
+              <div key={notif.id} style={{ 
+                padding: '1rem', 
+                borderBottom: '1px solid var(--border-light)',
+                display: 'flex',
+                gap: '0.75rem',
+                cursor: 'pointer',
+                backgroundColor: notif.read ? 'transparent' : 'var(--primary-light)',
+                transition: 'background 0.15s'
+              }}
+              onClick={() => {
+                if (!notif.read) markAsRead(notif.id);
+                // Optionally handle navigation via notif.link here if present
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = notif.read ? 'var(--accent-soft)' : 'var(--primary-light)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = notif.read ? 'transparent' : 'var(--primary-light)'}
+              >
+                <div style={{ 
+                  width: '32px', height: '32px', borderRadius: '8px', 
+                  backgroundColor: 'var(--surface-raised)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 
+                }}>
+                  {getIconForType(notif.type)}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: notif.read ? 600 : 800, color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {notif.title}
+                    </span>
+                    <span style={{ fontSize: '0.65rem', color: notif.read ? 'var(--text-muted)' : 'var(--primary)', fontWeight: notif.read ? 400 : 700 }}>
+                      {formatTimeAgo(notif.createdAt)}
+                    </span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: notif.read ? 'var(--text-muted)' : 'var(--text-main)', lineHeight: 1.4 }}>
+                    {notif.desc || notif.message}
+                  </p>
+                </div>
+                {!notif.read && (
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--primary)', alignSelf: 'center' }} />
+                )}
+              </div>
+            ))
+          )}
+        </div>
         <div style={{ padding: '0.75rem', textAlign: 'center', borderTop: '1px solid var(--border-light)', backgroundColor: 'var(--background)' }}>
-          <button style={{ 
+          <button 
+            onClick={() => {
+              // Optionally dispatch custom event to open the centralized Notification Hub
+              window.dispatchEvent(new CustomEvent('nav:notifications'));
+              onClose();
+            }}
+            style={{ 
             background: 'none', border: 'none', color: 'var(--text-main)', 
             fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' 
           }}>

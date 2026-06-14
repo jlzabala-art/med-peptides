@@ -1,5 +1,8 @@
+import Clock from "lucide-react/dist/esm/icons/clock";
+import User from "lucide-react/dist/esm/icons/user";
 import React from 'react';
-import { Clock, User } from 'lucide-react';
+
+
 import { StatusChip } from '../ui';
 
 /**

@@ -1,20 +1,27 @@
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
+import Archive from "lucide-react/dist/esm/icons/archive";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import MinusCircle from "lucide-react/dist/esm/icons/minus-circle";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import Link2 from "lucide-react/dist/esm/icons/link-2";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+import EyeOff from "lucide-react/dist/esm/icons/eye-off";
 import React from 'react';
-import { 
-  CheckCircle2, 
-  Clock, 
-  XCircle, 
-  Archive, 
-  Mail, 
-  MinusCircle, 
-  ShieldAlert, 
-  Link2, 
-  HelpCircle,
-  EyeOff
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 
 export default function AppStatusChip({ status }) {
   const normalized = status?.toLowerCase().trim() || 'unknown';
-  
   let bg = 'var(--color-bg-hover)';
   let color = 'var(--color-text-secondary)';
   let Icon = HelpCircle;

@@ -4,21 +4,22 @@ import { Routes, Route, Navigate, Outlet, useNavigate, useParams } from 'react-r
 // Import Layouts & Auth
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import ExitProfessionalMode from '../components/auth/ExitProfessionalMode';
-import GlobalAppLayout from '../components/shared/GlobalAppLayout';
-import ShopLayout from '../layout/ShopLayout';
-import AdminLayout from '../layout/AdminLayout';
-import ClinicalLayout from '../layout/ClinicalLayout';
 import PageTransition from '../components/PageTransition';
 import AppErrorBoundary from '../components/AppErrorBoundary';
 import AtlasHealthLogo from '../components/brand/AtlasHealthLogo';
-import { AdminProvider } from '../context/AdminProvider';
-import { DoctorProvider } from '../context/DoctorProvider';
 import { useUIStore } from '../stores/uiStore';
 import { useShop } from '../context/ShopProvider';
 import { useCart } from '../context/CartProvider';
 import { useAuth } from '../context/AuthContext';
 
-// Lazy Templates
+// Lazy Templates & Layouts
+const GlobalAppLayout = lazy(() => import('../components/shared/GlobalAppLayout'));
+const ShopLayout = lazy(() => import('../layout/ShopLayout'));
+const AdminLayout = lazy(() => import('../layout/AdminLayout'));
+const ClinicalLayout = lazy(() => import('../layout/ClinicalLayout'));
+const AdminProvider = lazy(() => import('../context/AdminProvider').then(module => ({ default: module.AdminProvider })));
+const DoctorProvider = lazy(() => import('../context/DoctorProvider').then(module => ({ default: module.DoctorProvider })));
+
 import ShopRoutes from './ShopRoutes';
 import AuthPage from '../templates/AuthPage';
 const AdminRoutes = lazy(() => import('./AdminRoutes'));
@@ -53,7 +54,7 @@ const ClinicalLoader = () => (
     <div style={{ animation: 'atlas-pulse 1.8s ease-in-out infinite' }}>
       <AtlasHealthLogo size={52} />
     </div>
-    <p style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 500, margin: 0 }}>Cargando…</p>
+    <p style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 500, margin: 0 }}>Loading…</p>
     <div style={{ width: 100, height: 3, borderRadius: 99, background: 'rgba(0,54,102,0.08)', overflow: 'hidden' }}>
       <div style={{ height: '100%', borderRadius: 99, background: 'linear-gradient(90deg,#003666,#00BCD4)', animation: 'atlas-shimmer 1.4s ease-in-out infinite' }} />
     </div>

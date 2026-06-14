@@ -1,7 +1,8 @@
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { usePermissions } from '../../contexts/PermissionsContext';
-import { ShieldAlert } from 'lucide-react';
+
 import { useTranslation } from 'react-i18next';
 
 const AccessDenied = () => {
@@ -30,7 +31,6 @@ const TAB_TO_PERMISSION_MAP = {
   'catalogs': 'canAccessAdminDashboard',
   'ai-builder': 'canAccessAdminDashboard',
   'access-levels': 'canAccessAdminDashboard',
-  
   // General views
   'my-profile': 'canAccessAdminDashboard', // Everyone with admin access
   'messages': 'canAccessAdminDashboard',

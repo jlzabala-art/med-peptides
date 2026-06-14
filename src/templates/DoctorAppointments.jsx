@@ -1,3 +1,16 @@
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Pill from "lucide-react/dist/esm/icons/pill";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Info from "lucide-react/dist/esm/icons/info";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import CalendarDays from "lucide-react/dist/esm/icons/calendar-days";
+import User from "lucide-react/dist/esm/icons/user";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Database from "lucide-react/dist/esm/icons/database";
+import Chrome from "lucide-react/dist/esm/icons/chrome";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import X from "lucide-react/dist/esm/icons/x";
 import React, { useState, useEffect } from 'react';
 import { 
   collection, 
@@ -12,25 +25,22 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
-import { 
-  Calendar, 
-  Pill, 
-  Clock, 
-  Info, 
-  CheckCircle2, 
-  CalendarDays, 
-  User, 
-  ArrowRight,
-  Database,
-  Chrome,
-  AlertTriangle,
-  RefreshCw,
-  X
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export default function DoctorAppointments() {
   const { user, userProfile, baseRole } = useAuth();
-  
   // Impersonation check
   const isAdmin = baseRole === 'admin';
   const storedImpersonatedId = sessionStorage.getItem('impersonatedDoctorId');
@@ -155,7 +165,6 @@ export default function DoctorAppointments() {
           <h2 style={styles.title}>📅 Clinical Agenda & Appointments</h2>
           <p style={styles.subtitle}>Manage scheduled patient visits, prescription timelines, 30-day refills, and transactions.</p>
         </div>
-        
         {/* Google Calendar Sync */}
         <div>
           {calendarConnected ? (
@@ -181,7 +190,6 @@ export default function DoctorAppointments() {
         <div style={styles.grid}>
           {/* Left Column: Calendar Agenda & Refills */}
           <div style={styles.col}>
-            
             {/* Daily Schedule Slots */}
             <div style={styles.card}>
               <div style={styles.cardHeader}>
@@ -218,7 +226,6 @@ export default function DoctorAppointments() {
                     const remindDate = r.remindAt?.toDate ? r.remindAt.toDate() : new Date(r.remindAt);
                     const daysRemaining = Math.ceil((remindDate - new Date()) / (1000 * 60 * 60 * 24));
                     const isDue = daysRemaining <= 0;
-                    
                     return (
                       <div key={r.id} style={styles.refillRow}>
                         <div style={{ flex: 1 }}>
@@ -243,7 +250,6 @@ export default function DoctorAppointments() {
 
           {/* Right Column: Prescriptions & Transactions */}
           <div style={styles.col}>
-            
             {/* Prescription History */}
             <div style={styles.card}>
               <div style={styles.cardHeader}>

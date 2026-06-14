@@ -1,3 +1,5 @@
+import Settings from "lucide-react/dist/esm/icons/settings";
+import X from "lucide-react/dist/esm/icons/x";
 import React, { useState, useEffect } from 'react';
 import { WIDGET_REGISTRY, DEFAULT_DOCTOR_CONFIG, DEFAULT_PATIENT_CONFIG, DEFAULT_WHOLESALER_CONFIG, DEFAULT_ADMIN_CONFIG, DEFAULT_CLINIC_CONFIG } from './WidgetRegistry';
 import { motion } from 'framer-motion';
@@ -5,7 +7,8 @@ import { db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-import { Settings, X } from 'lucide-react';
+
+
 import DashboardCustomizer from './DashboardCustomizer';
 
 export default function DashboardEngine({ role, dataContext }) {
@@ -33,7 +36,6 @@ export default function DashboardEngine({ role, dataContext }) {
       try {
         const userRef = doc(db, 'users', user.uid);
         const userSnap = await getDoc(userRef);
-        
         let loadedConfig = null;
         if (userSnap.exists() && userSnap.data().dashboardConfig) {
           loadedConfig = userSnap.data().dashboardConfig;
@@ -43,7 +45,6 @@ export default function DashboardEngine({ role, dataContext }) {
         if (!loadedConfig) {
           loadedConfig = getDefaultConfig();
         }
-        
         setConfig(loadedConfig);
       } catch (err) {
         console.error("Error loading dashboard config:", err);

@@ -1,9 +1,14 @@
+import FileUp from "lucide-react/dist/esm/icons/file-up";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-import { FileUp, FileText, CheckCircle2 } from 'lucide-react';
+
+
+
 
 export default function BloodworkUploaderWidget() {
   const { user } = useAuth();
@@ -39,7 +44,6 @@ export default function BloodworkUploaderWidget() {
     setLoading(true);
     try {
       const docRel = doctors.find(d => d.doctorId === selectedPhysician);
-      
       // Simulate file upload logic by creating a record in Firestore
       // In a real scenario, we would upload to Firebase Storage first and get the URL.
       await addDoc(collection(db, 'lab_results'), {
@@ -54,7 +58,6 @@ export default function BloodworkUploaderWidget() {
         status: 'pending_review',
         uploadedAt: serverTimestamp()
       });
-      
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -74,7 +77,6 @@ export default function BloodworkUploaderWidget() {
       <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <FileUp size={18} color="var(--primary)" /> {t('patient.bloodwork.title')}
       </h3>
-      
       {success ? (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--color-success)', gap: '1rem', padding: '1rem 0' }}>
           <CheckCircle2 size={40} />
@@ -86,7 +88,6 @@ export default function BloodworkUploaderWidget() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
           <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>{t('patient.bloodwork.description')}</p>
-          
           <div>
             <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--color-text-secondary)', marginBottom: '0.4rem', textTransform: 'uppercase' }}>{t('patient.bloodwork.send_to')}</label>
             <select value={selectedPhysician} onChange={e => setSelectedPhysician(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1.5px solid #e2e8f0', outline: 'none' }}>

@@ -1,8 +1,21 @@
+import Users from "lucide-react/dist/esm/icons/users";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Clock from "lucide-react/dist/esm/icons/clock";
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
-import { Users, ShoppingBag, Calendar, Mail, FileText, CheckCircle, Clock } from 'lucide-react';
+
+
+
+
+
+
+
 
 export default function ClientsTab() {
   const { userProfile } = useAuth();

@@ -1,7 +1,16 @@
+import Check from "lucide-react/dist/esm/icons/check";
+import X from "lucide-react/dist/esm/icons/x";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import AlertOctagon from "lucide-react/dist/esm/icons/alert-octagon";
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../../firebase';
-import { Check, X, ShieldAlert, Clock, AlertOctagon } from 'lucide-react';
+
+
+
+
+
 import { useToast } from '../../../hooks/useToast';
 import { useAuth } from '../../../context/AuthContext';
 
@@ -81,7 +90,6 @@ export default function AdminApprovalsWidget() {
   return (
     <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.05)', borderRadius: '1.5rem', border: '1px solid rgba(239, 68, 68, 0.2)', overflow: 'hidden', position: 'relative', boxShadow: '0 10px 15px -3px rgba(239, 68, 68, 0.05)' }}>
       <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: 'var(--color-error, #ef4444)' }} />
-      
       <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(239, 68, 68, 0.1)', display: 'flex', alignItems: 'center', gap: '1rem', backgroundColor: 'var(--color-surface)' }}>
         <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '0.75rem', borderRadius: '1rem' }}>
           <AlertOctagon style={{ width: '1.5rem', height: '1.5rem', color: 'var(--color-error, #dc2626)', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
@@ -93,11 +101,9 @@ export default function AdminApprovalsWidget() {
           </p>
         </div>
       </div>
-      
       <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', backgroundColor: 'rgba(255, 255, 255, 0.3)' }}>
         {approvals.map(app => (
           <div key={app.id} style={{ backgroundColor: 'var(--color-surface)', padding: '1.25rem', borderRadius: '1rem', border: '1px solid var(--color-border)', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
-            
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
                 <span style={{ padding: '0.25rem 0.75rem', backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)', fontSize: '0.75rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.05em', borderRadius: '0.5rem', border: '1px solid var(--color-border)' }}>
@@ -108,7 +114,6 @@ export default function AdminApprovalsWidget() {
                   {new Date(app.createdAt).toLocaleString()}
                 </span>
               </div>
-              
               {app.type === 'cost_update' && (
                 <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', lineHeight: 1.6 }}>
                   <strong style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>{app.requestedBy}</strong> requested to change costs for <strong style={{ color: 'var(--color-text-primary)', fontWeight: 'bold' }}>{app.data.productName}</strong>. 
@@ -129,7 +134,6 @@ export default function AdminApprovalsWidget() {
                   to <strong style={{ color: 'var(--color-text-primary)', fontWeight: 'bold' }}>{app.data.recipientName}</strong>.
                 </div>
               )}
-              
               {app.reason && (
                 <div style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: 'var(--color-text-tertiary)', backgroundColor: 'var(--color-bg-secondary)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', borderLeft: '2px solid var(--color-border)' }}>
                   <span style={{ fontWeight: 'bold', color: 'var(--color-text-secondary)', marginRight: '0.5rem' }}>Reason:</span>
@@ -137,7 +141,6 @@ export default function AdminApprovalsWidget() {
                 </div>
               )}
             </div>
-            
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
               <button 
                 onClick={() => handleAction(app.id, app.type, app.data, 'reject')}
@@ -154,7 +157,6 @@ export default function AdminApprovalsWidget() {
                 Authorize
               </button>
             </div>
-            
           </div>
         ))}
       </div>

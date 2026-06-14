@@ -1,17 +1,21 @@
-import {
-  Search,
-  FlaskConical,
-  BookOpen,
-  ShoppingCart,
-  ArrowRight,
-  Compass,
-  Zap,
-} from 'lucide-react';
+import Search from "lucide-react/dist/esm/icons/search";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Compass from "lucide-react/dist/esm/icons/compass";
+import Zap from "lucide-react/dist/esm/icons/zap";
+
+
+
+
+
+
+
 
 /* ─────────────────────────────────────────────────────────────────────────
    PHASE 3 — Exploration Journey
    Answers: "Are users actually exploring? What path do they take?"
-   
    Data sources (all existing, no new GA4 queries needed):
    - tops.searches   → what users look for
    - tops.peptides   → what compounds they reach

@@ -1,5 +1,8 @@
+import Bot from "lucide-react/dist/esm/icons/bot";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React, { useState } from 'react';
-import { Bot, ArrowRight } from 'lucide-react';
+
+
 import { useTranslation } from 'react-i18next';
 import { useResponsive } from '../../hooks/useResponsive';
 import '../../styles/hero_card.css';
@@ -35,7 +38,6 @@ export default function CardClinicAI({ onAsk }) {
       <div className="icon-box"><Bot size={24} /></div>
       <h3 className="card-title">{t('hero.ai.title', 'Help me choose')}</h3>
       <p className="card-desc">{t('hero.ai.desc', 'Describe your objective and let ClinicAI guide you.')}</p>
-      
       <div className="card-input-wrapper">
         <input
           className="card-input"

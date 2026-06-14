@@ -1,10 +1,24 @@
+import Activity from "lucide-react/dist/esm/icons/activity";
+import User from "lucide-react/dist/esm/icons/user";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import LogOut from "lucide-react/dist/esm/icons/log-out";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import HeartPulse from "lucide-react/dist/esm/icons/heart-pulse";
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
 import React, { useState, useCallback } from 'react';
 import { Outlet, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { 
-  Activity, User, Calendar, Beaker, ClipboardList, 
-  LogOut, ShieldCheck, HeartPulse, Stethoscope 
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
 import PortalLayout from '../components/ui/PortalLayout';
 
 export default function ClinicalLayout() {

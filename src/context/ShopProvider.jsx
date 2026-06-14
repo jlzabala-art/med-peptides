@@ -2,7 +2,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getCatalog } from '../repositories/productRepository';
-import { products as staticProducts } from '../data/products';
 
 const ShopContext = createContext();
 
@@ -45,7 +44,16 @@ export function ShopProvider({ children }) {
       } catch (err) {
         console.error('[ShopProvider] Product catalog load error:', err);
       }
-      const staticProductsList = Array.isArray(staticProducts) ? staticProducts : [];
+      let staticProductsList = [];
+      try {
+        const res = await fetch('/data/products.json');
+        if (res.ok) {
+          const data = await res.json();
+          staticProductsList = Array.isArray(data.products) ? data.products : [];
+        }
+      } catch (err) {
+        console.error('[ShopProvider] fetch products error', err);
+      }
       return staticProductsList.map(enrichV2);
     },
     staleTime: 1000 * 60 * 60, // 1 hour for catalog

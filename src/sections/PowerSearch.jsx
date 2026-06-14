@@ -1,5 +1,13 @@
- 
-import { Search, FlaskConical, BookOpen, MessageSquare, ArrowRight } from 'lucide-react';
+import Search from "lucide-react/dist/esm/icons/search";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+
+
+
+
+
 
 export default function PowerSearch({ onOpenSearch, searchQuery, setSearchQuery }) {
   const examples = [
@@ -120,7 +128,6 @@ export default function PowerSearch({ onOpenSearch, searchQuery, setSearchQuery 
               -webkit-overflow-scrolling: touch;
             }
             .ps-examples-container::-webkit-scrollbar { display: none; }
-            
             .ps-chip {
               white-space: nowrap;
               background: white;

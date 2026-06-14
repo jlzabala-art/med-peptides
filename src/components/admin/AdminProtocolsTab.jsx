@@ -1,3 +1,21 @@
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Save from "lucide-react/dist/esm/icons/save";
+import Check from "lucide-react/dist/esm/icons/check";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import X from "lucide-react/dist/esm/icons/x";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Package from "lucide-react/dist/esm/icons/package";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import User from "lucide-react/dist/esm/icons/user";
+import GripVertical from "lucide-react/dist/esm/icons/grip-vertical";
+import Edit3 from "lucide-react/dist/esm/icons/edit-3";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import Pause from "lucide-react/dist/esm/icons/pause";
+import Play from "lucide-react/dist/esm/icons/play";
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/set-state-in-effect */
 /**
@@ -10,27 +28,26 @@ import { collection, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/fi
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../../firebase';
 import { getPaginatedProtocols, updateProtocolFull } from '../../services/protocolStorage';
-import {
-  RefreshCw,
-  ChevronDown,
-  ChevronRight,
-  Trash2,
-  Save,
-  Check,
-  Plus,
-  X,
-  AlertTriangle,
-  FlaskConical,
-  Package,
-  Clock,
-  User,
-  GripVertical,
-  Edit3,
-  ExternalLink,
-  Pause,
-  Play,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { useToast } from '../../hooks/useToast';
+import notifier from '../../services/NotificationService';
 import CustomProtocolBuilder from './CustomProtocolBuilder';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -617,7 +634,6 @@ function PathwayBuilder({ onClose, onSave, onGenerateAI }) {
               <p style={{ color: '#64748b', fontSize: '0.95rem', maxWidth: '400px', margin: '0 auto 2rem' }}>
                 You can manually assemble the phases, or let Atlas AI generate a draft clinical pathway based on your parameters.
               </p>
-              
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                 <button 
                   onClick={buildTemplate}
@@ -643,7 +659,6 @@ function PathwayBuilder({ onClose, onSave, onGenerateAI }) {
           >
             {step === 1 ? 'Cancel' : 'Back'}
           </button>
-          
           {step < 3 && (
             <button 
               onClick={handleNext}
@@ -655,7 +670,6 @@ function PathwayBuilder({ onClose, onSave, onGenerateAI }) {
           )}
         </div>
       </motion.div>
-      
       <AnimatePresence>
         {showPathwayWizard && (
           <PathwayBuilder 
@@ -838,16 +852,17 @@ export default function AdminProtocolsTab() {
 
   // Delete
   async function handleDelete(id) {
-    if (!window.confirm('Permanently delete this protocol? This cannot be undone.')) return;
-    setDeleting(id);
-    try {
-      await deleteDoc(doc(db, 'protocols', id));
-      setProtocols((prev) => prev.filter((p) => p.id !== id));
-    } catch (err) {
-      toast.error('Delete failed: ' + err.message);
-    } finally {
-      setDeleting(null);
-    }
+    notifier.confirmCritical('Permanently delete this protocol? This cannot be undone.', async () => {
+      setDeleting(id);
+      try {
+        await deleteDoc(doc(db, 'protocols', id));
+        setProtocols((prev) => prev.filter((p) => p.id !== id));
+      } catch (err) {
+        toast.error('Delete failed: ' + err.message);
+      } finally {
+        setDeleting(null);
+      }
+    });
   };
 
   // Create new pathway from wizard
@@ -1320,7 +1335,6 @@ export default function AdminProtocolsTab() {
                                           {phase.items?.length || 0} Products
                                         </span>
                                       </div>
-                                      
                                       {phase.items && phase.items.length > 0 ? (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                           {phase.items.map((item, j) => (
@@ -1413,11 +1427,9 @@ export default function AdminProtocolsTab() {
           </div>
         )}
       </div>
-    
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: AdminProtocolsTab | Props: none
       </div>
-    
 </div>
   );
 }

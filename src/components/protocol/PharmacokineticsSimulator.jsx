@@ -1,6 +1,21 @@
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Heart from "lucide-react/dist/esm/icons/heart";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Info from "lucide-react/dist/esm/icons/info";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 /* eslint-disable no-unused-vars */
 import React, { useState, useMemo } from 'react';
-import { Activity, Clock, Heart, Sparkles, TrendingUp, Info, AlertCircle, RefreshCw } from 'lucide-react';
+
+
+
+
+
+
+
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { getPeptidePK } from '../../data/peptidePharmacokinetics';
 
@@ -22,10 +37,8 @@ export default function PharmacokineticsSimulator({ compounds = [] }) {
           steadyState: 'Reached in 5 days',
           notes: 'Standard clearance profile. Consistent administration is recommended to avoid deep troughs in concentration.'
         };
-        
         // Parse dosage
         const weeklyDose = c.weekly_dose_amount || parseFloat(c.weekly_dose || c.dose) || 1;
-        
         // Parse frequency
         const freqText = (c.dose_logic?.administration_frequency || c.frequency || 'Weekly')
           .toLowerCase()
@@ -35,7 +48,6 @@ export default function PharmacokineticsSimulator({ compounds = [] }) {
         else if (freqText.includes('every other day') || freqText.includes('eod')) frequencyDays = 2;
         else if (freqText.includes('twice') || freqText.includes('2x')) frequencyDays = 3.5;
         else if (freqText.includes('3x')) frequencyDays = 2.3;
-        
         return {
           id: slug,
           name,
@@ -74,7 +86,6 @@ export default function PharmacokineticsSimulator({ compounds = [] }) {
     const dataPoints = [];
     const totalDays = simulationDays;
     const ke = Math.LN2 / halfLifeDays;
-    
     // Determine dose schedule times
     const doseTimes = [];
     for (let t = 0; t <= totalDays; t += currentInterval) {
@@ -84,7 +95,6 @@ export default function PharmacokineticsSimulator({ compounds = [] }) {
     for (let i = 0; i <= pointsCount; i++) {
       const t = (totalDays * i) / pointsCount;
       let concentration = 0;
-      
       // Accumulate concentration from all previous doses
       doseTimes.forEach((doseTime) => {
         if (t >= doseTime) {
@@ -125,7 +135,6 @@ export default function PharmacokineticsSimulator({ compounds = [] }) {
       for (let i = 0; i <= pointsCount; i++) {
         const t = (totalDays * i) / pointsCount;
         let concentration = 0;
-        
         doseTimes.forEach((doseTime) => {
           if (t >= doseTime) {
             const timeSinceDose = t - doseTime;
@@ -201,7 +210,6 @@ export default function PharmacokineticsSimulator({ compounds = [] }) {
     const startY = height - paddingBottom;
     const endX = paddingLeft + chartWidth;
     const endY = height - paddingBottom;
-    
     const curvePoints = simulationData.map((d) => {
         const x = paddingLeft + (d.day / simulationDays) * chartWidth;
         const y = height - paddingBottom - (d.value / globalMaxVal) * chartHeight;
@@ -551,9 +559,7 @@ export default function PharmacokineticsSimulator({ compounds = [] }) {
                     return `L ${x} ${y}`;
                   })
                   .join(' ');
-                
                 const areaStr = `M ${startX} ${startY} ${curvePts} L ${endX} ${endY} Z`;
-                
                 return (
                   <motion.path
                     key={`area-${curve.compound.slug}`}
@@ -590,7 +596,6 @@ export default function PharmacokineticsSimulator({ compounds = [] }) {
                     return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
                   })
                   .join(' ');
-                
                 return (
                   <motion.path
                     key={`line-${curve.compound.slug}`}

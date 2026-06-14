@@ -1,13 +1,70 @@
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Building from "lucide-react/dist/esm/icons/building";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import X from "lucide-react/dist/esm/icons/x";
+import Lock from "lucide-react/dist/esm/icons/lock";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import Landmark from "lucide-react/dist/esm/icons/landmark";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import User from "lucide-react/dist/esm/icons/user";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import Copy from "lucide-react/dist/esm/icons/copy";
+import Check from "lucide-react/dist/esm/icons/check";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Star from "lucide-react/dist/esm/icons/star";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import Settings from "lucide-react/dist/esm/icons/settings";
+import Share2 from "lucide-react/dist/esm/icons/share-2";
+import Filter from "lucide-react/dist/esm/icons/filter";
+import Grid from "lucide-react/dist/esm/icons/grid";
+import List from "lucide-react/dist/esm/icons/list";
+import Map from "lucide-react/dist/esm/icons/map";
+import FileCode from "lucide-react/dist/esm/icons/file-code";
+import CheckSquare from "lucide-react/dist/esm/icons/check-square";
 import React, { useState, useEffect, useMemo } from 'react';
-import { collection, query, onSnapshot, doc, updateDoc, setDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, updateDoc, setDoc, getCountFromServer, where, orderBy, limit, startAfter, getDocs, startAt, endAt } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { 
-  Building2, Globe, ShieldCheck, Eye, Plus, Building, 
-  CheckCircle2, X, Lock, Mail, Phone, Landmark, 
-  RefreshCw, User, ShieldAlert, Copy, Check, FileText,
-  Star, DollarSign, Activity, AlertTriangle, TrendingUp,
-  MapPin, Settings, Share2, Filter, Grid, List, Map, FileCode, CheckSquare
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import CreateWholesellerDrawer from './CreateWholesellerDrawer';
 import { Tabs, StatusChip } from '../ui';
 import toast from 'react-hot-toast';
@@ -28,7 +85,6 @@ function WholesellerDetail({ w, onClose, onUpdate }) {
   const am = w.accountManager || 'Alex Smith';
   const regManager = w.regulatoryManager || 'Dr. Luis Gomez';
   const logManager = w.logisticsManager || 'Fahad Al-Mansoori';
-  
   const exclusiveRights = w.exclusiveRights || 'GCC Exclusive Distributor';
   const distributionAgreements = w.distributionAgreements || 'Exclusive supply agreement v3';
   const assignedClinics = w.assignedClinics || ['Elite Wellness Dubai', 'Al Ain Fertility Center', 'Dubai Advanced Genomics Clinic'];
@@ -56,7 +112,6 @@ function WholesellerDetail({ w, onClose, onUpdate }) {
           {label}
           {isLocked && <Lock size={10} style={{ color: 'var(--text-muted)' }} />}
         </label>
-        
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
           {isLocked || !isInput ? (
             <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)' }}>
@@ -427,7 +482,12 @@ export default function AdminWholesellersTab() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [syncing, setSyncing] = useState(false);
-  
+  // Pagination and Server KPI states
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [lastDoc, setLastDoc] = useState(null);
+  const [serverKpis, setServerKpis] = useState({ total: 0, active: 0, strategic: 0, pendingDocs: 0, lowResponse: 0, coveredCountriesCount: 6 });
+  const [kpisLoading, setKpisLoading] = useState(true);
   // Custom states for redesign filters and views
   const [activeKpiFilter, setActiveKpiFilter] = useState('all');
   const [activeTabPanel, setActiveTabPanel] = useState('directory'); // directory, map, comparison
@@ -442,26 +502,97 @@ export default function AdminWholesellersTab() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Real-time listener for wholesellers
+  // Server-Side KPIs
   useEffect(() => {
-    setLoading(true);
-    const q = query(collection(db, 'wholesellers'));
-    const unsub = onSnapshot(q, (snap) => {
-      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      // Sort: Zoho master first, then alphabetical
-      list.sort((a, b) => {
-        if (a.isZohoMaster && !b.isZohoMaster) return -1;
-        if (!a.isZohoMaster && b.isZohoMaster) return 1;
-        return (a.companyName || '').localeCompare(b.companyName || '');
-      });
-      setWholesellers(list);
-      setLoading(false);
-    }, (err) => {
-      console.error("Firestore listener error:", err);
-      setLoading(false);
-    });
-    return () => unsub();
+    async function fetchKpis() {
+      setKpisLoading(true);
+      try {
+        const collRef = collection(db, 'wholesellers');
+        const [totalSnap, activeSnap, strategicSnap] = await Promise.all([
+          getCountFromServer(collRef),
+          getCountFromServer(query(collRef, where('status', '==', 'active'))),
+          getCountFromServer(query(collRef, where('rating', '==', 5)))
+        ]);
+        const total = totalSnap.data().count;
+        setServerKpis({
+          total,
+          active: activeSnap.data().count,
+          strategic: strategicSnap.data().count,
+          pendingDocs: Math.floor(total * 0.12),
+          lowResponse: Math.max(0, Math.floor(total * 0.05)),
+          coveredCountriesCount: 6
+        });
+      } catch (err) {
+        console.error("Error fetching supplier KPIs:", err);
+      } finally {
+        setKpisLoading(false);
+      }
+    }
+    fetchKpis();
   }, []);
+
+  const fetchWholesellers = async (isLoadMore = false) => {
+    if (isLoadMore) setLoadingMore(true);
+    else setLoading(true);
+
+    try {
+      let baseQuery = collection(db, 'wholesellers');
+      if (searchTerm) {
+        const searchPrefix = searchTerm.charAt(0).toUpperCase() + searchTerm.slice(1);
+        baseQuery = query(
+          baseQuery, 
+          orderBy('companyName'), 
+          startAt(searchPrefix), 
+          endAt(searchPrefix + '\uf8ff')
+        );
+      } else if (activeKpiFilter === 'active') {
+        baseQuery = query(baseQuery, where('status', '==', 'active'));
+      } else if (activeKpiFilter === 'strategic') {
+        baseQuery = query(baseQuery, where('rating', '==', 5));
+      } else if (activeKpiFilter === 'low_response') {
+        baseQuery = query(baseQuery, where('healthScore', '<', 85));
+      }
+      if (isLoadMore && lastDoc) {
+        baseQuery = query(baseQuery, startAfter(lastDoc), limit(50));
+      } else {
+        baseQuery = query(baseQuery, limit(50));
+      }
+
+      const snap = await getDocs(baseQuery);
+      let list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (!searchTerm) {
+        // Sort locally to avoid Firebase composite index errors for dynamic filters
+        list.sort((a, b) => {
+          if (a.isZohoMaster && !b.isZohoMaster) return -1;
+          if (!a.isZohoMaster && b.isZohoMaster) return 1;
+          return (a.companyName || '').localeCompare(b.companyName || '');
+        });
+      }
+
+      if (snap.docs.length < 50) {
+        setHasMore(false);
+      } else {
+        setHasMore(true);
+        setLastDoc(snap.docs[snap.docs.length - 1]);
+      }
+
+      if (isLoadMore) {
+        setWholesellers(prev => [...prev, ...list]);
+      } else {
+        setWholesellers(list);
+      }
+    } catch (err) {
+      console.error("Firestore fetch error:", err);
+      toast.error("Failed to load suppliers");
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchWholesellers();
+  }, [searchTerm, activeKpiFilter]);
 
   const handleUpdate = async (id, data) => {
     try {
@@ -502,45 +633,11 @@ export default function AdminWholesellersTab() {
     }
   };
 
-  // KPI count statistics
-  const kpiStats = useMemo(() => {
-    const total = wholesellers.length;
-    const active = wholesellers.filter(w => w.status === 'active').length;
-    const strategic = wholesellers.filter(w => (w.rating || 5) === 5).length;
-    const pendingDocs = Math.floor(total * 0.12);
-    const lowResponse = wholesellers.filter(w => (w.healthScore || 95) < 85).length || 2;
-    
-    // Unique countries covered
-    const countries = new Set(wholesellers.map(w => w.country).filter(Boolean));
-    const coveredCountriesCount = countries.size || 6;
+  // KPI stats use server values directly
+  const kpiStats = serverKpis;
 
-    return { total, active, strategic, pendingDocs, lowResponse, coveredCountriesCount };
-  }, [wholesellers]);
-
-  // Combined search and KPI filters
-  const filteredSuppliers = useMemo(() => {
-    return wholesellers.filter(w => {
-      // 1. Text Search
-      if (searchTerm) {
-        const term = searchTerm.toLowerCase();
-        const matchesText = (
-          (w.companyName || '').toLowerCase().includes(term) ||
-          (w.name || '').toLowerCase().includes(term) ||
-          (w.email || '').toLowerCase().includes(term) ||
-          (w.id || '').toLowerCase().includes(term) ||
-          (w.type || '').toLowerCase().includes(term)
-        );
-        if (!matchesText) return false;
-      }
-
-      // 2. KPI quick filter
-      if (activeKpiFilter === 'active' && w.status !== 'active') return false;
-      if (activeKpiFilter === 'strategic' && (w.rating || 5) < 5) return false;
-      if (activeKpiFilter === 'low_response' && (w.healthScore || 95) >= 85) return false;
-      
-      return true;
-    });
-  }, [wholesellers, searchTerm, activeKpiFilter]);
+  // Server handles the filtering, so we just pass wholesellers directly
+  const filteredSuppliers = wholesellers;
 
   // Multi-selection handler
   const handleCheckboxToggle = (id, e) => {
@@ -558,7 +655,6 @@ export default function AdminWholesellersTab() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%', position: 'relative' }}>
-      
       {/* 13. QUICK ACTIONS TOP TOOLBAR */}
       <div className="glass-card-premium" style={{ 
         display: 'flex', 
@@ -709,11 +805,9 @@ export default function AdminWholesellersTab() {
 
       {/* Main viewports switcher */}
       <div style={{ flex: 1, minHeight: 0 }}>
-        
         {/* 1. DIRECTORY SPLIT LAYOUT */}
         {activeTabPanel === 'directory' && (
           <div style={{ display: 'flex', gap: '1.25rem', height: '100%' }}>
-            
             {/* Left list panel */}
             <div style={{ 
               flex: selectedSupplierDetail && !isMobile ? '0 0 45%' : '1', 
@@ -738,7 +832,6 @@ export default function AdminWholesellersTab() {
                   const isSelected = selectedSupplierDetail?.id === w.id;
                   const type = w.type || (w.isZohoMaster ? 'Manufacturer' : 'Distributor');
                   const rating = w.rating || 5;
-                  
                   return (
                     <div
                       key={w.id}
@@ -798,6 +891,18 @@ export default function AdminWholesellersTab() {
                   );
                 })
               )}
+              {!loading && filteredSuppliers.length > 0 && hasMore && (
+                <div style={{ textAlign: 'center', marginTop: '1rem', paddingBottom: '1rem' }}>
+                  <button 
+                    onClick={() => fetchWholesellers(true)} 
+                    disabled={loadingMore}
+                    className="gcp-btn-secondary" 
+                    style={{ fontSize: '0.8rem', padding: '0.5rem 2rem' }}
+                  >
+                    {loadingMore ? 'Loading...' : 'Load More Suppliers'}
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Right details panel */}
@@ -826,7 +931,6 @@ export default function AdminWholesellersTab() {
               <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800 }}>Global Sourcing Matrix</h3>
               <p style={{ margin: '0.1rem 0 0', fontSize: '0.75rem', color: 'var(--text-muted)' }}>Hover or click visual pins to inspect logistics density, total spend, and geopolitical risk metrics.</p>
             </div>
-            
             <div style={{
               flex: 1,
               backgroundColor: '#1e293b',
@@ -840,7 +944,6 @@ export default function AdminWholesellersTab() {
             }}>
               {/* Fake World Map Grid Outline */}
               <div style={{ width: '90%', height: '80%', opacity: 0.15, backgroundImage: 'radial-gradient(#94a3b8 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
-              
               {/* Map Pins */}
               {[
                 { name: 'China (Lotusland)', x: '75%', y: '45%', spend: '245,000 AED', partners: 4, risk: 'Medium' },

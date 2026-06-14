@@ -265,6 +265,17 @@
   .diagram-arrow {
     display: none;
   }
+
+  /* Safe Area Insets for Mobile */
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Prevent auto-zoom on iOS */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
 }
 
 /* --- Research Search --- */
@@ -798,6 +809,90 @@
     gap: 2rem;
   }
   .pt-toc-col { display: none; }
+}
+
+/* ── Bottom Tab Bar (Mobile) ───────────────────────── */
+.bottom-tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: calc(64px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 2000;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+}
+
+.bottom-tab-bar .tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  height: 100%;
+  color: var(--text-tertiary);
+  text-decoration: none;
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bottom-tab-bar .tab-item:hover,
+.bottom-tab-bar .tab-item:active,
+.bottom-tab-bar .tab-item.active {
+  color: var(--primary);
+}
+
+.bottom-tab-bar .tab-item.active svg {
+  fill: rgba(var(--primary-rgb), 0.15);
+}
+
+.cart-icon-wrapper {
+  position: relative;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  background: var(--danger, #d93025);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 2px 5px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* ── Horizontal Scroll Snap (Mobile Native Feel) ── */
+.scroll-snap-x {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+  -webkit-overflow-scrolling: touch;
+  gap: var(--space-m);
+  padding-bottom: 1rem; /* Space for shadow */
+}
+
+.scroll-snap-x::-webkit-scrollbar {
+  display: none; /* Safari/Chrome */
+}
+
+.scroll-snap-x > * {
+  scroll-snap-align: center;
+  flex: 0 0 85%; /* Cards take up 85% of screen to peek next item */
 }
 
 .mobile-toc-fab-container {

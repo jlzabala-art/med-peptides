@@ -1,5 +1,11 @@
- 
-import { Shield, FileCheck, Globe, PackageCheck } from 'lucide-react';
+import Shield from "lucide-react/dist/esm/icons/shield";
+import FileCheck from "lucide-react/dist/esm/icons/file-check";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import PackageCheck from "lucide-react/dist/esm/icons/package-check";
+
+
+
+
 
 const pillars = [
   { title: 'Secure Packaging', icon: <Shield size={22} />, desc: 'Pharmaceutical-grade shielded packaging.' }, // Descripciones un poco más cortas para mobile

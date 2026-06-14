@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 const bundleDir = './src/services/protocol_finder_2_0_protocols_bundle';
-const files = fs.readdirSync(bundleDir).filter(f => f.endsWith('.json'));
+const files = fs.readdirSync(bundleDir).filter(f => f.endsWith('.js'));
 
 const results = [];
 

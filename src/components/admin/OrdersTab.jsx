@@ -1,3 +1,25 @@
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import Package from "lucide-react/dist/esm/icons/package";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Download from "lucide-react/dist/esm/icons/download";
+import CheckCheck from "lucide-react/dist/esm/icons/check-check";
+import Send from "lucide-react/dist/esm/icons/send";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Users from "lucide-react/dist/esm/icons/users";
+import X from "lucide-react/dist/esm/icons/x";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import Building from "lucide-react/dist/esm/icons/building";
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import Receipt from "lucide-react/dist/esm/icons/receipt";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import Search from "lucide-react/dist/esm/icons/search";
+import Archive from "lucide-react/dist/esm/icons/archive";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import React, { useState, useEffect, useRef } from 'react';
 import {
   collection,
@@ -12,31 +34,30 @@ import {
   limit,
 } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
+import notifier from '../../services/NotificationService';
 import { logAction } from '../../services/auditLogger';
-import {
-  ShoppingCart,
-  Package,
-  Truck,
-  CheckCircle2,
-  AlertCircle,
-  FileText,
-  Download,
-  CheckCheck,
-  Send,
-  Mail,
-  Users,
-  X,
-  Eye,
-  Building,
-  Stethoscope,
-  MapPin,
-  Receipt,
-  ExternalLink,
-  Search,
-  Archive,
-  Trash2,
-  Sparkles,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { exportToCSV } from '../../utils/exportUtils';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { functions } from '../../firebase';
@@ -227,25 +248,35 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
 
   /* ── Archive & Delete ────────────────────────────────────────────────── */
   const handleArchive = async (order) => {
-    try {
-      if (!window.confirm(`Are you sure you want to archive order #${order.orderNumber || order.id.substring(0,8).toUpperCase()}?`)) return;
-      await updateDoc(doc(db, 'orders', order.id), { status: 'Archived' });
-      setOrders(orders.map(o => o.id === order.id ? { ...o, status: 'Archived' } : o));
-    } catch (err) {
-      console.error('Archive error:', err);
-      alert('Failed to archive order.');
-    }
+    notifier.confirmCritical(
+      `Are you sure you want to archive order #${order.orderNumber || order.id.substring(0,8).toUpperCase()}?`,
+      async () => {
+        try {
+          await updateDoc(doc(db, 'orders', order.id), { status: 'Archived' });
+          setOrders(orders.map(o => o.id === order.id ? { ...o, status: 'Archived' } : o));
+          notifier.success('Order archived.');
+        } catch (err) {
+          console.error('Archive error:', err);
+          notifier.error('Failed to archive order.');
+        }
+      }
+    );
   };
 
   const handleDeleteOrder = async (order) => {
-    try {
-      if (!window.confirm(`Are you sure you want to DELETE order #${order.orderNumber || order.id.substring(0,8).toUpperCase()}? This action cannot be undone.`)) return;
-      await deleteDoc(doc(db, 'orders', order.id));
-      setOrders(orders.filter(o => o.id !== order.id));
-    } catch (err) {
-      console.error('Delete error:', err);
-      alert('Failed to delete order.');
-    }
+    notifier.confirmCritical(
+      `Are you sure you want to DELETE order #${order.orderNumber || order.id.substring(0,8).toUpperCase()}? This action cannot be undone.`,
+      async () => {
+        try {
+          await deleteDoc(doc(db, 'orders', order.id));
+          setOrders(orders.filter(o => o.id !== order.id));
+          notifier.success('Order deleted.');
+        } catch (err) {
+          console.error('Delete error:', err);
+          notifier.error('Failed to delete order.');
+        }
+      }
+    );
   };
 
   /* ── Filtered orders ─────────────────────────────────────────────────── */
@@ -297,7 +328,7 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
       selectedOrderIds.length > 0
         ? filtered.filter((o) => selectedOrderIds.includes(o.id))
         : filtered;
-    if (exportData.length === 0) return alert('No orders to export');
+    if (exportData.length === 0) return notifier.info('No orders to export');
 
     exportToCSV(exportData, `orders_export_${new Date().toISOString().slice(0, 10)}.csv`, [
       { header: 'Order ID', accessor: (o) => o.orderNumber || o.orderId || o.id.substring(0, 8) },
@@ -395,7 +426,7 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
               o.status === 'Processing'
                 ? 'rgba(59, 130, 246, 0.1)'
                 : o.status === 'Shipped'
-                  ? 'rgba(16, 185, 129, 0.1)'
+                  ? 'rgba(10, 185, 129, 0.1)'
                   : o.status === 'Cancelled'
                     ? 'rgba(239, 68, 68, 0.1)'
                     : 'rgba(107, 114, 128, 0.1)',
@@ -605,7 +636,6 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
           </div>
         )}
       </div>
-      
       {/* ── Additional Metadata ── */}
       <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
         <div>
@@ -736,8 +766,8 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
 
       {/* ── Header ── */}
       <AdminPageHeader
-        title="Sales Orders"
-        subtitle="Review, confirm, and manage your sales orders."
+        title="B2C Orders"
+        subtitle="Review, confirm, and manage your direct-to-consumer orders."
         icon={ShoppingCart}
       />
 
@@ -801,19 +831,22 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
                 <Download size={14} /> Export Selected
               </button>
               <button
-                onClick={async () => {
-                  if (!window.confirm(`Are you sure you want to archive ${selectedOrderIds.length} orders?`)) return;
-                  try {
-                    const toArchive = [...selectedOrderIds];
-                    for (const id of toArchive) {
-                      await updateDoc(doc(db, 'orders', id), { status: 'Archived' });
+                onClick={() => {
+                  notifier.confirmCritical(
+                    `Are you sure you want to archive ${selectedOrderIds.length} orders?`,
+                    async () => {
+                      try {
+                        const promises = selectedOrderIds.map(id => updateDoc(doc(db, 'orders', id), { status: 'Archived' }));
+                        await Promise.all(promises);
+                        setOrders(orders.map(o => selectedOrderIds.includes(o.id) ? { ...o, status: 'Archived' } : o));
+                        setSelectedOrderIds([]);
+                        notifier.success('Orders archived.');
+                      } catch (err) {
+                        console.error('Bulk archive error:', err);
+                        notifier.error('Failed to archive some orders.');
+                      }
                     }
-                    setOrders(orders.map(o => toArchive.includes(o.id) ? { ...o, status: 'Archived' } : o));
-                    setSelectedOrderIds([]);
-                  } catch (err) {
-                    console.error('Bulk archive error:', err);
-                    alert('Failed to archive some orders.');
-                  }
+                  );
                 }}
                 className="btn btn-secondary"
                 style={{
@@ -829,19 +862,22 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
                 <Archive size={14} /> Archive Selected
               </button>
               <button
-                onClick={async () => {
-                  if (!window.confirm(`Are you sure you want to DELETE ${selectedOrderIds.length} orders? This cannot be undone.`)) return;
-                  try {
-                    const toDelete = [...selectedOrderIds];
-                    for (const id of toDelete) {
-                      await deleteDoc(doc(db, 'orders', id));
+                onClick={() => {
+                  notifier.confirmCritical(
+                    `Are you sure you want to DELETE ${selectedOrderIds.length} orders? This cannot be undone.`,
+                    async () => {
+                      try {
+                        const promises = selectedOrderIds.map(id => deleteDoc(doc(db, 'orders', id)));
+                        await Promise.all(promises);
+                        setOrders(orders.filter(o => !selectedOrderIds.includes(o.id)));
+                        setSelectedOrderIds([]);
+                        notifier.success('Orders deleted.');
+                      } catch (err) {
+                        console.error('Bulk delete error:', err);
+                        notifier.error('Failed to delete some orders.');
+                      }
                     }
-                    setOrders(orders.filter(o => !toDelete.includes(o.id)));
-                    setSelectedOrderIds([]);
-                  } catch (err) {
-                    console.error('Bulk delete error:', err);
-                    alert('Failed to delete some orders.');
-                  }
+                  );
                 }}
                 className="btn btn-secondary"
                 style={{
@@ -857,9 +893,7 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
                 <Trash2 size={14} /> Delete Selected
               </button>
               <button
-                onClick={() => {
-                   alert("Bulk Convert to Invoices will be fully integrated with Zoho Books once the syncing module is active.");
-                }}
+                onClick={() => notifier.info("Bulk Convert to Invoices will be fully integrated with Zoho Books once the syncing module is active.")}
                 className="btn btn-secondary"
                 style={{
                   display: 'flex',
@@ -1653,7 +1687,7 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
                   </select>
                   <button
                     onClick={() => {
-                      alert('Assignment notification sent to selected partner.');
+                      notifier.success('Assignment notification sent to selected partner.');
                       setViewModal(null);
                     }}
                     style={{

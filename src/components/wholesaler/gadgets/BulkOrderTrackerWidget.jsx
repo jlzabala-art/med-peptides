@@ -1,5 +1,10 @@
+import PackageSearch from "lucide-react/dist/esm/icons/package-search";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Truck from "lucide-react/dist/esm/icons/truck";
 import React from 'react';
-import { PackageSearch, ArrowRight, Truck } from 'lucide-react';
+
+
+
 
 export default function BulkOrderTrackerWidget() {
   const mockOrders = [
@@ -12,7 +17,6 @@ export default function BulkOrderTrackerWidget() {
       <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <PackageSearch size={18} color="var(--primary)" /> Seguimiento B2B
       </h3>
-      
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {mockOrders.map(o => (
           <div key={o.id} style={{ padding: '1rem', border: '1px solid #f1f5f9', borderRadius: '12px', background: 'var(--color-bg-app)' }}>

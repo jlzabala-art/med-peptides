@@ -1,22 +1,33 @@
+import Cpu from "lucide-react/dist/esm/icons/cpu";
+import Brain from "lucide-react/dist/esm/icons/brain";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import UserPlus from "lucide-react/dist/esm/icons/user-plus";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Link2 from "lucide-react/dist/esm/icons/link-2";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import {
-  Cpu,
-  Brain,
-  CheckCircle2,
-  Activity,
-  UserPlus,
-  AlertTriangle,
-  Globe,
-  Link2,
-  ShoppingBag,
-  ShieldCheck,
-  Layers,
-  RefreshCw,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
 import DashboardEngine from '../../engine/DashboardEngine';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+import notifier from '../../services/NotificationService';
 
 const SKU_AGENT_URL = 'https://europe-west1-med-peptides-app.cloudfunctions.net/skuSyncAgent';
 
@@ -45,7 +56,7 @@ export default function AdminOverviewTab({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mode: 'status', userProfile: { role: 'admin', uid: 'overview' } }),
     })
-      .then((r) => r.json())
+      .then((r) => r.js())
       .then((d) => setSkuStats(d?.statusCounts || null))
       .catch(() => {});
   }, []);
@@ -90,7 +101,7 @@ export default function AdminOverviewTab({
   async function handleQuickRestockSubmit(prodId, currentStock) {
     const amount = parseInt(restockAmounts[prodId]);
     if (isNaN(amount) || amount <= 0) {
-      alert('Please enter a valid number to increase stock.');
+      notifier.info('Please enter a valid number to increase stock.');
       return;
     }
     await handleUpdateProduct(prodId, { stock: currentStock + amount });
@@ -940,11 +951,9 @@ export default function AdminOverviewTab({
           ))}
         </div>
       </div>
-    
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: AdminOverviewTab | Props: none
       </div>
-    
 </div>
   );
 }

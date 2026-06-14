@@ -1,7 +1,16 @@
+import X from "lucide-react/dist/esm/icons/x";
+import Divide from "lucide-react/dist/esm/icons/divide";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 /* eslint-disable no-unused-vars */
 import React, { useState, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { X, Divide, Activity, TrendingUp, AlertCircle } from 'lucide-react';
+
+
+
+
+
 
 /* ─── Responsive styles injected once ─────────────────────────────────────── */
 const MODAL_STYLES = `

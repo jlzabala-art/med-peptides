@@ -1,9 +1,20 @@
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import Send from "lucide-react/dist/esm/icons/send";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import FileCheck from "lucide-react/dist/esm/icons/file-check";
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Card } from '../ui';
-import { Loader2, Send, ShieldCheck, CheckCircle, Truck, FileCheck } from 'lucide-react';
+
+
+
+
+
+
 import { useTranslation } from 'react-i18next';
 
 export default function PublicSupplierQuote() {
@@ -15,7 +26,6 @@ export default function PublicSupplierQuote() {
   const [items, setItems] = useState([]);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(null);
-  
   // Shipping State
   const [shippingData, setShippingData] = useState({ carrier: '', awb: '', eta: '' });
   const [shippingSubmitted, setShippingSubmitted] = useState(false);
@@ -98,7 +108,6 @@ export default function PublicSupplierQuote() {
   };
 
   if (loading) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Loader2 className="spin" /></div>;
-  
   if (error) return (
     <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
       <Card style={{ padding: '3rem', textAlign: 'center', maxWidth: '500px' }}>
@@ -226,7 +235,6 @@ export default function PublicSupplierQuote() {
   return (
     <div style={{ minHeight: '100vh', background: '#f1f5f9', padding: '3rem 1rem' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', justifyContent: 'center', color: '#64748b' }}>
           <ShieldCheck size={20} />
           <span style={{ fontSize: '0.9rem', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>{t('supplierQuote.securePortal', "Secure Supplier Portal")}</span>
@@ -304,7 +312,6 @@ export default function PublicSupplierQuote() {
                 />
               </div>
             </div>
-            
             <button 
               onClick={handleSubmit}
               className="gcp-btn gcp-btn--primary" 

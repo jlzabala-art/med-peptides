@@ -1,7 +1,9 @@
- 
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Home from "lucide-react/dist/esm/icons/home";
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Home } from 'lucide-react';
+
+
 
 /**
  * Premium Breadcrumbs Component
@@ -57,7 +59,6 @@ const Breadcrumbs = ({ items }) => {
         <Home size={12} />
         <span className="sr-only">Home</span>
       </Link>
-      
       {items.map((item, index) => (
         <React.Fragment key={index}>
           <ChevronRight size={11} className="breadcrumb-separator" />

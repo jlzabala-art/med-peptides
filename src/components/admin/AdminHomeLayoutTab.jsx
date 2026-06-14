@@ -1,3 +1,29 @@
+import Eye from "lucide-react/dist/esm/icons/eye";
+import EyeOff from "lucide-react/dist/esm/icons/eye-off";
+import ArrowUp from "lucide-react/dist/esm/icons/arrow-up";
+import ArrowDown from "lucide-react/dist/esm/icons/arrow-down";
+import Save from "lucide-react/dist/esm/icons/save";
+import RotateCcw from "lucide-react/dist/esm/icons/rotate-ccw";
+import Users from "lucide-react/dist/esm/icons/users";
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import GripVertical from "lucide-react/dist/esm/icons/grip-vertical";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import Search from "lucide-react/dist/esm/icons/search";
+import X from "lucide-react/dist/esm/icons/x";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Copy from "lucide-react/dist/esm/icons/copy";
+import Info from "lucide-react/dist/esm/icons/info";
+import Monitor from "lucide-react/dist/esm/icons/monitor";
+import History from "lucide-react/dist/esm/icons/history";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Layers from "lucide-react/dist/esm/icons/layers";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Package from "lucide-react/dist/esm/icons/package";
+import Tag from "lucide-react/dist/esm/icons/tag";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import User from "lucide-react/dist/esm/icons/user";
+import Link from "lucide-react/dist/esm/icons/link";
 /* eslint-disable no-unused-vars */
 /**
  * AdminHomeLayoutTab
@@ -13,34 +39,32 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
-import {
-  Eye,
-  EyeOff,
-  ArrowUp,
-  ArrowDown,
-  Save,
-  RotateCcw,
-  Users,
-  Stethoscope,
-  GripVertical,
-  Loader2,
-  Search,
-  X,
-  AlertCircle,
-  Copy,
-  Info,
-  Monitor,
-  History,
-  RefreshCw,
-  ShieldCheck,
-  Layers,
-  FlaskConical,
-  Package,
-  Tag,
-  Globe,
-  User,
-  Link,
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import {
   useHomeLayout,
   useLayoutHistory,
@@ -51,6 +75,8 @@ import {
   DEFAULT_PRO_SECTIONS,
 } from '../../hooks/useHomeLayout';
 import { Tabs } from '../ui';
+import toast from 'react-hot-toast';
+import notifier from '../../services/NotificationService';
 
 const ROLE_METADATA = {
   admin: {
@@ -100,22 +126,21 @@ function LayoutHistoryDrawer({ onClose, onRestore, saveLayout }) {
   }, []);
 
   async function handleRestore(v) {
-    if (
-      !window.confirm(
-        `Restore layout from "${v.versionLabel}"? This will overwrite the current layout.`
-      )
-    )
-      return;
-    setRestoring(v.id);
-    try {
-      await restoreVersion(v);
-      onRestore();
-      onClose();
-    } catch (err) {
-      console.error('Restore failed', err);
-    } finally {
-      setRestoring(null);
-    }
+    notifier.confirmCritical(
+      `Restore layout from "${v.versionLabel}"? This will overwrite the current layout.`,
+      async () => {
+        setRestoring(v.id);
+        try {
+          await restoreVersion(v);
+          onRestore();
+          onClose();
+        } catch (err) {
+          console.error('Restore failed', err);
+        } finally {
+          setRestoring(null);
+        }
+      }
+    );
   };
 
   return (
@@ -1221,16 +1246,15 @@ export default function AdminHomeLayoutTab() {
   };
 
   const handleReset = () => {
-    if (
-      !window.confirm(
-        `Reset ${ROLE_METADATA[activeRoleTab].label} layout to factory defaults? This will overwrite current changes.`
-      )
-    )
-      return;
-    const defaults = PRO_ROLES.includes(activeRoleTab)
-      ? DEFAULT_PRO_SECTIONS
-      : DEFAULT_GUEST_SECTIONS;
-    handleSectionsChange(defaults);
+    notifier.confirmCritical(
+      `Reset ${ROLE_METADATA[activeRoleTab].label} layout to factory defaults? This will overwrite current changes.`,
+      () => {
+        const defaults = PRO_ROLES.includes(activeRoleTab)
+          ? DEFAULT_PRO_SECTIONS
+          : DEFAULT_GUEST_SECTIONS;
+        handleSectionsChange(defaults);
+      }
+    );
   };
 
   const handleCopyToOther = () => {
@@ -1238,11 +1262,11 @@ export default function AdminHomeLayoutTab() {
       `Copy ${ROLE_METADATA[activeRoleTab].label} layout to which role?\nAvailable: ${ALL_ROLES.filter((r) => r !== activeRoleTab).join(', ')}`
     );
     if (!targetRole || !ALL_ROLES.includes(targetRole)) return;
-    if (!window.confirm(`Overwrite ${targetRole} layout with ${activeRoleTab}'s layout?`)) return;
-
-    setDraft((prev) => ({ ...(prev ?? layout), [targetRole]: working[activeRoleTab] }));
-    setSaved(false);
-    setError(null);
+    notifier.confirmCritical(`Overwrite ${targetRole} layout with ${activeRoleTab}'s layout?`, () => {
+      setDraft((prev) => ({ ...(prev ?? layout), [targetRole]: working[activeRoleTab] }));
+      setSaved(false);
+      setError(null);
+    });
   };
 
   if (loading) {
@@ -1497,7 +1521,7 @@ export default function AdminHomeLayoutTab() {
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(`${window.location.origin}/${activeRoleTab}`);
-                  alert(`Copied: ${window.location.origin}/${activeRoleTab}`);
+                  toast.success(`Copied: ${window.location.origin}/${activeRoleTab}`);
                 }}
                 style={{ ...linkBtnStyle, color: 'var(--primary)' }}
                 title="Copy public landing page link"

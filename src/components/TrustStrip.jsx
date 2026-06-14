@@ -1,5 +1,8 @@
 import React from 'react';
-import { ShieldCheck, Zap, Globe, FlaskConical } from 'lucide-react';
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 import { useTranslation } from 'react-i18next';
 
 const TrustStrip = () => {

@@ -1,9 +1,16 @@
+import Pill from "lucide-react/dist/esm/icons/pill";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-import { Pill, Clock, AlertTriangle, RefreshCw } from 'lucide-react';
+
+
+
+
 
 export default function MyActivePrescriptionsWidget() {
   const { user } = useAuth();
@@ -69,7 +76,6 @@ export default function MyActivePrescriptionsWidget() {
       <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <Pill size={18} color="var(--primary)" /> {t('patient.prescriptions.title')}
       </h3>
-      
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
         {prescriptions.map(p => {
           const now = new Date();
@@ -102,7 +108,6 @@ export default function MyActivePrescriptionsWidget() {
                   <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.8rem', color: '#92400e' }}>
                     {t('patient.prescriptions.refill_alert_desc')}
                   </p>
-                  
                   {successRefill === p.id ? (
                     <div style={{ fontSize: '0.8rem', color: 'var(--color-success)', fontWeight: 700 }}>{t('patient.prescriptions.refill_success')}</div>
                   ) : (

@@ -1,6 +1,20 @@
- 
+import Activity from "lucide-react/dist/esm/icons/activity";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Info from "lucide-react/dist/esm/icons/info";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
 import React, { useState } from 'react';
-import { Activity, CheckCircle2, Info, Zap, ShieldCheck, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+
+
+
+
+
+
+
+
 
 export default function ProtocolCompare({ variants, currentSelection, onSelectVariant }) {
   const [expandedRationale, setExpandedRationale] = useState({});
@@ -117,7 +131,6 @@ export default function ProtocolCompare({ variants, currentSelection, onSelectVa
           user-select: none;
           padding: 0.5rem 0;
         }
-        
         .rationale-toggle:hover {
           color: var(--primary);
         }
@@ -148,7 +161,6 @@ export default function ProtocolCompare({ variants, currentSelection, onSelectVa
           const isSelected = currentSelection === variant.id;
           const isExpanded = !!expandedRationale[variant.id];
           const duration = variant.data.blueprint.phases.reduce((acc, p) => acc + (p.end_week - p.start_week + 1), 0);
-          
           return (
             <div 
               key={variant.id}
@@ -213,7 +225,6 @@ export default function ProtocolCompare({ variants, currentSelection, onSelectVa
                 <p style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 700, marginBottom: '1rem', lineHeight: 1.5 }}>
                   {variant.guidance}
                 </p>
-                
                 {/* Visual Clinical Badges */}
                 <div style={{ marginBottom: '1rem' }}>
                   {variant.tags.map(tag => (
@@ -263,5 +274,4 @@ export default function ProtocolCompare({ variants, currentSelection, onSelectVa
     </div>
   );
 }
-
 

@@ -1,9 +1,28 @@
+import Percent from "lucide-react/dist/esm/icons/percent";
+import Search from "lucide-react/dist/esm/icons/search";
+import Sliders from "lucide-react/dist/esm/icons/sliders";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Minus from "lucide-react/dist/esm/icons/minus";
 import React, { useState, useEffect } from 'react';
 import { collection, doc, getDocs, getDoc, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getCatalog, getVariants } from '../../repositories/productRepository';
-import { Percent, Search, Sliders, RefreshCw, CheckCircle, AlertCircle, BookOpen, TrendingDown, TrendingUp, Minus } from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
 import DataTable from '../ui/DataTable';
 import AppEntityCell from '../ui/AppEntityCell';
 import ProductContextSwitcher from './ProductContextSwitcher';
@@ -129,7 +148,6 @@ export default function AdminPricesTab() {
             const retail = v.pricing?.retailPrice?.base || 0;
             const computedClinic = parseFloat((retail * (1 - discountVal / 100)).toFixed(2));
             const computedWholesale = parseFloat((retail * (1 - discountVal / 100)).toFixed(2));
-            
             const updates = {};
             if (!v.pricing?.clinicPrice?.override) {
                updates['pricing.clinicPrice.base'] = computedClinic;
@@ -137,7 +155,6 @@ export default function AdminPricesTab() {
             if (!v.pricing?.wholesalePrice?.override) {
                updates['pricing.wholesalePrice.base'] = computedWholesale;
             }
-            
             if (Object.keys(updates).length > 0) {
                updates.updatedAt = new Date().toISOString();
                const vRef = doc(db, 'products', p.id, 'variants', v.id);
@@ -157,7 +174,6 @@ export default function AdminPricesTab() {
       if (batchCount > 0) {
         await batch.commit();
       }
-      
       console.log(`Successfully updated ${totalUpdated} variants for category ${category}`);
 
       // Update state
@@ -510,13 +526,11 @@ export default function AdminPricesTab() {
                   return <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>No data</div>;
                 }
                 const bestMatch = match.competitors[0];
-                
                 // Compare with our guestVialPrice
                 const myPrice = parseFloat(p.guestVialPrice) || 0;
                 const compPrice = parseFloat(bestMatch.price_usd) || 0;
                 const isExpensive = myPrice > compPrice && myPrice > 0;
                 const isCheaper = myPrice < compPrice && myPrice > 0;
-                
                 return (
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>

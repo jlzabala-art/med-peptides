@@ -1,6 +1,15 @@
+import X from "lucide-react/dist/esm/icons/x";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import Beaker from "lucide-react/dist/esm/icons/beaker";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useEffect, useState, useMemo } from 'react';
-import { X, Globe, Activity, Beaker, AlertTriangle } from 'lucide-react';
+
+
+
+
+
 import { lockScroll, unlockScroll } from '../utils/scrollLock';
 import { resolveVariantPrice } from '../utils/resolvePrice';
 import { usePricingTier } from '../hooks/usePricingTier';
@@ -292,7 +301,6 @@ export default function Cart({ isOpen, onClose, cart, cartMetadata = {}, updateC
 
   // Group protocol items by protocolId for the ProtocolBundleCard renderer
   const protocolGroupMap = {};
-  
   // 1. First, populate from metaBundles (explicitly added bundles).
   //    Keep bundle.products (array of peptide names) — don't overwrite with [].
   metaBundles.forEach(bundle => {
@@ -309,7 +317,6 @@ export default function Cart({ isOpen, onClose, cart, cartMetadata = {}, updateC
     const m = cartMetadata[key];
     if (!m || (!m.isProtocol && !m.protocolId)) return;
     const pid = m.protocolId ?? 'protocol';
-    
     if (!protocolGroupMap[pid]) {
       protocolGroupMap[pid] = {
         id: pid,
@@ -320,7 +327,6 @@ export default function Cart({ isOpen, onClose, cart, cartMetadata = {}, updateC
         estimatedCost: m.bundleTotal ?? 0,
       };
     }
-    
     if (!protocolGroupMap[pid].products.includes(key)) {
       protocolGroupMap[pid].products.push(key);
     }
@@ -561,7 +567,6 @@ export default function Cart({ isOpen, onClose, cart, cartMetadata = {}, updateC
         <style>{`
           @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
           @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
-          
           .pse-products-scroll::-webkit-scrollbar {
             width: 4px;
           }

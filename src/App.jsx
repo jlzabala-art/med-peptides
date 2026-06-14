@@ -8,37 +8,29 @@ import AppRouter from './routes/AppRouter';
 import PageTransition from './components/PageTransition';
 import Header from './layout/Header';
 import { HelmetProvider } from 'react-helmet-async';
-import SearchModal from './snippets/SearchModal';
 import Hero from './sections/Hero';
 import Footer from './layout/Footer';
+import BottomTabBar from './layout/BottomTabBar';
 import RegionBar from './sections/RegionBar';
 import BackToTop from './layout/BackToTop';
-import Cart from './snippets/Cart';
-import AccessCatalogOverlay from './layout/AccessCatalogOverlay';
 import ExitProfessionalMode from './components/auth/ExitProfessionalMode';
 import ClinicalAssistant from './components/shared/ClinicalAssistant';
-import ProductComparator from './components/discovery/ProductComparator';
 import { trackPageView } from './hooks/useAnalytics';
 import { Toaster } from 'react-hot-toast';
 
-// --- Layouts and Contexts ---
+// --- Contexts ---
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import GlobalAppLayout from './components/shared/GlobalAppLayout';
-import ShopLayout from './layout/ShopLayout';
 import { HeaderProvider } from './context/HeaderContext';
 import { PreferencesProvider } from './context/PreferencesContext';
-import AdminLayout from './layout/AdminLayout';
-import ClinicalLayout from './layout/ClinicalLayout';
 import { useCart } from './context/CartProvider';
 import { useShop } from './context/ShopProvider';
 import { useUIStore } from './stores/uiStore';
-import { AdminProvider } from './context/AdminProvider';
-import { DoctorProvider } from './context/DoctorProvider';
-
-
-import B2BClientQuoteView from './components/b2b/B2BClientQuoteView';
-
 // ── Lazy Loading Heavy Templates (Section 2: Performance) ────────────────────
+const SearchModal = lazy(() => import('./snippets/SearchModal'));
+const Cart = lazy(() => import('./snippets/Cart'));
+const AccessCatalogOverlay = lazy(() => import('./layout/AccessCatalogOverlay'));
+const ProductComparator = lazy(() => import('./components/discovery/ProductComparator'));
+
 const HomeView = lazy(() => import('./templates/HomeView'));
 const About = lazy(() => import('./templates/About'));
 const Quality = lazy(() => import('./templates/Quality'));
@@ -151,7 +143,7 @@ const ClinicalLoader = () => (
     <div style={{ animation: 'atlas-pulse 1.8s ease-in-out infinite' }}>
       <AtlasHealthLogo size={52} />
     </div>
-    <p style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 500, margin: 0 }}>Cargando…</p>
+    <p style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 500, margin: 0 }}>Loading…</p>
     <div style={{ width: 100, height: 3, borderRadius: 99, background: 'rgba(0,54,102,0.08)', overflow: 'hidden' }}>
       <div style={{ height: '100%', borderRadius: 99, background: 'linear-gradient(90deg,#003666,#00BCD4)', animation: 'atlas-shimmer 1.4s ease-in-out infinite' }} />
     </div>
@@ -162,34 +154,15 @@ const ClinicalLoader = () => (
   </div>
 );
 
-import { db } from './firebase';
-import { onSnapshot, doc, setDoc } from 'firebase/firestore';
-import { fetchLiveRates } from './utils/liveRates';
 import { getCatalog } from './repositories/productRepository';
-// v2 canonical catalog — replaces the legacy staticProducts fallback
-import { catalog as staticProducts, categories as v2Categories } from './data/v2/index.js';
-import { productCategories } from './data/products'; // still needed for legacy category nav
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useTenant } from './context/TenantContext';
 import { useFirestoreData } from './hooks/useFirestoreData';
-import { COUNTRIES } from './data/countries';
+import { useCartOwnershipSync } from './hooks/useCartOwnershipSync';
+import { useGlobalSettings } from './hooks/useGlobalSettings';
 import { REGION_FLAGS } from './data/regions';
 
 // Initial default settings (will be overridden by Firestore)
-const DEFAULT_SETTINGS = {
-  exchangeRates: {
-    ae: { rate: 1, currency: 'USD', name: 'United Arab Emirates' },
-    qa: { rate: 1, currency: 'USD', name: 'Qatar' },
-    kw: { rate: 1, currency: 'USD', name: 'Kuwait' },
-    sa: { rate: 1, currency: 'USD', name: 'Saudi Arabia' },
-    eu: { rate: 1, currency: 'USD', name: 'European Union' },
-    gb: { rate: 1, currency: 'USD', name: 'United Kingdom' },
-    us: { rate: 1, currency: 'USD', name: 'USA' },
-    row: { rate: 1, currency: 'USD', name: 'Global' }
-  },
-  shippingCosts: { standard: 0, express: 50, courier: 30 },
-  deliveryTimes: { standard: '5-7 days', express: '2-3 days', courier: 'next day' }
-};
 
 // ── Feature Flags ────────────────────────────────────────────────────────────
 // Set to `true` to show the Region/Profile bar at the bottom of the page,
@@ -229,6 +202,8 @@ function App() {
   const { isProfessional, isAdmin, isPhysician, isPatient, user, userProfile, loading: authLoading, activeRole } = useAuth();
   // allFaqs and protocolIndex: read-only, session-cached — no products fetch inside hook
   const { allFaqs, protocolIndex, supplementCatalogue } = useFirestoreData();
+  useGlobalSettings();
+  useCartOwnershipSync();
   const [loadingTimeout, setLoadingTimeout] = useState(false);
 
   useEffect(() => {
@@ -283,173 +258,14 @@ function App() {
 
 
 
-  // IP-Based Detection — uses ISO country code for reliable matching
-  useEffect(() => {
-    if (!region && !manualRegionChange) {
-      fetch('https://ipapi.co/json/')
-        .then(res => res.json())
-        .then(data => {
-          const countryCode = (data.country_code || '').toLowerCase(); // e.g. 'ae', 'us', 'gb'
-          const countryName = data.country_name || '';
-
-          if (countryCode) {
-            // 1. Check if we have a direct exchange-rate region key for this country code
-            if (settings.exchangeRates[countryCode]) {
-              setRegion(countryCode);
-            } else {
-              // 2. Try to match the detected country code inside COUNTRIES list
-              //    so we can at least show the correct flag/name without an exchange-rate entry
-              const knownCountry = COUNTRIES.find(c => c.code === countryCode);
-              if (knownCountry) {
-                // Store the ISO code as region so header shows the real flag
-                setRegion(countryCode);
-              } else {
-                setRegion('row'); // True fallback: unknown country
-              }
-            }
-            setManualRegionChange(false);
-            // Store detected country metadata for checkout to use
-            setSettings(prev => ({ ...prev, detectedCountry: countryName, detectedCountryCode: countryCode }));
-          }
-        })
-        .catch(err => console.warn("IP detection failed:", err));
-    }
-  }, [region, settings.exchangeRates, manualRegionChange]);
-
-  // ── Phase 4: Stamp cartOwnership when auth state changes ──────────────────
-  // When a patient logs in → set patientId and reset source to 'patient_selected'.
-  // When anyone else logs in → only patientId is relevant if they're a patient.
-  // On logout → wipe ownership back to anonymous defaults.
-  //
-  // IMPORTANT: Only clear the cart when the auth identity *actually* changes
-  // (different UID, or login → logout transition). Firebase Auth re-initializes
-  // on every page load, causing this effect to fire even for unchanged guest state.
-  // Without this guard, guest carts are wiped on every product page navigation.
-  const prevUserUidRef = useRef(undefined); // undefined = not yet initialized
-  useEffect(() => {
-    const prevUid = prevUserUidRef.current;
-    const currUid = user?.uid ?? null;
-
-    // Skip on first mount (Firebase Auth hasn't resolved yet) — undefined means uninitialized
-    if (prevUid === undefined) {
-      prevUserUidRef.current = currUid;
-      // Still stamp ownership on first mount without clearing cart
-      if (user && isPatient) {
-        setCartOwnership({
-          patientId: user.uid,
-          supervisingPhysicianId: userProfile?.assignedPhysicianIds?.[0] ?? null,
-          supervisingAdminId: null,
-          source: 'patient_selected',
-          recommendationId: null,
-        });
-      } else if (!user) {
-        setCartOwnership({
-          patientId: null,
-          supervisingPhysicianId: null,
-          supervisingAdminId: null,
-          source: 'patient_selected',
-          recommendationId: null,
-        });
-      }
-      return;
-    }
-
-    // Only clear cart if identity actually changed (different user or login/logout)
-    const identityChanged = prevUid !== currUid;
-    prevUserUidRef.current = currUid;
-
-    if (identityChanged) {
-      setCart({});
-      setCartMetadata({});
-    }
-
-    if (user && isPatient) {
-      // Patient just authenticated — stamp ownership.
-      setCartOwnership({
-        patientId: user.uid,
-        supervisingPhysicianId: userProfile?.assignedPhysicianIds?.[0] ?? null,
-        supervisingAdminId: null,
-        source: 'patient_selected',
-        recommendationId: null,
-      });
-    } else if (!user) {
-      // Logged out — reset to anonymous defaults.
-      setCartOwnership({
-        patientId: null,
-        supervisingPhysicianId: null,
-        supervisingAdminId: null,
-        source: 'patient_selected',
-        recommendationId: null,
-      });
-    }
-    // Non-patient users (professionals, admins) keep the default null ownership
-    // because THEY never pay — only patients do.
-  }, [user, isPatient, userProfile?.assignedPhysicianIds]);
-
+  
+  
 
   // ── Product catalog is now fetched by ShopProvider ────────────────────────
 
 
-  // ── Live Exchange Rate Sync ──────────────────────────────────────────────
-  // Fetches fresh rates from open.er-api.com once per session (24-hour gap)
-  // and saves them to Firestore. The onSnapshot below picks up the change
-  // automatically and distributes it to all components.
-  useEffect(() => {
-    const LAST_SYNC_KEY = 'mp_rates_last_sync';
-    const SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
-
-    const syncRates = async () => {
-      if (!isAdmin) return; // Only admins can update the global rates doc
-      
-      try {
-        const lastSync = sessionStorage.getItem(LAST_SYNC_KEY);
-        if (lastSync && Date.now() - parseInt(lastSync, 10) < SYNC_INTERVAL_MS) {
-          return; 
-        }
-        const live = await fetchLiveRates();
-        await setDoc(
-          doc(db, 'settings', 'global'),
-          { ...live },
-          { merge: true }
-        );
-        sessionStorage.setItem(LAST_SYNC_KEY, String(Date.now()));
-        console.info('[Rates] Live exchange rates synced →', live.ratesLastUpdated);
-      } catch (err) {
-        console.warn('[Rates] Live sync failed:', err.message);
-      }
-    };
-
-    if (isAdmin) syncRates();
-  }, [isAdmin]);
-
-  // ── Dynamic Settings Subscription (single document — real-time) ──────────
-  useEffect(() => {
-    const unsubscribeSettings = onSnapshot(doc(db, 'settings', 'global'), (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        // Transform incoming flat rates back into the rich object format needed by the UI
-        const mappedRates = { ...DEFAULT_SETTINGS.exchangeRates };
-        if (data.exchangeRates) {
-          Object.entries(data.exchangeRates).forEach(([key, val]) => {
-            if (mappedRates[key]) {
-              mappedRates[key] = { ...mappedRates[key], rate: val };
-            }
-          });
-        }
-        setSettings({
-          ...DEFAULT_SETTINGS,
-          ...data,
-          exchangeRates: mappedRates
-        });
-      }
-    }, (error) => {
-      console.error('Firestore Settings Error:', error);
-      // Fail silently — DEFAULT_SETTINGS are already applied
-    });
-
-    return () => { unsubscribeSettings(); };
-  }, []);
-
+  
+  
   const toggleCompare = (product) => {
     setCompareList(prev => {
       const exists = prev.find(p => p.id === product.id || p.name === product.name);
@@ -467,76 +283,8 @@ function App() {
 
 
 
-  // ── Listen for direct cart additions from PatientPrescriptionPanel (Rx "Buy" button)
-  //    and from Clinical Assistant PDF analyzer ────────────────────────────────────────
-  useEffect(() => {
-    const handleAddToCartDirect = (e) => {
-      const { product, delta = 1, metadata = {} } = e.detail || {};
-      if (!product) return;
-
-      // 1. Add the item to the cart quantity map
-      updateCart(product, delta);
-
-      // 2. Stamp per-item metadata (prescriptionId, source, supervisingPhysicianId, …)
-      const itemKey = product.name;
-      if (Object.keys(metadata).length > 0) {
-        setCartMetadata(prev => ({
-          ...prev,
-          [itemKey]: { ...(prev[itemKey] || {}), ...metadata },
-        }));
-      }
-
-      // 3. If this item came from a prescription, stamp cartOwnership so Checkout
-      //    can write prescriptionId onto the Firestore order document.
-      //    This is required for the onOrderCreatedForRx Cloud Function to fire.
-      const rxId  = product.prescriptionId || metadata.prescriptionId || null;
-      const docId = product.doctorId       || metadata.supervisingPhysicianId || null;
-      if (rxId || docId) {
-        setCartOwnership(prev => ({
-          ...prev,
-          prescriptionId:         rxId  ?? prev.prescriptionId,
-          supervisingPhysicianId: docId ?? prev.supervisingPhysicianId,
-          source: 'from_prescription',
-        }));
-      }
-
-      setActiveModal('cart');
-    };
-    window.addEventListener('add-to-cart-direct', handleAddToCartDirect);
-    return () => window.removeEventListener('add-to-cart-direct', handleAddToCartDirect);
-  }, [updateCart]);
-
-  // ── Listen for refill / rx-add-to-cart events (PatientHome refill flow) ───────────
-  useEffect(() => {
-    const handleRxAddToCart = (e) => {
-      const { items = [], prescriptionId, source = 'refill', doctorId } = e.detail || {};
-      items.forEach(item => {
-        if (!item?.name) return;
-        // Build a product-like object compatible with updateCart
-        updateCart({ name: item.name, id: item.id || item.name }, item.quantity || 1);
-        setCartMetadata(prev => ({
-          ...prev,
-          [item.name]: {
-            ...(prev[item.name] || {}),
-            prescriptionId,
-            source,
-            supervisingPhysicianId: doctorId || item.doctorId || null,
-          },
-        }));
-      });
-      if (prescriptionId) {
-        setCartOwnership(prev => ({
-          ...prev,
-          prescriptionId,
-          source,
-          supervisingPhysicianId: doctorId ?? prev.supervisingPhysicianId,
-        }));
-      }
-    };
-    window.addEventListener('rx-add-to-cart', handleRxAddToCart);
-    return () => window.removeEventListener('rx-add-to-cart', handleRxAddToCart);
-  }, [updateCart]);
-
+  
+  
   const handleProtocolSupply = (bundle) => {
     setCartMetadata(prev => ({
       ...prev,
@@ -547,68 +295,7 @@ function App() {
 
 
 
-  // ── Phase 4: Accept a doctor recommendation into the cart ─────────────────
-  // Called when a patient taps "Accept Recommendation" in their portal.
-  // Seeds the cart with the recommended products/protocols and upgrades
-  // cartOwnership.source to 'doctor_recommended'.
-  //
-  // @param {object} recommendation — Firestore recommendation document
-  //   { id, patientId, doctorId, products: [{name, qty}], protocols: [...], ... }
-  const acceptRecommendation = (recommendation) => {
-    if (!recommendation) return;
-
-    const { id, doctorId, adminId, products: recProducts = [], protocols: recProtocols = [], peptides = [] } = recommendation;
-
-    // Seed cart with recommended products
-    recProducts.forEach(item => {
-      if (item.name && item.qty > 0) {
-        setCart(prev => ({
-          ...prev,
-          [item.name]: (prev[item.name] || 0) + item.qty,
-        }));
-        // Tag each item with the recommendation source in metadata
-        setCartMetadata(prev => ({
-          ...prev,
-          [item.name]: {
-            ...(prev[item.name] || {}),
-            source: 'doctor_recommended',
-            recommendationId: id,
-          },
-        }));
-      }
-    });
-
-    // Also support simple peptides list (from PhysicianDashboard new recommendations)
-    peptides.forEach(peptideName => {
-      const name = typeof peptideName === 'string' ? peptideName : peptideName.name;
-      if (name) {
-        setCart(prev => ({
-          ...prev,
-          [name]: (prev[name] || 0) + 1,
-        }));
-        setCartMetadata(prev => ({
-          ...prev,
-          [name]: {
-            ...(prev[name] || {}),
-            source: 'doctor_recommended',
-            recommendationId: id,
-          },
-        }));
-      }
-    });
-
-    // Upgrade ownership to reflect doctor-guided purchase
-    setCartOwnership(prev => ({
-      ...prev,
-      supervisingPhysicianId: doctorId ?? prev.supervisingPhysicianId,
-      supervisingAdminId: adminId ?? prev.supervisingAdminId,
-      source: adminId ? 'admin_recommended' : 'doctor_recommended',
-      recommendationId: id ?? null,
-    }));
-
-    setActiveModal('cart');
-  };
-
+  
   const isHome = location.pathname === '/' || ['/clinic', '/doctor', '/wholesaler', '/sales_agent', '/staff', '/patient'].includes(location.pathname);
 
 
@@ -904,40 +591,48 @@ function App() {
 
       {activeModal === 'compare' && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 3000, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'flex-end' }}>
-          <ProductComparator 
-            compareList={compareList} 
-            setCompareList={setCompareList} 
-            onClose={() => setActiveModal(null)} 
-          />
+          <Suspense fallback={null}>
+            <ProductComparator 
+              compareList={compareList} 
+              setCompareList={setCompareList} 
+              onClose={() => setActiveModal(null)} 
+            />
+          </Suspense>
         </div>
       )}
 
-      <SearchModal 
-        isOpen={activeModal === 'search'} 
-        onClose={() => { setActiveModal(null); setSearchQuery(''); setSearchInitialTab('peptides'); }} 
-        onSelectProduct={handleProductSelect}
-        products={visibleProducts}
-        allFaqs={allFaqs}
-        protocolIndex={protocolIndex}
-        initialQuery={searchQuery}
-        initialTab={searchInitialTab}
-        isProfessional={isProfessional}
-        supplementCatalogue={supplementCatalogue}
-      />
+      <Suspense fallback={null}>
+        <SearchModal 
+          isOpen={activeModal === 'search'} 
+          onClose={() => { setActiveModal(null); setSearchQuery(''); setSearchInitialTab('peptides'); }} 
+          onSelectProduct={handleProductSelect}
+          products={visibleProducts}
+          allFaqs={allFaqs}
+          protocolIndex={protocolIndex}
+          initialQuery={searchQuery}
+          initialTab={searchInitialTab}
+          isProfessional={isProfessional}
+          supplementCatalogue={supplementCatalogue}
+        />
+      </Suspense>
 
       {!isPublicAuthRoute && (
-        <AccessCatalogOverlay 
-          region={region} 
-          setRegion={(r) => {
-            setRegion(r);
-            setManualRegionChange(false);
-          }}
-          onOpenLogin={() => navigate('/login')}
-          EXCHANGE_RATES={settings.exchangeRates}
-          detectedCountry={settings.detectedCountry}
-        />
+        <Suspense fallback={null}>
+          <AccessCatalogOverlay 
+            region={region} 
+            setRegion={(r) => {
+              setRegion(r);
+              setManualRegionChange(false);
+            }}
+            onOpenLogin={() => navigate('/login')}
+            EXCHANGE_RATES={settings.exchangeRates}
+            detectedCountry={settings.detectedCountry}
+          />
+        </Suspense>
       )}
 
+      {/* ── Mobile Navigation ── */}
+      <BottomTabBar />
       </div>
   );
 }

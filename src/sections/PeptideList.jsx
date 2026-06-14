@@ -1,6 +1,8 @@
- 
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import Tag from "lucide-react/dist/esm/icons/tag";
 import React from 'react';
-import { ExternalLink, Tag } from 'lucide-react';
+
+
 
 const PeptideList = () => {
   const peptides = [
@@ -64,7 +66,6 @@ const PeptideList = () => {
                   <span className="text-gradient font-bold">{pep.potency}</span>
                 </div>
               </div>
-              
               <p className="p-m text-secondary mb-l line-height-m">
                 {pep.desc}
               </p>

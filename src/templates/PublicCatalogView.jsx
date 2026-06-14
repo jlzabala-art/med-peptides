@@ -1,3 +1,15 @@
+import Search from "lucide-react/dist/esm/icons/search";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Send from "lucide-react/dist/esm/icons/send";
+import X from "lucide-react/dist/esm/icons/x";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import Check from "lucide-react/dist/esm/icons/check";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import FileText from "lucide-react/dist/esm/icons/file-text";
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { catalogRepository } from '../repositories/catalogRepository';
@@ -5,15 +17,22 @@ import { productRepository } from '../repositories/productRepository';
 import { protocolRepository } from '../repositories/protocolRepository';
 import { searchCatalogSemantic, askCatalogAssistant } from '../services/catalogAIService';
 import { resolveCatalogContact } from '../utils/contactRouter';
-import { 
-  Search, MessageSquare, Send, X, Phone, Mail, 
-  ChevronDown, HelpCircle, Shield, Check, ExternalLink, FileText
-} from 'lucide-react';
+
+
+
+
+
+
+
+
+
+
+
+
 
 export default function PublicCatalogView() {
   const { catalogSlug } = useParams();
   const [searchParams] = useSearchParams();
-  
   // URL Customization hooks
   const urlRecipient = searchParams.get('recipient') || '';
   const urlClinic = searchParams.get('clinic') || '';
@@ -283,7 +302,6 @@ export default function PublicCatalogView() {
               <p style={{ fontSize: '0.8rem', color: '#5f6368', margin: '0 0 1.25rem 0' }}>
                 {searchResult.relevanceExplanation}
               </p>
-              
               {/* Matched Products Grid */}
               <div style={productsGridStyle}>
                 {searchResult.matchedProductIds?.map(prodId => {
@@ -331,7 +349,6 @@ export default function PublicCatalogView() {
                       <p style={productDescStyle}>
                         {prod.desc || prod.science?.desc || 'Details currently under review.'}
                       </p>
-                      
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f3f4', paddingTop: '0.75rem' }}>
                         <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#137333' }}>
                           {catalog.pricingVisible && prod.defaultVariant?.pricing?.retailPrice?.base?.kitUSD
@@ -501,7 +518,6 @@ export default function PublicCatalogView() {
                 <X size={18} />
               </button>
             </div>
-            
             <div style={chatBodyStyle}>
               {chatHistory.length === 0 && (
                 <div style={chatEmptyStyle}>

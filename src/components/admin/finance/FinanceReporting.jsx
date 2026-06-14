@@ -1,9 +1,25 @@
+import Download from "lucide-react/dist/esm/icons/download";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Presentation from "lucide-react/dist/esm/icons/presentation";
+import Briefcase from "lucide-react/dist/esm/icons/briefcase";
+import Zap from "lucide-react/dist/esm/icons/zap";
 import React, { useState } from 'react';
-import { Download, FileText, CheckCircle, BarChart3, TrendingUp, Presentation, Briefcase, Zap } from 'lucide-react';
+
+
+
+
+
+
+
+
 
 import FinancePnL from './FinancePnL';
 import ComparativeAnalysisTool from './ComparativeAnalysisTool';
 import PredictivePnLSimulator from './PredictivePnLSimulator';
+import notifier from '../../../services/NotificationService';
 
 export default function FinanceReporting({ dashboardData, totalBalance, activeSubs }) {
   const [generating, setGenerating] = useState(false);
@@ -15,13 +31,11 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
   const totalIncome = dashboardData?.profitAndLoss?.total_income || mrr;
   const totalExpenses = dashboardData?.profitAndLoss?.total_expenses || 0;
   const netProfit = dashboardData?.profitAndLoss?.net_profit || ebitda;
-  
   const pnl2026 = dashboardData?.pnl2026 || null;
 
   const handleGeneratePDF = async () => {
     setGenerating(true);
     setReportReady(false);
-    
     try {
       const [jsPdfModule, autoTableModule] = await Promise.all([
         import('jspdf'),
@@ -31,18 +45,15 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
       const autoTable = autoTableModule.default || autoTableModule;
 
       const doc = new jsPDF();
-      
       // Branding Header
       doc.setFontSize(22);
       doc.setTextColor(15, 23, 42); // slate-900
       doc.setFont('helvetica', 'bold');
       doc.text("CFO Intelligence Hub - Monthly Report", 14, 22);
-      
       doc.setFontSize(10);
       doc.setTextColor(100, 116, 139); // slate-500
       doc.setFont('helvetica', 'normal');
       doc.text(`Generated: ${new Date().toLocaleDateString('en-US')} • System Verified Data`, 14, 28);
-      
       doc.setDrawColor(226, 232, 240); // slate-200
       doc.setLineWidth(0.5);
       doc.line(14, 34, 196, 34);
@@ -60,7 +71,6 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
         `Total Income recorded in Zoho Books is $${totalIncome.toLocaleString()} against expenses of $${totalExpenses.toLocaleString()}, ` +
         `resulting in a Net Profit (EBITDA approx.) of $${netProfit.toLocaleString()}. ` +
         `Total cash reserves stand at $${(dashboardData?.profitAndLoss?.net_profit || totalBalance).toLocaleString()}, providing a strong runway for continuous operational growth.`;
-      
       const splitSummary = doc.splitTextToSize(summaryText, 182);
       doc.text(splitSummary, 14, 52);
 
@@ -112,11 +122,10 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
 
       // Download
       doc.save(`CFO_Hub_Financial_Report_${new Date().toISOString().split('T')[0]}.pdf`);
-      
       setReportReady(true);
     } catch (error) {
       console.error("PDF Generation failed", error);
-      alert("Failed to generate PDF. Check console for details.");
+      notifier.error("Failed to generate PDF. Check console for details.");
     } finally {
       setGenerating(false);
     }
@@ -124,7 +133,6 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
 
   return (
     <div className="anim-fade-up" style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      
       <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', justifyItems: 'center', padding: '1rem', background: 'rgba(79, 70, 229, 0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
           <Presentation style={{ width: '40px', height: '40px', color: '#4f46e5' }} />
@@ -134,12 +142,10 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
       </div>
 
       <div className="glass-card-premium" style={{ overflow: 'hidden' }}>
-        
         {/* Header Area */}
         <div style={{ background: 'var(--primary)', color: 'white', padding: '2rem', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: '-6rem', right: '-6rem', width: '256px', height: '256px', background: 'rgba(99, 102, 241, 0.3)', filter: 'blur(80px)', borderRadius: '50%', pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', bottom: '-6rem', left: '-6rem', width: '256px', height: '256px', background: 'rgba(16, 185, 129, 0.2)', filter: 'blur(80px)', borderRadius: '50%', pointerEvents: 'none' }} />
-          
           <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
             <div style={{ flex: '1 1 auto', maxWidth: '600px' }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.25rem 0.75rem', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '999px', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
@@ -151,7 +157,6 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
                 This report automatically aggregates real-time metrics including Cash Balance, MRR, ARR, and EBITDA projections. It formats them into a branded, confidential PDF ready for distribution.
               </p>
             </div>
-            
             <button
               onClick={handleGeneratePDF}
               disabled={generating}
@@ -171,10 +176,8 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
             </button>
           </div>
         </div>
-        
         {/* Features / Details */}
         <div style={{ padding: '2rem', background: 'var(--surface-raised)' }}>
-          
           {reportReady && (
             <div className="anim-fade-up" style={{ marginBottom: '2rem', padding: '1.5rem', background: 'var(--success)', color: 'white', borderRadius: '16px', display: 'flex', alignItems: 'flex-start', gap: '1rem', boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.2)' }}>
               <CheckCircle style={{ width: '32px', height: '32px', flexShrink: 0 }} />
@@ -197,7 +200,6 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
                 Aggregates Zoho Books P&L data to project adjusted EBITDA and operational margins.
               </p>
             </div>
-            
             <div className="glass-card-premium" style={{ padding: '1.5rem' }}>
               <div style={{ background: 'rgba(16, 185, 129, 0.1)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
                 <TrendingUp style={{ width: '24px', height: '24px', color: 'var(--success)' }} />
@@ -207,7 +209,6 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
                 Includes real-time MRR, ARR, and active subscription counts directly from Stripe.
               </p>
             </div>
-            
             <div className="glass-card-premium" style={{ padding: '1.5rem' }}>
               <div style={{ background: 'rgba(234, 88, 12, 0.1)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
                 <Briefcase style={{ width: '24px', height: '24px', color: '#ea580c' }} />
@@ -218,14 +219,10 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
               </p>
             </div>
           </div>
-          
         </div>
       </div>
-      
       <FinancePnL pnl2026={pnl2026} />
-      
       <PredictivePnLSimulator pnl2026={pnl2026} />
-      
       <ComparativeAnalysisTool />
 
     </div>

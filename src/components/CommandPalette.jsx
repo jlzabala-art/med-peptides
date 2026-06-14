@@ -1,6 +1,14 @@
 // Updated CommandPalette with premium glassmorphism, recent history, and keyboard hints
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Search, Box, LayoutDashboard, Sparkles, Zap, Command, ArrowUp, ArrowDown, ArrowRight } from 'lucide-react';
+import Search from "lucide-react/dist/esm/icons/search";
+import Box from "lucide-react/dist/esm/icons/box";
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Command from "lucide-react/dist/esm/icons/command";
+import ArrowUp from "lucide-react/dist/esm/icons/arrow-up";
+import ArrowDown from "lucide-react/dist/esm/icons/arrow-down";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDebounce } from '../hooks/useDebounce';

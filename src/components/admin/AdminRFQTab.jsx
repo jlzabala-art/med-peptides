@@ -1,11 +1,29 @@
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Send from "lucide-react/dist/esm/icons/send";
+import Receipt from "lucide-react/dist/esm/icons/receipt";
+import Download from "lucide-react/dist/esm/icons/download";
 import { useLocation } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, getDocs, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, functions, storage, auth } from '../../firebase';
-import { FileText, Loader2, Plus, Sparkles, CheckCircle, AlertTriangle, Send, Receipt, Download } from 'lucide-react';
+
+
+
+
+
+
+
+
+
 import { Card } from '../ui';
+import notifier from '../../services/NotificationService';
 import SupplierPriceListUpdater from './gadgets/SupplierPriceListUpdater';
 import DataTable from '../ui/DataTable';
 import AdminPageHeader from './AdminPageHeader';
@@ -92,11 +110,11 @@ export default function AdminRFQTab() {
           status: 'DRAFT'
         });
       } else {
-        alert("Failed to parse RFQ: " + response.data.error);
+        notifier.error("Failed to parse RFQ: " + response.data.error);
       }
     } catch (err) {
       console.error("Parse Error:", err);
-      alert("Error parsing document.");
+      notifier.error("Error parsing document.");
     }
     setParseProgress({ state: 'idle', count: 0 });
   };
@@ -172,7 +190,7 @@ export default function AdminRFQTab() {
       loadRfqs();
     } catch (err) {
       console.error(err);
-      alert("Error saving RFQ.");
+      notifier.error("Error saving RFQ.");
     }
   };
 
@@ -183,52 +201,52 @@ export default function AdminRFQTab() {
       });
       loadRfqs();
     } catch (err) {
-      alert("Error updating PO status");
+      notifier.error("Error updating PO status");
     }
   };
 
   const convertToPO = async (rfq) => {
-    if (!window.confirm('Convert this RFQ to a Purchase Order?')) return;
-    try {
-      const items = rfq.items.map(i => ({
-        itemName: i.itemName || i.productName || i.name,
-        quantity: i.quantity || 1,
-        unit: i.units || 'vial',
-        unitPrice: parseFloat(i.supplierUnitCost) || 0
-      }));
-      const totalAmount = items.reduce((s, i) => s + (i.quantity * i.unitPrice), 0);
+    notifier.confirmCritical('Convert this RFQ to a Purchase Order?', async () => {
+      try {
+        const items = rfq.items.map(i => ({
+          itemName: i.itemName || i.productName || i.name,
+          quantity: i.quantity || 1,
+          unit: i.units || 'vial',
+          unitPrice: parseFloat(i.supplierUnitCost) || 0
+        }));
+        const totalAmount = items.reduce((s, i) => s + (i.quantity * i.unitPrice), 0);
 
-      const payload = {
-        supplierName: rfq.supplierName || 'Unknown Supplier',
-        poNumber: `PO-${Date.now().toString().slice(-6)}`,
-        status: 'open',
-        items,
-        totalAmount,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        linkedRfqId: rfq.id
-      };
-      
-      await addDoc(collection(db, 'purchaseOrders'), payload);
-      await updateDoc(doc(db, 'agency_rfqs', rfq.id), { status: 'PO_CREATED', poAttached: true });
-      alert('Purchase Order successfully created!');
-      loadRfqs();
-    } catch (e) {
-      console.error(e);
-      alert('Error creating Purchase Order');
-    }
+        const payload = {
+          supplierName: rfq.supplierName || 'Unknown Supplier',
+          poNumber: `PO-${Date.now().toString().slice(-6)}`,
+          status: 'open',
+          items,
+          totalAmount,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          linkedRfqId: rfq.id
+        };
+        await addDoc(collection(db, 'purchaseOrders'), payload);
+        await updateDoc(doc(db, 'agency_rfqs', rfq.id), { status: 'PO_CREATED', poAttached: true });
+        notifier.success('Purchase Order successfully created!');
+        loadRfqs();
+      } catch (e) {
+        console.error(e);
+        notifier.error('Error creating Purchase Order');
+      }
+    });
   };
 
   const generateSupplierMagicLink = async (id) => {
     const magicLink = `${window.location.origin}/supplier-quote/${id}?token=secure_${Date.now()}`;
     await navigator.clipboard.writeText(magicLink);
-    alert(`Magic Link copied to clipboard!\n\n${magicLink}\n\nLotusLand can open this link to enter costs.`);
+    notifier.success('Magic Link copied to clipboard! LotusLand can open this link to enter costs.');
   };
 
   const generateClientMagicLink = async (id) => {
     const magicLink = `${window.location.origin}/client-quote/${id}?token=secure_${Date.now()}`;
     await navigator.clipboard.writeText(magicLink);
-    alert(`Client Link copied to clipboard!\n\n${magicLink}\n\nMagenta can open this link to approve the quote.`);
+    notifier.success('Client Link copied to clipboard! Magenta can open this link to approve the quote.');
   };
 
   const handleInvoiceUpload = async (e, rfq) => {
@@ -239,7 +257,6 @@ export default function AdminRFQTab() {
     try {
       const storageRef = ref(storage, `invoices/${rfq.id}_${Date.now()}.pdf`);
       await uploadBytes(storageRef, file);
-      
       const reconcileSupplierInvoice = httpsCallable(functions, 'reconcileSupplierInvoice');
       const response = await reconcileSupplierInvoice({
         rfqId: rfq.id,
@@ -254,11 +271,11 @@ export default function AdminRFQTab() {
         });
         loadRfqs(); // Reload to see the new status
       } else {
-        alert("Reconciliation failed: " + response.data.error);
+        notifier.error("Reconciliation failed: " + response.data.error);
       }
     } catch (err) {
       console.error(err);
-      alert("Error processing invoice.");
+      notifier.error("Error processing invoice.");
     }
     setIsReconciling(false);
   };
@@ -274,13 +291,13 @@ export default function AdminRFQTab() {
         syncedToZoho: true,
         zohoBillId: `zb_${Date.now()}` // Mock ID for now
       });
-      alert('Invoice approved and successfully synced to Zoho Books as a Bill.');
+      notifier.success('Invoice approved and successfully synced to Zoho Books as a Bill.');
       setReconciliationResult(null);
       setSelectedRfqId(null);
       loadRfqs();
     } catch (err) {
       console.error(err);
-      alert('Failed to sync with Zoho Books.');
+      notifier.error('Failed to sync with Zoho Books.');
     }
     setIsSyncing(false);
   };
@@ -291,20 +308,20 @@ export default function AdminRFQTab() {
       await updateDoc(doc(db, 'agency_rfqs', selectedRfqId), {
         status: 'DISPUTED'
       });
-      alert('Invoice marked as disputed. An email draft will be prepared for the supplier.');
+      notifier.success('Invoice marked as disputed. An email draft will be prepared for the supplier.');
       setReconciliationResult(null);
       setSelectedRfqId(null);
       loadRfqs();
     } catch (err) {
       console.error(err);
-      alert('Failed to update status.');
+      notifier.error('Failed to update status.');
     }
   };
 
   const reconcileInvoice = async (rfqId) => {
     const rfq = rfqs.find(r => r.id === rfqId);
     if (!rfq || !rfq.invoicePath) {
-      alert("No invoice path found for this RFQ.");
+      notifier.error("No invoice path found for this RFQ.");
       return;
     }
     setIsReconciling(true);
@@ -320,11 +337,11 @@ export default function AdminRFQTab() {
         setSelectedRfqId(rfqId);
         loadRfqs(); // Reload to see the new status
       } else {
-        alert("Reconciliation failed: " + response.data.error);
+        notifier.error("Reconciliation failed: " + response.data.error);
       }
     } catch (err) {
       console.error(err);
-      alert("Error processing invoice.");
+      notifier.error("Error processing invoice.");
     }
     setIsReconciling(false);
   };
@@ -510,7 +527,6 @@ export default function AdminRFQTab() {
               </div>
               <button onClick={() => setPreviewData(null)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
             </div>
-            
             <div style={{ padding: '2rem' }}>
               <div style={{ marginBottom: '2rem' }}>
                 <h2 style={{ margin: '0 0 0.5rem' }}>Request For Quote #{previewData.id?.slice(0,6).toUpperCase()}</h2>
@@ -624,7 +640,6 @@ export default function AdminRFQTab() {
                 </ul>
               </div>
             )}
-            
             <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.5rem' }}>
               <button 
                 onClick={handleRejectInvoice}
@@ -666,7 +681,6 @@ export default function AdminRFQTab() {
                 <FileText size={48} color="#94a3b8" style={{ margin: '0 auto 1rem' }} />
                 <h4 style={{ margin: '0 0 0.5rem' }}>Upload Excel or CSV</h4>
                 <p style={{ margin: '0 0 1rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>The AI will extract items, dosages, and quantities automatically.</p>
-                
                 <input 
                   type="file" 
                   accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
@@ -675,7 +689,6 @@ export default function AdminRFQTab() {
                   id="rfq-upload"
                   disabled={parseProgress.state !== 'idle'}
                 />
-                
                 {parseProgress.state !== 'idle' ? (
                   <div style={{ padding: '1rem', backgroundColor: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
                     <Loader2 size={24} className="spin" color="#3b82f6" style={{ margin: '0 auto 0.5rem', display: 'block' }} />
@@ -818,7 +831,6 @@ export default function AdminRFQTab() {
           </Card>
         </div>
       )}
-      
       {/* Supplier Price List Updater */}
       <SupplierPriceListUpdater />
 

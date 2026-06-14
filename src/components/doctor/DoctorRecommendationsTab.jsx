@@ -1,3 +1,8 @@
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Send from "lucide-react/dist/esm/icons/send";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import BrainCircuit from "lucide-react/dist/esm/icons/brain-circuit";
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -5,7 +10,11 @@ import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../ui/Card';
 import Spinner from '../ui/Spinner';
-import { ClipboardList, Plus, Send, Loader2, BrainCircuit } from 'lucide-react';
+
+
+
+
+
 
 export default function DoctorRecommendationsTab({ doctorId, doctorMeta, patients }) {
   const { activePermissions } = useAuth();
@@ -96,11 +105,9 @@ export default function DoctorRecommendationsTab({ doctorId, doctorMeta, patient
             <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--primary)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Plus size={18} /> New Recommendation for {selName}
             </div>
-            
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <input placeholder='Title (e.g. Repair Protocol)' value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required style={inputStyle} />
               <input placeholder='Peptides (comma separated, e.g. BPC-157, TB-500)' value={form.peptides} onChange={e => setForm(f => ({ ...f, peptides: e.target.value }))} style={inputStyle} />
-              
               {clinicalLogs ? (
                 <textarea placeholder='Clinical notes / dosage instructions...' value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }} />
               ) : (
@@ -108,7 +115,6 @@ export default function DoctorRecommendationsTab({ doctorId, doctorMeta, patient
                   Clinical notes restricted (Requires Clinical Logs permission)
                 </div>
               )}
-              
               {mutation.isError && <div style={{ color: 'red', fontSize: '0.85rem' }}>{mutation.error.message}</div>}
               {mutation.isSuccess && <div style={{ color: 'green', fontSize: '0.85rem' }}>Recommendation sent successfully!</div>}
 
@@ -121,7 +127,6 @@ export default function DoctorRecommendationsTab({ doctorId, doctorMeta, patient
 
           <Card>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-text-primary)', margin: '0 0 1.25rem' }}>Recommendation History</h3>
-            
             {recLoading ? (
               <Spinner text="Loading recommendations..." />
             ) : recs.length === 0 ? (
@@ -162,7 +167,6 @@ export default function DoctorRecommendationsTab({ doctorId, doctorMeta, patient
                         ))}
                       </div>
                     )}
-                    
                     {r.notes && (
                       <div style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)', lineHeight: 1.6, background: 'var(--color-bg-surface)', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                         {clinicalLogs ? r.notes : <span style={{ color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>[Notes restricted]</span>}

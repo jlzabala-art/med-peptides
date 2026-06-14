@@ -14,9 +14,9 @@
  * Shape of each record: see src/schemas/productSchema.js
  */
 
-import productsV2    from './products.v2.json'    assert { type: 'json' };
-import supplementsV2 from './supplements.v2.json' assert { type: 'json' };
-import catalogV2     from './catalog.v2.json'     assert { type: 'json' };
+import productsV2    from './products.v2.json';
+import supplementsV2 from './supplements.v2.json';
+import catalogV2     from './catalog.v2.json';
 
 /** All peptide products in canonical v2 format (54 entries, grouped variants). */
 export const products = productsV2;

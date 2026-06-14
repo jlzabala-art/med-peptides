@@ -1,6 +1,12 @@
  
 import React, { useState, useEffect } from 'react';
-import { Download, AlertTriangle, Bug, HardDrive, LayoutList, BookOpen, AlertCircle } from 'lucide-react';
+import Download from "lucide-react/dist/esm/icons/download";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Bug from "lucide-react/dist/esm/icons/bug";
+import HardDrive from "lucide-react/dist/esm/icons/hard-drive";
+import LayoutList from "lucide-react/dist/esm/icons/layout-list";
+import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import { relationshipAuditService } from '../services/relationshipAuditService';
 import { exportService } from '../services/exportService';
 import { useAuth } from '../context/AuthContext';

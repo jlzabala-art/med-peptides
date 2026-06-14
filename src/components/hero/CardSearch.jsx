@@ -1,5 +1,8 @@
+import Search from "lucide-react/dist/esm/icons/search";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React, { useState, useEffect } from 'react';
-import { Search, ArrowRight } from 'lucide-react';
+
+
 import { useTranslation } from 'react-i18next';
 import { useResponsive } from '../../hooks/useResponsive';
 import '../../styles/hero_card.css';

@@ -1,13 +1,20 @@
- 
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import LogIn from "lucide-react/dist/esm/icons/log-in";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import Globe from "lucide-react/dist/esm/icons/globe";
+import Info from "lucide-react/dist/esm/icons/info";
 import React, { useEffect } from 'react';
-import { ArrowLeft, LogIn, ShieldAlert, Globe, Info } from 'lucide-react';
+
+
+
+
+
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 export default function ExitProfessionalMode({ onBack, onLogin }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
@@ -53,7 +60,6 @@ export default function ExitProfessionalMode({ onBack, onLogin }) {
         }}>
           {t('auth.exit.title', 'Professional Session Ended')}
         </h1>
-        
         <p style={{ 
           color: 'var(--text-muted)', 
           fontSize: '1.1rem', 
@@ -102,7 +108,6 @@ export default function ExitProfessionalMode({ onBack, onLogin }) {
           >
             <ArrowLeft size={18} /> {t('auth.exit.btnGuest', 'Continue as Guest')}
           </button>
-          
           <button 
             className="btn btn-secondary" 
             onClick={handleLogin}
