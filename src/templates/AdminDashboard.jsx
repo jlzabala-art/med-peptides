@@ -114,7 +114,7 @@ import AdminHomeLayoutTab from '../components/admin/AdminHomeLayoutTab';
 import AdminPlaceholderTab from '../components/admin/AdminPlaceholderTab';
 import AdminAIAgentsTab from '../components/admin/AdminAIAgentsTab';
 import AdminAuditLogsTab from '../components/admin/AdminAuditLogsTab';
-import AtlasMessagesHub from '../features/messages/AtlasMessagesHub';
+import MessagingWidget from '../components/messaging/MessagingWidget';
 import AdminStorageTab from '../components/admin/AdminStorageTab';
 import AdminAIToolsTab from '../components/admin/AdminAIToolsTab';
 import AdminSkuMappingTab from '../components/admin/SkuMappingTab/AdminSkuMappingTab';
@@ -360,7 +360,7 @@ function TabContent({ tab, catalogToEdit, setCatalogToEdit, setActiveTab }) {
     <AdminTabErrorBoundary tabId={tab} tabLabel={tabLabel}>
       <React.Suspense fallback={<AdminLoadingFallback />}>
         {tab === 'dashboard' && <AdminMetricsDashboard />}
-        {tab === 'messages' && <AtlasMessagesHub />}
+        {tab === 'messages' && <MessagingWidget role="admin" ownerId="admin" />}
         {tab === 'quotations' && <B2BQuotationsHub />}
         {tab === 'invoices' && <InvoiceIntelligenceHub />}
         {tab === 'workflows' && <AdminWorkflowsTab />}
