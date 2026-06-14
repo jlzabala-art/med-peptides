@@ -1,109 +1,152 @@
-import PackageOpen from "lucide-react/dist/esm/icons/package-open";
-import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import ArchiveX from "lucide-react/dist/esm/icons/archive-x";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-import HeartPulse from "lucide-react/dist/esm/icons/heart-pulse";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Search from "lucide-react/dist/esm/icons/search";
-import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import PackageMinus from "lucide-react/dist/esm/icons/package-minus";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import Tag from "lucide-react/dist/esm/icons/tag";
-import PackagePlus from "lucide-react/dist/esm/icons/package-plus";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import Send from "lucide-react/dist/esm/icons/send";
+import PackageOpen from 'lucide-react/dist/esm/icons/package-open';
+import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
+import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
+import Activity from 'lucide-react/dist/esm/icons/activity';
+import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign';
+import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
+import ArchiveX from 'lucide-react/dist/esm/icons/archive-x';
+import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
+import HeartPulse from 'lucide-react/dist/esm/icons/heart-pulse';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import Search from 'lucide-react/dist/esm/icons/search';
+import BarChart3 from 'lucide-react/dist/esm/icons/bar-chart-3';
+import Zap from 'lucide-react/dist/esm/icons/zap';
+import PackageMinus from 'lucide-react/dist/esm/icons/package-minus';
+import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
+import Tag from 'lucide-react/dist/esm/icons/tag';
+import PackagePlus from 'lucide-react/dist/esm/icons/package-plus';
+import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
+import Send from 'lucide-react/dist/esm/icons/send';
 import React from 'react';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const mockData = [
-  { id: 1, name: 'BPC-157 5mg', stock: 12, reorderPoint: 50, supplier: 'PeptideSci', moq: 100, leadTime: '14 days', salesStatus: 'fast', price: 45, noSalesDays: 2 },
-  { id: 2, name: 'TB-500 10mg', stock: 0, reorderPoint: 30, supplier: 'BioGenetics', moq: 50, leadTime: '7 days', salesStatus: 'fast', price: 65, noSalesDays: 0 },
-  { id: 3, name: 'GHK-Cu 50mg', stock: 450, reorderPoint: 20, supplier: 'CopperLabs', moq: 200, leadTime: '21 days', salesStatus: 'dead', price: 25, noSalesDays: 125 },
-  { id: 4, name: 'Ipamorelin 2mg', stock: 8, reorderPoint: 40, supplier: 'PeptideSci', moq: 100, leadTime: '14 days', salesStatus: 'normal', price: 30, noSalesDays: 5 },
-  { id: 5, name: 'CJC-1295 2mg', stock: 15, reorderPoint: 50, supplier: 'BioGenetics', moq: 50, leadTime: '7 days', salesStatus: 'fast', price: 35, noSalesDays: 1 },
-  { id: 6, name: 'Semaglutide 5mg', stock: 320, reorderPoint: 100, supplier: 'PharmaTech', moq: 500, leadTime: '30 days', salesStatus: 'fast', price: 120, noSalesDays: 0 },
-  { id: 7, name: 'Tirzepatide 10mg', stock: 5, reorderPoint: 200, supplier: 'PharmaTech', moq: 500, leadTime: '30 days', salesStatus: 'fast', price: 150, noSalesDays: 0 },
-  { id: 8, name: 'Melanotan II 10mg', stock: 210, reorderPoint: 50, supplier: 'SunLabs', moq: 100, leadTime: '10 days', salesStatus: 'dead', price: 40, noSalesDays: 140 },
+  {
+    id: 1,
+    name: 'BPC-157 5mg',
+    stock: 12,
+    reorderPoint: 50,
+    supplier: 'PeptideSci',
+    moq: 100,
+    leadTime: '14 days',
+    salesStatus: 'fast',
+    price: 45,
+    noSalesDays: 2,
+  },
+  {
+    id: 2,
+    name: 'TB-500 10mg',
+    stock: 0,
+    reorderPoint: 30,
+    supplier: 'BioGenetics',
+    moq: 50,
+    leadTime: '7 days',
+    salesStatus: 'fast',
+    price: 65,
+    noSalesDays: 0,
+  },
+  {
+    id: 3,
+    name: 'GHK-Cu 50mg',
+    stock: 450,
+    reorderPoint: 20,
+    supplier: 'CopperLabs',
+    moq: 200,
+    leadTime: '21 days',
+    salesStatus: 'dead',
+    price: 25,
+    noSalesDays: 125,
+  },
+  {
+    id: 4,
+    name: 'Ipamorelin 2mg',
+    stock: 8,
+    reorderPoint: 40,
+    supplier: 'PeptideSci',
+    moq: 100,
+    leadTime: '14 days',
+    salesStatus: 'normal',
+    price: 30,
+    noSalesDays: 5,
+  },
+  {
+    id: 5,
+    name: 'CJC-1295 2mg',
+    stock: 15,
+    reorderPoint: 50,
+    supplier: 'BioGenetics',
+    moq: 50,
+    leadTime: '7 days',
+    salesStatus: 'fast',
+    price: 35,
+    noSalesDays: 1,
+  },
+  {
+    id: 6,
+    name: 'Semaglutide 5mg',
+    stock: 320,
+    reorderPoint: 100,
+    supplier: 'PharmaTech',
+    moq: 500,
+    leadTime: '30 days',
+    salesStatus: 'fast',
+    price: 120,
+    noSalesDays: 0,
+  },
+  {
+    id: 7,
+    name: 'Tirzepatide 10mg',
+    stock: 5,
+    reorderPoint: 200,
+    supplier: 'PharmaTech',
+    moq: 500,
+    leadTime: '30 days',
+    salesStatus: 'fast',
+    price: 150,
+    noSalesDays: 0,
+  },
+  {
+    id: 8,
+    name: 'Melanotan II 10mg',
+    stock: 210,
+    reorderPoint: 50,
+    supplier: 'SunLabs',
+    moq: 100,
+    leadTime: '10 days',
+    salesStatus: 'dead',
+    price: 40,
+    noSalesDays: 140,
+  },
 ];
 
-export default function InventoryIntelligenceView({ products = [] }) {
+export default function InventoryIntelligenceView({ variants = [] }) {
   const data = React.useMemo(() => {
-    if (!products || products.length === 0) return mockData;
-    
-    const flatVariants = [];
-    products.forEach(p => {
-      if (p.variants && p.variants.length > 0) {
-        p.variants.forEach((v, idx) => {
-          // Compute status based on stock level if it exists, otherwise fake it
-          const stock = v.inventory !== undefined ? Number(v.inventory) : Math.floor(Math.random() * 200);
-          const price = Number(v.cost) || Number(v.msrp) || 0;
-          flatVariants.push({
-            id: `${p.id}-var-${idx}`,
-            name: `${p.name || p.displayName} - ${v.format || ''} ${v.size || ''}`.trim(),
-            stock: stock,
-            reorderPoint: Number(v.minStock) || 50,
-            supplier: v.supplier || v.vendor || 'Unassigned',
-            moq: Number(v.moq) || 100,
-            leadTime: v.leadTime ? `${v.leadTime} days` : '14 days',
-            salesStatus: stock < 50 ? 'fast' : (stock > 150 ? 'dead' : 'normal'),
-            price: price,
-            noSalesDays: stock > 150 ? 125 : 5
-          });
-        });
-      } else {
-         flatVariants.push({
-            id: p.id,
-            name: p.name || p.displayName || 'Unknown Product',
-            stock: 0,
-            reorderPoint: 50,
-            supplier: p.supplier || p.vendor || 'Unassigned',
-            moq: 100,
-            leadTime: '14 days',
-            salesStatus: 'normal',
-            price: 0,
-            noSalesDays: 0
-         });
-      }
-    });
-    return flatVariants;
-  }, [products]);
+    if (!variants || variants.length === 0) return mockData;
 
-  const totalValue = data.reduce((sum, p) => sum + (p.stock * p.price), 0);
-  const lowStockCount = data.filter(p => p.stock > 0 && p.stock < p.reorderPoint).length;
-  const outOfStockCount = data.filter(p => p.stock === 0).length;
-  const deadStockCount = data.filter(p => p.salesStatus === 'dead' || p.noSalesDays > 120).length;
+    return variants.map((v) => {
+      const stock = v.stock;
+      return {
+        ...v,
+        salesStatus: stock < 50 ? 'fast' : stock > 150 ? 'dead' : 'normal',
+        noSalesDays: stock > 150 ? 125 : 5,
+      };
+    });
+  }, [variants]);
+
+  const totalValue = data.reduce((sum, p) => sum + p.stock * p.price, 0);
+  const lowStockCount = data.filter((p) => p.stock > 0 && p.stock < p.reorderPoint).length;
+  const outOfStockCount = data.filter((p) => p.stock === 0).length;
+  const deadStockCount = data.filter((p) => p.salesStatus === 'dead' || p.noSalesDays > 120).length;
   const reorderCount = lowStockCount + outOfStockCount;
   // Fake health score based on metrics
-  const healthScore = Math.max(0, 100 - (outOfStockCount * 5) - (lowStockCount * 2) - (deadStockCount * 3));
+  const healthScore = Math.max(
+    0,
+    100 - outOfStockCount * 5 - lowStockCount * 2 - deadStockCount * 3
+  );
 
-  const reorderRecommendations = data.filter(p => p.stock < p.reorderPoint);
-  const deadStockItems = data.filter(p => p.salesStatus === 'dead' || p.noSalesDays > 120);
-  const fastMovers = data.filter(p => p.salesStatus === 'fast').sort((a, b) => a.stock - b.stock);
+  const reorderRecommendations = data.filter((p) => p.stock < p.reorderPoint);
+  const deadStockItems = data.filter((p) => p.salesStatus === 'dead' || p.noSalesDays > 120);
+  const fastMovers = data.filter((p) => p.salesStatus === 'fast').sort((a, b) => a.stock - b.stock);
 
   return (
     <div className="intelligence-workspace">
@@ -442,10 +485,10 @@ export default function InventoryIntelligenceView({ products = [] }) {
       <div className="ai-query-container">
         <div className="ai-query-inner">
           <Sparkles size={24} color="#6366f1" />
-          <input 
-            type="text" 
-            className="ai-query-input" 
-            placeholder="Ask Atlas AI... e.g. 'Which products should I reorder this week?'" 
+          <input
+            type="text"
+            className="ai-query-input"
+            placeholder="Ask Atlas AI... e.g. 'Which products should I reorder this week?'"
           />
           <button className="ai-badge">
             Generate Insights <ArrowRight size={18} />
@@ -478,7 +521,9 @@ export default function InventoryIntelligenceView({ products = [] }) {
             Low Stock
           </div>
           <div>
-            <div className="metric-value" style={{ color: '#d97706' }}>{lowStockCount}</div>
+            <div className="metric-value" style={{ color: '#d97706' }}>
+              {lowStockCount}
+            </div>
             <div className="metric-sub">Below reorder threshold</div>
           </div>
         </div>
@@ -491,7 +536,9 @@ export default function InventoryIntelligenceView({ products = [] }) {
             Out of Stock
           </div>
           <div>
-            <div className="metric-value" style={{ color: '#dc2626' }}>{outOfStockCount}</div>
+            <div className="metric-value" style={{ color: '#dc2626' }}>
+              {outOfStockCount}
+            </div>
             <div className="metric-sub">Requires immediate action</div>
           </div>
         </div>
@@ -504,7 +551,9 @@ export default function InventoryIntelligenceView({ products = [] }) {
             Dead Stock
           </div>
           <div>
-            <div className="metric-value" style={{ color: '#4b5563' }}>{deadStockCount}</div>
+            <div className="metric-value" style={{ color: '#4b5563' }}>
+              {deadStockCount}
+            </div>
             <div className="metric-sub">No sales in 120+ days</div>
           </div>
         </div>
@@ -517,12 +566,17 @@ export default function InventoryIntelligenceView({ products = [] }) {
             To Reorder
           </div>
           <div>
-            <div className="metric-value" style={{ color: '#2563eb' }}>{reorderCount}</div>
+            <div className="metric-value" style={{ color: '#2563eb' }}>
+              {reorderCount}
+            </div>
             <div className="metric-sub">POs ready to be generated</div>
           </div>
         </div>
 
-        <div className="glass-card metric-card" style={{ background: 'linear-gradient(135deg, #f0fdf4, #ffffff)' }}>
+        <div
+          className="glass-card metric-card"
+          style={{ background: 'linear-gradient(135deg, #f0fdf4, #ffffff)' }}
+        >
           <div className="metric-header">
             <div className="metric-icon-wrap" style={{ background: '#dcfce7', color: '#22c55e' }}>
               <HeartPulse size={20} />
@@ -530,7 +584,9 @@ export default function InventoryIntelligenceView({ products = [] }) {
             Health Score
           </div>
           <div>
-            <div className="metric-value" style={{ color: '#16a34a' }}>{healthScore}%</div>
+            <div className="metric-value" style={{ color: '#16a34a' }}>
+              {healthScore}%
+            </div>
             <div className="metric-sub">Overall inventory efficiency</div>
           </div>
         </div>
@@ -538,32 +594,61 @@ export default function InventoryIntelligenceView({ products = [] }) {
 
       {/* Inventory Alerts Carousel */}
       <div>
-        <h2 className="section-title"><AlertCircle size={24} color="#0f172a" /> Intelligence Alerts</h2>
+        <h2 className="section-title">
+          <AlertCircle size={24} color="#0f172a" /> Intelligence Alerts
+        </h2>
         <div className="carousel-container">
           <div className="glass-card alert-card critical">
             <AlertTriangle size={28} color="#ef4444" style={{ flexShrink: 0 }} />
             <div>
-              <h4 style={{ margin: '0 0 0.5rem 0', color: '#7f1d1d', fontSize: '1.1rem' }}>{outOfStockCount} Products Out of Stock</h4>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: '#991b1b' }}>Revenue is being lost. Immediate replenishment required for top sellers like TB-500.</p>
-              <button className="action-btn outline" style={{ marginTop: '1rem', background: 'white' }}>View Stock-outs</button>
+              <h4 style={{ margin: '0 0 0.5rem 0', color: '#7f1d1d', fontSize: '1.1rem' }}>
+                {outOfStockCount} Products Out of Stock
+              </h4>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: '#991b1b' }}>
+                Revenue is being lost. Immediate replenishment required for top sellers like TB-500.
+              </p>
+              <button
+                className="action-btn outline"
+                style={{ marginTop: '1rem', background: 'white' }}
+              >
+                View Stock-outs
+              </button>
             </div>
           </div>
 
           <div className="glass-card alert-card warning">
             <TrendingDown size={28} color="#f59e0b" style={{ flexShrink: 0 }} />
             <div>
-              <h4 style={{ margin: '0 0 0.5rem 0', color: '#92400e', fontSize: '1.1rem' }}>{lowStockCount} Products Below Threshold</h4>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: '#b45309' }}>These items will deplete within 14 days based on current sales velocity.</p>
-              <button className="action-btn outline" style={{ marginTop: '1rem', background: 'white' }}>Review Reorders</button>
+              <h4 style={{ margin: '0 0 0.5rem 0', color: '#92400e', fontSize: '1.1rem' }}>
+                {lowStockCount} Products Below Threshold
+              </h4>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: '#b45309' }}>
+                These items will deplete within 14 days based on current sales velocity.
+              </p>
+              <button
+                className="action-btn outline"
+                style={{ marginTop: '1rem', background: 'white' }}
+              >
+                Review Reorders
+              </button>
             </div>
           </div>
 
           <div className="glass-card alert-card info">
             <ArchiveX size={28} color="#3b82f6" style={{ flexShrink: 0 }} />
             <div>
-              <h4 style={{ margin: '0 0 0.5rem 0', color: '#1e3a8a', fontSize: '1.1rem' }}>{deadStockCount} Slow Moving Assets</h4>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: '#1d4ed8' }}>Capital is locked in inventory that hasn't moved in 120 days. Consider promotions.</p>
-              <button className="action-btn outline" style={{ marginTop: '1rem', background: 'white' }}>Analyze Dead Stock</button>
+              <h4 style={{ margin: '0 0 0.5rem 0', color: '#1e3a8a', fontSize: '1.1rem' }}>
+                {deadStockCount} Slow Moving Assets
+              </h4>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: '#1d4ed8' }}>
+                Capital is locked in inventory that hasn't moved in 120 days. Consider promotions.
+              </p>
+              <button
+                className="action-btn outline"
+                style={{ marginTop: '1rem', background: 'white' }}
+              >
+                Analyze Dead Stock
+              </button>
             </div>
           </div>
         </div>
@@ -572,7 +657,7 @@ export default function InventoryIntelligenceView({ products = [] }) {
       {/* Reorder Recommendations */}
       <div className="glass-card">
         <h2 className="section-title">
-          <PackagePlus size={24} color="#2563eb" /> 
+          <PackagePlus size={24} color="#2563eb" />
           Reorder Recommendations
         </h2>
         <div className="table-container">
@@ -589,7 +674,7 @@ export default function InventoryIntelligenceView({ products = [] }) {
               </tr>
             </thead>
             <tbody>
-              {reorderRecommendations.map(item => (
+              {reorderRecommendations.map((item) => (
                 <tr key={item.id}>
                   <td style={{ fontWeight: 600, color: '#0f172a' }}>{item.name}</td>
                   <td style={{ color: '#475569' }}>{item.supplier}</td>
@@ -600,20 +685,32 @@ export default function InventoryIntelligenceView({ products = [] }) {
                   </td>
                   <td style={{ color: '#475569' }}>{item.moq}</td>
                   <td style={{ color: '#475569' }}>{item.leadTime}</td>
-                  <td style={{ fontWeight: 700, color: '#0f172a' }}>{Math.max(item.moq, item.reorderPoint * 2 - item.stock)}</td>
+                  <td style={{ fontWeight: 700, color: '#0f172a' }}>
+                    {Math.max(item.moq, item.reorderPoint * 2 - item.stock)}
+                  </td>
                   <td>
                     <div className="action-group">
-                      <button className="action-btn primary"><Send size={14}/> Create PO</button>
+                      <button className="action-btn primary">
+                        <Send size={14} /> Create PO
+                      </button>
                       <button className="action-btn outline">RFQ</button>
-                      <button className="action-btn ai"><Sparkles size={14}/> Ask Atlas</button>
+                      <button className="action-btn ai">
+                        <Sparkles size={14} /> Ask Atlas
+                      </button>
                     </div>
                   </td>
                 </tr>
               ))}
               {reorderRecommendations.length === 0 && (
                 <tr>
-                  <td colSpan="7" style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
-                    <PackageOpen size={48} style={{ opacity: 0.2, margin: '0 auto 1rem auto', display: 'block' }} />
+                  <td
+                    colSpan="7"
+                    style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}
+                  >
+                    <PackageOpen
+                      size={48}
+                      style={{ opacity: 0.2, margin: '0 auto 1rem auto', display: 'block' }}
+                    />
                     No products currently require reordering.
                   </td>
                 </tr>
@@ -621,27 +718,69 @@ export default function InventoryIntelligenceView({ products = [] }) {
             </tbody>
           </table>
           <div className="mobile-card-container">
-            {reorderRecommendations.map(item => (
+            {reorderRecommendations.map((item) => (
               <div key={item.id} className="mobile-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginBottom: '0.5rem',
+                  }}
+                >
                   <h4 style={{ margin: 0, fontWeight: 600, color: '#0f172a' }}>{item.name}</h4>
-                  <span className={`status-badge ${item.stock === 0 ? 'critical' : 'warning'}`}>{item.stock} / {item.reorderPoint}</span>
+                  <span className={`status-badge ${item.stock === 0 ? 'critical' : 'warning'}`}>
+                    {item.stock} / {item.reorderPoint}
+                  </span>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.85rem', color: '#475569', marginBottom: '1rem' }}>
-                  <div><strong>Supplier:</strong> {item.supplier}</div>
-                  <div><strong>MOQ:</strong> {item.moq}</div>
-                  <div><strong>Lead Time:</strong> {item.leadTime}</div>
-                  <div><strong style={{ color: '#0f172a' }}>Reorder:</strong> {Math.max(item.moq, item.reorderPoint * 2 - item.stock)}</div>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '0.5rem',
+                    fontSize: '0.85rem',
+                    color: '#475569',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  <div>
+                    <strong>Supplier:</strong> {item.supplier}
+                  </div>
+                  <div>
+                    <strong>MOQ:</strong> {item.moq}
+                  </div>
+                  <div>
+                    <strong>Lead Time:</strong> {item.leadTime}
+                  </div>
+                  <div>
+                    <strong style={{ color: '#0f172a' }}>Reorder:</strong>{' '}
+                    {Math.max(item.moq, item.reorderPoint * 2 - item.stock)}
+                  </div>
                 </div>
-                <div className="action-group" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <button className="action-btn primary" style={{ flex: 1, justifyContent: 'center' }}><Send size={14}/> PO</button>
-                  <button className="action-btn outline" style={{ flex: 1, justifyContent: 'center' }}>RFQ</button>
+                <div
+                  className="action-group"
+                  style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
+                >
+                  <button
+                    className="action-btn primary"
+                    style={{ flex: 1, justifyContent: 'center' }}
+                  >
+                    <Send size={14} /> PO
+                  </button>
+                  <button
+                    className="action-btn outline"
+                    style={{ flex: 1, justifyContent: 'center' }}
+                  >
+                    RFQ
+                  </button>
                 </div>
               </div>
             ))}
             {reorderRecommendations.length === 0 && (
               <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
-                <PackageOpen size={32} style={{ opacity: 0.2, margin: '0 auto 0.5rem auto', display: 'block' }} />
+                <PackageOpen
+                  size={32}
+                  style={{ opacity: 0.2, margin: '0 auto 0.5rem auto', display: 'block' }}
+                />
                 No products currently require reordering.
               </div>
             )}
@@ -652,25 +791,44 @@ export default function InventoryIntelligenceView({ products = [] }) {
       <div className="grid-2">
         {/* Stock Forecast */}
         <div className="glass-card">
-          <h2 className="section-title"><BarChart3 size={24} color="#8b5cf6" /> Stock Depletion Forecast</h2>
+          <h2 className="section-title">
+            <BarChart3 size={24} color="#8b5cf6" /> Stock Depletion Forecast
+          </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {fastMovers.slice(0, 4).map((item, idx) => {
               // Fake prediction logic
-              const daysLeft = item.stock === 0 ? 0 : Math.max(1, Math.floor(item.stock / (item.price > 100 ? 2 : 5)));
+              const daysLeft =
+                item.stock === 0
+                  ? 0
+                  : Math.max(1, Math.floor(item.stock / (item.price > 100 ? 2 : 5)));
               const percentageLeft = Math.min(100, Math.max(5, (daysLeft / 60) * 100));
               const color = daysLeft < 14 ? '#ef4444' : daysLeft < 30 ? '#f59e0b' : '#22c55e';
               return (
                 <div key={item.id}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      marginBottom: '0.25rem',
+                    }}
+                  >
                     <span style={{ fontWeight: 600 }}>{item.name}</span>
-                    <span style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <span
+                      style={{
+                        fontSize: '0.85rem',
+                        color: '#64748b',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                      }}
+                    >
                       <Sparkles size={12} color="#8b5cf6" />
                       {daysLeft === 0 ? 'Stocked out' : `Stock-out expected in ${daysLeft} days`}
                     </span>
                   </div>
                   <div className="forecast-bar-container">
-                    <div 
-                      className="forecast-bar" 
+                    <div
+                      className="forecast-bar"
                       style={{ width: `${percentageLeft}%`, background: color }}
                     ></div>
                   </div>
@@ -682,17 +840,39 @@ export default function InventoryIntelligenceView({ products = [] }) {
 
         {/* Fast Movers */}
         <div className="glass-card">
-          <h2 className="section-title"><Zap size={24} color="#eab308" /> Fast Movers (Top Selling)</h2>
+          <h2 className="section-title">
+            <Zap size={24} color="#eab308" /> Fast Movers (Top Selling)
+          </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {fastMovers.slice(0, 4).map(item => (
-              <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+            {fastMovers.slice(0, 4).map((item) => (
+              <div
+                key={item.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '1rem',
+                  background: '#f8fafc',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                }}
+              >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ background: '#fef08a', color: '#a16207', padding: '0.5rem', borderRadius: '10px' }}>
+                  <div
+                    style={{
+                      background: '#fef08a',
+                      color: '#a16207',
+                      padding: '0.5rem',
+                      borderRadius: '10px',
+                    }}
+                  >
                     <TrendingUp size={20} />
                   </div>
                   <div>
                     <h4 style={{ margin: '0 0 0.25rem 0', fontWeight: 600 }}>{item.name}</h4>
-                    <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Moving fast • Stock: {item.stock}</span>
+                    <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                      Moving fast • Stock: {item.stock}
+                    </span>
                   </div>
                 </div>
                 <button className="action-btn outline">View Trend</button>
@@ -704,7 +884,9 @@ export default function InventoryIntelligenceView({ products = [] }) {
 
       {/* Dead Stock Analysis */}
       <div className="glass-card">
-        <h2 className="section-title"><PackageMinus size={24} color="#64748b" /> Dead Stock Analysis</h2>
+        <h2 className="section-title">
+          <PackageMinus size={24} color="#64748b" /> Dead Stock Analysis
+        </h2>
         <div className="table-container">
           <table className="modern-table desktop-table">
             <thead>
@@ -718,34 +900,67 @@ export default function InventoryIntelligenceView({ products = [] }) {
               </tr>
             </thead>
             <tbody>
-              {deadStockItems.map(item => (
+              {deadStockItems.map((item) => (
                 <tr key={item.id}>
                   <td style={{ fontWeight: 600, color: '#0f172a' }}>{item.name}</td>
                   <td>
-                    <span style={{ color: '#ef4444', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span
+                      style={{
+                        color: '#ef4444',
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                      }}
+                    >
                       <Activity size={16} /> {item.noSalesDays} days
                     </span>
                   </td>
                   <td style={{ fontWeight: 600 }}>${(item.stock * item.price).toLocaleString()}</td>
                   <td>{item.stock}</td>
                   <td>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', background: '#f3e8ff', color: '#7e22ce', padding: '0.25rem 0.5rem', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 500 }}>
-                      <Sparkles size={12} /> {item.stock > 200 ? 'Bundle & Discount 20%' : 'Promote via Email'}
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                        background: '#f3e8ff',
+                        color: '#7e22ce',
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '6px',
+                        fontSize: '0.85rem',
+                        fontWeight: 500,
+                      }}
+                    >
+                      <Sparkles size={12} />{' '}
+                      {item.stock > 200 ? 'Bundle & Discount 20%' : 'Promote via Email'}
                     </span>
                   </td>
                   <td>
                     <div className="action-group">
-                      <button className="action-btn outline"><Tag size={14} /> Discount</button>
-                      <button className="action-btn outline"><PackagePlus size={14} /> Bundle</button>
-                      <button className="action-btn danger"><ArchiveX size={14} /> Remove</button>
+                      <button className="action-btn outline">
+                        <Tag size={14} /> Discount
+                      </button>
+                      <button className="action-btn outline">
+                        <PackagePlus size={14} /> Bundle
+                      </button>
+                      <button className="action-btn danger">
+                        <ArchiveX size={14} /> Remove
+                      </button>
                     </div>
                   </td>
                 </tr>
               ))}
               {deadStockItems.length === 0 && (
                 <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
-                    <Activity size={48} style={{ opacity: 0.2, margin: '0 auto 1rem auto', display: 'block' }} />
+                  <td
+                    colSpan="6"
+                    style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}
+                  >
+                    <Activity
+                      size={48}
+                      style={{ opacity: 0.2, margin: '0 auto 1rem auto', display: 'block' }}
+                    />
                     Excellent! You have no dead stock right now.
                   </td>
                 </tr>
@@ -753,37 +968,86 @@ export default function InventoryIntelligenceView({ products = [] }) {
             </tbody>
           </table>
           <div className="mobile-card-container">
-            {deadStockItems.map(item => (
+            {deadStockItems.map((item) => (
               <div key={item.id} className="mobile-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginBottom: '0.5rem',
+                  }}
+                >
                   <h4 style={{ margin: 0, fontWeight: 600, color: '#0f172a' }}>{item.name}</h4>
-                  <span style={{ color: '#ef4444', fontWeight: 600 }}>{item.noSalesDays} days W/O</span>
+                  <span style={{ color: '#ef4444', fontWeight: 600 }}>
+                    {item.noSalesDays} days W/O
+                  </span>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.85rem', color: '#475569', marginBottom: '1rem' }}>
-                  <div><strong>Tied Capital:</strong> ${(item.stock * item.price).toLocaleString()}</div>
-                  <div><strong>Current Stock:</strong> {item.stock}</div>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '0.5rem',
+                    fontSize: '0.85rem',
+                    color: '#475569',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  <div>
+                    <strong>Tied Capital:</strong> ${(item.stock * item.price).toLocaleString()}
+                  </div>
+                  <div>
+                    <strong>Current Stock:</strong> {item.stock}
+                  </div>
                   <div style={{ gridColumn: 'span 2' }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', background: '#f3e8ff', color: '#7e22ce', padding: '0.25rem 0.5rem', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 500 }}>
-                      <Sparkles size={12} /> {item.stock > 200 ? 'Bundle & Discount 20%' : 'Promote via Email'}
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                        background: '#f3e8ff',
+                        color: '#7e22ce',
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '6px',
+                        fontSize: '0.85rem',
+                        fontWeight: 500,
+                      }}
+                    >
+                      <Sparkles size={12} />{' '}
+                      {item.stock > 200 ? 'Bundle & Discount 20%' : 'Promote via Email'}
                     </span>
                   </div>
                 </div>
-                <div className="action-group" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <button className="action-btn outline" style={{ flex: 1, justifyContent: 'center' }}><Tag size={14} /> Discount</button>
-                  <button className="action-btn danger" style={{ flex: 1, justifyContent: 'center' }}><ArchiveX size={14} /> Remove</button>
+                <div
+                  className="action-group"
+                  style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
+                >
+                  <button
+                    className="action-btn outline"
+                    style={{ flex: 1, justifyContent: 'center' }}
+                  >
+                    <Tag size={14} /> Discount
+                  </button>
+                  <button
+                    className="action-btn danger"
+                    style={{ flex: 1, justifyContent: 'center' }}
+                  >
+                    <ArchiveX size={14} /> Remove
+                  </button>
                 </div>
               </div>
             ))}
             {deadStockItems.length === 0 && (
               <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
-                <Activity size={32} style={{ opacity: 0.2, margin: '0 auto 0.5rem auto', display: 'block' }} />
+                <Activity
+                  size={32}
+                  style={{ opacity: 0.2, margin: '0 auto 0.5rem auto', display: 'block' }}
+                />
                 Excellent! You have no dead stock right now.
               </div>
             )}
           </div>
         </div>
       </div>
-
     </div>
   );
 }
