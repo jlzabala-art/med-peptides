@@ -91,6 +91,7 @@ function SidebarItem({ item, isActive, expanded, onClick }) {
 // ── Main AppSidebar ───────────────────────────────────────────────────────────
 export default function AppSidebar({
   groups = [],
+  pinnedItems = [],
   activeId,
   onNavigate,
   isMobile,
@@ -121,6 +122,24 @@ export default function AppSidebar({
       </div>
 
       <nav className="sb-scroll">
+        {/* Render pinned items */}
+        {pinnedItems.length > 0 && (
+          <div className="sb-group">
+            <div className="sb-group-items">
+              {pinnedItems.map(item => (
+                <SidebarItem 
+                  key={item.id} 
+                  item={item} 
+                  isActive={activeId === item.id} 
+                  expanded={expanded}
+                  onClick={onNavigate}
+                />
+              ))}
+            </div>
+            <div className="sb-divider" />
+          </div>
+        )}
+
         {/* Render standard groups */}
         {groups.map((group, idx) => (
           <div key={group.id} className="sb-group">

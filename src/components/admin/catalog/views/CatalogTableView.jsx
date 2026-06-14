@@ -367,7 +367,7 @@ export default function CatalogTableView({
 
   const renderVariantRow = (row) => {
     if (matrixViewType === 'flat') return null;
-    return <ExpandedProductRow row={row} />;
+    return <ExpandedProductRow row={row} onAction={onAction} />;
   };
 
   const handleRowClick = (row) => {

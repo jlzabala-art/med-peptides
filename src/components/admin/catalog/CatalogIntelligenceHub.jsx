@@ -20,6 +20,7 @@ import SmartProductIntakeWizard from './SmartProductIntakeWizard';
 import AdvancedFiltersDrawer from './AdvancedFiltersDrawer';
 import CatalogImportWizard from './CatalogImportWizard';
 import ProductIntelligenceModal from './ProductIntelligenceModal';
+import VariantDetailsModal from '../products/VariantDetailsModal';
 
 import toast from 'react-hot-toast';
 import styles from './CatalogIntelligenceHub.module.css';
@@ -80,6 +81,8 @@ export default function CatalogIntelligenceHub() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [aiProduct, setAiProduct] = useState(null);
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
 
   // Derive categories for chips
   const categories = useMemo(() => {
@@ -345,10 +348,30 @@ export default function CatalogIntelligenceHub() {
     }
   }, [searchQuery, activeWorkspace, activeCategories, advancedFilters]);
 
-  const handleAction = (action, product) => {
-    if (action === 'edit') {
+  const handleAction = (action, product, variant) => {
+    if (action === 'edit_variant' && variant) {
+      setSelectedProduct(product);
+      setSelectedVariant(variant);
+      setIsVariantModalOpen(true);
+    } else if (action === 'edit') {
       setSelectedProduct(product);
       setIsDrawerOpen(true);
+    } else if (action === 'delete_variant' && variant) {
+      toast(
+        (t) => (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <span style={{ fontWeight: 600 }}>Delete variant {variant.sku || 'N/A'}?</span>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+              <button onClick={() => toast.dismiss(t.id)} className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem' }}>Cancel</button>
+              <button onClick={() => {
+                // Implementation for variant deletion
+                toast.dismiss(t.id);
+                toast.success('Variant deleted (mock)');
+              }} style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', border: 'none', background: '#ef4444', color: 'white', cursor: 'pointer', fontSize: '0.875rem' }}>Delete</button>
+            </div>
+          </div>
+        ), { duration: Infinity }
+      );
     } else if (action === 'delete') {
       toast(
         (t) => (
@@ -385,7 +408,7 @@ export default function CatalogIntelligenceHub() {
         ),
         { duration: Infinity }
       );
-    } else if (action === 'ai') {
+    } else if (action === 'ai_variant' || action === 'ai') {
       setAiProduct(product);
       setIsAiModalOpen(true);
     }
@@ -586,6 +609,13 @@ export default function CatalogIntelligenceHub() {
         isOpen={isAiModalOpen}
         onClose={() => setIsAiModalOpen(false)}
         product={aiProduct}
+      />
+      <VariantDetailsModal
+        isOpen={isVariantModalOpen}
+        onClose={() => setIsVariantModalOpen(false)}
+        product={selectedProduct}
+        variant={selectedVariant}
+        onSave={() => refresh()}
       />
 
       {/* Mobile Floating Action Button */}

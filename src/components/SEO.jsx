@@ -29,7 +29,7 @@ export default function SEO() {
       <meta name="twitter:image" content={meta.image} />
 
       {/* Canonical Link */}
-      <link rel="canonical" href={meta.path} />
+      <link rel="canonical" href={meta.path || undefined} />
 
       {/* Structured Data */}
       {meta.structuredData && (
