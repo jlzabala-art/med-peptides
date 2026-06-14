@@ -1,42 +1,42 @@
-import Users from "lucide-react/dist/esm/icons/users";
-import UserPlus from "lucide-react/dist/esm/icons/user-plus";
-import PackageSearch from "lucide-react/dist/esm/icons/package-search";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import Server from "lucide-react/dist/esm/icons/server";
-import Cpu from "lucide-react/dist/esm/icons/cpu";
-import Database from "lucide-react/dist/esm/icons/database";
-import Layers from "lucide-react/dist/esm/icons/layers";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import Settings from "lucide-react/dist/esm/icons/settings";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Eye from "lucide-react/dist/esm/icons/eye";
-import EyeOff from "lucide-react/dist/esm/icons/eye-off";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import Building2 from "lucide-react/dist/esm/icons/building-2";
-import Link2 from "lucide-react/dist/esm/icons/link-2";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import X from "lucide-react/dist/esm/icons/x";
-import Send from "lucide-react/dist/esm/icons/send";
-import Sliders from "lucide-react/dist/esm/icons/sliders";
-import Play from "lucide-react/dist/esm/icons/play";
-import Check from "lucide-react/dist/esm/icons/check";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import UserCheck from "lucide-react/dist/esm/icons/user-check";
-import CreditCard from "lucide-react/dist/esm/icons/credit-card";
-import Briefcase from "lucide-react/dist/esm/icons/briefcase";
-import Layers3 from "lucide-react/dist/esm/icons/layers-3";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import Home from "lucide-react/dist/esm/icons/home";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import MoreHorizontal from "lucide-react/dist/esm/icons/more-horizontal";
+import Users from 'lucide-react/dist/esm/icons/users';
+import UserPlus from 'lucide-react/dist/esm/icons/user-plus';
+import PackageSearch from 'lucide-react/dist/esm/icons/package-search';
+import Activity from 'lucide-react/dist/esm/icons/activity';
+import ArrowUpRight from 'lucide-react/dist/esm/icons/arrow-up-right';
+import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
+import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
+import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
+import Server from 'lucide-react/dist/esm/icons/server';
+import Cpu from 'lucide-react/dist/esm/icons/cpu';
+import Database from 'lucide-react/dist/esm/icons/database';
+import Layers from 'lucide-react/dist/esm/icons/layers';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import ChevronUp from 'lucide-react/dist/esm/icons/chevron-up';
+import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
+import Settings from 'lucide-react/dist/esm/icons/settings';
+import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign';
+import Eye from 'lucide-react/dist/esm/icons/eye';
+import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
+import Globe from 'lucide-react/dist/esm/icons/globe';
+import Building2 from 'lucide-react/dist/esm/icons/building-2';
+import Link2 from 'lucide-react/dist/esm/icons/link-2';
+import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
+import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
+import X from 'lucide-react/dist/esm/icons/x';
+import Send from 'lucide-react/dist/esm/icons/send';
+import Sliders from 'lucide-react/dist/esm/icons/sliders';
+import Play from 'lucide-react/dist/esm/icons/play';
+import Check from 'lucide-react/dist/esm/icons/check';
+import FileText from 'lucide-react/dist/esm/icons/file-text';
+import UserCheck from 'lucide-react/dist/esm/icons/user-check';
+import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
+import Briefcase from 'lucide-react/dist/esm/icons/briefcase';
+import Layers3 from 'lucide-react/dist/esm/icons/layers-3';
+import Calendar from 'lucide-react/dist/esm/icons/calendar';
+import Home from 'lucide-react/dist/esm/icons/home';
+import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
+import MoreHorizontal from 'lucide-react/dist/esm/icons/more-horizontal';
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import {
@@ -55,45 +55,6 @@ import { db } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import {
   ExecutiveSummaryStrip,
   TodayPrioritiesQueue,
@@ -103,8 +64,9 @@ import {
   CrmPipelineFunnel,
   WholesalersLeaderboard,
   AiCommandConsole,
-  GlobalActivityFeed
+  GlobalActivityFeed,
 } from './widgets/CommandCenterWidgets';
+import HealthMatrixWidget from './widgets/HealthMatrixWidget';
 import AdminExecutiveSummaryWidget from './AdminExecutiveSummaryWidget';
 import notifier from '../../services/NotificationService';
 import styles from './AdminMetricsDashboard.module.css';
@@ -112,13 +74,43 @@ import styles from './AdminMetricsDashboard.module.css';
 // Roles-based dashboard configurations preset layout
 const ROLE_PRESETS = {
   CEO: {
-    visibleKPIs: ['revenue', 'grossProfit', 'openOrders', 'pendingApprovals', 'openRFQs', 'aiAlerts', 'cashPosition'],
-    visibleWidgets: ['todayPriorities', 'businessHealth', 'cashFlow', 'crmPipeline', 'wholesalersRanking', 'aiWorkspace', 'activityFeed'],
-    kpiOrder: ['revenue', 'grossProfit', 'cashPosition', 'openOrders', 'pendingApprovals', 'openRFQs', 'aiAlerts'],
+    visibleKPIs: [
+      'revenue',
+      'grossProfit',
+      'openOrders',
+      'pendingApprovals',
+      'openRFQs',
+      'aiAlerts',
+      'cashPosition',
+    ],
+    visibleWidgets: [
+      'todayPriorities',
+      'businessHealth',
+      'cashFlow',
+      'crmPipeline',
+      'wholesalersRanking',
+      'aiWorkspace',
+      'activityFeed',
+    ],
+    kpiOrder: [
+      'revenue',
+      'grossProfit',
+      'cashPosition',
+      'openOrders',
+      'pendingApprovals',
+      'openRFQs',
+      'aiAlerts',
+    ],
   },
   Finance: {
     visibleKPIs: ['revenue', 'grossProfit', 'cashPosition', 'pendingApprovals'],
-    visibleWidgets: ['todayPriorities', 'financeTasks', 'cashFlow', 'businessHealth', 'activityFeed'],
+    visibleWidgets: [
+      'todayPriorities',
+      'financeTasks',
+      'cashFlow',
+      'businessHealth',
+      'activityFeed',
+    ],
     kpiOrder: ['revenue', 'grossProfit', 'cashPosition', 'pendingApprovals'],
   },
   Purchasing: {
@@ -128,14 +120,26 @@ const ROLE_PRESETS = {
   },
   Sales: {
     visibleKPIs: ['revenue', 'openOrders', 'openRFQs'],
-    visibleWidgets: ['todayPriorities', 'crmPipeline', 'wholesalersRanking', 'businessHealth', 'activityFeed'],
+    visibleWidgets: [
+      'todayPriorities',
+      'crmPipeline',
+      'wholesalersRanking',
+      'businessHealth',
+      'activityFeed',
+    ],
     kpiOrder: ['revenue', 'openOrders', 'openRFQs'],
   },
   Operations: {
     visibleKPIs: ['openOrders', 'pendingApprovals', 'aiAlerts'],
-    visibleWidgets: ['todayPriorities', 'businessHealth', 'wholesalersRanking', 'activityFeed', 'systemStatus'],
+    visibleWidgets: [
+      'todayPriorities',
+      'businessHealth',
+      'wholesalersRanking',
+      'activityFeed',
+      'systemStatus',
+    ],
     kpiOrder: ['openOrders', 'pendingApprovals', 'aiAlerts'],
-  }
+  },
 };
 
 export default function AdminMetricsDashboard({ wholesalerId = null }) {
@@ -168,25 +172,60 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
 
   // Today Priorities list
   const [priorities, setPriorities] = useState([
-    { id: 1, text: '5 RFQs require immediate approval', type: 'rfq', priority: 'high', link: '/admin/rfq' },
-    { id: 2, text: '3 supplier bills due today', type: 'bill', priority: 'critical', link: '/admin/bills' },
-    { id: 3, text: '2 leads require follow-up', type: 'lead', priority: 'medium', link: '/admin/leads' },
-    { id: 4, text: '1 inventory alert: low stock on Peptide A1', type: 'stock', priority: 'high', link: '/admin/products' },
-    { id: 5, text: 'AI detected pricing anomaly in Wholesale B', type: 'anomaly', priority: 'low', link: '/admin/analytics' },
+    {
+      id: 1,
+      text: '5 RFQs require immediate approval',
+      type: 'rfq',
+      priority: 'high',
+      link: '/admin/rfq',
+    },
+    {
+      id: 2,
+      text: '3 supplier bills due today',
+      type: 'bill',
+      priority: 'critical',
+      link: '/admin/bills',
+    },
+    {
+      id: 3,
+      text: '2 leads require follow-up',
+      type: 'lead',
+      priority: 'medium',
+      link: '/admin/leads',
+    },
+    {
+      id: 4,
+      text: '1 inventory alert: low stock on Peptide A1',
+      type: 'stock',
+      priority: 'high',
+      link: '/admin/products',
+    },
+    {
+      id: 5,
+      text: 'AI detected pricing anomaly in Wholesale B',
+      type: 'anomaly',
+      priority: 'low',
+      link: '/admin/analytics',
+    },
   ]);
 
   // AI Command Console simulation helper
   const handleAiAsk = async (queryText) => {
     const queryLower = queryText.toLowerCase();
-    if (queryLower.includes('attention') || queryLower.includes('priorities') || queryLower.includes('today')) {
+    if (
+      queryLower.includes('attention') ||
+      queryLower.includes('priorities') ||
+      queryLower.includes('today')
+    ) {
       return {
-        answer: "Here are the top issues that require your immediate attention today: Overdue bills (AED 34,200) and 3 pending RFQs.",
-        actions: []
+        answer:
+          'Here are the top issues that require your immediate attention today: Overdue bills (AED 34,200) and 3 pending RFQs.',
+        actions: [],
       };
     }
     return {
       answer: `AI processing finished for "${queryText}": Current cash reserves are stable.`,
-      actions: []
+      actions: [],
     };
   };
 
@@ -199,7 +238,12 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
     { id: 2, text: 'PO #1920 Created for wholeseller BioPharma', time: '15 mins ago', type: 'po' },
     { id: 3, text: 'Bill #9023 Paid (AED 12,500)', time: '1 hour ago', type: 'bill' },
     { id: 4, text: 'New Lead: Clinic MedCare Dubai registered', time: '3 hours ago', type: 'lead' },
-    { id: 5, text: 'Supplier catalog synced with Zoho Inventory', time: '5 hours ago', type: 'sync' },
+    {
+      id: 5,
+      text: 'Supplier catalog synced with Zoho Inventory',
+      time: '5 hours ago',
+      type: 'sync',
+    },
     { id: 6, text: 'AI Analysis Completed: Q2 Margin Optimization', time: '1 day ago', type: 'ai' },
   ]);
 
@@ -212,12 +256,12 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
       const activityTypes = [
         { text: 'AI detected new market price shift for peptide G3', type: 'ai' },
         { text: 'RFQ #2411 received pricing from supplier B', type: 'rfq' },
-        { text: 'Supplier Bill #9244 matching completed', type: 'bill' }
+        { text: 'Supplier Bill #9244 matching completed', type: 'bill' },
       ];
       const randomActivity = activityTypes[Math.floor(Math.random() * activityTypes.length)];
-      setActivityFeed(prev => [
+      setActivityFeed((prev) => [
         { id: Date.now(), text: randomActivity.text, time: 'Just now', type: randomActivity.type },
-        ...prev.slice(0, 10)
+        ...prev.slice(0, 10),
       ]);
     }, 15000);
     return () => clearInterval(interval);
@@ -234,8 +278,8 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
         setDbLatency(`${latency}ms`);
 
         const recentRegs = usersSnap.docs
-          .map(d => ({ id: d.id, ...d.data() }))
-          .sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0))
+          .map((d) => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
           .slice(0, 5);
         setRecentRegistrations(recentRegs);
         setLoading(false);
@@ -254,23 +298,57 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
   };
 
   const toggleKPIVisibility = (kpi) => {
-    setVisibleKPIs(prev =>
-      prev.includes(kpi) ? prev.filter(k => k !== kpi) : [...prev, kpi]
-    );
+    setVisibleKPIs((prev) => (prev.includes(kpi) ? prev.filter((k) => k !== kpi) : [...prev, kpi]));
   };
 
   const toggleWidgetVisibility = (widget) => {
-    setVisibleWidgets(prev =>
-      prev.includes(widget) ? prev.filter(w => w !== widget) : [...prev, widget]
+    setVisibleWidgets((prev) =>
+      prev.includes(widget) ? prev.filter((w) => w !== widget) : [...prev, widget]
     );
   };
 
   // Mock Wholesaler Leaderboard Data
   const wholesalers = [
-    { name: 'Gulf Distribution LLC', revenue: 'AED 245,000', patients: 120, orders: 48, growth: '+14%', margin: '18%', score: 96, status: 'Strategic' },
-    { name: 'PurePeptides GCC', revenue: 'AED 134,000', patients: 84, orders: 32, growth: '+22%', margin: '24%', score: 92, status: 'Active' },
-    { name: 'Apex Pharmacy Direct', revenue: 'AED 98,200', patients: 45, orders: 20, growth: '-4%', margin: '15%', score: 78, status: 'Active' },
-    { name: 'Oasis Biotech UAE', revenue: 'AED 62,500', patients: 38, orders: 15, growth: '+8%', margin: '20%', score: 85, status: 'Critical Audit' }
+    {
+      name: 'Gulf Distribution LLC',
+      revenue: 'AED 245,000',
+      patients: 120,
+      orders: 48,
+      growth: '+14%',
+      margin: '18%',
+      score: 96,
+      status: 'Strategic',
+    },
+    {
+      name: 'PurePeptides GCC',
+      revenue: 'AED 134,000',
+      patients: 84,
+      orders: 32,
+      growth: '+22%',
+      margin: '24%',
+      score: 92,
+      status: 'Active',
+    },
+    {
+      name: 'Apex Pharmacy Direct',
+      revenue: 'AED 98,200',
+      patients: 45,
+      orders: 20,
+      growth: '-4%',
+      margin: '15%',
+      score: 78,
+      status: 'Active',
+    },
+    {
+      name: 'Oasis Biotech UAE',
+      revenue: 'AED 62,500',
+      patients: 38,
+      orders: 15,
+      growth: '+8%',
+      margin: '20%',
+      score: 85,
+      status: 'Critical Audit',
+    },
   ];
 
   // Cash flow mock data
@@ -282,19 +360,60 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
   ];
 
   return (
-    <div className={styles.atlasCommandCenter} >
+    <div className={styles.atlasCommandCenter}>
       {/* Dynamic Embedded CSS Styles */}
-      
 
       {/* ── COMMAND CENTER HEADER & PRESET CUSTOMIZER ────────────────── */}
       <div className={styles.glassCard} style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '1rem',
+          }}
+        >
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-              <span style={{ display: 'inline-flex', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', boxShadow: '0 0 8px #10b981' }} />
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Live · All Systems Operational</span>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                marginBottom: '0.25rem',
+              }}
+            >
+              <span
+                style={{
+                  display: 'inline-flex',
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: '#10b981',
+                  boxShadow: '0 0 8px #10b981',
+                }}
+              />
+              <span
+                style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  color: '#10b981',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                Live · All Systems Operational
+              </span>
             </div>
-            <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: '1.75rem',
+                fontWeight: 800,
+                color: '#0f172a',
+                letterSpacing: '-0.02em',
+              }}
+            >
               Atlas Command Center
             </h1>
             <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#64748b' }}>
@@ -305,8 +424,15 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
           {/* Controls Bar */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             {/* Preset Selector */}
-            <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '8px', padding: '2px' }}>
-              {Object.keys(ROLE_PRESETS).map(preset => (
+            <div
+              style={{
+                display: 'flex',
+                background: '#f1f5f9',
+                borderRadius: '8px',
+                padding: '2px',
+              }}
+            >
+              {Object.keys(ROLE_PRESETS).map((preset) => (
                 <button
                   key={preset}
                   onClick={() => handleApplyPreset(preset)}
@@ -320,7 +446,7 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
                     color: currentRolePreset === preset ? '#0f172a' : '#64748b',
                     boxShadow: currentRolePreset === preset ? '0 1px 3px rgba(0,0,0,0.05)' : 'none',
                     cursor: 'pointer',
-                    transition: 'all 0.15s ease'
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   {preset}
@@ -343,7 +469,7 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
                 fontSize: '0.8rem',
                 fontWeight: 600,
                 cursor: 'pointer',
-                transition: 'all 0.2s'
+                transition: 'all 0.2s',
               }}
             >
               <Sliders size={14} />
@@ -354,14 +480,51 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
 
         {/* Customization Drawer / Control Box */}
         {isCustomizing && (
-          <div style={{ marginTop: '1.25rem', padding: '1.25rem', borderRadius: '12px', backgroundColor: '#f8fafc', border: '1px dashed #cbd5e1', animation: 'slideDown 0.2s ease-out' }}>
-            <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '0.9rem', fontWeight: 600, color: '#0f172a' }}>Configure Active Widgets & Metrics</h3>
+          <div
+            style={{
+              marginTop: '1.25rem',
+              padding: '1.25rem',
+              borderRadius: '12px',
+              backgroundColor: '#f8fafc',
+              border: '1px dashed #cbd5e1',
+              animation: 'slideDown 0.2s ease-out',
+            }}
+          >
+            <h3
+              style={{
+                margin: '0 0 0.75rem 0',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                color: '#0f172a',
+              }}
+            >
+              Configure Active Widgets & Metrics
+            </h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2rem' }}>
               {/* KPIs */}
               <div>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Visible KPIs (Top Strip)</span>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    color: '#475569',
+                    display: 'block',
+                    marginBottom: '0.5rem',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Visible KPIs (Top Strip)
+                </span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  {['revenue', 'grossProfit', 'openOrders', 'pendingApprovals', 'openRFQs', 'aiAlerts', 'cashPosition'].map(kpi => (
+                  {[
+                    'revenue',
+                    'grossProfit',
+                    'openOrders',
+                    'pendingApprovals',
+                    'openRFQs',
+                    'aiAlerts',
+                    'cashPosition',
+                  ].map((kpi) => (
                     <button
                       key={kpi}
                       onClick={() => toggleKPIVisibility(kpi)}
@@ -376,7 +539,7 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
                         cursor: 'pointer',
                       }}
                     >
-                      {kpi.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                      {kpi.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
                     </button>
                   ))}
                 </div>
@@ -384,7 +547,18 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
 
               {/* Widgets */}
               <div>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Visible Workspace Widgets</span>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    color: '#475569',
+                    display: 'block',
+                    marginBottom: '0.5rem',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Visible Workspace Widgets
+                </span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                   {[
                     { id: 'todayPriorities', label: "Today's Priorities" },
@@ -395,8 +569,8 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
                     { id: 'wholesalersRanking', label: 'Top Wholesalers Leaderboard' },
                     { id: 'aiWorkspace', label: 'AI Sync & Insights Hub' },
                     { id: 'activityFeed', label: 'Real-time Activity Feed' },
-                    { id: 'systemStatus', label: 'Infrastructure Specs' }
-                  ].map(w => (
+                    { id: 'systemStatus', label: 'Infrastructure Specs' },
+                  ].map((w) => (
                     <button
                       key={w.id}
                       onClick={() => toggleWidgetVisibility(w.id)}
@@ -451,10 +625,8 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
             />
           )}
 
-          {/* ── 3. BUSINESS HEALTH RADAR (TRAFFIC LIGHTS) ───────────────── */}
-          {visibleWidgets.includes('businessHealth') && (
-            <BusinessHealthRadar />
-          )}
+          {/* ── 3. BUSINESS HEALTH MATRIX (TRAFFIC LIGHTS) ───────────────── */}
+          {visibleWidgets.includes('businessHealth') && <HealthMatrixWidget />}
 
           {/* ── 4. FINANCIAL TASKS WORKSPACE ───────────────────────────── */}
           {visibleWidgets.includes('financeTasks') && (
@@ -467,16 +639,11 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
 
           {/* ── 5. CASH FLOW ANALYSIS WIDGET ────────────────────────────── */}
           {visibleWidgets.includes('cashFlow') && (
-            <CashFlowForecast
-              cashFlowData={cashFlowData}
-              riskLevel="Low"
-            />
+            <CashFlowForecast cashFlowData={cashFlowData} riskLevel="Low" />
           )}
 
           {/* ── 6. CRM PIPELINE FUNNEL WIDGET ────────────────────────────── */}
-          {visibleWidgets.includes('crmPipeline') && (
-            <CrmPipelineFunnel />
-          )}
+          {visibleWidgets.includes('crmPipeline') && <CrmPipelineFunnel />}
 
           {/* ── 7. TOP WHOLESALERS LEADERBOARD ────────────────────────── */}
           {visibleWidgets.includes('wholesalersRanking') && (
@@ -491,13 +658,32 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
           {/* ── 8. AI WORKSPACE (SYNC & INSIGHTS HUB) ───────────────────── */}
           {visibleWidgets.includes('aiWorkspace') && (
             <div className={styles.glassCard} style={{ padding: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.5rem' }}>
-                <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '1rem',
+                  borderBottom: '1px solid #cbd5e1',
+                  paddingBottom: '0.5rem',
+                }}
+              >
+                <h3
+                  style={{
+                    margin: 0,
+                    fontSize: '0.95rem',
+                    fontWeight: 700,
+                    color: '#0f172a',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                  }}
+                >
                   <Sparkles size={16} color="#0ea5e9" /> Atlas AI Sourcing Hub
                 </h3>
                 {/* Tabs */}
                 <div style={{ display: 'flex', gap: '0.25rem' }}>
-                  {['insights', 'predictions', 'recommendations', 'agents'].map(tab => (
+                  {['insights', 'predictions', 'recommendations', 'agents'].map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setAiWorkspaceTab(tab)}
@@ -511,69 +697,148 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
 
               {/* Workspace Content */}
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0.75rem', backgroundColor: '#f8fafc', borderRadius: '6px', marginBottom: '0.75rem', fontSize: '0.75rem' }}>
-                  <span>Last analysis: <strong>Today 14:02</strong></span>
-                  <span>Confidence score: <strong style={{ color: '#10b981' }}>98.4%</strong></span>
-                  <span>Estimated impact: <strong style={{ color: '#0284c7' }}>+AED 24,000 / mo</strong></span>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '0.5rem 0.75rem',
+                    backgroundColor: '#f8fafc',
+                    borderRadius: '6px',
+                    marginBottom: '0.75rem',
+                    fontSize: '0.75rem',
+                  }}
+                >
+                  <span>
+                    Last analysis: <strong>Today 14:02</strong>
+                  </span>
+                  <span>
+                    Confidence score: <strong style={{ color: '#10b981' }}>98.4%</strong>
+                  </span>
+                  <span>
+                    Estimated impact: <strong style={{ color: '#0284c7' }}>+AED 24,000 / mo</strong>
+                  </span>
                 </div>
 
                 {aiWorkspaceTab === 'insights' && (
-                  <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.82rem', color: '#334155', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                    <li>Revenue increased <strong>18%</strong> this month across strategic wholesaler segments.</li>
+                  <ul
+                    style={{
+                      margin: 0,
+                      paddingLeft: '1.2rem',
+                      fontSize: '0.82rem',
+                      color: '#334155',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.4rem',
+                    }}
+                  >
+                    <li>
+                      Revenue increased <strong>18%</strong> this month across strategic wholesaler
+                      segments.
+                    </li>
                     <li>No overdue supplier bills in the queue. AP matches are healthy.</li>
-                    <li><strong>3 opportunities</strong> in Dubai clinic network need strategic discount review.</li>
-                    <li>Average RFQ response time improved by <strong>22%</strong> over the last 14 days.</li>
+                    <li>
+                      <strong>3 opportunities</strong> in Dubai clinic network need strategic
+                      discount review.
+                    </li>
+                    <li>
+                      Average RFQ response time improved by <strong>22%</strong> over the last 14
+                      days.
+                    </li>
                   </ul>
                 )}
                 {aiWorkspaceTab === 'predictions' && (
                   <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
-                    AI predicts a potential shipping delay of 3 days from EU laboratories next week due to logistics strikes. Recommend frontloading Peptide B purchases.
+                    AI predicts a potential shipping delay of 3 days from EU laboratories next week
+                    due to logistics strikes. Recommend frontloading Peptide B purchases.
                   </p>
                 )}
                 {aiWorkspaceTab === 'recommendations' && (
                   <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
-                    Adjust pricing on product catalog item #4401. Market price rose by 14%, current margins will reduce to 11% if not updated in Zoho Inventory.
+                    Adjust pricing on product catalog item #4401. Market price rose by 14%, current
+                    margins will reduce to 11% if not updated in Zoho Inventory.
                   </p>
                 )}
                 {aiWorkspaceTab === 'agents' && (
                   <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
-                    Autonomous agents: <strong>Sourcing Bot</strong> is active (last synced 4 mins ago). <strong>Discrepancy Agent</strong> matched 18/18 bills successfully.
+                    Autonomous agents: <strong>Sourcing Bot</strong> is active (last synced 4 mins
+                    ago). <strong>Discrepancy Agent</strong> matched 18/18 bills successfully.
                   </p>
                 )}
               </div>
             </div>
           )}
-
         </div>
 
         {/* RIGHT COLUMN: SIDEBAR METRICS & INFRASTRUCTURE */}
         <div className={styles.sideCol}>
           {/* ── 9. GLOBAL ACTIVITY FEED ────────────────────────────────── */}
-          {visibleWidgets.includes('activityFeed') && (
-            <GlobalActivityFeed logs={activityFeed} />
-          )}
+          {visibleWidgets.includes('activityFeed') && <GlobalActivityFeed logs={activityFeed} />}
 
           {/* ── 10. INFRASTRUCTURE & TECH STATUS ───────────────────────── */}
           {visibleWidgets.includes('systemStatus') && (
             <div className={styles.glassCard} style={{ padding: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  marginBottom: '1rem',
+                }}
+              >
                 <Server size={16} color="#64748b" />
-                <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>Infrastructure Specs</h3>
+                <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>
+                  Infrastructure Specs
+                </h3>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.8rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                  fontSize: '0.8rem',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    borderBottom: '1px solid #f1f5f9',
+                    paddingBottom: '0.4rem',
+                  }}
+                >
                   <span style={{ color: '#64748b' }}>Firestore Database</span>
                   <span style={{ color: '#10b981', fontWeight: 600 }}>Connected</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    borderBottom: '1px solid #f1f5f9',
+                    paddingBottom: '0.4rem',
+                  }}
+                >
                   <span style={{ color: '#64748b' }}>AI Engine Link</span>
                   <span style={{ color: '#0284c7', fontWeight: 600 }}>gemini-2.5-pro</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    borderBottom: '1px solid #f1f5f9',
+                    paddingBottom: '0.4rem',
+                  }}
+                >
                   <span style={{ color: '#64748b' }}>Router Latency</span>
                   <span style={{ color: '#0f172a', fontWeight: 600 }}>{dbLatency}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    borderBottom: '1px solid #f1f5f9',
+                    paddingBottom: '0.4rem',
+                  }}
+                >
                   <span style={{ color: '#64748b' }}>Zoho Books Gateway</span>
                   <span style={{ color: '#10b981', fontWeight: 600 }}>Synced (200 OK)</span>
                 </div>
@@ -584,34 +849,50 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
               </div>
             </div>
           )}
-
         </div>
-
       </div>
 
       {/* ── 13. MOBILE UX BOTTOM NAVIGATION BAR ─────────────────────── */}
       <div className={styles.mobileNavBar}>
-        <a onClick={() => setMobileTab('home')} className={`${styles.mobileNavItem} ${mobileTab === "home" ? styles.active : ""}`}>
+        <a
+          onClick={() => setMobileTab('home')}
+          className={`${styles.mobileNavItem} ${mobileTab === 'home' ? styles.active : ''}`}
+        >
           <Home size={20} />
           <span>Home</span>
         </a>
-        <a onClick={() => setMobileTab('tasks')} className={`${styles.mobileNavItem} ${mobileTab === "tasks" ? styles.active : ""}`}>
+        <a
+          onClick={() => setMobileTab('tasks')}
+          className={`${styles.mobileNavItem} ${mobileTab === 'tasks' ? styles.active : ''}`}
+        >
           <CheckCircle2 size={20} />
           <span>Tasks</span>
         </a>
-        <a onClick={() => setMobileTab('finance')} className={`${styles.mobileNavItem} ${mobileTab === "finance" ? styles.active : ""}`}>
+        <a
+          onClick={() => setMobileTab('finance')}
+          className={`${styles.mobileNavItem} ${mobileTab === 'finance' ? styles.active : ''}`}
+        >
           <DollarSign size={20} />
           <span>Finance</span>
         </a>
-        <a onClick={() => setMobileTab('crm')} className={`${styles.mobileNavItem} ${mobileTab === "crm" ? styles.active : ""}`}>
+        <a
+          onClick={() => setMobileTab('crm')}
+          className={`${styles.mobileNavItem} ${mobileTab === 'crm' ? styles.active : ''}`}
+        >
           <Users size={20} />
           <span>CRM</span>
         </a>
-        <a onClick={() => setMobileTab('ai')} className={`${styles.mobileNavItem} ${mobileTab === "ai" ? styles.active : ""}`}>
+        <a
+          onClick={() => setMobileTab('ai')}
+          className={`${styles.mobileNavItem} ${mobileTab === 'ai' ? styles.active : ''}`}
+        >
           <Sparkles size={20} />
           <span>AI</span>
         </a>
-        <a onClick={() => setMobileTab('more')} className={`${styles.mobileNavItem} ${mobileTab === "more" ? styles.active : ""}`}>
+        <a
+          onClick={() => setMobileTab('more')}
+          className={`${styles.mobileNavItem} ${mobileTab === 'more' ? styles.active : ''}`}
+        >
           <MoreHorizontal size={20} />
           <span>More</span>
         </a>
