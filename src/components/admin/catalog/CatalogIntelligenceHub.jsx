@@ -487,11 +487,10 @@ export default function CatalogIntelligenceHub() {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            flexWrap: 'wrap',
             gap: '1rem',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flex: 1 }}>
             <h1
               className={styles.title}
               style={{ margin: 0, fontSize: '1.5rem', whiteSpace: 'nowrap' }}
@@ -509,7 +508,9 @@ export default function CatalogIntelligenceHub() {
                 border: '1px solid var(--color-border, #e2e8f0)',
                 borderRadius: '20px',
                 padding: '0.4rem 1rem',
-                width: isMobile ? '100%' : '350px',
+                flex: 1,
+                minWidth: '200px',
+                maxWidth: '400px',
                 boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)',
               }}
             >

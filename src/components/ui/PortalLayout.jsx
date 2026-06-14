@@ -1,23 +1,14 @@
-import Menu from "lucide-react/dist/esm/icons/menu";
-import Search from "lucide-react/dist/esm/icons/search";
-import Bell from "lucide-react/dist/esm/icons/bell";
-import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
-import User from "lucide-react/dist/esm/icons/user";
-import Bot from "lucide-react/dist/esm/icons/bot";
-import X from "lucide-react/dist/esm/icons/x";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import Maximize2 from "lucide-react/dist/esm/icons/maximize-2";
-import List from "lucide-react/dist/esm/icons/list";
+import Menu from 'lucide-react/dist/esm/icons/menu';
+import Search from 'lucide-react/dist/esm/icons/search';
+import Bell from 'lucide-react/dist/esm/icons/bell';
+import HelpCircle from 'lucide-react/dist/esm/icons/help-circle';
+import User from 'lucide-react/dist/esm/icons/user';
+import Bot from 'lucide-react/dist/esm/icons/bot';
+import X from 'lucide-react/dist/esm/icons/x';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import Maximize2 from 'lucide-react/dist/esm/icons/maximize-2';
+import List from 'lucide-react/dist/esm/icons/list';
 import React, { useState, useEffect } from 'react';
-
-
-
-
-
-
-
-
-
 
 import ClinicalAssistant from '../shared/ClinicalAssistant';
 import SidebarGadget from '../shared/AppSidebar/SidebarGadget';
@@ -45,7 +36,7 @@ const ROLE_SUGGESTED_PROMPTS = {
     { label: '📦 Unprocessed orders today' },
     { label: '⚠️ Low stock alerts' },
     { label: '💰 Summarize accounts receivable (AR)' },
-    { label: '📉 Project net income based on sales' }
+    { label: '📉 Project net income based on sales' },
   ],
   doctor: [
     { label: '💉 Protocolo para pérdida de peso' },
@@ -97,16 +88,16 @@ const ROLE_AGENT_TYPE = {
  * PortalLayout - The universal layout wrapper for all private portals
  * Mimics Google Cloud Console layout (Left Sidebar + Topbar + Main Area + Right AI Drawer)
  */
-export default function PortalLayout({ 
-  children, 
-  sidebarNavGroups = [], 
+export default function PortalLayout({
+  children,
+  sidebarNavGroups = [],
   sidebarPinnedItems = [],
-  activeNavId, 
+  activeNavId,
   onNavigate,
   portalTitle = 'Cloud Console',
   roleContext = 'patient',
   pageContext = null,
-  headerActions
+  headerActions,
 }) {
   useSessionTracking(); // Start tracking session for the current user
   const routerNavigate = useNavigate();
@@ -129,7 +120,7 @@ export default function PortalLayout({
     const handleKeyDown = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        setPaletteOpen(prev => !prev);
+        setPaletteOpen((prev) => !prev);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -149,7 +140,7 @@ export default function PortalLayout({
   // Derived state: Filter out read notifications and sort
   const readIds = userProfile?.read_notifications || [];
   const visibleNotifications = notifications
-    .filter(n => !readIds.includes(n.id))
+    .filter((n) => !readIds.includes(n.id))
     .sort((a, b) => {
       const severityScore = { critical: 3, warning: 2, info: 1 };
       return (severityScore[b.severity] || 0) - (severityScore[a.severity] || 0);
@@ -160,10 +151,10 @@ export default function PortalLayout({
     if (!user) return;
     try {
       await updateDoc(doc(db, 'users', user.uid), {
-        read_notifications: arrayUnion(id)
+        read_notifications: arrayUnion(id),
       });
     } catch (error) {
-      console.error("Error marking notification as read:", error);
+      console.error('Error marking notification as read:', error);
     }
   };
 
@@ -171,13 +162,13 @@ export default function PortalLayout({
     if (e) e.stopPropagation();
     if (!user || visibleNotifications.length === 0) return;
     try {
-      const allIds = visibleNotifications.map(n => n.id);
+      const allIds = visibleNotifications.map((n) => n.id);
       await updateDoc(doc(db, 'users', user.uid), {
-        read_notifications: arrayUnion(...allIds)
+        read_notifications: arrayUnion(...allIds),
       });
       setNotificationsOpen(false);
     } catch (error) {
-      console.error("Error marking all as read:", error);
+      console.error('Error marking all as read:', error);
     }
   };
 
@@ -185,7 +176,7 @@ export default function PortalLayout({
   useEffect(() => {
     const handleContextUpdate = (e) => {
       if (e?.detail) {
-        setEnrichedContext(prev => ({ ...prev, ...e.detail }));
+        setEnrichedContext((prev) => ({ ...prev, ...e.detail }));
       }
     };
     window.addEventListener('admin-context-update', handleContextUpdate);
@@ -357,7 +348,16 @@ export default function PortalLayout({
   `;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden', backgroundColor: 'var(--color-bg-app)' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        width: '100vw',
+        overflow: 'hidden',
+        backgroundColor: 'var(--color-bg-app)',
+      }}
+    >
       <style>{siriAnimation}</style>
       <style>{headerCSS}</style>
       {/* TOPBAR */}
@@ -367,7 +367,17 @@ export default function PortalLayout({
           {isMobile && (
             <button
               onClick={() => setSidebarOpen(!isSidebarOpen)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.4rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '0.4rem',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
               title="Toggle Menu"
             >
               <Menu size={20} color="var(--color-text-primary)" />
@@ -377,7 +387,9 @@ export default function PortalLayout({
             <>
               <span className="portal-header-title">{portalTitle}</span>
               <span className="portal-header-sep">|</span>
-              <span className="portal-header-switcher"><AdminPortalSwitcher /></span>
+              <span className="portal-header-switcher">
+                <AdminPortalSwitcher />
+              </span>
             </>
           )}
         </div>
@@ -415,70 +427,122 @@ export default function PortalLayout({
 
           {/* Notifications Dropdown (GCP Attention Style) */}
           <div style={{ position: 'relative' }}>
-            <button 
-              onClick={() => setNotificationsOpen(!isNotificationsOpen)} 
+            <button
+              onClick={() => setNotificationsOpen(!isNotificationsOpen)}
               style={{
                 ...iconBtnStyle,
                 position: 'relative',
-                backgroundColor: isNotificationsOpen ? 'rgba(26,115,232,0.1)' : 'rgba(255,255,255,0.5)',
-                borderColor: isNotificationsOpen ? 'var(--color-primary)' : 'rgba(0,0,0,0.05)'
-              }} 
+                backgroundColor: isNotificationsOpen
+                  ? 'rgba(26,115,232,0.1)'
+                  : 'rgba(255,255,255,0.5)',
+                borderColor: isNotificationsOpen ? 'var(--color-primary)' : 'rgba(0,0,0,0.05)',
+              }}
               title="Alertas de Atención"
             >
-              <Bell size={20} color={visibleNotifications.length > 0 ? 'var(--color-warning, #f59e0b)' : 'var(--color-text-secondary)'} />
+              <Bell
+                size={20}
+                color={
+                  visibleNotifications.length > 0
+                    ? 'var(--color-warning, #f59e0b)'
+                    : 'var(--color-text-secondary)'
+                }
+              />
               {visibleNotifications.length > 0 && (
-                <span style={{
-                  position: 'absolute',
-                  top: '-2px',
-                  right: '-2px',
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                  fontSize: '0.65rem',
-                  fontWeight: 700,
-                  width: '16px',
-                  height: '16px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '2px solid white'
-                }}>
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '-2px',
+                    right: '-2px',
+                    backgroundColor: '#ef4444',
+                    color: 'white',
+                    fontSize: '0.65rem',
+                    fontWeight: 700,
+                    width: '16px',
+                    height: '16px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '2px solid white',
+                  }}
+                >
                   {visibleNotifications.length}
                 </span>
               )}
             </button>
 
             {isNotificationsOpen && (
-              <div style={{
-                position: 'absolute',
-                top: 'calc(100% + 8px)',
-                right: 0,
-                width: '320px',
-                backgroundColor: 'white',
-                borderRadius: '12px',
-                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-                border: '1px solid rgba(0, 0, 0, 0.08)',
-                zIndex: 100,
-                overflow: 'hidden'
-              }}>
-                <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid rgba(0,0,0,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
-                  <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1e293b' }}>Attention Items</span>
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 8px)',
+                  right: 0,
+                  width: '320px',
+                  backgroundColor: 'white',
+                  borderRadius: '12px',
+                  boxShadow:
+                    '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid rgba(0, 0, 0, 0.08)',
+                  zIndex: 100,
+                  overflow: 'hidden',
+                }}
+              >
+                <div
+                  style={{
+                    padding: '0.75rem 1rem',
+                    borderBottom: '1px solid rgba(0,0,0,0.06)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    backgroundColor: '#f8fafc',
+                  }}
+                >
+                  <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1e293b' }}>
+                    Attention Items
+                  </span>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: 500 }}>{visibleNotifications.length} pending</span>
+                    <span
+                      style={{
+                        fontSize: '0.75rem',
+                        color: 'var(--color-primary)',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {visibleNotifications.length} pending
+                    </span>
                     {visibleNotifications.length > 0 && (
-                      <button onClick={handleMarkAllAsRead} style={{ fontSize: '0.7rem', color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Mark all read</button>
+                      <button
+                        onClick={handleMarkAllAsRead}
+                        style={{
+                          fontSize: '0.7rem',
+                          color: '#64748b',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                        }}
+                      >
+                        Mark all read
+                      </button>
                     )}
                   </div>
                 </div>
                 <div style={{ maxHeight: '280px', overflowY: 'auto' }}>
                   {visibleNotifications.length === 0 ? (
-                    <div style={{ padding: '2rem 1rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem' }}>
+                    <div
+                      style={{
+                        padding: '2rem 1rem',
+                        textAlign: 'center',
+                        color: '#94a3b8',
+                        fontSize: '0.8rem',
+                      }}
+                    >
                       ✨ No items require attention.
                     </div>
                   ) : (
                     visibleNotifications.slice(0, 15).map((n, idx) => (
-                      <div 
-                        key={idx} 
+                      <div
+                        key={idx}
                         onClick={() => {
                           if (n.actionPath) {
                             // If path contains query string, navigate to /admin/<tab>?query
@@ -490,33 +554,59 @@ export default function PortalLayout({
                         }}
                         style={{
                           padding: '0.75rem 1rem',
-                          borderBottom: idx < Math.min(visibleNotifications.length, 15) - 1 ? '1px solid rgba(0,0,0,0.04)' : 'none',
+                          borderBottom:
+                            idx < Math.min(visibleNotifications.length, 15) - 1
+                              ? '1px solid rgba(0,0,0,0.04)'
+                              : 'none',
                           cursor: 'pointer',
                           transition: 'background 0.2s',
                           display: 'flex',
                           flexDirection: 'column',
                           gap: '2px',
-                          textAlign: 'left'
+                          textAlign: 'left',
                         }}
-                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.backgroundColor = 'transparent')
+                        }
                       >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{
-                            fontSize: '0.65rem',
-                            fontWeight: 700,
-                            textTransform: 'uppercase',
-                            color: n.severity === 'critical' ? '#ef4444' : '#f59e0b',
-                            backgroundColor: n.severity === 'critical' ? '#fee2e2' : '#fef3c7',
-                            padding: '1px 6px',
-                            borderRadius: '4px'
-                          }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: '0.65rem',
+                              fontWeight: 700,
+                              textTransform: 'uppercase',
+                              color: n.severity === 'critical' ? '#ef4444' : '#f59e0b',
+                              backgroundColor: n.severity === 'critical' ? '#fee2e2' : '#fef3c7',
+                              padding: '1px 6px',
+                              borderRadius: '4px',
+                            }}
+                          >
                             {n.type}
                           </span>
-                          <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>{n.timeLabel}</span>
+                          <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>
+                            {n.timeLabel}
+                          </span>
                         </div>
-                        <span style={{ fontSize: '0.8rem', color: '#334155', fontWeight: 500, marginTop: '3px' }}>{n.title}</span>
-                        <span style={{ fontSize: '0.7rem', color: '#64748b' }}>{n.description}</span>
+                        <span
+                          style={{
+                            fontSize: '0.8rem',
+                            color: '#334155',
+                            fontWeight: 500,
+                            marginTop: '3px',
+                          }}
+                        >
+                          {n.title}
+                        </span>
+                        <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                          {n.description}
+                        </span>
                       </div>
                     ))
                   )}
@@ -538,20 +628,46 @@ export default function PortalLayout({
               padding: '0.4rem 0.8rem',
               borderRadius: '24px',
               gap: '6px',
-              backgroundColor: (roleContext === 'admin' ? isCopilotOpen : isAiOpen) ? 'rgba(168, 85, 247, 0.1)' : 'rgba(255,255,255,0.5)',
-              borderColor: (roleContext === 'admin' ? isCopilotOpen : isAiOpen) ? 'rgba(168, 85, 247, 0.4)' : 'rgba(0,0,0,0.05)'
+              backgroundColor: (roleContext === 'admin' ? isCopilotOpen : isAiOpen)
+                ? 'rgba(168, 85, 247, 0.1)'
+                : 'rgba(255,255,255,0.5)',
+              borderColor: (roleContext === 'admin' ? isCopilotOpen : isAiOpen)
+                ? 'rgba(168, 85, 247, 0.4)'
+                : 'rgba(0,0,0,0.05)',
             }}
             title="Ask Atlas anything"
           >
-            <Sparkles size={16} color={(roleContext === 'admin' ? isCopilotOpen : isAiOpen) ? '#a855f7' : 'var(--color-text-secondary)'} />
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: (roleContext === 'admin' ? isCopilotOpen : isAiOpen) ? '#a855f7' : 'var(--color-text-secondary)', display: isMobile ? 'none' : 'inline' }}>
+            <Sparkles
+              size={16}
+              color={
+                (roleContext === 'admin' ? isCopilotOpen : isAiOpen)
+                  ? '#a855f7'
+                  : 'var(--color-text-secondary)'
+              }
+            />
+            <span
+              style={{
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                color: (roleContext === 'admin' ? isCopilotOpen : isAiOpen)
+                  ? '#a855f7'
+                  : 'var(--color-text-secondary)',
+                display: isMobile ? 'none' : 'inline',
+              }}
+            >
               Atlas AI
             </span>
           </button>
 
-          <div style={{ marginLeft: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <AvatarGenerator 
-              name={(userProfile?.firstName && userProfile?.lastName) ? `${userProfile.firstName} ${userProfile.lastName}` : (userProfile?.fullName || userProfile?.displayName)}
+          <div
+            style={{ marginLeft: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <AvatarGenerator
+              name={
+                userProfile?.firstName && userProfile?.lastName
+                  ? `${userProfile.firstName} ${userProfile.lastName}`
+                  : userProfile?.fullName || userProfile?.displayName
+              }
               email={userProfile?.email || user?.email}
               size={36}
               onClick={() => routerNavigate(`/${roleContext}/my-profile`)}
@@ -565,7 +681,7 @@ export default function PortalLayout({
       {/* MAIN LAYOUT WRAPPER */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         {/* LEFT SIDEBAR GADGET */}
-        <SidebarGadget 
+        <SidebarGadget
           groups={sidebarNavGroups}
           pinnedItems={sidebarPinnedItems}
           activeId={activeNavId}
@@ -578,45 +694,71 @@ export default function PortalLayout({
         />
 
         {/* CENTER CONTENT */}
-        <main style={{ 
-          flex: 1, 
-          overflowY: 'auto', 
-          backgroundColor: 'var(--color-bg-app)',
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
+        <main
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            backgroundColor: 'var(--color-bg-app)',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
           {children}
         </main>
 
         {/* AdminAIAssistant removed in favor of CopilotWorkspacePanel */}
         {isAiOpen && roleContext !== 'admin' && (
-          <aside style={{
-            width: isMobile ? '100%' : '300px',
-            position: isMobile ? 'absolute' : 'relative',
-            right: 0,
-            top: 0,
-            bottom: 0,
-            backgroundColor: 'var(--color-bg-surface)',
-            borderLeft: '1px solid var(--color-border)',
-            display: 'flex',
-            flexDirection: 'column',
-            zIndex: isMobile ? 60 : 40,
-            boxShadow: isMobile ? '-4px 0 15px rgba(0,0,0,0.1)' : 'none'
-          }}>
+          <aside
+            style={{
+              width: isMobile ? '100%' : '300px',
+              position: isMobile ? 'absolute' : 'relative',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              backgroundColor: 'var(--color-bg-surface)',
+              borderLeft: '1px solid var(--color-border)',
+              display: 'flex',
+              flexDirection: 'column',
+              zIndex: isMobile ? 60 : 40,
+              boxShadow: isMobile ? '-4px 0 15px rgba(0,0,0,0.1)' : 'none',
+            }}
+          >
             {isMobile && (
-              <div style={{ padding: '1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 600, color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div
+                style={{
+                  padding: '1rem',
+                  borderBottom: '1px solid var(--color-border)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <span
+                  style={{
+                    fontWeight: 600,
+                    color: 'var(--color-primary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                  }}
+                >
                   <Sparkles size={18} /> Atlas AI
                 </span>
-                <button onClick={() => setAiOpen(false)} style={{ background: 'none', border: 'none' }}><X size={20} /></button>
+                <button
+                  onClick={() => setAiOpen(false)}
+                  style={{ background: 'none', border: 'none' }}
+                >
+                  <X size={20} />
+                </button>
               </div>
             )}
             <div style={{ flex: 1, overflow: 'hidden' }}>
-              <ClinicalAssistant 
-                embedded={true} 
-                isOpen={true} 
-                setIsOpen={() => setAiOpen(false)} 
-                pageContext={enrichedContext ? { ...pageContext, ...enrichedContext } : pageContext} 
+              <ClinicalAssistant
+                embedded={true}
+                isOpen={true}
+                setIsOpen={() => setAiOpen(false)}
+                pageContext={enrichedContext ? { ...pageContext, ...enrichedContext } : pageContext}
                 contextMode={roleContext}
                 agentType={ROLE_AGENT_TYPE[roleContext] || 'default'}
                 suggestedPrompts={ROLE_SUGGESTED_PROMPTS[roleContext] || []}
@@ -626,8 +768,8 @@ export default function PortalLayout({
         )}
       </div>
 
-      <CommandPalette 
-        isOpen={isPaletteOpen} 
+      <CommandPalette
+        isOpen={isPaletteOpen}
         onClose={() => setPaletteOpen(false)}
         navGroups={sidebarNavGroups}
         pinnedItems={sidebarPinnedItems}
@@ -639,7 +781,9 @@ export default function PortalLayout({
           // Dispatch after a tick so the panel is mounted before receiving the event
           if (q && q.trim()) {
             setTimeout(() => {
-              window.dispatchEvent(new CustomEvent('ATLAS_PREFILL_QUERY', { detail: { query: q } }));
+              window.dispatchEvent(
+                new CustomEvent('ATLAS_PREFILL_QUERY', { detail: { query: q } })
+              );
             }, 150);
           }
         }}
@@ -660,5 +804,5 @@ const iconBtnStyle = {
   alignItems: 'center',
   justifyContent: 'center',
   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-  boxShadow: '0 2px 5px rgba(0,0,0,0.02)'
+  boxShadow: '0 2px 5px rgba(0,0,0,0.02)',
 };

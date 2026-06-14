@@ -393,7 +393,7 @@ export default function CatalogTableView({
         selectedIds={selectedIds}
         onSelectionChange={onSelectionChange}
         expandableRender={matrixViewType === 'grouped' ? renderVariantRow : undefined}
-        onRowClick={handleRowClick}
+        onRowClick={matrixViewType === 'grouped' ? undefined : handleRowClick}
         currentPage={currentPage}
         totalPages={Math.ceil(displayData.length / rowsPerPage) || 1}
         totalItems={displayData.length}

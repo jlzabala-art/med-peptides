@@ -17,6 +17,7 @@ import Check from 'lucide-react/dist/esm/icons/check';
 import Settings from 'lucide-react/dist/esm/icons/settings';
 import Grid from 'lucide-react/dist/esm/icons/grid';
 import X from 'lucide-react/dist/esm/icons/x';
+import Briefcase from 'lucide-react/dist/esm/icons/briefcase';
 
 const PORTALS = [
   {
@@ -44,6 +45,15 @@ const PORTALS = [
     icon: ShoppingCart,
     route: '/',
     color: '#ec4899', // pink-500
+    group: 'Commercial',
+  },
+  {
+    id: 'account_manager',
+    label: 'Account Manager Portal',
+    description: 'Manage clinical accounts & sales',
+    icon: Briefcase,
+    route: '/account-manager',
+    color: '#8b5cf6', // violet-500
     group: 'Commercial',
   },
   {
@@ -275,7 +285,7 @@ export default function AdminPortalSwitcher() {
           padding: '0.6rem 1rem',
           cursor: 'pointer',
           borderRadius: '8px',
-          margin: '0 0.5rem',
+          margin: '0',
           background: isFocused
             ? 'var(--color-bg-subtle, #f1f5f9)'
             : isCurrent
@@ -326,10 +336,9 @@ export default function AdminPortalSwitcher() {
           <span
             style={{
               fontSize: '0.75rem',
-              color: 'var(--color-text-tertiary)',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
+              color: '#64748b',
+              lineHeight: 1.3,
+              marginTop: '0.1rem',
             }}
           >
             {portal.description}
@@ -567,7 +576,7 @@ export default function AdminPortalSwitcher() {
                 position: 'absolute',
                 top: 'calc(100% + 0.5rem)',
                 left: 0,
-                width: '420px',
+                width: '640px',
                 background: 'white',
                 borderRadius: '16px',
                 boxShadow: '0 10px 40px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05)',
@@ -655,58 +664,56 @@ export default function AdminPortalSwitcher() {
                 </div>
               </div>
 
-              {/* Portal List */}
+              {/* Portal List - Grid Layout */}
               <div
                 ref={containerRef}
-                style={{ maxHeight: '480px', overflowY: 'auto', padding: '0.5rem 0' }}
+                style={{ maxHeight: '480px', overflowY: 'auto', padding: '1rem' }}
               >
                 {listItems.length === 0 ? (
                   <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
                     No portals found for "{search}"
                   </div>
                 ) : (
-                  listItems.map((item, i) => {
-                    if (item.type === 'header') {
-                      return (
-                        <div
-                          key={`hdr-${i}`}
-                          style={{
-                            padding: '0.75rem 1rem 0.25rem',
-                            fontSize: '0.7rem',
-                            fontWeight: 700,
-                            color: '#94a3b8',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.05em',
-                          }}
-                        >
-                          {item.label}
-                        </div>
-                      );
-                    } else if (item.type === 'group_label') {
-                      return (
-                        <div
-                          key={`grp-${i}`}
-                          style={{
-                            padding: '0.5rem 1.5rem 0.25rem',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            color: '#475569',
-                          }}
-                        >
-                          {item.label}
-                        </div>
-                      );
-                    } else {
-                      return (
-                        <PortalRow
-                          key={item.portal.id}
-                          portal={item.portal}
-                          index={i}
-                          isCurrent={item.portal.id === currentPortal.id}
-                        />
-                      );
-                    }
-                  })
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(2, 1fr)',
+                      gap: '0.5rem',
+                    }}
+                  >
+                    {listItems.map((item, i) => {
+                      if (item.type === 'header' || item.type === 'group_label') {
+                        return (
+                          <div
+                            key={`hdr-${i}`}
+                            style={{
+                              gridColumn: '1 / -1',
+                              padding:
+                                item.type === 'header'
+                                  ? '1rem 0.5rem 0.25rem'
+                                  : '0.5rem 0.5rem 0.25rem',
+                              fontSize: item.type === 'header' ? '0.7rem' : '0.75rem',
+                              fontWeight: item.type === 'header' ? 700 : 600,
+                              color: item.type === 'header' ? '#94a3b8' : '#475569',
+                              textTransform: item.type === 'header' ? 'uppercase' : 'none',
+                              letterSpacing: item.type === 'header' ? '0.05em' : 'normal',
+                            }}
+                          >
+                            {item.label}
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <PortalRow
+                            key={`${item.type}-${i}-${item.portal.id}`}
+                            portal={item.portal}
+                            index={i}
+                            isCurrent={item.portal.id === currentPortal.id}
+                          />
+                        );
+                      }
+                    })}
+                  </div>
                 )}
               </div>
 
@@ -720,7 +727,10 @@ export default function AdminPortalSwitcher() {
                 }}
               >
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    setIsOpen(false);
+                    navigate('/admin/access-levels');
+                  }}
                   style={{
                     flex: 1,
                     display: 'flex',
@@ -743,7 +753,10 @@ export default function AdminPortalSwitcher() {
                 </button>
                 <div style={{ width: '1px', background: 'var(--color-border)' }} />
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    setIsOpen(false);
+                    navigate('/admin/settings');
+                  }}
                   style={{
                     flex: 1,
                     display: 'flex',
