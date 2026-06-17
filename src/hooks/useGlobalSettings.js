@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useShop } from '../context/ShopProvider';
 import { useUIStore } from '../stores/uiStore';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { onSnapshot, doc, setDoc } from 'firebase/firestore';
 import { fetchLiveRates } from '../utils/liveRates';
 import { COUNTRIES } from '../data/countries';
@@ -67,7 +67,7 @@ export function useGlobalSettings() {
     const SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
     const syncRates = async () => {
-      if (!isAdmin) return;
+      if (!isAdmin || !auth.currentUser) return;
       try {
         const lastSync = sessionStorage.getItem(LAST_SYNC_KEY);
         if (lastSync && Date.now() - parseInt(lastSync, 10) < SYNC_INTERVAL_MS) {
@@ -87,6 +87,7 @@ export function useGlobalSettings() {
 
   // 3. Firestore Dynamic Settings Subscription
   useEffect(() => {
+    if (!auth.currentUser) return;
     const unsubscribeSettings = onSnapshot(doc(db, 'settings', 'global'), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();

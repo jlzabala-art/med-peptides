@@ -31,6 +31,9 @@ export default function ProductAutocomplete({ value, onChange, onSelect, placeho
           p.variants.forEach(v => {
             flattened.push({
               id: `${docSnap.id}-${v.sku || v.name}`,
+              productId: docSnap.id,
+              variantId: v.id || v.variantId || v.sku || v.name,
+              supplierId: v.supplierId || p.supplierId || null,
               name: v.name || p.name,
               sku: v.sku || p.sku || '',
               category: p.category || '',
@@ -43,6 +46,9 @@ export default function ProductAutocomplete({ value, onChange, onSelect, placeho
         } else {
           flattened.push({
             id: docSnap.id,
+            productId: docSnap.id,
+            variantId: p.id || docSnap.id,
+            supplierId: p.supplierId || null,
             name: p.name,
             sku: p.sku || '',
             category: p.category || '',

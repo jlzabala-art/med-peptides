@@ -169,21 +169,21 @@ export function CartProvider({ children }) {
 
       if (isObject) {
         setCartMetadata(mPrev => {
-          if (mPrev[itemKey] && mPrev[itemKey].price != null) return mPrev;
           let price = productOrName.price ?? null;
           if (price == null && productOrName.pricing?.retail?.perUnit != null) {
             price = productOrName.pricing.retail.perUnit;
           }
-          if (price != null || productOrName.productType === 'diagnostic') {
-             const mNext = { ...mPrev };
-             mNext[itemKey] = {
-               ...mNext[itemKey],
-               price: price,
-               isSupplement: productOrName.productType === 'supplement' || productOrName.productType === 'diagnostic' || productOrName.isSupplement,
-             };
-             return mNext;
-          }
-          return mPrev;
+          const currentMeta = mPrev[itemKey] || {};
+          const mNext = { ...mPrev };
+          mNext[itemKey] = {
+            ...currentMeta,
+            price: price != null ? price : currentMeta.price,
+            isSupplement: productOrName.productType === 'supplement' || productOrName.productType === 'diagnostic' || productOrName.isSupplement,
+            productId: productOrName.productId || productOrName.id,
+            variantId: productOrName.variantId || productOrName.id,
+            supplierId: productOrName.supplierId || productOrName.supplier || null
+          };
+          return mNext;
         });
       }
 

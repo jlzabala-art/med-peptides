@@ -38,13 +38,13 @@ import { useAuth } from '../context/AuthContext';
 
 
 import DoctorOverviewTab         from '../components/doctor/DoctorOverviewTab';
-import PhysicianPatientsTab      from '../components/doctor/DoctorPatientsTab';
-import PhysicianRecommendationsTab from '../components/doctor/DoctorRecommendationsTab';
-import PhysicianOrdersTab        from '../components/doctor/DoctorOrdersTab';
-import PhysicianProtocolsTab     from '../components/doctor/DoctorProtocolsTab';
-import PhysicianSettingsTab      from '../components/doctor/DoctorSettingsTab';
+
+
+
+
+
 import DoctorPrescriptionsTab    from '../components/doctor/DoctorPrescriptionsTab';
-import PhysicianAssistantsTab    from '../components/doctor/DoctorAssistantsTab';
+
 import CatalogCreatorFlow        from '../components/wholesaler/CatalogCreatorFlow';
 import RefillReminderBanner      from '../components/shared/RefillReminderBanner';
 import AdminTabErrorBoundary     from '../components/admin/AdminTabErrorBoundary';

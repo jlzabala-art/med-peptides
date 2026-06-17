@@ -51,25 +51,37 @@ export const generateThreadInsights = async (threadText, entityName) => {
                 let sentiment = 'neutral';
                 let healthScore = 85;
                 let aiSummary = `Standard conversation with ${entityName}. No immediate actions required.`;
+                let category = 'Inquiry';
+                let hasPurchaseIntent = false;
                 
                 if (text.includes('delay') || text.includes('issue') || text.includes('customs') || text.includes('bad') || text.includes('missing')) {
                     sentiment = 'negative';
                     healthScore = Math.floor(Math.random() * 30) + 40; // 40-70
                     aiSummary = `Action required: ${entityName} is reporting an issue or delay. Please review the timeline.`;
-                } else if (text.includes('great') || text.includes('thanks') || text.includes('quote') || text.includes('bulk')) {
+                    category = 'Issue';
+                } else if (text.includes('buy') || text.includes('quote') || text.includes('bulk') || text.includes('order') || text.includes('price')) {
                     sentiment = 'positive';
                     healthScore = Math.floor(Math.random() * 10) + 90; // 90-100
-                    aiSummary = `Positive interaction with ${entityName}. Potential for upselling or successful resolution.`;
+                    aiSummary = `Purchase intent detected from ${entityName}. They are inquiring about ordering or pricing.`;
+                    category = 'RFQ';
+                    hasPurchaseIntent = true;
+                } else if (text.includes('urgent') || text.includes('asap') || text.includes('emergency')) {
+                    sentiment = 'negative';
+                    healthScore = 50;
+                    aiSummary = `Urgent request from ${entityName}. Requires immediate attention.`;
+                    category = 'Urgent';
                 }
 
                 resolve({
                     sentiment,
                     healthScore,
                     aiSummary,
+                    category,
+                    hasPurchaseIntent,
                     suggestedReplies: [
-                        "Let me look into this right away.",
+                        hasPurchaseIntent ? "I've attached a quote for your review." : "Let me look into this right away.",
                         "Could you provide more details?",
-                        "Thank you for the update."
+                        "Thank you for the update. We're on it."
                     ]
                 });
             }, 1500); // AI simulation latency

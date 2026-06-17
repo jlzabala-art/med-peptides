@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React from 'react';
+import { useFirestoreData } from '../hooks/useFirestoreData';
 import { useParams, useNavigate } from 'react-router-dom';
 import Catalog from './Catalog';
 import CategoryDetailView from './CategoryDetailView';
@@ -58,8 +59,8 @@ export default function CollectionTemplate({
   onOpenSearch,
   products,
   EXCHANGE_RATES,
-  allFaqs,
 }) {
+  const { allFaqs } = useFirestoreData();
   const { slug } = useParams();
   const navigate = useNavigate();
 

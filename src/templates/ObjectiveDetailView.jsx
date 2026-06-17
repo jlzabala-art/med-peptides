@@ -9,6 +9,7 @@ import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 import Bot from "lucide-react/dist/esm/icons/bot";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo } from 'react';
+import { useFirestoreData } from '../hooks/useFirestoreData';
 
 
 
@@ -34,9 +35,8 @@ export default function ObjectiveDetailView({
   onBack, 
   onSelectProduct, 
   isProfessional, 
-  products,
-  allFaqs
-}) {
+  products}) {
+  const { allFaqs } = useFirestoreData();
   const [activeFAQProduct, setActiveFAQProduct] = useState(null);
   const [faqItems, setFaqItems] = useState([]);
   const [activePubMedProduct, setActivePubMedProduct] = useState(null);
@@ -49,7 +49,7 @@ export default function ObjectiveDetailView({
 
   const handleOpenFAQ = async (product) => {
     setActiveFAQProduct(product);
-    const faqs = getFAQForProduct(product.name, allFaqs || [], product.id, isProfessional);
+    const faqs = getFAQForProduct(product.name|| [], product.id, isProfessional);
     setFaqItems(faqs);
     setShowFAQModal(true);
   };
@@ -79,8 +79,6 @@ export default function ObjectiveDetailView({
     return Object.values(groups);
   }, [products, objectiveId]);
 
-  if (!objectiveId) return null;
-
   const backgrounds = {
     'Healing & Repair': "Focuses on accelerating tissue regeneration, modulating the inflammatory cascade, and enhancing extracellular matrix remodeling for advanced wound healing studies.",
     'Metabolic Optimization': "Targets energy homeostasis, lipid metabolism, and insulin receptor sensitivity to study metabolic pathways and related models.",
@@ -89,14 +87,17 @@ export default function ObjectiveDetailView({
     'Somatic Research': "Examines muscle hypertrophy, satellite cell activation, and myostatin inhibition to understand somatic tissue development and preservation.",
     'Hormonal Pathways': "Involves the study of neuroendocrine regulation, HPTA axis signaling, and secretagogue physiological effects."
   };
+  const safeObjectiveId = objectiveId || "Objectives";
   const researchBackground = backgrounds[objectiveId] || "Investigate specific biological mechanisms and signaling pathways using our high-purity research compounds.";
 
   // Dynamic SEO & OG Tags
   usePageMeta({
-    title: objectiveId,
+    title: safeObjectiveId,
     description: researchBackground.substring(0, 160),
-    path: `/protocol/${objectiveId.toLowerCase().replace(/ /g, '-')}`
+    path: `/protocol/${safeObjectiveId.toLowerCase().replace(/ /g, '-')}`
   });
+
+  if (!objectiveId) return null;
 
   return (
     <div className="template-root" style={{ padding: '0 1.5rem 4rem 1.5rem', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}>

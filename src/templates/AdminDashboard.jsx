@@ -61,12 +61,13 @@ import Workflow from 'lucide-react/dist/esm/icons/workflow';
 import GraduationCap from 'lucide-react/dist/esm/icons/graduation-cap';
 import PackageOpen from 'lucide-react/dist/esm/icons/package-open';
 import Package from 'lucide-react/dist/esm/icons/package';
+import Inbox from 'lucide-react/dist/esm/icons/inbox';
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import RefillReminderBanner from '../components/shared/RefillReminderBanner';
-import { db } from '../firebase';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db, auth } from '../firebase';
+import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 
@@ -77,63 +78,7 @@ import Omnibar from '../components/admin/Omnibar';
 import GlobalNotificationCenter from '../components/shared/widgets/GlobalNotificationCenter';
 import MarketIntelligenceHub from '../components/admin/market/MarketIntelligenceHub';
 
-// ── Lazy tab components ────────────────────────────────────────────────────────
-import AdminUsersTab from '../components/admin/AdminUsersTab';
-import AdminPhysiciansTab from '../components/admin/physicians/AdminPhysiciansTab';
-import AtlasCommandCenter from '../components/admin/AtlasCommandCenter';
-import AdminWholesellersTab from '../components/admin/AdminWholesellersTab';
-import AdminAccountManagersTab from '../components/admin/AdminAccountManagersTab';
-import AdminWorkflowsTab from '../components/admin/AdminWorkflowsTab';
-import AdminLogisticsTab from '../components/admin/AdminLogisticsTab';
-import ImportCatalogsTab from '../components/admin/imports/ImportCatalogsTab';
-import ImportPriceListsTab from '../components/admin/imports/ImportPriceListsTab';
-import ImportCoATab from '../components/admin/imports/ImportCoATab';
-import ImportRFQTab from '../components/admin/imports/ImportRFQTab';
-import AdminImportHistoryTab from '../components/admin/imports/AdminImportHistoryTab';
-import CatalogIntelligenceHub from '../components/admin/catalog/CatalogIntelligenceHub';
-import AdminCompetitorsTab from '../components/admin/AdminCompetitorsTab';
-import AdminSettingsTab from '../components/admin/AdminSettingsTab';
-import AdminInvitationsTab from '../components/admin/AdminInvitationsTab';
-import AdminCostsTab from '../components/admin/AdminCostsTab';
-import AdminRelationshipsTab from '../components/admin/AdminRelationshipsTab';
-import AdminSemanticTab from '../components/admin/AdminSemanticTab';
-const B2BQuotationsHub = lazy(() => import('../features/quotations/B2BQuotationsHub'));
-const InvoiceIntelligenceHub = lazy(() => import('../features/invoices/InvoiceIntelligenceHub'));
-import AdminPricesTab from '../components/admin/AdminPricesTab';
-import AdminViewsConfigTab from '../components/admin/AdminViewsConfigTab';
-import AdminVariantsTab from '../components/admin/AdminVariantsTab';
-import AdminProtocolsTab from '../components/admin/AdminProtocolsTab';
-import AdminProgramsTab from '../components/admin/AdminProgramsTab';
-import AdminMetricsDashboard from '../components/admin/AdminMetricsDashboard';
-import OrdersTab from '../components/admin/OrdersTab';
-import AdminAccessLevelsTab from '../components/admin/AdminAccessLevelsTab';
-import ClinicalAIWidget from '../components/admin/ClinicalAIWidget';
-import AdminAnalyticsTab from '../components/admin/AdminAnalyticsTab';
-import AdminClinicalLogsTab from '../components/admin/AdminClinicalLogsTab';
-import AdminHomeLayoutTab from '../components/admin/AdminHomeLayoutTab';
-import AdminPlaceholderTab from '../components/admin/AdminPlaceholderTab';
-import AdminAIAgentsTab from '../components/admin/AdminAIAgentsTab';
-import AdminAuditLogsTab from '../components/admin/AdminAuditLogsTab';
-import AtlasMessagesHub from '../features/messages/AtlasMessagesHub';
-import AdminStorageTab from '../components/admin/AdminStorageTab';
-import AdminAIToolsTab from '../components/admin/AdminAIToolsTab';
-import AdminSkuMappingTab from '../components/admin/SkuMappingTab/AdminSkuMappingTab';
-import AdminZohoCRMWidget from '../components/admin/gadgets/AdminZohoCRMWidget';
-import AdminBulkOrdersTab from '../components/admin/AdminBulkOrdersTab';
-import AdminFinanceWidget from '../components/admin/gadgets/AdminFinanceWidget';
-import AdminEmailTemplatesTab from '../components/admin/AdminEmailTemplatesTab';
-import AdminProductSyncWidget from '../components/admin/gadgets/AdminProductSyncWidget';
-import AdminGadgetRepositoryTab from '../components/admin/AdminGadgetRepositoryTab';
-import CatalogList from '../components/wholesaler/CatalogList';
-import CatalogCreatorFlow from '../components/wholesaler/CatalogCreatorFlow';
-import EmailCampaignBuilder from '../components/wholesaler/EmailCampaignBuilder';
-import AdminFinanceTab from '../components/admin/AdminFinanceTab';
-import AdminRFQTab from '../components/admin/AdminRFQTab';
-import AdminPOTab from '../components/admin/AdminPOTab';
-import AdminBillsTab from '../components/admin/AdminBillsTab';
-import AdminPaymentsMadeTab from '../components/admin/AdminPaymentsMadeTab';
-import AdminPaymentsReceivedTab from '../components/admin/AdminPaymentsReceivedTab';
-
+// ── Removed unused tab component imports for code splitting ─────────────────
 // icon alias (lucide doesn't export MailPlus2 — must be before NAV_GROUPS)
 function MailPlus2(props) {
   return <UserPlus {...props} />;
@@ -143,6 +88,7 @@ function MailPlus2(props) {
 const PINNED_ITEMS = [
   { id: 'dashboard', label: 'Dashboard KPIs', icon: LayoutDashboard },
   { id: 'messages', label: 'Messages', icon: MessageSquare },
+  { id: 'operations-inbox', label: 'Inbox', icon: Inbox },
   { id: 'calendar', label: 'Calendar', icon: Calendar },
 ];
 
@@ -178,6 +124,53 @@ function useUnreadMessagesCount() {
   return unread;
 }
 
+function useInboxPendingCount() {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    const q = query(
+      collection(db, 'operations_queue'),
+      where('status', 'in', ['New', 'AI Processing', 'Awaiting Review', 'Awaiting Approval'])
+    );
+    const unsub = onSnapshot(q, (snap) => setCount(snap.size), () => {});
+    return unsub;
+  }, []);
+  return count;
+}
+
+function useUpcomingCalendarCount() {
+  const { user } = useAuth();
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!user || !auth.currentUser) return;
+    const q = query(
+      collection(db, 'calendar_events'),
+      where('ownerIds', 'array-contains', user.uid),
+      orderBy('start', 'asc')
+    );
+
+    const unsub = onSnapshot(q, (snap) => {
+      let pending = 0;
+      const startOfToday = new Date();
+      startOfToday.setHours(0,0,0,0);
+      const todayIso = startOfToday.toISOString();
+
+      snap.forEach(doc => {
+        const data = doc.data();
+        const startStr = data.start?.toDate ? data.start.toDate().toISOString() : data.start;
+        if (startStr && startStr >= todayIso) {
+          pending++;
+        }
+      });
+      setCount(pending);
+    }, () => {});
+
+    return unsub;
+  }, [user]);
+
+  return count;
+}
+
 // ── Intent-based navigation groups ────────────────────────────────────────────
 const NAV_GROUPS = [
   {
@@ -189,7 +182,7 @@ const NAV_GROUPS = [
       { id: 'sales-orders', label: 'Sales Orders', icon: Box },
       { id: 'invoices', label: 'Invoices', icon: DollarSign },
       { id: 'payments-received', label: 'Payments Received', icon: DollarSign },
-      { id: 'orders', label: 'B2C Orders', icon: PackageSearch },
+      { id: 'orders', label: 'Patient Orders', icon: PackageSearch },
       { id: 'bulk-orders', label: 'Bulk Orders', icon: Box },
       { id: 'agency-deals', label: 'Agency Deals', icon: Briefcase },
       { id: 'logistics', label: 'Logistics Tracker', icon: Truck },
@@ -352,6 +345,8 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const unreadMessages = useUnreadMessagesCount();
+  const pendingInboxItems = useInboxPendingCount();
+  const upcomingCalendarCount = useUpcomingCalendarCount();
   const [isOmnibarOpen, setIsOmnibarOpen] = useState(false);
 
   useEffect(() => {
@@ -374,9 +369,23 @@ export default function AdminDashboard() {
           badgeColor: '#25D366', // WhatsApp green
         };
       }
+      if (item.id === 'operations-inbox') {
+        return {
+          ...item,
+          badge: pendingInboxItems > 0 ? pendingInboxItems : null,
+          badgeColor: '#0ea5e9', // Blue
+        };
+      }
+      if (item.id === 'calendar') {
+        return {
+          ...item,
+          badge: upcomingCalendarCount > 0 ? upcomingCalendarCount : null,
+          badgeColor: '#f97316', // Orange for calendar
+        };
+      }
       return item;
     });
-  }, [unreadMessages]);
+  }, [unreadMessages, pendingInboxItems, upcomingCalendarCount]);
 
   const filteredNavGroups = React.useMemo(() => {
     if (isAdmin || userProfile?.role === 'admin') {

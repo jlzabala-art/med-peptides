@@ -295,6 +295,11 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
     if (found) set({ country: found });
   }, [region, detectedCountry, countryOptions, prefillApplied, set]);
 
+  const scrollReset = () => {
+    window.scrollTo(0, 0);
+    document.getElementById('co-overlay')?.scrollTo(0, 0);
+  };
+
   // P1 Fix 1.2 — Auto-skip to Step 3 for logged-in users with complete profiles
   useEffect(() => {
     if (!user || !prefillApplied || step !== 1) return;
@@ -421,10 +426,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
        (user || (formData.password && formData.confirmPassword && formData.password === formData.confirmPassword)));
   const step2Valid = formData.country && formData.address;
 
-  const scrollReset = () => {
-    window.scrollTo(0, 0);
-    document.getElementById('co-overlay')?.scrollTo(0, 0);
-  };
+
 
   const goNext = () => {
     if (step === 1 && !step1Valid) { setInlineError('Please fill in all required fields.'); return; }
@@ -533,7 +535,19 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
         }
       }
 
-      const items = enrichedCartItems.map(i => ({ name: i.itemKey, variant: i.dosagePart, quantity: i.qty, unitPrice: i.unitPrice, lineTotal: i.lineTotal }));
+      const items = enrichedCartItems.map(i => {
+        const meta = cartMetadata[i.itemKey] || {};
+        return { 
+          name: i.itemKey, 
+          variant: i.dosagePart, 
+          quantity: i.qty, 
+          unitPrice: i.unitPrice, 
+          lineTotal: i.lineTotal,
+          productId: meta.productId || null,
+          variantId: meta.variantId || null,
+          supplierId: meta.supplierId || null
+        };
+      });
       const subtotal = enrichedCartItems.reduce((a, i) => a + i.lineTotal, 0);
       const total = subtotal + shippingCost;
       const currency = EXCHANGE_RATES[activeRegion]?.currency || 'USD';

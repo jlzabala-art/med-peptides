@@ -18,6 +18,8 @@ import { PreferencesProvider } from '../context/PreferencesContext';
 import { HeaderProvider } from '../context/HeaderContext';
 import { CopilotProvider } from '../context/CopilotContext';
 
+import { ClinicalCartProvider } from '../contexts/ClinicalCartContext';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -46,19 +48,21 @@ export default function AppProviders({ children }) {
             <TenantProvider>
               <ShopProvider>
                 <CartProvider>
-                  <HelmetProvider>
-                    <ThemeProvider>
-                      <NotificationProvider>
-                        <PreferencesProvider>
-                          <CopilotProvider>
-                            <HeaderProvider>
-                              {children}
-                            </HeaderProvider>
-                          </CopilotProvider>
-                        </PreferencesProvider>
-                      </NotificationProvider>
-                    </ThemeProvider>
-                  </HelmetProvider>
+                  <ClinicalCartProvider>
+                    <HelmetProvider>
+                      <ThemeProvider>
+                        <NotificationProvider>
+                          <PreferencesProvider>
+                            <CopilotProvider>
+                              <HeaderProvider>
+                                {children}
+                              </HeaderProvider>
+                            </CopilotProvider>
+                          </PreferencesProvider>
+                        </NotificationProvider>
+                      </ThemeProvider>
+                    </HelmetProvider>
+                  </ClinicalCartProvider>
                 </CartProvider>
               </ShopProvider>
             </TenantProvider>

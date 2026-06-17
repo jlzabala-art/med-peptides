@@ -201,7 +201,7 @@ export default function AppHeader({
           </div>
           <div className="app-header-user-info">
             <span className="app-header-user-name">{displayName}</span>
-            <span className="app-header-user-role">{activeRole || 'User'}</span>
+            <span className="app-header-user-role">{activeRole === 'b2c' ? 'Patient' : (activeRole || 'User')}</span>
           </div>
           <ChevronDown size={14} color="var(--color-text-secondary)" style={{ marginLeft: '4px' }} />
           {isUserMenuOpen && (

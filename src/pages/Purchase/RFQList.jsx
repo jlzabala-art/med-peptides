@@ -30,6 +30,7 @@ import Layers from "lucide-react/dist/esm/icons/layers";
 import React, { useState, useEffect, useMemo } from 'react';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, addDoc, serverTimestamp, arrayUnion } from 'firebase/firestore';
 import { db } from '../../firebase';
+import { useLocation } from 'react-router-dom';
 
 
 
@@ -280,6 +281,24 @@ function RFQDetail({ rfq, onClose, onStatusChange, onEdit }) {
                   ))}
                 </tbody>
               </table>
+              
+              <div style={{ padding: '0.75rem 1.5rem', background: '#f8fafc', borderTop: '1px solid #e2e8f0', position: 'relative' }}>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button style={{ padding: '0.4rem 0.75rem', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Plus size={14} /> Add Row
+                  </button>
+                  
+                  <div style={{ position: 'relative' }}>
+                    <button onClick={() => {
+                        // Normally this would toggle state, we will do a simple alert for now if state is tricky, or just add the state
+                        alert('Importing data will be available here using context'); 
+                    }} style={{ padding: '0.4rem 0.75rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px', color: '#1d4ed8', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      Import Data ▾
+                    </button>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         )}
@@ -392,6 +411,7 @@ export default function RFQList() {
   const [showWizard, setShowWizard] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const location = useLocation();
 
   // Resize listener
   useEffect(() => {
@@ -454,9 +474,20 @@ export default function RFQList() {
 
       setRfqs(data);
       setLoading(false);
+
+      // Handle highlight query parameter
+      const params = new URLSearchParams(location.search);
+      const highlightId = params.get('highlight');
+      if (highlightId && data.length > 0) {
+        const target = data.find(r => r.rfqNumber === highlightId || r.id === highlightId);
+        if (target) {
+          setSelectedRfq(target);
+          setActiveTabPanel('directory');
+        }
+      }
     });
     return () => unsub();
-  }, []);
+  }, [location.search]);
 
   const handleBulkAction = async (newStatus) => {
     try {
@@ -666,11 +697,11 @@ export default function RFQList() {
       <div style={{ flex: 1, minHeight: 0 }}>
         {/* DIRECTORY SPLIT PANEL */}
         {activeTabPanel === 'directory' && (
-          <div style={{ display: 'flex', gap: '1.25rem', height: '100%', alignItems: 'flex-start' }}>
-            {/* Left RFQ List Cards */}
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
+            {/* FULL WIDTH LIST */}
             <div style={{ 
-              flex: selectedRfq && !isMobile ? '0 0 35%' : '1', 
-              display: selectedRfq && isMobile ? 'none' : 'flex', 
+              flex: 1, 
+              display: 'flex', 
               flexDirection: 'column', 
               gap: '0.75rem',
               overflowY: 'auto',
@@ -745,22 +776,28 @@ export default function RFQList() {
               )}
             </div>
 
-            {/* Right RFQ Detail Workspace */}
+            {/* DRAWER FOR WORKSPACE */}
             {selectedRfq && (
-              <div style={{ 
-                flex: '1', 
-                border: '1px solid var(--border)', 
-                borderRadius: '12px', 
-                overflow: 'hidden',
-                backgroundColor: 'var(--surface)'
-              }}>
-                <RFQDetail
-                  rfq={selectedRfq}
-                  onClose={() => setSelectedRfq(null)}
-                  onStatusChange={() => console.log('RFQ update')}
-                  onEdit={() => toast.info('Edit form triggered')}
+              <>
+                <div 
+                  style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 999 }}
+                  onClick={() => setSelectedRfq(null)}
                 />
-              </div>
+                <div 
+                  style={{
+                    position: 'fixed', top: 0, right: 0, bottom: 0, width: '900px', maxWidth: '100vw',
+                    backgroundColor: 'var(--surface)', zIndex: 1000, display: 'flex', flexDirection: 'column',
+                    boxShadow: '-4px 0 15px rgba(0,0,0,0.1)', overflow: 'hidden'
+                  }}
+                >
+                  <RFQDetail
+                    rfq={selectedRfq}
+                    onClose={() => setSelectedRfq(null)}
+                    onStatusChange={() => console.log('RFQ update')}
+                    onEdit={() => toast.info('Edit form triggered')}
+                  />
+                </div>
+              </>
             )}
 
           </div>

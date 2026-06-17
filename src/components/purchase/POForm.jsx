@@ -21,7 +21,7 @@ export default function POForm({ po, onClose }) {
   const [supplierName, setSupplierName] = useState(po?.supplierName || '');
   const [poNumber, setPoNumber] = useState(po?.poNumber || `PO-${Date.now().toString().slice(-6)}`);
   const [status, setStatus] = useState(po?.status || 'open');
-  const [items, setItems] = useState(po?.items || [{ itemName: '', quantity: 1, unit: 'vial', unitPrice: 0 }]);
+  const [items, setItems] = useState(po?.items || [{ itemName: '', quantity: 1, unit: 'vial', unitPrice: 0, productId: null, variantId: null, supplierId: null }]);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
@@ -57,13 +57,13 @@ export default function POForm({ po, onClose }) {
     setIsSaving(false);
   };
 
-  const addItem = () => setItems([...items, { itemName: '', quantity: 1, unit: 'vial', unitPrice: 0 }]);
+  const addItem = () => setItems([...items, { itemName: '', quantity: 1, unit: 'vial', unitPrice: 0, productId: null, variantId: null, supplierId: null }]);
   const updateItem = (index, field, value) => {
     const newItems = [...items];
     newItems[index][field] = value;
     // Rapid entry: add a new empty line if the last row is being typed into
     if (index === items.length - 1 && field === 'itemName' && value.length > 0) {
-      newItems.push({ itemName: '', quantity: 1, unit: 'vial', unitPrice: 0 });
+      newItems.push({ itemName: '', quantity: 1, unit: 'vial', unitPrice: 0, productId: null, variantId: null, supplierId: null });
     }
     setItems(newItems);
   };
@@ -159,6 +159,9 @@ export default function POForm({ po, onClose }) {
                             newItems[idx].itemName = prod.dosage ? `${prod.name} (${prod.dosage})` : prod.name;
                             if (prod.unit) newItems[idx].unit = prod.unit;
                             if (prod.costPrice) newItems[idx].unitPrice = prod.costPrice;
+                            newItems[idx].productId = prod.productId || prod.id || null;
+                            newItems[idx].variantId = prod.variantId || prod.id || null;
+                            newItems[idx].supplierId = prod.supplierId || null;
                             setItems(newItems);
                           }
                         }}

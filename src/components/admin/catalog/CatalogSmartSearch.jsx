@@ -32,10 +32,10 @@ export default function CatalogSmartSearch({
   onToggleQuickFilter
 }) {
   const placeholders = [
-    "Ask Atlas: 'Compare suppliers for BPC-157'...",
-    "Ask Atlas: 'Show products with missing COA'...",
-    "Ask Atlas: 'Find top-rated TB-500 vendors'...",
-    "Ask Atlas: 'Filter by purity > 99%'..."
+    "Search products by name or SKU...",
+    "Search for suppliers...",
+    "Search by format (e.g., Vial, Capsule)...",
+    "Type a keyword to find items..."
   ];
 
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
@@ -110,33 +110,6 @@ export default function CatalogSmartSearch({
         {/* Row 2: Actions */}
         <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '4px' }} className="hide-scrollbars">
           <style>{`.hide-scrollbars::-webkit-scrollbar { display: none; }`}</style>
-          <button
-            onClick={() => {
-              // Trigger AI Semantic Search (either by modifying searchQuery or emitting event)
-              onSearchChange("Ask Atlas: ");
-            }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.75rem 1.25rem',
-              background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.1))',
-              border: '1px solid rgba(99,102,241,0.3)',
-              borderRadius: '24px',
-              cursor: 'pointer',
-              fontWeight: 600,
-              color: 'var(--color-primary, #6366f1)',
-              boxShadow: '0 2px 10px rgba(99,102,241, 0.05)',
-              whiteSpace: 'nowrap',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
-            onMouseOut={(e) => e.currentTarget.style.transform = 'none'}
-          >
-            <Sparkles size={18} color="var(--color-primary, #6366f1)" /> 
-            AI Search
-          </button>
-
           <button
             onClick={onOpenAdvancedFilters}
             style={{

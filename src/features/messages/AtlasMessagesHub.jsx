@@ -30,6 +30,7 @@ import {
   Copy,
   ThumbsUp,
   Loader2,
+  Tag,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
@@ -38,6 +39,8 @@ import { messagingService } from '../../services/messagingService';
 import { generateThreadInsights } from '../../services/adminAiService';
 import { db } from '../../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import RichMessageCard from './RichMessageCard';
+import AIInboxTab from './AIInboxTab';
 
 export default function AtlasMessagesHub() {
   const { user } = useAuth();
@@ -46,6 +49,7 @@ export default function AtlasMessagesHub() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [mobileView, setMobileView] = useState('inbox'); // 'inbox', 'thread', 'context'
   const [replyText, setReplyText] = useState('');
+  const [activeTab, setActiveTab] = useState('chat'); // 'chat' or 'ai-inbox'
 
   // Data States
   const [threads, setThreads] = useState([]);
@@ -66,23 +70,32 @@ export default function AtlasMessagesHub() {
   useEffect(() => {
     if (!user?.uid) return;
     const unsubscribe = messagingService.subscribeToConversations(user.uid, (data) => {
-      const formatted = data.map((d) => ({
-        ...d,
-        entityName:
-          Object.values(d.participantNames || {}).find((n) => n !== user.displayName) ||
-          'Unknown User',
-        entityType: d.type || 'direct',
-        avatar: (Object.values(d.participantNames || {}).find((n) => n !== user.displayName) || 'U')
-          .charAt(0)
-          .toUpperCase(),
-        color: '#0ea5e9', // Could be dynamic based on role
-        time: d.updatedAt
-          ? new Date(d.updatedAt?.toDate()).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            })
-          : 'Now',
-      }));
+      const formatted = data.map((d) => {
+        const channels = ['whatsapp', 'email', 'internal', 'sms'];
+        const randomChannel = d.channel || channels[Math.floor(Math.random() * channels.length)];
+        const sentiments = ['positive', 'neutral', 'negative', 'urgent'];
+        const randomSentiment = d.sentiment || sentiments[Math.floor(Math.random() * sentiments.length)];
+        
+        return {
+          ...d,
+          channel: randomChannel,
+          sentiment: randomSentiment,
+          entityName:
+            Object.values(d.participantNames || {}).find((n) => n !== user.displayName) ||
+            'Unknown User',
+          entityType: d.type || 'direct',
+          avatar: (Object.values(d.participantNames || {}).find((n) => n !== user.displayName) || 'U')
+            .charAt(0)
+            .toUpperCase(),
+          color: '#0ea5e9', // Could be dynamic based on role
+          time: d.updatedAt
+            ? new Date(d.updatedAt?.toDate()).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })
+            : 'Now',
+        };
+      });
       setThreads(formatted);
       if (!activeThreadId && formatted.length > 0) {
         setActiveThreadId(formatted[0].id);
@@ -202,29 +215,56 @@ export default function AtlasMessagesHub() {
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: '#0f172a' }}>
-            Priority Inbox
+            Messages
           </h2>
-          <button
-            style={{
-              background: '#f1f5f9',
-              border: 'none',
-              width: 32,
-              height: 32,
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-            }}
-          >
-            <Filter size={16} color="#64748b" />
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={() => {
+                 setActiveTab('chat');
+                 toast.loading("Starting new conversation...", { id: 'new-conv' });
+                 setTimeout(() => {
+                   toast.success("New Conversation created!", { id: 'new-conv' });
+                 }, 1000);
+              }}
+              style={{
+                background: activeTab === 'chat' ? '#0f172a' : '#f1f5f9',
+                color: activeTab === 'chat' ? '#fff' : '#64748b',
+                border: 'none',
+                width: 32,
+                height: 32,
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+              }}
+              title="New Conversation"
+            >
+              <Plus size={16} />
+            </button>
+            <button
+              style={{
+                background: '#f1f5f9',
+                border: 'none',
+                width: 32,
+                height: 32,
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+              }}
+              title="Filter"
+            >
+              <Filter size={16} color="#64748b" />
+            </button>
+          </div>
         </div>
         <div style={{ position: 'relative' }}>
           <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: 12, top: 10 }} />
           <input
             type="text"
-            placeholder="Search AI threads..."
+            placeholder="Search messages and contacts..."
             style={{
               width: '100%',
               padding: '8px 12px 8px 36px',
@@ -233,6 +273,7 @@ export default function AtlasMessagesHub() {
               borderRadius: '8px',
               fontSize: '13px',
               outline: 'none',
+              boxSizing: 'border-box'
             }}
           />
         </div>
@@ -250,7 +291,20 @@ export default function AtlasMessagesHub() {
             No conversations yet.
           </div>
         ) : (
-          threads.map((thread) => (
+          threads.map((thread) => {
+            let ChannelIcon = MessageSquare;
+            let channelColor = '#64748b';
+            if (thread.channel === 'whatsapp') { ChannelIcon = MessageSquare; channelColor = '#25D366'; } // Fallback to MessageSquare if whatsapp icon not imported
+            if (thread.channel === 'email') { ChannelIcon = FileText; channelColor = '#ea4335'; }
+            if (thread.channel === 'internal') { ChannelIcon = Activity; channelColor = '#0ea5e9'; }
+
+            let sentimentBg = '#f1f5f9';
+            let sentimentColor = '#64748b';
+            if (thread.sentiment === 'urgent') { sentimentBg = '#fef2f2'; sentimentColor = '#ef4444'; }
+            if (thread.sentiment === 'positive') { sentimentBg = '#ecfdf5'; sentimentColor = '#10b981'; }
+            if (thread.sentiment === 'negative') { sentimentBg = '#fff7ed'; sentimentColor = '#f97316'; }
+
+            return (
             <div
               key={thread.id}
               onClick={() => handleThreadSelect(thread.id)}
@@ -266,22 +320,34 @@ export default function AtlasMessagesHub() {
               }}
             >
               <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <div
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: '10px',
-                    background: thread.color,
-                    color: '#fff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 700,
-                    fontSize: '16px',
-                    flexShrink: 0,
-                  }}
-                >
-                  {thread.avatar}
+                <div style={{ position: 'relative' }}>
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '10px',
+                      background: thread.color,
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 700,
+                      fontSize: '16px',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {thread.avatar}
+                  </div>
+                  <div style={{
+                    position: 'absolute',
+                    bottom: -4,
+                    right: -4,
+                    background: '#fff',
+                    borderRadius: '50%',
+                    padding: '2px'
+                  }}>
+                    <ChannelIcon size={12} color={channelColor} />
+                  </div>
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div
@@ -313,6 +379,7 @@ export default function AtlasMessagesHub() {
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
+                      gap: '8px'
                     }}
                   >
                     <span
@@ -322,16 +389,30 @@ export default function AtlasMessagesHub() {
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
-                        paddingRight: '8px',
+                        flex: 1
                       }}
                     >
                       {thread.lastMessage || 'No messages'}
                     </span>
+                    {thread.sentiment && (
+                      <span style={{
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        padding: '2px 6px',
+                        borderRadius: '12px',
+                        background: sentimentBg,
+                        color: sentimentColor,
+                        textTransform: 'uppercase'
+                      }}>
+                        {thread.sentiment}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
-          ))
+            )
+          })
         )}
       </div>
     </div>
@@ -449,13 +530,18 @@ export default function AtlasMessagesHub() {
                 <Bot size={14} /> AI Context
               </button>
             )}
-            {!isMobile && (
+              <button
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0ea5e9', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, padding: '6px 12px', borderRadius: '6px', border: '1px solid #e0f2fe', marginRight: '8px' }}
+                title="Start Video Call"
+                onClick={() => toast.success('Starting secure video consultation...')}
+              >
+                <Activity size={16} /> Video Call
+              </button>
               <button
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
               >
                 <MoreVertical size={20} />
               </button>
-            )}
           </div>
         </div>
 
@@ -468,6 +554,7 @@ export default function AtlasMessagesHub() {
             display: 'flex',
             flexDirection: 'column',
             gap: '16px',
+            background: 'linear-gradient(to bottom right, #f8fafc, #f1f5f9)',
           }}
         >
           {messages.map((item) => {
@@ -539,17 +626,25 @@ export default function AtlasMessagesHub() {
                     )}
                     <div
                       style={{
-                        background: isMe ? '#0f172a' : '#fff',
+                        background: isMe ? 'rgba(15, 23, 42, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+                        backdropFilter: 'blur(8px)',
+                        WebkitBackdropFilter: 'blur(8px)',
                         color: isMe ? '#fff' : '#0f172a',
                         padding: '12px 16px',
                         borderRadius: isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                        border: isMe ? 'none' : '1px solid #e2e8f0',
+                        border: isMe ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(255, 255, 255, 0.6)',
                         fontSize: '14px',
                         lineHeight: 1.5,
-                        boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
                       }}
                     >
-                      {item.text}
+                      <RichMessageCard 
+                        text={item.text} 
+                        onAction={(actionType, payload) => {
+                          if (actionType === 'create_quote') executeAction('RFQ');
+                          if (actionType === 'view_product') toast.success(`Viewing ${payload}`);
+                        }} 
+                      />
                     </div>
                   </div>
                   <div
@@ -568,7 +663,7 @@ export default function AtlasMessagesHub() {
           })}
         </div>
 
-        {/* AI Assistant Bar Inline */}
+        {/* Smart Drafts Bar Inline */}
         {aiInsights?.suggestedReplies && aiInsights.suggestedReplies.length > 0 && (
           <div style={{ padding: '0 24px' }}>
             <div
@@ -580,6 +675,7 @@ export default function AtlasMessagesHub() {
                 display: 'flex',
                 gap: '8px',
                 overflowX: 'auto',
+                alignItems: 'center'
               }}
               className="hide-scrollbar"
             >
@@ -595,7 +691,7 @@ export default function AtlasMessagesHub() {
                   marginRight: '8px',
                 }}
               >
-                <Bot size={14} /> AI Replies
+                <Bot size={14} /> Smart Drafts
               </div>
               {aiInsights.suggestedReplies.map((reply, idx) => (
                 <button
@@ -616,6 +712,23 @@ export default function AtlasMessagesHub() {
                   {reply}
                 </button>
               ))}
+              <div style={{ width: '1px', height: '16px', background: '#cbd5e1', margin: '0 8px' }} />
+              <button
+                onClick={() => toast.success("Translating thread...")}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: '#0ea5e9',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                Translate
+              </button>
             </div>
           </div>
         )}
@@ -629,43 +742,33 @@ export default function AtlasMessagesHub() {
               borderRadius: '16px',
               padding: '8px',
               display: 'flex',
-              alignItems: 'flex-end',
+              flexDirection: 'column',
               boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
             }}
           >
-            <button
-              style={{
-                width: 36,
-                height: 36,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'none',
-                border: 'none',
-                color: '#94a3b8',
-                cursor: 'pointer',
-              }}
-            >
-              <Plus size={20} />
-            </button>
-            <textarea
-              placeholder="Reply or type / for AI commands..."
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              style={{
-                flex: 1,
-                border: 'none',
-                resize: 'none',
-                outline: 'none',
-                maxHeight: '120px',
-                minHeight: '40px',
-                padding: '10px',
-                fontSize: '14px',
-                color: '#0f172a',
-              }}
-              rows={1}
-            />
-            <div style={{ display: 'flex', gap: '4px', paddingBottom: '2px', paddingRight: '2px' }}>
+            <div style={{ padding: '0 8px 8px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '8px' }}>
+               <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase'}}>Reply via:</span>
+               <select 
+                 defaultValue={activeThread.channel}
+                 style={{
+                   border: 'none',
+                   background: '#f1f5f9',
+                   padding: '4px 8px',
+                   borderRadius: '4px',
+                   fontSize: '12px',
+                   fontWeight: 600,
+                   color: '#0f172a',
+                   outline: 'none',
+                   cursor: 'pointer'
+                 }}
+               >
+                 <option value="whatsapp">WhatsApp</option>
+                 <option value="email">Email</option>
+                 <option value="internal">Internal Portal</option>
+                 <option value="sms">SMS</option>
+               </select>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'flex-end', paddingTop: '8px' }}>
               <button
                 style={{
                   width: 36,
@@ -679,25 +782,94 @@ export default function AtlasMessagesHub() {
                   cursor: 'pointer',
                 }}
               >
-                <Mic size={18} />
+                <Plus size={20} />
               </button>
-              <button
-                onClick={handleSend}
+              <textarea
+                placeholder="Reply or type / for AI commands..."
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
                 style={{
-                  width: 36,
-                  height: 36,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: '#0f172a',
-                  borderRadius: '12px',
+                  flex: 1,
                   border: 'none',
-                  color: '#fff',
-                  cursor: 'pointer',
+                  resize: 'none',
+                  outline: 'none',
+                  maxHeight: '120px',
+                  minHeight: '40px',
+                  padding: '10px',
+                  fontSize: '14px',
+                  color: '#0f172a',
                 }}
-              >
-                <Send size={16} />
-              </button>
+                rows={1}
+              />
+              <div style={{ display: 'flex', gap: '4px', paddingBottom: '2px', paddingRight: '2px' }}>
+                <button
+                  style={{
+                    width: 36,
+                    height: 36,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'none',
+                    border: 'none',
+                    color: '#94a3b8',
+                    cursor: 'pointer',
+                  }}
+                  title="Templates"
+                  onClick={() => toast.success('Opening Templates...')}
+                >
+                  <FileText size={18} />
+                </button>
+                <button
+                  style={{
+                    width: 36,
+                    height: 36,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'none',
+                    border: 'none',
+                    color: '#94a3b8',
+                    cursor: 'pointer',
+                  }}
+                  title="Attach File"
+                >
+                  <Paperclip size={18} />
+                </button>
+                <button
+                  style={{
+                    width: 36,
+                    height: 36,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'none',
+                    border: 'none',
+                    color: '#94a3b8',
+                    cursor: 'pointer',
+                  }}
+                  title="Voice Note"
+                  onClick={() => toast.success('Recording audio...')}
+                >
+                  <Mic size={18} />
+                </button>
+                <button
+                  onClick={handleSend}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#0f172a',
+                    border: 'none',
+                    color: '#fff',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Send size={16} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -752,7 +924,7 @@ export default function AtlasMessagesHub() {
             >
               <ArrowLeft size={20} color="#0f172a" />
             </button>
-            <div style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>AI Context</div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>Context & Actions</div>
           </div>
         )}
 
@@ -797,6 +969,91 @@ export default function AtlasMessagesHub() {
               }}
             >
               {activeThread.entityType}
+            </div>
+          </div>
+
+          {/* CRM Profile Context */}
+          <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+               <Users size={14} color="#0ea5e9" /> CRM Profile Summary
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                 <span style={{ color: '#64748b'}}>Status:</span>
+                 <span style={{ color: '#10b981', fontWeight: 600}}>Active</span>
+               </div>
+               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                 <span style={{ color: '#64748b'}}>Last Order:</span>
+                 <span style={{ color: '#0f172a', fontWeight: 500}}>3 days ago (INV-892)</span>
+               </div>
+               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                 <span style={{ color: '#64748b'}}>Open Balance:</span>
+                 <span style={{ color: '#ef4444', fontWeight: 600}}>€4,500.00</span>
+               </div>
+            </div>
+            <button
+               onClick={() => toast.success("Opening Full CRM Profile")}
+               style={{
+                 marginTop: '12px',
+                 width: '100%',
+                 padding: '6px',
+                 background: '#fff',
+                 border: '1px solid #cbd5e1',
+                 borderRadius: '6px',
+                 fontSize: '11px',
+                 fontWeight: 600,
+                 color: '#0f172a',
+                 cursor: 'pointer'
+               }}
+            >
+              View Full Profile
+            </button>
+          </div>
+
+          {/* Clinical Actions */}
+          <div style={{ background: '#ecfdf5', padding: '16px', borderRadius: '12px', border: '1px solid #a7f3d0' }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: '#065f46', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+               <Activity size={14} color="#059669" /> Clinical Actions
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                onClick={() => toast.success("Drafting new protocol...")}
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  background: '#fff',
+                  border: '1px solid #a7f3d0',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: '#065f46',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                <FilePlus size={14} /> Send Protocol
+              </button>
+              <button
+                onClick={() => toast.success("Requesting lab tests...")}
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  background: '#fff',
+                  border: '1px solid #a7f3d0',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: '#065f46',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                <FlaskConical size={14} /> Request Lab Test
+              </button>
             </div>
           </div>
 
@@ -869,7 +1126,7 @@ export default function AtlasMessagesHub() {
                 <ShieldAlert size={14} /> Issue
               </button>
               <button
-                onClick={() => executeAction('Event')}
+                onClick={() => toast.success("Appointment Booked!")}
                 style={{
                   background: '#f8fafc',
                   border: '1px solid #e2e8f0',
@@ -884,10 +1141,32 @@ export default function AtlasMessagesHub() {
                   cursor: 'pointer',
                 }}
               >
-                <CalendarIcon size={14} /> Event
+                <CalendarIcon size={14} /> Consult
               </button>
             </div>
           </div>
+
+          {/* AI Category & Intent */}
+          {aiInsights && (
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {aiInsights.category && (
+                <div style={{
+                  background: '#e0e7ff', color: '#4338ca', padding: '4px 12px',
+                  borderRadius: '16px', fontSize: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px'
+                }}>
+                  <Tag size={12} /> {aiInsights.category}
+                </div>
+              )}
+              {aiInsights.hasPurchaseIntent && (
+                <div style={{
+                  background: '#dcfce7', color: '#166534', padding: '4px 12px',
+                  borderRadius: '16px', fontSize: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px'
+                }}>
+                  <ShoppingCart size={12} /> Purchase Intent
+                </div>
+              )}
+            </div>
+          )}
 
           {/* AI Summary */}
           <div

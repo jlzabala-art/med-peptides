@@ -105,7 +105,7 @@ const MOCK_STATS = [
   { label: 'Avg Health Score', value: '84', icon: ShieldCheck, color: '#0ea5e9' },
 ];
 
-export default function SupplierInsightsView({ variants = [] }) {
+export default function SupplierInsightsView({ variants = [], onAction }) {
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -253,10 +253,13 @@ export default function SupplierInsightsView({ variants = [] }) {
     <div
       className="supplier-insights"
       style={{
+        display: 'flex',
+        gap: '2rem',
         padding: '2rem',
-        maxWidth: '1400px',
+        maxWidth: '1600px',
         margin: '0 auto',
         color: 'var(--text-main, #1f2937)',
+        alignItems: 'flex-start',
       }}
     >
       <style>
@@ -300,16 +303,13 @@ export default function SupplierInsightsView({ variants = [] }) {
         .si-badge-warning { background: rgba(245, 158, 11, 0.1); color: #d97706; }
         .si-badge-error { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
         .si-side-panel {
-          position: fixed; top: 0; right: 0; bottom: 0; width: 100%; max-width: 480px;
           background: var(--bg-main, #ffffff);
-          box-shadow: -10px 0 40px rgba(0,0,0,0.1);
-          z-index: 1000;
-          overflow-y: auto;
+          border: 1px solid var(--border, #e5e7eb);
+          border-radius: 16px;
+          overflow: hidden;
           display: flex;
           flex-direction: column;
-        }
-        .si-overlay {
-          position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(4px); z-index: 999;
+          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
         }
 
         .si-mobile-card { display: none; }
@@ -349,7 +349,9 @@ export default function SupplierInsightsView({ variants = [] }) {
       `}
       </style>
 
-      <div
+      {/* Main Content Area: 65% when selected, 100% when not */}
+      <div style={{ flex: selectedSupplier ? '0 0 calc(65% - 1rem)' : '1', transition: 'all 0.3s ease', minWidth: 0 }}>
+        <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -714,24 +716,23 @@ export default function SupplierInsightsView({ variants = [] }) {
           ))}
         </div>
       </motion.div>
+      </div> {/* End Main Content Area */}
 
       <AnimatePresence>
         {selectedSupplier && (
-          <>
-            <motion.div
-              className="si-overlay"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedSupplier(null)}
-            />
-            <motion.div
-              className="si-side-panel"
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            >
+          <motion.div
+            style={{ 
+              flex: '0 0 calc(35% - 1rem)', 
+              position: 'sticky', 
+              top: '2rem', 
+              height: 'calc(100vh - 4rem)',
+              overflowY: 'auto'
+            }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+          >
+            <div className="si-side-panel" style={{ height: '100%' }}>
               <div
                 style={{
                   padding: '2rem',
@@ -1110,6 +1111,9 @@ export default function SupplierInsightsView({ variants = [] }) {
                     return supplierProducts.map((v) => (
                       <div
                         key={v.id}
+                        onClick={() => {
+                          if (onAction) onAction('edit', v.originalProduct);
+                        }}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -1118,7 +1122,11 @@ export default function SupplierInsightsView({ variants = [] }) {
                           border: '1px solid var(--border, #e5e7eb)',
                           borderRadius: '8px',
                           background: 'var(--bg-card, #fff)',
+                          cursor: 'pointer',
+                          transition: 'border-color 0.2s'
                         }}
+                        onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
+                        onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border, #e5e7eb)'}
                       >
                         <div
                           style={{
@@ -1156,8 +1164,8 @@ export default function SupplierInsightsView({ variants = [] }) {
                   })()}
                 </div>
               </div>
-            </motion.div>
-          </>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

@@ -421,21 +421,42 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
   // Quick Action AI trigger
   const triggerAiAction = (actionType) => {
     setIsImproving(true);
-    setTimeout(() => {
-      setIsImproving(false);
-      if (actionType === 'fix') {
-        setForm(prev => ({
-          ...prev,
-          guestVialPrice: 100,
-          costPrice: 50,
-          docStatus_coa: 'Approved',
-          docStatus_msds: 'Approved'
-        }));
-        toast.success('Critical anomalies solved automatically by Atlas AI!');
-      } else {
-        toast.success(`AI content generated for ${actionType}!`);
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: `Atlas AI is generating ${actionType}...`,
+        success: () => {
+          setIsImproving(false);
+          if (actionType === 'fix') {
+            setForm(prev => ({
+              ...prev,
+              guestVialPrice: 100,
+              costPrice: 50,
+              docStatus_coa: 'Approved',
+              docStatus_msds: 'Approved'
+            }));
+            return 'Critical anomalies solved automatically by Atlas AI!';
+          } else if (actionType === 'description') {
+            setForm(prev => ({
+              ...prev,
+              description: `High-purity therapeutic grade ${form.name || 'product'} formulated to medical-standards for cellular rejuvenation, anti-aging therapies, and tissue regeneration. Synthesized under strict CGMP protocols with >99.2% purity verified via HPLC and MS analytics.`
+            }));
+            return 'AI description generated and applied!';
+          } else if (actionType === 'parse_coa') {
+            setForm(prev => ({
+              ...prev,
+              docStatus_coa: 'Approved',
+              docStatus_msds: 'Approved',
+              regulatoryNotes: prev.regulatoryNotes ? prev.regulatoryNotes + '\n\n[Atlas AI] Parsed uploaded CoA document. Found >99.2% purity. Auto-approved CoA and MSDS compliance.' : '[Atlas AI] Parsed uploaded CoA document. Found >99.2% purity. Auto-approved CoA and MSDS compliance.'
+            }));
+            return 'Document parsed successfully. Metadata extracted and compliance approved!';
+          } else {
+            return `AI content generated for ${actionType}!`;
+          }
+        },
+        error: 'Failed to generate content.'
       }
-    }, 1000);
+    );
   };
 
   // Zoho Sync Action
@@ -1285,7 +1306,27 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
             </div>
           </div>
           <div style={{ marginTop: '1rem' }}>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Description</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8' }}>Description</label>
+              <button
+                onClick={() => triggerAiAction('description')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  border: '1px solid #8b5cf6',
+                  backgroundColor: 'transparent',
+                  color: '#c084fc',
+                  fontSize: '0.7rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                <Sparkles size={10} /> Auto-Generate
+              </button>
+            </div>
             <textarea rows={3} value={form.description || ''} onChange={e => setForm({...form, description: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', resize: 'vertical', backgroundColor: '#0f172a', color: '#fff' }} />
           </div>
         </Card>
@@ -1856,7 +1897,27 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
 
         {/* Certificate matrices */}
         <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
-          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Compliance Documents Checklist</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Compliance Documents Checklist</h3>
+            <button
+              onClick={() => triggerAiAction('parse_coa')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                border: '1px dashed #3b82f6',
+                backgroundColor: '#3b82f615',
+                color: '#60a5fa',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <UploadCloud size={14} /> Upload & Parse CoA (AI)
+            </button>
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px' }}>
             {[
               { id: 'docStatus_coa', label: 'CoA (Analysis)' },

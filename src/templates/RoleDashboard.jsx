@@ -44,7 +44,6 @@ import AdminCostsTab from '../components/admin/AdminCostsTab';
 import AdminRelationshipsTab from '../components/admin/AdminRelationshipsTab';
 import AdminSemanticTab from '../components/admin/AdminSemanticTab';
 import AdminPricesTab from '../components/admin/AdminPricesTab';
-import AdminVariantsTab from '../components/admin/AdminVariantsTab';
 import AdminProtocolsTab from '../components/admin/AdminProtocolsTab';
 import AdminBlueprintsTab from '../components/admin/AdminWorkflowsTab';
 
@@ -113,7 +112,6 @@ export default function RoleDashboard({ onBack }) {
     patients: { component: DoctorPatientsTab, label: 'Patients', icon: Activity },
     doctor_protocols: { component: DoctorProtocolsTab, label: 'My Protocols', icon: FlaskConical },
     blueprints: { component: AdminBlueprintsTab, label: 'Blueprints', icon: LayoutDashboard },
-    variants: { component: AdminVariantsTab, label: 'Variants', icon: Layers },
   };
 
   async function fetchViewConfig(currentRoleKey) {

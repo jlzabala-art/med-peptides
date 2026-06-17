@@ -3,26 +3,26 @@ import { Routes, Route, useNavigate, useOutletContext, Navigate } from 'react-ro
 
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import DoctorDashboard from '../templates/DoctorDashboard';
-import UserSettings from '../templates/UserSettings';
+const UserSettings = lazy(() => import('../templates/UserSettings'));
 
 // ── Eager imports (small, always used) ───────────────────────────────────────
-import DoctorOverviewTab from '../components/doctor/DoctorOverviewTab';
-import PhysicianPatientsTab from '../components/doctor/DoctorPatientsTab';
-import PhysicianRecommendationsTab from '../components/doctor/DoctorRecommendationsTab';
-import PhysicianOrdersTab from '../components/doctor/DoctorOrdersTab';
-import PhysicianProtocolsTab from '../components/doctor/DoctorProtocolsTab';
-import DoctorPrescriptionsTab from '../components/doctor/DoctorPrescriptionsTab';
-import PhysicianAssistantsTab from '../components/doctor/DoctorAssistantsTab';
-import DoctorMessagesTab from '../components/doctor/DoctorMessagesTab';
+const DoctorOverviewTab = lazy(() => import('../components/doctor/DoctorOverviewTab'));
+const PhysicianPatientsTab = lazy(() => import('../components/doctor/DoctorPatientsTab'));
+const PhysicianRecommendationsTab = lazy(() => import('../components/doctor/DoctorRecommendationsTab'));
+const PhysicianOrdersTab = lazy(() => import('../components/doctor/DoctorOrdersTab'));
+const PhysicianProtocolsTab = lazy(() => import('../components/doctor/DoctorProtocolsTab'));
+const DoctorPrescriptionsTab = lazy(() => import('../components/doctor/DoctorPrescriptionsTab'));
+const PhysicianAssistantsTab = lazy(() => import('../components/doctor/DoctorAssistantsTab'));
+const DoctorMessagesTab = lazy(() => import('../components/doctor/DoctorMessagesTab'));
 
 // ── Additional Templates ─────────────────────────────────────────────────────
-import DoctorAppointments from '../templates/DoctorAppointments';
-import DoctorLabResults from '../templates/DoctorLabResults';
-import DoctorResearch from '../templates/DoctorResearch';
+const DoctorAppointments = lazy(() => import('../templates/DoctorAppointments'));
+const DoctorLabResults = lazy(() => import('../templates/DoctorLabResults'));
+const DoctorResearch = lazy(() => import('../templates/DoctorResearch'));
 
 // ── Lazy ─────────────────────────────────────────────────────────────────────
 const CatalogCreatorFlow = lazy(() => import('../components/wholesaler/CatalogCreatorFlow'));
-import UserProfileTab from '../components/shared/UserProfileTab';
+const UserProfileTab = lazy(() => import('../components/shared/UserProfileTab'));
 
 const TabSkeleton = () => (
   <div style={{ padding: '2rem' }}>

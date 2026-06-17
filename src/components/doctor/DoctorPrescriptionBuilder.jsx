@@ -322,54 +322,56 @@ function PrescriptionItemRow({ item, index, onChange, onRemove, onAddTest, catal
   );
 }
 
+import { useUnifiedCatalogSearch } from '../../hooks/useUnifiedCatalogSearch';
+
 // ── Product search mini-dropdown ───────────────────────────────────────────────
 function ProductSearchBar({ onAdd, catalogProducts = [], catalogProtocols = [] }) {
   const [q, setQ]           = useState('');
   const [mode, setMode]     = useState('catalog'); // 'catalog' | 'apis'
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [localResults, setLocalResults] = useState([]);
+  const [localLoading, setLocalLoading] = useState(false);
   const debounce = useRef(null);
 
-  const search = useCallback((term, currentMode) => {
-    console.log('[ProductSearch] Starting local search for term:', term);
-    if (term.length < 2) { setResults([]); return; }
-    setLoading(true);
+  const { results: unifiedResults, loading: unifiedLoading, handleInput: handleUnifiedInput, clear: clearUnified } = useUnifiedCatalogSearch();
+
+  const results = mode === 'catalog' ? unifiedResults : localResults;
+  const loading = mode === 'catalog' ? unifiedLoading : localLoading;
+
+  const searchLocalApis = useCallback((term) => {
+    console.log('[ProductSearch] Starting local API search for term:', term);
+    if (term.length < 2) { setLocalResults([]); return; }
+    setLocalLoading(true);
     try {
-      if (currentMode === 'catalog') {
-        const filtered = catalogProducts.filter(p =>
-          (p.name || p.displayName || '').toLowerCase().includes(term.toLowerCase())
-        );
-        const protos = catalogProtocols.filter(p =>
-          (p.name || '').toLowerCase().includes(term.toLowerCase())
-        );
-        setResults([...filtered.slice(0, 6), ...protos.slice(0, 4)]);
-      } else {
-        const filteredApis = apiCatalog.filter(a => 
-          (a.name || '').toLowerCase().includes(term.toLowerCase())
-        );
-        setResults(filteredApis.slice(0, 10));
-      }
+      const filteredApis = apiCatalog.filter(a => 
+        (a.name || '').toLowerCase().includes(term.toLowerCase())
+      );
+      setLocalResults(filteredApis.slice(0, 10));
     } catch (err) {
-      console.error('[ProductSearch] Error in local search:', err);
+      console.error('[ProductSearch] Error in API search:', err);
     } finally {
-      setLoading(false);
+      setLocalLoading(false);
     }
-  }, [catalogProducts, catalogProtocols]);
+  }, []);
 
   const handleInput = (val) => {
     setQ(val);
-    clearTimeout(debounce.current);
-    debounce.current = setTimeout(() => search(val, mode), 150);
+    if (mode === 'catalog') {
+      handleUnifiedInput(val);
+    } else {
+      clearTimeout(debounce.current);
+      debounce.current = setTimeout(() => searchLocalApis(val), 150);
+    }
   };
 
   const handleModeChange = (newMode) => {
     setMode(newMode);
     setQ('');
-    setResults([]);
+    setLocalResults([]);
+    clearUnified();
   };
 
   const handleAdd = (item) => {
-    if (mode === 'apis') {
+    if (mode === 'apis' || item.type === 'api') {
       onAdd({
         type: 'supplement_compounding',
         id: `comp-${item.id}-${Date.now()}`,
@@ -388,12 +390,12 @@ function ProductSearchBar({ onAdd, catalogProducts = [], catalogProtocols = [] }
            id: item.id,
            name: item.name,
            dose: '',
-           unit: item.baseUnit,
+           unit: item.baseUnit || 'mg',
         }]
       });
     } else {
       onAdd({
-        type:      item.type,
+        type:      item.type || 'product',
         id:        item.id,
         name:      item.name || item.displayName || '',
         sku:       item.sku || item.variants?.[0]?.sku || '',
@@ -409,7 +411,8 @@ function ProductSearchBar({ onAdd, catalogProducts = [], catalogProtocols = [] }
       });
     }
     setQ('');
-    setResults([]);
+    setLocalResults([]);
+    clearUnified();
   };
 
   return (
@@ -418,7 +421,7 @@ function ProductSearchBar({ onAdd, catalogProducts = [], catalogProtocols = [] }
         <button 
           onClick={() => handleModeChange('catalog')}
           style={{ flex: 1, padding: '0.4rem', borderRadius: '8px', border: mode === 'catalog' ? '2px solid #003666' : '1px solid #cbd5e1', background: mode === 'catalog' ? '#f0f9ff' : 'var(--color-bg-surface)', fontWeight: mode === 'catalog' ? 800 : 600, color: mode === 'catalog' ? 'var(--color-primary)' : 'var(--color-text-secondary)', cursor: 'pointer', fontSize: '0.75rem' }}>
-          Catálogo Regular
+          Catálogo Regular (Algolia)
         </button>
         <button 
           onClick={() => handleModeChange('apis')}
@@ -457,7 +460,7 @@ function ProductSearchBar({ onAdd, catalogProducts = [], catalogProtocols = [] }
             onMouseEnter={e => e.currentTarget.style.background = 'var(--color-bg-app)'}
             onMouseLeave={e => e.currentTarget.style.background = 'none'}>
               <span style={{ fontSize: '0.9rem' }}>
-                {mode === 'apis' ? '🧪' : (r.type === 'protocol' ? '🧬' : (r.productType === 'testing' || r.type === 'testing' ? '🔬' : '💊'))}
+                {mode === 'apis' || r.type === 'api' ? '🧪' : (r.type === 'protocol' ? '🧬' : (r.productType === 'testing' || r.type === 'testing' ? '🔬' : '💊'))}
               </span>
               <div>
                 <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
@@ -467,7 +470,7 @@ function ProductSearchBar({ onAdd, catalogProducts = [], catalogProtocols = [] }
                   {mode === 'apis' ? `API Base: ${r.baseUnit}` : (r.type === 'protocol' ? 'Protocolo' : `SKU: ${r.sku || '—'}`)}
                 </div>
               </div>
-              <Plus size={13} color={mode === 'apis' ? "#0d9488" : "var(--color-primary)"} style={{ marginLeft: 'auto' }} />
+              <Plus size={13} color={(mode === 'apis' || r.type === 'api') ? "#0d9488" : "var(--color-primary)"} style={{ marginLeft: 'auto' }} />
             </button>
           ))}
         </div>

@@ -766,7 +766,7 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
 
       {/* ── Header ── */}
       <AdminPageHeader
-        title="B2C Orders"
+        title="Patient Orders"
         subtitle="Review, confirm, and manage your direct-to-consumer orders."
         icon={ShoppingCart}
       />

@@ -1,6 +1,5 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const { getFirestore } = require("firebase-admin/firestore");
-const structuredLogger = require("../lib/structuredLogger");
 
 /**
  * Endpoint para recibir Webhooks desde Zoho Books
@@ -16,7 +15,7 @@ exports.zohoWebhooks = onRequest({ cors: true, maxInstances: 10 }, async (req, r
     }
 
     const payload = req.body;
-    structuredLogger.info({ event: "zoho_webhook_received", payload });
+    console.info("zoho_webhook_received", payload);
 
     const db = getFirestore();
 
@@ -39,7 +38,7 @@ exports.zohoWebhooks = onRequest({ cors: true, maxInstances: 10 }, async (req, r
             paymentStatus: entity.status, // e.g., 'paid', 'partially_paid'
             updatedAt: new Date()
           });
-          structuredLogger.info({ event: "zoho_invoice_synced", id: docRef.id, status: entity.status });
+          console.info("zoho_invoice_synced", { id: docRef.id, status: entity.status });
         }
       } else if (payload.bill) {
         // Find internal Purchase Order by Zoho Bill ID
@@ -51,7 +50,7 @@ exports.zohoWebhooks = onRequest({ cors: true, maxInstances: 10 }, async (req, r
             paymentStatus: entity.status,
             updatedAt: new Date()
           });
-          structuredLogger.info({ event: "zoho_bill_synced", id: docRef.id, status: entity.status });
+          console.info("zoho_bill_synced", { id: docRef.id, status: entity.status });
         }
       }
     }
@@ -60,7 +59,7 @@ exports.zohoWebhooks = onRequest({ cors: true, maxInstances: 10 }, async (req, r
     res.status(200).send({ success: true, message: "Webhook processed successfully." });
 
   } catch (error) {
-    structuredLogger.error({ event: "zoho_webhook_error", error: error.message, stack: error.stack });
+    console.error("zoho_webhook_error", { error: error.message, stack: error.stack });
     // Still return 200 so Zoho doesn't retry infinitely on non-recoverable errors
     res.status(200).send({ success: false, message: error.message });
   }

@@ -10,6 +10,7 @@ import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 import Bot from "lucide-react/dist/esm/icons/bot";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo } from 'react';
+import { useFirestoreData } from '../hooks/useFirestoreData';
 
 
 
@@ -32,9 +33,8 @@ export default function CategoryDetailView({
   onBack, 
   onSelectProduct, 
   isProfessional,
-  products,
-  allFaqs
-}) {
+  products}) {
+  const { allFaqs } = useFirestoreData();
   const [activeFAQProduct, setActiveFAQProduct] = useState(null);
   const [faqItems, setFaqItems] = useState([]);
   const [activePubMedProduct, setActivePubMedProduct] = useState(null);
@@ -83,7 +83,7 @@ export default function CategoryDetailView({
 
     // getFAQForProduct now derives all slug variants from product.name internally,
     // so a single call is enough to match FAQs tagged with any variant of the name.
-    let faqs = getFAQForProduct(product.name, allFaqs || [], product.id, isProfessional, 8);
+    let faqs = getFAQForProduct(product.name|| [], product.id, isProfessional, 8);
 
     // Final fallback: full-text search by product name in FAQ question/answer/tags
     if (!faqs.length) {

@@ -29,6 +29,7 @@ export default function DataTable({
   isLoading = false,
   // Selection
   selectedIds = [],
+  indeterminateIds = [], // Array of IDs that should be shown as indeterminate
   onSelectionChange, // receives array of selected ids
   // Pagination
   currentPage = 1,
@@ -79,6 +80,9 @@ export default function DataTable({
   const [hoveredRowId, setHoveredRowId] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [showColMenu, setShowColMenu] = useState(false);
+  
+  // Long-press state
+  const [touchTimer, setTouchTimer] = useState(null);
 
   // Use visibleColumns prop if provided, otherwise assume all visible
   const activeColumns = useMemo(() => {
@@ -131,10 +135,25 @@ export default function DataTable({
     }
   };
 
+  const handleTouchStart = (id) => {
+    if (!onSelectionChange) return;
+    const timer = setTimeout(() => {
+      // Long press triggers selection
+      const isSelected = selectedIds.includes(id) || indeterminateIds.includes(id);
+      handleSelectRow(id, !isSelected);
+    }, 500); // 500ms long press
+    setTouchTimer(timer);
+  };
 
+  const handleTouchEnd = () => {
+    if (touchTimer) {
+      clearTimeout(touchTimer);
+      setTouchTimer(null);
+    }
+  };
 
   const allSelected = sortedData.length > 0 && selectedIds.length === sortedData.length;
-  const someSelected = selectedIds.length > 0 && selectedIds.length < sortedData.length;
+  const someSelected = (selectedIds.length > 0 && selectedIds.length < sortedData.length) || indeterminateIds.length > 0;
 
   return (
     <div style={{ 
@@ -432,13 +451,17 @@ export default function DataTable({
               const rowKey = (row && row[keyField] !== undefined && row[keyField] !== null) ? row[keyField] : `fallback-key-${rowIndex}`;
               const isExpanded = expandedId === rowKey;
               const isSelected = selectedIds.includes(rowKey);
+              const isIndeterminate = indeterminateIds.includes(rowKey);
+              const isActive = isSelected || isIndeterminate;
+
               return (
                 <React.Fragment key={rowKey}>
                   <tr 
                     style={{ 
                       borderBottom: '1px solid var(--color-border)', 
-                      backgroundColor: isSelected ? 'var(--color-bg-selected)' : (isExpanded ? 'var(--color-bg-hover)' : 'transparent'),
-                      transition: 'background-color 0.2s ease',
+                      borderLeft: isActive ? '4px solid #3b82f6' : '4px solid transparent',
+                      backgroundColor: isActive ? 'var(--color-bg-selected)' : (isExpanded ? 'var(--color-bg-hover)' : 'transparent'),
+                      transition: 'all 0.2s ease',
                       height: '64px',
                       cursor: (expandableRender || onRowClick) ? 'pointer' : 'default',
                       position: 'relative',
@@ -452,12 +475,15 @@ export default function DataTable({
                     }}
                     onMouseEnter={(e) => {
                       setHoveredRowId(rowKey);
-                      if (!isSelected && !isExpanded) e.currentTarget.style.backgroundColor = 'var(--color-bg-hover)';
+                      if (!isActive && !isExpanded) e.currentTarget.style.backgroundColor = 'var(--color-bg-hover)';
                     }}
                     onMouseLeave={(e) => {
                       setHoveredRowId(null);
-                      if (!isSelected && !isExpanded) e.currentTarget.style.backgroundColor = 'transparent';
+                      if (!isActive && !isExpanded) e.currentTarget.style.backgroundColor = 'transparent';
                     }}
+                    onTouchStart={() => handleTouchStart(rowKey)}
+                    onTouchEnd={handleTouchEnd}
+                    onTouchCancel={handleTouchEnd}
                   >
                     {onSelectionChange && (
                       <td style={{ 
@@ -466,7 +492,8 @@ export default function DataTable({
                       }}>
                         <input 
                           type="checkbox" 
-                          checked={isSelected}
+                          checked={isSelected || isIndeterminate}
+                          ref={input => { if (input) input.indeterminate = isIndeterminate; }}
                           onChange={(e) => handleSelectRow(rowKey, e.target.checked)}
                           onClick={(e) => e.stopPropagation()}
                           style={{ cursor: 'pointer' }}

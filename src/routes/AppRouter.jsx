@@ -100,16 +100,7 @@ export default function AppRouter(props) {
     pendingQuote,
   } = props;
 
-  const {
-    searchQuery,
-    setSearchQuery,
-    searchInitialTab,
-    setSearchInitialTab,
-    activeModal,
-    setActiveModal,
-    scrolled,
-    setManualRegionChange,
-  } = useUIStore();
+  const setActiveModal = useUIStore(state => state.setActiveModal);
   const { region, setRegion, settings, compareList, setCompareList } = useShop();
   const { cart, setCart, updateCart, cartCount } = useCart();
   const { activeRole, isProfessional, isAdmin, userProfile } = useAuth();

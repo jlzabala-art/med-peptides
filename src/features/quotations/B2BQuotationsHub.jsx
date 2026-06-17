@@ -35,6 +35,10 @@ export default function B2BQuotationsHub() {
         });
       }
       setLoading(false);
+    }, (error) => {
+      console.error('Error fetching quotations:', error);
+      setLoading(false);
+      setQuotes([]); // Optional: clear quotes or set an error state
     });
     return () => unsub();
   }, []);
@@ -49,45 +53,36 @@ export default function B2BQuotationsHub() {
   }
 
   return (
-    <>
-      <ERPTriPaneLayout
-        leftPaneWidth="430px"
-        leftPane={
-          <QuotationListPane 
-            quotes={quotes} 
-            selectedQuoteId={selectedQuote?.id} 
-            onSelect={setSelectedQuote} 
-            onCreateNew={() => {}}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
+      {/* FULL WIDTH LIST */}
+      <div style={{ flex: 1, overflow: 'hidden' }}>
+        <QuotationListPane 
+          quotes={quotes} 
+          selectedQuoteId={selectedQuote?.id} 
+          onSelect={setSelectedQuote} 
+          onCreateNew={() => {}}
+        />
+      </div>
+
+      {/* DRAWER FOR WORKSPACE */}
+      {selectedQuote && (
+        <>
+          <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 9998 }}
+            onClick={() => setSelectedQuote(null)}
           />
-        }
-        centerPane={
-          selectedQuote ? (
-            <QuotationWorkspace quote={selectedQuote} />
-          ) : (
-            <div style={{ margin: 'auto', marginTop: '5rem', color: '#94a3b8', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-              <div style={{ width: 64, height: 64, borderRadius: '50%', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-              </div>
-              Select a quotation to view workspace
+          <div 
+            style={{
+              position: 'fixed', top: 0, right: 0, bottom: 0, width: '1200px', maxWidth: '100vw',
+              backgroundColor: '#fff', zIndex: 9999, display: 'flex', flexDirection: 'column',
+              boxShadow: '-4px 0 15px rgba(0,0,0,0.1)', overflow: 'hidden'
+            }}
+          >
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              <QuotationWorkspace quote={selectedQuote} onClose={() => setSelectedQuote(null)} />
             </div>
-          )
-        }
-        rightPane={
-          selectedQuote && (
-            <QuotationIntelligencePane 
-              quote={selectedQuote} 
-              onConvert={() => setShowWizard(true)}
-            />
-          )
-        }
-        mobileView={
-          <QuotationMobileViews 
-            quotes={quotes} 
-            selectedQuote={selectedQuote} 
-            onSelect={setSelectedQuote} 
-          />
-        }
-      />
+          </div>
+        </>
+      )}
 
       {showWizard && selectedQuote && (
         <QuotationConvertWizard 
@@ -99,6 +94,6 @@ export default function B2BQuotationsHub() {
           }} 
         />
       )}
-    </>
+    </div>
   );
 }

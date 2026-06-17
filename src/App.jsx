@@ -104,7 +104,7 @@ const ProtocolFinderRedirect = () => {
   return null;
 };
 
-const ObjectiveDetailRouteWrapper = ({ isProfessional, visibleProducts, allFaqs, onSelectProduct }) => {
+const ObjectiveDetailRouteWrapper = ({ isProfessional, visibleProducts, onSelectProduct }) => {
   const { objectiveId } = useParams();
   const navigate = useNavigate();
   
@@ -125,7 +125,7 @@ const ObjectiveDetailRouteWrapper = ({ isProfessional, visibleProducts, allFaqs,
       onSelectProduct={onSelectProduct}
       isProfessional={isProfessional}
       products={visibleProducts}
-      allFaqs={allFaqs}
+      
     />
   );
 };
@@ -158,7 +158,6 @@ const ClinicalLoader = () => (
 import { getCatalog } from './repositories/productRepository';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useTenant } from './context/TenantContext';
-import { useFirestoreData } from './hooks/useFirestoreData';
 import { useCartOwnershipSync } from './hooks/useCartOwnershipSync';
 import { useGlobalSettings } from './hooks/useGlobalSettings';
 import { REGION_FLAGS } from './data/regions';
@@ -174,12 +173,15 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const { tenantSlug } = useTenant();
-  const { scrolled, setScrolled } = useUIStore();
+  const setScrolled = useUIStore(state => state.setScrolled);
   const { showCheckout, setShowCheckout } = useUIStore();
   const { manualRegionChange, setManualRegionChange } = useUIStore();
-  const { searchQuery, setSearchQuery } = useUIStore();
-  const { searchInitialTab, setSearchInitialTab } = useUIStore();
-  const { activeModal, setActiveModal } = useUIStore();
+  const setSearchQuery = useUIStore(state => state.setSearchQuery);
+  const searchQuery = useUIStore(state => state.searchQuery);
+  const searchInitialTab = useUIStore(state => state.searchInitialTab);
+  const setSearchInitialTab = useUIStore(state => state.setSearchInitialTab);
+  const activeModal = useUIStore(state => state.activeModal);
+  const setActiveModal = useUIStore(state => state.setActiveModal);
 
   const tenantNavigate = (path, options) => {
     if (typeof path === 'string' && tenantSlug && path.startsWith('/') && !path.startsWith('/admin') && !path.startsWith('/login') && !path.startsWith('/session-ended')) {
@@ -201,8 +203,6 @@ function App() {
   const { cart, setCart, cartMetadata, setCartMetadata, cartOwnership, setCartOwnership, updateCart, removeProtocolBundle, cartBreakdown, cartCount } = useCart();
   
   const { isProfessional, isAdmin, isPhysician, isPatient, user, userProfile, loading: authLoading, activeRole } = useAuth();
-  // allFaqs and protocolIndex: read-only, session-cached — no products fetch inside hook
-  const { allFaqs, protocolIndex, supplementCatalogue } = useFirestoreData();
   useGlobalSettings();
   useCartOwnershipSync();
   const [loadingTimeout, setLoadingTimeout] = useState(false);
@@ -459,7 +459,7 @@ function App() {
   const routerProps = {
     location, navigate, tenantNavigate,
     handleCategorySelect, handleProductSelect, visibleProducts,
-    setPendingQuote, allFaqs,
+    setPendingQuote,
     isHome, pendingQuote,
   };
 
@@ -608,12 +608,12 @@ function App() {
           onClose={() => { setActiveModal(null); setSearchQuery(''); setSearchInitialTab('peptides'); }} 
           onSelectProduct={handleProductSelect}
           products={visibleProducts}
-          allFaqs={allFaqs}
-          protocolIndex={protocolIndex}
-          initialQuery={searchQuery}
+          
+          
+          
           initialTab={searchInitialTab}
           isProfessional={isProfessional}
-          supplementCatalogue={supplementCatalogue}
+          
         />
       </Suspense>
 

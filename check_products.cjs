@@ -1,40 +1,33 @@
 const admin = require('firebase-admin');
 const fs = require('fs');
+const path = require('path');
 
-if (fs.existsSync('./firebase-adminsdk.json')) {
-  admin.initializeApp({
-    credential: admin.credential.cert(require('./firebase-adminsdk.json')),
-    projectId: "med-peptides-app"
-  });
-} else {
-  admin.initializeApp({
-    projectId: "med-peptides-app"
+const envPath = path.resolve(process.cwd(), '.env.local');
+if (fs.existsSync(envPath)) {
+  const envConfig = fs.readFileSync(envPath, 'utf8');
+  envConfig.split('\n').forEach(line => {
+    const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+    if (match) {
+      process.env[match[1]] = (match[2] || '').replace(/^['"]|['"]$/g, '');
+    }
   });
 }
 
-async function checkProducts() {
-  const db = admin.firestore();
-  const snapshot = await db.collection('products').get();
-  const products = [];
-  snapshot.forEach(doc => {
-    products.push({ id: doc.id, ...doc.data() });
-  });
+if (!admin.apps.length) admin.initializeApp();
+const db = admin.firestore();
 
-  console.log("Found", products.length, "products.");
-  let lotuslandCount = 0;
-  let nplabCount = 0;
-  
-  products.forEach(p => {
-    const supplier = p.supplier || p.manufacturer || '';
-    if (supplier.toLowerCase().includes('lotusland')) lotuslandCount++;
-    if (supplier.toLowerCase().includes('nplab')) nplabCount++;
-  });
-  
-  console.log("Products with Lotusland:", lotuslandCount);
-  console.log("Products with NPLAB:", nplabCount);
-  if (products.length > 0) {
-    console.log("Sample supplier fields:", products.slice(0,5).map(p => ({ id: p.id, name: p.name, supplier: p.supplier, manufacturer: p.manufacturer })));
+async function checkStructure() {
+  const snapshot = await db.collection('products').limit(20).get();
+  console.log(`Found ${snapshot.docs.length} products (sample).`);
+  for (const doc of snapshot.docs) {
+    const data = doc.data();
+    console.log(`Product: ${doc.id} | Name: ${data.name}`);
+    const vSnap = await db.collection('products').doc(doc.id).collection('variants').get();
+    console.log(`  -> Variants count: ${vSnap.docs.length}`);
+    vSnap.docs.forEach(v => {
+      console.log(`     Variant: ${v.id} | Name: ${v.data().name} | Size: ${v.data().size}`);
+    });
   }
 }
 
-checkProducts().catch(console.error);
+checkStructure().then(() => process.exit(0)).catch(console.error);

@@ -254,11 +254,48 @@ function PrescriptionCard({ rx, onPay }) {
           </div>
 
           {isOrdered && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center',
-              padding: '0.75rem', borderRadius: '10px',
-              background: 'rgba(16,185,129,0.06)', color: 'var(--color-success)',
-              fontSize: '0.82rem', fontWeight: 700 }}>
-              <CheckCircle2 size={15} /> Order placed · Your doctor has been notified
+            <div style={{ marginTop: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center',
+                padding: '0.75rem', borderRadius: '10px',
+                background: 'rgba(16,185,129,0.06)', color: 'var(--color-success)',
+                fontSize: '0.82rem', fontWeight: 700 }}>
+                <CheckCircle2 size={15} /> Order placed · Your doctor has been notified
+              </div>
+              <button
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  // Notify doctor by adding a timeline event and updating a refill flag
+                  try {
+                    await updateDoc(doc(db, 'prescriptions', rx.id), {
+                      refillRequested: true,
+                      updatedAt: serverTimestamp(),
+                      timeline:  [...(rx.timeline || []), {
+                        event: 'refill_requested',
+                        actorId: rx.patient?.uid || 'patient',
+                        actorRole: 'patient',
+                        note: 'Patient requested a refill for this prescription',
+                        timestamp: new Date().toISOString(),
+                      }],
+                    });
+                    alert('Refill request sent to your doctor.');
+                  } catch (err) {
+                    console.error('Error requesting refill:', err);
+                  }
+                }}
+                disabled={rx.refillRequested}
+                style={{
+                  width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                  padding: '0.75rem', borderRadius: '10px',
+                  background: rx.refillRequested ? '#f1f5f9' : 'rgba(0,54,102,0.06)',
+                  color: rx.refillRequested ? 'var(--color-text-tertiary)' : 'var(--color-primary)',
+                  fontWeight: 700, fontSize: '0.85rem',
+                  border: rx.refillRequested ? '1px solid #e2e8f0' : '1px solid rgba(0,54,102,0.1)',
+                  cursor: rx.refillRequested ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {rx.refillRequested ? 'Refill Requested' : 'Request Refill'}
+              </button>
             </div>
           )}
         </div>

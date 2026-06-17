@@ -9,6 +9,7 @@ import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
 import Check from "lucide-react/dist/esm/icons/check";
 import Bot from "lucide-react/dist/esm/icons/bot";
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useFirestoreData } from '../hooks/useFirestoreData';
 
 
 
@@ -63,7 +64,6 @@ const MobileProductCard = React.memo(function MobileProductCard({
   onSelectProduct,
   isProfessional,
   products,
-  allFaqs,
   cart,
   onAddToCart,
 }) {
@@ -130,10 +130,10 @@ const MobileProductCard = React.memo(function MobileProductCard({
 
   const handleOpenFAQ = useCallback(async (p) => {
     setActiveFAQProduct(p);
-    const faqs = getFAQForProduct(p.name, allFaqs || [], p.id, isProfessional);
+    const faqs = getFAQForProduct(p.name|| [], p.id, isProfessional);
     setFaqItems(faqs);
     setShowFAQModal(true);
-  }, [allFaqs, isProfessional]);
+  }, [ isProfessional]);
 
   const handleOpenPubMed = useCallback((p) => {
     setActivePubMedProduct(p);

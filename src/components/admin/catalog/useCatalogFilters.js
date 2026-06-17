@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useDeferredValue, useEffect } from 'react';
+import Fuse from 'fuse.js';
 import { useAuth } from '../../../context/AuthContext';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../../firebase';
@@ -127,21 +128,19 @@ export function useCatalogFilters(items = []) {
   };
 
   // Filtering Logic
-  const deferredSearchQuery = React.useDeferredValue(searchQuery);
+  const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const filteredData = useMemo(() => {
     let result = [...items];
 
     // Search
     if (deferredSearchQuery) {
-      const lowerQ = deferredSearchQuery.toLowerCase();
-      result = result.filter(
-        (item) =>
-          (item.name || '').toLowerCase().includes(lowerQ) ||
-          (item.sku || '').toLowerCase().includes(lowerQ) ||
-          (item.supplier || '').toLowerCase().includes(lowerQ) ||
-          (item.category || '').toLowerCase().includes(lowerQ)
-      );
+      const fuse = new Fuse(result, {
+        keys: ['name', 'displayName', 'sku', 'supplier', 'category', 'format'],
+        threshold: 0.3,
+        ignoreLocation: true,
+      });
+      result = fuse.search(deferredSearchQuery).map(res => res.item);
     }
 
     // Advanced Filters

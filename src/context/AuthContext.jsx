@@ -101,6 +101,7 @@ export function AuthProvider({ children }) {
 
   // Sync role permissions in real-time from Firestore /settings/permissions
   useEffect(() => {
+    if (!auth.currentUser) return;
     const docRef = doc(db, 'settings', 'permissions');
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {

@@ -10,7 +10,7 @@ import WholesalerHome, {
   PlaceholderTab
 } from '../templates/WholesalerHome';
 import DashboardEngine from '../engine/DashboardEngine';
-import UserSettings from '../templates/UserSettings';
+const UserSettings = lazy(() => import('../templates/UserSettings'));
 
 // ── Premium loading skeleton ──────────────────────────────────────────────────
 const TabSkeleton = () => (
@@ -22,15 +22,15 @@ const TabSkeleton = () => (
 );
 
 import AdminMetricsDashboard from '../components/admin/AdminMetricsDashboard';
-import MessagingWidget from '../components/messaging/MessagingWidget';
-import ClinicalAIWidget from '../components/admin/ClinicalAIWidget';
-import GeographyAreasTab from '../components/wholesaler/GeographyAreasTab';
-import BrandingTab from '../components/wholesaler/BrandingTab';
-import DomainsTab from '../components/wholesaler/DomainsTab';
-import ClientsTab from '../components/wholesaler/ClientsTab';
-import CatalogList from '../components/wholesaler/CatalogList';
-import CatalogCreatorFlow from '../components/wholesaler/CatalogCreatorFlow';
-import EmailCampaignBuilder from '../components/wholesaler/EmailCampaignBuilder';
+const MessagingWidget = lazy(() => import('../components/messaging/MessagingWidget'));
+const ClinicalAIWidget = lazy(() => import('../components/admin/ClinicalAIWidget'));
+const GeographyAreasTab = lazy(() => import('../components/wholesaler/GeographyAreasTab'));
+const BrandingTab = lazy(() => import('../components/wholesaler/BrandingTab'));
+const DomainsTab = lazy(() => import('../components/wholesaler/DomainsTab'));
+const ClientsTab = lazy(() => import('../components/wholesaler/ClientsTab'));
+const CatalogList = lazy(() => import('../components/wholesaler/CatalogList'));
+const CatalogCreatorFlow = lazy(() => import('../components/wholesaler/CatalogCreatorFlow'));
+const EmailCampaignBuilder = lazy(() => import('../components/wholesaler/EmailCampaignBuilder'));
 
 export default function WholesalerRoutes() {
   const { user } = useAuth();

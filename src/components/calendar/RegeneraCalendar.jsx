@@ -13,6 +13,7 @@ import { functions } from '../../firebase';
 import ProtocolDayBadge from './ProtocolDayBadge';
 import { useAuth } from '../../context/AuthContext';
 import CalendarContextDrawer from './CalendarContextDrawer';
+import ProductAutocomplete from '../shared/ProductAutocomplete';
 
 // Detect mobile viewport
 const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 768;
@@ -58,7 +59,7 @@ const generateICal = (events) => {
   return lines.join('\n');
 };
 
-export default function RegeneraCalendar() {
+export default function RegeneraCalendar({ viewMode = 'all' }) {
   const { events, loading, createEvent, updateEvent, deleteEvent } = useCalendarEvents();
   const { userProfile } = useAuth();
   const isPatient = userProfile?.role === 'patient';
@@ -87,7 +88,7 @@ export default function RegeneraCalendar() {
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [mobile, loading, activeFilter]);
+  }, [mobile, loading, activeFilter, viewMode]);
 
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -108,6 +109,7 @@ export default function RegeneraCalendar() {
     patientId: '',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     description: '',
+    medicationCompound: '',
     dosage: '',
     injectionSite: '',
     prn: false,
@@ -126,8 +128,16 @@ export default function RegeneraCalendar() {
   // Apply filters
   const filteredEvents = events
     .filter((e) => {
-      if (activeFilter === 'all') return true;
-      return e.extendedProps?.type === activeFilter;
+      const type = e.extendedProps?.type || 'default';
+      
+      // View mode filter
+      if (viewMode === 'clinical' && !['prescription', 'protocol', 'test', 'followup', 'consultation'].includes(type)) return false;
+      if (viewMode === 'logistics' && !['order', 'shipping'].includes(type)) return false;
+      
+      // Active filter
+      if (activeFilter !== 'all' && type !== activeFilter) return false;
+      
+      return true;
     })
     .map((e) => ({
       ...e,
@@ -241,6 +251,7 @@ export default function RegeneraCalendar() {
       type: eventForm.type,
       timezone: eventForm.timezone,
       description: eventForm.description,
+      medicationCompound: eventForm.medicationCompound,
       dosage: eventForm.dosage,
       injectionSite: eventForm.injectionSite,
       prn: eventForm.prn,
@@ -794,12 +805,19 @@ export default function RegeneraCalendar() {
 
                     {eventForm.type === 'prescription' && (
                       <>
-                        <TextField
-                          label="Medication / Compound"
-                          placeholder="e.g., BPC-157"
-                          id="medicationCompound"
-                          disabled={isPatient}
-                        />
+                        <div style={{ marginBottom: '1rem' }}>
+                          <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--cal-color-text-secondary)', marginBottom: '0.4rem' }}>Medication / Compound</label>
+                          <ProductAutocomplete
+                            value={eventForm.medicationCompound}
+                            onChange={(val) => setEventForm({ ...eventForm, medicationCompound: val })}
+                            placeholder="e.g., BPC-157"
+                            onSelect={(prod) => {
+                              if (prod && prod.dosage) {
+                                setEventForm(prev => ({ ...prev, dosage: prod.dosage }));
+                              }
+                            }}
+                          />
+                        </div>
                         <div style={{ display: 'flex', gap: '1rem' }}>
                           <div style={{ flex: 1 }}>
                             <TextField

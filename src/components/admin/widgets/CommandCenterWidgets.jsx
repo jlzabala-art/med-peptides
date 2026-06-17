@@ -10,6 +10,7 @@ import Send from 'lucide-react/dist/esm/icons/send';
 import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
 import MoreHorizontal from 'lucide-react/dist/esm/icons/more-horizontal';
 import React, { useState } from 'react';
+import OperationalKPICard from '../../shared/widgets/OperationalKPICard';
 
 import {
   AreaChart,
@@ -236,55 +237,20 @@ export function ExecutiveSummaryStrip({ metrics = {}, visibleKPIs = [], onCardCl
       {kpis
         .filter((k) => visibleKPIs.length === 0 || visibleKPIs.includes(k.id))
         .map((k) => (
-          <div
+          <OperationalKPICard
             key={k.id}
-            className="cc-widget-card cc-kpi-card"
-            style={{ borderLeftColor: k.alert ? '#ef4444' : '#0284c7' }}
+            title={k.label}
+            value={k.value}
+            severity={k.alert ? 'critical' : 'neutral'}
+            trend={k.trend}
+            actionLabel="View Details"
             onClick={() => onCardClick && onCardClick(k.id)}
           >
-            <span
-              style={{
-                fontSize: '0.65rem',
-                fontWeight: 700,
-                color: '#64748b',
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em',
-              }}
-            >
-              {k.label}
-            </span>
-            <span
-              style={{
-                fontSize: '1.4rem',
-                fontWeight: 800,
-                color: k.alert ? '#ef4444' : '#0f172a',
-                letterSpacing: '-0.02em',
-                marginTop: '0.2rem',
-              }}
-            >
-              {k.value}
-            </span>
-
             <MiniSparkline
               data={k.spark}
               color={k.trendUp ? '#10b981' : k.trendUp === false ? '#ef4444' : '#64748b'}
             />
-
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-                fontSize: '0.75rem',
-                color: k.trendUp ? '#10b981' : k.trendUp === false ? '#ef4444' : '#64748b',
-                fontWeight: 600,
-                marginTop: 'auto',
-              }}
-            >
-              {k.trendUp && <TrendingUp size={12} />}
-              {k.trend}
-            </div>
-          </div>
+          </OperationalKPICard>
         ))}
     </div>
   );

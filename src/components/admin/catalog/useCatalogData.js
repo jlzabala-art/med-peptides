@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { searchClient } from '../../../algolia';
 import {
   collection,
   query,
@@ -10,93 +11,335 @@ import {
   deleteDoc,
   addDoc,
   collectionGroup,
+  limit,
+  startAfter,
+  where,
+  getCountFromServer,
+  setDoc,
 } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { useToast } from '../../../hooks/useToast';
 
-export function useCatalogData() {
+export function useCatalogData(options = {}) {
+  const {
+    pageSize = 20,
+    searchQuery = '',
+    categoryFilter = null,
+    activeWorkspace = 'products',
+  } = options;
+
   const [products, setProducts] = useState([]);
+  const [variants, setVariants] = useState([]);
+  const [metrics, setMetrics] = useState({
+    totalProducts: 0,
+    totalVariants: 0,
+    lowStock: 0,
+    outOfStock: 0,
+    missingCOA: 0,
+    missingGMP: 0,
+    missingSupplier: 0,
+    missingPricing: 0,
+  });
+  
   const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
+  const [lastVisible, setLastVisible] = useState(null);
+  const [pageHistory, setPageHistory] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (direction = 'next', reset = false) => {
     try {
       setLoading(true);
 
-      const [productsSnap, variantsSnap] = await Promise.all([
-        getDocs(query(collection(db, 'products'), orderBy('name'))),
-        getDocs(collectionGroup(db, 'variants')),
-      ]);
+      if (searchQuery && searchClient) {
+        // --- ALGOLIA SEARCH PATH ---
+        try {
+          const { results } = await searchClient.search({
+            requests: [
+              {
+                indexName: 'products',
+                query: searchQuery,
+                hitsPerPage: pageSize,
+                page: currentPage - 1,
+              },
+            ],
+          });
+          const searchRes = results[0];
+
+          if (searchRes.hits.length === 0) {
+            console.warn("Algolia returned 0 hits. Falling back to Firestore in case index is empty...");
+            // Do not return early, let it fall through to Firestore below
+          } else {
+            setHasMore(searchRes.page < searchRes.nbPages - 1);
+
+            // Fetch the actual documents from Firestore based on Algolia's objectID
+            const promises = searchRes.hits.map((hit) => getDoc(doc(db, 'products', hit.objectID)));
+            const docsSnap = await Promise.all(promises);
+            
+            // Filter out missing docs and construct the snapshot-like array
+            const validDocs = docsSnap.filter(d => d.exists());
+            const rawProducts = validDocs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+
+            // Now fetch variants for these products using individual subcollection queries
+            // This avoids the need for a global collectionGroup index
+            const variantPromises = validDocs.map(d => getDocs(collection(db, 'products', d.id, 'variants')));
+            const variantSnaps = await Promise.all(variantPromises);
+            
+            let allVariants = [];
+            variantSnaps.forEach(snap => {
+              allVariants = allVariants.concat(snap.docs.map(vDoc => ({ id: vDoc.id, ...vDoc.data() })));
+            });
+
+            const variantsByProduct = {};
+            allVariants.forEach((v) => {
+              if (!variantsByProduct[v.productId]) variantsByProduct[v.productId] = [];
+              variantsByProduct[v.productId].push(v);
+            });
+
+            const finalProducts = rawProducts.map((p) => {
+              p.variants = variantsByProduct[p.id] || [];
+              return p;
+            });
+
+            setProducts(finalProducts);
+            setVariants(allVariants);
+            setLoading(false);
+            return;
+          }
+
+          setHasMore(searchRes.page < searchRes.nbPages - 1);
+
+          // Fetch the actual documents from Firestore based on Algolia's objectID
+          const promises = searchRes.hits.map((hit) => getDoc(doc(db, 'products', hit.objectID)));
+          const docsSnap = await Promise.all(promises);
+          
+          // Filter out missing docs and construct the snapshot-like array
+          const validDocs = docsSnap.filter(d => d.exists());
+          const rawProducts = validDocs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+
+          // Now fetch variants for these products
+          const idChunks = [];
+          for (let i = 0; i < validDocs.length; i += 10) {
+            idChunks.push(validDocs.map(d => d.id).slice(i, i + 10));
+          }
+
+          let allVariants = [];
+          for (const chunk of idChunks) {
+            const vQ = query(collectionGroup(db, 'variants'), where('productId', 'in', chunk));
+            const vSnap = await getDocs(vQ);
+            allVariants = allVariants.concat(vSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
+          }
+
+          const variantsByProduct = {};
+          allVariants.forEach((v) => {
+            if (!variantsByProduct[v.productId]) variantsByProduct[v.productId] = [];
+            variantsByProduct[v.productId].push(v);
+          });
+
+          const finalProducts = rawProducts.map((p) => {
+            p.variants = variantsByProduct[p.id] || [];
+            return p;
+          });
+
+          setProducts(finalProducts);
+          setVariants(allVariants);
+          setLoading(false);
+          return;
+
+        } catch (error) {
+          console.error("Algolia search failed, falling back to Firestore:", error);
+          // Fall through to Firestore query if Algolia fails
+        }
+      }
+
+      // --- FIRESTORE FALLBACK / DEFAULT PATH ---
+      let q = query(collection(db, 'products'), orderBy('name', 'asc'));
+
+      if (searchQuery) {
+        // Prefix search trick for Firestore
+        q = query(
+          collection(db, 'products'),
+          where('name', '>=', searchQuery),
+          where('name', '<=', searchQuery + '\uf8ff'),
+          orderBy('name', 'asc')
+        );
+      } else if (categoryFilter && categoryFilter !== 'All Categories') {
+        q = query(
+          collection(db, 'products'),
+          where('category', '==', categoryFilter),
+          orderBy('name', 'asc')
+        );
+      }
+
+      q = query(q, limit(pageSize));
+
+      if (!reset) {
+        if (direction === 'next' && lastVisible) {
+          q = query(q, startAfter(lastVisible));
+        } else if (direction === 'prev' && pageHistory.length > 1) {
+          const history = [...pageHistory];
+          history.pop(); // pop current
+          const prevCursor = history.pop(); // pop previous to use as startAfter
+          setPageHistory(history);
+          if (prevCursor) {
+            q = query(q, startAfter(prevCursor));
+          }
+        }
+      } else {
+        setPageHistory([]);
+        setCurrentPage(1);
+      }
+
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) {
+        setHasMore(false);
+        if (reset || pageHistory.length === 0) {
+          setProducts([]);
+          setVariants([]);
+        }
+        setLoading(false);
+        return;
+      }
+
+      setHasMore(snapshot.docs.length === pageSize);
+      const newLastVisible = snapshot.docs[snapshot.docs.length - 1];
+      setLastVisible(newLastVisible);
+
+      if (direction === 'next' || reset) {
+        if (!reset && newLastVisible) {
+          setPageHistory((prev) => [...prev, newLastVisible]);
+          setCurrentPage((c) => c + 1);
+        } else if (reset) {
+          setPageHistory([]);
+          setCurrentPage(1);
+        }
+      } else if (direction === 'prev') {
+        setCurrentPage((c) => Math.max(1, c - 1));
+      }
+
+      // Fetch variants for the current page of products
+      const productIds = snapshot.docs.map((d) => d.id);
+      
+      const chunkArray = (arr, size) =>
+        Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
+          arr.slice(i * size, i * size + size)
+        );
+      const idChunks = chunkArray(productIds, 10);
+
+      let allVariants = [];
+      // Attempt to query via collectionGroup if productId is indexed
+      try {
+        for (const chunk of idChunks) {
+          const vQ = query(collectionGroup(db, 'variants'), where('productId', 'in', chunk));
+          const vSnap = await getDocs(vQ);
+          allVariants = allVariants.concat(vSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
+        }
+      } catch (err) {
+        // Fallback: manually fetch subcollections if index is missing or productId not populated
+        const promises = snapshot.docs.map((p) =>
+          getDocs(collection(db, 'products', p.id, 'variants'))
+        );
+        const vSnaps = await Promise.all(promises);
+        vSnaps.forEach((vSnap, idx) => {
+          const parentId = snapshot.docs[idx].id;
+          vSnap.docs.forEach((d) => {
+            allVariants.push({ id: d.id, productId: parentId, ...d.data() });
+          });
+        });
+      }
 
       const variantsByProduct = {};
-      variantsSnap.docs.forEach((vSnap) => {
-        const productId = vSnap.ref.parent.parent?.id;
-        if (productId) {
-          if (!variantsByProduct[productId]) {
-            variantsByProduct[productId] = [];
-          }
-          variantsByProduct[productId].push({ id: vSnap.id, ...vSnap.data() });
+      allVariants.forEach((v) => {
+        const pid = v.productId;
+        if (pid) {
+          if (!variantsByProduct[pid]) variantsByProduct[pid] = [];
+          variantsByProduct[pid].push(v);
         }
       });
 
-      const rawProducts = productsSnap.docs.map((docSnap) => {
+      const rawProducts = snapshot.docs.map((docSnap) => {
         const productData = { id: docSnap.id, ...docSnap.data() };
         productData.variants = variantsByProduct[docSnap.id] || [];
         return productData;
       });
 
-      // Group products by case-insensitive name to merge duplicates
-      const groupedMap = new Map();
-      rawProducts.forEach((p) => {
-        const name = (p.name || p.displayName || 'Unknown').trim().toUpperCase();
+      setProducts(rawProducts);
 
-        if (!groupedMap.has(name)) {
-          groupedMap.set(name, {
-            ...p,
-            name: p.name || p.displayName,
-            variants: p.variants && p.variants.length > 0 ? [...p.variants] : [],
+      const flatVars = [];
+      rawProducts.forEach((p) => {
+        if (p.variants && p.variants.length > 0) {
+          p.variants.forEach((v, idx) => {
+            const details = [
+              v.format || p.format || '',
+              v.dosage || p.dosage || '',
+              v.size || p.size || '',
+            ].filter(Boolean).join(' ');
+            const computedPrice = Number(v.pricing?.retail?.perUnit || v.price) || 0;
+            const computedCost = Number(v.cost_per_gram || v.pricing?.master?.perUnit || v.cost) || 0;
+
+            flatVars.push({
+              ...v,
+              id: v.id || `${p.id}-var-${idx}`,
+              productId: p.id,
+              productName: p.name || 'Unknown Product',
+              name: `${p.name || ''}${details ? ` - ${details}` : ''}`.trim(),
+              supplier: v.supplier || p.supplier || 'Unassigned',
+              stock: Number(v.stock?.available || v.stock) || 0,
+              reorderPoint: Number(v.reorderPoint) || 20,
+              price: computedPrice,
+              cost: computedCost,
+              coa: v.hasCoa ? 'Valid' : 'Missing',
+              gmp: v.hasGmp ? 'Valid' : 'Missing',
+              registration: 'Active',
+              isMissingSupplier: !(v.supplier || p.supplier),
+              isMissingPricing: !(computedPrice || computedCost),
+              rawVariant: v,
+              rawProduct: p,
+            });
           });
         } else {
-          const existing = groupedMap.get(name);
-          // If existing had no variants, convert its root to a variant before merging
-          if (existing.variants.length === 0) {
-            existing.variants.push({
-              id: `${existing.id}-root`,
-              format: existing.format || '',
-              size: existing.size || '',
-              dosage: existing.dosage || '',
-              supplier: existing.supplier || existing.vendor || 'Unassigned',
-              stock: existing.stock || existing.inventoryLevel || 0,
-              price: existing.price || existing.msrp || 0,
-              cost: existing.cost || existing.unitCost || 0,
-              sku: existing.sku || '',
-              hasCoa: existing.hasCoa,
-              hasGmp: existing.hasGmp,
-            });
-          }
+          const computedPrice = Number(p.pricing?.retail?.perUnit || p.price) || 0;
+          const computedCost = Number(p.cost_per_gram || p.pricing?.master?.perUnit || p.cost) || 0;
 
-          if (p.variants && p.variants.length > 0) {
-            existing.variants.push(...p.variants);
-          } else {
-            // add duplicate's root as variant
-            existing.variants.push({
-              id: p.id,
-              format: p.format || '',
-              size: p.size || '',
-              dosage: p.dosage || '',
-              supplier: p.supplier || p.vendor || 'Unassigned',
-              stock: p.stock || p.inventoryLevel || 0,
-              price: p.price || p.msrp || 0,
-              cost: p.cost || p.unitCost || 0,
-              sku: p.sku || '',
-              hasCoa: p.hasCoa,
-              hasGmp: p.hasGmp,
-            });
-          }
+          flatVars.push({
+            ...p,
+            id: p.id,
+            productId: p.id,
+            productName: p.name || 'Unknown Product',
+            name: p.name || 'Unknown Product',
+            supplier: p.supplier || 'Unassigned',
+            stock: Number(p.stock?.available || p.stock) || 0,
+            reorderPoint: Number(p.reorderPoint) || 20,
+            price: computedPrice,
+            cost: computedCost,
+            coa: p.hasCoa ? 'Valid' : 'Missing',
+            gmp: p.hasGmp ? 'Valid' : 'Missing',
+            registration: 'Active',
+            isMissingSupplier: !p.supplier,
+            isMissingPricing: !(computedPrice || computedCost),
+            rawVariant: null,
+            rawProduct: p,
+          });
         }
       });
+      setVariants(flatVars);
 
-      setProducts(Array.from(groupedMap.values()));
+      // Fetch real global metrics from the Cloud Function updated document
+      getDoc(doc(db, 'catalog_metadata', 'stats')).then((snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          setMetrics((m) => ({ 
+            ...m, 
+            totalProducts: data.totalProducts || 0,
+            globalKpis: data.globalKpis || {}
+          }));
+        }
+      }).catch((e) => {
+         console.warn("Failed to load catalog_metadata/stats", e);
+      });
+
     } catch (err) {
       console.error('Error fetching catalog:', err);
       toast.error('Failed to load catalog data.');
@@ -106,9 +349,9 @@ export function useCatalogData() {
   };
 
   useEffect(() => {
-    Promise.resolve().then(() => fetchProducts());
+    fetchProducts('next', true); // passing true overrides query and starts from page 1
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [searchQuery, categoryFilter, activeWorkspace]);
 
   const updateProduct = async (id, updates) => {
     try {
@@ -127,41 +370,53 @@ export function useCatalogData() {
   const addProduct = async (productData) => {
     try {
       const { _mode, parentProductId, ...data } = productData;
-
       if (_mode === 'variant') {
         const parentRef = doc(db, 'products', parentProductId);
         const parentDoc = await getDoc(parentRef);
         if (!parentDoc.exists()) throw new Error('Parent product not found');
 
-        const parentData = parentDoc.data();
-        const existingVariants = parentData.variants || [];
-
-        const newVariant = {
-          id: `var_${Date.now()}`,
+        const newVariantId = `var_${Date.now()}`;
+        const newVariantRef = doc(db, 'products', parentProductId, 'variants', newVariantId);
+        
+        await setDoc(newVariantRef, {
           ...data,
+          productId: parentProductId,
+          isVariant: true,
           createdAt: new Date().toISOString(),
-        };
-
-        await updateDoc(parentRef, {
-          variants: [...existingVariants, newVariant],
           updatedAt: new Date().toISOString(),
         });
-
-        setProducts((prev) =>
-          prev.map((p) =>
-            p.id === parentProductId ? { ...p, variants: [...(p.variants || []), newVariant] } : p
-          )
-        );
+        
         toast.success('Variant created successfully');
+        fetchProducts('next', true); // Refresh to show new variant
         return true;
       } else {
-        const docRef = await addDoc(collection(db, 'products'), {
+        // Create Product
+        const newProductRef = await addDoc(collection(db, 'products'), {
           ...data,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
-        setProducts((prev) => [...prev, { id: docRef.id, ...data }]);
+        
+        // Ensure a default variant is initialized
+        const defaultVariantId = `var_${Date.now()}`;
+        const defaultVariantRef = doc(db, 'products', newProductRef.id, 'variants', defaultVariantId);
+        await setDoc(defaultVariantRef, {
+          sku: data.sku ? `${data.sku}-DEFAULT` : 'DEFAULT',
+          format: 'Standard',
+          size: 'Standard',
+          supplier: data.supplier || 'Unassigned',
+          costPerGram: data.costPerGram || 0,
+          pricePerGram: data.pricePerGram || 0,
+          stock: data.stock || 0,
+          reorderPoint: data.reorderPoint || 20,
+          productId: newProductRef.id,
+          isVariant: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+
         toast.success('Product created successfully');
+        fetchProducts('next', true); // Refresh
         return true;
       }
     } catch (err) {
@@ -184,165 +439,19 @@ export function useCatalogData() {
     }
   };
 
-  const variants = useMemo(() => {
-    const flatVars = [];
-    products.forEach((p) => {
-      if (p.variants && p.variants.length > 0) {
-        p.variants.forEach((v, idx) => {
-          const details = [
-            v.format || p.format || '',
-            v.dosage || p.dosage || '',
-            v.size || p.size || '',
-          ]
-            .filter(Boolean)
-            .join(' ');
-          flatVars.push({
-            id: v.id || `${p.id}-var-${idx}`,
-            productId: p.id,
-            productName: p.name || p.displayName || 'Unknown Product',
-            name: `${p.name || p.displayName}${details ? ` - ${details}` : ''}`.trim(),
-            supplier: v.supplier || v.vendor || p.supplier || p.vendor || 'Unassigned',
-            stock: Number(v.inventoryLevel) || Number(v.stock) || 0,
-            reorderPoint: Number(v.reorderPoint) || 20,
-            moq: Number(v.moq) || 50,
-            leadTime: v.leadTime || p.leadTime || '14 days',
-            price: Number(v.price) || Number(v.msrp) || 0,
-            cost: Number(v.cost) || Number(v.unitCost) || 0,
-            clinicPrice: Number(v.clinicPrice) || 0,
-            wholesalePrice: Number(v.wholesalePrice) || 0,
-            format: v.format || '',
-            size: v.size || '',
-            sku: v.sku || p.sku || '',
-            // Compliance & Quality (Fake data fallback if missing)
-            coa: v.hasCoa || (p.id ? p.id.charCodeAt(0) : 0) % 2 === 0 ? 'Valid' : 'Missing',
-            gmp:
-              v.hasGmp || (p.id ? p.id.charCodeAt(p.id.length - 1) : 0) % 2 === 0
-                ? 'Valid'
-                : 'Missing',
-            registration: 'Active',
-            stability: 'Valid',
-            permit: 'Active',
-            // Missing data checks
-            isMissingSupplier: !(v.supplier || v.vendor || p.supplier || p.vendor),
-            isMissingPricing: !(v.price || v.msrp || v.cost || v.unitCost),
-            isMissingImages: !v.images || v.images.length === 0,
-            // Import Tracking
-            createdAt:
-              p.createdAt ||
-              new Date(
-                new Date('2026-06-14').getTime() - ((p.id ? p.id.charCodeAt(0) : 0) % 45) * 86400000
-              ).toISOString(),
-            importDate:
-              v.importDate ||
-              new Date(
-                new Date('2026-06-14').getTime() -
-                  (((p.id ? p.id.charCodeAt(0) : 0) + (v.id ? v.id.charCodeAt(0) : 0)) % 45) *
-                    86400000
-              ).toISOString(),
-            updatedAt:
-              v.updatedAt ||
-              new Date(
-                new Date('2026-06-14').getTime() - ((v.id ? v.id.charCodeAt(0) : 0) % 5) * 86400000
-              ).toISOString(),
-            importedBy:
-              v.importedBy ||
-              ['Jose Zabala', 'Admin Team', 'System Auto', 'Supplier Sync'][
-                ((v.id ? v.id.charCodeAt(0) : 0) + idx) % 4
-              ],
-            source:
-              v.source ||
-              ['CSV Import', 'Manual Entry', 'API Integration'][
-                (p.id ? p.id.charCodeAt(p.id.length - 1) : 0) % 3
-              ],
-            // Original data reference
-            rawVariant: v,
-            rawProduct: p,
-          });
-        });
-      } else {
-        flatVars.push({
-          id: p.id,
-          productId: p.id,
-          productName: p.name || p.displayName || 'Unknown Product',
-          name: p.name || p.displayName || 'Unknown Product',
-          supplier: p.supplier || p.vendor || 'Unassigned',
-          stock: Number(p.inventoryLevel) || Number(p.stock) || 0,
-          reorderPoint: Number(p.reorderPoint) || 20,
-          moq: Number(p.moq) || 50,
-          leadTime: p.leadTime || '14 days',
-          price: Number(p.price) || Number(p.msrp) || 0,
-          cost: Number(p.cost) || Number(p.unitCost) || 0,
-          clinicPrice: Number(p.clinicPrice) || 0,
-          wholesalePrice: Number(p.wholesalePrice) || 0,
-          format: p.format || '',
-          size: p.size || '',
-          sku: p.sku || '',
-          coa: p.hasCoa || (p.id ? p.id.charCodeAt(0) : 0) % 2 === 0 ? 'Valid' : 'Missing',
-          gmp:
-            p.hasGmp || (p.id ? p.id.charCodeAt(p.id.length - 1) : 0) % 2 === 0
-              ? 'Valid'
-              : 'Missing',
-          registration: 'Active',
-          stability: 'Valid',
-          permit: 'Active',
-          isMissingSupplier: !(p.supplier || p.vendor),
-          isMissingPricing: !(p.price || p.msrp || p.cost || p.unitCost),
-          isMissingImages: !p.images || p.images.length === 0,
-          // Import Tracking
-          createdAt:
-            p.createdAt ||
-            new Date(
-              new Date('2026-06-14').getTime() - ((p.id ? p.id.charCodeAt(0) : 0) % 45) * 86400000
-            ).toISOString(),
-          importDate:
-            p.importDate ||
-            new Date(
-              new Date('2026-06-14').getTime() - ((p.id ? p.id.charCodeAt(0) : 0) % 45) * 86400000
-            ).toISOString(),
-          updatedAt:
-            p.updatedAt ||
-            new Date(
-              new Date('2026-06-14').getTime() - ((p.id ? p.id.charCodeAt(0) : 0) % 5) * 86400000
-            ).toISOString(),
-          importedBy:
-            p.importedBy ||
-            ['Jose Zabala', 'Admin Team', 'System Auto', 'Supplier Sync'][
-              (p.id ? p.id.charCodeAt(0) : 0) % 4
-            ],
-          source:
-            p.source ||
-            ['CSV Import', 'Manual Entry', 'API Integration'][
-              (p.id ? p.id.charCodeAt(p.id.length - 1) : 0) % 3
-            ],
-          rawVariant: null,
-          rawProduct: p,
-        });
-      }
-    });
-    return flatVars;
-  }, [products]);
-
-  const metrics = useMemo(() => {
-    return {
-      totalProducts: products.length,
-      totalVariants: variants.length,
-      lowStock: variants.filter((v) => v.stock > 0 && v.stock <= v.reorderPoint).length,
-      outOfStock: variants.filter((v) => v.stock === 0).length,
-      missingCOA: variants.filter((v) => v.coa === 'Missing').length,
-      missingGMP: variants.filter((v) => v.gmp === 'Missing').length,
-      missingSupplier: variants.filter((v) => v.isMissingSupplier).length,
-      missingPricing: variants.filter((v) => v.isMissingPricing).length,
-    };
-  }, [products, variants]);
-
   return {
     products,
     variants,
     metrics,
     loading,
-    refresh: fetchProducts,
+    refresh: () => fetchProducts('next', true),
     updateProduct,
     deleteProduct,
     addProduct,
+    // Pagination helpers
+    hasMore,
+    currentPage,
+    nextPage: () => fetchProducts('next'),
+    prevPage: () => fetchProducts('prev'),
   };
 }

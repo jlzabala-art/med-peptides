@@ -94,8 +94,8 @@ export default function ProductDetail({
   onSelectCategory,
   onSelectProduct,
   products,
-  allFaqs,
 }) {
+  const { allFaqs } = useFirestoreData();
   const { tier, isLoading: tierLoading } = usePricingTier();
 
 
@@ -254,8 +254,8 @@ export default function ProductDetail({
   // Memoized FAQs from Engine
   const productDiscoveryFaqs = useMemo(() => {
     if (!activeProduct?.name || !allFaqs) return [];
-    return getFAQForProduct(activeProduct.name, allFaqs, activeProduct.id || null, isProfessional, 3);
-  }, [activeProduct, allFaqs, isProfessional]);
+    return getFAQForProduct(activeProduct.name, activeProduct.id || null, isProfessional, 3);
+  }, [activeProduct, isProfessional]);
 
   // Memoized Related Peptides
   const discoveryRelated = useMemo(

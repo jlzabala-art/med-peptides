@@ -5,14 +5,14 @@ import DashboardEngine from '../engine/DashboardEngine';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 
 import PatientHome from '../templates/PatientHome';
-import PatientAppointments from '../templates/PatientAppointments';
-import UserSettings from '../templates/UserSettings';
+const PatientAppointments = lazy(() => import('../templates/PatientAppointments'));
+const UserSettings = lazy(() => import('../templates/UserSettings'));
 
-import MessagingWidget from '../components/messaging/MessagingWidget';
-import ClinicalAIWidget from '../components/admin/ClinicalAIWidget';
-import PatientPrescriptionPanel from '../components/patient/PatientPrescriptionPanel';
-import OrdersTab from '../components/admin/OrdersTab';
-import UserProfileTab from '../components/shared/UserProfileTab';
+const MessagingWidget = lazy(() => import('../components/messaging/MessagingWidget'));
+const ClinicalAIWidget = lazy(() => import('../components/admin/ClinicalAIWidget'));
+const PatientPrescriptionPanel = lazy(() => import('../components/patient/PatientPrescriptionPanel'));
+const OrdersTab = lazy(() => import('../components/admin/OrdersTab'));
+const UserProfileTab = lazy(() => import('../components/shared/UserProfileTab'));
 
 const TabSkeleton = () => (
   <div style={{ padding: '2rem' }}>

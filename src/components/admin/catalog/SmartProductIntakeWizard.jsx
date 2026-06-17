@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, UploadCloud, ChevronRight, ChevronLeft, Save, Bot, CheckCircle } from 'lucide-react';
+import { X, UploadCloud, ChevronRight, ChevronLeft, Save, Bot, CheckCircle, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { extractApiPeptidesFromImage } from '../../../services/atlasAiService';
 
@@ -126,16 +126,20 @@ export default function SmartProductIntakeWizard({
           boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
         }}
       >
-        {/* Header */}
+        {/* Premium AI Header */}
         <div
           style={{
             padding: '1.5rem',
+            background: 'linear-gradient(to right, #ffffff, #f3e8ff)',
             borderBottom: '1px solid #e5e7eb',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            position: 'relative'
           }}
         >
+          {/* Subtle top border gradient */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(to right, #8b5cf6, #d946ef)' }} />
           <h2
             style={{
               margin: 0,
@@ -146,9 +150,9 @@ export default function SmartProductIntakeWizard({
               gap: '0.5rem',
             }}
           >
-            {step === 1 && <Bot size={20} color="#8b5cf6" />}
+            {step === 1 && <Sparkles size={22} color="#8b5cf6" style={{ filter: 'drop-shadow(0 2px 4px rgba(139, 92, 246, 0.3))' }} />}
             {step === 1
-              ? 'Atlas AI Auto-Fill'
+              ? 'Atlas AI Document Scanner'
               : step === 2
                 ? 'Basic Details'
                 : 'Regulatory & Inventory'}
@@ -196,26 +200,28 @@ export default function SmartProductIntakeWizard({
                 textAlign: 'center',
               }}
             >
-              <p style={{ color: '#4b5563', margin: 0 }}>
-                Upload a COA, Supplier Invoice, or Label. Atlas AI will extract the{' '}
-                {mode === 'variant' ? 'variant specs' : 'peptide name'}, purity, and pricing for
-                you.
+              <p style={{ color: '#4b5563', margin: 0, fontSize: '0.95rem', lineHeight: '1.5' }}>
+                Drop a COA, Supplier Invoice, or Product Label here.<br/> 
+                <span style={{ fontWeight: 600, color: '#8b5cf6' }}>Atlas AI</span> will magically extract the {mode === 'variant' ? 'variant specs' : 'peptide name'}, purity, and pricing.
               </p>
 
               <label
                 style={{
-                  border: '2px dashed #d1d5db',
-                  borderRadius: '8px',
-                  padding: '3rem 2rem',
+                  border: '2px dashed #a78bfa',
+                  borderRadius: '12px',
+                  padding: '4rem 2rem',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   gap: '1rem',
                   cursor: 'pointer',
                   width: '100%',
-                  background: '#f9fafb',
+                  background: 'linear-gradient(to bottom, #ffffff, #f5f3ff)',
+                  boxShadow: 'inset 0 2px 10px rgba(139, 92, 246, 0.05)',
                   transition: 'all 0.2s',
                 }}
+                onMouseOver={(e) => { e.currentTarget.style.borderColor = '#8b5cf6'; e.currentTarget.style.background = '#f5f3ff'; }}
+                onMouseOut={(e) => { e.currentTarget.style.borderColor = '#a78bfa'; e.currentTarget.style.background = 'linear-gradient(to bottom, #ffffff, #f5f3ff)'; }}
               >
                 {isProcessingAI ? (
                   <div
@@ -257,8 +263,19 @@ export default function SmartProductIntakeWizard({
 
               <button
                 onClick={handleNext}
-                className="btn btn-outline"
-                style={{ width: '100%', padding: '0.75rem' }}
+                style={{ 
+                  width: '100%', 
+                  padding: '0.75rem', 
+                  background: 'transparent',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  color: '#475569',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
                 Skip Auto-Fill (Manual Entry)
               </button>
@@ -398,9 +415,10 @@ export default function SmartProductIntakeWizard({
                     type="number"
                     className="input"
                     value={formData.costPerGram}
-                    onChange={(e) =>
-                      setFormData({ ...formData, costPerGram: parseFloat(e.target.value) })
-                    }
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      setFormData({ ...formData, costPerGram: isNaN(val) ? 0 : val });
+                    }}
                     style={{ padding: '0.6rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
                   />
                 </div>
@@ -412,9 +430,10 @@ export default function SmartProductIntakeWizard({
                     type="number"
                     className="input"
                     value={formData.pricePerGram}
-                    onChange={(e) =>
-                      setFormData({ ...formData, pricePerGram: parseFloat(e.target.value) })
-                    }
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      setFormData({ ...formData, pricePerGram: isNaN(val) ? 0 : val });
+                    }}
                     style={{ padding: '0.6rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
                   />
                 </div>
@@ -449,7 +468,10 @@ export default function SmartProductIntakeWizard({
                     type="number"
                     className="input"
                     value={formData.stock}
-                    onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) })}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      setFormData({ ...formData, stock: isNaN(val) ? 0 : val });
+                    }}
                     style={{ padding: '0.6rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
                   />
                 </div>
@@ -461,9 +483,10 @@ export default function SmartProductIntakeWizard({
                     type="number"
                     className="input"
                     value={formData.reorderPoint}
-                    onChange={(e) =>
-                      setFormData({ ...formData, reorderPoint: parseInt(e.target.value) })
-                    }
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      setFormData({ ...formData, reorderPoint: isNaN(val) ? 0 : val });
+                    }}
                     style={{ padding: '0.6rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
                   />
                 </div>

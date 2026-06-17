@@ -87,7 +87,7 @@ if (typeof window !== 'undefined') {
 }
 
 export const storage = getStorage(app);
-export const functions = getFunctions(app, "europe-west1");
+export const functions = getFunctions(app, "us-central1");
 export { ref, uploadBytes, getDownloadURL };
 
 export default app;

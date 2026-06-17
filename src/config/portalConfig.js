@@ -10,6 +10,10 @@ import {
  */
 export const PORTAL_CONFIG = {
   admin: [
+    { id: 'operations-inbox', label: 'Operations Inbox', icon: FiMessageSquare, path: '/admin/operations-inbox' },
+    { id: 'messages', label: 'Messages', icon: FiMessageSquare, path: '/admin/messages' },
+    { id: 'calendar', label: 'Calendar', icon: FiCalendar, path: '/admin/calendar' },
+    
     // Dashboard & Insights
     { id: 'overview', label: 'Overview', icon: FiHome, path: '/admin', category: 'Dashboard & Analytics' },
     { id: 'analytics', label: 'Platform Analytics', icon: FiActivity, path: '/admin/analytics', category: 'Dashboard & Analytics' },
@@ -26,7 +30,7 @@ export const PORTAL_CONFIG = {
     
     // Inventory & Sales
     { id: 'products', label: 'Products Catalog', icon: FiBox, path: '/admin/products', category: 'Inventory & Sales' },
-    { id: 'orders', label: 'B2C Orders', icon: FiBox, path: '/admin/orders', category: 'Inventory & Sales' },
+    { id: 'orders', label: 'Patient Orders', icon: FiBox, path: '/admin/orders', category: 'Inventory & Sales' },
     { id: 'quotations', label: 'Quotations', icon: FiFileText, path: '/admin/quotations', category: 'Inventory & Sales' },
     
     // Operations Setup

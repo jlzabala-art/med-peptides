@@ -30,7 +30,33 @@ class AIImporterElement extends HTMLElement {
   }
 }
 
-// Define the custom element if it hasn't been defined yet
+// Define the AI Importer custom element
 if (!customElements.get('ai-importer')) {
   customElements.define('ai-importer', AIImporterElement);
+}
+
+import CatalogIntelligenceHub from '../components/admin/catalog/CatalogIntelligenceHub';
+
+class CatalogHubElement extends HTMLElement {
+  connectedCallback() {
+    const readOnly = this.getAttribute('readonly') === 'true';
+    const ownerId = this.getAttribute('owner-id') || null;
+    const ownerType = this.getAttribute('owner-type') || 'admin';
+    const hideCosts = this.getAttribute('hide-costs') === 'true';
+    
+    const root = ReactDOM.createRoot(this);
+    root.render(
+      <CatalogIntelligenceHub 
+        readOnly={readOnly}
+        ownerId={ownerId}
+        ownerType={ownerType}
+        hideCosts={hideCosts}
+      />
+    );
+  }
+}
+
+// Define the Catalog Hub custom element
+if (!customElements.get('catalog-hub-gadget')) {
+  customElements.define('catalog-hub-gadget', CatalogHubElement);
 }

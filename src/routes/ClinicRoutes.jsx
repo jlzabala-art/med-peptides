@@ -4,11 +4,11 @@ import { useAuth } from '../context/AuthContext';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 
 import ClinicHome, { ClinicDashboardTab, PlaceholderTab } from '../templates/ClinicHome';
-import UserSettings from '../templates/UserSettings';
+const UserSettings = lazy(() => import('../templates/UserSettings'));
 
-import MessagingWidget from '../components/messaging/MessagingWidget';
-import ClinicalAIWidget from '../components/admin/ClinicalAIWidget';
-import OrdersTab from '../components/admin/OrdersTab';
+const MessagingWidget = lazy(() => import('../components/messaging/MessagingWidget'));
+const ClinicalAIWidget = lazy(() => import('../components/admin/ClinicalAIWidget'));
+const OrdersTab = lazy(() => import('../components/admin/OrdersTab'));
 
 const TabSkeleton = () => (
   <div style={{ padding: '2rem' }}>

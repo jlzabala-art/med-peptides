@@ -55,6 +55,7 @@ exports.weeklyCompetitorDigest = weeklyCompetitorDigest.weeklyCompetitorDigest;
 // TRIGGERS
 exports.scoreNewLead = require('./src/triggers/on_lead_created').scoreNewLead;
 exports.onProductCreated = require('./src/triggers/products').onProductCreated;
+exports.updateCatalogStats = require('./src/triggers/catalogStats').updateCatalogStats;
 exports.protocolCompute = require('./src/triggers/protocolCompute').protocolCompute;
 exports.publicProtocols = require('./src/http/api_protocols').publicProtocols;
 exports.syncProductToAlgolia = require('./src/triggers/algoliaSync').syncProductToAlgolia;
@@ -152,6 +153,8 @@ exports.syncSupplierBillToZoho = functions.https.onCall(async (data, context) =>
   return { success: true, message: "Placeholder only" };
 });
 
+exports.createZohoEstimate = require("./src/http/createZohoEstimate").createZohoEstimate;
+
 // ── AI Operations ───────────────────────────────────────────────────────────
 const aiOperations = require("./src/http/aiOperations");
 exports.threeWayMatching = aiOperations.threeWayMatching;
@@ -160,6 +163,10 @@ exports.analyzeRFQEndpoint = aiOperations.analyzeRFQEndpoint;
 // ── Webhooks ────────────────────────────────────────────────────────────────
 const zohoWebhooks = require("./src/http/zohoWebhooks");
 exports.zohoWebhooks = zohoWebhooks.zohoWebhooks;
+exports.processInboundEmail = require('./src/webhooks/inboundEmail').processInboundEmail;
+exports.triggerAiOnEmailWorker = require('./src/webhooks/inboundEmail').triggerAiOnEmailWorker;
+exports.reprocessEmail = require('./src/http/reprocessEmail').reprocessEmail;
+exports.acceptPrescription = require('./src/http/acceptPrescription').acceptPrescription;
 
 // ── Strategic Upgrade (Phase 2) ─────────────────────────────────────────────
 exports.calculateRevenueAttribution = require("./src/http/calculateRevenueAttribution").calculateRevenueAttribution;

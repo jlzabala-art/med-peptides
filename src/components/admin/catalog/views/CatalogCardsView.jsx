@@ -10,8 +10,41 @@ import { calculateProductHealthScore } from '../useProductHealthScore';
 export default function CatalogCardsView({ items, loading, onRowClick, onAction, filterState }) {
   if (loading) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-        Loading catalog...
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gap: '1rem',
+        }}
+      >
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div
+            key={i}
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              border: '1px solid var(--border)',
+              padding: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
+              height: '160px',
+            }}
+          >
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '8px', backgroundColor: '#e2e8f0', animation: 'pulse 1.5s infinite' }}></div>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ height: '16px', backgroundColor: '#e2e8f0', borderRadius: '4px', width: '80%', animation: 'pulse 1.5s infinite' }}></div>
+                <div style={{ height: '12px', backgroundColor: '#e2e8f0', borderRadius: '4px', width: '50%', animation: 'pulse 1.5s infinite' }}></div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto' }}>
+              <div style={{ height: '24px', backgroundColor: '#e2e8f0', borderRadius: '4px', width: '30%', animation: 'pulse 1.5s infinite' }}></div>
+              <div style={{ height: '24px', backgroundColor: '#e2e8f0', borderRadius: '4px', width: '20%', animation: 'pulse 1.5s infinite' }}></div>
+            </div>
+            <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }`}</style>
+          </div>
+        ))}
       </div>
     );
   }

@@ -18,21 +18,30 @@ import CatalogTableView from './CatalogTableView';
 import CatalogCardsView from './CatalogCardsView';
 import CatalogOverviewDashboard from './CatalogOverviewDashboard';
 import CatalogCommandBar from './CatalogCommandBar';
+import CatalogBulkActionsBar from './CatalogBulkActionsBar';
 import { useCatalogFilters } from '../useCatalogFilters';
 
 const CatalogProductsWorkspace = ({
   products = [],
   variants = [],
   loading = false,
+  searchQuery = '',
+  setSearchQuery,
   activeDisplayMode = 'table',
   onDisplayModeChange,
+  isMobile,
+  hasMore,
+  currentPage,
+  nextPage,
+  prevPage,
   onAction,
 }) => {
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [matrixViewType, setMatrixViewType] = useState('grouped'); // 'grouped' | 'flat'
+  const [selectedIds, setSelectedIds] = useState([]);
 
-  const itemsToFilter = matrixViewType === 'flat' ? variants : products;
-  const filterState = useCatalogFilters(itemsToFilter);
+  // Filter states (quick filters from CatalogCommandBar)
+  const [quickFilters, setQuickFilters] = useState([]);
 
   const handleBulkAction = (action) => {
     setShowBulkActions(false);
@@ -178,100 +187,22 @@ const CatalogProductsWorkspace = ({
               <LayoutGrid size={18} />
             </button>
           </div>
-
-          {/* Bulk Actions Dropdown */}
-          <div className="bulk-actions-dropdown" style={{ position: 'relative' }}>
-            <button
-              onClick={() => setShowBulkActions(!showBulkActions)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 16px',
-                borderRadius: '6px',
-                border: '1px solid #e2e8f0',
-                backgroundColor: '#ffffff',
-                color: '#334155',
-                fontWeight: '500',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
-            >
-              Bulk Actions <ChevronDown size={16} />
-            </button>
-            {showBulkActions && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '100%',
-                  right: 0,
-                  marginTop: '8px',
-                  backgroundColor: '#ffffff',
-                  borderRadius: '8px',
-                  boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)',
-                  border: '1px solid #e2e8f0',
-                  minWidth: '180px',
-                  zIndex: 9999,
-                }}
-              >
-                <button
-                  onClick={() => handleBulkAction('import')}
-                  style={dropdownItemStyle}
-                  onMouseEnter={handleHover}
-                  onMouseLeave={handleLeave}
-                >
-                  <Upload size={16} color="#64748b" /> Import Products
-                </button>
-                <button
-                  onClick={() => handleBulkAction('export')}
-                  style={dropdownItemStyle}
-                  onMouseEnter={handleHover}
-                  onMouseLeave={handleLeave}
-                >
-                  <Download size={16} color="#64748b" /> Export Catalog
-                </button>
-                <div style={{ height: '1px', backgroundColor: '#e2e8f0', margin: '4px 0' }}></div>
-                <button
-                  onClick={() => handleBulkAction('bulk_update')}
-                  style={dropdownItemStyle}
-                  onMouseEnter={handleHover}
-                  onMouseLeave={handleLeave}
-                >
-                  <Edit size={16} color="#64748b" /> Mass Update
-                </button>
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
+      {/* Bulk Actions Bar (Sticky above the grid) */}
+      <CatalogBulkActionsBar
+        selectedIds={selectedIds}
+        variants={variants}
+        onClearSelection={() => setSelectedIds([])}
+        onAction={(action) => {
+          if (onAction) onAction(action, selectedIds);
+        }}
+      />
+
       {/* Main Content Area */}
       <div className="workspace-content" style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
-        {loading ? (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '100%',
-            }}
-          >
-            <div
-              style={{
-                border: '3px solid #f3f3f3',
-                borderTop: '3px solid #3b82f6',
-                borderRadius: '50%',
-                width: '32px',
-                height: '32px',
-                animation: 'spin 1s linear infinite',
-              }}
-            ></div>
-            <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-          </div>
-        ) : products.length === 0 ? (
+        {(!loading && products.length === 0) ? (
           <div
             className="empty-state"
             style={{
@@ -342,22 +273,29 @@ const CatalogProductsWorkspace = ({
             className="products-view"
             style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
           >
-            <CatalogCommandBar filterState={filterState} />
             <div style={{ flex: 1, overflowY: 'auto' }}>
               {activeDisplayMode === 'table' ? (
                 <CatalogTableView
-                  products={matrixViewType === 'grouped' ? filterState.paginatedData : []}
-                  variants={matrixViewType === 'flat' ? filterState.paginatedData : variants}
+                  products={matrixViewType === 'grouped' ? products : []}
+                  variants={matrixViewType === 'flat' ? variants : variants}
+                  loading={loading}
+                  currentPage={currentPage}
+                  rowsPerPage={20}
+                  onPageChange={() => {}}
+                  onRowsPerPageChange={() => {}}
+                  onRowClick={(item) => onAction && onAction('edit', item)}
                   onAction={onAction}
                   matrixViewType={matrixViewType}
-                  filterState={filterState}
+                  selectedIds={selectedIds}
+                  onSelectionChange={setSelectedIds}
                 />
               ) : (
                 <CatalogCardsView
-                  items={filterState.loadedData}
+                  items={products}
+                  loading={loading}
                   onAction={onAction}
-                  matrixViewType={matrixViewType}
-                  filterState={filterState}
+                  selectedIds={selectedIds}
+                  onSelectionChange={setSelectedIds}
                 />
               )}
             </div>
@@ -375,75 +313,33 @@ const CatalogProductsWorkspace = ({
                 }}
               >
                 <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                  Showing{' '}
-                  {Math.min(
-                    (filterState.currentPage - 1) * filterState.rowsPerPage + 1,
-                    filterState.totalItems
-                  )}{' '}
-                  to{' '}
-                  {Math.min(
-                    filterState.currentPage * filterState.rowsPerPage,
-                    filterState.totalItems
-                  )}{' '}
-                  of {filterState.totalItems} entries
+                  Page {currentPage}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <select
-                    value={filterState.rowsPerPage}
-                    onChange={(e) => filterState.setRowsPerPage(Number(e.target.value))}
-                    style={{
-                      padding: '6px 10px',
-                      borderRadius: '4px',
-                      border: '1px solid #e2e8f0',
-                      color: '#475569',
-                      fontSize: '0.85rem',
-                      outline: 'none',
-                    }}
-                  >
-                    <option value={10}>10 rows</option>
-                    <option value={20}>20 rows</option>
-                    <option value={50}>50 rows</option>
-                    <option value={100}>100 rows</option>
-                  </select>
                   <button
-                    disabled={filterState.currentPage === 1}
-                    onClick={() => filterState.setCurrentPage((p) => p - 1)}
+                    disabled={currentPage === 1}
+                    onClick={prevPage}
                     style={{
                       padding: '6px 12px',
                       borderRadius: '4px',
                       border: '1px solid #e2e8f0',
-                      backgroundColor: filterState.currentPage === 1 ? '#f8fafc' : '#fff',
-                      color: filterState.currentPage === 1 ? '#94a3b8' : '#475569',
-                      cursor: filterState.currentPage === 1 ? 'not-allowed' : 'pointer',
+                      backgroundColor: currentPage === 1 ? '#f8fafc' : '#fff',
+                      color: currentPage === 1 ? '#94a3b8' : '#475569',
+                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
                     }}
                   >
                     Previous
                   </button>
                   <button
-                    disabled={
-                      filterState.currentPage === filterState.totalPages ||
-                      filterState.totalPages === 0
-                    }
-                    onClick={() => filterState.setCurrentPage((p) => p + 1)}
+                    disabled={!hasMore}
+                    onClick={nextPage}
                     style={{
                       padding: '6px 12px',
                       borderRadius: '4px',
                       border: '1px solid #e2e8f0',
-                      backgroundColor:
-                        filterState.currentPage === filterState.totalPages ||
-                        filterState.totalPages === 0
-                          ? '#f8fafc'
-                          : '#fff',
-                      color:
-                        filterState.currentPage === filterState.totalPages ||
-                        filterState.totalPages === 0
-                          ? '#94a3b8'
-                          : '#475569',
-                      cursor:
-                        filterState.currentPage === filterState.totalPages ||
-                        filterState.totalPages === 0
-                          ? 'not-allowed'
-                          : 'pointer',
+                      backgroundColor: !hasMore ? '#f8fafc' : '#fff',
+                      color: !hasMore ? '#94a3b8' : '#475569',
+                      cursor: !hasMore ? 'not-allowed' : 'pointer',
                     }}
                   >
                     Next

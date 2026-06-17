@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import AppActionGroup from '../../../../ui/AppActionGroup';
 
 const thStyle = {
@@ -8,6 +8,8 @@ const thStyle = {
   borderBottom: '1px solid var(--color-border)',
   textAlign: 'left',
   backgroundColor: '#f1f5f9',
+  cursor: 'pointer',
+  userSelect: 'none'
 };
 const tdStyleMain = {
   padding: '12px',
@@ -33,7 +35,82 @@ const badgeStyle = (isValid) => ({
   color: isValid === true || isValid === 'Valid' || isValid === 'Active' ? '#10b981' : '#64748b',
 });
 
-export default function VariantRegulatoryTable({ variants, parentProduct, onAction }) {
+export default function VariantRegulatoryTable({ variants, parentProduct, onAction, selectedIds = [], onSelectionChange }) {
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return ' ↕';
+    return sortConfig.direction === 'asc' ? ' ↑' : ' ↓';
+  };
+
+  const processedVariants = useMemo(() => {
+    return variants.map(v => {
+      const generateFallbackSku = () => {
+        const prodName = parentProduct?.name || parentProduct?.displayName || 'UNK';
+        const safeName = prodName.replace(/[^a-zA-Z0-9]/g, '').substring(0, 5).toUpperCase();
+        const format = (v.format || '').substring(0, 3).toUpperCase();
+        const size = (v.size || v.dosage || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        return ['SKU', safeName, format, size].filter(Boolean).join('-');
+      };
+
+      const regStatus = v.registrationStatus || v.registration || 'Unregistered';
+
+      return {
+        ...v,
+        displaySku: v.sku || generateFallbackSku(),
+        supplierName: v.supplier || parentProduct?.supplier || 'Unassigned',
+        regStatus,
+        coa: v.coa === 'Valid' ? 'Valid' : 'Missing',
+        gmp: v.gmp === 'Valid' ? 'Valid' : 'Missing',
+        stability: v.stability === 'Valid' ? 'Valid' : 'Missing',
+        permit: v.permit === 'Active' ? 'Active' : 'Missing',
+      };
+    });
+  }, [variants, parentProduct]);
+
+  const sortedVariants = useMemo(() => {
+    let sortableItems = [...processedVariants];
+    if (sortConfig.key !== null) {
+      sortableItems.sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [processedVariants, sortConfig]);
+
+  const allSelected = variants.length > 0 && variants.every(v => selectedIds.includes(v.id));
+  const someSelected = variants.some(v => selectedIds.includes(v.id)) && !allSelected;
+
+  const handleSelectAll = (e) => {
+    if (!onSelectionChange) return;
+    if (e.target.checked) {
+      const newIds = new Set([...selectedIds, ...variants.map(v => v.id)]);
+      onSelectionChange(Array.from(newIds));
+    } else {
+      const variantIds = new Set(variants.map(v => v.id));
+      onSelectionChange(selectedIds.filter(id => !variantIds.has(id)));
+    }
+  };
+
+  const handleSelectRow = (id, checked) => {
+    if (!onSelectionChange) return;
+    if (checked) {
+      onSelectionChange([...selectedIds, id]);
+    } else {
+      onSelectionChange(selectedIds.filter(sid => sid !== id));
+    }
+  };
+
   return (
     <table
       style={{
@@ -48,75 +125,101 @@ export default function VariantRegulatoryTable({ variants, parentProduct, onActi
     >
       <thead>
         <tr>
-          <th style={thStyle}>SKU</th>
-          <th style={thStyle}>Supplier</th>
-          <th style={thStyle}>Registration</th>
-          <th style={thStyle}>COA</th>
-          <th style={thStyle}>GMP</th>
-          <th style={thStyle}>Stability</th>
-          <th style={thStyle}>Import Permit</th>
-          <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
+          {onSelectionChange && (
+            <th style={{ ...thStyle, width: '48px', textAlign: 'center', cursor: 'default' }}>
+              <input
+                type="checkbox"
+                checked={allSelected}
+                ref={input => { if (input) input.indeterminate = someSelected; }}
+                onChange={handleSelectAll}
+                style={{ cursor: 'pointer' }}
+              />
+            </th>
+          )}
+          <th style={thStyle} onClick={() => handleSort('displaySku')}>SKU{getSortIcon('displaySku')}</th>
+          <th style={thStyle} onClick={() => handleSort('supplierName')}>Supplier{getSortIcon('supplierName')}</th>
+          <th style={thStyle} onClick={() => handleSort('regStatus')}>Registration{getSortIcon('regStatus')}</th>
+          <th style={thStyle} onClick={() => handleSort('coa')}>COA{getSortIcon('coa')}</th>
+          <th style={thStyle} onClick={() => handleSort('gmp')}>GMP{getSortIcon('gmp')}</th>
+          <th style={thStyle} onClick={() => handleSort('stability')}>Stability{getSortIcon('stability')}</th>
+          <th style={thStyle} onClick={() => handleSort('permit')}>Import Permit{getSortIcon('permit')}</th>
+          <th style={{ ...thStyle, textAlign: 'right', cursor: 'default' }}>Actions</th>
         </tr>
       </thead>
       <tbody>
-        {variants.map((v, i) => (
-          <tr key={v.id || i} style={trStyle}>
-            <td style={tdStyleMain}>{v.sku || '-'}</td>
-            <td style={tdStyle}>{v.supplier || '-'}</td>
-            <td style={tdStyle}>
-              <span
-                style={badgeStyle(
-                  v.registrationStatus === 'Registered' || v.registration === 'Active'
-                )}
-              >
-                {v.registrationStatus || v.registration || 'Unregistered'}
-              </span>
-            </td>
-            <td style={tdStyle}>
-              <span style={badgeStyle(v.coa)}>{v.coa === 'Valid' ? 'Valid' : 'Missing'}</span>
-            </td>
-            <td style={tdStyle}>
-              <span style={badgeStyle(v.gmp)}>{v.gmp === 'Valid' ? 'Valid' : 'Missing'}</span>
-            </td>
-            <td style={tdStyle}>
-              <span style={badgeStyle(v.stability)}>
-                {v.stability === 'Valid' ? 'Valid' : 'Missing'}
-              </span>
-            </td>
-            <td style={tdStyle}>
-              <span style={badgeStyle(v.permit)}>
-                {v.permit === 'Active' ? 'Active' : 'Missing'}
-              </span>
-            </td>
-            <td style={{ ...tdStyle, textAlign: 'right' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'flex-end',
-                  gap: '0.5rem',
-                }}
-              >
-                <AppActionGroup
-                  actions={[
-                    {
-                      type: 'view',
-                      onClick: () => onAction && onAction('view_variant', parentProduct, v),
-                    },
-                    {
-                      type: 'edit',
-                      onClick: () => onAction && onAction('edit_variant', parentProduct, v),
-                    },
-                    {
-                      type: 'delete',
-                      onClick: () => onAction && onAction('delete_variant', parentProduct, v),
-                    },
-                  ]}
-                />
-              </div>
-            </td>
-          </tr>
-        ))}
+        {sortedVariants.map((v, i) => {
+          const isSelected = selectedIds.includes(v.id);
+          return (
+            <tr 
+              key={v.id || i} 
+              style={{
+                ...trStyle,
+                backgroundColor: isSelected ? 'var(--color-bg-selected)' : 'transparent',
+                borderLeft: isSelected ? '4px solid #3b82f6' : '4px solid transparent',
+              }}
+              onClick={() => onAction && onAction('view_variant', parentProduct, v)}
+            >
+              {onSelectionChange && (
+                <td style={{ ...tdStyle, textAlign: 'center' }}>
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={(e) => handleSelectRow(v.id, e.target.checked)}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ cursor: 'pointer' }}
+                  />
+                </td>
+              )}
+              <td style={tdStyleMain}>{v.displaySku}</td>
+              <td style={tdStyle}>{v.supplierName}</td>
+              <td style={tdStyle}>
+                <span style={badgeStyle(v.regStatus === 'Registered' || v.regStatus === 'Active')}>
+                  {v.regStatus}
+                </span>
+              </td>
+              <td style={tdStyle}>
+                <span style={badgeStyle(v.coa)}>{v.coa}</span>
+              </td>
+              <td style={tdStyle}>
+                <span style={badgeStyle(v.gmp)}>{v.gmp}</span>
+              </td>
+              <td style={tdStyle}>
+                <span style={badgeStyle(v.stability)}>{v.stability}</span>
+              </td>
+              <td style={tdStyle}>
+                <span style={badgeStyle(v.permit)}>{v.permit}</span>
+              </td>
+              <td style={{ ...tdStyle, textAlign: 'right' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    gap: '0.5rem',
+                  }}
+                >
+                  <AppActionGroup
+                    maxVisible={3}
+                    actions={[
+                      {
+                        type: 'view',
+                        onClick: () => onAction && onAction('view_variant', parentProduct, v),
+                      },
+                      {
+                        type: 'edit',
+                        onClick: () => onAction && onAction('edit_variant', parentProduct, v, 'regulatory'),
+                      },
+                      {
+                        type: 'delete',
+                        onClick: () => onAction && onAction('delete_variant', parentProduct, v),
+                      },
+                    ]}
+                  />
+                </div>
+              </td>
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );

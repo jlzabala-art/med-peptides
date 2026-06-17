@@ -127,11 +127,17 @@ export default function ProductGrid({ items = [], readOnly = false, onUpdateItem
                   {isExpanded && (
                     <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                       <td colSpan={readOnly ? 7 : 8} style={{ padding: '1rem' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.8rem', color: '#475569' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', fontSize: '0.8rem', color: '#475569' }}>
+                          <div>
+                            <div style={{ fontWeight: 600, color: '#0f172a', marginBottom: '0.25rem' }}>Identifiers</div>
+                            <div>Variant ID: <span style={{ fontFamily: 'monospace' }}>{item.variantId || 'N/A'}</span></div>
+                            <div>Product ID: <span style={{ fontFamily: 'monospace' }}>{item.productId || 'N/A'}</span></div>
+                          </div>
                           <div>
                             <div style={{ fontWeight: 600, color: '#0f172a', marginBottom: '0.25rem' }}>Supplier Specs</div>
+                            <div>Supplier ID: <span style={{ fontFamily: 'monospace' }}>{item.supplierId || 'N/A'}</span></div>
                             <div>Lead Time: {item.leadTime || 'Standard 3-5 days'}</div>
-                            <div>Cold Chain Required: {item.coldChain ? 'Yes ❄️' : 'No'}</div>
+                            <div>Cold Chain: {item.coldChain ? 'Yes ❄️' : 'No'}</div>
                           </div>
                           <div>
                             <div style={{ fontWeight: 600, color: '#0f172a', marginBottom: '0.25rem' }}>Cost Breakdown</div>

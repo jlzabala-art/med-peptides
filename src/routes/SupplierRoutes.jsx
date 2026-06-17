@@ -4,17 +4,17 @@ import { useAuth } from '../context/AuthContext';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 
 import SupplierHome, { SupplierDashboardTab, PlaceholderTab } from '../templates/SupplierHome';
-import UserSettings from '../templates/UserSettings';
+const UserSettings = lazy(() => import('../templates/UserSettings'));
 
 // ── All tab components lazy-loaded for optimal code splitting ──────────────────
-import OrdersTab from '../components/admin/OrdersTab';
+const OrdersTab = lazy(() => import('../components/admin/OrdersTab'));
 import AdminMetricsDashboard from '../components/admin/AdminMetricsDashboard';
-import MessagingWidget from '../components/messaging/MessagingWidget';
-import ClinicalAIWidget from '../components/admin/ClinicalAIWidget';
-import AdminClientsTab from '../components/admin/AdminClientsTab';
-import CatalogIntelligenceHub from '../components/admin/catalog/CatalogIntelligenceHub';
-import AdminAccountManagersTab from '../components/admin/AdminAccountManagersTab';
-import ShippingTrackerTab from '../components/supplier/ShippingTrackerTab';
+const MessagingWidget = lazy(() => import('../components/messaging/MessagingWidget'));
+const ClinicalAIWidget = lazy(() => import('../components/admin/ClinicalAIWidget'));
+const AdminClientsTab = lazy(() => import('../components/admin/AdminClientsTab'));
+const CatalogIntelligenceHub = lazy(() => import('../components/admin/catalog/CatalogIntelligenceHub'));
+const AdminAccountManagersTab = lazy(() => import('../components/admin/AdminAccountManagersTab'));
+const ShippingTrackerTab = lazy(() => import('../components/supplier/ShippingTrackerTab'));
 
 // ── Premium loading skeleton ──────────────────────────────────────────────────
 const TabSkeleton = () => (

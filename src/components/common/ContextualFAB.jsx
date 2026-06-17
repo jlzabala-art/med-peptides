@@ -24,7 +24,7 @@ import { useScrollDirection } from '../../hooks/useScrollDirection';
 const getContextConfig = (pathname) => {
   const isMatch = (path) => pathname.includes(path);
 
-  if (isMatch('/admin/products') || isMatch('/admin/variants')) {
+  if (isMatch('/admin/products')) {
     return {
       id: 'products',
       theme: '#0ea5e9', // Blue

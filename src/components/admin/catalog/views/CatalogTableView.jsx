@@ -12,6 +12,7 @@ import { useAuth } from '../../../../context/AuthContext';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../../../firebase';
 import AppActionGroup from '../../../ui/AppActionGroup';
+import UnifiedItemWorkspaceDrawer from './UnifiedItemWorkspaceDrawer';
 import ExpandedProductRow from './ExpandedProductRow';
 
 export default function CatalogTableView({
@@ -29,6 +30,7 @@ export default function CatalogTableView({
   matrixViewType = 'grouped',
 }) {
   const { user } = useAuth();
+  const [drawerProduct, setDrawerProduct] = useState(null);
 
   // Transform data based on flat vs grouped
   const displayData = useMemo(() => {
@@ -46,7 +48,94 @@ export default function CatalogTableView({
     }));
   }, [products, variants, matrixViewType]);
 
+  // Compute selected and indeterminate product IDs for grouped mode
+  const { parentSelectedIds, parentIndeterminateIds } = useMemo(() => {
+    if (matrixViewType === 'flat') return { parentSelectedIds: selectedIds, parentIndeterminateIds: [] };
+
+    const selectedSet = new Set(selectedIds || []);
+    const pSelected = [];
+    const pIndeterminate = [];
+
+    products.forEach((p) => {
+      if (!p.variants || p.variants.length === 0) return;
+      const selectedCount = p.variants.filter((v) => selectedSet.has(v.id)).length;
+
+      if (selectedCount === p.variants.length) {
+        pSelected.push(p.id);
+      } else if (selectedCount > 0) {
+        pIndeterminate.push(p.id);
+      }
+    });
+
+    return { parentSelectedIds: pSelected, parentIndeterminateIds: pIndeterminate };
+  }, [products, selectedIds, matrixViewType]);
+
+  const handleDataTableSelectionChange = (newProductIds) => {
+    if (matrixViewType === 'flat') {
+      onSelectionChange(newProductIds);
+      return;
+    }
+
+    // Determine what changed by comparing newProductIds with parentSelectedIds + parentIndeterminateIds
+    const oldProductIds = new Set([...parentSelectedIds, ...parentIndeterminateIds]);
+    const newProductIdsSet = new Set(newProductIds);
+
+    // If "Select All" was clicked
+    if (newProductIds.length === products.length && products.length > 0 && oldProductIds.size < products.length) {
+      const allVariantIds = products.flatMap((p) => (p.variants || []).map((v) => v.id));
+      onSelectionChange(allVariantIds);
+      return;
+    }
+
+    // If "Deselect All" was clicked
+    if (newProductIds.length === 0 && oldProductIds.size > 0) {
+      onSelectionChange([]);
+      return;
+    }
+
+    // Otherwise, find which specific product was added or removed
+    let toggledProductId = null;
+    let isAdded = false;
+
+    // Check for additions
+    for (const id of newProductIds) {
+      if (!oldProductIds.has(id)) {
+        toggledProductId = id;
+        isAdded = true;
+        break;
+      }
+    }
+
+    // Check for removals
+    if (!toggledProductId) {
+      for (const id of oldProductIds) {
+        if (!newProductIdsSet.has(id)) {
+          toggledProductId = id;
+          isAdded = false;
+          break;
+        }
+      }
+    }
+
+    if (toggledProductId) {
+      const product = products.find((p) => p.id === toggledProductId);
+      if (!product || !product.variants) return;
+
+      const variantIds = product.variants.map((v) => v.id);
+      const newSelectedIds = new Set(selectedIds || []);
+
+      if (isAdded) {
+        variantIds.forEach((vid) => newSelectedIds.add(vid));
+      } else {
+        variantIds.forEach((vid) => newSelectedIds.delete(vid));
+      }
+
+      onSelectionChange(Array.from(newSelectedIds));
+    }
+  };
+
   const [visibleColumns, setVisibleColumns] = useState(null);
+
   const [activeSavedView, setActiveSavedView] = useState('Default View');
 
   const renderSavedViews = () => (
@@ -110,24 +199,47 @@ export default function CatalogTableView({
       },
       {
         key: 'product',
-        header: 'Product / SKU',
+        header: 'NAME',
         sortKey: 'name',
         render: (row) => (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.9rem' }}>
-              {row.name || row.displayName}
-            </div>
-            {row.isVariantRow && (
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                SKU: {row.sku || 'N/A'}
-              </div>
-            )}
-            {!row.isVariantRow && row.category && (
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{row.category}</div>
-            )}
+          <div 
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onAction) onAction('edit', row.isVariantRow ? row.parentProduct : row);
+            }}
+            style={{ 
+              fontWeight: 600, 
+              color: '#0f172a', // Darker for emphasis
+              fontSize: '0.90rem',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              maxWidth: '250px'
+            }}
+          >
+            {row.name || row.displayName}
           </div>
         ),
       },
+      {
+        key: 'sku',
+        header: 'SKU',
+        render: (row) => (
+          <span style={{ fontSize: '0.80rem', color: '#64748b', fontFamily: 'monospace' }}>
+            {row.sku || (row.isVariantRow && row.parentProduct?.sku) || '-'}
+          </span>
+        )
+      },
+      {
+        key: 'type',
+        header: 'TYPE / FORMAT',
+        render: (row) => (
+          <span style={{ fontSize: '0.85rem', color: '#475569' }}>
+            {row.format || row.category || 'Goods'}
+          </span>
+        )
+      }
     ];
 
     let contextColumns = [
@@ -135,7 +247,7 @@ export default function CatalogTableView({
         key: 'variantCount',
         header: 'Variants',
         render: (row) => {
-          if (row.isVariantRow) return <span style={{ fontSize: '0.85rem' }}>-</span>;
+          if (row.isVariantRow) return <div style={{ width: '16px', height: '2px', background: '#e2e8f0', borderRadius: '2px' }} title="Variants only apply to products"></div>;
           const count = row.variants?.length || 0;
           return (
             <div
@@ -158,8 +270,13 @@ export default function CatalogTableView({
         key: 'supplierCount',
         header: 'Suppliers',
         render: (row) => {
-          if (row.isVariantRow)
-            return <span style={{ fontSize: '0.85rem' }}>{row.supplier || 'Unassigned'}</span>;
+          if (row.isVariantRow) {
+            return row.supplier ? (
+              <span style={{ fontSize: '0.85rem' }}>{row.supplier}</span>
+            ) : (
+              <span style={{ fontSize: '0.70rem', color: '#94a3b8', fontStyle: 'italic', background: '#f8fafc', padding: '2px 6px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>Unassigned</span>
+            );
+          }
 
           const uniqueSuppliers = new Set(
             (row.variants || []).map((v) => v.supplier).filter(Boolean)
@@ -195,50 +312,45 @@ export default function CatalogTableView({
         },
       },
       {
-        key: 'statusSummary',
-        header: 'Status Summary',
+        key: 'statusMatrix',
+        header: 'Status Matrix',
         render: (row) => {
-          if (row.isVariantRow) {
-            const { score, color, status } = calculateVariantHealthScore(row);
-            return (
-              <span style={{ fontSize: '0.85rem', color, fontWeight: 600 }}>
-                {status} ({score})
-              </span>
-            );
-          }
+          if (row.isVariantRow) return null;
 
-          // Aggregate status for parent product
-          let healthyCount = 0;
-          let atRiskCount = 0;
-          let missingDataCount = 0;
+          // Compute Inventory Status
+          const totalStock = (row.variants || []).reduce((sum, v) => sum + (v.stock || 0), 0);
+          const inventoryStatus = totalStock === 0 ? { label: 'Out of Stock', color: '#ef4444', bg: '#fef2f2' } 
+            : totalStock < 50 ? { label: 'Low Stock', color: '#f59e0b', bg: '#fffbeb' }
+            : { label: 'In Stock', color: '#10b981', bg: '#ecfdf5' };
 
-          (row.variants || []).forEach((v) => {
-            const { score } = calculateVariantHealthScore(v);
-            if (score >= 80) healthyCount++;
-            else if (score >= 60) atRiskCount++;
-            else missingDataCount++;
-          });
+          // Compute Supplier Status
+          const uniqueSuppliers = new Set((row.variants || []).map((v) => v.supplier).filter(Boolean));
+          const supplierStatus = uniqueSuppliers.size === 0 ? { label: 'Missing Supplier', color: '#ef4444', bg: '#fef2f2' }
+            : uniqueSuppliers.size === 1 ? { label: 'Single Source Risk', color: '#f59e0b', bg: '#fffbeb' }
+            : { label: 'Assigned', color: '#10b981', bg: '#ecfdf5' };
+
+          // Compute Regulatory Status (Mock logic based on variants)
+          const missingDocs = (row.variants || []).some(v => v.missingDocs);
+          const regStatus = missingDocs ? { label: 'Missing Docs', color: '#ef4444', bg: '#fef2f2' }
+            : { label: 'Registered', color: '#10b981', bg: '#ecfdf5' };
+
+          // Compute Commercial Status
+          const hasMissingPrice = (row.variants || []).some(v => !(v.price || v.msrp || v.pricing?.retail?.perUnit));
+          const commStatus = hasMissingPrice ? { label: 'Price Missing', color: '#ef4444', bg: '#fef2f2' }
+            : { label: 'Active', color: '#10b981', bg: '#ecfdf5' };
+
+          const Badge = ({ status }) => (
+            <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', background: status.bg, color: status.color, whiteSpace: 'nowrap' }}>
+              {status.label}
+            </span>
+          );
 
           return (
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              {healthyCount > 0 && (
-                <span style={{ fontSize: '0.75rem', color: '#10b981' }}>
-                  ✓ {healthyCount} Healthy
-                </span>
-              )}
-              {atRiskCount > 0 && (
-                <span style={{ fontSize: '0.75rem', color: '#f59e0b' }}>
-                  ⚠ {atRiskCount} At Risk
-                </span>
-              )}
-              {missingDataCount > 0 && (
-                <span style={{ fontSize: '0.75rem', color: '#ef4444' }}>
-                  ✕ {missingDataCount} Issues
-                </span>
-              )}
-              {healthyCount === 0 && atRiskCount === 0 && missingDataCount === 0 && (
-                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>No Variants</span>
-              )}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+              <Badge status={inventoryStatus} />
+              <Badge status={supplierStatus} />
+              <Badge status={regStatus} />
+              <Badge status={commStatus} />
             </div>
           );
         },
@@ -248,101 +360,112 @@ export default function CatalogTableView({
     if (matrixViewType === 'flat') {
       contextColumns = [
         {
-          key: 'stock',
-          header: 'Stock',
+          key: 'cost',
+          header: 'PURCHASE RATE',
+          align: 'right',
           render: (row) => (
-            <input
-              type="number"
-              defaultValue={row.stock || 0}
-              onBlur={(e) => {
-                const val = Number(e.target.value);
-                if (val !== row.stock && onAction) {
-                  onAction('quick_edit', row, 'stock', val);
-                }
-              }}
-              style={{
-                width: '70px',
-                padding: '4px 8px',
-                border: '1px solid transparent',
-                borderRadius: '4px',
-                fontSize: '0.85rem',
-                backgroundColor: 'rgba(0,0,0,0.02)',
-                outline: 'none',
-                transition: 'all 0.2s',
-              }}
-              onFocus={(e) => {
-                e.target.style.border = '1px solid #3b82f6';
-                e.target.style.backgroundColor = '#fff';
-              }}
-              onClick={(e) => e.stopPropagation()}
-            />
+            <span style={{ fontSize: '0.85rem', color: '#475569' }}>
+              ${Number(row.cost || row.unitCost || 0).toFixed(2)}
+            </span>
           ),
         },
         {
-          key: 'cost',
-          header: 'Cost ($)',
+          key: 'supplier',
+          header: 'DESCRIPTION (SUPPLIER)',
           render: (row) => (
-            <input
-              type="number"
-              step="0.01"
-              defaultValue={row.cost || row.unitCost || 0}
-              onBlur={(e) => {
-                const val = Number(e.target.value);
-                if (val !== (row.cost || row.unitCost) && onAction) {
-                  onAction('quick_edit', row, 'cost', val);
-                }
-              }}
-              style={{
-                width: '80px',
-                padding: '4px 8px',
-                border: '1px solid transparent',
-                borderRadius: '4px',
-                fontSize: '0.85rem',
-                backgroundColor: 'rgba(0,0,0,0.02)',
-                outline: 'none',
-                transition: 'all 0.2s',
-              }}
-              onFocus={(e) => {
-                e.target.style.border = '1px solid #3b82f6';
-                e.target.style.backgroundColor = '#fff';
-              }}
-              onClick={(e) => e.stopPropagation()}
-            />
+            <span style={{ fontSize: '0.85rem', color: '#475569', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px', display: 'inline-block' }}>
+              {row.supplier || row.originalProduct?.supplier || '-'}
+            </span>
           ),
         },
         {
           key: 'msrp',
-          header: 'MSRP ($)',
+          header: 'RATE',
+          align: 'right',
           render: (row) => (
-            <input
-              type="number"
-              step="0.01"
-              defaultValue={row.msrp || row.price || 0}
-              onBlur={(e) => {
-                const val = Number(e.target.value);
-                if (val !== (row.msrp || row.price) && onAction) {
-                  onAction('quick_edit', row, 'msrp', val);
-                }
-              }}
-              style={{
-                width: '80px',
-                padding: '4px 8px',
-                border: '1px solid transparent',
-                borderRadius: '4px',
-                fontSize: '0.85rem',
-                backgroundColor: 'rgba(0,0,0,0.02)',
-                outline: 'none',
-                transition: 'all 0.2s',
-              }}
-              onFocus={(e) => {
-                e.target.style.border = '1px solid #3b82f6';
-                e.target.style.backgroundColor = '#fff';
-              }}
-              onClick={(e) => e.stopPropagation()}
-            />
+            <span style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 500 }}>
+              ${Number(row.msrp || row.price || 0).toFixed(2)}
+            </span>
           ),
         },
-        ...contextColumns.filter((c) => c.key === 'supplierCount' || c.key === 'statusSummary'),
+        {
+          key: 'stock',
+          header: 'STOCK ON HAND',
+          align: 'right',
+          render: (row) => (
+            <span style={{ fontSize: '0.85rem', color: '#475569' }}>
+              {row.stock || 0}
+            </span>
+          ),
+        },
+        {
+          key: 'size',
+          header: 'USAGE UNIT',
+          render: (row) => (
+            <span style={{ fontSize: '0.85rem', color: '#475569' }}>
+              {row.size || 'Unit'}
+            </span>
+          ),
+        },
+        {
+          key: 'priceHealth',
+          header: 'Price Health',
+          render: (row) => {
+            const margin = ((row.msrp || row.price || 0) - (row.cost || row.unitCost || 0)) / (row.msrp || row.price || 1);
+            let status = 'Good';
+            let color = '#10b981';
+            let bg = 'rgba(16, 185, 129, 0.1)';
+            
+            if (margin < 0.2 && margin > 0) {
+              status = 'Low Margin';
+              color = '#f59e0b';
+              bg = 'rgba(245, 158, 11, 0.1)';
+            } else if (margin <= 0) {
+              status = 'Loss Leader';
+              color = '#ef4444';
+              bg = 'rgba(239, 68, 68, 0.1)';
+            } else if ((row.msrp || row.price) > 300) {
+              status = 'Premium';
+              color = '#6366f1';
+              bg = 'rgba(99, 102, 241, 0.1)';
+            }
+
+            return (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{
+                  fontWeight: 600,
+                  color: color,
+                  fontSize: '0.75rem',
+                  background: bg,
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  display: 'inline-block',
+                }}>
+                  {status}
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onAction) onAction('optimize_price', row);
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#6366f1',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '4px'
+                  }}
+                  title="AI Optimize Price"
+                >
+                  <Sparkles size={14} />
+                </button>
+              </div>
+            );
+          }
+        },
+        ...contextColumns.filter((c) => c.key === 'supplierCount' || c.key === 'statusMatrix'),
       ];
     }
 
@@ -384,8 +507,9 @@ export default function CatalogTableView({
               <Sparkles size={12} /> Atlas
             </button>
             <AppActionGroup
+              maxVisible={3}
               actions={[
-                { type: 'view', onClick: () => onAction('view', productRef) },
+                { type: 'clone', onClick: () => onAction(row.isVariantRow ? 'clone_variant' : 'clone_product', row) },
                 { type: 'edit', onClick: () => onAction('edit', productRef) },
                 { type: 'delete', onClick: () => onAction('delete', productRef) },
               ]}
@@ -469,19 +593,14 @@ export default function CatalogTableView({
     document.body.removeChild(link);
   };
 
-  const renderVariantRow = (row) => {
-    if (matrixViewType === 'flat') return null;
-    return <ExpandedProductRow row={row} onAction={onAction} />;
-  };
-
   const handleRowClick = (row) => {
-    // If we click a row, always edit the parent product. The drawer handles variants.
+    // Open Unified Item Workspace Drawer instead of ExpandedProductRow or default edit
     const productRef = row.isVariantRow ? row.parentProduct : row;
-    if (onRowClick) onRowClick(productRef);
-    else if (onAction) onAction('edit', productRef);
+    setDrawerProduct(productRef);
   };
 
   return (
+    <>
     <div
       style={{
         backgroundColor: 'white',
@@ -494,9 +613,13 @@ export default function CatalogTableView({
         data={displayData}
         columns={columns}
         keyField="id"
-        selectedIds={selectedIds}
-        onSelectionChange={onSelectionChange}
-        expandableRender={matrixViewType === 'grouped' ? renderVariantRow : undefined}
+        selectedIds={matrixViewType === 'grouped' ? parentSelectedIds : selectedIds}
+        indeterminateIds={matrixViewType === 'grouped' ? parentIndeterminateIds : []}
+        onSelectionChange={handleDataTableSelectionChange}
+        expandableRender={matrixViewType === 'grouped' ? (row) => {
+          if (!row.variants || row.variants.length === 0) return null;
+          return <ExpandedProductRow row={row} onAction={onAction} selectedIds={selectedIds} onSelectionChange={onSelectionChange} />;
+        } : undefined}
         onRowClick={matrixViewType === 'grouped' ? undefined : handleRowClick}
         currentPage={currentPage}
         totalPages={Math.ceil(displayData.length / rowsPerPage) || 1}
@@ -514,7 +637,19 @@ export default function CatalogTableView({
         visibleColumns={visibleColumns}
         onColumnToggle={handleColumnToggle}
         tableId={`catalogProducts_items_${matrixViewType}`}
+        dense={true}
       />
     </div>
+    
+    {drawerProduct && (
+      <UnifiedItemWorkspaceDrawer 
+        product={drawerProduct} 
+        onClose={() => setDrawerProduct(null)} 
+        onAction={onAction} 
+        selectedIds={selectedIds}
+        onSelectionChange={onSelectionChange}
+      />
+    )}
+    </>
   );
 }

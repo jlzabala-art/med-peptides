@@ -4,20 +4,35 @@ import Share2 from "lucide-react/dist/esm/icons/share-2";
 import Users from "lucide-react/dist/esm/icons/users";
 import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Select from 'react-select';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from "../../../firebase";
 
 import RightWorkspacePanel from './RightWorkspacePanel';
 import toast from 'react-hot-toast';
 
+const subcategories = [
+  { id: 'weight_loss', label: 'Weight Loss / GLP-1' },
+  { id: 'recovery', label: 'Recovery & Healing' },
+  { id: 'anti_aging', label: 'Anti-Aging & Longevity' },
+  { id: 'nootropics', label: 'Cognitive & Nootropics' },
+  { id: 'growth', label: 'Growth & Muscle' },
+  { id: 'hormones', label: 'Hormones & Fertility' },
+  { id: 'skin', label: 'Cosmetics / Skin' },
+  { id: 'research', label: 'Research Peptides' }
+];
+
 const CATEGORY_TREE = [
   {
-    id: 'peptides',
-    label: 'Peptides',
-    children: [
-      { id: 'api_peptides', label: 'API Peptides' },
-      { id: 'finished_peptides', label: 'Finished Peptides' },
-      { id: 'research_peptides', label: 'Research Peptides' }
-    ]
+    id: 'lyophilized_peptides',
+    label: 'Lyophilized Peptides',
+    children: subcategories.map(s => ({ ...s, id: `lyo_${s.id}` }))
+  },
+  {
+    id: 'api_peptides',
+    label: 'API Peptides',
+    children: subcategories.map(s => ({ ...s, id: `api_${s.id}` }))
   },
   {
     id: 'longevity',
@@ -39,6 +54,44 @@ const CATEGORY_TREE = [
 ];
 
 export default function AdvancedFiltersDrawer({ isOpen, onClose, activeWorkspace = 'products', advancedFilters, setAdvancedFilters, activeCategories = [], onCategoryChange }) {
+  const [suppliers, setSuppliers] = useState([]);
+  const [recentSearches, setRecentSearches] = useState([]);
+  const [isLoadingSuppliers, setIsLoadingSuppliers] = useState(false);
+
+  useEffect(() => {
+    // Load recent searches from localStorage
+    const saved = localStorage.getItem('recentSupplierSearches');
+    if (saved) {
+      try {
+        setRecentSearches(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to parse recent searches', e);
+      }
+    }
+
+    // Fetch suppliers from Firestore
+    const fetchSuppliers = async () => {
+      setIsLoadingSuppliers(true);
+      try {
+        const querySnapshot = await getDocs(collection(db, 'wholesellers'));
+        const supplierList = querySnapshot.docs.map(doc => ({
+          value: doc.data().companyName || doc.id,
+          label: doc.data().companyName || doc.id
+        })).filter(s => s.label);
+        
+        // Sort alphabetically
+        supplierList.sort((a, b) => a.label.localeCompare(b.label));
+        setSuppliers(supplierList);
+      } catch (error) {
+        console.error('Error fetching suppliers:', error);
+      } finally {
+        setIsLoadingSuppliers(false);
+      }
+    };
+
+    fetchSuppliers();
+  }, []);
+
   if (!isOpen) return null;
 
   const handleAction = (actionName) => {
@@ -270,11 +323,65 @@ export default function AdvancedFiltersDrawer({ isOpen, onClose, activeWorkspace
             <div style={{ padding: '0 1.25rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <div>
                 <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Supplier</label>
-                <select className="glass-select" value={advancedFilters.suppliers.supplier} onChange={(e) => { updateFilter('suppliers', 'supplier', e.target.value); updateFilter('products', 'supplier', e.target.value); }}>
-                  <option>All Suppliers</option>
-                  <option>Atlas Bio Labs</option>
-                  <option>Medipharm</option>
-                </select>
+                <Select
+                  isLoading={isLoadingSuppliers}
+                  isClearable
+                  placeholder="Search suppliers..."
+                  value={
+                    advancedFilters.suppliers.supplier && advancedFilters.suppliers.supplier !== 'All Suppliers'
+                      ? { value: advancedFilters.suppliers.supplier, label: advancedFilters.suppliers.supplier }
+                      : null
+                  }
+                  onChange={(selected) => {
+                    const val = selected ? selected.value : 'All Suppliers';
+                    updateFilter('suppliers', 'supplier', val);
+                    updateFilter('products', 'supplier', val);
+                    
+                    if (selected) {
+                      // Save to recent searches
+                      setRecentSearches(prev => {
+                        const newRecent = [selected, ...prev.filter(s => s.value !== selected.value)].slice(0, 3);
+                        localStorage.setItem('recentSupplierSearches', JSON.stringify(newRecent));
+                        return newRecent;
+                      });
+                    }
+                  }}
+                  options={[
+                    ...(recentSearches.length > 0 ? [{
+                      label: 'Recent Searches',
+                      options: recentSearches
+                    }] : []),
+                    {
+                      label: 'All Suppliers',
+                      options: suppliers
+                    }
+                  ]}
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      background: 'rgba(255,255,255,0.7)',
+                      borderColor: 'rgba(0,0,0,0.1)',
+                      borderRadius: '12px',
+                      padding: '2px',
+                      boxShadow: 'none',
+                      '&:hover': {
+                        borderColor: 'rgba(0,0,0,0.2)'
+                      }
+                    }),
+                    menu: (base) => ({
+                      ...base,
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      zIndex: 50
+                    }),
+                    option: (base, state) => ({
+                      ...base,
+                      backgroundColor: state.isSelected ? '#111' : state.isFocused ? 'rgba(0,0,0,0.05)' : 'white',
+                      color: state.isSelected ? 'white' : '#333',
+                      cursor: 'pointer'
+                    })
+                  }}
+                />
               </div>
               <div>
                 <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Country</label>

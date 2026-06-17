@@ -40,8 +40,8 @@ const PORTALS = [
   },
   {
     id: 'b2c',
-    label: 'B2C Shop',
-    description: 'Customer storefront',
+    label: 'Patient Shop',
+    description: 'Patient storefront',
     icon: ShoppingCart,
     route: '/',
     color: '#ec4899', // pink-500

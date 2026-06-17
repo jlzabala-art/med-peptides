@@ -119,7 +119,7 @@ const mockData = [
   },
 ];
 
-export default function InventoryIntelligenceView({ variants = [] }) {
+export default function InventoryIntelligenceView({ variants = [], onAction }) {
   const data = React.useMemo(() => {
     if (!variants || variants.length === 0) return mockData;
 
@@ -662,8 +662,14 @@ export default function InventoryIntelligenceView({ variants = [] }) {
                 const daysLeft = item.stock === 0 ? 0 : Math.max(1, Math.floor(item.stock / (item.price > 100 ? 2 : 5)));
                 const confidence = daysLeft < 7 ? '95%' : '82%';
                 return (
-                  <tr key={item.id}>
-                    <td style={{ fontWeight: 600, color: '#0f172a' }}>{item.name}</td>
+                  <tr 
+                    key={item.id}
+                    onClick={() => {
+                      if (onAction) onAction('edit', item.originalProduct || item);
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <td style={{ fontWeight: 600, color: '#0f172a' }}>{item.name || item.productName}</td>
                     <td>
                       <div style={{ color: '#475569', fontSize: '0.85rem' }}>{item.supplier}</div>
                       <span className={`status-badge ${item.stock === 0 ? 'critical' : 'warning'}`} style={{ marginTop: '4px' }}>
@@ -721,7 +727,14 @@ export default function InventoryIntelligenceView({ variants = [] }) {
           </table>
           <div className="mobile-card-container">
             {reorderRecommendations.map((item) => (
-              <div key={item.id} className="mobile-card">
+              <div 
+                key={item.id} 
+                className="mobile-card"
+                onClick={() => {
+                  if (onAction) onAction('edit', item.originalProduct || item);
+                }}
+                style={{ cursor: 'pointer' }}
+              >
                 <div
                   style={{
                     display: 'flex',
@@ -729,7 +742,7 @@ export default function InventoryIntelligenceView({ variants = [] }) {
                     marginBottom: '0.5rem',
                   }}
                 >
-                  <h4 style={{ margin: 0, fontWeight: 600, color: '#0f172a' }}>{item.name}</h4>
+                  <h4 style={{ margin: 0, fontWeight: 600, color: '#0f172a' }}>{item.name || item.productName}</h4>
                   <span className={`status-badge ${item.stock === 0 ? 'critical' : 'warning'}`}>
                     {item.stock} / {item.reorderPoint}
                   </span>

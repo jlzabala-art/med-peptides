@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useFirestoreData } from '../hooks/useFirestoreData';
 import { trackEvent } from '../hooks/useAnalytics';
 import { configService } from '../services/configService';
 import { productCategories as _fallbackCategories } from '../data/productConstants';
@@ -27,7 +28,6 @@ const Catalog = React.memo(function Catalog({
   initialCategory,
   EXCHANGE_RATES,
   products,
-  allFaqs,
 }) {
   const { setHeader, clearHeader } = useHeaderContext();
 
@@ -137,12 +137,12 @@ const Catalog = React.memo(function Catalog({
     setFaqItems([]);
     setShowFAQModal(true);
     try {
-      const resolved = getFAQForProduct(product.name, allFaqs || [], product.id, isProfessional, 8);
+      const resolved = getFAQForProduct(product.name|| [], product.id, isProfessional, 8);
       setFaqItems(resolved);
     } catch (err) {
       console.error('FAQ fetch error:', err);
     }
-  }, [allFaqs, isProfessional]);
+  }, [ isProfessional]);
 
   const handleOpenPubMed = useCallback((product) => {
     setActivePubMedProduct(product);

@@ -29,22 +29,6 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('react')) return 'vendor-react';
-            if (id.includes('firebase')) return 'vendor-firebase';
-            if (id.includes('framer-motion')) return 'vendor-motion';
-            if (id.includes('lucide-react')) return 'vendor-lucide';
-            if (id.includes('recharts')) return 'vendor-recharts';
-            return 'vendor';
-          }
-          // Portal-specific chunks to prevent B2C users from downloading admin/B2B code
-          if (
-            id.includes('/src/components/admin/') ||
-            id.includes('/src/routes/AdminRoutes') ||
-            id.includes('/src/templates/Admin')
-          ) {
-            return 'portal-admin';
-          }
           if (id.includes('/src/routes/DoctorRoutes') || id.includes('/src/templates/Doctor')) {
             return 'portal-doctor';
           }
